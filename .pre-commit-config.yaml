@@ -67,6 +67,26 @@ repos:
     rev: v0.23.2
     hooks:
       - id: markdownlint-cli2
+  # how a link destination is spelled, which markdownlint has no rule
+  # for. Section 4 of README.md is the rule, why the prefix and not the
+  # extension, why a badge needed the link text to step over an image,
+  # and what this cannot see; there is no shared hook repository to write
+  # it in once, so it is the same hook in each repository, `pinned-rev`
+  # above being that arrangement already
+  - repo: local
+    hooks:
+      - id: local-link-prefix
+        name: a local markdown link destination begins with ./
+        language: pygrep
+        # one line, and no literal space in it -- "\x20" is the space the
+        # reference branch allows -- so yamllint reads the value as a
+        # single unbreakable word and its 100-column rule exempts it. A
+        # block scalar rather than a quoted one for the same reason a
+        # folded scalar was rejected: folding joins lines with a space,
+        # which would land inside the regex
+        entry: |-
+          (?<![`!\[])(?:!?\[(?:[^]]|\]\([^)]*\))*\]\(|^\x20{0,3}\[[^]]+\]:\s*)(?!\./|#|[A-Za-z][A-Za-z0-9+.-]*:)[^)\s]
+        types: [markdown]
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: v3.9.6
     hooks:
