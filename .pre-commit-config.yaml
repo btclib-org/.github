@@ -95,9 +95,13 @@ repos:
         # named by path rather than by type: `jsonc` is not a tag identify
         # knows, so a types_or entry for it fails the config outright
         files: ^(.*\.ya?ml|\.markdownlint\.jsonc)$
-  # the toml of this repository is its own configuration, and one indent
-  # for every toml in the organization is the point of having a formatter
-  # at all: .taplo.toml carries the choices and the reasoning
+  # the toml here is configuration and nothing else: .taplo.toml, which
+  # carries the formatting choices and the reasoning, and .typos.toml.
+  # One indent for every toml in the organization is the point of having
+  # a formatter at all. Naming them here is what .taplo.toml asks of the
+  # repository that carries it, that file being shared and so unable to
+  # say which toml any one tree holds; git ls-files '*.toml' is what says
+  # whether this comment has gone stale
   - repo: https://github.com/ComPWA/taplo-pre-commit
     rev: v0.9.3
     hooks:
