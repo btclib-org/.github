@@ -1270,8 +1270,9 @@ not.
    naming the package where the wheel is one package tree, and the page,
    the script and the test where it is not; `check-manifest`, only
    where the sdist's inclusion is declared as an include list, in the
-   file the backend reads it from — `MANIFEST.in` under setuptools. A
-   `dist` job that inspects what would be published.
+   file the backend reads it from — `MANIFEST.in` under setuptools,
+   the backend's own sdist target otherwise. A `dist` job that
+   inspects what would be published.
 1. Workflows: `test` (with its aggregate and its `changes` job), `lint`,
    `docs`, then the periodic ones the project earns.
 1. `.github/dependabot.yml`, `ISSUE_TEMPLATE/`,
