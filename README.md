@@ -809,6 +809,18 @@ stays right is a rebase carrying no new work.
     `can_approve_pull_request_reviews` matters as much as the token: a
     run that can approve a pull request is a way around the one rule
     that says somebody other than the author approves.
+
+    **The inheritance is one-way, and its absence is unreadable.** A
+    repository that sets its own value stops following the organization
+    default and there is no way back: the endpoint takes `read` or
+    `write` and has neither `null` nor `inherit`, and no endpoint
+    reports which repositories carry an override. The only way to find
+    one is to move the organization default and see which repositories
+    do *not* move — and that survey is blind to any repository already
+    holding the new value, which is therefore untested rather than
+    known good. So a repository that pins its own is recorded in its
+    `REPOSITORY.md`, that file being the one place the fact can live,
+    and whoever moves the organization default moves those with it.
 - **Secret scanning, its push protection and Dependabot security updates
   are on.** All three are free on a public repository and off by
   default; push protection is the one that refuses the push rather than
