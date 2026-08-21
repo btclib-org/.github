@@ -1021,7 +1021,8 @@ GitHub records nowhere else.
   only at the first call that needs it.
 
 Worked answers, each named for the property of its distribution that
-decides it rather than as a shape to copy. `bitcoin-core-rpc` names
+decides it rather than as a shape to copy, and each re-derived by section
+15's tree commands rather than taken on trust. `bitcoin-core-rpc` names
 `package = ["bitcoin_core_rpc"]` and stops there — measured against a
 wheel built with `py.typed` stripped and `RECORD` edited to match, which
 installs and imports cleanly and which the unconfigured tool passes —
@@ -1124,12 +1125,23 @@ grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'
 grep -L '^permissions:' .github/workflows/*.yml
 grep -rn -- '--frozen' .github/workflows/
 grep -rn 'merge=union' .gitattributes
+git ls-files MANIFEST.in '*package-content-policy*' '*_contents*'
+sed -nE '/^\[tool\.check-wheel-contents\]/,/^\[/{/^[a-z]/p;}' pyproject.toml
+sed -nE '/^\[.*targets\.sdist\]/,/^\[/{/^[a-z]/p;}' pyproject.toml
 uv run pre-commit run --all-files
 ```
 
 An action not pinned to forty hex digits, a workflow with no
 `permissions:` block, and a `--frozen` anywhere are each a finding on
 their own. Check exit codes, not filtered output.
+
+What the package-content lines have to say: where the wheel is one
+package tree, a `package` naming it, whose absence is section 12's
+finding; where the wheel is not one, the codes the tool is told to
+ignore, and the page, the script and the test that a repository which
+escalates owes together rather than singly. A tracked `MANIFEST.in` says
+the sdist half is owed; an sdist target that only excludes says it is
+not.
 
 ## 16. Checklists
 
