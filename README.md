@@ -1260,7 +1260,11 @@ not.
 1. `tests/` with the naming convention, a `conftest.py` carrying the
    selective-run coverage hook, and the first convention tests.
 1. `docs/source` and `.readthedocs.yaml`, built with `-W --keep-going`.
-1. `MANIFEST.in`, `[tool.check-manifest]`, and a `dist` job that inspects
+1. Section 12's package-content floor: `[tool.check-wheel-contents]`
+   naming the package where the wheel is one package tree, and the page,
+   the script and the test where it is not; `check-manifest`, with a
+   `MANIFEST.in` where the backend reads one, only where the sdist's
+   inclusion is declared as an include list. A `dist` job that inspects
    what would be published.
 1. Workflows: `test` (with its aggregate and its `changes` job), `lint`,
    `docs`, then the periodic ones the project earns.
@@ -1288,6 +1292,13 @@ Ordered by what the gap costs, not by what it takes to close.
    zero.
 1. **`uv` and a committed lock**, `--locked` in every job, and one
    documented command per job.
+1. **What the distribution carries, where the repository publishes** —
+   section 12's floor: `[tool.check-wheel-contents]` naming the package
+   where the wheel is one package tree, the page, the script and the
+   test where it is not, and the sdist half only where an include list
+   declares the inclusion. Everything else the `dist` job runs reads a
+   distribution's account of itself, which a `py.typed` lost to a
+   `package-data` typo passes.
 1. **`.pre-commit-config.yaml` as the single lint gate**, and the lint
    workflow reduced to running it. Delete any second list of the same
    tools from the workflows.
