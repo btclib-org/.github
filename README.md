@@ -376,9 +376,21 @@ pre-commit.ci does not have — the lint workflow covers it. No
     `../DOES_NOT_EXIST.md` each reach that fallback and each is missed
     by the union of both greps a repository ran, so an `.md`-scoped
     rule leaves every one of them writable. A prefix refuses all four
-    where they are written. `bitcoin-core-rpc`'s README linking its
-    licence file from an included root file is the same argument with a
-    live destination in it.
+    where they are written.
+
+    **A badge hides its destination behind an image, and the first
+    version of this hook could not reach it.** `bitcoin-core-rpc`'s
+    README linking its licence file was cited as the live case for the
+    rule, and that link is `[![license: MIT](…)](./LICENSE)` — a link
+    text written `[^]]*` stops at the `]` closing the alt text, so the
+    scan checked the image `src` and never the badge's own href. The
+    cited evidence was the one destination the rule did not cover, in
+    every repository that carries badges. Link text is therefore
+    `(?:[^]]|\]\([^)]*\))*`, a character that is not `]` or a whole
+    `](…)` group, which steps over the image and still checks the `src`
+    by backtracking. Measured: a badge href renders exactly what a
+    plain href renders, so every row of the table above can be written
+    as a badge destination.
 
     Measured in all three publishing repositories, with an unresolvable
     link written each way: `./page.md`, `./page.md#anchor`,

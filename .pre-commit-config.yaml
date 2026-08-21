@@ -80,20 +80,31 @@ repos:
   # to write it in once, so it is the same hook in each repository,
   # `pinned-rev` above being that arrangement already.
   #
-  # The pattern asks for a whole `[text](destination)` whose "[" is not
-  # preceded by a backtick, so prose can still quote the refused shape
-  # in a code span; its second branch reads a reference definition,
+  # The pattern asks for a whole `[text](destination)`, and its link text
+  # steps over a nested image, because a badge is "[![alt](src)](href)"
+  # and a link text written "[^]]*" stops at the "]" that closes the alt
+  # text -- which left every badge destination unchecked in this hook's
+  # first shape. Its second branch reads a reference definition,
   # "[label]: page.md", which carries no "(" and renders the same
-  # fallback, and is anchored at the start of the line so that a *use*
-  # site followed by a colon is not mistaken for one. What pygrep cannot
-  # see is a fenced block, being line based -- an example of the refused
-  # shape inside one fails this hook
+  # fallback, anchored at the start of the line so that a *use* site
+  # followed by a colon is not mistaken for one. The lookbehind refuses a
+  # "[" preceded by a backtick, "!" or "[", which is what lets prose
+  # quote the refused shape in a code span, a badge included. What pygrep
+  # cannot see is a fenced block, being line based -- an example of the
+  # refused shape inside one fails this hook
   - repo: local
     hooks:
       - id: local-link-prefix
         name: a local markdown link destination begins with ./
         language: pygrep
-        entry: '(?<!`)(?:\[[^]]*\]\(|^ {0,3}\[[^]]+\]:\s*)(?!\./|#|[A-Za-z][A-Za-z0-9+.-]*:)[^)\s]'
+        # one line, and no literal space in it -- "\x20" is the space the
+        # reference branch allows -- so yamllint reads the value as a
+        # single unbreakable word and its 100-column rule exempts it. A
+        # block scalar rather than a quoted one for the same reason a
+        # folded scalar was rejected: folding joins lines with a space,
+        # which would land inside the regex
+        entry: |-
+          (?<![`!\[])(?:!?\[(?:[^]]|\]\([^)]*\))*\]\(|^\x20{0,3}\[[^]]+\]:\s*)(?!\./|#|[A-Za-z][A-Za-z0-9+.-]*:)[^)\s]
         types: [markdown]
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: v3.9.6
