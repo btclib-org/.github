@@ -1,9 +1,24 @@
 # The btclib-org repository standard
 
-What every repository in the organization is configured to do, and why.
-It is written to be read twice: once when a repository is created, so
-that the shape is right from the first commit, and once when an existing
-one is normalized, so that the gap is a list rather than an impression.
+**This repository keeps the standards the btclib-org projects have in
+common: it states them, and it is where they are kept true.** The
+statement is this file. Keeping it true is the issue tracker beside it,
+which is where a repository's drift from the standard is filed and
+worked off — because a divergence between two repositories belongs to
+neither of them, and an issue opened on one is an issue the other never
+sees.
+
+So the work has two directions and both land here. A repository that has
+fallen behind the standard is an issue against the repository, tracked
+here. A repository that has gone *ahead* of it — a practice worth having
+everywhere, arrived at in one place — is an issue against this file, and
+the standard changes.
+
+What follows is that standard: what every repository in the organization
+is configured to do, and why. It is written to be read twice: once when
+a repository is created, so that the shape is right from the first
+commit, and once when an existing one is normalized, so that the gap is
+a list rather than an impression.
 
 The reference implementations are `btclib`, `btclib-secp256k1`,
 `bitcoin-core-rpc` and `btclib-benchmarks`. Where they agree, this file
@@ -31,6 +46,11 @@ file is the third of:
 - **This file** is inherited by nothing and is the point: one statement
   of the standard, linked from each repository's `CONTRIBUTING.md`,
   rather than a copy per repository for the copies to drift apart in.
+- **The issue tracker** is the maintenance. An alignment finding names
+  the repositories it is about and the command that re-derives it, and
+  stays open until every one of them answers — which is the thing an
+  issue filed on a single repository cannot do, its checkboxes being
+  invisible from the others.
 
 Branch rules, rulesets and repository settings are *not* inherited from
 here either. On an organization plan without organization-wide rulesets
