@@ -1,0 +1,125 @@
+---
+name: links
+
+# lychee over every markdown file in a repository that is markdown and
+# nothing else: README.md is the standard the other repositories are held
+# to and profile/README.md is what github.com/btclib-org renders, so a
+# dead link here is read either by somebody following the rules or by
+# somebody meeting the organization for the first time, neither of whom
+# can tell it from a project that has moved on.
+#
+# A workflow of its own rather than a job beside the lint one, because the
+# two answer on different cadences and a job cannot. A link rots without
+# anybody touching the tree, so asking per commit reports the internet's
+# weather on somebody's prose branch, and a third party returning 502 or
+# throttling a runner would turn a red merge into a thing to re-run rather
+# than a thing to fix. Weekly, on demand, and red in the Actions tab is
+# where this belongs -- which also keeps it out of main's required checks,
+# where it must stay out: that rule lives outside the repository and names
+# its checks as literal strings.
+#
+# Not the unresolved-link grep the sibling repositories run: that one
+# reads href="#./" out of docs/build/html, an artifact a sphinx build
+# leaves when a cross-reference resolves to no page. There is no docs
+# build here and no built html for it to read, so it would check nothing
+# and pass -- which is the shape a gate must never take.
+
+on:
+  schedule:
+    # Mondays, 05:37 UTC. Not on the hour: GitHub queues scheduled
+    # workflows across every repository that asked for the same minute,
+    # and a run can be dropped outright when the queue is long -- so this
+    # asks for a minute no sibling repository's weekly run asks for
+    # either
+    - cron: "37 5 * * 1"
+  # the escape hatch, and the way to check a branch before merging a
+  # change that adds links: nothing else runs this on a pull request that
+  # only edits prose, deliberately, per the header above
+  workflow_dispatch:
+  # so a change to this file is checked by the thing it configures
+  pull_request:
+    # ready_for_review so a pull request marked ready gets the run the
+    # draft condition below withheld while it was a draft: the default
+    # types do not include it. closed too, though the job declines the
+    # real work on it -- the same superseding the other workflows here
+    # take it for
+    types: [opened, reopened, synchronize, ready_for_review, closed]
+    paths:
+      - .github/workflows/links.yml
+
+# least privilege for the GITHUB_TOKEN. lychee is handed it below for
+# github.com links only, where an unauthenticated runner is rate limited
+# hard enough to look like rot, and reading is all that takes.
+# Deliberately not issues: write. An automatic "link rot" issue is the
+# usual next step, and it would make this the only workflow here that can
+# write anything, to save a maintainer from reading a failure
+# notification they already get
+permissions:
+  contents: read
+
+concurrency:
+  # named literally rather than through github.workflow, as everywhere
+  # else here, and keyed on the pull request's number for the reason
+  # lint.yml carries: two forks whose head branches share a name share
+  # one head_ref group. A scheduled or dispatched run has no number and
+  # falls back to github.ref, which is refs/heads/main for both, so the
+  # weekly run and a dispatch of it supersede each other -- wanted,
+  # since they ask the same question of the same tree
+  group: links-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  links:
+    name: Check the documentation links
+    # a draft spends no runner, and a closed pull request spends none
+    # either: the trigger above takes the closed event only to supersede
+    # a run this ref's group is still holding
+    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    # every link the tree holds, with retries; a job past this is hung on
+    # one of them
+    timeout-minutes: 15
+    steps:
+      # every action pinned to a commit SHA with the tag in the comment:
+      # a tag, let alone a branch, is a name its owner can move
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # lychee reads the tree and nothing pushes it back
+          persist-credentials: false
+      - name: Check the links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          # every markdown file, where the sibling repositories name the
+          # prose and exclude the source: there is no source here to
+          # exclude, and no citation in a docstring that is a reference
+          # rather than a link a reader clicks. What is checked is
+          # therefore the whole tree.
+          # --no-progress because the log is not a terminal. The retries,
+          # the wait and a timeout well past lychee's default of 20
+          # seconds are what keep a slow or throttling host from being
+          # reported as a dead one, which is the one failure this
+          # workflow must not produce: it gates nothing, so a false red
+          # costs an investigation and buys nothing.
+          # --accept is lychee's own default range with 429 added to it,
+          # rather than a list of codes: `lychee --help` gives that
+          # default as 100..=103,200..=299, so the "200,206,429" the
+          # sibling repositories pass narrows it -- a 201 or a 204
+          # becomes a dead link -- to add a 206 the default already
+          # covered. 429 is the one code worth adding, a rate limit
+          # being an answer from a host that is alive
+          args: >-
+            --no-progress
+            --max-retries 3
+            --retry-wait-time 10
+            --timeout 45
+            --cache
+            --max-cache-age 1d
+            --accept 100..=103,200..=299,429
+            "*.md" "profile/*.md"
+          # fail the job rather than only summarizing: a green run that
+          # found dead links is the state this workflow exists to end
+          fail: true
+        env:
+          # for github.com links only, per the permissions comment above
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

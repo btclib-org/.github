@@ -1,0 +1,132 @@
+---
+name: lint
+
+# what this workflow runs is .pre-commit-config.yaml itself, never a
+# second list of the same tools: a commit and CI then enforce one thing,
+# and a hook added to that file needs no edit here.
+#
+# Here because README.md section 4 states that rule and this repository
+# was the one not keeping it: the hook config and the markdownlint,
+# yamllint, taplo and typos configuration it reads were all in the tree
+# with nothing on the forge running any of them, so the gate was a
+# suggestion an author could forget. The `ci:` block names pre-commit.ci
+# as a runner, and pre-commit.ci reports rather than blocks -- what makes
+# a hook a gate is this job's name in the branch rule.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    # closed too, though the job below declines the real work on it: a
+    # merge or a close is neither a push nor a synchronize, so a run this
+    # pull request's own concurrency group is still holding survives
+    # either unless the closed event lands in that same group -- which
+    # this type is what makes it do, cancel-in-progress below turning the
+    # landing into the cancellation
+    types: [opened, reopened, synchronize, ready_for_review, closed]
+  # the gates included: a branch whose pull request is not open yet has
+  # no other way to ask
+  workflow_dispatch:
+
+# least privilege for the GITHUB_TOKEN. Nothing here writes anything --
+# the hooks that fix in place fix a checkout that is thrown away, the
+# `ci:` block refusing an autofix commit for the same reason -- so no job
+# elevates it
+permissions:
+  contents: read
+
+concurrency:
+  # named literally, never through github.workflow: in a called workflow
+  # that expression is the *caller's* name, so two workflows called from
+  # one place would share a group and cancel each other.
+  #
+  # Keyed on the pull request's number rather than on github.head_ref,
+  # which is the form section 10 of README.md documents. Not because
+  # head_ref would collide with the push trigger's group -- it would
+  # not: head_ref is read from the event payload, so it is there on a
+  # closed pull request too, where github.ref has already resolved to
+  # the base branch. What the number survives and head_ref does not is
+  # two pull requests whose head branches carry the same name, two forks
+  # each pushing "patch-1", which share one head_ref group and cancel
+  # each other. btclib-org/btclib#1158 settled that, and btclib's own
+  # lint.yml and test.yml carry the number today.
+  #
+  # A run with no pull request -- a push to main, a dispatch -- has no
+  # number and falls back to github.ref, which is what gives it a group
+  # of its own
+  group: lint-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    # this job is the whole of what gates a merge here, so this name is
+    # the required check's context, a context being keyed by name alone.
+    # Deliberately not the sibling repositories' "Lint and type-check":
+    # there is no Python in this tree and no mypy hook in the config, and
+    # a check naming a step that does not run is exactly the defect
+    # README.md is written against. Renaming it later cannot be done in a
+    # pull request -- the branch stops producing the old name while the
+    # rule outside the repository still waits for it -- so it is chosen
+    # once, here
+    name: Lint
+    # a draft pull request is work its author is not asking anyone to
+    # read yet and spends no runner. A closed one spends none either --
+    # the trigger above takes the closed event only to supersede a run
+    # this pull request's own group is still holding
+    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    # a cold cache builds a node, a rust and a python environment before
+    # a hook runs at all; a job past this is hung rather than working
+    timeout-minutes: 20
+    steps:
+      # every action pinned to a commit SHA with the tag in the comment:
+      # a tag, let alone a branch, is a name its owner can move
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the hooks read the tree and nothing pushes it back
+          persist-credentials: false
+
+      # uv is the only prerequisite here as everywhere, and this is the
+      # step that supplies it. No cache asked of it: enable-cache keys on
+      # a lock file, of which this repository has none, and what it would
+      # hold is one wheel and an interpreter. The environments that cost
+      # the minutes are cached below
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+
+      # the cache key needs the runner image, not only the OS: a
+      # pre-commit environment built on one image is not always usable on
+      # the next one, and a stale hit fails in the hook rather than here
+      - name: Identify the runner image
+        id: image
+        run: echo "os=${ImageOS:-unknown}" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the pre-commit environments
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/pre-commit
+          # the hook config alone, where the sibling repositories hash
+          # .python-version beside it: there is no project here and no
+          # such file, and every environment pre-commit builds is named
+          # by a rev this file pins
+          key: >-
+            pre-commit-${{ runner.os }}-${{ steps.image.outputs.os }}-${{
+            hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-${{ steps.image.outputs.os }}-
+
+      # uvx, where the sibling repositories' lint job runs
+      # "uv run --locked --only-group lint pre-commit": there is no
+      # pyproject.toml and no lock file here, so there is no project
+      # environment for pre-commit to be a dependency group of and
+      # --locked would have nothing to check. This is the command
+      # CLAUDE.md gives an author to run before pushing, and running the
+      # same one is the point -- a workflow invoking pre-commit some
+      # other way is the second declaration section 4 refuses, one
+      # version behind the author's or ahead of it.
+      # --show-diff-on-failure changes no hook's answer: it prints what
+      # an in-place fixer changed, so a red job says what to apply rather
+      # than only that something is unclean
+      - name: Run every hook
+        run: uvx pre-commit run --all-files --show-diff-on-failure
