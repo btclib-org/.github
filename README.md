@@ -88,8 +88,9 @@ they are applied per repository, which section 15 is how to verify.
   first checklist is the same list without the reasoning, for when the
   reasoning has already been read once.
 - **An existing repository** — section 16's second checklist is ordered
-  by what a gap costs, not by what it takes to close: an unsigned commit
-  or a token that can write to the repository outranks a formatter.
+  by what a gap costs, wherever dependency leaves that order free. Its
+  opening paragraph is where that order is argued, and each step that
+  waits on another says there what it waits for.
 - **A rule with no reason beside it is not this file's rule.** Every
   setting below was decided against an alternative, and the alternative
   is what stops the next reader from undoing it.
@@ -1274,7 +1275,7 @@ not.
    the backend's own sdist target otherwise. A `dist` job that
    inspects what would be published.
 1. Workflows: `test` (with its aggregate and its `changes` job), `lint`,
-   `docs`, then the periodic ones the project earns.
+   `docs`, `claude-review`, then the periodic ones the project earns.
 1. `.github/dependabot.yml`, `ISSUE_TEMPLATE/`,
    `PULL_REQUEST_TEMPLATE.md`.
 1. `CONTRIBUTING.md`, `REVIEWING.md`, `REPOSITORY.md`, `SECURITY.md`,
@@ -1288,13 +1289,50 @@ not.
 
 ### Normalizing an existing repository
 
-Ordered by what the gap costs, not by what it takes to close.
+Ordered by what the gap costs — an unsigned commit or a token that can
+write to the repository outranks a formatter — wherever dependency
+leaves that order free, because a step whose prerequisite has not landed
+cannot be performed, and one that cannot be performed has no cost to
+weigh. Dependency is a partial order and fixes only the steps below that
+say what they wait for: it has nothing to say about mypy against ruff
+against pytest, so ordering the whole list by it would settle those by
+nothing at all. Cost settles them, and cost is what makes any prefix of
+this list the right prefix — a normalization lands over many pull
+requests and stops wherever it stops.
 
+Not every constraint is an order between two steps, and the ones that
+are not hold over all of them. **A rule arrives with its subject**: a
+hook lands with the files it reads, and configuration copied from a
+sibling comes minus any rule whose subject this tree does not have yet,
+each such rule arriving with its file. **A gate's first run is over a
+tree it has never seen**, so it runs over the whole tree rather than
+over what its own step added — everything the steps before it wrote was
+written before the gate that judges it.
+
+1. **`REVIEWING.md` and `claude-review.yml` first**, before anything is
+   proposed: section 11 is where the ack of record is that workflow's,
+   and the workflow's prompt reads `REVIEWING.md` by name — so a
+   repository holding neither has no ack available to it.
+   This is not the costliest gap, it is the one every step that lands as
+   a pull request waits on, which is every step below that changes the
+   tree. The settings applied straight to the repository — section 11's,
+   and the branch rules of the step under this one — are not proposed
+   and not reviewed, so they do not wait for it. The credential is an
+   organization secret with `visibility=all`, so a repository configures
+   nothing for it: `gh api orgs/<org>/actions/secrets` is the reading.
 1. **Signatures and branch rules** — `required_signatures`, no direct
    push, linear history, one review, squash-only. An unsigned commit that
    already landed is history; the rule stops the next one.
 1. **Token permissions** — `contents: read` by default, one elevation per
    job, and no long-lived publishing token where OIDC works.
+1. **Secret scanning and its push protection**, with the settings above:
+   each is a switch and each starts paying the moment it is on — section
+   11 has which of the two refuses and which reports — and neither reads
+   a lock file.
+   **Dependabot's updates wait** for the lock below — turned on over the
+   outgoing resolution, they propose bumps to a file that step deletes,
+   and one landed there is a conflict on the migration rather than a
+   fix.
 1. **Actions pinned to commit SHAs**, then `actionlint` and `zizmor` to
    zero.
 1. **`uv` and a committed lock**, `--locked` in every job, and one
@@ -1309,12 +1347,17 @@ Ordered by what the gap costs, not by what it takes to close.
    of itself, which a `py.typed` lost to a `package-data` typo passes.
 1. **`.pre-commit-config.yaml` as the single lint gate**, and the lint
    workflow reduced to running it. Delete any second list of the same
-   tools from the workflows.
+   tools from the workflows. The shared configuration its hooks read
+   lands with them — `.markdownlint.jsonc`, `.yamllint.yaml`,
+   `.taplo.toml` — as does `.gitattributes`, whose `merge=union` entries
+   wait for the two history files below. Then run it `--all-files`, over
+   everything the steps above added.
 1. **mypy `strict = true`** aimed at the `requires-python` floor, with
    the optional error codes surveyed one at a time. Every silencing
    `type: ignore` names its code.
 1. **ruff** with the widths, the docstring family and `max-complexity`,
-   and the copyright rule.
+   and the copyright rule, which reads `COPYRIGHT` — so that file lands
+   here and not with the root files below.
 1. **pytest strictness** — `--strict-config`, `--strict-markers`,
    `filterwarnings = ["error"]`, `xfail_strict`. Expect this one to be
    the loudest.
@@ -1324,9 +1367,11 @@ Ordered by what the gap costs, not by what it takes to close.
    `fail_under = 100` only once the tree is there. Include the tests in
    `source` from the start.
 1. **The convention tests**, one per convention the prose already states.
-1. **The missing root files**, `REVIEWING.md` and `REPOSITORY.md` first:
-   the second is the only record of what the settings are.
-1. **Dependabot, the sentinel workflow, and the periodic platform runs.**
+1. **The missing root files**, `REPOSITORY.md` first: it is the only
+   record of what the settings are.
+1. **Dependabot's own configuration, the sentinel workflow, and the
+   periodic platform runs** — the updates held above, now that what they
+   read is the lock that ships.
 1. **The prose pass** — 80 columns, the reasoning and its negative
    results in the configuration comments, no stated counts, and history
    moved to the two files that carry it.
