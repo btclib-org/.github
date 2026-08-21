@@ -57,6 +57,10 @@ they say that too.
 - **[portanode](https://github.com/btclib-org/portanode)** — Bitcoin Core
   and Electrum on a portable external disk, shared between macOS and
   Windows.
+- **[.github](https://github.com/btclib-org/.github)** — this page, and
+  the standard the repositories above are built and kept to. Its issue
+  tracker is where a repository's drift from that standard is filed,
+  since a divergence between two repositories belongs to neither.
 
 ## Answering to somebody else's vectors
 
