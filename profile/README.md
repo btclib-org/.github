@@ -2,17 +2,22 @@
 
 Bitcoin cryptography in Python, written to be read.
 
-[btclib](https://btclib.org) began as a teaching tool for Ferdinando
-Ametrano's *[Bitcoin and Blockchain
+[btclib](https://btclib.org) is a Python3
+[type annotated](https://docs.python.org/3/library/typing.html) library
+intended for teaching, learning and using bitcoin, focused on elliptic
+curve cryptography and bitcoin's blockchain. It began as a teaching tool
+for Ferdinando Ametrano's *[Bitcoin and Blockchain
 Technology](https://www.ametrano.net/bbt/)* course — taught at the
-University of Milano-Bicocca, Politecnico di Milano and the University of
-Milano — and is used in production today. It is still marked beta,
-because it is still refactored whenever that makes it clearer.
+University of Milano-Bicocca, Politecnico di Milano, the University of
+Milano, and ESSEC (Paris) — and is used in production today. It is still
+marked beta, because it is still refactored whenever that makes it
+clearer.
 
 What the projects here have in common is a preference for the explicit
-one: annotated types everywhere, a public function that validates what it
-is handed, and a docstring that states the contract rather than restating
-the name. Where behaviour comes from a BIP, an RFC or a Bitcoin Core
+one: a public function that validates what it is handed, a docstring that
+states the contract rather than restating the name, and a `py.typed` in
+every package, so a caller's own type checker reads the same annotations
+mypy is held to here. Where behaviour comes from a BIP, an RFC or a Bitcoin Core
 function, the code says so and cites it; where these libraries deviate,
 they say that too.
 
