@@ -87,10 +87,12 @@ reported by anything else.
 ## Branch protection and the rulesets
 
 `main` is the only branch, and everything reaches it through a pull
-request. With no classic protection, what the call below answers is the
-whole of what holds; rules [aggregate rather than replace each
-other][s11-branch], so adding the required check above changes nothing
-here:
+request. Rules [aggregate rather than replace each other][s11-branch], so
+what holds is what the call below answers **together with** the classic
+protection two headings up: that one requires a review, a linear history,
+resolved conversations and the `Lint` check, and refuses a force push or a
+deletion, and it exempts an administrator where these rulesets do not.
+Where the two overlap, the stricter answer is the one that applies:
 
 ```shell
 gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
