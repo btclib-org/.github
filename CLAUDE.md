@@ -43,6 +43,15 @@ the gate's answer to anything.
   carries the commands, and a claim in this file or in `README.md` that
   no command re-derives is the defect this organization writes down most
   often.
+- **`lint.yml` runs those hooks on every pull request, and its job is
+  the required check**, which `REPOSITORY.md` reads back from the
+  endpoint. There is no suite and no documentation build for the rule to
+  name, so the hooks are the whole of what a merge is gated on, and the
+  prose this repository ships is checked by a reader rather than by a
+  runner. `links.yml` gates nothing — weekly, and on a change to itself
+  — and `claude-review.yml` gates nothing either. So a review may rely
+  on the lint gate rather than running it again, `README.md`'s Review
+  section having what the reliance takes.
 - **The lint gate is not installed as a git hook.** Nothing here has a
   project environment for `pre-commit install` to point at, and a hook
   wired to a `uvx` cache path is a reference that breaks without saying
