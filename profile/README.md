@@ -79,12 +79,15 @@ request — is written down, with the reasoning and the rejected
 alternatives, in
 [the repository standard](https://github.com/btclib-org/.github).
 
-## Elsewhere
+## Contributing
 
-- the documentation, at [btclib.readthedocs.io](https://btclib.readthedocs.io)
-- the packages, on PyPI: [btclib](https://pypi.org/project/btclib/),
-  [btclib_secp256k1](https://pypi.org/project/btclib_secp256k1/),
-  [bitcoin-core-rpc](https://pypi.org/project/bitcoin-core-rpc/)
-- questions and patches: the issues and pull requests of each repository
+Questions and patches: the issues and pull requests of each repository.
+Its own README says where the package and the documentation are; each
+carries a `CONTRIBUTING.md` with the commands that gate a change there.
+
+What every one of them asks for is the same, and none of it waits for
+CI to say so: the lint gate clean, the suite passing with its coverage,
+a signed commit, and a changelog entry wherever a user would notice the
+difference.
 
 Everything here is MIT licensed.
