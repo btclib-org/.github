@@ -857,7 +857,26 @@ A pull request needs an approving review from somebody other than its
 author; GitHub refuses a self-approval, which is why the record of a
 review is a comment whose last line is `ACK <sha>` or
 `CHANGES REQUESTED <sha>`, naming a sha because an ack belongs to a tree
-and not to a branch. `REVIEWING.md` is the standard: a diff is acked when
+and not to a branch.
+
+**The ack of record is `claude-review.yml`'s**, and an author's own is
+not one. A comment from the account that opened the pull request is a
+statement that its gates were run — worth having, and not a reading. The
+distinction is the whole of why the review requirement exists: an author
+verifying their own work cannot find what they did not think to look
+for, which is the class of defect a second reader exists to catch. The
+workflow runs on `opened`, `reopened`, `synchronize` and
+`ready_for_review`, and on demand when a comment names `@claude` — that
+last is how a head that moved after the review gets a fresh one, since
+the ack does not follow the branch.
+
+It is deliberately **not a required check**, and its own header says it
+must not become one. Requiring it would make a review a gate to be
+satisfied rather than a reading to be answered, and would hand the merge
+button to whatever the workflow happened to say. What it is instead is
+the thing a human landing the pull request reads before pressing.
+
+`REVIEWING.md` is the standard: a diff is acked when
 it leaves the tree better than it found it, a matter of taste is not a
 finding, and work the diff never set out to do becomes an issue rather
 than a comment. Every finding is labelled blocking, non-blocking, nit or
