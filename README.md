@@ -62,6 +62,22 @@ file is the third of:
   issue filed on a single repository cannot do, its checkboxes being
   invisible from the others.
 
+**A finding that spans repositories is filed here, and only here.** Not
+here *as well*: the same divergence written up once per repository is
+what this rule exists to stop. It costs twice — a defect acquires
+several numbers and no owner, so closing one leaves the others open
+against something that no longer exists; and the copies cannot see each
+other, which is how the same defect was filed twice ninety minutes apart
+by two passes over one file, neither noticing the other.
+
+The shape is one issue naming the repositories it is about, with a
+checkbox per repository and the command that re-derives the finding, and
+it closes when the last box is ticked. A per-repository issue is for
+work that is genuinely that repository's alone; where one is opened for
+a repository's share of a cross-repository finding, it links to the
+issue here rather than restating it, and closes when that repository's
+pull request lands.
+
 Branch rules, rulesets and repository settings are *not* inherited from
 here either. On an organization plan without organization-wide rulesets
 they are applied per repository, which section 15 is how to verify.
