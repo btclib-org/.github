@@ -977,12 +977,40 @@ GitHub records nowhere else.
   commit, and a normalization step for the sdist. The bill of materials
   is reproducible for the same reason, so a rebuild verifies against the
   attestation exactly as the distribution files do.
-- **What is published is inspected first** — an allowlist of what may be
-  in a wheel and an sdist, stated in prose and compared against the
-  script by a test; `twine check --strict`, `check-wheel-contents`,
-  `pyroma --min 10`; then the wheel is installed from an empty directory
-  and smoke-tested, so the import finds the wheel and not the source
-  tree.
+- **What is published is inspected first** — `twine check --strict`,
+  `check-wheel-contents` and `pyroma --min 10` on the files the release
+  will publish; then the wheel is installed from an empty directory and
+  smoke-tested, so the import finds the wheel and not the source tree.
+  Those read a distribution's *metadata*, and an unconfigured
+  `check-wheel-contents` reads the wheel's own `RECORD`, which is the
+  wheel's account of itself: none of them asks what the tree the wheel
+  was built from has. A `py.typed` dropped by a `package-data` typo gives
+  a wheel that installs, imports, type checks as `Any`, and passes all of
+  the above.
+- **So the wheel is diffed against the package tree it claims to carry**,
+  in both directions, and where that tree is the whole of the wheel's
+  library the diff is `[tool.check-wheel-contents]` naming it — a line of
+  configuration rather than a check to write, test and keep in step with
+  a page. Where the wheel is *not* one package tree, that flag has no
+  wording for it: a compiled artifact at the wheel's own root is reported
+  as a file outside the package whether or not it is the one the build
+  intends, and the repository owes a script saying what the flag cannot,
+  its allowlist stated in prose and compared against the script's
+  constants by a test, in both directions, so neither is free to drift.
+  Some other check implying the same diff does not stand in for the flag
+  where the flag applies: that is the same assertion bought with code to
+  maintain, and it moves what the `dist` job knows about the artifact
+  into a chain that holds only while every link runs.
+- **The sdist's half follows from how its inclusion is declared.** An
+  include list drops a tracked file nobody added to it, silently, and
+  `check-manifest` gating the tree against the archive is what answers
+  that; an exclude-list sdist target ships a new file by default, so its
+  failure is an archive too wide, which is not silent. Past that, an
+  allowlist for the sdist — which members may sit at the archive's root,
+  that every member is a regular file or a directory where a tar can
+  carry a symlink or a device node, that no directory holds another
+  distribution's metadata — is the escalation a repository takes when its
+  archive carries more than the package.
 - **The smoke test runs again in the release job, without constraints**,
   after the upload rather than before: installing a dependency executes
   its code, and a compromised one must not reach a `dist/` still to be
@@ -991,6 +1019,25 @@ GitHub records nowhere else.
   published artifact *works*, not whether it installs — an import runs
   `__init__.py` alone, where a data file missing from the wheel is opened
   only at the first call that needs it.
+
+Worked answers, each named for the property of its distribution that
+decides it rather than as a shape to copy, and each re-derived by section
+15's tree commands rather than taken on trust. `bitcoin-core-rpc` names
+`package = ["bitcoin_core_rpc"]` and stops there — measured against a
+wheel built with `py.typed` stripped and `RECORD` edited to match, which
+installs and imports cleanly and which the unconfigured tool passes —
+because a single-module package with no data directory has no member that
+the flag and `check-manifest` between them leave unpinned.
+`btclib-secp256k1` has no package to name: every wheel it ships carries a
+compiled artifact at the wheel's own root, so it keeps `ignore = ["W003",
+"W009"]` for the top-level member that is not a mistake, and its script
+asks what the flag has no wording for — which artifact a wheel of that
+tag must carry, and that it is not the zero-byte one a half-finished
+build step leaves behind. Its sdist target is an exclude list, so the
+sdist half is not its question. `btclib` owes that half: its `MANIFEST.in`
+is an include list, and its archive carries the suite and the vendored
+vectors, where which files may sit at the root and what kind of member the
+tar holds are questions nothing it runs otherwise asks.
 
 ## 13. Editor and agent configuration
 
@@ -1036,8 +1083,13 @@ files that never trip the rule it relaxes.
 
 **Decided per repository**: `requires-python` and `.python-version`; the
 matrix breadth; which optional workflows exist; the ruff `select` list's
-project-specific additions and its `per-file-ignores`; the convention
-tests, which follow the conventions that project's prose states; and the
+project-specific additions and its `per-file-ignores`; what a publishing
+repository checks about its package contents past section 12's floor —
+the sdist allowlist, and the script a wheel that is not one package tree
+needs — which follows the shape of that project's own distribution and
+is settled by measuring it, not by copying what a sibling does; the
+convention tests, which follow the conventions that project's prose
+states; and the
 `[tool.uv.sources]` table, which exists only while a dependency is not on
 the index and goes the day it is.
 
@@ -1073,12 +1125,23 @@ grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'
 grep -L '^permissions:' .github/workflows/*.yml
 grep -rn -- '--frozen' .github/workflows/
 grep -rn 'merge=union' .gitattributes
+git ls-files MANIFEST.in '*package-content-policy*' '*_contents*'
+sed -nE '/^\[tool\.check-wheel-contents\]/,/^\[/{/^[a-z]/p;}' pyproject.toml
+sed -nE '/^\[.*targets\.sdist\]/,/^\[/{/^[a-z]/p;}' pyproject.toml
 uv run pre-commit run --all-files
 ```
 
 An action not pinned to forty hex digits, a workflow with no
 `permissions:` block, and a `--frozen` anywhere are each a finding on
 their own. Check exit codes, not filtered output.
+
+What the package-content lines have to say: where the wheel is one
+package tree, a `package` naming it, whose absence is section 12's
+finding; where the wheel is not one, the codes the tool is told to
+ignore, and the page, the script and the test that a repository which
+escalates owes together rather than singly. A tracked `MANIFEST.in` says
+the sdist half is owed; an sdist target that only excludes says it is
+not.
 
 ## 16. Checklists
 
