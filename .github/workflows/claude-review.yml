@@ -129,6 +129,14 @@ jobs:
             CLAUDE.md has the facts about this tree a review has to
             know.
 
+            The summary's last line is the verdict README.md states,
+            `ACK <sha>` or `CHANGES REQUESTED <sha>`, naming the sha
+            because an ack belongs to a tree and not to a branch. It is
+            not optional and not a judgement: it is the only part of a
+            review that anything other than a person can read, and a
+            review ending without it cannot be told apart from one that
+            never finished.
+
             What this repository ships is prose, so the findings differ
             in kind from a code review's. A rule that is stated without
             the reason that chose it, a claim no command re-derives, a
