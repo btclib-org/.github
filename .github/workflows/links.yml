@@ -59,12 +59,13 @@ permissions:
 
 concurrency:
   # named literally rather than through github.workflow, as everywhere
-  # else here. head_ref falls back to ref rather than being used bare: it
-  # is set only for a pull_request event, so a scheduled or dispatched
-  # run still gets its own group, and a pull request always groups by its
-  # own branch -- closed and merged ones included, which plain
-  # github.ref does not, resolving to the base branch on that event
-  group: links-${{ github.head_ref || github.ref }}
+  # else here, and keyed on the pull request's number for the reason
+  # lint.yml carries: two forks whose head branches share a name share
+  # one head_ref group. A scheduled or dispatched run has no number and
+  # falls back to github.ref, which is refs/heads/main for both, so the
+  # weekly run and a dispatch of it supersede each other -- wanted,
+  # since they ask the same question of the same tree
+  group: links-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -99,9 +100,14 @@ jobs:
           # seconds are what keep a slow or throttling host from being
           # reported as a dead one, which is the one failure this
           # workflow must not produce: it gates nothing, so a false red
-          # costs an investigation and buys nothing. 429 is accepted for
-          # the same reason -- a rate limit is an answer from a host that
-          # is alive
+          # costs an investigation and buys nothing.
+          # --accept is lychee's own default range with 429 added to it,
+          # rather than a list of codes: `lychee --help` gives that
+          # default as 100..=103,200..=299, so the "200,206,429" the
+          # sibling repositories pass narrows it -- a 201 or a 204
+          # becomes a dead link -- to add a 206 the default already
+          # covered. 429 is the one code worth adding, a rate limit
+          # being an answer from a host that is alive
           args: >-
             --no-progress
             --max-retries 3
@@ -109,7 +115,7 @@ jobs:
             --timeout 45
             --cache
             --max-cache-age 1d
-            --accept 200,206,429
+            --accept 100..=103,200..=299,429
             "*.md" "profile/*.md"
           # fail the job rather than only summarizing: a green run that
           # found dead links is the state this workflow exists to end

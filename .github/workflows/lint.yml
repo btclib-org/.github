@@ -39,11 +39,21 @@ concurrency:
   # named literally, never through github.workflow: in a called workflow
   # that expression is the *caller's* name, so two workflows called from
   # one place would share a group and cancel each other.
-  # Keyed on the pull request's number rather than on github.ref alone,
-  # because a merged pull request's closed event sets github.ref to the
-  # base branch: grouped by github.ref that event would land in the push
-  # trigger's own group and cancel the run linting the merge commit. A
-  # push carries no pull_request context, so github.ref still groups it
+  #
+  # Keyed on the pull request's number rather than on github.head_ref,
+  # which is the form section 10 of README.md documents. Not because
+  # head_ref would collide with the push trigger's group -- it would
+  # not: head_ref is read from the event payload, so it is there on a
+  # closed pull request too, where github.ref has already resolved to
+  # the base branch. What the number survives and head_ref does not is
+  # two pull requests whose head branches carry the same name, two forks
+  # each pushing "patch-1", which share one head_ref group and cancel
+  # each other. btclib-org/btclib#1158 settled that, and btclib's own
+  # lint.yml and test.yml carry the number today.
+  #
+  # A run with no pull request -- a push to main, a dispatch -- has no
+  # number and falls back to github.ref, which is what gives it a group
+  # of its own
   group: lint-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
