@@ -191,7 +191,7 @@ gh api repos/btclib-org/.github \
 ```
 
 Issues are where this organization's cross-repository findings live, and
-where they live *only*, for the reason [`CLAUDE.md`](CLAUDE.md) gives: a
+where they live *only*, for the reason [`CLAUDE.md`](./CLAUDE.md) gives: a
 finding about several repositories filed on one of them is invisible from
 the others.
 
@@ -271,14 +271,14 @@ choice.
   recorded there rather than remembered, and this file is that
   measurement pointed at the repository the commands came from.
 
-[s10-check]: README.md#the-aggregate-job-and-the-required-check
-[s11-bots]: README.md#dependabot-and-pre-commitci
-[s11-branch]: README.md#branch-protection-and-rulesets
-[s11-merge]: README.md#merge-method
-[s11-review]: README.md#review
-[s11-sigs]: README.md#signatures
-[s11-title]: README.md#what-a-pull-request-says-it-is
-[s11-tokens]: README.md#tokens-publishing-scanning
-[s11]: README.md#11-github-settings
-[s15]: README.md#15-auditing-a-repository-against-this-file
-[s16]: README.md#16-checklists
+[s10-check]: ./README.md#the-aggregate-job-and-the-required-check
+[s11-bots]: ./README.md#dependabot-and-pre-commitci
+[s11-branch]: ./README.md#branch-protection-and-rulesets
+[s11-merge]: ./README.md#merge-method
+[s11-review]: ./README.md#review
+[s11-sigs]: ./README.md#signatures
+[s11-title]: ./README.md#what-a-pull-request-says-it-is
+[s11-tokens]: ./README.md#tokens-publishing-scanning
+[s11]: ./README.md#11-github-settings
+[s15]: ./README.md#15-auditing-a-repository-against-this-file
+[s16]: ./README.md#16-checklists
