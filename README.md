@@ -14,6 +14,16 @@ here. A repository that has gone *ahead* of it — a practice worth having
 everywhere, arrived at in one place — is an issue against this file, and
 the standard changes.
 
+**And not only drift: the ongoing maintenance that crosses repositories
+is tracked here too**, whether or not the standard has anything to say
+about it. A badge to remove from every README, an action that changed
+its inputs, a tool that deprecated a flag four `pyproject.toml`s pass, a
+convention worth adopting everywhere at once — each is one piece of work
+that lands as one pull request per repository, and what it needs is a
+single place to be planned from, watched, and closed once every one of
+them has answered. That is the same argument as above, and it is what
+makes this a project rather than a document.
+
 What follows is that standard: what every repository in the organization
 is configured to do, and why. It is written to be read twice: once when
 a repository is created, so that the shape is right from the first
