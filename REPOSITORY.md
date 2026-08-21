@@ -25,13 +25,15 @@ the answer the sibling repositories give.
 ```shell
 gh api repos/btclib-org/.github/branches/main/protection \
   --jq '.required_status_checks | {strict, checks: [.checks[].context]}'
-# gh: Branch not protected (HTTP 404)
+# {"strict":true,"checks":["Lint"]}
 ```
 
-There is no classic protection here, so nothing waits on a check. The
-rulesets below enforce the signatures and the review; [classic protection
-is where the required checks go][s16], and it is what this repository has
-yet to grow. `lint.yml` is what a rule will name:
+The rulesets below enforce the signatures and the review, and [classic
+protection is where the required checks go][s16]. It was created once
+`lint.yml` had produced its context, which is the order that call
+requires; the command that created it is kept at the foot of this section
+because a `PUT` there sets every field and a reader restoring the
+protection needs the whole object rather than the answer above.
 
 | Check | Produced by |
 | --- | --- |
@@ -49,11 +51,11 @@ whether somebody else's server answered, which is a question a merge
 cannot depend on; its own header carries the reasoning.
 `claude-review.yml` is not one either, and [says so itself][s11-review].
 
-A check context cannot be bound before a workflow has produced it, so
-`lint.yml` runs first and the rule follows. Creating the protection is
-one call, and it carries the whole object because there is none to patch
-— every field of it, since a `PUT` sets what it is given and clears what
-it is not:
+A check context cannot be bound before a workflow has produced it, which
+is why `lint.yml` landed before the rule did. The call that created the
+protection carries the whole object — every field of it, since a `PUT`
+sets what it is given and clears what it is not, so this is also what
+restores it:
 
 ```shell
 gh api -X PUT repos/btclib-org/.github/branches/main/protection \
@@ -85,10 +87,12 @@ reported by anything else.
 ## Branch protection and the rulesets
 
 `main` is the only branch, and everything reaches it through a pull
-request. With no classic protection, what the call below answers is the
-whole of what holds; rules [aggregate rather than replace each
-other][s11-branch], so adding the required check above changes nothing
-here:
+request. Rules [aggregate rather than replace each other][s11-branch], so
+what holds is what the call below answers **together with** the classic
+protection two headings up: that one requires a review, a linear history,
+resolved conversations and the `Lint` check, and refuses a force push or a
+deletion, and it exempts an administrator where these rulesets do not.
+Where the two overlap, the stricter answer is the one that applies:
 
 ```shell
 gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
