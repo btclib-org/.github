@@ -153,10 +153,6 @@ Dotfiles: `.pre-commit-config.yaml`, `.python-version`, `.gitattributes`,
 `.readthedocs.yaml`, `.secrets.baseline`, and `.vscode/` and `.claude/`,
 both tracked.
 
-`REVIEWING.md` and `RELEASE_NOTES.md` are the two most often missing from
-an older repository; neither is optional in a repository that takes pull
-requests or publishes.
-
 ### Directories
 
 - the package directory, holding `py.typed` and a `__init__.py` that
