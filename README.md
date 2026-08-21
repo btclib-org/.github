@@ -392,7 +392,7 @@ pre-commit.ci does not have — the lint workflow covers it. No
     plain href renders, so every row of the table above can be written
     as a badge destination.
 
-    Measured in all three publishing repositories, with an unresolvable
+    Measured in each publishing repository, with an unresolvable
     link written each way: `./page.md`, `./page.md#anchor`,
     `./page.txt`, `./sub/page.md` and an extensionless `./page` each
     render `#./` followed by the destination, so one pattern sees every
