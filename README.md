@@ -800,6 +800,24 @@ body — never the pull request's description.
 
 `delete_branch_on_merge` is on.
 
+### What a pull request says it is
+
+**A pull request that closes an issue names it in its title, in
+parentheses**: `Say when github-release runs instead of relying on no if
+(issue #1142)`. Squash is the only merge method, and
+`squash_merge_commit_title` is `COMMIT_OR_PR_TITLE`, so that title is
+what the landing commit's subject says — the number reaches `git log`
+and stays reachable from a checkout with no forge in front of it. A pull
+request that closes nothing carries no parentheses, and adding some
+because the shape looks right is how a wrong number gets in.
+
+The title is not the closing mechanism. `Closes #N` in the *description*
+is what GitHub acts on, and both are wanted: the description closes the
+issue, the title records which one. Neither works across repositories —
+a keyword naming another repository's issue is a link and not a close —
+so a cross-repository task keeps its tracking issue open until every one
+of its pull requests has landed, and somebody closes it by hand.
+
 ### Review
 
 A pull request needs an approving review from somebody other than its
