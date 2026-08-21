@@ -1103,7 +1103,13 @@ GitHub records nowhere else.
   include list drops a tracked file nobody added to it, silently, and
   `check-manifest` gating the tree against the archive is what answers
   that; an exclude-list sdist target ships a new file by default, so its
-  failure is an archive too wide, which is not silent. Past that, an
+  failure is an archive too wide, which is not silent. Which file
+  declares it is the backend's: setuptools reads `MANIFEST.in`,
+  hatchling reads `[tool.hatch.build.targets.sdist]` and never reads a
+  `MANIFEST.in` at all, so a manifest in a tree whose backend ignores
+  it is a file that looks like a rule and governs nothing. The question
+  is what the backend reads, and `check-manifest` follows the include
+  list into whichever file that is. Past that, an
   allowlist for the sdist — which members may sit at the archive's root,
   that every member is a regular file or a directory where a tar can
   carry a symlink or a device node, that no directory holds another
@@ -1260,8 +1266,13 @@ not.
 1. `tests/` with the naming convention, a `conftest.py` carrying the
    selective-run coverage hook, and the first convention tests.
 1. `docs/source` and `.readthedocs.yaml`, built with `-W --keep-going`.
-1. `MANIFEST.in`, `[tool.check-manifest]`, and a `dist` job that inspects
-   what would be published.
+1. Section 12's package-content floor: `[tool.check-wheel-contents]`
+   naming the package where the wheel is one package tree, and the page,
+   the script and the test where it is not; `check-manifest`, only
+   where the sdist's inclusion is declared as an include list, in the
+   file the backend reads it from — `MANIFEST.in` under setuptools,
+   the backend's own sdist target otherwise. A `dist` job that
+   inspects what would be published.
 1. Workflows: `test` (with its aggregate and its `changes` job), `lint`,
    `docs`, then the periodic ones the project earns.
 1. `.github/dependabot.yml`, `ISSUE_TEMPLATE/`,
@@ -1288,6 +1299,14 @@ Ordered by what the gap costs, not by what it takes to close.
    zero.
 1. **`uv` and a committed lock**, `--locked` in every job, and one
    documented command per job.
+1. **What the distribution carries, where the repository publishes** —
+   section 12's floor: `[tool.check-wheel-contents]` naming the package
+   where the wheel is one package tree, the page, the script and the
+   test where it is not, and `check-manifest` against the include list
+   — `MANIFEST.in` under setuptools, the backend's own sdist target
+   otherwise — only where the inclusion is declared that way.
+   Everything else the `dist` job runs reads a distribution's account
+   of itself, which a `py.typed` lost to a `package-data` typo passes.
 1. **`.pre-commit-config.yaml` as the single lint gate**, and the lint
    workflow reduced to running it. Delete any second list of the same
    tools from the workflows.
