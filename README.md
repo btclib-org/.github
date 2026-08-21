@@ -1310,9 +1310,9 @@ over what its own step added — everything the steps before it wrote was
 written before the gate that judges it.
 
 1. **`REVIEWING.md` and `claude-review.yml` first**, before anything is
-   proposed: section 11's ack of record is that workflow's, an author's
-   own is not one, and the workflow's prompt reads `REVIEWING.md` by
-   name — so a repository holding neither has no ack available to it.
+   proposed: section 11 is where the ack of record is that workflow's,
+   and the workflow's prompt reads `REVIEWING.md` by name — so a
+   repository holding neither has no ack available to it.
    This is not the costliest gap, it is the one every step that lands as
    a pull request waits on, which is every step below that changes the
    tree. The settings applied straight to the repository — section 11's,
@@ -1326,8 +1326,9 @@ written before the gate that judges it.
 1. **Token permissions** — `contents: read` by default, one elevation per
    job, and no long-lived publishing token where OIDC works.
 1. **Secret scanning and its push protection**, with the settings above:
-   push protection refuses a push today, scanning reports what has
-   already landed, and neither reads a lock file.
+   each is a switch and each starts paying the moment it is on — section
+   11 has which of the two refuses and which reports — and neither reads
+   a lock file.
    **Dependabot's updates wait** for the lock below — turned on over the
    outgoing resolution, they propose bumps to a file that step deletes,
    and one landed there is a conflict on the migration rather than a
@@ -1355,9 +1356,8 @@ written before the gate that judges it.
    the optional error codes surveyed one at a time. Every silencing
    `type: ignore` names its code.
 1. **ruff** with the widths, the docstring family and `max-complexity`,
-   and the copyright rule — whose `notice-rgx` spells out `COPYRIGHT`'s
-   three lines, so that file lands here and not with the root files
-   below.
+   and the copyright rule, which reads `COPYRIGHT` — so that file lands
+   here and not with the root files below.
 1. **pytest strictness** — `--strict-config`, `--strict-markers`,
    `filterwarnings = ["error"]`, `xfail_strict`. Expect this one to be
    the loudest.
