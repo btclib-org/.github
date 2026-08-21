@@ -952,6 +952,16 @@ finding, and work the diff never set out to do becomes an issue rather
 than a comment. Every finding is labelled blocking, non-blocking, nit or
 question.
 
+**A gate already run on this sha is relied on, and the run is named.**
+Where the required checks run beside the review on that commit, or an
+author hands over a branch they gated themselves and said so, the review
+says whose run it is rather than repeating it; where no such run is on
+the record it runs them, and a gate that fails is the strongest finding
+available. The sha is the whole of the condition, so a rebase voids it —
+the branch was gated and then the tree moved under the gate — and naming
+the run is what lets a reader tell a gate relied on from one nobody
+looked at.
+
 **What a diff decides with is run, not read.** Where a diff adds
 something that decides an outcome by matching or computing — a regex, a
 pattern in a hook, a grep, a script, a query — the review executes it,
