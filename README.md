@@ -88,10 +88,9 @@ they are applied per repository, which section 15 is how to verify.
   first checklist is the same list without the reasoning, for when the
   reasoning has already been read once.
 - **An existing repository** — section 16's second checklist is ordered
-  by what a gap costs, an unsigned commit or a token that can write to
-  the repository outranking a formatter, wherever dependency leaves that
-  order free: a step whose prerequisite has not landed cannot be
-  performed at all, and the ones that wait say so.
+  by what a gap costs, wherever dependency leaves that order free. Its
+  opening paragraph is where that order is argued, and each step that
+  waits on another says there what it waits for.
 - **A rule with no reason beside it is not this file's rule.** Every
   setting below was decided against an alternative, and the alternative
   is what stops the next reader from undoing it.
@@ -1314,8 +1313,11 @@ written before the gate that judges it.
    proposed: section 11's ack of record is that workflow's, an author's
    own is not one, and the workflow's prompt reads `REVIEWING.md` by
    name — so a repository holding neither has no ack available to it.
-   This is not the costliest gap, it is the one every other step waits
-   on, each of them landing as a pull request. The credential is an
+   This is not the costliest gap, it is the one every step that lands as
+   a pull request waits on, which is every step below that changes the
+   tree. The settings applied straight to the repository — section 11's,
+   and the branch rules of the step under this one — are not proposed
+   and not reviewed, so they do not wait for it. The credential is an
    organization secret with `visibility=all`, so a repository configures
    nothing for it: `gh api orgs/<org>/actions/secrets` is the reading.
 1. **Signatures and branch rules** — `required_signatures`, no direct
@@ -1324,7 +1326,8 @@ written before the gate that judges it.
 1. **Token permissions** — `contents: read` by default, one elevation per
    job, and no long-lived publishing token where OIDC works.
 1. **Secret scanning and its push protection**, with the settings above:
-   each refuses something today and neither reads a lock file.
+   push protection refuses a push today, scanning reports what has
+   already landed, and neither reads a lock file.
    **Dependabot's updates wait** for the lock below — turned on over the
    outgoing resolution, they propose bumps to a file that step deletes,
    and one landed there is a conflict on the migration rather than a
