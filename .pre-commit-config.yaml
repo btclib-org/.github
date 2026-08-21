@@ -1,0 +1,89 @@
+---
+# the lint gate of a repository that is prose and nothing else: the
+# markdown half of the organization standard this repository carries,
+# with the Python half left out because there is no Python here.
+#
+# Skip a hook with SKIP=<id>, or all of them with "git commit -n".
+ci:
+  # a bot committing to a branch is at odds with a setup where no
+  # workflow token can write: a failing hook is fixed by its author
+  autofix_prs: false
+  autoupdate_commit_msg: "Update the pinned pre-commit hook revisions"
+  autoupdate_schedule: weekly
+
+repos:
+  # this file checking itself, and the only two hooks with no environment
+  # to install: a pattern that has stopped matching is a rule that has
+  # quietly stopped running
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+  # and checking the two moves "autoupdate" must not make: a rev naming
+  # only a major follows every future release of it, and a prerelease is
+  # not a release. pre-commit says the first half itself, on stderr, on a
+  # run that then exits zero -- which is the difference between a warning
+  # and a gate. A commit SHA stays acceptable: forty hex characters do not
+  # end in a prerelease marker
+  - repo: local
+    hooks:
+      - id: pinned-rev
+        name: every pre-commit rev names a released version
+        language: pygrep
+        entry: '^ *rev: "?v?([0-9]+|[0-9][0-9.]*(a|b|rc|dev)[0-9]+)"?$'
+        files: ^\.pre-commit-config\.yaml$
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-case-conflict
+      - id: fix-byte-order-marker
+      - id: check-merge-conflict
+      - id: check-vcs-permalinks
+      - id: detect-private-key
+      - id: check-yaml
+      - id: check-added-large-files
+      # there are none, and a submodule is the one dependency that would
+      # be pinned by nothing here
+      - id: forbid-submodules
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.3
+    hooks:
+      - id: codespell
+  # a release tag, not the `v1` beside it: that one is a major-version
+  # alias upstream moves onto each release, so `pre-commit autoupdate`
+  # picks it as the newest tag and the pin stops being one
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.49.0
+    hooks:
+      - id: typos
+  # MD013 at 80 columns, tables included, and the shared configuration is
+  # the one every repository of the organization carries: prose moves
+  # between them, and a paragraph that lints in one has to lint here
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.23.2
+    hooks:
+      - id: markdownlint-cli2
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: v3.9.6
+    hooks:
+      - id: prettier
+        name: prettier (yaml and jsonc, in place fixes)
+        # named by path rather than by type: `jsonc` is not a tag identify
+        # knows, so a types_or entry for it fails the config outright
+        files: ^(.*\.ya?ml|\.markdownlint\.jsonc)$
+  # the toml of this repository is its own configuration, and one indent
+  # for every toml in the organization is the point of having a formatter
+  # at all: .taplo.toml carries the choices and the reasoning
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format
+        name: taplo (toml, in place fixes)
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
