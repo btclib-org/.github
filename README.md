@@ -882,6 +882,24 @@ finding, and work the diff never set out to do becomes an issue rather
 than a comment. Every finding is labelled blocking, non-blocking, nit or
 question.
 
+**What a diff decides with is run, not read.** Where a diff adds
+something that decides an outcome by matching or computing — a regex, a
+pattern in a hook, a grep, a script, a query — the review executes it,
+against the shapes the diff's own prose claims to cover and the shapes
+the tree actually holds, and the finding quotes what it printed.
+Reading it again is not a second check: the author read it and believed
+it. A claim the prose makes about the tree takes the same treatment,
+"every link here is already `./`-prefixed" being one `git grep`'s worth
+of evidence and the reason a change is offered as safe. None of it is a
+run of the gates — those run beside the review on the same sha, or are
+the author's to run before pushing — because what the diff adds has
+been run against nothing until a review runs it. Where what is at hand
+cannot run it — a script or a query wanting an interpreter, where a
+pattern against the tree needs only a grep and is the usual case — the
+summary says so in those words, that it was not run: a hand trace is
+the author's reading performed a second time, and it can carry a
+finding but not an ack.
+
 **A correction is a commit of its own, never an amend.** A force-push
 replaces the commits the review is attached to. The one force-push that
 stays right is a rebase carrying no new work.
