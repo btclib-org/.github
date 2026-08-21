@@ -354,6 +354,64 @@ pre-commit.ci does not have — the lint workflow covers it. No
   `universal_newlines=True`: a decoded child process takes the locale's
   encoding, which is the same defect ruff's `unspecified-encoding`
   catches one layer in, and no linter here has an opinion on the keyword.
+- **`local-link-prefix`** — pygrep refusing a markdown link whose
+  destination is local and does not begin `./`. In every repository of
+  the organization, this one included: the rule is the organization's
+  and not the publishing repositories', because one spelling is what
+  lets a check downstream key on one pattern, and a standard whose own
+  tree does not keep it is a standard with a counter-example at the top
+  of it.
+
+    What it buys where documentation is built: `docs.yml` greps the
+    built html for `href="#./`, which is what MyST renders in place of a
+    link the `RootFileLinks` transform in `docs/source/conf.py` cannot
+    resolve — an anchor to an id no page has, and a dead link `-W` sees
+    nothing wrong with once a suppression is added back. MyST renders
+    the destination verbatim, so what that grep can match is decided by
+    how the link was written, upstream of the workflow entirely.
+
+    **The prefix is the rule, and not the extension**, because
+    btclib-org/btclib#1175's table settles it: `DOES_NOT_EXIST.txt`,
+    `sub/DOES_NOT_EXIST.md`, `DOES_NOT_EXIST` and
+    `../DOES_NOT_EXIST.md` each reach that fallback and each is missed
+    by the union of both greps a repository ran, so an `.md`-scoped
+    rule leaves every one of them writable. A prefix refuses all four
+    where they are written. `bitcoin-core-rpc`'s README linking its
+    licence file from an included root file is the same argument with a
+    live destination in it.
+
+    Measured in all three publishing repositories, with an unresolvable
+    link written each way: `./page.md`, `./page.md#anchor`,
+    `./page.txt`, `./sub/page.md` and an extensionless `./page` each
+    render `#./` followed by the destination, so one pattern sees every
+    one; the same destinations written without the `./` render the
+    destination alone, which no single pattern reaches without also
+    matching the autodoc anchors those pages carry.
+
+    **`../` is refused with the rest, and it is the row that most needs
+    a reason beside it.** `RootFileLinks` *deliberately declines* to
+    resolve a target that normalizes to something starting `..`, on the
+    reasoning that nothing above the repository root is a document that
+    build can answer for. So `../page.md` reaches MyST's fallback by
+    design rather than through a gap in the transform, renders
+    `href="#../page.md"`, and is matched by neither surviving grep —
+    and the grep should not be widened to reach it, because a link
+    climbing out of the root has nothing to resolve to in the first
+    place. Refusing it at source is the only place that shape can be
+    caught at all.
+
+    The pattern's first branch asks for a whole `[text](destination)`
+    whose `[` is not preceded by a backtick, so prose can quote the
+    refused shape in a code span and grep output carrying no `[` is not
+    matched. Its second branch reads a link reference definition,
+    `[label]: page.md`, which carries no `(` and renders the same
+    fallback; it is anchored at the start of the line, because a
+    reference *use* followed by a colon is ordinary prose and an
+    unanchored pattern reports it — measured, in
+    `btclib-benchmarks`'s changelog. pygrep is line based and cannot
+    see a fenced block, so an example of the refused shape inside one
+    fails the hook; the code span is the way round it, and this file is
+    written accordingly.
 
 ## 5. ruff
 

@@ -67,6 +67,34 @@ repos:
     rev: v0.23.2
     hooks:
       - id: markdownlint-cli2
+  # how a link destination is spelled, which markdownlint has no rule
+  # for. The rule and its reasoning are section 4 of README.md, this
+  # file being one of the things that file describes; the short of it is
+  # that the publishing repositories grep their built html for `href="#./`
+  # to find a link myst could not resolve, myst renders the destination
+  # verbatim, and a pattern downstream can only key on one spelling.
+  #
+  # Here rather than only there because the rule is the organization's:
+  # a standard whose own tree does not keep it is a standard with a
+  # counter-example at the top of it. There is no shared hook repository
+  # to write it in once, so it is the same hook in each repository,
+  # `pinned-rev` above being that arrangement already.
+  #
+  # The pattern asks for a whole `[text](destination)` whose "[" is not
+  # preceded by a backtick, so prose can still quote the refused shape
+  # in a code span; its second branch reads a reference definition,
+  # "[label]: page.md", which carries no "(" and renders the same
+  # fallback, and is anchored at the start of the line so that a *use*
+  # site followed by a colon is not mistaken for one. What pygrep cannot
+  # see is a fenced block, being line based -- an example of the refused
+  # shape inside one fails this hook
+  - repo: local
+    hooks:
+      - id: local-link-prefix
+        name: a local markdown link destination begins with ./
+        language: pygrep
+        entry: '(?<!`)(?:\[[^]]*\]\(|^ {0,3}\[[^]]+\]:\s*)(?!\./|#|[A-Za-z][A-Za-z0-9+.-]*:)[^)\s]'
+        types: [markdown]
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: v3.9.6
     hooks:
