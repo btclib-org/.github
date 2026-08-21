@@ -2,17 +2,22 @@
 
 Bitcoin cryptography in Python, written to be read.
 
-[btclib](https://btclib.org) began as a teaching tool for Ferdinando
-Ametrano's *[Bitcoin and Blockchain
+[btclib](https://btclib.org) is a Python3
+[type annotated](https://docs.python.org/3/library/typing.html) library
+intended for teaching, learning and using bitcoin, focused on elliptic
+curve cryptography and bitcoin's blockchain. It began as a teaching tool
+for Ferdinando Ametrano's *[Bitcoin and Blockchain
 Technology](https://www.ametrano.net/bbt/)* course — taught at the
-University of Milano-Bicocca, Politecnico di Milano and the University of
-Milano — and is used in production today. It is still marked beta,
-because it is still refactored whenever that makes it clearer.
+University of Milano-Bicocca, Politecnico di Milano, the University of
+Milano, and ESSEC (Paris) — and is used in production today. It is still
+marked beta, because it is still refactored whenever that makes it
+clearer.
 
 What the projects here have in common is a preference for the explicit
-one: annotated types everywhere, a public function that validates what it
-is handed, and a docstring that states the contract rather than restating
-the name. Where behaviour comes from a BIP, an RFC or a Bitcoin Core
+one: a public function that validates what it is handed, a docstring that
+states the contract rather than restating the name, and a `py.typed` in
+every package, so a caller's own type checker reads the same annotations
+mypy is held to here. Where behaviour comes from a BIP, an RFC or a Bitcoin Core
 function, the code says so and cites it; where these libraries deviate,
 they say that too.
 
@@ -52,6 +57,10 @@ they say that too.
 - **[portanode](https://github.com/btclib-org/portanode)** — Bitcoin Core
   and Electrum on a portable external disk, shared between macOS and
   Windows.
+- **[.github](https://github.com/btclib-org/.github)** — this page, and
+  the standard the repositories above are built and kept to. Its issue
+  tracker is where a repository's drift from that standard is filed,
+  since a divergence between two repositories belongs to neither.
 
 ## Answering to somebody else's vectors
 
@@ -70,12 +79,15 @@ request — is written down, with the reasoning and the rejected
 alternatives, in
 [the repository standard](https://github.com/btclib-org/.github).
 
-## Elsewhere
+## Contributing
 
-- the documentation, at [btclib.readthedocs.io](https://btclib.readthedocs.io)
-- the packages, on PyPI: [btclib](https://pypi.org/project/btclib/),
-  [btclib_secp256k1](https://pypi.org/project/btclib_secp256k1/),
-  [bitcoin-core-rpc](https://pypi.org/project/bitcoin-core-rpc/)
-- questions and patches: the issues and pull requests of each repository
+Questions and patches: the issues and pull requests of each repository.
+Its own README says where the package and the documentation are; each
+carries a `CONTRIBUTING.md` with the commands that gate a change there.
+
+What every one of them asks for is the same, and none of it waits for
+CI to say so: the lint gate clean, the suite passing with its coverage,
+a signed commit, and a changelog entry wherever a user would notice the
+difference.
 
 Everything here is MIT licensed.
