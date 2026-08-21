@@ -68,30 +68,11 @@ repos:
     hooks:
       - id: markdownlint-cli2
   # how a link destination is spelled, which markdownlint has no rule
-  # for. The rule and its reasoning are section 4 of README.md, this
-  # file being one of the things that file describes; the short of it is
-  # that the publishing repositories grep their built html for `href="#./`
-  # to find a link myst could not resolve, myst renders the destination
-  # verbatim, and a pattern downstream can only key on one spelling.
-  #
-  # Here rather than only there because the rule is the organization's:
-  # a standard whose own tree does not keep it is a standard with a
-  # counter-example at the top of it. There is no shared hook repository
-  # to write it in once, so it is the same hook in each repository,
-  # `pinned-rev` above being that arrangement already.
-  #
-  # The pattern asks for a whole `[text](destination)`, and its link text
-  # steps over a nested image, because a badge is "[![alt](src)](href)"
-  # and a link text written "[^]]*" stops at the "]" that closes the alt
-  # text -- which left every badge destination unchecked in this hook's
-  # first shape. Its second branch reads a reference definition,
-  # "[label]: page.md", which carries no "(" and renders the same
-  # fallback, anchored at the start of the line so that a *use* site
-  # followed by a colon is not mistaken for one. The lookbehind refuses a
-  # "[" preceded by a backtick, "!" or "[", which is what lets prose
-  # quote the refused shape in a code span, a badge included. What pygrep
-  # cannot see is a fenced block, being line based -- an example of the
-  # refused shape inside one fails this hook
+  # for. Section 4 of README.md is the rule, why the prefix and not the
+  # extension, why a badge needed the link text to step over an image,
+  # and what this cannot see; there is no shared hook repository to write
+  # it in once, so it is the same hook in each repository, `pinned-rev`
+  # above being that arrangement already
   - repo: local
     hooks:
       - id: local-link-prefix
