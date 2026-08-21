@@ -91,3 +91,8 @@ a signed commit, and a changelog entry wherever a user would notice the
 difference.
 
 Everything here is MIT licensed.
+
+---
+
+btclib is actively supported by [DGI](https://dgi.io) and
+[CheckSig](https://checksig.com).
