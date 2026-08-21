@@ -79,3 +79,8 @@ alternatives, in
 - questions and patches: the issues and pull requests of each repository
 
 Everything here is MIT licensed.
+
+---
+
+btclib is actively supported by [DGI](https://dgi.io) and
+[CheckSig](https://checksig.com).

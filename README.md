@@ -148,6 +148,23 @@ Every repository carries these, and each is one fact in one place:
 | `pyproject.toml` | the project and every tool's configuration |
 | `uv.lock` | the pinned resolution |
 
+**Every `README.md` ends with the same line**, under a thematic break,
+naming who supports the work:
+
+```markdown
+---
+
+btclib is actively supported by [DGI](https://dgi.io) and
+[CheckSig](https://checksig.com).
+```
+
+Identical everywhere, this repository's own README and the organization
+profile included, and identical on purpose: a reader arriving at any one
+of these repositories should not have to work out whether it is somebody's
+weekend project. Reworded per repository it would be several claims to
+keep true instead of one, and the `links` workflow is what notices if
+either URL stops resolving.
+
 Dotfiles: `.pre-commit-config.yaml`, `.python-version`, `.gitattributes`,
 `.gitignore`, `.markdownlint.jsonc`, `.taplo.toml`, `.yamllint.yaml`,
 `.readthedocs.yaml`, `.secrets.baseline`, and `.vscode/` and `.claude/`,
@@ -1042,3 +1059,8 @@ Ordered by what the gap costs, not by what it takes to close.
 1. **The prose pass** — 80 columns, the reasoning and its negative
    results in the configuration comments, no stated counts, and history
    moved to the two files that carry it.
+
+---
+
+btclib is actively supported by [DGI](https://dgi.io) and
+[CheckSig](https://checksig.com).
