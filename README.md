@@ -1295,10 +1295,8 @@ An action not pinned to forty hex digits, a workflow with no
 their own. Check exit codes, not filtered output.
 
 `tests/README.md` is section 7's answer, and it is the only one of these
-a command cannot compute: which conventions a repository tests is a
-declaration, because the suites do not name the same idea the same way
-and one folds several bullets into a file about something else. Read it against
-section 7's list — a bullet the repository's prose states and this file
+a command cannot compute — that section says why. Read it against
+section 7's list: a bullet the repository's prose states and this file
 does not claim is the finding, and a bullet it claims is answered by the
 test in that repository that asserts the claim. Across the organization
 the same command run in each tree is the matrix, and there is no shorter
