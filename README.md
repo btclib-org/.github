@@ -251,8 +251,35 @@ their reasoning needs more room than a hook argument has.
   `license-files`, not the deprecated table and not a `License ::`
   classifier. `requires = ["setuptools>=77"]` is the floor both halves
   need.
-- **`keywords` are the GitHub topics**, in the same order and the same
-  lowercase spelling, ordered by relevance: PyPI shows them as given.
+- **`keywords` are the GitHub topics**, the same names in the same
+  lowercase spelling. The keywords carry an order and the topics do not:
+  PyPI shows keywords as given, so they are ordered by relevance, while
+  `gh api repos/<org>/<repo> --jq '.topics'` answers alphabetically
+  whatever was set. So the order is maintained on one side and compared
+  on neither, and what it decides is which name is left out when GitHub's
+  twenty are full — past twenty the topics are the first twenty
+  keywords, which is the one place the two may differ at all.
+
+    Both name what the tree holds. A keyword no module answers to is a
+    claim an index makes on a reader's behalf; a module no keyword names
+    is why somebody did not find the package. Neither is visible from
+    inside the file, so both are read against the tree rather than
+    against the list they were copied from.
+- **`classifiers` are present**, and each is a claim about this tree
+  rather than a line taken from a sibling's: `Typing :: Typed` only where
+  a `py.typed` ships, an `Operating System` only where the package is
+  built for it and `OS Independent` only where nothing is compiled, and
+  one `Programming Language :: Python :: X.Y` per interpreter the matrix
+  runs. That last one is a convention this section states, so section 7's
+  closing rule makes it a test rather than a hope: a library carries it as
+  `interpreters_test.py`, which reads the floor, the
+  classifiers and the matrix and refuses a disagreement. Nothing local
+  refuses a classifier that is not a classifier at all — `twine check`
+  reads the long description and not this list, and a build accepts
+  whatever the file says; PyPI's upload endpoint is what rejects one, at
+  the point where a version is already being consumed. `trove-classifiers`
+  is the same list as a package, and comparing against it is the check
+  that can run before then.
 - **`[project.urls]`** carries homepage, documentation, download,
   changelog, repository, issues and pull requests.
 - **No upper bound on a sibling dependency.** Two projects developed
@@ -378,6 +405,19 @@ pre-commit.ci does not have — the lint workflow covers it. No
     The criterion is which price is smaller: a project whose types rest
     on its own package wants the first, one whose types rest on a
     handful of stub packages can afford the second.
+
+    **What the `skip:` then costs** is answered where that key is:
+    the lint workflow covers the hook. What is left to say here is what
+    pre-commit.ci is still kept for — the pull request that bumps the
+    revisions pinned in this file — and that a local hook has no
+    revision to bump, `uv.lock` moving its mypy instead, on Dependabot's
+    own day.
+
+    **Under the mirror, two declarations have to stay equal**, and
+    nothing makes them: the hook's `rev` against the mypy `uv.lock`
+    resolves, and each `additional_dependencies` pin against the same
+    package there. The second declaration is the price named above; that
+    it is unchecked is the part worth knowing before choosing it.
 - **`toml-comment-width`** — pygrep, 80 columns on a toml comment, a
   trailing unbreakable link exempt.
 - **`decoded-subprocess-encoding`** — pygrep refusing `text=True` and
@@ -1363,6 +1403,22 @@ it is a second opinion nothing enforces, and the reflex installs that
 would fight a hook are listed as `unwantedRecommendations`. Anything
 machine-local belongs in the editor's own user settings.
 
+**`mypy-type-checker.importStrategy` follows section 4's branch**, and
+getting it wrong is silent both ways. With the local hook it is
+`fromEnvironment`: the mypy the extension bundles is a different version
+from the locked one, and an `enable_error_code` name it does not know is
+dropped with a warning no extension surfaces. With the mirror it is
+`useBundled`, there being no project mypy to point at — `fromEnvironment`
+against a `.venv` without one reports nothing at all rather than failing.
+
+The exception is a package that is a **compiled extension**, and it goes
+the other way: the mirror's isolated environment has no built extension,
+so the import does not resolve there and the editor cannot use that
+environment whatever the hook does. It reads the project's instead, which
+`uv sync` built the extension into — so `fromEnvironment` under the
+mirror, and the version equality section 4 asks for is what makes the two
+the same mypy rather than merely both present.
+
 `CLAUDE.md` carries what an agent cannot read off the tree: where the
 gates are, which local run is the gate and which is only a report, the
 non-obvious failure modes, and the rule that a session never works in the
@@ -1444,6 +1500,35 @@ sed -nE '/^\[.*targets\.sdist\]/,/^\[/{/^[a-z]/p;}' pyproject.toml
 uv run pre-commit run --all-files
 cat tests/README.md
 ```
+
+The metadata an index shows, which no command in the tree can compare
+because half of it is a repository setting:
+
+```shell
+gh api repos/<org>/<repo> --jq '.topics | join(", ")'
+sed -n '/^keywords = \[/,/^\]/p' pyproject.toml
+uv build --sdist && uvx twine check dist/*.tar.gz
+```
+
+The first two have to name the same things, up to GitHub's twenty — as
+sets and not as sequences, the first command answering alphabetically
+whatever was set, where the second echoes an order somebody chose. The
+third checks less than its name suggests — section 3 says what it does
+and does not read — so the classifiers are asked about separately, and
+before a release rather than during one:
+
+```shell
+uvx --with trove-classifiers python -c '
+import pathlib, tomllib
+from trove_classifiers import classifiers
+declared = tomllib.loads(
+    pathlib.Path("pyproject.toml").read_text()
+)["project"]["classifiers"]
+print([c for c in declared if c not in classifiers])'
+```
+
+An empty list is the answer. A string in it is one PyPI would refuse on
+upload, at the point where a version is already being consumed.
 
 The calendar of section 10, across the organization, which is the one
 audit no single tree can answer:
