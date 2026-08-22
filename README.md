@@ -1114,43 +1114,35 @@ does not have. Copying the workflow faithfully into a tree that has
 neither is the same defect as copying any other shared file that
 describes one tree, committed by the act of spreading it.
 
-**What the job's shape costs, each of which was found by being bitten:**
+**Why the job has the shape it has** is in the workflow's own header, in
+every copy of it: why a missing credential had to be made loud, why the
+action's refusal to run under an edited copy arrives as a green skip and
+what makes that red, why the fork condition is a fact about secrets
+rather than a policy, and why `id-token: write` is required for
+something other than what it looks like. That file is where each was
+written by whoever was bitten by it, and repeating them here would make
+this the second place either can be wrong.
 
-- **A missing credential was a silent pass.** With the organization
-  secret once deleted the action found the token empty, reviewed nothing
-  and reported success. A step refusing to run without a credential is
-  what makes that red.
-- **A refusal is reported by skipping, green.** The action declines to
-  run when the workflow file differs from the default branch's copy — a
-  pull request must not be able to edit the workflow holding the
-  credential — and says so by skipping. A step keyed on the action
-  producing no execution file is what makes that red instead.
-- **Therefore the pull request that adds or edits this workflow is red
-  by design**, and gets no ack, until the change is on the default
-  branch. That is not something to work around: it is the honest shape
-  of "no review happened", and such a pull request lands on its gates
-  and its description saying so.
-- **The guard tests the invocation, not the artifact.** A run that
-  starts, finishes green and posts no comment at all passes it, because
-  the execution file exists. What a reader needs to know is whether a
-  review exists, which is a question about the pull request's comments
-  and not about the job's outputs.
+One consequence belongs here rather than there, because it is about
+landing rather than about the job: **the pull request that adds or edits
+this workflow is red by design and gets no ack**, until the change is on
+the default branch. That is not something to work around — it is the
+honest shape of "no review happened" — so such a pull request lands on
+its gates and on a description saying so.
+
+**Two failures are in no copy's comments**, both of them cases where the
+job is green and a reader takes it for a review:
+
+- **The guard tests the invocation, not the artifact.** It fires when
+  the action produced no execution file, so a run that starts, finishes
+  green and posts no comment at all passes it. What a reader needs to
+  know is whether a review *exists*, which is a question about the pull
+  request's comments and not about the job's outputs.
 - **A review reads more than the sha.** The tree it judges is the
   commit's; the title and description it judges are fetched separately,
-  and a correction made after the push can be invisible to it — with no
-  `edited` trigger, nothing re-fires, so the finding cannot clear itself
-  except through a further push or a `close`/`reopen`.
-- **The fork condition is a fact about secrets, not a policy.** Secrets
-  are not passed to a workflow triggered from a fork, so a contributor's
-  pull request would start the job, find the token empty and fail — a red
-  check on the pull requests of the people least able to tell it from
-  their own mistake. The `issue_comment` path still works there, being a
-  base-repository event.
-- **`id-token: write` is required, and not for what it looks like.** The
-  action mints a GitHub OIDC token during its own startup regardless of
-  the Anthropic credential; without the permission the run dies before
-  authentication, with a message about workload identity that sends the
-  reader in the wrong direction.
+  so a correction made after the push can be invisible to it — and with
+  no `edited` trigger nothing re-fires, so the finding cannot clear
+  itself except through a further push or a `close`/`reopen`.
 
 ### Tokens, publishing, scanning
 
