@@ -343,9 +343,10 @@ pre-commit.ci does not have — the lint workflow covers it. No
   the return writes the summary a second time, buying conformance with
   noise. btclib-org/bitcoin-core-rpc#172 holds the question open with
   its own for-and-against, and under this rule that is where its answer
-  belongs. What every repository owes is the answer
-  written in its own `.pre-commit-config.yaml` beside the hook, with the
-  reason, which is what this file asks of any setting. What is *not*
+  belongs. Where the answer goes is section 3's rule and not a new one:
+  `[tool.pydoclint]` in `pyproject.toml`, which every one of the four
+  already writes explicitly rather than inheriting, and what each owes
+  beside it is the reason. What is *not*
   offered is `false` for the public API and the default elsewhere:
   pydoclint has no such split, so it would take two invocations over two
   file lists plus a rule about which files are public that nothing
