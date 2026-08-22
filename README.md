@@ -1090,6 +1090,60 @@ finding but not an ack.
 replaces the commits the review is attached to. The one force-push that
 stays right is a rebase carrying no new work.
 
+#### The workflow, and what a port of it has to adapt
+
+`claude-review.yml` is in every repository this file governs, and the
+credential is not a repository's to hold:
+
+```shell
+gh api repos/<org>/<repo>/contents/.github/workflows/claude-review.yml --jq .name
+gh api orgs/<org>/actions/secrets --jq '.secrets[] | "\(.name) \(.visibility)"'
+```
+
+The token is an **organization** secret at `visibility=all`, so a
+repository adopting the workflow configures nothing for it. That is worth
+stating because the answer *nothing* is invisible from a repository's own
+settings page, and it is the first question a port asks.
+
+**Two things a port must adapt**, and both are claims about the receiving
+tree rather than settings. The prompt names `REVIEWING.md`, and it tells
+the reviewer that the gates are running beside it on this sha — so a
+repository without that file, or without those workflows, needs a prompt
+that says something true instead of inheriting a claim about files it
+does not have. Copying the workflow faithfully into a tree that has
+neither is the same defect as copying any other shared file that
+describes one tree, committed by the act of spreading it.
+
+**Why the job has the shape it has** is in the workflow's own header, in
+every copy of it: why a missing credential had to be made loud, why the
+action's refusal to run under an edited copy arrives as a green skip and
+what makes that red, why the fork condition is a fact about secrets
+rather than a policy, and why `id-token: write` is required for
+something other than what it looks like. That file is where each was
+written by whoever was bitten by it, and repeating them here would make
+this the second place either can be wrong.
+
+One consequence belongs here rather than there, because it is about
+landing rather than about the job: **the pull request that adds or edits
+this workflow is red by design and gets no ack**, until the change is on
+the default branch. That is not something to work around — it is the
+honest shape of "no review happened" — so such a pull request lands on
+its gates and on a description saying so.
+
+**Two failures are in no copy's comments**, both of them cases where the
+job is green and a reader takes it for a review:
+
+- **The guard tests the invocation, not the artifact.** It fires when
+  the action produced no execution file, so a run that starts, finishes
+  green and posts no comment at all passes it. What a reader needs to
+  know is whether a review *exists*, which is a question about the pull
+  request's comments and not about the job's outputs.
+- **A review reads more than the sha.** The tree it judges is the
+  commit's; the title and description it judges are fetched separately,
+  so a correction made after the push can be invisible to it — and with
+  no `edited` trigger nothing re-fires, so the finding cannot clear
+  itself except through a further push or a `close`/`reopen`.
+
 ### Tokens, publishing, scanning
 
 - **The default `GITHUB_TOKEN` is read-only repository-wide**; a job
