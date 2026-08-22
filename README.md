@@ -1505,9 +1505,17 @@ lint in the others. Each bullet's subject is the path, which is what lets
   every tree points at instead of repeating it.
 - `AUTHORS.md` — who has contributed, kept for the organization rather
   than per package, a contributor to one being a contributor.
-- `CODE_OF_CONDUCT.md` — where a repository has none GitHub falls back
-  to this one's, so a repository that does carry its own carries the
-  same one or advertises a second policy.
+- `CODE_OF_CONDUCT.md` — owed by every repository. Where one carries
+  none GitHub falls back to this repository's copy, so a repository that
+  does carry its own carries the same one or the organization advertises
+  two policies.
+- `LICENSE` — owed by every repository: MIT, the holder named and no year
+  range. A range is a line nobody updates, and `COPYRIGHT` states the
+  holder without one, so the two would disagree the first January nobody
+  remembered.
+- `CONTRIBUTING.md` — owed by every repository. What is true of one tree
+  only is `CLAUDE.md`'s, and this file says so in as many words rather
+  than carrying a section per repository.
 - `REVIEWING.md` — owed by every repository this file governs, because a
   review that means one thing in one tree and another in the next is not
   a standard. What is true of one tree only is `CLAUDE.md`'s, and the

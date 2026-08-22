@@ -1,65 +1,18 @@
 # Contributing
 
-`README.md` in this repository is the
-[btclib-org repository standard](./README.md): what every repository of
-the organization is built and kept to, each rule with the alternative it
-was decided against. A sibling's `CONTRIBUTING.md` links out to it; this
-one is written inside it, so where a rule below is the standard's, the
-section number is given rather than the rule restated.
+What this repository holds in common with the others of the organization
+-- the toolchain, the lint gate, the tool tables behind it, the workflow
+set and the branch rules -- is stated once in the
+[btclib-org repository standard](https://github.com/btclib-org/.github),
+each rule with the alternative it was decided against. It binds this
+repository, so a change departing from it is a divergence, and one filed
+as an issue in that repository rather than here: a difference between two
+repositories belongs to neither of them.
 
-Read `README.md` before changing it. Most of what a session here wants to
-add is already in it, with the rejected alternative beside it.
-
-## The environment
-
-uv is the only thing that has to be installed; it fetches interpreters
-and tools itself. There is a project here, and nothing installs it:
-`package = false`, its only Python being one test suite.
-
-## The gates
-
-```shell
-uvx pre-commit run --all-files          # the whole gate
-uvx pre-commit run markdownlint-cli2    # one hook
-uvx pre-commit validate-config .pre-commit-config.yaml
-```
-
-`uvx` and not the `uv run` a sibling's lint job uses, and `lint.yml` runs
-this same command: a workflow invoking pre-commit some other way is the
-second declaration section 4 refuses, one version behind the author's or
-ahead of it. The last one is worth running before pushing a change to the
-hook config — it catches what a wrong `types_or` tag or a malformed entry
-would otherwise turn into a red lint job.
-
-**Check exit codes, not filtered output.** `pre-commit run ... | grep -v
-Passed` hides a failure, and `grep` finding nothing exits 1, which is not
-the gate's answer to anything.
-
-**The gate is not installed as a git hook.** `pre-commit install` writes
-into the common git directory, which every worktree of this repository
-shares: `git -C <worktree> rev-parse --git-path hooks` answers with the
-maintainer's checkout. So one session installing it installs it for every
-other. Run the gate by hand before committing.
-
-The suite is a second thing and not a gate. It asks the organization what
-no single repository can ask itself, it reaches GitHub to do so, and it
-skips itself unless `BTCLIB_INTEGRATION` is set. `alignment.yml` carries
-the command it runs; a copy of that command here would be the line that
-goes stale first.
-
-## What gates a merge, and what only reports
-
-`lint.yml`'s job is the required check and is the whole of what a merge
-is gated on; `REPOSITORY.md` reads the rule back from the endpoint rather
-than restating it.
-
-Everything else reports. `alignment.yml` is a sentinel: what it finds is
-drift that happened days ago in a repository nobody is working in, and an
-API that is down is nothing a pull request introduced. `links.yml` asks
-whether somebody else's server answered. `claude-review.yml` writes the
-review and its own header says it must not become a required check —
-requiring it would make a review a gate to satisfy rather than a reading
-to answer.
+**This file is the same in every repository of the organization.** What
+is true of one tree only -- the commands that build its environment, the
+gates it runs, which of its workflows decide a merge -- is `CLAUDE.md`'s,
+and section 2's root-files table is what says which file holds what.
 
 ## The issue tracker
 
