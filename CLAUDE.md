@@ -47,7 +47,56 @@ line that goes stale first.
 Passed` hides a failure, and `grep` finding nothing exits 1, which is not
 the gate's answer to anything.
 
-## What is different here, and will otherwise waste a session
+## Architecture
+
+`README.md` is the standard, and it is the product: every other
+repository of the organization is built and kept to it, and a change here
+is a change to what they are measured against. `profile/README.md` is the
+organization's page, `REPOSITORY.md` is this repository's own settings
+read back from the endpoint, and `tests/` is the half of section 15's
+audit a machine can run — its subject being the other repositories rather
+than this tree.
+
+Nothing here is installed, imported or released. What this repository
+ships, it ships by being read.
+
+## The primary checkout is the maintainer's
+
+**Never work in it.** No edit, no `git add`, no commit, no branch
+switch, no rebase, no `git stash` — the hooks fix files in place. Reading
+it is fine, and so is `git fetch`, which writes refs and leaves the work
+tree alone.
+
+**Every session works in a worktree**, its own, from the first edit:
+
+```shell
+WT=<scratchpad>/wt<issue>
+git worktree add -b <branch> "$WT" origin/main
+cd "$WT"                              # no uv sync: the gate does it
+# edit, gate and commit here, then
+git push origin HEAD:refs/heads/<branch>
+git worktree remove --force "$WT"     # removing it is part of finishing
+```
+
+**Never `git stash` in a worktree either: `refs/stash` is shared.** A
+worktree isolates files, not refs, so `git stash push` pushes onto the
+same stack every other session pops from. Commit to your own branch
+instead.
+
+**Do not rewrite `refs/heads/main`, or advance it with work that is not
+yours.** Your own branch is what you push, and the pull request is what
+moves `main`.
+
+## Model
+
+The default model for this repository is Sonnet. Switch to Opus only for
+a change to what the standard *says* — a convention two repositories
+disagree about, a rule whose rejected alternative has to be weighed. Use
+`/model opus` for the session, then switch back.
+
+Do not use Fable unless explicitly instructed.
+
+## Non-obvious facts that will otherwise waste a session
 
 - **`pyproject.toml` is not a distribution's.** `package = false`, no
   build backend and no wheel, so section 3 describes a file this one is
@@ -88,48 +137,6 @@ the gate's answer to anything.
   so a change here changes what a reader sees on repositories nobody is
   looking at.
 
-## The primary checkout is the maintainer's
-
-**Never work in it.** No edit, no `git add`, no commit, no branch
-switch, no rebase, no `git stash` — the hooks fix files in place. Reading
-it is fine, and so is `git fetch`, which writes refs and leaves the work
-tree alone.
-
-**Every session works in a worktree**, its own, from the first edit:
-
-```shell
-WT=<scratchpad>/wt<issue>
-git worktree add -b <branch> "$WT" origin/main
-cd "$WT"                              # no uv sync: the gate does it
-# edit, gate and commit here, then
-git push origin HEAD:refs/heads/<branch>
-git worktree remove --force "$WT"     # removing it is part of finishing
-```
-
-**Never `git stash` in a worktree either: `refs/stash` is shared.** A
-worktree isolates files, not refs, so `git stash push` pushes onto the
-same stack every other session pops from. Commit to your own branch
-instead.
-
-**Do not rewrite `refs/heads/main`, or advance it with work that is not
-yours.** Your own branch is what you push, and the pull request is what
-moves `main`.
-
-## How a pull request lands
-
-`CONTRIBUTING.md`'s *Landing it* has it, the bypass included: the rule
-takes an approving review, `gh pr merge` cannot invoke the maintainer's
-bypass, and the merge endpoint can.
-
-## Model
-
-The default model for this repository is Sonnet. Switch to Opus only for
-a change to what the standard *says* — a convention two repositories
-disagree about, a rule whose rejected alternative has to be weighed. Use
-`/model opus` for the session, then switch back.
-
-Do not use Fable unless explicitly instructed.
-
 ## Conventions to match
 
 `CONTRIBUTING.md`'s *Documentation and comments* is the prose style, and
@@ -143,3 +150,31 @@ closes, and *The issue tracker* has what an issue filed here may be about.
 What is left to this file is what those cannot say, because it is about a
 session rather than about the tree: the worktree rule above, the model
 below, and the failure modes in the section that names them.
+
+## What a review of this tree checks that a generic one would not
+
+Each of these is a question, and the document that answers it is named
+because that document, and not this one, is where the rule lives.
+
+- **Does a rule arrive with the reason that chose it, the negative result
+  included?** A rule stated without its argument is one the next reader
+  re-litigates, and `CONTRIBUTING.md` says so.
+- **Does a claim about the repositories carry the command that
+  re-derives it?** Section 15 is where such a command belongs, and a
+  claim no command answers is the defect this repository files most.
+- **Is a fact stated a second time somewhere it is already stated?** Two
+  wordings are two things to keep true, and the standard's own sections
+  are the first place a second wording appears.
+- **Does the standard keep the rule it states, here?** This repository is
+  governed by `README.md` as much as any other, and the rule it fails is
+  the one nobody thought to apply to the tree holding it.
+- **Does a change to `profile/README.md` read as the organization's front
+  page?** It is what github.com/btclib-org renders.
+
+## Verifying
+
+Check exit codes, not filtered output: `pre-commit run ... | grep -v
+Passed` hides a failure, and `grep` finding nothing exits 1, which is not
+the gate's answer to anything. Run the command as documented before
+claiming it works, and prefer measuring to asserting — every claim in
+this file was checked against the tree, and the tree changes.
