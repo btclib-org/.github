@@ -174,7 +174,9 @@ CI needs no second pin.
 
 ### Root files
 
-Every repository carries these, and each is one fact in one place:
+Every repository carries these, and each is one fact in one place. One
+row is conditional and no other is; the paragraph under the table is
+which, and on what:
 
 | file | what it is |
 | --- | --- |
@@ -191,9 +193,16 @@ Every repository carries these, and each is one fact in one place:
 | `CHANGELOG.md` | every user-visible change, by group |
 | `RELEASE_NOTES.md` | what a user has to *act* on, on top of it |
 | `CLAUDE.md` | what an agent needs and cannot read off the tree |
-| `MANIFEST.in` | what the sdist carries |
+| `MANIFEST.in` | what the sdist carries, where setuptools reads it |
 | `pyproject.toml` | the project and every tool's configuration |
 | `uv.lock` | the pinned resolution |
+
+**`MANIFEST.in` is the conditional row**, and what it is conditional on
+is the build backend: which file carries the sdist's include list is the
+backend's to say, which section 12 settles and section 15's audit reads
+back. `btclib-secp256k1` is on hatchling and tracks no `MANIFEST.in`,
+correctly; a tree on setuptools tracks one. A normalizer reaching this
+table from section 16 owes the row only once that question is answered.
 
 **Every `README.md` ends with the same line**, under a thematic break,
 naming who supports the work:
