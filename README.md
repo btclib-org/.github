@@ -1001,6 +1001,32 @@ a keyword naming another repository's issue is a link and not a close —
 so a cross-repository task keeps its tracking issue open until every one
 of its pull requests has landed, and somebody closes it by hand.
 
+**That is true of keywords and false of manual links**, which is what
+makes it a trap rather than a rule with an exception. A link made by
+hand in the Development panel closes its issue on merge exactly as a
+keyword does, across repositories included — and it appears in no diff,
+no commit message and no description, so every surface a reviewer reads
+can say the opposite of what merging will do. It has happened here:
+`btclib-org/bitcoin-core-rpc#178`'s body says in as many words that it
+does not close `btclib-org/btclib#1160`, and it closed it.
+
+So **what a pull request closes is read before it is merged**, from the
+one place that answers:
+
+```shell
+gh api graphql -F owner=<org> -F name=<repo> -F num=<n> -f query='
+query($owner:String!,$name:String!,$num:Int!){
+  repository(owner:$owner,name:$name){
+    pullRequest(number:$num){
+      closingIssuesReferences(first:10){
+        nodes{number repository{nameWithOwner}}}}}}'
+```
+
+An issue there that the description does not name is the finding, and a
+cross-repository one is the finding this rule exists for: a tracking
+issue closed on the first of three repositories leaves the other two
+answering to nothing.
+
 ### Review
 
 A pull request needs an approving review from somebody other than its
