@@ -14,6 +14,14 @@ The only Python is `tests/`, and its subject is the organization rather
 than this tree: whether the repositories still agree with `README.md`,
 which is the half of section 15's audit a machine can run.
 
+How to work here — the environment, the gates in full, what the issue
+tracker takes, the prose style and how a pull request is opened and
+landed — is `CONTRIBUTING.md`. Repository configuration is
+`REPOSITORY.md`: read it before changing a workflow, a branch rule or a
+setting. Reviewing is `REVIEWING.md`, and `/review` is that file as a
+command; read it before reviewing a pull request and before opening one,
+since it is what the pull request will be answered against.
+
 ## Commands
 
 uv is the only tool that must be installed.
@@ -109,38 +117,9 @@ moves `main`.
 
 ## How a pull request lands
 
-`main` takes a pull request and nothing else: `main-self-merge` requires
-an approving review, and the maintainer is a bypass actor in
-`pull_request` mode. Squash is the only method.
-
-**The bypass is not automatic — it has to be invoked, and `gh pr merge`
-cannot invoke it.** That command refuses client-side, before it asks
-GitHub anything:
-
-```text
-Pull request is not mergeable: the base branch policy prohibits the merge
-```
-
-The merge endpoint applies the bypass server-side, and it is the same
-endpoint the merge button asks:
-
-```shell
-gh api -X PUT repos/btclib-org/.github/pulls/<n>/merge \
-  -f merge_method=squash
-```
-
-**Verify what landed rather than trusting the answer**: GitHub composes
-the squash commit itself and signs it with its web-flow key, which is a
-valid signature and all `main-integrity` asks for — but a landing that
-went another way may not be.
-
-```shell
-gh api repos/btclib-org/.github/commits/main \
-  --jq '.commit.verification | {verified, reason}'
-```
-
-`delete_branch_on_merge` is on, so the head branch goes by itself; the
-worktree does not, and removing it is still yours to do.
+`CONTRIBUTING.md`'s *Landing it* has it, the bypass included: the rule
+takes an approving review, `gh pr merge` cannot invoke the maintainer's
+bypass, and the merge endpoint can.
 
 ## Model
 
@@ -153,22 +132,14 @@ Do not use Fable unless explicitly instructed.
 
 ## Conventions to match
 
-- **The prose style is `CONTRIBUTING.md`'s "Documentation and comments"
-  section, in every sibling repository**: neutral, factual, dry; a
-  comment carries the reasoning *including the negative result*; measure
-  rather than assert; one fact in one place; no history in the prose.
-  It governs this file and the standard alike.
-- **Markdown wraps at 80 columns**, tables included (MD013 is on), so
-  long commands go in fenced blocks split with `\`.
-- **Never state how many of anything a file holds.** A stated count is a
-  line every open branch has to edit, and nothing here checks one.
-  `README.md`'s section 15 has the commands that answer with today's
-  number, whenever one is wanted.
-- **A pull request that closes an issue names it in its title, in
-  parentheses**; one that closes nothing carries no parentheses. The
-  title becomes the landing commit's subject, `squash_merge_commit_title`
-  being `COMMIT_OR_PR_TITLE`.
-- **An alignment finding names the repositories it is about and the
-  command that re-derives it**, and stays open until every one of them
-  answers. That is what an issue filed here can do and one filed on a
-  single repository cannot.
+`CONTRIBUTING.md`'s *Documentation and comments* is the prose style, and
+it governs this file and the standard alike: a comment says why and never
+how it got here, the reasoning includes the negative result, a claim is
+measured rather than asserted, one fact lives in one place, nothing
+states how many of anything a file holds, and markdown wraps at 80
+columns. Its *Pull requests* has what a title does with the issue it
+closes, and *The issue tracker* has what an issue filed here may be about.
+
+What is left to this file is what those cannot say, because it is about a
+session rather than about the tree: the worktree rule above, the model
+below, and the failure modes in the section that names them.

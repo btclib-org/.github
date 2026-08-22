@@ -1144,9 +1144,13 @@ answering to nothing.
 
 A pull request needs an approving review from somebody other than its
 author; GitHub refuses a self-approval, which is why the record of a
-review is a comment whose last line is `ACK <sha>` or
-`CHANGES REQUESTED <sha>`, naming a sha because an ack belongs to a tree
-and not to a branch.
+review is a comment rather than a forge approval.
+
+**What a landing reads is the ack of record**: a comment whose last line
+is `ACK <sha>` or `CHANGES REQUESTED <sha>`, naming a sha because an ack
+belongs to a tree and not to a branch. A review that delivers no verdict
+is a reading and not an unfinished review; `REVIEWING.md` states that
+distinction, and why, for whoever reviews.
 
 **The ack of record is `claude-review.yml`'s**, and an author's own is
 not one. A comment from the account that opened the pull request is a
@@ -1504,6 +1508,15 @@ lint in the others. Each bullet's subject is the path, which is what lets
 - `CODE_OF_CONDUCT.md` — where a repository has none GitHub falls back
   to this one's, so a repository that does carry its own carries the
   same one or advertises a second policy.
+- `REVIEWING.md` — owed by every repository this file governs, because a
+  review that means one thing in one tree and another in the next is not
+  a standard. What is true of one tree only is `CLAUDE.md`'s, and the
+  file hands it over in as many words rather than carrying a section per
+  repository.
+- `.claude/commands/review.md` — owed wherever `REVIEWING.md` is: it is
+  the invocation and not a second copy of the standard, and it stays a
+  file of its own rather than folding into `CLAUDE.md`, which is read by
+  every session including the one that wrote the diff.
 
 **Verbatim in part**, the file around it being the repository's own and
 so nothing a comparison can do: the `ci:` block of
