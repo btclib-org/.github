@@ -255,8 +255,8 @@ What this is not:
 
 ## The gates are the evidence
 
-Run them on that sha, and read **exit codes, not filtered output** — a
-pipe into `grep -v Passed` hides the failure it was meant to find. **What
+Run them on that sha, and read exit codes rather than filtered output,
+for the reason `CONTRIBUTING.md`'s *The gates* gives. **What
 the gates of this tree are is `CLAUDE.md`'s**, and so is every way a run
 of them lies — a suite run over a subset that is not the coverage gate, a
 hook set that is not the whole of what CI runs. A reviewer who names a
@@ -311,9 +311,10 @@ one, is where the rule lives.
 - A new or changed workflow: the conventions in `CLAUDE.md`, and
   `REPOSITORY.md` before any rule or setting is touched. A renamed job
   is a required check renamed out of existence.
-- Is a reference to another repository **qualified**? A bare `#123`
-  resolves inside the repository it is written in, so a cross-repository
-  reference is `org/repo#123` or it points somewhere else in silence.
+- Is a reference to another repository **qualified**, and does the pull
+  request's title say what it closes? `CONTRIBUTING.md`'s *Documentation
+  and comments* and *Pull requests* name the rules, and the second is
+  the one most often found broken after the fact.
 
 **What this tree checks beyond these is `CLAUDE.md`'s**, that being the
 file whose subject is what cannot be read off the tree. A repository

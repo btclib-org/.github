@@ -24,28 +24,10 @@ since it is what the pull request will be answered against.
 
 ## Commands
 
-uv is the only tool that must be installed.
-
-```shell
-uvx pre-commit run --all-files          # the whole gate
-uvx pre-commit run markdownlint-cli2    # one hook
-uvx pre-commit validate-config .pre-commit-config.yaml
-```
-
-That last one is worth running before pushing a change to the hook
-config: it catches what a wrong `types_or` tag or a malformed entry
-would otherwise turn into a red lint job. `jsonc` is not a tag `identify`
-knows, which is why the prettier hook selects by path.
-
-The suite skips itself unless `BTCLIB_INTEGRATION` is set, this being
-the one suite in the organization that reaches the network on purpose.
-`alignment.yml` carries the command it runs, and what the suite asks is
-in `tests/`: it is still being written, so a copy of either here is the
-line that goes stale first.
-
-**Check exit codes, not filtered output.** `pre-commit run ... | grep -v
-Passed` hides a failure, and `grep` finding nothing exits 1, which is not
-the gate's answer to anything.
+`CONTRIBUTING.md`'s *The environment* and *The gates* have them, and the
+root-files table of section 2 is why they are there rather than here: it
+gives that file the commands. What a session needs on top of them is the
+worktree rule below, nothing else being different for an agent.
 
 ## Architecture
 
@@ -107,25 +89,9 @@ Do not use Fable unless explicitly instructed.
   until `[tool.typos]` names it, with the reason beside it.
 - **The suite's subject is the other repositories, and there is no
   coverage**: what it would measure is a tree that ships nothing, so the
-  number would be the suite measuring itself. A claim in this file or in
-  `README.md` that no command re-derives is the defect this organization
-  writes down most often, and a reader is what catches the ones no test
-  reaches.
-- **`lint.yml` runs those hooks on every pull request, and its job is
-  the required check**, which `REPOSITORY.md` reads back from the
-  endpoint. It is the only one, so the hooks are the whole of what a
-  merge is gated on. `alignment.yml` is a sentinel and not a gate, for
-  the reason its own header gives — an API that is down is nothing a
-  pull request introduced — `links.yml` gates nothing, weekly and on a
-  change to itself, and `claude-review.yml` gates nothing either. So a
-  review may rely on the lint gate rather than running it again,
-  `README.md`'s Review section having what the reliance takes.
-- **The lint gate is not installed as a git hook.** `pre-commit
-  install` writes into the common git directory, which every worktree
-  shares: `git -C <worktree> rev-parse --git-path hooks` answers with
-  the maintainer's checkout. So a session installing it installs it in
-  the tree the section below says never to work in, and in every other
-  session's worktree at once. Run the gate by hand before committing.
+  number would be the suite measuring itself. What it cannot reach — a
+  claim in this file or in `README.md` that no command re-derives — a
+  reader catches or nothing does.
 - **`profile/README.md` is public in a way no other file here is**: it
   is what github.com/btclib-org renders. Treat a change to it as a change
   to the organization's front page, because it is one.
@@ -173,8 +139,7 @@ because that document, and not this one, is where the rule lives.
 
 ## Verifying
 
-Check exit codes, not filtered output: `pre-commit run ... | grep -v
-Passed` hides a failure, and `grep` finding nothing exits 1, which is not
-the gate's answer to anything. Run the command as documented before
-claiming it works, and prefer measuring to asserting — every claim in
-this file was checked against the tree, and the tree changes.
+Run the command as documented before claiming it works, and read its exit
+code rather than its filtered output, for the reason `CONTRIBUTING.md`'s
+*The gates* gives. Every claim in this file was checked against the tree,
+and the tree changes.

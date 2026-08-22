@@ -63,56 +63,37 @@ to answer.
 
 ## The issue tracker
 
-**An issue belongs to a repository when closing it means touching that
-repository and no other.** One that spans repositories, or whose subject
-is the standard itself, is filed in
-[btclib-org/.github](https://github.com/btclib-org/.github/issues): a
-difference between two repositories belongs to neither of them, and filed
-once per repository it is copies that do not know about each other.
+Where an issue is filed, and what an alignment finding has to name, is
+[the standard's *What this repository is*][s-what]: an issue spanning
+repositories, or whose subject is the standard, goes to
+[btclib-org/.github](https://github.com/btclib-org/.github/issues), and
+one about this tree alone stays here.
 
-**An issue says how it was measured**, and a finding names the command
-that re-derives it. A finding about several repositories names each of
-them, and stays open until every one answers.
-
-A finding noticed while doing something else is filed, not carried: a
-pull request that answers two questions cannot be accepted for either.
-Look for the issue already open before filing another.
+A finding noticed while doing something else is filed, not carried.
+`REVIEWING.md`'s *Every collateral finding becomes an issue* is the whole
+of what to do with one, and it applies to an author as much as to a
+reviewer: a pull request answering two questions cannot be accepted for
+either.
 
 ## Documentation and comments
 
-The house style of btclib-org, in one line: a comment says *why*, never
-*how it got here*. Present-tense reasoning, **including the negative
-result** — what was tried, what it measured, why it was not taken — is
-what makes a file reviewable. History belongs in `CHANGELOG.md`.
-
-**Measure rather than assert.** A claim that no command re-derives is the
-defect this organization writes down most often. Where a claim is worth
-making, the command that re-derives it goes beside it.
-
-**Never state how many of anything a file holds.** A stated count is a
-line every open branch has to edit, and nothing checks one. It is also
-what `merge=union` keeps both of, in silence, when two branches edit it.
-
-**One fact in one place.** A rule stated in two files is two things to
-keep true, and the second wording is the one that goes stale. Point at
-the file that owns the fact rather than restating it.
-
-Markdown wraps at 80 columns, tables included — MD013 is on — so a long
-command goes in a fenced block split with `\`. A line holding nothing but
-an unbreakable URL is exempt.
-
-**A reference to another repository is qualified.** A bare `#123`
-resolves inside the repository it is written in, so a cross-repository
-reference is `owner/repo#123` or it points somewhere else in silence. The
-one exemption is mechanical: a pull request's closing keyword is read by
-the forge, so it takes the forge's own form.
+[Section 9 of the standard][s9] is the prose style, and it governs every
+file in this tree — comments, docstrings, markdown and commit messages
+alike. It is not restated here: a second wording is the one that goes
+stale, which is that section's own *One fact in one place*.
 
 ## Pull requests
 
 `main` is the only branch and takes a pull request and nothing else, a
 direct push being refused for everyone. Run the gates locally first — the
-section above says which they are — because CI runs exactly them, so a
+sections above say which they are — because CI runs exactly them, so a
 red run there is a local run that was not done.
+
+What a pull request's title and description have to say about the issues
+it closes, and why a manual link in the Development panel is a trap
+neither of them shows, is [the standard's *What a pull request says it
+is*][s-title]. Read it before opening one; it is the rule most often
+found broken after the fact.
 
 `REVIEWING.md` is the standard a review is written against, and is this
 file's other half. Read before opening a pull request, it is what the
@@ -127,11 +108,6 @@ repositories that publish.
 A pull request answers one question. Issues that share a subject are one
 pull request, closing each of them; issues that do not are one pull
 request each, however small either of them is.
-
-**One that closes an issue names it in its title, in parentheses; one
-that closes nothing carries no parentheses.** The title becomes the
-landing commit's subject, `squash_merge_commit_title` being
-`COMMIT_OR_PR_TITLE`. The body carries the forge's closing keyword.
 
 It is opened the moment it is written and verified — not held for the
 previous one to be reviewed or to land, and not batched with the next. A
@@ -151,10 +127,6 @@ and the forge then shows the base's old text as additions with nothing
 red anywhere. Read the child's diff afterwards rather than trusting the
 rebase, and retarget each child onto `main` as its parent lands.
 
-**A correction is a commit of its own, never an amend.** A force-push
-replaces the commits a review is attached to; the one force-push that
-stays right is a rebase carrying no new work.
-
 ### The review
 
 A review is given promptly and on local evidence. It does not wait for
@@ -173,12 +145,12 @@ free to move under a review:
 - the reviewer resolves the threads they opened, that being what says a
   finding is closed, and re-reviews the delta rather than the branch.
 
-**What ends the loop is the ack of record**, a comment whose last line
-names the sha it acks, and the author does not supply their own. A
-reading that says what it found and delivers no verdict is a review too
-and ends nothing; `REVIEWING.md` has both, and why they are not the same
-thing. A disagreement that survives a second exchange goes to the
-maintainer instead of into a third round.
+**What ends the loop is the ack of record**, and the author does not
+supply their own. A reading that says what it found and delivers no
+verdict is a review too and ends nothing; [the standard's *Review*][s-rev]
+has which is which, and `REVIEWING.md` has how each is written. A
+disagreement that survives a second exchange goes to the maintainer
+instead of into a third round.
 
 ### Landing it
 
@@ -189,9 +161,7 @@ rebase that moved nothing but the base leaves the ack standing; one that
 resolved a conflict does not, that resolution being a change no reviewer
 has seen.
 
-Then squash, which is the only method the rule accepts. The forge
-composes the commit and signs it with its own key, and that is what the
-rule asks for: a valid signature, not a particular signer's.
+Then squash, which is the only method the rule accepts.
 
 **The maintainer's bypass is not automatic — it has to be invoked, and
 `gh pr merge` cannot invoke it**, refusing client-side before it asks
@@ -209,7 +179,9 @@ gh api -X PUT repos/{owner}/{repo}/pulls/<n>/merge \
   -f merge_method=squash
 ```
 
-**Verify what landed rather than trusting the answer:**
+**Verify what landed rather than trusting the answer**, the signature
+[the standard asks for][s-sigs] being a valid one rather than a
+particular signer's:
 
 ```shell
 gh api repos/{owner}/{repo}/commits/main \
@@ -221,3 +193,9 @@ is still yours is bringing every checkout sitting on `main` up to date,
 that being where the next session starts from and a stale one being where
 a branch gets built on a base that has moved. `REPOSITORY.md` carries the
 settings and why they are what they are.
+
+[s-what]: https://github.com/btclib-org/.github#what-this-repository-is
+[s9]: https://github.com/btclib-org/.github#9-prose-comments-and-docstrings
+[s-title]: https://github.com/btclib-org/.github#what-a-pull-request-says-it-is
+[s-rev]: https://github.com/btclib-org/.github#review
+[s-sigs]: https://github.com/btclib-org/.github#signatures
