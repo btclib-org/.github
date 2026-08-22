@@ -1,0 +1,110 @@
+---
+name: alignment
+
+# The half of section 15's audit a machine can run: the questions whose
+# answer is not in any one tree. A repository can test what it says about
+# itself -- interpreters_test.py, conventions_test.py, the hook pins --
+# and none of them can test that the repositories agree, because
+# agreement is not a property any one of them holds.
+#
+# What it asks is in tests/, each module's docstring naming the section
+# it reads. Restating the list here would be a second copy to keep in
+# step with the first, and the copy nobody running the suite reads.
+#
+# A sentinel and not a gate, for the reason every network check in this
+# organization is one: an API that is down is nothing a pull request
+# introduced, and what this reports is drift that happened elsewhere,
+# days ago, in a repository nobody is currently working in. It gates
+# nothing, so a red run here is a backlog rather than a block.
+#
+# It runs on a pull request that touches the suite itself, which is how a
+# change to a question gets asked before it is merged, and reads this
+# working tree for `.github` rather than cloning it -- so a pull request
+# that edits the calendar is checked against the calendar it proposes.
+#
+# The default token answers most of these. Topics, the trees and a
+# ruleset's rules are public; two things inside them are not, both
+# omitted rather than refused for a token without push access -- the
+# four merge-method fields on the repository endpoint, and a rule's
+# bypass_actors. GITHUB_TOKEN also reaches only the repository it runs
+# in. The tests that ask those questions skip with the reason rather
+# than passing. Setting ALIGNMENT_TOKEN to a fine-grained token with
+# read access to the organization's repositories turns them on, and
+# nothing here changes.
+
+on:
+  schedule:
+    # The time is section 10's grid and not this file's to restate.
+    # Only the default branch schedules workflows, so on any other branch
+    # this is reachable through the dispatch below alone
+    - cron: "24 4 * * 4"
+  workflow_dispatch:
+  pull_request:
+    # ready_for_review, so a pull request marked ready gets the run the
+    # draft condition below withheld while it was a draft: the default
+    # types do not include it, and without it a readied pull request
+    # would wait for its next push to be checked at all.
+    # closed joins them so that a run still held in this pull request's
+    # own concurrency group is superseded by it -- cancel-in-progress
+    # fires only when a new run lands in that group, and nothing
+    # otherwise does
+    types: [opened, reopened, synchronize, ready_for_review, closed]
+    paths:
+      # every workflow of this tree and not this one alone: the suite
+      # reads the `cron:` of each of them, so a schedule edited here is
+      # a change to what it is being asked about
+      - .github/workflows/**
+      - tests/**
+      - pyproject.toml
+      - uv.lock
+      # the two sections the suite reads as data: a row added to the
+      # calendar, or a file added to the verbatim list, is checked by
+      # the run on the commit that adds it
+      - README.md
+
+# least privilege: this reads the organization's repositories and writes
+# nothing, files nothing and publishes nothing
+permissions:
+  contents: read
+
+concurrency:
+  # github.event.pull_request.number, not github.ref alone: for a closed,
+  # merged pull request github.ref resolves to the base branch's ref,
+  # which the schedule and a dispatch also resolve to, so grouping by it
+  # alone would let a closed pull request cancel a scheduled run
+  group: alignment-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  alignment:
+    name: Check the organization against README.md
+    # a draft pull request is work in progress and spends no runner here.
+    # A closed one spends none either -- the trigger above takes the
+    # closed event only to supersede a run still holding in this group
+    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment: a
+      # tag, let alone a branch, is a name its owner can move
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # nothing here pushes, and a token left in the checkout's git
+          # config is one every later step can read
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
+
+      # BTCLIB_INTEGRATION is what the suite skips itself without, this
+      # being the one suite in the organization that reaches the network
+      # on purpose. --locked so a stale lock fails here rather than
+      # resolving something nobody chose
+      - name: Check what no single repository can
+        env:
+          BTCLIB_INTEGRATION: "1"
+          # the fine-grained token where one is set, and the default
+          # otherwise: see the header on which question needs which
+          GH_TOKEN: ${{ secrets.ALIGNMENT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: uv run --locked --no-default-groups --group test pytest

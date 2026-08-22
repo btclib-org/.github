@@ -1,7 +1,8 @@
 ---
-# the lint gate of a repository that is prose and nothing else: the
-# markdown half of the organization standard this repository carries,
-# with the Python half left out because there is no Python here.
+# the lint gate of the repository that carries the organization
+# standard. Mostly the markdown half of it, this tree being mostly prose;
+# the Python half applies to tests/, which is the standard asking the
+# organization the questions no single repository can ask itself.
 #
 # Skip a hook with SKIP=<id>, or all of them with "git commit -n".
 ci:
@@ -10,6 +11,11 @@ ci:
   autofix_prs: false
   autoupdate_commit_msg: "Update the pinned pre-commit hook revisions"
   autoupdate_schedule: weekly
+  # the one hook pre-commit.ci cannot run: it shells out to uv, which is
+  # not installed there. What the skip costs is nothing that decides a
+  # merge -- lint.yml runs this file whole, with the command a developer
+  # runs, on every commit and every pull request
+  skip: [mypy]
 
 repos:
   # this file checking itself, and the only two hooks with no environment
@@ -116,6 +122,36 @@ repos:
     hooks:
       - id: taplo-format
         name: taplo (toml, in place fixes)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.3
+    hooks:
+      - id: ruff-check
+        name: ruff check (in place fixes)
+        args: [--fix]
+      - id: ruff-format
+        name: ruff format (in place fixes)
+  # the project's own environment rather than the mirror's isolated one:
+  # what this suite's types rest on is pytest, PyYAML and
+  # trove-classifiers, all three already resolved in uv.lock, where the
+  # mirror would need each named again in additional_dependencies and
+  # kept equal to the lock by nothing. Section 4 has the trade in full;
+  # the price taken here is the `skip:` above
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy (strict, in the project environment)
+        entry: >
+          uv run --locked --no-default-groups --group lint --group test
+          mypy tests
+        language: system
+        types: [python]
+        pass_filenames: false
+        require_serial: true
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.12.5
+    hooks:
+      # keep uv.lock in sync with pyproject.toml
+      - id: uv-lock
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.38.0
     hooks:

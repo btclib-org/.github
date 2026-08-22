@@ -904,44 +904,85 @@ weighed against.
 
 ### The set, and its cadence
 
-| workflow | when | what it varies |
+A gate runs on a pull request and on a push:
+
+| workflow | what it varies |
+| --- | --- |
+| `test` | — |
+| `lint` | — |
+| `docs` | — |
+| `release` | a tag, calling the others before it publishes |
+
+**One image and one interpreter.** `ubuntu-latest` and the version in
+`.python-version`, and nothing a gate runs varies further. The reason is
+one number, the ceiling the plan puts on an organization's concurrent
+jobs: at that ceiling a pull request's wall clock is the wait for a slot
+rather than the work, so a second image before a review buys a rarer
+answer at the price of every review. Everything else answers weekly and
+before a release instead — a regression sitting on `main` for at most a
+week, against every review paying for it.
+
+**What runs weekly does not also gate**, so nothing is asked twice at
+the price a gate charges. The converse does not hold: a sentinel runs
+its matrix whole, the cells a gate already covered included, because a
+matrix with a hole in it is one nobody can read the shape of, and the
+hole would be re-derived from the gate every time somebody asked what
+ran.
+
+Two tables make the calendar, and they are the calendar — the workflow
+owns a day and an hour, the repository owns the minute:
+
+| workflow | day | hour |
 | --- | --- | --- |
-| `test` | pull request, push | platforms × interpreters |
-| `lint` | pull request, push | — |
-| `docs` | pull request, push | — |
-| `integration` | pull request, push, and Friday | a node, an emulator |
-| `links` | Monday | — |
-| `codeql` | Tuesday, and push to main | languages |
-| `macos` | Wednesday, and a release | platform × interpreter |
-| `latest` | Wednesday | dependencies upgraded |
-| Dependabot | Thursday | what the lock pins |
-| `windows` | Saturday, and a release | platform × interpreter |
-| `mutation` | Sunday | — |
-| `published` | the 1st, and a release | what the index serves |
-| `release` | a tag | calls the gates, then publishes |
+| `links` | Monday | 04 |
+| `vendored-vectors` | Monday | 05 |
+| `codeql` | Tuesday | 04 |
+| `python-arm-authority` | Tuesday | 05 |
+| `latest` | Wednesday | 04 |
+| `published` | Wednesday | 05 |
+| `alignment` | Thursday | 04 |
+| `ubuntu` | Friday | 04 |
+| `hwi-integration` | Friday | 05 |
+| `macos` | Saturday | 04 |
+| `windows` | Saturday | 05 |
+| `mutation` | Sunday | 04 |
+| `integration` | Sunday | 05 |
+
+| repository | minute |
+| --- | --- |
+| `btclib` | 04 |
+| `btclib-secp256k1` | 08 |
+| `bitcoin-core-rpc` | 12 |
+| `btclib-benchmarks` | 16 |
+| `btclib-node` | 20 |
+| `.github` | 24 |
+
+**The week is the whole of the grid's period**, so every row is a weekly
+run, and a `cron:` repeating on any other cadence is one the calendar has
+no way to name. A workflow that would rather run monthly runs weekly
+instead: what the rarer schedule buys is a few runs nobody was waiting
+for, against an instant two tables state and a test checks.
 
 **The weekday is the same in every repository**, so a failure
 notification names the workflow by the day it arrived, and one calendar
-is one thing to remember rather than one per tree. A workflow that
-exists in more than one repository runs on the same day in all of them;
-what a repository decides for itself is the minute, GitHub queueing
-same-minute schedules across every repository that asked.
+is one thing to remember rather than one per tree. The minute is the
+repository's because GitHub queues same-minute schedules across every
+repository that asked for one, and a long enough queue drops a run
+outright; minute `:00` is in no row for the same reason, being the
+minute everybody else's cron picks.
 
 A day is a slot rather than a census: it says when that workflow runs
-where a repository has it, not that every repository does. `integration`
-is the row where the two differ most — it gates a merge everywhere it
-exists and answers Friday unattended where the thing it integrates
-against is worth asking about weekly. The commands that re-derive the
-calendar are in section 15, and there are two of them because Dependabot
-states its day in a different file and a different shape.
+where a repository has it, not that every repository does. Dependabot is
+in neither table and runs Thursday, that being the day `latest` reports
+on the upgrade before the pull request arrives — it states its own
+schedule in `dependabot.yml`, in a different shape, and picks its own
+minute.
 
-**What waits for a merge is the first four rows and nothing else.** The
-reason is one number: the ceiling the plan puts on an organization's
-concurrent jobs. At that ceiling a pull request's wall clock is the wait
-for a slot rather than the work, so a platform row earns a place before a
-review only if it is cheap to wait for. The expensive ones answer weekly
-and before a release instead — a regression sitting on `main` for at most
-a week, against every review paying for it.
+`tests/grid_test.py` of this repository reads both tables and every
+`cron:` of every repository, in both directions: a schedule no row names
+fails there, and so does a row nothing in the organization answers to,
+which is what keeps a row here from being a claim nobody checks. The
+commands a human runs instead are in section 15.
 
 `latest` is the sentinel that makes a Dependabot pull request a diff
 whose result is already known: it upgrades everything the resolver
@@ -1382,7 +1423,7 @@ corrected in none of the ones that shipped.
   after the upload rather than before: installing a dependency executes
   its code, and a compromised one must not reach a `dist/` still to be
   handed on.
-- **A monthly workflow installs from the index** and asks whether the
+- **A scheduled workflow installs from the index** and asks whether the
   published artifact *works*, not whether it installs — an import runs
   `__init__.py` alone, where a data file missing from the wheel is opened
   only at the first call that needs it.
@@ -1444,7 +1485,8 @@ beside it, with the same argument as `.vscode/`.
 
 **The same file in every repository**, and deliberately so — prose and
 configuration move between them, and a paragraph that lints in one has to
-lint in the others:
+lint in the others. Each bullet's subject is the path, which is what lets
+`tests/verbatim_test.py` of this repository compare the copies it finds:
 
 - `.markdownlint.jsonc` — no rule disabled; what it names is a style
   where markdownlint's default is "consistent", which asks each file to
@@ -1455,10 +1497,18 @@ lint in the others:
 - `.taplo.toml` — four-space indent, `reorder_keys` left false because
   the order of a table is an argument, `array_auto_collapse` false so
   that adding an entry is a one-line diff.
-- `COPYRIGHT`, `AUTHORS.md`, `CODE_OF_CONDUCT.md`, and the `ci:` block
-  of `.pre-commit-config.yaml`.
-- The mypy strictness block, the ruff width and complexity settings, the
-  pytest strictness flags, and `fail_under = 100`.
+- `COPYRIGHT` — one line naming the holder, and what every header in
+  every tree points at instead of repeating it.
+- `AUTHORS.md` — who has contributed, kept for the organization rather
+  than per package, a contributor to one being a contributor.
+- `CODE_OF_CONDUCT.md` — where a repository has none GitHub falls back
+  to this one's, so a repository that does carry its own carries the
+  same one or advertises a second policy.
+
+**Verbatim in part**, the file around it being the repository's own and
+so nothing a comparison can do: the `ci:` block of
+`.pre-commit-config.yaml`, the mypy strictness block, the ruff width and
+complexity settings, the pytest strictness flags, and `fail_under = 100`.
 
 A per-file exception belongs in that file's own
 `markdownlint-configure-file` comment, not in the shared config read by
@@ -1480,6 +1530,21 @@ the index and goes the day it is.
 
 Alignment is measured, not remembered. Each command below answers for
 one section above.
+
+**Some of it runs on its own.** `tests/` of this repository is a suite
+that asks the questions whose answer is in no single tree, because
+agreement between repositories is not a property any one of them holds,
+so no convention test of theirs can hold it either. Which section each
+module reads is that module's own docstring, and there is no second copy
+of the list here to keep in step with it. `alignment.yml` runs it weekly.
+
+The commands below are the other half, and where one of them asks a
+question the suite also asks, the suite asks it of every repository at
+once and the command answers for the tree in front of you. The rest are
+the questions about one tree, and the ones that need a judgement rather
+than a comparison. A repository answers for itself where it can —
+`interpreters_test.py`, `conventions_test.py`, the hook-pin tests — and
+this file is where the rest is written down.
 
 The settings, which is where the defects have actually been:
 

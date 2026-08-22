@@ -1,0 +1,156 @@
+# The one thing this repository could not check about itself in prose:
+# whether the other repositories still agree with README.md. Section 15
+# gives the commands a human runs to audit one repository; this is the
+# subset a machine can run against all of them, weekly, unattended.
+#
+# It is not a distribution. Section 3 describes the `pyproject.toml` of a
+# package that ships -- name, version, classifiers, keywords, urls, a
+# build backend, a wheel -- and none of that applies to a tree whose only
+# Python is a test suite. `package = false` below is what says so to uv,
+# and what keeps `uv run` from trying to build this directory before
+# running anything in it.
+
+[project]
+name = "btclib-alignment"
+version = "0"
+# This is not a library covering every interpreter still in support: it
+# is one suite, run by one workflow, on one runner. So the rule for an
+# application applies -- the newest its dependencies allow -- and which
+# interpreter that is, `.python-version` says rather than this comment.
+requires-python = ">=3.14"
+
+[dependency-groups]
+# `gh` and `git` are the other two dependencies and neither is a wheel:
+# both are on every GitHub-hosted runner already, and CONTRIBUTING.md
+# says so for a developer running this by hand.
+test = [
+    "pytest",
+    # a workflow file is read with a parser and not with a regex: what
+    # this suite asks of one is where its `cron:` entries are, which is
+    # a question about the document's shape rather than about a line
+    "pyyaml",
+    # the offline copy of PyPI's classifier list, which is what makes
+    # "is this a real classifier" answerable before an upload rather
+    # than during one. Section 3 has the argument
+    "trove-classifiers",
+]
+lint = ["mypy", "pre-commit", "types-PyYAML"]
+
+[tool.uv]
+# nothing is built here, so nothing installs this directory either
+package = false
+
+[tool.ruff]
+# target-version is inferred from project.requires-python
+
+[tool.ruff.lint]
+# preview and explicit-preview-rules only make sense as a pair, and this
+# file needs the first because naming a rule in `ignore` below, instead
+# of coding it, is itself a preview feature. Alone it would also turn on
+# every rule ruff is still designing; the second takes that back off, so
+# a preview rule runs only where this file names it exactly.
+preview = true
+explicit-preview-rules = true
+# The tree is a test suite and nothing else, so the select list is the
+# organization's minus what only a library has to answer for: no CPY,
+# there being no package to carry a copyright header; no D on top of the
+# defaults beyond what a test module needs. What is here is what finds
+# something in test code -- a bare except, a mutable default, an
+# undocumented module, a path built with os.path.
+select = [
+    "A",   # flake8-builtins
+    "B",   # flake8-bugbear
+    "BLE", # flake8-blind-except
+    "C4",  # flake8-comprehensions
+    "C90", # mccabe
+    "D",   # pydocstyle
+    "E",   # pycodestyle errors
+    "ERA", # eradicate
+    "F",   # pyflakes
+    "FA",  # flake8-future-annotations
+    "FIX", # flake8-fixme
+    "I",   # isort
+    "PGH", # pygrep-hooks
+    "PIE", # flake8-pie
+    "PL",  # pylint
+    "PT",  # flake8-pytest-style
+    "PTH", # flake8-use-pathlib
+    "RET", # flake8-return
+    "RUF", # ruff-specific rules
+    "S",   # flake8-bandit
+    "SIM", # flake8-simplify
+    "T20", # flake8-print
+    "TID", # flake8-tidy-imports
+    "UP",  # pyupgrade
+    "W",   # pycodestyle warnings
+]
+ignore = [
+    # __init__ is documented by its class, and a magic method by the data
+    # model it implements: the two pep257 does not ask for, and the same
+    # two every sibling ignores
+    "undocumented-magic-method",
+    "undocumented-public-init",
+    # each of these is one half of a pair ruff reports as incompatible,
+    # and the half every sibling drops: a class gets no blank line before
+    # its docstring, and a multi-line summary starts on the first line
+    "incorrect-blank-line-before-class",
+    "multi-line-summary-second-line",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+    "S101", # assert, which is how a test states what it checks
+    # this suite exists to run `git` and `gh`, so a subprocess call with a
+    # partial path is what every helper here is. The argument lists are
+    # built from the organization name and a repository name the API
+    # answered with -- never from a test's input -- and `shell=False` is
+    # the default the helpers keep
+    "S603",
+    "S607",
+]
+
+[tool.ruff.lint.mccabe]
+# ruff's default, as everywhere in the organization
+max-complexity = 10
+
+[tool.mypy]
+strict = true
+show_column_numbers = true
+show_error_codes = true
+enable_error_code = [
+    "deprecated",
+    "exhaustive-match",
+    "ignore-without-code",
+    "mutable-override",
+    "narrowed-type-not-subtype",
+    "possibly-undefined",
+    "redundant-expr",
+    "redundant-self",
+    "truthy-bool",
+    "truthy-iterable",
+    "unimported-reveal",
+]
+warn_unreachable = true
+# what requires-python says, for the reason a sibling's own comment
+# gives at this key: without it mypy targets whatever runs it
+python_version = "3.14"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# the organization's strictness flags, minus the ones that answer a
+# question this suite does not have. No --cov: coverage at 100% is a
+# claim about a package's own code, and this tree ships none -- what
+# would be measured is the suite measuring itself. No -n auto either:
+# every test here waits on the network, so the wall clock is the fetch
+# and not the CPU, and the fetching is done once in a session fixture
+addopts = "-ra --durations=8 --strict-config --strict-markers"
+xfail_strict = true
+# --strict-markers is on, so a marker is declared here or it is a typo.
+# The whole suite carries `integration`: section 7's rule that a test
+# never reaches the network is what makes this one an exception that has
+# to announce itself, and BTCLIB_INTEGRATION is the same switch the
+# siblings' own integration suites read
+markers = [
+    "integration: reaches GitHub, opt-in via BTCLIB_INTEGRATION",
+]
+filterwarnings = ["error"]
