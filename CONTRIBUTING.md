@@ -154,3 +154,62 @@ settings and why they are what they are.
 [s-title]: https://github.com/btclib-org/.github#what-a-pull-request-says-it-is
 [s-rev]: https://github.com/btclib-org/.github#review
 [s-sigs]: https://github.com/btclib-org/.github#signatures
+
+## This repository in particular
+
+Everything above is the same file in every repository of the
+organization; everything below is this one's, and the comparison stops at
+this heading.
+
+### The environment and the gates
+
+uv is the only thing that has to be installed; it fetches interpreters
+and tools itself. There is a project here, and nothing installs it:
+`package = false`, its only Python being one test suite.
+
+`gh` and `git` are the other two prerequisites and neither is a wheel:
+both are on every GitHub-hosted runner already, and the suite shells out
+to them rather than importing a client.
+
+```shell
+uvx pre-commit run --all-files          # the whole gate
+uvx pre-commit run markdownlint-cli2    # one hook
+uvx pre-commit validate-config .pre-commit-config.yaml
+```
+
+`uvx` and not the `uv run` a sibling's lint job uses, and `lint.yml` runs
+this same command: a workflow invoking pre-commit some other way is the
+second declaration section 4 refuses, one version behind the author's or
+ahead of it. The last one is worth running before pushing a change to the
+hook config — it catches what a wrong `types_or` tag or a malformed entry
+would otherwise turn into a red lint job.
+
+**Check exit codes, not filtered output.** `pre-commit run ... | grep -v
+Passed` hides a failure, and `grep` finding nothing exits 1, which is not
+the gate's answer to anything.
+
+**The gate is not installed as a git hook.** `pre-commit install` writes
+into the common git directory, which every worktree of this repository
+shares: `git -C <worktree> rev-parse --git-path hooks` answers with the
+maintainer's checkout. So one session installing it installs it for every
+other. Run the gate by hand before committing.
+
+The suite is a second thing and not a gate. It asks the organization what
+no single repository can ask itself, it reaches GitHub to do so, and it
+skips itself unless `BTCLIB_INTEGRATION` is set. `alignment.yml` carries
+the command it runs; a copy of that command here would be the line that
+goes stale first.
+
+### What gates a merge, and what only reports
+
+`lint.yml`'s job is the required check and is the whole of what a merge
+is gated on; `REPOSITORY.md` reads the rule back from the endpoint rather
+than restating it.
+
+Everything else reports. `alignment.yml` is a sentinel: what it finds is
+drift that happened days ago in a repository nobody is working in, and an
+API that is down is nothing a pull request introduced. `links.yml` asks
+whether somebody else's server answered. `claude-review.yml` writes the
+review and its own header says it must not become a required check —
+requiring it would make a review a gate to satisfy rather than a reading
+to answer.

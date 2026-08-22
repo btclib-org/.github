@@ -121,23 +121,26 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            This repository has no REVIEWING.md of its own: it holds
-            the organization standard that the others' copies descend
-            from. Read README.md -- its "Review" section is what a
-            review here is written against, and the rest of it is what a
-            finding cites, since this repository *is* the rules.
-            CLAUDE.md has the facts about this tree a review has to
-            know.
+            REVIEWING.md is what a review here is written against, and
+            it is the same file in every repository of the organization
+            -- its last section is this tree's. README.md is what a
+            finding cites, this repository being the one that holds the
+            rules; CONTRIBUTING.md's last section has the gates, and
+            CLAUDE.md the facts about this tree a review has to know.
 
-            The summary's last line is the verdict README.md states,
-            `ACK <sha>` or `CHANGES REQUESTED <sha>`, naming the sha
-            because an ack belongs to a tree and not to a branch. It is
-            not optional and not a judgement: it is the only part of a
-            review that anything other than a person can read, and a
-            review ending without it cannot be told apart from one that
-            never finished.
+            The summary's last line is the verdict, `ACK <sha>` or
+            `CHANGES REQUESTED <sha>`, naming the sha because an ack
+            belongs to a tree and not to a branch. For this review it is
+            not optional: this is the ack of record, the one a landing
+            reads, and it is the only part of a review that anything
+            other than a person can read -- a review of record ending
+            without it cannot be told apart from one that never
+            finished. A person reading the same diff may say what they
+            found and deliver no verdict; REVIEWING.md has why the two
+            are not the same thing.
 
-            What this repository ships is prose, so the findings differ
+            What this repository ships is mostly prose, so the findings
+            differ
             in kind from a code review's. A rule that is stated without
             the reason that chose it, a claim no command re-derives, a
             count of anything, a second wording of a fact stated

@@ -10,10 +10,21 @@ audit has no revision to compare against.
 ### The repository that owns the standard carries what it names
 
 - **`REVIEWING.md` and `.claude/commands/review.md` are section 14
-  verbatim files.** Between the four repositories already aligned to the
-  standard, `REVIEWING.md` differed only in its H1 and in the section
-  whose title says it is not generic — `btclib-node`, mid-normalization,
-  is three sections short of them; that section is handed to `CLAUDE.md`,
+  verbatim files.** `REVIEWING.md` was already one file wherever the
+  standard had reached: the copies differed in their H1 and in the
+  section whose title says it is not generic, and in nothing else. The
+  command that re-derives it strips those two and diffs the rest:
+
+  ```shell
+  strip() {
+      sed '1d' "$1" \
+        | awk '/^## What a review of this tree/{s=1} /^## The verdict/{s=0} !s'
+  }
+  diff <(strip a) <(strip b)
+  ```
+
+  `btclib-node` is the tree the standard has not reached yet, and it is
+  short of the others by whole sections; that section is handed to `CLAUDE.md`,
   which is the file whose subject is what cannot be read off the tree.
   The command follows it for the same reason, and stays a file of its own
   rather than folding into `CLAUDE.md`, which every session loads
@@ -39,9 +50,12 @@ audit has no revision to compare against.
   and `CLAUDE.md`'s skeleton gains the section that answers what gates a
   merge and what only reports.
 
-- **The files section 2 names and this repository lacked**: `COPYRIGHT`,
-  `AUTHORS.md`, `CONTRIBUTING.md`, `REVIEWING.md`, `CHANGELOG.md`,
-  `RELEASE_NOTES.md` and `.gitattributes`. `CODE_OF_CONDUCT.md` takes the
+- **Some of the files section 2 names and this repository lacked**:
+  `COPYRIGHT`, `AUTHORS.md`, `CONTRIBUTING.md`, `REVIEWING.md`,
+  `CHANGELOG.md`, `RELEASE_NOTES.md` and `.gitattributes`. Others it
+  still lacks — `SECURITY.md` and `RELEASING.md` among them — and what a
+  repository that publishes nothing owes of that table is not settled
+  here. `CODE_OF_CONDUCT.md` takes the
   shared text, and `LICENSE` loses its year range — `COPYRIGHT` names the
   holder without one, so the two disagreed the first January nobody
   remembered.

@@ -109,9 +109,11 @@ uv run pre-commit run --all-files    # the whole lint gate
 ```
 
 Every documented command is a `uv run` command, and every workflow step
-runs the same command verbatim. `CLAUDE.md` carries each CI job's command
-literally, so a workflow change that does not update it makes that file
-wrong rather than merely stale.
+runs the same command verbatim. `CONTRIBUTING.md`'s last section carries
+the commands a developer runs, so a workflow change that leaves one of
+them behind makes that file wrong rather than merely stale. A workflow
+whose command lives only in the workflow says so where it is written,
+rather than being copied into prose that nothing re-runs.
 
 **`--locked`, never `--frozen`.** `--locked` fails when `uv.lock` and
 `pyproject.toml` disagree; `--frozen` takes the lock as it finds it and

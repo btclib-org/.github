@@ -312,10 +312,9 @@ one, is where the rule lives.
 - A new or changed workflow: the conventions in `CLAUDE.md`, and
   `REPOSITORY.md` before any rule or setting is touched. A renamed job
   is a required check renamed out of existence.
-- Is a reference to another repository **qualified**? A bare `#123`
-  resolves inside the repository it is written in, so a cross-repository
-  reference is `owner/repo#123` or it points somewhere else in silence.
-  Section 9 of the standard has the rule and its one exemption.
+- Is a reference to another repository **qualified**? Section 9 of the
+  standard has the rule and its one exemption, and a bare number is the
+  shape that breaks it.
 - Does the pull request's **title** say what it closes, and does its
   description close what the title says? Section 11 has the rule, and it
   is the one most often found broken after the fact.
@@ -409,3 +408,28 @@ there.
 Ack when every blocking finding is closed, the gates passed locally on
 that sha, and the diff answers its issues. Non-blocking findings and
 nits do not hold an ack — say that they are left to the author.
+
+## This repository in particular
+
+Everything above is the same file in every repository of the
+organization; everything below is this one's, and the comparison stops at
+this heading.
+
+Each of these is a question, and the document that answers it is named
+because that document, and not this one, is where the rule lives.
+
+- **Does a rule arrive with the reason that chose it, the negative result
+  included?** A rule stated without its argument is one the next reader
+  re-litigates, and the standard's *How to use this file* asks for the
+  argument beside the rule.
+- **Does a claim about the repositories carry the command that
+  re-derives it?** Section 15 is where such a command belongs, and a
+  claim no command answers is the defect this repository files most.
+- **Is a fact stated a second time somewhere it is already stated?** Two
+  wordings are two things to keep true, and the standard's own sections
+  are the first place a second wording appears.
+- **Does the standard keep the rule it states, here?** This repository is
+  governed by `README.md` as much as any other, and the rule it fails is
+  the one nobody thought to apply to the tree holding it.
+- **Does a change to `profile/README.md` read as the organization's front
+  page?** It is what github.com/btclib-org renders.
