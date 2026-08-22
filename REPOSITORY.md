@@ -41,10 +41,11 @@ protection needs the whole object rather than the answer above.
 
 `lint.yml` has one job, so that job is the context: the [aggregate job a
 required check needs][s10-check] is for a matrix, and there is none here.
-The name is not the sibling repositories' `Lint and type-check` — there
-is no Python in this tree and no mypy hook in `.pre-commit-config.yaml`,
-so that name would promise a check nobody runs, and a context is keyed by
-name alone.
+The name is not the sibling repositories' `Lint and type-check`, though
+the hook config it runs carries a mypy hook as theirs do: a context is
+keyed by name alone and bound outside the tree, so changing one is not
+something a pull request can do. The direction that would matter is the
+other one, a name promising a check nobody runs.
 
 **`links.yml` is not a required check and must not become one.** It asks
 whether somebody else's server answered, which is a question a merge
@@ -250,7 +251,8 @@ so this call reports the setting and not the request.
 
 There is no `.github/dependabot.yml`, where [the standard asks for the
 `github-actions` ecosystem at least][s11-bots]: the actions these
-workflows pin have nothing proposing their next SHA. The pre-commit
+workflows pin have nothing proposing their next SHA, and `uv.lock` has
+nothing proposing its next resolution. The pre-commit
 revisions do have pre-commit.ci's weekly autoupdate, per the `ci:` block
 of `.pre-commit-config.yaml`. The missing file is a gap rather than a
 choice.
@@ -261,16 +263,22 @@ choice.
   or downloaded; what this repository ships, it ships by being read on
   github.com. So there is no `pypi` environment, no OIDC trusted
   publisher, and no tag to protect.
-- **No CodeQL.** It analyses code for vulnerabilities, and there is none
-  here: `README.md`, `profile/README.md` and configuration.
+- **No CodeQL.** The reason recorded here was that there is no code, and
+  `tests/` is code. What stands in its place is narrower: that suite is
+  neither installed nor imported by anything, and what it reads is this
+  organization's own API answers. Whether that is enough to leave the
+  analysis off is open rather than settled.
 - **No Pages and no Read the Docs.** The rendered form of this repository
   is the organization profile GitHub builds from `profile/README.md`,
   which is not a site anything deploys.
-- **No test suite, so no coverage.** What replaces one is [the audit the
-  standard carries][s15]: alignment is measured with the commands
-  recorded there rather than remembered, and this file is that
-  measurement pointed at the repository the commands came from.
+- **A suite, and no coverage.** [Section 8's ratchet][s8] is a claim
+  about a package's own code and this tree ships none, so what the number
+  would measure is the suite measuring itself. What the suite does
+  measure is [the audit the standard carries][s15], for the questions
+  whose answer is in no single tree — and this file is the rest of that
+  audit, pointed at the repository the commands came from.
 
+[s8]: ./README.md#8-coverage-at-100
 [s10-check]: ./README.md#the-aggregate-job-and-the-required-check
 [s11-bots]: ./README.md#dependabot-and-pre-commitci
 [s11-branch]: ./README.md#branch-protection-and-rulesets

@@ -111,7 +111,7 @@ repos:
         # knows, so a types_or entry for it fails the config outright
         files: ^(.*\.ya?ml|\.markdownlint\.jsonc)$
   # the toml here is configuration and nothing else: .taplo.toml, which
-  # carries the formatting choices and the reasoning, and .typos.toml.
+  # carries the formatting choices and the reasoning, and pyproject.toml.
   # One indent for every toml in the organization is the point of having
   # a formatter at all. Naming them here is what .taplo.toml asks of the
   # repository that carries it, that file being shared and so unable to

@@ -3,17 +3,20 @@
 This file provides guidance to Claude Code (claude.ai/code) when working
 with code in this repository.
 
-There is no code. `README.md` is the standard every btclib-org
-repository is built and kept to, `profile/README.md` is the
-organization's page, and the issue tracker is where a repository's drift
-from that standard is filed and worked off. Read `README.md` before
-changing it: most of what a session here wants to add is already in it,
-with the alternative that was rejected beside it.
+`README.md` is the standard every btclib-org repository is built and
+kept to, `profile/README.md` is the organization's page, and the issue
+tracker is where a repository's drift from that standard is filed and
+worked off. Read `README.md` before changing it: most of what a session
+here wants to add is already in it, with the alternative that was
+rejected beside it.
+
+The only Python is `tests/`, and its subject is the organization rather
+than this tree: whether the repositories still agree with `README.md`,
+which is the half of section 15's audit a machine can run.
 
 ## Commands
 
-uv is the only tool that must be installed. There is no project and no
-lock file, so nothing is synced and every command is `uvx`:
+uv is the only tool that must be installed.
 
 ```shell
 uvx pre-commit run --all-files          # the whole gate
@@ -26,36 +29,46 @@ config: it catches what a wrong `types_or` tag or a malformed entry
 would otherwise turn into a red lint job. `jsonc` is not a tag `identify`
 knows, which is why the prettier hook selects by path.
 
+The suite skips itself unless `BTCLIB_INTEGRATION` is set, this being
+the one suite in the organization that reaches the network on purpose.
+`alignment.yml` carries the command it runs, and what the suite asks is
+in `tests/`: it is still being written, so a copy of either here is the
+line that goes stale first.
+
 **Check exit codes, not filtered output.** `pre-commit run ... | grep -v
 Passed` hides a failure, and `grep` finding nothing exits 1, which is not
 the gate's answer to anything.
 
 ## What is different here, and will otherwise waste a session
 
-- **There is no `pyproject.toml`**, so the tool configuration that lives
-  in one elsewhere lives in files of its own: `.typos.toml` for typos,
-  `.taplo.toml`, `.yamllint.yaml`, `.markdownlint.jsonc`. A word this
-  file's own prose needs — `CPY`, ruff's copyright rule — is a typo to
-  the spell checker until it is named there, with the reason beside it.
-- **There is no suite and no coverage**, so the gate is the hooks and
-  nothing else. What replaces a test here is that the standard is
-  measured against the repositories rather than asserted: section 15
-  carries the commands, and a claim in this file or in `README.md` that
-  no command re-derives is the defect this organization writes down most
-  often.
+- **`pyproject.toml` is not a distribution's.** `package = false`, no
+  build backend and no wheel, so section 3 describes a file this one is
+  not. The tools that read a `pyproject.toml` are configured in it, and
+  the ones that do not keep files of their own: `.taplo.toml`,
+  `.yamllint.yaml`, `.markdownlint.jsonc`. A word this file's own prose
+  needs — `CPY`, ruff's copyright rule — is a typo to the spell checker
+  until `[tool.typos]` names it, with the reason beside it.
+- **The suite's subject is the other repositories, and there is no
+  coverage**: what it would measure is a tree that ships nothing, so the
+  number would be the suite measuring itself. A claim in this file or in
+  `README.md` that no command re-derives is the defect this organization
+  writes down most often, and a reader is what catches the ones no test
+  reaches.
 - **`lint.yml` runs those hooks on every pull request, and its job is
   the required check**, which `REPOSITORY.md` reads back from the
-  endpoint. There is no suite and no documentation build for the rule to
-  name, so the hooks are the whole of what a merge is gated on, and the
-  prose this repository ships is checked by a reader rather than by a
-  runner. `links.yml` gates nothing — weekly, and on a change to itself
-  — and `claude-review.yml` gates nothing either. So a review may rely
-  on the lint gate rather than running it again, `README.md`'s Review
-  section having what the reliance takes.
-- **The lint gate is not installed as a git hook.** Nothing here has a
-  project environment for `pre-commit install` to point at, and a hook
-  wired to a `uvx` cache path is a reference that breaks without saying
-  so. Run the gate by hand before committing.
+  endpoint. It is the only one, so the hooks are the whole of what a
+  merge is gated on. `alignment.yml` is a sentinel and not a gate, for
+  the reason its own header gives — an API that is down is nothing a
+  pull request introduced — `links.yml` gates nothing, weekly and on a
+  change to itself, and `claude-review.yml` gates nothing either. So a
+  review may rely on the lint gate rather than running it again,
+  `README.md`'s Review section having what the reliance takes.
+- **The lint gate is not installed as a git hook.** `pre-commit
+  install` writes into the common git directory, which every worktree
+  shares: `git -C <worktree> rev-parse --git-path hooks` answers with
+  the maintainer's checkout. So a session installing it installs it in
+  the tree the section below says never to work in, and in every other
+  session's worktree at once. Run the gate by hand before committing.
 - **`profile/README.md` is public in a way no other file here is**: it
   is what github.com/btclib-org renders. Treat a change to it as a change
   to the organization's front page, because it is one.
@@ -79,7 +92,7 @@ tree alone.
 ```shell
 WT=<scratchpad>/wt<issue>
 git worktree add -b <branch> "$WT" origin/main
-cd "$WT"                              # no uv sync: there is no project
+cd "$WT"                              # no uv sync: the gate does it
 # edit, gate and commit here, then
 git push origin HEAD:refs/heads/<branch>
 git worktree remove --force "$WT"     # removing it is part of finishing

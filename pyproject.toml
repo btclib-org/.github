@@ -113,6 +113,17 @@ ignore = [
 # ruff's default, as everywhere in the organization
 max-complexity = 10
 
+# typos' configuration, where section 4 says both spell checkers are
+# configured and where every sibling keeps this one. What is *not* here
+# matters as much: no `files.extend-exclude`. A file the checker never
+# reads is a file nobody is checking, and the point of naming a word is
+# that the next one still gets reported.
+[tool.typos.default.extend-words]
+# ruff's flake8-copyright prefix, which the standard names where it says
+# the copyright notice is a ruff rule rather than a hook. typos reads it
+# as "COPY" or "CPU" misspelled, both of which it would be anywhere else
+CPY = "CPY"
+
 [tool.mypy]
 strict = true
 show_column_numbers = true
