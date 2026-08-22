@@ -9,10 +9,10 @@ repository, so a change departing from it is a divergence, and one filed
 as an issue in that repository rather than here: a difference between two
 repositories belongs to neither of them.
 
-**This file is the same in every repository of the organization.** What
-is true of one tree only — the commands that build its environment, the
-gates it runs, which of its workflows decide a merge — is `CLAUDE.md`'s,
-and section 2's root-files table is what says which file holds what.
+**This file is the same in every repository of the organization up to
+its last section.** What is true of one tree only — the commands that
+build its environment, the gates it runs, which of its workflows decide
+a merge — is under that heading, and the comparison stops there.
 
 ## The issue tracker
 
@@ -39,8 +39,8 @@ stale, which is that section's own *One fact in one place*.
 
 What `main` accepts, and what it refuses to everyone, is [section 11 of
 the standard][s11]. Run the gates locally before opening anything —
-`CLAUDE.md` says which they are in this tree — because CI runs exactly
-them, so a red run there is a local run that was not done.
+the last section of this file says which they are — because CI runs
+exactly them, so a red run there is a local run that was not done.
 
 What a pull request's title and description have to say about the issues
 it closes, and why a manual link in the Development panel is a trap

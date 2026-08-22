@@ -150,7 +150,8 @@ jobs:
 
             Do not run the gates. lint.yml runs this repository's gate,
             `uvx pre-commit run --all-files`, beside you on this same
-            sha, and CLAUDE.md is what makes relying on it sound. Say in
+            sha, and CONTRIBUTING.md's last section is what makes
+            relying on it sound. Say in
             the summary that no gates were run by this job and that the
             author's own statement of what they ran is what stands --
             and say so too when a pull request makes no such statement.

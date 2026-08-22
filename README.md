@@ -188,13 +188,13 @@ which, and on what:
 | `AUTHORS.md` | a pointer to the contributor graph, not a list |
 | `CODE_OF_CONDUCT.md` | a pointer to the PSF code of conduct |
 | `SECURITY.md` | reporting, supported versions, known limitations |
-| `CONTRIBUTING.md` | how to work: the tracker, the prose, pull requests |
+| `CONTRIBUTING.md` | how to work, this tree's commands in its last section |
 | `REVIEWING.md` | the standard a review is written against |
 | `REPOSITORY.md` | the settings that live outside the tree |
 | `RELEASING.md` | how a release is cut, and how one is recovered |
 | `CHANGELOG.md` | every user-visible change, by group |
 | `RELEASE_NOTES.md` | what a user has to *act* on, on top of it |
-| `CLAUDE.md` | the commands, the gates, and the rest of this tree |
+| `CLAUDE.md` | what a session needs and no human document holds |
 | `MANIFEST.in` | what the sdist carries, where setuptools reads it |
 | `pyproject.toml` | the project and every tool's configuration |
 | `uv.lock` | the pinned resolution |
@@ -1485,8 +1485,7 @@ environment whatever the hook does. It reads the project's instead, which
 mirror, and the version equality section 4 asks for is what makes the two
 the same mypy rather than merely both present.
 
-`CLAUDE.md` carries what an agent cannot read off the tree: where the
-gates are, which local run is the gate and which is only a report, the
+`CLAUDE.md` carries what an agent cannot read off the tree — the
 non-obvious failure modes, and the rule that a session never works in the
 maintainer's own checkout — a worktree per session, and never `git stash`
 in one, `refs/stash` being shared across worktrees. `.claude/` is tracked
@@ -1520,14 +1519,6 @@ lint in the others. Each bullet's subject is the path, which is what lets
   range. A range is a line nobody updates, and `COPYRIGHT` states the
   holder without one, so the two would disagree the first January nobody
   remembered.
-- `CONTRIBUTING.md` — owed by every repository. What is true of one tree
-  only is `CLAUDE.md`'s, and this file says so in as many words rather
-  than carrying a section per repository.
-- `REVIEWING.md` — owed by every repository this file governs, because a
-  review that means one thing in one tree and another in the next is not
-  a standard. What is true of one tree only is `CLAUDE.md`'s, and the
-  file hands it over in as many words rather than carrying a section per
-  repository.
 - `.claude/commands/review.md` — owed wherever `REVIEWING.md` is: it is
   the invocation and not a second copy of the standard, and it stays a
   file of its own rather than folding into `CLAUDE.md`, which is read by
@@ -1538,12 +1529,31 @@ so nothing a comparison can do: the `ci:` block of
 `.pre-commit-config.yaml`, the mypy strictness block, the ruff width and
 complexity settings, the pytest strictness flags, and `fail_under = 100`.
 
-`AUTHORS.md` is here rather than above, and it is the one whole file in
-this category: every repository owes it and every copy is the same except
-the one contributor graph it points at, which is that repository's own. A
-single pointer would be accurate only while one graph stays a superset of
-the others — true today, re-derived by nothing, and the first person to
-contribute somewhere else would go uncredited in silence.
+Three whole files are here too, and each says in itself where the
+comparison stops:
+
+- `CONTRIBUTING.md` — owed by every repository, and the same file in each
+  **up to `## This repository in particular`**. Under that heading are
+  the commands and the gates of that tree, because a human should not
+  open an agent's file to learn how to run one — which is what holding
+  them in `CLAUDE.md` asked.
+- `REVIEWING.md` — owed by every repository this file governs, and the
+  same file in each up to the same heading, a review that means one thing
+  in one tree and another in the next being no standard. Under it is what
+  a review of that tree checks beyond the generic.
+`tests/verbatim_test.py` compares what precedes that heading where a file
+carries one, and the whole file where it does not — so the marker is the
+declaration, and there is no second list of exceptions to keep in step.
+
+`AUTHORS.md` is owed by every repository and is the same file in each
+except the one contributor graph it points at, which is that
+repository's own. It is named here in prose and not as a bullet
+deliberately: what differs is a token and not a section, so no marker
+can cut it, and a byte comparison would report it as drifted for ever. A
+single pointer instead would be accurate only while one graph stays a
+superset of the others — true today, re-derived by nothing, and the
+first person to contribute somewhere else would go uncredited in
+silence.
 
 A per-file exception belongs in that file's own
 `markdownlint-configure-file` comment, not in the shared config read by

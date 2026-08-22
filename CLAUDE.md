@@ -16,8 +16,9 @@ which is the half of section 15's audit a machine can run.
 
 How to work here — what the issue tracker takes, the prose style, and
 how a pull request is opened and landed — is `CONTRIBUTING.md`, which is
-the same file in every repository of the organization. The commands and
-the gates are below, this tree's being this tree's. Repository
+the same file in every repository of the organization up to its last
+section, which is this tree's and holds the commands and the gates.
+Repository
 configuration is
 `REPOSITORY.md`: read it before changing a workflow, a branch rule or a
 setting. Reviewing is `REVIEWING.md`, and `/review` is that file as a
@@ -107,9 +108,8 @@ has what a title does with the issue it closes, and its *The issue
 tracker* has what an issue filed here may be about.
 
 What is left to this file is what those cannot say, because it is about a
-session rather than about the tree: the commands and the gates above,
-the worktree rule and the model with them, and the failure modes in the
-section that names them.
+session rather than about the tree: the worktree rule, the model, the
+failure modes in the section that names them, and what this tree is.
 
 ## Verifying
 

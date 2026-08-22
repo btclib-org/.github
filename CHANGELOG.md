@@ -44,11 +44,11 @@ audit has no revision to compare against.
   the pull request's own account of them is reasoning in a circle nobody
   reading the last line would see.
 
-- **`CONTRIBUTING.md` is one file in every repository**, and what is true
-  of one tree only — the commands, the gates, which workflows decide a
-  merge — is `CLAUDE.md`'s. Section 2's root-files table moves with it,
-  and `CLAUDE.md`'s skeleton gains the section that answers what gates a
-  merge and what only reports.
+- **`CONTRIBUTING.md` and `REVIEWING.md` are one file up to their last
+  section**, which is the tree's own and holds the commands, the gates
+  and what a review of that tree checks beyond the generic. A human
+  should not open an agent's file to learn how to run a gate, and
+  section 2 calls `CONTRIBUTING.md` *"how to work"*.
 
 - **Some of the files section 2 names and this repository lacked**:
   `COPYRIGHT`, `AUTHORS.md`, `CONTRIBUTING.md`, `REVIEWING.md`,
@@ -64,6 +64,14 @@ audit has no revision to compare against.
   14 said the file was kept for the organization rather than per package;
   that holds today only because one graph happens to be a superset of the
   others, which nothing re-derives.
+
+- **A shared file may answer for the tree it is in.** `CONTRIBUTING.md`
+  and `REVIEWING.md` carry `## This repository in particular` as their
+  last heading, and `tests/verbatim_test.py` compares what precedes it
+  where a file carries one and the whole file where it does not. Without
+  that rule those two would have been declared byte-identical while
+  differing by construction, so the sentinel would have reported them
+  drifted for ever — an alarm with no state in which it closes.
 
 - **Section 9 states the rule for a cross-repository reference.** A bare
   `#123` resolves inside the repository it is written in. The rule was

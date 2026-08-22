@@ -14,8 +14,8 @@ names the line that states them rather than a copy kept here.
 deliberately so: a review that means one thing here and another there is
 not a standard. Section 14 of that standard is what says so, and
 `tests/verbatim_test.py` of that repository is what compares the copies.
-So nothing written here may be true of one tree only — what is, is
-`CLAUDE.md`'s to say, and the section below hands it over.
+So nothing written here may be true of one tree only, down to the last
+section: that one is this tree's, and the comparison stops at it.
 
 It is for whoever reviews: a contributor reading somebody else's pull
 request, the maintainer, an agent session that starts with the pull
@@ -60,7 +60,7 @@ directions:
    to the parent goes on the parent's pull request — repeated on the
    child, the author answers it twice and resolves it once.
 1. **The tree at that sha**, checked out and gated. `gh pr checkout <N>`,
-   and whatever this repository's `CLAUDE.md` says builds its
+   and whatever this repository's `CONTRIBUTING.md` says builds its
    environment; that file also has where a checkout may be made and where
    it may not.
 
@@ -258,7 +258,8 @@ What this is not:
 Run them on that sha, and read exit codes rather than filtered output —
 a pipe into `grep -v Passed` hides the failure it was meant to find.
 **What
-the gates of this tree are is `CLAUDE.md`'s**, and so is every way a run
+the gates of this tree are is `CONTRIBUTING.md`'s**, and so is every way
+a run
 of them lies — a suite run over a subset that is not the coverage gate, a
 hook set that is not the whole of what CI runs. A reviewer who names a
 gate this repository does not have has reported nothing.
@@ -266,7 +267,8 @@ gate this repository does not have has reported nothing.
 **Unless they have already been run on this sha and that run is on the
 record.** Then rely on it, and say whose it is. Two runs qualify: the
 workflows of the required checks, running beside a review on the same
-commit — `CLAUDE.md` names which checks those are — and an author handing
+commit — `CONTRIBUTING.md` names which checks those are — and an author
+handing
 over a branch they gated themselves and said so. What is relied on is
 that those gates run and hold the merge, not the colour of a check, which
 stays none of a reviewer's business for the reason below.
@@ -319,10 +321,10 @@ one, is where the rule lives.
   description close what the title says? Section 11 has the rule, and it
   is the one most often found broken after the fact.
 
-**What this tree checks beyond these is `CLAUDE.md`'s**, that being the
-file whose subject is what cannot be read off the tree. A repository
-whose `CLAUDE.md` says nothing about reviewing has nothing further to
-check, which is an answer and not a gap.
+**What this tree checks beyond these is the last section of this file**,
+which is that repository's own. A repository whose last section names
+nothing further has nothing further to check, which is an answer and not
+a gap.
 
 ## The verdict
 
