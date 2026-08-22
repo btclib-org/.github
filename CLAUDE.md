@@ -14,9 +14,11 @@ The only Python is `tests/`, and its subject is the organization rather
 than this tree: whether the repositories still agree with `README.md`,
 which is the half of section 15's audit a machine can run.
 
-How to work here — the environment, the gates in full, what the issue
-tracker takes, the prose style and how a pull request is opened and
-landed — is `CONTRIBUTING.md`. Repository configuration is
+How to work here — what the issue tracker takes, the prose style, and
+how a pull request is opened and landed — is `CONTRIBUTING.md`, which is
+the same file in every repository of the organization. The commands and
+the gates are below, this tree's being this tree's. Repository
+configuration is
 `REPOSITORY.md`: read it before changing a workflow, a branch rule or a
 setting. Reviewing is `REVIEWING.md`, and `/review` is that file as a
 command; read it before reviewing a pull request and before opening one,
@@ -147,13 +149,11 @@ Do not use Fable unless explicitly instructed.
 
 ## Conventions to match
 
-`CONTRIBUTING.md`'s *Documentation and comments* is the prose style, and
-it governs this file and the standard alike: a comment says why and never
-how it got here, the reasoning includes the negative result, a claim is
-measured rather than asserted, one fact lives in one place, nothing
-states how many of anything a file holds, and markdown wraps at 80
-columns. Its *Pull requests* has what a title does with the issue it
-closes, and *The issue tracker* has what an issue filed here may be about.
+Section 9 of `README.md` is the prose style, and it governs this file and
+the standard alike. It is not re-listed here, that section's own *One
+fact in one place* being the reason. `CONTRIBUTING.md`'s *Pull requests*
+has what a title does with the issue it closes, and its *The issue
+tracker* has what an issue filed here may be about.
 
 What is left to this file is what those cannot say, because it is about a
 session rather than about the tree: the worktree rule above, the model

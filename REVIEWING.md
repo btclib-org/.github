@@ -13,8 +13,8 @@ names the line that states them rather than a copy kept here.
 **This file is the same in every repository of the organization**, and
 deliberately so: a review that means one thing here and another there is
 not a standard. Section 14 of that standard is what says so, and
-`tests/verbatim_test.py` is what compares the copies. So nothing written
-here may be true of one tree only — what is true of one tree is
+`tests/verbatim_test.py` of that repository is what compares the copies.
+So nothing written here may be true of one tree only — what is, is
 `CLAUDE.md`'s to say, and the section below hands it over.
 
 It is for whoever reviews: a contributor reading somebody else's pull
@@ -60,9 +60,9 @@ directions:
    to the parent goes on the parent's pull request — repeated on the
    child, the author answers it twice and resolves it once.
 1. **The tree at that sha**, checked out and gated. `gh pr checkout <N>`,
-   and whatever this repository's `CONTRIBUTING.md` says builds its
-   environment; `CLAUDE.md` has where a checkout may be made and where it
-   may not.
+   and whatever this repository's `CLAUDE.md` says builds its
+   environment; that file also has where a checkout may be made and where
+   it may not.
 
 Read the whole diff before writing the first comment. A comment on line
 5 that line 60 answers costs the author a reply and the reviewer their
@@ -181,14 +181,15 @@ in the browser — no checkout, no editor, one click:
 
 *Add suggestion to batch* takes several of them into one commit, which
 is what to use when a review leaves more than one.
-`CONTRIBUTING.md` states the same thing from the author's side, as
-something they may apply directly through the interface.
+The author may apply one directly through the interface, which is why a
+suggestion is offered where a description would do.
 
 Two properties make this the right shape here and not merely a
 convenience: the commit GitHub writes is signed with its web-flow key,
 and `main` requires a valid signature rather than one particular
 signer; and it lands as a commit of its own on top of the branch,
-which is the shape `CONTRIBUTING.md` asks a correction to take, so the
+which is the shape section 11 of the standard asks a correction to take,
+so the
 shas the review is attached to survive it.
 
 Two properties decide when not to:
@@ -256,7 +257,8 @@ What this is not:
 ## The gates are the evidence
 
 Run them on that sha, and read exit codes rather than filtered output,
-for the reason `CONTRIBUTING.md`'s *The gates* gives. **What
+— a pipe into `grep -v Passed` hides the failure it was meant to find.
+**What
 the gates of this tree are is `CLAUDE.md`'s**, and so is every way a run
 of them lies — a suite run over a subset that is not the coverage gate, a
 hook set that is not the whole of what CI runs. A reviewer who names a
@@ -302,19 +304,22 @@ document that answers it is named because that document, and not this
 one, is where the rule lives.
 
 - Does the diff **state a count** of anything — of files, of entries, of
-  findings, of seconds? `CONTRIBUTING.md` says why it must not, and only
-  some of those are caught by a test.
+  findings, of seconds? Section 9 of the standard says why it must not,
+  and only some of those are caught by a test.
 - If the branch was rebased: does `CHANGELOG.md` still say what the
   branch meant it to say, and the release notes with it where the
-  repository has them? Section 14 marks them `merge=union`, so they never
+  repository has them? Section 9 marks them `merge=union`, so they never
   conflict and a rebase can put back a line the branch had removed.
 - A new or changed workflow: the conventions in `CLAUDE.md`, and
   `REPOSITORY.md` before any rule or setting is touched. A renamed job
   is a required check renamed out of existence.
-- Is a reference to another repository **qualified**, and does the pull
-  request's title say what it closes? `CONTRIBUTING.md`'s *Documentation
-  and comments* and *Pull requests* name the rules, and the second is
-  the one most often found broken after the fact.
+- Is a reference to another repository **qualified**? A bare `#123`
+  resolves inside the repository it is written in, so a cross-repository
+  reference is `owner/repo#123` or it points somewhere else in silence.
+  Section 9 of the standard has the rule and its one exemption.
+- Does the pull request's **title** say what it closes, and does its
+  description close what the title says? Section 11 has the rule, and it
+  is the one most often found broken after the fact.
 
 **What this tree checks beyond these is `CLAUDE.md`'s**, that being the
 file whose subject is what cannot be read off the tree. A repository
@@ -336,8 +341,8 @@ ACK <sha>
 ```
 
 Nothing else is an ack — not "looks good", and not a forge approval,
-which `CONTRIBUTING.md` records GitHub as refusing to the author of the
-pull request. That refusal is why the record of a review here is a
+which section 11 of the standard records GitHub as refusing to the author
+of the pull request. That refusal is why the record of a review here is a
 comment at all. It names the sha because an ack belongs to a tree and
 not to a branch.
 
@@ -371,8 +376,9 @@ before its child, and otherwise the oldest.
 ## Re-review
 
 The delta is `git diff <old-sha>..<new-sha>`, and there is one to read
-because `CONTRIBUTING.md` has corrections added as commits rather than
-amended in: the shas the review was attached to are still there.
+because section 11 of the standard has corrections added as commits
+rather than amended in: the shas the review was attached to are still
+there.
 
 - **Resolve every thread the author addressed, and only those.** A
   thread they declined stays open only if it is still blocking; where

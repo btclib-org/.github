@@ -2,7 +2,7 @@
 
 What this repository holds in common with the others of the organization
 -- the toolchain, the lint gate, the tool tables behind it, the workflow
-set and the branch rules -- is stated once in the
+set and the branch rules — is stated once in the
 [btclib-org repository standard](https://github.com/btclib-org/.github),
 each rule with the alternative it was decided against. It binds this
 repository, so a change departing from it is a divergence, and one filed
@@ -10,8 +10,8 @@ as an issue in that repository rather than here: a difference between two
 repositories belongs to neither of them.
 
 **This file is the same in every repository of the organization.** What
-is true of one tree only -- the commands that build its environment, the
-gates it runs, which of its workflows decide a merge -- is `CLAUDE.md`'s,
+is true of one tree only — the commands that build its environment, the
+gates it runs, which of its workflows decide a merge — is `CLAUDE.md`'s,
 and section 2's root-files table is what says which file holds what.
 
 ## The issue tracker
@@ -37,10 +37,10 @@ stale, which is that section's own *One fact in one place*.
 
 ## Pull requests
 
-`main` is the only branch and takes a pull request and nothing else, a
-direct push being refused for everyone. Run the gates locally first — the
-sections above say which they are — because CI runs exactly them, so a
-red run there is a local run that was not done.
+What `main` accepts, and what it refuses to everyone, is [section 11 of
+the standard][s11]. Run the gates locally before opening anything —
+`CLAUDE.md` says which they are in this tree — because CI runs exactly
+them, so a red run there is a local run that was not done.
 
 What a pull request's title and description have to say about the issues
 it closes, and why a manual link in the Development panel is a trap
@@ -114,7 +114,7 @@ rebase that moved nothing but the base leaves the ack standing; one that
 resolved a conflict does not, that resolution being a change no reviewer
 has seen.
 
-Then squash, which is the only method the rule accepts.
+Then squash, [the only method the rule accepts][s11].
 
 **The maintainer's bypass is not automatic — it has to be invoked, and
 `gh pr merge` cannot invoke it**, refusing client-side before it asks
@@ -141,13 +141,15 @@ gh api repos/{owner}/{repo}/commits/main \
   --jq '.commit.verification | {verified, reason}'
 ```
 
-`delete_branch_on_merge` is on, so the head branch goes by itself. What
-is still yours is bringing every checkout sitting on `main` up to date,
+The forge deletes the head branch itself, per the setting section 11
+names. What is still yours is bringing every checkout sitting on `main`
+up to date,
 that being where the next session starts from and a stale one being where
 a branch gets built on a base that has moved. `REPOSITORY.md` carries the
 settings and why they are what they are.
 
 [s-what]: https://github.com/btclib-org/.github#what-this-repository-is
+[s11]: https://github.com/btclib-org/.github#11-github-settings
 [s9]: https://github.com/btclib-org/.github#9-prose-comments-and-docstrings
 [s-title]: https://github.com/btclib-org/.github#what-a-pull-request-says-it-is
 [s-rev]: https://github.com/btclib-org/.github#review

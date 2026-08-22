@@ -186,13 +186,13 @@ which, and on what:
 | `AUTHORS.md` | a pointer to the contributor graph, not a list |
 | `CODE_OF_CONDUCT.md` | a pointer to the PSF code of conduct |
 | `SECURITY.md` | reporting, supported versions, known limitations |
-| `CONTRIBUTING.md` | how to work: commands, conventions, pull requests |
+| `CONTRIBUTING.md` | how to work: the tracker, the prose, pull requests |
 | `REVIEWING.md` | the standard a review is written against |
 | `REPOSITORY.md` | the settings that live outside the tree |
 | `RELEASING.md` | how a release is cut, and how one is recovered |
 | `CHANGELOG.md` | every user-visible change, by group |
 | `RELEASE_NOTES.md` | what a user has to *act* on, on top of it |
-| `CLAUDE.md` | what an agent needs and cannot read off the tree |
+| `CLAUDE.md` | the commands, the gates, and the rest of this tree |
 | `MANIFEST.in` | what the sdist carries, where setuptools reads it |
 | `pyproject.toml` | the project and every tool's configuration |
 | `uv.lock` | the pinned resolution |
@@ -842,6 +842,11 @@ weighed against.
   same wrong number merge without a conflict.
 - **One fact in one place.** Two files stating the same thing become two
   files disagreeing about it; the second points at the first.
+- **A reference to another repository is qualified.** A bare `#123`
+  resolves inside the repository it is written in, so a cross-repository
+  reference is `owner/repo#123` or it points somewhere else in silence.
+  The one exemption is mechanical: a pull request's closing keyword is
+  read by the forge, so it takes the forge's own form.
 - **No history in the prose.** Comments say why the code is as it is, in
   the present tense. History has two files of its own.
 - **80 columns everywhere prose lives** — markdown by MD013, tables
@@ -1503,8 +1508,12 @@ lint in the others. Each bullet's subject is the path, which is what lets
   that adding an entry is a one-line diff.
 - `COPYRIGHT` — one line naming the holder, and what every header in
   every tree points at instead of repeating it.
-- `AUTHORS.md` — who has contributed, kept for the organization rather
-  than per package, a contributor to one being a contributor.
+- `AUTHORS.md` — owed by every repository, and the same file in each
+  except the contributor graph it points at, which is that repository's
+  own. A single pointer would be accurate only while one graph stays a
+  superset of the others, which is true today and re-derived by nothing:
+  the first person to contribute somewhere else would go uncredited in
+  silence.
 - `CODE_OF_CONDUCT.md` — owed by every repository. Where one carries
   none GitHub falls back to this repository's copy, so a repository that
   does carry its own carries the same one or the organization advertises
