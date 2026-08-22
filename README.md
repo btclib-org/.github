@@ -540,6 +540,20 @@ preview rule then runs only where `extend-select` names it exactly.
   invariant while enforcing nothing.
 - **`ignore` names rules, never codes.** The reason sits in the comment
   and the rule sits in the entry, with nothing to look up between them.
+- **`FIX` is selected and `TD` is not.** Unfinished work belongs in an
+  issue, where it can be searched, assigned and closed; a marker in a
+  comment is a backlog nobody queries, sitting beside code that reads as
+  finished. `FIX` refuses four of them — `TODO`, `FIXME`, `XXX` and
+  `HACK` — wherever one opens a comment, on its own line or after code.
+  `TD` disciplines the format of the first three and says nothing about
+  the fourth, and every unsuppressed line it could discipline is a line
+  `FIX` already refuses. The two are redundant, so the choice is which
+  to keep: formatting a marker, or refusing it. A repository that
+  finishes what it starts keeps the refusal.
+  What `FIX` does not read bounds what selecting it buys: a marker
+  inside a docstring or a string literal is invisible to it, as is a
+  mid-sentence mention that opens no comment, and a `TODO.md` at the
+  root is the same defect in a file ruff never opens.
 - **Docstrings are gated**: the `D` family with `convention = "pep257"`,
   every public module, class, method and function carrying one.
   `__init__` and the magic methods are the two exemptions pep257 itself
@@ -1489,7 +1503,9 @@ mode and never `always`, and a token that is `read`.
 The tree:
 
 ```shell
-grep -n 'strict = true\|fail_under = 100\|branch = true' pyproject.toml
+grep -n 'strict = true\|fail_under = 100\|branch = true\|"FIX"\|"TD"' \
+    pyproject.toml
+git ls-files 'TODO*' '**/TODO*'
 grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'
 grep -L '^permissions:' .github/workflows/*.yml
 grep -rn -- '--frozen' .github/workflows/
@@ -1740,8 +1756,10 @@ written before the gate that judges it.
    the optional error codes surveyed one at a time. Every silencing
    `type: ignore` names its code.
 1. **ruff** with the widths, the docstring family and `max-complexity`,
-   and the copyright rule, which reads `COPYRIGHT` — so that file lands
-   here and not with the root files below.
+   the copyright rule, which reads `COPYRIGHT` — so that file lands here
+   and not with the root files below — and `FIX`, whose subject is an
+   empty backlog: it arrives once the markers it refuses, and any
+   `TODO.md`, are issues.
 1. **pytest strictness** — `--strict-config`, `--strict-markers`,
    `filterwarnings = ["error"]`, `xfail_strict`. Expect this one to be
    the loudest.
