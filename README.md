@@ -454,6 +454,31 @@ pre-commit.ci does not have — the lint workflow covers it. No
     see a fenced block, so an example of the refused shape inside one
     fails the hook; the code span is the way round it, and this file is
     written accordingly.
+- **`no-hyphen-at-end-of-line`** — pygrep refusing a markdown line that
+  ends inside a word, at that word's own hyphen. Markdown joins two
+  source lines with a space, so a word wrapped there renders with the
+  hyphen *and then a space* inside it. The source looks correct, which
+  is why reading a diff does not find one; the instance that produced
+  this rule was found by scanning rendered `<code>` spans in built html
+  across the organization, which is the only gate here that reads output
+  rather than source, and there is no such gate.
+
+    Nothing else covers it. markdownlint has no rule for it, the width
+    rules read a line rather than what two lines become, and
+    `sphinx-build -W` is not asked whether a token means anything. It
+    matters most where the token is a command or an identifier, because
+    a reader copies what the page shows.
+
+    **What it cannot see**, stated so the rule is not mistaken for the
+    class: a code span whose content breaks at a `/` or a `.` renders
+    with the same intruding space and has no hyphen to match. Reading
+    the built html is what catches that, and this hook is not it.
+
+    Measured before it was proposed: every repository of the
+    organization was clean under `git grep -n -E '[A-Za-z0-9]-$' --
+    '*.md'` once `btclib-secp256k1`'s three were fixed, so the rule
+    costs nothing today and exists to keep the next one from being
+    written.
 
 ## 5. ruff
 

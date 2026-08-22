@@ -87,6 +87,20 @@ repos:
         entry: |-
           (?<![`!\[])(?:!?\[(?:[^]]|\]\([^)]*\))*\]\(|^\x20{0,3}\[[^]]+\]:\s*)(?!\./|#|[A-Za-z][A-Za-z0-9+.-]*:)[^)\s]
         types: [markdown]
+      # a word wrapped at its own hyphen, which markdown renders with a
+      # space inside it: two source lines are joined with one, so
+      # "read-any-" and "number-of-times" come out as "read-any-
+      # number-of-times". The source looks right, which is why reading a
+      # diff does not find it, and nothing else here reads the output --
+      # markdownlint has no rule for it and sphinx-build -W is not asked
+      # whether a token means anything. Section 4 of README.md carries the
+      # rule and what this cannot see: a code span whose content breaks at
+      # a "/" or a "." renders the same way and has no hyphen to match
+      - id: no-hyphen-at-end-of-line
+        name: a word is not wrapped at its own hyphen
+        language: pygrep
+        entry: "[A-Za-z0-9]-$"
+        types: [markdown]
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: v3.9.6
     hooks:
