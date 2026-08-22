@@ -331,6 +331,22 @@ pre-commit.ci does not have — the lint workflow covers it. No
   `D` family checks that a docstring *exists*; this checks that it
   describes the parameters and the return the signature declares, which
   is the half that goes wrong silently when a signature changes.
+  `skip-checking-short-docstrings` is **each repository's to set and to
+  say why**, and this is a position rather than an omission. Left at its
+  default, a one-line docstring is taken at its word; set `false`, every
+  docstring owes its parameters and its return whatever its length. The
+  cost of `false` is not the standard's to spend: `btclib` measured 4404
+  findings over 111 files, which is a rewrite of that package's prose
+  and not a lint fix, while `btclib-benchmarks` argues against it from
+  this file's own rule — a `Returns:` under a one-line summary that
+  already states the return writes the summary a second time, buying
+  conformance with noise. What every repository owes is the answer
+  written in its own `.pre-commit-config.yaml` beside the hook, with the
+  reason, which is what this file asks of any setting. What is *not*
+  offered is `false` for the public API and the default elsewhere:
+  pydoclint has no such split, so it would take two invocations over two
+  file lists plus a rule about which files are public that nothing
+  checks.
 - **types** — a mypy hook, below.
 - **packaging** — `uv-lock`, `check-manifest`, `pyroma`.
 
