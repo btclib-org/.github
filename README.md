@@ -1529,7 +1529,7 @@ so nothing a comparison can do: the `ci:` block of
 `.pre-commit-config.yaml`, the mypy strictness block, the ruff width and
 complexity settings, the pytest strictness flags, and `fail_under = 100`.
 
-Whole files are here too. Two of them say in themselves where the
+Whole files are here too, and these say in themselves where the
 comparison stops:
 
 - `CONTRIBUTING.md` — owed by every repository, and the same file in each
@@ -1546,15 +1546,14 @@ comparison stops:
 carries one, and the whole file where it does not — so the marker is the
 declaration, and there is no second list of exceptions to keep in step.
 
-`AUTHORS.md` is owed by every repository and is the same file in each
-except the one contributor graph it points at, which is that
-repository's own. It is named here in prose and not as a bullet
-deliberately: what differs is a token and not a section, so no marker
-can cut it, and a byte comparison would report it as drifted for ever. A
-single pointer instead would be accurate only while one graph stays a
-superset of the others — true today, re-derived by nothing, and the
-first person to contribute somewhere else would go uncredited in
-silence.
+`AUTHORS.md` is owed by every repository and points at that
+repository's own contributor graph. It is named here in prose and not as
+a bullet deliberately: a file meant to differ per repository can never
+satisfy a byte comparison, so listing it above would buy an assert with
+no state in which it closes. A single shared pointer instead would be
+accurate only while one graph stays a superset of the others — which is
+what the copies do today, and what leaves the first person to contribute
+somewhere else uncredited in silence.
 
 A per-file exception belongs in that file's own
 `markdownlint-configure-file` comment, not in the shared config read by

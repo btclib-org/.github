@@ -61,8 +61,8 @@ directions:
    child, the author answers it twice and resolves it once.
 1. **The tree at that sha**, checked out and gated. `gh pr checkout <N>`,
    and whatever this repository's `CONTRIBUTING.md` says builds its
-   environment; that file also has where a checkout may be made and where
-   it may not.
+   environment; `CLAUDE.md` has where a checkout may be made and where it
+   may not.
 
 Read the whole diff before writing the first comment. A comment on line
 5 that line 60 answers costs the author a reply and the reviewer their
@@ -257,19 +257,17 @@ What this is not:
 
 Run them on that sha, and read exit codes rather than filtered output —
 a pipe into `grep -v Passed` hides the failure it was meant to find.
-**What
-the gates of this tree are is `CONTRIBUTING.md`'s**, and so is every way
-a run
-of them lies — a suite run over a subset that is not the coverage gate, a
-hook set that is not the whole of what CI runs. A reviewer who names a
+**What the gates of this tree are is `CONTRIBUTING.md`'s last
+section**, and so is every way a run of them lies — a suite run over a
+subset that is not the coverage gate, a hook set that is not the whole
+of what CI runs. A reviewer who names a
 gate this repository does not have has reported nothing.
 
 **Unless they have already been run on this sha and that run is on the
 record.** Then rely on it, and say whose it is. Two runs qualify: the
 workflows of the required checks, running beside a review on the same
 commit — `CONTRIBUTING.md` names which checks those are — and an author
-handing
-over a branch they gated themselves and said so. What is relied on is
+handing over a branch they gated themselves and said so. What is relied on is
 that those gates run and hold the merge, not the colour of a check, which
 stays none of a reviewer's business for the reason below.
 

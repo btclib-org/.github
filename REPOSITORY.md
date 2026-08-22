@@ -192,10 +192,9 @@ gh api repos/btclib-org/.github \
 ```
 
 Issues are where this organization's cross-repository findings live, and
-where they live *only*, for the reason
-[`CONTRIBUTING.md`](./CONTRIBUTING.md)'s *The issue tracker* gives: a
-finding about several repositories filed on one of them is invisible from
-the others.
+where they live *only*, for the reason [`README.md`](./README.md)'s
+*What this repository is* gives: a finding about several repositories
+filed on one of them is invisible from the others.
 
 Public matters more here than elsewhere. This repository supplies the
 community health files GitHub shows for any public repository of the
