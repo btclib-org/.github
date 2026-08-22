@@ -654,9 +654,9 @@ the module that tests it, and a test in the same suite asserts that
 declaration is true — the rule one paragraph up, applied to this section
 itself. Two things force it. The suites do not agree on names and are
 right not to: one repository writes a module per bullet, another
-`test_`-prefixes throughout, and a third folds three checks into the one
-file that is about its single module, which is the honest shape for a
-package that is one module. And this section's own escape clause — a
+`test_`-prefixes throughout, and a third folds several of these checks
+into the one file that is about its single module, which is the honest
+shape for a package that is one module. And this section's own escape clause — a
 repository needs the ones its conventions state — makes an *absent*
 convention test indistinguishable from a convention the repository does
 not have. A declaration is what tells those two apart; a `grep` over
@@ -1296,8 +1296,8 @@ their own. Check exit codes, not filtered output.
 
 `tests/README.md` is section 7's answer, and it is the only one of these
 a command cannot compute: which conventions a repository tests is a
-declaration, because the suites name the same idea three ways and one
-folds several bullets into a file about something else. Read it against
+declaration, because the suites do not name the same idea the same way
+and one folds several bullets into a file about something else. Read it against
 section 7's list — a bullet the repository's prose states and this file
 does not claim is the finding, and a bullet it claims is answered by the
 test in that repository that asserts the claim. Across the organization
