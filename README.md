@@ -652,15 +652,16 @@ is worth a test.
 `tests/README.md` names each bullet above that this repository tests and
 the module that tests it, and a test in the same suite asserts that
 declaration is true — the rule one paragraph up, applied to this section
-itself. Two things force it. The suites do not agree on names and are
-right not to: one repository writes a module per bullet, another
-`test_`-prefixes throughout, and a third folds several of these checks
-into the one file that is about its single module, which is the honest
-shape for a package that is one module. And this section's own escape clause — a
-repository needs the ones its conventions state — makes an *absent*
-convention test indistinguishable from a convention the repository does
-not have. A declaration is what tells those two apart; a `grep` over
-`tests/` cannot, which is why the audit below reads the declarations.
+itself, and it is forced rather than chosen. The suites do not agree on
+names and are right not to: one repository writes a module per bullet,
+another `test_`-prefixes throughout, and a third folds several of these
+checks into the one file that is about its single module, which is the
+honest shape for a package that is one module. And this section's own
+escape clause — a repository needs the ones its conventions state — makes
+an *absent* convention test indistinguishable from a convention the
+repository does not have. A declaration is what tells those two apart; a
+`grep` over `tests/` cannot, which is why the audit below reads the
+declarations.
 
 **A convention test moves with the code it walks.** These tests walk a
 package: a module carved out into a repository of its own stops being
