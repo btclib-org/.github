@@ -1,4 +1,4 @@
-"""The files section 14 calls verbatim are byte-identical.
+"""The files section 14 calls verbatim agree where it says they do.
 
 The list is prose with a reason under each entry, which is what a person
 reading it needs; the subject of each bullet is a path, which is what

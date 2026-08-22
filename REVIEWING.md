@@ -311,7 +311,7 @@ one, is where the rule lives.
   branch meant it to say, and the release notes with it where the
   repository has them? Section 9 marks them `merge=union`, so they never
   conflict and a rebase can put back a line the branch had removed.
-- A new or changed workflow: the conventions in `CLAUDE.md`, and
+- A new or changed workflow: section 10 of the standard, and
   `REPOSITORY.md` before any rule or setting is touched. A renamed job
   is a required check renamed out of existence.
 - Is a reference to another repository **qualified**? Section 9 of the

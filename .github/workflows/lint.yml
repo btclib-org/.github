@@ -121,8 +121,9 @@ jobs:
 
       # uvx, and not the "uv run --locked --only-group lint pre-commit"
       # of the sibling repositories, which the project in this tree would
-      # now make available: this is the command CLAUDE.md gives an author
-      # to run before pushing, and running the same one is the point -- a
+      # now make available: this is the command CONTRIBUTING.md's last
+      # section gives an author to run before pushing, and running the
+      # same one is the point -- a
       # workflow invoking pre-commit some other way is the second
       # declaration section 4 refuses, one version behind the author's or
       # ahead of it. So taking the sibling form is a change to that file

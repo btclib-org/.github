@@ -10,25 +10,15 @@ audit has no revision to compare against.
 ### The repository that owns the standard carries what it names
 
 - **`REVIEWING.md` and `.claude/commands/review.md` are section 14
-  verbatim files.** `REVIEWING.md` was already one file wherever the
-  standard had reached: the copies differed in their H1 and in the
-  section whose title says it is not generic, and in nothing else. The
-  command that re-derives it strips those two and diffs the rest:
-
-  ```shell
-  strip() {
-      sed '1d' "$1" \
-        | awk '/^## What a review of this tree/{s=1} /^## The verdict/{s=0} !s'
-  }
-  diff <(strip a) <(strip b)
-  ```
-
-  `btclib-node` is the tree the standard has not reached yet, and it is
-  short of the others by whole sections; that section is handed to `CLAUDE.md`,
-  which is the file whose subject is what cannot be read off the tree.
-  The command follows it for the same reason, and stays a file of its own
-  rather than folding into `CLAUDE.md`, which every session loads
-  including the one that wrote the diff.
+  entries.** Where the standard had reached, the copies were one file
+  but for their H1 and the section whose title says it is not generic:
+  that was the measurement this change rests on, taken before
+  `btclib-org/btclib-benchmarks#159` moved one of them mid-branch. What
+  the entry can still say without a claim that ages is what the shape
+  became — the per-tree half is now that file's own last section, and
+  `.claude/commands/review.md` follows it for the same reason, staying a
+  file of its own rather than folding into `CLAUDE.md`, which every
+  session loads including the one that wrote the diff.
 
 - **A review need not deliver a verdict.** The ack of record is what a
   landing reads and ends in `ACK <sha>` or `CHANGES REQUESTED <sha>`. A

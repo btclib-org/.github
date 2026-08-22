@@ -1529,7 +1529,7 @@ so nothing a comparison can do: the `ci:` block of
 `.pre-commit-config.yaml`, the mypy strictness block, the ruff width and
 complexity settings, the pytest strictness flags, and `fail_under = 100`.
 
-Three whole files are here too, and each says in itself where the
+Whole files are here too. Two of them say in themselves where the
 comparison stops:
 
 - `CONTRIBUTING.md` — owed by every repository, and the same file in each
@@ -1541,6 +1541,7 @@ comparison stops:
   same file in each up to the same heading, a review that means one thing
   in one tree and another in the next being no standard. Under it is what
   a review of that tree checks beyond the generic.
+
 `tests/verbatim_test.py` compares what precedes that heading where a file
 carries one, and the whole file where it does not — so the marker is the
 declaration, and there is no second list of exceptions to keep in step.

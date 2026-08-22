@@ -34,7 +34,7 @@ def repositories() -> list[str]:
     conventions are upstream's, and that is false for a fork the
     organization has taken over. `bbt` is one -- its upstream has not
     been pushed since 2022, every commit since is the organization's, and
-    the nine forks downstream are of this copy rather than of that one.
+    the forks downstream are of this copy rather than of that one.
     Excluding it meant the one repository furthest from the standard was
     the one nothing measured.
 
