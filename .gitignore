@@ -1,1 +1,9 @@
 .DS_Store
+
+# what running the suite in this tree leaves behind: the environment uv
+# builds, and the caches pytest, mypy and ruff keep between runs
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+__pycache__/

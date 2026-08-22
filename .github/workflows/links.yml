@@ -26,12 +26,10 @@ name: links
 
 on:
   schedule:
-    # Mondays, 05:37 UTC. Not on the hour: GitHub queues scheduled
-    # workflows across every repository that asked for the same minute,
-    # and a run can be dropped outright when the queue is long -- so this
-    # asks for a minute no sibling repository's weekly run asks for
-    # either
-    - cron: "37 5 * * 1"
+    # The time is section 10's grid and not this file's to restate.
+    # Only the default branch schedules workflows, so on any other branch
+    # this is reachable through the dispatch below alone
+    - cron: "24 4 * * 1"
   # the escape hatch, and the way to check a branch before merging a
   # change that adds links: nothing else runs this on a pull request that
   # only edits prose, deliberately, per the header above
