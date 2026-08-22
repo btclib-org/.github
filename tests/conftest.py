@@ -38,10 +38,10 @@ def repositories() -> list[str]:
     Excluding it meant the one repository furthest from the standard was
     the one nothing measured.
 
-    What would justify the filter coming back is a fork this organization
-    does *not* maintain, and then the criterion is that rather than
-    GitHub's flag, which answers a question about ancestry and not about
-    ownership.
+    The filter is right in general and was wrong for one repository, so
+    it comes back the day that repository is detached from its upstream:
+    btclib-org/bbt#13 carries the request GitHub's support grants, and
+    the last box on it is this line.
 
     :returns: the repository names, `.github` among them.
     """
