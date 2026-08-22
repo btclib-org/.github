@@ -648,6 +648,30 @@ A new repository does not need all of these. It needs the ones its own
 conventions state in prose, and the rule that a convention worth stating
 is worth a test.
 
+**Which of them a repository implements is declared, not inferred.**
+`tests/README.md` names each bullet above that this repository tests and
+the module that tests it, and a test in the same suite asserts that
+declaration is true — the rule one paragraph up, applied to this section
+itself. Two things force it. The suites do not agree on names and are
+right not to: one repository writes a module per bullet, another
+`test_`-prefixes throughout, and a third folds three checks into the one
+file that is about its single module, which is the honest shape for a
+package that is one module. And this section's own escape clause — a
+repository needs the ones its conventions state — makes an *absent*
+convention test indistinguishable from a convention the repository does
+not have. A declaration is what tells those two apart; a `grep` over
+`tests/` cannot, which is why the audit below reads the declarations.
+
+**A convention test moves with the code it walks.** These tests walk a
+package: a module carved out into a repository of its own stops being
+walked the moment it leaves, and the receiving tree either takes the
+test or drops the convention with nothing red anywhere. So when code
+moves between repositories, the convention tests that covered it are
+part of what moves, and both `tests/README.md` files change in the same
+pair of pull requests. What must *not* be aligned is where those tests
+live or what they are called — only which conventions are tested, and
+that each tree says which.
+
 ## 8. Coverage at 100%
 
 ```toml
@@ -1263,11 +1287,22 @@ git ls-files MANIFEST.in '*package-content-policy*' '*_contents*'
 sed -nE '/^\[tool\.check-wheel-contents\]/,/^\[/{/^[a-z]/p;}' pyproject.toml
 sed -nE '/^\[.*targets\.sdist\]/,/^\[/{/^[a-z]/p;}' pyproject.toml
 uv run pre-commit run --all-files
+cat tests/README.md
 ```
 
 An action not pinned to forty hex digits, a workflow with no
 `permissions:` block, and a `--frozen` anywhere are each a finding on
 their own. Check exit codes, not filtered output.
+
+`tests/README.md` is section 7's answer, and it is the only one of these
+a command cannot compute: which conventions a repository tests is a
+declaration, because the suites name the same idea three ways and one
+folds several bullets into a file about something else. Read it against
+section 7's list — a bullet the repository's prose states and this file
+does not claim is the finding, and a bullet it claims is answered by the
+test in that repository that asserts the claim. Across the organization
+the same command run in each tree is the matrix, and there is no shorter
+way to it.
 
 What the package-content lines have to say: where the wheel is one
 package tree, a `package` naming it, whose absence is section 12's
@@ -1294,7 +1329,9 @@ not.
    generate `.secrets.baseline`.
 1. `uv sync`, commit `uv.lock`.
 1. `tests/` with the naming convention, a `conftest.py` carrying the
-   selective-run coverage hook, and the first convention tests.
+   selective-run coverage hook, the first convention tests, and the
+   `tests/README.md` that declares which of section 7's bullets they are
+   — with the test that asserts the declaration.
 1. `docs/source` and `.readthedocs.yaml`, built with `-W --keep-going`.
 1. Section 12's package-content floor: `[tool.check-wheel-contents]`
    naming the package where the wheel is one package tree, and the page,
@@ -1395,7 +1432,12 @@ written before the gate that judges it.
    cover` with a reason where the line is unreachable, and set
    `fail_under = 100` only once the tree is there. Include the tests in
    `source` from the start.
-1. **The convention tests**, one per convention the prose already states.
+1. **The convention tests**, one per convention the prose already states,
+   and `tests/README.md` declaring which of section 7's bullets those
+   are. An older repository is where the declaration earns most: it is
+   the step that says which conventions this tree has decided it does
+   not have, which is otherwise indistinguishable from having forgotten
+   them.
 1. **The missing root files**, `REPOSITORY.md` first: it is the only
    record of what the settings are.
 1. **Dependabot's own configuration, the sentinel workflow, and the
