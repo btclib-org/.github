@@ -189,8 +189,7 @@ convenience: the commit GitHub writes is signed with its web-flow key,
 and `main` requires a valid signature rather than one particular
 signer; and it lands as a commit of its own on top of the branch,
 which is the shape section 11 of the standard asks a correction to take,
-so the
-shas the review is attached to survive it.
+so the shas the review is attached to survive it.
 
 Two properties decide when not to:
 
@@ -256,8 +255,8 @@ What this is not:
 
 ## The gates are the evidence
 
-Run them on that sha, and read exit codes rather than filtered output,
-— a pipe into `grep -v Passed` hides the failure it was meant to find.
+Run them on that sha, and read exit codes rather than filtered output —
+a pipe into `grep -v Passed` hides the failure it was meant to find.
 **What
 the gates of this tree are is `CLAUDE.md`'s**, and so is every way a run
 of them lies — a suite run over a subset that is not the coverage gate, a

@@ -82,8 +82,8 @@ alternatives, in
 ## Contributing
 
 Questions and patches: the issues and pull requests of each repository.
-Its own README says where the package and the documentation are; each
-carries a `CONTRIBUTING.md` with the commands that gate a change there.
+Its own README says where the package and the documentation are, and its
+`CONTRIBUTING.md` how a change is proposed.
 
 What every one of them asks for is the same, and none of it waits for
 CI to say so: the lint gate clean, the suite passing with its coverage,

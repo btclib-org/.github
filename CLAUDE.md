@@ -156,8 +156,9 @@ has what a title does with the issue it closes, and its *The issue
 tracker* has what an issue filed here may be about.
 
 What is left to this file is what those cannot say, because it is about a
-session rather than about the tree: the worktree rule above, the model
-below, and the failure modes in the section that names them.
+session rather than about the tree: the commands and the gates above,
+the worktree rule and the model with them, and the failure modes in the
+section that names them.
 
 ## What a review of this tree checks that a generic one would not
 
@@ -166,7 +167,7 @@ because that document, and not this one, is where the rule lives.
 
 - **Does a rule arrive with the reason that chose it, the negative result
   included?** A rule stated without its argument is one the next reader
-  re-litigates, and `CONTRIBUTING.md` says so.
+  re-litigates, and section 9 of this file says so.
 - **Does a claim about the repositories carry the command that
   re-derives it?** Section 15 is where such a command belongs, and a
   claim no command answers is the defect this repository files most.

@@ -109,9 +109,9 @@ uv run pre-commit run --all-files    # the whole lint gate
 ```
 
 Every documented command is a `uv run` command, and every workflow step
-runs the same command verbatim. `CONTRIBUTING.md` carries each CI job's
-command literally, so a workflow change that does not update it makes
-that file wrong rather than merely stale.
+runs the same command verbatim. `CLAUDE.md` carries each CI job's command
+literally, so a workflow change that does not update it makes that file
+wrong rather than merely stale.
 
 **`--locked`, never `--frozen`.** `--locked` fails when `uv.lock` and
 `pyproject.toml` disagree; `--frozen` takes the lock as it finds it and
@@ -1497,23 +1497,19 @@ configuration move between them, and a paragraph that lints in one has to
 lint in the others. Each bullet's subject is the path, which is what lets
 `tests/verbatim_test.py` of this repository compare the copies it finds:
 
-- `.markdownlint.jsonc` — no rule disabled; what it names is a style
-  where markdownlint's default is "consistent", which asks each file to
-  agree with itself and therefore lets two files disagree.
-- `.yamllint.yaml` — two rules of the default set enabled, `line-length`
-  at 100 and `document-start`. The rest report a convention rather than a
-  defect, each with the reason it stays off.
-- `.taplo.toml` — four-space indent, `reorder_keys` left false because
-  the order of a table is an argument, `array_auto_collapse` false so
-  that adding an entry is a one-line diff.
-- `COPYRIGHT` — one line naming the holder, and what every header in
-  every tree points at instead of repeating it.
-- `AUTHORS.md` — owed by every repository, and the same file in each
-  except the contributor graph it points at, which is that repository's
-  own. A single pointer would be accurate only while one graph stays a
-  superset of the others, which is true today and re-derived by nothing:
-  the first person to contribute somewhere else would go uncredited in
-  silence.
+- `.markdownlint.jsonc` — owed by every repository; no rule disabled.
+  What it names is a style where markdownlint's default is "consistent",
+  which asks each file to agree with itself and therefore lets two files
+  disagree.
+- `.yamllint.yaml` — owed by every repository; two rules of the default
+  set enabled, `line-length` at 100 and `document-start`. The rest report
+  a convention rather than a defect, each with the reason it stays off.
+- `.taplo.toml` — owed by every repository that holds a `toml`;
+  four-space indent, `reorder_keys` left false because the order of a
+  table is an argument, `array_auto_collapse` false so that adding an
+  entry is a one-line diff.
+- `COPYRIGHT` — owed by every repository; one line naming the holder, and
+  what every header in every tree points at instead of repeating it.
 - `CODE_OF_CONDUCT.md` — owed by every repository. Where one carries
   none GitHub falls back to this repository's copy, so a repository that
   does carry its own carries the same one or the organization advertises
@@ -1539,6 +1535,13 @@ lint in the others. Each bullet's subject is the path, which is what lets
 so nothing a comparison can do: the `ci:` block of
 `.pre-commit-config.yaml`, the mypy strictness block, the ruff width and
 complexity settings, the pytest strictness flags, and `fail_under = 100`.
+
+`AUTHORS.md` is here rather than above, and it is the one whole file in
+this category: every repository owes it and every copy is the same except
+the one contributor graph it points at, which is that repository's own. A
+single pointer would be accurate only while one graph stays a superset of
+the others — true today, re-derived by nothing, and the first person to
+contribute somewhere else would go uncredited in silence.
 
 A per-file exception belongs in that file's own
 `markdownlint-configure-file` comment, not in the shared config read by

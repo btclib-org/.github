@@ -10,9 +10,10 @@ audit has no revision to compare against.
 ### The repository that owns the standard carries what it names
 
 - **`REVIEWING.md` and `.claude/commands/review.md` are section 14
-  verbatim files.** Between the repositories the standard governs,
-  `REVIEWING.md` already differed only in its H1 and in the section whose
-  title says it is not generic; that section is handed to `CLAUDE.md`,
+  verbatim files.** Between the four repositories already aligned to the
+  standard, `REVIEWING.md` differed only in its H1 and in the section
+  whose title says it is not generic — `btclib-node`, mid-normalization,
+  is three sections short of them; that section is handed to `CLAUDE.md`,
   which is the file whose subject is what cannot be read off the tree.
   The command follows it for the same reason, and stays a file of its own
   rather than folding into `CLAUDE.md`, which every session loads

@@ -192,7 +192,8 @@ gh api repos/btclib-org/.github \
 ```
 
 Issues are where this organization's cross-repository findings live, and
-where they live *only*, for the reason [`CLAUDE.md`](./CLAUDE.md) gives: a
+where they live *only*, for the reason
+[`CONTRIBUTING.md`](./CONTRIBUTING.md)'s *The issue tracker* gives: a
 finding about several repositories filed on one of them is invisible from
 the others.
 
