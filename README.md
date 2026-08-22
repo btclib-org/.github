@@ -855,13 +855,31 @@ weighed against.
 | `test` | pull request, push | platforms × interpreters |
 | `lint` | pull request, push | — |
 | `docs` | pull request, push | — |
-| `integration` | pull request, push | a node, an emulator |
-| `codeql` | push to main, weekly | languages |
-| `windows`, `macos` | weekly, and a release | platform × interpreter |
-| `latest` | weekly | dependencies upgraded |
-| `links`, `mutation` | weekly | — |
-| `published` | monthly, and a release | what the index serves |
+| `integration` | pull request, push, and Friday | a node, an emulator |
+| `links` | Monday | — |
+| `codeql` | Tuesday, and push to main | languages |
+| `macos` | Wednesday, and a release | platform × interpreter |
+| `latest` | Wednesday | dependencies upgraded |
+| Dependabot | Thursday | what the lock pins |
+| `windows` | Saturday, and a release | platform × interpreter |
+| `mutation` | Sunday | — |
+| `published` | the 1st, and a release | what the index serves |
 | `release` | a tag | calls the gates, then publishes |
+
+**The weekday is the same in every repository**, so a failure
+notification names the workflow by the day it arrived, and one calendar
+is one thing to remember rather than one per tree. A workflow that
+exists in more than one repository runs on the same day in all of them;
+what a repository decides for itself is the minute, GitHub queueing
+same-minute schedules across every repository that asked.
+
+A day is a slot rather than a census: it says when that workflow runs
+where a repository has it, not that every repository does. `integration`
+is the row where the two differ most — it gates a merge everywhere it
+exists and answers Friday unattended where the thing it integrates
+against is worth asking about weekly. The commands that re-derive the
+calendar are in section 15, and there are two of them because Dependabot
+states its day in a different file and a different shape.
 
 **What waits for a merge is the first four rows and nothing else.** The
 reason is one number: the ceiling the plan puts on an organization's
@@ -1046,6 +1064,12 @@ workflow runs on `opened`, `reopened`, `synchronize` and
 last is how a head that moved after the review gets a fresh one, since
 the ack does not follow the branch.
 
+**A green check is not an ack.** The check says the job ran; the verdict
+is the last line of the comment it wrote, and the two are independent —
+a review that requests changes is a job that succeeded. Read the comment,
+never the tick: green does not mean a review exists either, for the two
+reasons below.
+
 It is deliberately **not a required check**, and its own header says it
 must not become one. Requiring it would make a review a gate to be
 satisfied rather than a reading to be answered, and would hand the merge
@@ -1207,6 +1231,19 @@ the default branch is the target, and a `target-branch` naming a branch
 that is not there is not an error anywhere — it is a repository where
 nothing is ever proposed.
 
+**A Dependabot pull request reads a different secret store.** GitHub
+hands a `pull_request` run whose actor is `dependabot[bot]` the
+Dependabot secrets rather than the Actions secrets, so a secret held only
+in the second resolves to the empty string on exactly those runs. A
+workflow that needs one there needs it registered in both, under the same
+name; a workflow that fails loudly on an empty secret is what turns the
+omission from a silent pass into a red check.
+
+An action may refuse a bot besides. The review action does, unless the
+bot is named in `allowed_bots` — name the one that opens pull requests
+here rather than passing `*`, which on a public repository lets any App
+permitted to comment start a run carrying a prompt it wrote.
+
 ### Pages and Read the Docs
 
 Where a repository serves a site from its own root, the source, the
@@ -1217,6 +1254,18 @@ served broken. Read the Docs' `latest` follows the default branch,
 new tag, and the webhook has to carry the secret the project's own
 integration page issued — one added by hand is refused with a 400 that
 GitHub records nowhere else.
+
+The **slug** is what serves the site, and it is not the project's name:
+renaming the project leaves the slug where it was, so a repository
+renamed while its documentation was not is a URL that 404s over a build
+that succeeds. Renaming the slug is a dashboard action of its own, and
+the old one stops answering rather than redirecting.
+
+Get that URL right before a release rather than after, because
+`pyproject.toml`'s `documentation` reaches where no pull request does:
+the metadata of every version already on the index, and the body of every
+release that quotes it. A wrong one is superseded by the next release and
+corrected in none of the ones that shipped.
 
 ## 12. Releasing
 
@@ -1396,6 +1445,40 @@ uv run pre-commit run --all-files
 cat tests/README.md
 ```
 
+The calendar of section 10, across the organization, which is the one
+audit no single tree can answer:
+
+```shell
+for r in <every repository>; do
+  gh api "repos/<org>/$r/contents/.github/workflows" --jq '.[].name' |
+  while read -r f; do
+    gh api "repos/<org>/$r/contents/.github/workflows/$f" --jq '.content' |
+      base64 -d | sed -n "s/^ *- cron: /$r $f /p"
+  done
+done | sort -k2
+```
+
+Sorted by workflow, so a file running on a different day from its
+namesake in another tree is one line out of place. A minute shared by two
+repositories at the same day and hour is the other finding, for the
+reason section 10 gives beside the table.
+
+That loop reads `cron:` and reaches no further, so the calendar's
+Dependabot row is not in it: that schedule is an `interval` and a `day`
+in `.github/dependabot.yml`, a different shape in a different file, and
+it takes a second command.
+
+```shell
+for r in <every repository>; do
+  gh api "repos/<org>/$r/contents/.github/dependabot.yml" --jq '.content' \
+    | base64 -d | sed -n "s/^ *day: /$r dependabot /p" | sort -u
+done
+```
+
+One line per repository where every ecosystem agrees, more than one
+where they do not — which is itself the finding, an ecosystem opening on
+a day the sentinel before it does not precede.
+
 An action not pinned to forty hex digits, a workflow with no
 `permissions:` block, and a `--frozen` anywhere are each a finding on
 their own. Check exit codes, not filtered output.
@@ -1415,6 +1498,52 @@ ignore, and the page, the script and the test that a repository which
 escalates owes together rather than singly. A tracked `MANIFEST.in` says
 the sdist half is owed; an sdist target that only excludes says it is
 not.
+
+### Reading the workflow comments
+
+The one audit here that is a reading rather than a command, and the one
+nothing else covers. `actionlint` reads the workflow, `zizmor` reads it
+for injection, the gate reads the code — and a sentence asserting that a
+job "calls three reusable workflows" sits unchallenged beside a file that
+calls six. It reads as authoritative precisely because it sits next to
+the thing it describes.
+
+1. **Read every comment, end to end.** Not a grep for suspicious words:
+   the stale ones read exactly like the true ones.
+1. **Check each claim against this repository's tree**, never against
+   another comment. Named triggers against the `on:` block; call-graph
+   claims against the actual `uses:` and `needs:` lines, grepped and
+   counted rather than eyeballed; context references against what they
+   resolve to; cron days against every other schedule here and against
+   `dependabot.yml`; any file, line or count a comment names re-derived
+   independently. **Never against the sibling the file was copied from
+   either**: prose moves between these repositories more easily than
+   configuration does, so a paragraph true where it was written is an
+   ordinary way for a comment to be wrong where it now sits.
+1. **Run the command a comment gives, and read it for what it reaches.**
+   A comment quoting a command's output is the hardest kind to doubt, and
+   the command can confirm a claim rather than test it: a paginated
+   endpoint asked without `--paginate` answers for its newest page alone,
+   so "nothing here has ever been X" survives every X older than that
+   page.
+1. **`git log -S "<phrase>"` on every mismatch**, to separate *was true,
+   drifted* from *never matched*. That axis decides whether the fix is
+   the comment or the code, and a comment describing a safer design that
+   was never built is a finding against the code.
+1. **Follow anomalous width.** A comment line past 80 columns breaks
+   section 9's rule, and in practice it is the un-rewrapped remainder of
+   an earlier fix — the one property of a comment a reader notices
+   without reading it, and worth following into the paragraph around it:
+
+   ```shell
+   awk 'length > 80 && /^ *#/ {print FILENAME ":" FNR}' .github/workflows/*.yml
+   ```
+
+   The 100 columns yaml gets in section 9 are for a line pinned to a
+   commit SHA with its tag after it. A comment is not that line.
+
+The file set divides cleanly across readers by size, each file being
+independent and the checklist the same for each.
 
 ## 16. Checklists
 
