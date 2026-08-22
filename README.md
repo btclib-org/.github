@@ -1546,14 +1546,18 @@ comparison stops:
 carries one, and the whole file where it does not — so the marker is the
 declaration, and there is no second list of exceptions to keep in step.
 
-`AUTHORS.md` is owed by every repository and points at that
-repository's own contributor graph. It is named here in prose and not as
-a bullet deliberately: a file meant to differ per repository can never
-satisfy a byte comparison, so listing it above would buy an assert with
-no state in which it closes. A single shared pointer instead would be
-accurate only while one graph stays a superset of the others — which is
-what the copies do today, and what leaves the first person to contribute
-somewhere else uncredited in silence.
+`AUTHORS.md` is owed by every repository and differs in two ways that
+are the repository's own. It points at **that repository's** contributor
+graph: a single shared pointer would be accurate only while one graph
+stays a superset of the others, and would leave the first person to
+contribute somewhere else uncredited in silence. And a tree that vendors
+somebody else's work attributes it here, which is what the file is for —
+`btclib-secp256k1` says that the vendored libsecp256k1 is not its work,
+carries its own licence and its own authors, and is only ever read from.
+
+It is named in prose and not as a bullet deliberately: a file meant to
+differ per repository can never satisfy a byte comparison, so listing it
+above would buy an assert with no state in which it closes.
 
 A per-file exception belongs in that file's own
 `markdownlint-configure-file` comment, not in the shared config read by

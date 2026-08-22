@@ -1,7 +1,7 @@
 # Contributing
 
 What this repository holds in common with the others of the organization
--- the toolchain, the lint gate, the tool tables behind it, the workflow
+— the toolchain, the lint gate, the tool tables behind it, the workflow
 set and the branch rules — is stated once in the
 [btclib-org repository standard](https://github.com/btclib-org/.github),
 each rule with the alternative it was decided against. It binds this
@@ -30,10 +30,15 @@ either.
 
 ## Documentation and comments
 
-[Section 9 of the standard][s9] is the prose style, and it governs every
-file in this tree — comments, docstrings, markdown and commit messages
-alike. It is not restated here: a second wording is the one that goes
-stale, which is that section's own *One fact in one place*.
+[Section 9 of the standard][s9] is the prose style, and it governs the
+prose this tree ships — comments, docstrings and markdown. It is not
+restated here: a second wording is the one that goes stale, which is
+that section's own *One fact in one place*.
+
+A commit message is prose this tree ships too, though section 9 does not
+say so: squash is the only merge method and the landing commit carries
+the messages, so what is written in one is read on `main` long after the
+branch is gone.
 
 ## Pull requests
 

@@ -7,8 +7,9 @@ review is not about.
 
 This is the reviewer's half of [CONTRIBUTING.md](./CONTRIBUTING.md),
 which is the author's. It does not restate the rules a review cites —
-those are in that file, in REPOSITORY.md and in CLAUDE.md, and a finding
-names the line that states them rather than a copy kept here.
+most are in the organization's standard, the rest in that file, in
+REPOSITORY.md and in CLAUDE.md — and a finding names the line that
+states them rather than a copy kept here.
 
 **This file is the same in every repository of the organization**, and
 deliberately so: a review that means one thing here and another there is
