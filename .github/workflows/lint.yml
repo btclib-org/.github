@@ -61,13 +61,13 @@ jobs:
   lint:
     # this job is the whole of what gates a merge here, so this name is
     # the required check's context, a context being keyed by name alone.
-    # Deliberately not the sibling repositories' "Lint and type-check":
-    # there is no Python in this tree and no mypy hook in the config, and
-    # a check naming a step that does not run is exactly the defect
-    # README.md is written against. Renaming it later cannot be done in a
-    # pull request -- the branch stops producing the old name while the
-    # rule outside the repository still waits for it -- so it is chosen
-    # once, here
+    # Not the sibling repositories' "Lint and type-check", though the
+    # config it runs carries a mypy hook as theirs do: the name is bound
+    # outside the repository, so changing it cannot be done in a pull
+    # request -- the branch stops producing the old name while the rule
+    # still waits for it -- and a name narrower than the job is what that
+    # costs. The direction README.md is written against is the other one,
+    # a check naming a step that does not run
     name: Lint
     # a draft pull request is work its author is not asking anyone to
     # read yet and spends no runner. A closed one spends none either --
@@ -88,10 +88,11 @@ jobs:
           persist-credentials: false
 
       # uv is the only prerequisite here as everywhere, and this is the
-      # step that supplies it. No cache asked of it: enable-cache keys on
-      # a lock file, of which this repository has none, and what it would
-      # hold is one wheel and an interpreter. The environments that cost
-      # the minutes are cached below
+      # step that supplies it. No cache asked of it, where alignment.yml
+      # asks for one: what uv resolves in this job is the mypy hook's
+      # environment, and whether that is worth a cache is a question for
+      # a measured job time rather than for this comment. The
+      # environments that cost the minutes today are cached below
       - name: Install uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
 
@@ -107,24 +108,25 @@ jobs:
         with:
           path: ~/.cache/pre-commit
           # the hook config alone, where the sibling repositories hash
-          # .python-version beside it: there is no project here and no
-          # such file, and every environment pre-commit builds is named
-          # by a rev this file pins
+          # .python-version beside it: every environment pre-commit
+          # builds is named by a rev this file pins, and the interpreter
+          # .python-version names belongs to the project environment the
+          # mypy hook resolves through uv, which is not pre-commit's to
+          # cache
           key: >-
             pre-commit-${{ runner.os }}-${{ steps.image.outputs.os }}-${{
             hashFiles('.pre-commit-config.yaml') }}
           restore-keys: |
             pre-commit-${{ runner.os }}-${{ steps.image.outputs.os }}-
 
-      # uvx, where the sibling repositories' lint job runs
-      # "uv run --locked --only-group lint pre-commit": there is no
-      # pyproject.toml and no lock file here, so there is no project
-      # environment for pre-commit to be a dependency group of and
-      # --locked would have nothing to check. This is the command
-      # CLAUDE.md gives an author to run before pushing, and running the
-      # same one is the point -- a workflow invoking pre-commit some
-      # other way is the second declaration section 4 refuses, one
-      # version behind the author's or ahead of it.
+      # uvx, and not the "uv run --locked --only-group lint pre-commit"
+      # of the sibling repositories, which the project in this tree would
+      # now make available: this is the command CLAUDE.md gives an author
+      # to run before pushing, and running the same one is the point -- a
+      # workflow invoking pre-commit some other way is the second
+      # declaration section 4 refuses, one version behind the author's or
+      # ahead of it. So taking the sibling form is a change to that file
+      # in the same commit, and not to this one alone.
       # --show-diff-on-failure changes no hook's answer: it prints what
       # an in-place fixer changed, so a red job says what to apply rather
       # than only that something is unclean

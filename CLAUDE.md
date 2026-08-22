@@ -44,10 +44,10 @@ the gate's answer to anything.
 - **`pyproject.toml` is not a distribution's.** `package = false`, no
   build backend and no wheel, so section 3 describes a file this one is
   not. The tools that read a `pyproject.toml` are configured in it, and
-  the ones that do not keep files of their own: `.typos.toml` for typos,
-  `.taplo.toml`, `.yamllint.yaml`, `.markdownlint.jsonc`. A word this
-  file's own prose needs — `CPY`, ruff's copyright rule — is a typo to
-  the spell checker until it is named there, with the reason beside it.
+  the ones that do not keep files of their own: `.taplo.toml`,
+  `.yamllint.yaml`, `.markdownlint.jsonc`. A word this file's own prose
+  needs — `CPY`, ruff's copyright rule — is a typo to the spell checker
+  until `[tool.typos]` names it, with the reason beside it.
 - **The suite's subject is the other repositories, and there is no
   coverage**: what it would measure is a tree that ships nothing, so the
   number would be the suite measuring itself. A claim in this file or in

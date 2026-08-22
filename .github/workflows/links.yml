@@ -89,10 +89,10 @@ jobs:
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           # every markdown file, where the sibling repositories name the
-          # prose and exclude the source: there is no source here to
-          # exclude, and no citation in a docstring that is a reference
-          # rather than a link a reader clicks. What is checked is
-          # therefore the whole tree.
+          # prose and exclude the source: the globs below name the prose,
+          # and the source is excluded by not being named -- a citation
+          # in a docstring is a reference rather than a link a reader
+          # clicks.
           # --no-progress because the log is not a terminal. The retries,
           # the wait and a timeout well past lychee's default of 20
           # seconds are what keep a slow or throttling host from being
