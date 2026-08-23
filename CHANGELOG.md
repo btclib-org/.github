@@ -335,6 +335,29 @@ audit has no revision to compare against.
   keeps the mechanism it defers to and points at the rule for what it
   costs.
 
+### The standard names the private channel a `SECURITY.md` promises
+
+- **The advisory form is owed at every tier** — issue #100. Section 2
+  gives the file to a publisher and lets the rest inherit this
+  repository's, and that policy sends a reporter to the Security tab of
+  the repository the defect is in, so the setting behind that tab is
+  every repository's whether or not it carries the file. `REPOSITORY.md`
+  reads this repository's own back.
+- **The reporting address is *security at btclib dot org*, spelled
+  out** — issue #109. One mailbox for the organization, because whether
+  a mailbox is answered is not something a reporter can check; the
+  spelling is what a harvester reading a public file does not lift.
+- **Section 15 measures each**, so a `SECURITY.md` written next is
+  written against the standard rather than against whichever sibling was
+  nearest. The address loop prints the repositories with no file of
+  their own rather than answering blank for them, so a blank is a policy
+  the pattern found no address in and is not read as agreement.
+  `tests/security_test.py` is the running half, and it names the
+  sections that decide it.
+- **Section 15's calendar is an audit no single tree can answer rather
+  than the one.** This block is another, and so is the `claude-review.yml`
+  sweep beside it.
+
 ### The tree's own comments say what the rule is, in the present tense
 
 - **Two backlog rows are spent and go.** Every tree that runs mypy

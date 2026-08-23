@@ -257,6 +257,15 @@ revisions do have pre-commit.ci's weekly autoupdate, per the `ci:` block
 of `.pre-commit-config.yaml`. The missing file is a gap rather than a
 choice.
 
+## Private vulnerability reporting
+
+```shell
+gh api repos/btclib-org/.github/private-vulnerability-reporting
+# {"enabled":true}
+```
+
+On, [as the standard asks of every tier][s2-root].
+
 ## What is not configured, and why
 
 - **No publishing, and no release workflow.** Nothing here is installed
@@ -278,6 +287,7 @@ choice.
   whose answer is in no single tree — and this file is the rest of that
   audit, pointed at the repository the commands came from.
 
+[s2-root]: ./README.md#root-files
 [s8]: ./README.md#8-coverage-at-100
 [s10-check]: ./README.md#the-aggregate-job-and-the-required-check
 [s11-bots]: ./README.md#dependabot-and-pre-commitci

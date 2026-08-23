@@ -352,6 +352,26 @@ knowing: an inherited policy cannot name the flaws that are that tree's,
 or the project a report about it should go to instead, so a tree
 with either to say says it in its `README.md` and its issue tracker.
 
+**The private channel that row promises is a setting as well as a
+file.** *Report a vulnerability* on a repository's Security tab does not
+wait on somebody remembering to read a mailbox, where the address beside
+it does. The file is tier 1's and the setting is every tier's, because
+the policy sends a reporter to the Security tab of the repository the
+defect is in, and that repository need not be one carrying a policy of
+its own; where the form is off, the policy offers a route the repository
+does not have.
+
+**The address kept beside the form** is *security at btclib dot org*,
+spelled out rather than written as a `mailto:` or with an `@`. Beside,
+because an address needs neither an account nor a repository setting to
+work; spelled out, because that is the form a harvester reading a public
+file does not lift, and a reporter reads either. One address for the
+organization rather than one per file, because whether a mailbox is
+answered is not something a reporter can check: a report sent to one
+that is not answered is the failure they never learn about. It names
+the subject rather than a team, so who answers a report can change
+without the policy changing.
+
 **A publishing repository's `README.md` ends with the line naming who
 supports the work**, under a thematic break:
 
@@ -2257,6 +2277,49 @@ of the same name — so the discriminator is a link back to the
 organization and not a `200`. `<name>` is what `pyproject.toml`
 declares, which is not always the repository's.
 
+The private channel section 2 owes, which is a setting in every
+repository and an address in the files that carry the policy:
+
+```shell
+for r in <every repository>; do
+  printf '%-20s ' "$r"
+  enabled=$(gh api "repos/<org>/$r/private-vulnerability-reporting" \
+    --jq .enabled 2>/dev/null) || enabled=unreadable
+  echo "$enabled"
+done
+
+one='security at btclib dot org'
+any='[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
+for r in <every repository>; do
+  printf '%-20s ' "$r"
+  policy=$(gh api "repos/<org>/$r/contents/SECURITY.md" --jq .content \
+    2>/dev/null | base64 -d 2>/dev/null)
+  [ -n "$policy" ] || { echo 'no SECURITY.md'; continue; }
+  printf '%s\n' "$policy" | grep -o -i -E "$one|$any" \
+    | sort -u | tr '\n' ' '
+  echo
+done
+```
+
+`true` from every repository is the answer to the first, a `false` being
+a policy that links a form the reporters of that repository do not have,
+and *unreadable* an endpoint that answered neither — captured rather
+than let through, an error body on stdout being what the publishing
+sweep above uses `--silent` against.
+
+The second answers one line per repository.
+*security at btclib dot org* is a repository carrying a policy and
+giving the address; *no SECURITY.md* is one inheriting this
+repository's, read beside the publishing sweep since at tier 1 that is
+the missing file; a blank line is a policy the pattern found no address
+in — another spelled-out mailbox, or none at all — and printing the
+missing file rather than leaving it blank is what tells a blank from a
+policy that is not there. An `@` form is the finding wherever it prints,
+that being the spelling the address is written to avoid. The grep reads
+no further: a pattern taking any spelled-out address would report the
+one `btclib-secp256k1` gives for the C library it binds, which is
+upstream's and correctly there.
+
 Section 11's rule that `claude-review.yml` is in every repository, which
 no single tree can answer for the others and nothing in `tests/` asks:
 
@@ -2273,8 +2336,8 @@ stated and its check printed a 404's body where a name was expected,
 and the one repository that failed it stayed in the column for as long
 as nobody read the JSON.
 
-The calendar of section 10, across the organization, which is the one
-audit no single tree can answer:
+The calendar of section 10, across the organization, an audit no single
+tree can answer:
 
 ```shell
 for r in <every repository>; do
