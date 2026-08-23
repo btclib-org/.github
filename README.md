@@ -164,8 +164,8 @@ twice and a test refuses the day the two disagree.
 Committed, and the only thing that moves it is Dependabot's uv ecosystem
 and the `uv-lock` hook. The dependency groups declare no versions: the
 whole drift of ruff, mypy, pytest and sphinx lives in the lock file, so
-one pull request a week carries all of it, pre-validated by the `latest`
-workflow.
+one pull request a week carries all of it, pre-validated by the
+`deps-latest` workflow.
 
 `[tool.uv] required-version` names the oldest uv that may read the lock —
 low enough for Dependabot's own bundled uv, since it re-locks with that
@@ -982,7 +982,8 @@ minute everybody else's cron picks.
 
 A day is a slot rather than a census: it says when that workflow runs
 where a repository has it, not that every repository does. Dependabot is
-in neither table and runs Thursday, that being the day `latest` reports
+in neither table and runs Thursday, that being the day `deps-latest`
+reports
 on the upgrade before the pull request arrives — it states its own
 schedule in `dependabot.yml`, in a different shape, and picks its own
 minute.
@@ -993,7 +994,7 @@ fails there, and so does a row nothing in the organization answers to,
 which is what keeps a row here from being a claim nobody checks. The
 commands a human runs instead are in section 15.
 
-`latest` is the sentinel that makes a Dependabot pull request a diff
+`deps-latest` is the sentinel that makes a Dependabot pull request a diff
 whose result is already known: it upgrades everything the resolver
 touches, runs the suite, the lint gate and the packaging checks, and
 commits nothing.
