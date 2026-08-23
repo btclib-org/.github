@@ -144,6 +144,37 @@ The two point at opposite ends on purpose:
 the version line makes uv ignore the file and fall back to a default
 interpreter.
 
+**What sets the two ends is what the repository is.** A library is
+imported by code its authors never see and an application is run by its
+own users, and the interpreters each of them covers follow from that.
+Which of the two a repository is, section 2's tier measures here: what
+this organization publishes is what other projects import, so tier 1 is
+a library and everything below it an application.
+
+A **library covers every interpreter still in support**: the floor is
+the oldest Python that has not reached end of life, `.python-version` is
+the newest released, and the classifiers name every version between them
+while the platform sweeps run each. Neither end is a choice, and the
+[Python release cycle](https://devguide.python.org/versions/) — whose
+table carries the end-of-life date of every branch — is what moves both.
+It moves them in the same month, one version reaching end of life as the
+next is released, so a library's window changes on a date rather than on
+a decision. The libraries name one window between them, since it is
+python.org's window and not each tree's: a library whose floor is not
+the others' is out of step with the cycle rather than with them, and
+section 15's command is what reads it.
+
+An **application takes the newest interpreter its dependencies allow**.
+Nothing imports it, so covering an older one buys compatibility for
+nobody: `.python-version` is the newest version every dependency
+publishes for, and `requires-python` is the oldest the tree itself means
+to run on, which is that same version where it means to run on one
+interpreter alone. Where a dependency holds `.python-version` below the
+newest release, that file's comment names the dependency and the
+condition for raising it — a ceiling with no reason beside it is one the
+next reader cannot tell from a preference, and it outlives the
+dependency that set it.
+
 ### Dependency groups
 
 Groups rather than extras, because uv has no default extra: an extra
@@ -2158,6 +2189,44 @@ print([c for c in declared if c not in classifiers])'
 
 An empty list is the answer. A string in it is one PyPI would refuse on
 upload, at the point where a version is already being consumed.
+
+Section 1's interpreter window, declared once in `requires-python`,
+again in the classifiers, again in `.python-version` and a fourth time
+in the matrix the platform sweeps run:
+
+```shell
+for r in <every repository>; do
+  toml=$(gh api "repos/<org>/$r/contents/pyproject.toml" --jq .content \
+    2>/dev/null | base64 -d 2>/dev/null)
+  matrix=$(gh api "repos/<org>/$r/contents/.github/workflows" \
+    --jq '.[].name' 2>/dev/null | while read -r f; do
+      gh api "repos/<org>/$r/contents/.github/workflows/$f" --jq .content |
+        base64 -d | sed -nE 's/^ +- "(3\.[0-9]+t?|pypy3\.[0-9]+)"$/\1/p'
+    done | sort -u | paste -sd, -)
+  printf '%s\tfloor %s\tclassifiers %s\tpin %s\tmatrix %s\n' "$r" \
+    "$(printf '%s' "$toml" |
+       sed -nE 's/^requires-python = ">=(3\.[0-9]+)"/\1/p')" \
+    "$(printf '%s' "$toml" |
+       sed -nE 's/^ +"Programming Language :: Python :: (3\.[0-9]+)",$/\1/p' \
+       | paste -sd, -)" \
+    "$(gh api "repos/<org>/$r/contents/.python-version" --jq .content \
+       2>/dev/null | base64 -d 2>/dev/null | grep -v '^#')" "$matrix"
+done
+```
+
+One line per repository. Where a line carries classifiers, the floor is
+the lowest of them, the pin is the highest, and the matrix runs every
+one. The library lines are the same window as each other, that window
+being python.org's; an application's line is read against the comment in
+its own `.python-version` instead, which is where section 1 puts the
+dependency that set the ceiling.
+
+The matrix column is empty where no workflow names a list of them,
+which is a tree whose workflows name no interpreter at all and a tree
+that runs a single one as a key: either way the pin is what runs.
+`3.14t` and `pypy3.11` are in the column and are not versions to compare
+against a classifier — the first is CPython 3.14 built without the GIL,
+and PyPy is a classifier of its own under `Implementation`.
 
 Which repositories publish, which is what section 2's first tier turns
 on and so what decides whether a `SECURITY.md` is owed or inherited:

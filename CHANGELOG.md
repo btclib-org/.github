@@ -92,6 +92,30 @@ audit has no revision to compare against.
   ignores neither. The comment names the section that grants the
   exemptions instead, that being where the reason belongs.
 
+### What decides an interpreter range, and the command that reads it
+
+- **Section 1 says what sets the two ends** — issue #83. The section
+  gave what `.python-version` and `requires-python` are and not what
+  decides their values, which left the rule in the `.python-version`
+  comments of the trees that state it. A library covers every
+  interpreter still in support, which is python.org's release cycle and
+  so moves on a date rather than on a decision; an application takes the
+  newest its dependencies allow, and where a dependency holds it below
+  the newest release, `.python-version`'s comment names that dependency
+  and the condition for raising it. Which of the two a repository is,
+  section 2's tier measures.
+- **Section 15 gains the command that reads the window off every
+  repository** — `requires-python`, the per-version classifiers,
+  `.python-version` and the interpreters the platform sweeps run, one
+  line each, so a tree out of step is a line out of step.
+- **`interpreters_test.py` asks the half no tree can ask of itself** —
+  whether the libraries name one window, the window being the release
+  cycle's rather than any one of theirs. It asks every Python tree
+  besides whether `.python-version` is the newest interpreter its
+  classifiers name, that being one end of the window declared in two
+  files, and asks every library whether it holds the module section 15
+  names as reading its own three declarations against one another.
+
 ### The test-file spelling and the public surface each state one rule
 
 - **The test-file spelling is a choice between two patterns pytest
