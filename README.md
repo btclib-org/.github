@@ -944,16 +944,16 @@ owns a day and an hour, the repository owns the minute:
 | `links` | Monday | 04 |
 | `vendored-vectors` | Monday | 05 |
 | `codeql` | Tuesday | 04 |
-| `python-arm-authority` | Tuesday | 05 |
-| `latest` | Wednesday | 04 |
-| `published` | Wednesday | 05 |
+| `py-arm-authority` | Tuesday | 05 |
+| `deps-latest` | Wednesday | 04 |
+| `pypi-install` | Wednesday | 05 |
 | `alignment` | Thursday | 04 |
-| `ubuntu` | Friday | 04 |
-| `hwi-integration` | Friday | 05 |
-| `macos` | Saturday | 04 |
-| `windows` | Saturday | 05 |
+| `os-ubuntu` | Friday | 04 |
+| `integration-hwi` | Friday | 05 |
+| `os-macos` | Saturday | 04 |
+| `os-windows` | Saturday | 05 |
 | `mutation` | Sunday | 04 |
-| `integration` | Sunday | 05 |
+| `integration-bitcoind` | Sunday | 05 |
 
 | repository | minute |
 | --- | --- |
@@ -963,6 +963,8 @@ owns a day and an hour, the repository owns the minute:
 | `btclib-benchmarks` | 16 |
 | `btclib-node` | 20 |
 | `.github` | 24 |
+| `portanode` | 28 |
+| `bbt` | 32 |
 
 **The week is the whole of the grid's period**, so every row is a weekly
 run, and a `cron:` repeating on any other cadence is one the calendar has
