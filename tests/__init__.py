@@ -228,17 +228,11 @@ def names() -> list[str]:
 
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
-    (112, "test_the_gate_runs_mypy", ("bbt",)),
     (131, "test_name_tests_test_runs_at_its_default", ("btclib-node",)),
     (
         131,
         "test_every_test_file_is_named_so_pytest_collects_it",
         ("btclib-node",),
-    ),
-    (
-        165,
-        "test_enable_error_code_is_section_6_s_list",
-        ("bbt",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection."""

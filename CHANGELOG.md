@@ -15,6 +15,13 @@ audit has no revision to compare against.
 
 ### The tree's own comments say what the rule is, in the present tense
 
+- **The backlog is down to what one repository still owes.** Every tree
+  that runs mypy carries section 6's error codes now — issue #165 — and
+  bbt's gate runs mypy since btclib-org/bbt#24, so the rows recording
+  those two against issues #165 and #112 are spent and go. What is left
+  is issue #131's pair against btclib-node, suspended on the
+  maintainer's decision while another session annotates that tree.
+
 - **`dependabot_test.py`'s docstring says what section 11 says now.**
   Section 11 stopped closing the count at three ecosystems in this same
   change, and the module that enforces it went on stating the closed
