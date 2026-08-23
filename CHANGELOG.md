@@ -13,6 +13,100 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 15's audit runs as the suite, one row per repository
+
+- **Section 15's commands are tests, asked of every repository at
+  once.** The suite asked what no single tree could — the calendar, the
+  verbatim copies, the rulesets — and left every per-tree command of
+  section 15 to a person reading its output: `--frozen`, the action
+  pins, the `permissions:` block, the syntax and local hooks,
+  `name-tests-test` and the layout it enforces, `strict = true` and the
+  hook that runs it, the copyright notice, the dependency groups against
+  section 1's table, the project urls, the Dependabot ecosystems, the
+  security address and the reporting setting, the newest tag's object
+  type, the workflow token, classic protection, and the `links` workflow's
+  `--accept` and `--cache`. Each is now a test taking a `repository`
+  argument, parametrized over the organization at collection, so a run
+  is the matrix issue #38 asked for and a failure names the tree and the
+  command that decides it by hand. The commands are the audit issues'
+  own — #88, #100, #105, #109, #110, #111, #112, #119, and #128 to #134 —
+  and the first run reproduced every finding they record. None is
+  resolved here: a red cell on a repository is the audit's answer, not
+  the suite's defect.
+
+- **A tier is measured, and a test names the tier it applies down to.**
+  `tests/repositories.py` measures section 2's tier off each tree by the
+  two files that section names, and a test marked `tier(n)` is skipped
+  with the reason on a repository that tier does not bind, so the report
+  says which cells were not asked and why. `tests/tiers_test.py` checks
+  section 2's table against the measurement in both directions, which is
+  the loop that section prints beside it.
+
+- **What the tracker already records runs as a strict expected
+  failure.** The backlog in `tests/repositories.py` is one row per
+  issue, naming the test and the repositories whose failure that issue
+  records, applied at collection, and only an assertion counts as the
+  failure expected. A repository that catches up turns its row into a
+  failure until the row is deleted, which is what closes the checkbox
+  on the issue; a row naming a test no module asks per repository, or a
+  repository the API does not list, refuses the collection rather than
+  excusing nothing in silence. The alternative, a cell left red until
+  its issue closes, would keep every run red for as long as the tracker
+  holds a finding, and the first run held one for every row of the
+  backlog. `tests/copyright_test.py`'s table of one repository moves
+  into it, and its test is asked per repository like the rest;
+  `verbatim_test.py` keeps its own, that one being keyed on a path and
+  not on a tree.
+
+  A row on a cell the run skips is reported as a failure too, naming
+  the row. A repository that stops failing by losing the file the test
+  reads, or by moving to a tier the test does not ask, is skipped
+  before the assertion, and a skip is neither the expected failure nor
+  the pass that would have turned the row red: on this branch before
+  the hook, two such rows gave `2 skipped` and exit 0. `conftest.py`
+  rewrites that report, and `tests/backlog_test.py` runs the hook on a
+  suite of its own to show it does -- the one module whose subject is
+  this tree rather than the organization, and the reason `pytester`
+  is loaded.
+
+- **A `main` with no classic protection fails the list, and only a
+  repository the token cannot read is skipped.** The protection
+  endpoint answers 404 to both, and `tests/protection_test.py` took
+  both for a token without access and skipped: a repository that moved
+  to rulesets alone, which is the very drift #88 is about, would have
+  been reported as unreadable. The two are told apart on what `gh`
+  wrote -- `Branch not protected` against `Not Found` -- and the first
+  is the document with every field off, failing the one assertion the
+  backlog excuses. `tests/links_test.py` reads `--accept=<list>` as
+  well as `--accept <list>`, the one-word spelling having read as the
+  default.
+
+- **The run without the switch reaches nothing.** `BTCLIB_INTEGRATION`
+  was read by an autouse fixture, which runs after the session fixtures
+  a test asked for: on a snapshot of `main` before this change,
+  `pytest --durations=4` without the switch showed the rulesets fixture
+  set up in twelve seconds and the trees cloned in seven, and then every
+  test skipped. The switch is now read at collection, where a skip is
+  decided before any fixture is set up, and the same run takes a
+  fraction of a second.
+
+- **Section 15 says what runs and what a person still reads.** Its
+  opening no longer says the suite asks only what no single tree can;
+  it says that which repositories a question is asked of is section 2's
+  tier, that which failures are already filed is the backlog, and that
+  two of its audits stay a reading — `tests/README.md` against section
+  7, and the workflow comments. `CONTRIBUTING.md`'s last section and
+  `alignment.yml`'s header say the same of the suite, and
+  `settings_test.py` no longer says classic protection and the workflow
+  token stay a person's to run, since they do not. `pyproject.toml`
+  registers the `tier` marker, `--strict-markers` being on.
+
+- **Found by the first run and filed, not fixed: #153.** `check-toml` is
+  absent from two trees that track toml, which the syntax-hook test
+  reports once it asks for a hook only where the tree tracks the file
+  type — section 4's own condition, `check-hooks-apply` refusing a hook
+  that matches nothing.
+
 ### Section 12 states what a publisher owes, in the terms of its backend
 
 - **A published sdist reproduces from its tag, as a property.** Section
@@ -139,10 +233,10 @@ audit has no revision to compare against.
   every repository: five declare the derived regex byte for byte, and
   `bitcoin-core-rpc` declares the MIT notice in full by a departure its
   own file records, which is issue #119's and not this one's. That
-  repository is an entry in the module's `EXPECTED_DRIFT`, a strict
-  expected failure naming the issue: the suite stays green on a drift
-  already filed, and the day the tree aligns the unexpected pass turns
-  red, which is the signal to delete the entry.
+  repository is a row of the backlog in `tests/repositories.py`, a
+  strict expected failure naming the issue: the suite stays green on a
+  drift already filed, and the day the tree aligns the unexpected pass
+  turns red, which is the signal to delete the row.
 
 - **`.gitattributes` is a section 14 file.** Every repository carries
   it and every copy sets the same two files to `merge=union`, and the

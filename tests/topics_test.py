@@ -18,6 +18,8 @@ from typing import Any
 
 import pytest
 
+from .organization import ORG, by_hand
+
 CAP = 20
 """How many topics GitHub keeps. Not a choice of the organization's."""
 
@@ -85,3 +87,20 @@ def test_the_topics_are_the_keywords(
                 "keywords only": sorted(want - here),
             }
     assert not apart, f"topics and keywords that disagree: {apart}"
+
+
+def test_a_repository_has_topics(repository: str, topics: dict[str, set[str]]) -> None:
+    """A reader arriving from a search arrives at every repository.
+
+    The rule above derives the topics from `keywords` and so reaches a
+    package alone; a repository with no `keywords` to derive them from
+    is the one with none set, and btclib-org/.github#105 is where what
+    such a repository owes is being decided. What is asked meanwhile is
+    the floor either answer shares: that there is at least one.
+
+    :param repository: the repository asked about.
+    :param topics: the topics of each repository.
+    """
+    assert topics[repository], "no topics at all; " + by_hand(
+        repository, f"gh api repos/{ORG}/{repository}/topics --jq .names"
+    )
