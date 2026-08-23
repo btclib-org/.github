@@ -50,3 +50,38 @@ def gh_json(endpoint: str) -> Any:
         encoding="utf-8",
     ).stdout
     return json.loads(out)
+
+
+def by_hand(repository: str, command: str) -> str:
+    """Say how a failure is decided without this suite.
+
+    Section 15 gives every question of the standard as a command a
+    person runs in one checkout, and a failure here names that command
+    so the reader can take it there: the message is the section's line
+    for that repository rather than a restatement of it.
+
+    :param repository: the repository the assertion was asked of.
+    :param command: the shell that decides it in a checkout of that tree.
+    :returns: the text an assertion message ends with.
+    """
+    return f"by hand, in a checkout of {ORG}/{repository}: {command}"
+
+
+def tracked(root: Path, *patterns: str) -> list[str]:
+    """List the files a tree tracks under some pathspecs.
+
+    `git ls-files` rather than a walk, so a checkout's own environment
+    -- the `.venv` this tree keeps beside its suite -- is not read as
+    part of it.
+
+    :param root: the root of the checkout.
+    :param patterns: git pathspecs, `*.toml` and the like.
+    :returns: the paths, relative to the root, in git's order.
+    """
+    out = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "--", *patterns],
+        capture_output=True,
+        check=True,
+        encoding="utf-8",
+    ).stdout
+    return out.splitlines()

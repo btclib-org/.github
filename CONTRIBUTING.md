@@ -201,11 +201,11 @@ shares: `git -C <worktree> rev-parse --git-path hooks` answers with the
 maintainer's checkout. So one session installing it installs it for every
 other. Run the gate by hand before committing.
 
-The suite is a second thing and not a gate. It asks the organization what
-no single repository can ask itself, it reaches GitHub to do so, and it
-skips itself unless `BTCLIB_INTEGRATION` is set. `alignment.yml` carries
-the command it runs; a copy of that command here would be the line that
-goes stale first.
+The suite is a second thing and not a gate. It asks every repository of
+the organization whether it still agrees with `README.md`, it reaches
+GitHub to do so, and it skips itself unless `BTCLIB_INTEGRATION` is set.
+`alignment.yml` carries the command it runs; a copy of that command here
+would be the line that goes stale first.
 
 ### What gates a merge, and what only reports
 

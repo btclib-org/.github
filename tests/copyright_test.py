@@ -19,6 +19,9 @@ from typing import Any
 
 import pytest
 
+from .organization import by_hand
+from .repositories import Tier
+
 pytestmark = pytest.mark.integration
 
 METACHARACTERS = frozenset(r"\.^$|?*+()[]{}")
@@ -61,80 +64,30 @@ def declared(parsed: dict[str, Any]) -> str | None:
     return value if isinstance(value, str) else None
 
 
-EXPECTED_DRIFT = {
-    "bitcoin-core-rpc": (
-        "btclib-org/.github#119: bcr's header is the full MIT notice"
-        " by a recorded departure"
-    ),
-}
-"""A repository whose `notice-rgx` is known not to be its `COPYRIGHT` yet.
-
-The value is the issue that decides it. An entry here is a strict
-expected failure rather than a red row: the suite stays green on a
-drift that is already filed, and the day the tree aligns the test passes
-unexpectedly, which strict turns red -- the signal to delete the entry.
-"""
-
-
+@pytest.mark.tier(Tier.PYTHON)
 def test_every_notice_rgx_is_its_copyright_transcribed(
+    repository: str,
     trees: dict[str, Path],
     pyprojects: dict[str, dict[str, Any]],
 ) -> None:
     """Where a repository declares the regex, it is its own file's text.
 
-    A repository that declares none is not a finding here: whether it
-    selects `CPY` at all is section 5's question of that tree, and a
-    tree that selects the rule without the key fails its own gate on
-    every file, ruff's default regex asking for a year the notice does
-    not carry. A repository in `EXPECTED_DRIFT` is the test below's.
+    A repository that declares none is skipped rather than failed:
+    whether it selects `CPY` at all is section 5's question of that
+    tree, asked in `pyproject_test.py`, and a tree that selects the rule
+    without the key fails its own gate on every file, ruff's default
+    regex asking for a year the notice does not carry.
 
+    :param repository: the repository asked about.
     :param trees: the checkouts.
     :param pyprojects: the parsed files.
-    """
-    drifted: dict[str, dict[str, str]] = {}
-    checked: list[str] = []
-    for repository, parsed in sorted(pyprojects.items()):
-        regex = declared(parsed)
-        if regex is None or repository in EXPECTED_DRIFT:
-            continue
-        checked.append(repository)
-        expected = transcribed(trees[repository] / "COPYRIGHT")
-        if regex != expected:
-            drifted[repository] = {"declared": regex, "expected": expected}
-    assert checked, "no repository declares a notice-rgx, so nothing was compared"
-    assert not drifted, f"notice-rgx that is not COPYRIGHT transcribed: {drifted}"
-
-
-@pytest.mark.parametrize(
-    "repository",
-    [
-        pytest.param(
-            repository,
-            marks=pytest.mark.xfail(strict=True, raises=AssertionError, reason=reason),
-        )
-        for repository, reason in EXPECTED_DRIFT.items()
-    ],
-)
-def test_a_recorded_drift_is_still_one(
-    repository: str,
-    trees: dict[str, Path],
-    pyprojects: dict[str, dict[str, Any]],
-) -> None:
-    """The entry in `EXPECTED_DRIFT` still describes the tree.
-
-    Only an assertion counts as the expected failure: a repository the
-    table names and the organization no longer has, or one that has
-    dropped the key rather than aligned it, is a stale entry, and it
-    errors rather than passing for the wrong reason.
-
-    :param repository: the entry.
-    :param trees: the checkouts.
-    :param pyprojects: the parsed files.
-    :raises LookupError: if the repository no longer declares the key.
     """
     regex = declared(pyprojects[repository])
     if regex is None:
-        msg = f"EXPECTED_DRIFT names {repository}, which declares no notice-rgx"
-        raise LookupError(msg)
+        pytest.skip(f"{repository} declares no notice-rgx")
     expected = transcribed(trees[repository] / "COPYRIGHT")
-    assert regex == expected, f"{repository} still declares {regex!r}"
+    assert regex == expected, (
+        f"notice-rgx is not COPYRIGHT transcribed: declared {regex!r},"
+        f" expected {expected!r}; "
+        + by_hand(repository, "grep -n 'notice-rgx' pyproject.toml; cat COPYRIGHT")
+    )

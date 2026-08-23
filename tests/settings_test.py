@@ -1,13 +1,11 @@
-"""The rulesets and the merge method section 11 describes, everywhere.
+"""The rulesets, the merge method and the token section 11 describes.
 
 These are the rules that live in no tree: a repository setting is
 invisible to every gate, every hook and every reviewer, and the only
 thing that would notice one quietly turned off is somebody opening the
-settings page of a repository nobody is currently working on. Two of
-section 15's settings commands are asked here weekly; the other two are
-not, so `actions/permissions/workflow` and the classic
-`branches/main/protection` -- which is where required checks and
-`enforce_admins` live -- stay a person's to run.
+settings page of a repository nobody is currently working on. Three of
+section 15's settings commands are asked here; the classic
+`branches/main/protection` is `protection_test.py`'s.
 
 Rulesets are read by what they enforce rather than by what they are
 called: a rule is what holds the door, and a name is how a person finds
@@ -20,7 +18,7 @@ from typing import Any
 
 import pytest
 
-from .organization import ORG, gh_json
+from .organization import ORG, by_hand, gh_json
 
 MAIN = "refs/heads/main"
 TAGS = "refs/tags/v*"
@@ -264,3 +262,19 @@ def test_squash_is_the_only_button(settings: dict[str, dict[str, Any]]) -> None:
             f"this run's token cannot see the merge method on {unseen}:"
             " those four fields need push access to read"
         )
+
+
+def test_the_workflow_token_is_read(repository: str) -> None:
+    """Section 15: a token that is `read`, and a job elevates what it needs.
+
+    The default grant is the one every workflow runs with that declares
+    nothing more, so a `write` here is a write every step of every
+    workflow holds.
+
+    :param repository: the repository asked about.
+    """
+    endpoint = f"repos/{ORG}/{repository}/actions/permissions/workflow"
+    granted = gh_json(endpoint)["default_workflow_permissions"]
+    assert granted == "read", f"the default workflow token is {granted!r}; " + by_hand(
+        repository, f"gh api {endpoint}"
+    )

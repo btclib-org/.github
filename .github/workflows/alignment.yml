@@ -1,11 +1,12 @@
 ---
 name: alignment
 
-# The half of section 15's audit a machine can run: the questions whose
-# answer is not in any one tree. A repository can test what it says about
-# itself -- interpreters_test.py, conventions_test.py, the hook pins --
-# and none of them can test that the repositories agree, because
-# agreement is not a property any one of them holds.
+# The half of section 15's audit a machine can run: every repository
+# asked whether it still agrees with README.md, and the questions whose
+# answer is not in any one tree. A repository can test what it says
+# about itself -- interpreters_test.py, conventions_test.py, the hook
+# pins -- and none of them can test that it agrees with a file it holds
+# no copy of, or that the repositories agree with each other.
 #
 # What it asks is in tests/, each module's docstring naming the section
 # it reads. Restating the list here would be a second copy to keep in

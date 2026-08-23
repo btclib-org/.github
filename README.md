@@ -1933,18 +1933,27 @@ the index and goes the day it is.
 Alignment is measured, not remembered. Each command below answers for
 one section above.
 
-**Some of it runs on its own.** `tests/` of this repository is a suite
-that asks the questions whose answer is in no single tree, because
-agreement between repositories is not a property any one of them holds,
-so no convention test of theirs can hold it either. Which section each
-module reads is that module's own docstring, and there is no second copy
-of the list here to keep in step with it. `alignment.yml` runs it weekly.
+**Much of it runs on its own.** `tests/` of this repository is a suite
+that asks every repository the questions below, one test per question
+and one row per repository, so that a run is the matrix and a failure
+names the tree and the command that decides it by hand. It asks them
+here and not in each tree's own convention tests because what is
+measured is agreement with this file, which no tree holds a copy of: a
+test there answers for that repository's reading of a rule, and the
+rule has moved since. Which section each module reads is that module's
+own docstring, and there is no second copy of the list here to keep in
+step with it. Which repositories a question is asked of is section 2's
+tier, measured off each tree as that section measures it, and a tree the
+tier does not bind is skipped with the reason. Which failures the
+tracker already records is `tests/repositories.py`: those run as strict
+expected failures naming the issue, so a repository that catches up is
+reported until its row is deleted. `alignment.yml` runs it weekly.
 
-The commands below are the other half, and where one of them asks a
-question the suite also asks, the suite asks it of every repository at
-once and the command answers for the tree in front of you. The rest are
-the questions about one tree, and the ones that need a judgement rather
-than a comparison. A repository answers for itself where it can —
+The commands below are the same questions for the tree in front of you,
+and the questions the suite does not ask yet or cannot. Which it asks is
+each module's docstring; two it never will, each being a reading rather
+than a comparison — `tests/README.md` against section 7, and the
+workflow comments, below. A repository answers for itself where it can —
 `interpreters_test.py`, `conventions_test.py`, the hook-pin tests — and
 this file is where the rest is written down.
 

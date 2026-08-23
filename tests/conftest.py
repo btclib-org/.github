@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import os
 import subprocess
 import tomllib
@@ -10,45 +11,147 @@ from typing import Any
 
 import pytest
 
-from .organization import ORG, ROOT, SELF, gh, gh_json
+from .organization import ORG, ROOT, SELF, gh_json
+from .repositories import BACKLOG, Tier, filed, names, tier
+
+SWITCH = "BTCLIB_INTEGRATION"
+"""The environment variable without which this suite skips itself."""
+
+REPOSITORY = "repository"
+"""The argument a test takes to be asked once per repository.
+
+A test that names it is parametrized over the organization at
+collection, by `pytest_generate_tests` below, and is what the tier
+marker and the backlog apply to. The cross-repository tests take the
+session fixtures instead and run once.
+"""
+
+
+def opted_in() -> bool:
+    """Say whether the switch is set.
+
+    :returns: whether the run may reach GitHub.
+    """
+    return bool(os.environ.get(SWITCH))
+
+
+def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
+    """Ask every per-repository test of every repository, by name.
+
+    Each repository is one parameter and so one row of the report,
+    which is what makes the run a matrix rather than one assertion over
+    a dict: a reader sees which tree failed which question without
+    parsing a message. A failure the tracker already records carries the
+    issue as a strict expected failure, read off the backlog here and not
+    in the test, so the test states the rule and this says who is known
+    not to keep it yet. Only an assertion counts as the expected
+    failure: a repository that errors before the assertion -- a file it
+    no longer has, a key it dropped -- is reported as the error it is
+    rather than passing for the wrong reason.
+
+    Without the switch the parameter is one placeholder, which
+    `pytest_collection_modifyitems` then skips with everything else: the
+    list is fetched from the API, and a run that may not reach it has no
+    names to parametrize on.
+
+    :param metafunc: the test function being collected.
+    """
+    if REPOSITORY not in metafunc.fixturenames:
+        return
+    if not opted_in():
+        metafunc.parametrize(REPOSITORY, [pytest.param("", id="unset")])
+        return
+    test = metafunc.definition.originalname
+    params = []
+    for name in names():
+        issues = filed(test, name)
+        marks = []
+        if issues:
+            reason = ", ".join(f"btclib-org/.github#{issue}" for issue in issues)
+            marks.append(
+                pytest.mark.xfail(strict=True, raises=AssertionError, reason=reason)
+            )
+        params.append(pytest.param(name, id=name, marks=marks))
+    metafunc.parametrize(REPOSITORY, params)
+
+
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Skip the run without the switch, and refuse an orphaned backlog row.
+
+    The switch is read here and not in a fixture because a skip marked
+    at collection is decided before any fixture is set up, where a
+    fixture that skips runs after every session fixture the test asked
+    for: the rulesets fetched and the trees cloned, and then the test
+    skipped. This whole suite being integration, a run without the
+    switch reaches nothing.
+
+    A backlog row keyed on a test that was renamed, or on a repository
+    that was, would match nothing and excuse nothing, and the strict
+    expected failure it was meant to be would never be asked: the run
+    would be green with a finding unfiled. So a row naming a test no
+    module of this suite defines, or a repository the API does not
+    list, is an error of the collection and not a quiet no-op. The
+    modules are read rather than the collected items, so that a run
+    narrowed to one test by its id is not refused for the rows it left
+    out.
+
+    :param items: the collected tests, parametrized.
+    :raises pytest.UsageError: where a backlog row names nothing.
+    """
+    if not opted_in():
+        for item in items:
+            item.add_marker(
+                pytest.mark.skip(reason=f"set {SWITCH}=1 to run the alignment tests")
+            )
+        return
+    defined = {
+        attribute
+        for path in sorted(Path(__file__).parent.glob("*_test.py"))
+        for attribute in vars(importlib.import_module(f"{__package__}.{path.stem}"))
+        if attribute.startswith("test_")
+    }
+    orphans = [
+        f"#{issue}: {test} on {repository}"
+        for issue, test, repositories in BACKLOG
+        for repository in repositories
+        if test not in defined or repository not in names()
+    ]
+    if orphans:
+        msg = f"tests/repositories.py lists rows no test answers to: {orphans}"
+        raise pytest.UsageError(msg)
 
 
 @pytest.fixture(autouse=True)
-def _opt_in() -> None:
-    """Skip unless the switch is set, this whole suite being integration."""
-    if not os.environ.get("BTCLIB_INTEGRATION"):
-        pytest.skip("set BTCLIB_INTEGRATION=1 to run the alignment tests")
+def _in_tier(request: pytest.FixtureRequest) -> None:
+    """Skip a per-repository test asked of a repository its tier does not bind.
+
+    The `tier` marker names the tier a test applies down to, and a test
+    without one applies to every repository. Skipped with the reason
+    rather than passed, so the report says which cells of the matrix
+    were not asked and why, and a repository whose tier moves shows as
+    a change in the skips rather than in nothing.
+
+    :param request: the test being set up.
+    """
+    marker = request.node.get_closest_marker("tier")
+    if marker is None or REPOSITORY not in request.fixturenames:
+        return
+    (asked,) = marker.args
+    repository = request.getfixturevalue(REPOSITORY)
+    tiers: dict[str, Tier] = request.getfixturevalue("tiers")
+    if not asked.binds(tiers[repository]):
+        pytest.skip(
+            f"{repository} is tier {tiers[repository]}, and this asks tier {asked}"
+        )
 
 
 @pytest.fixture(scope="session")
 def repositories() -> list[str]:
-    """Ask the API for every repository, rather than listing them here.
-
-    A list written down here would be one more place to remember a new
-    repository, and the one place nobody would think to look: a tree that
-    joins the organization is in scope for this suite the moment it
-    exists. Archived repositories are out -- what they agree with is the
-    standard of the day they were archived.
-
-    Forks are not, though they were: the reason given was that a fork's
-    conventions are upstream's, and that is false for a fork the
-    organization has taken over. `bbt` is one -- its upstream has not
-    been pushed since 2022, every commit since is the organization's, and
-    the forks downstream are of this copy rather than of that one.
-    Excluding it meant the one repository furthest from the standard was
-    the one nothing measured.
-
-    The filter is right in general and was wrong for one repository, so
-    it comes back the day that repository is detached from its upstream:
-    btclib-org/bbt#13 carries the request GitHub's support grants, and
-    the last box on it is this line.
+    """Return the names `pytest_generate_tests` parametrized on.
 
     :returns: the repository names, `.github` among them.
     """
-    return gh(
-        f"orgs/{ORG}/repos?per_page=100",
-        ".[] | select(.archived == false) | .name",
-    )
+    return names()
 
 
 @pytest.fixture(scope="session")
@@ -103,6 +206,16 @@ def trees(
         )
         out[repository] = target
     return out
+
+
+@pytest.fixture(scope="session")
+def tiers(trees: dict[str, Path]) -> dict[str, Tier]:
+    """Measure the tier of every repository off its tree.
+
+    :param trees: the checkouts.
+    :returns: each name against its tier.
+    """
+    return {repository: tier(root) for repository, root in trees.items()}
 
 
 @pytest.fixture(scope="session")
