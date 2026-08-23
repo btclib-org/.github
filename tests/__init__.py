@@ -271,7 +271,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "portanode",
         ),
     ),
-    (112, "test_mypy_is_strict", ("btclib-node",)),
     (112, "test_the_gate_runs_mypy", ("bbt",)),
     (119, "test_every_notice_rgx_is_its_copyright_transcribed", ("bitcoin-core-rpc",)),
     (128, "test_no_step_passes_frozen", ("btclib-secp256k1",)),
