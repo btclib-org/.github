@@ -13,6 +13,16 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The root-files table says what a README is at every tier it binds
+
+- **Section 2's `README.md` row describes the file rather than a
+  package** — issue #179. The row gave it as the package's long
+  description and the site homepage, and it binds tier 3, which is
+  measured by the absence of a `pyproject.toml`; a repository that holds
+  no `docs/source` has no site for it to be the homepage of either. What
+  an index renders is stated where that tier is argued, in the
+  support-line paragraph under the same table.
+
 ### The test-file spelling and the public surface each state one rule
 
 - **The test-file spelling is a choice between two patterns pytest
