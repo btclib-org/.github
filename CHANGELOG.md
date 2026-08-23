@@ -13,6 +13,15 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The blank lines the union driver ate are back
+
+- **`CHANGELOG.md` would pass MD022 and MD032 with the directive at its
+  head taken out** — issue #214. Two branches each adding a `###`
+  section under `## Unreleased` merge into a heading with no blank line
+  above it, and the two rules being off is why the gate reports none of
+  them; every heading that lost one has it back. The directive itself
+  stays, its removal being issue #190's.
+
 ### The root-files table says what a README is at every tier it binds
 
 - **Section 2's `README.md` row describes the file rather than a
@@ -177,6 +186,7 @@ audit has no revision to compare against.
   `__all__` off the checkout rather than importing a package nothing
   here installs. `btclib-secp256k1` is a backlog row against issue #79,
   which stays open for the modules and the census it owes.
+
 ### Who owes a verbatim copy is section 14's to say, and the suite asks
 
 - **Each bullet of section 14 opens with one of two spellings of who
@@ -260,6 +270,7 @@ audit has no revision to compare against.
   repository built from the checklist had the choice made for it by a
   list that does not say it is choosing. Section 16's normalizing
   checklist names no shape either.
+
 ### A Dependabot ecosystem is asked of the tree that would carry it
 
 - **`dependabot_test.py` asks the two halves of section 11's sentence
@@ -278,6 +289,7 @@ audit has no revision to compare against.
   failed assertion**, the shape `hooks_test.py` uses for a tree with no
   lint gate: a backlog row excuses an assertion, and a file that is gone
   is not one.
+
 ### An aggregate job answers to a branch rule, not to a matrix
 
 - **Section 10 states one rule for when a workflow needs an aggregate
@@ -294,6 +306,7 @@ audit has no revision to compare against.
   `Lint` context put the aggregate down to a matrix, which is the
   reading section 10 no longer carries; the one job it names is the
   context because the workflow has one job.
+
 ### The suite refuses a `License ::` classifier beside the expression
 
 - **`classifiers_test.py` asks the other rule section 3 states about the
@@ -309,6 +322,7 @@ audit has no revision to compare against.
   issue #173. A tree declaring the classifier and no `license` string is
   short of the expression rather than carrying the pair, which is that
   issue's question and not this test's.
+
 ### Section 5's two ruff settings, kept here and asked of every tree
 
 - **`pyproject.toml` declares `max-doc-length` and the pep257
@@ -323,6 +337,7 @@ audit has no revision to compare against.
   together, since either half alone gates nothing. bbt sets the width
   and selects no `W` — issue #176 — and bbt and btclib-node select no
   `D` — issue #177 — so those cells are rows of the backlog.
+
 ### The support line is asked of the repositories that publish
 
 - **Section 2 asks for the support line at tier 1** — issue #98. The
@@ -335,6 +350,7 @@ audit has no revision to compare against.
   owe a pull request adding the line.
 - **This repository's `README.md` ends without the line.** It publishes
   nothing, so `profile/README.md` carries the organization's only copy.
+
 ### Section 6's mypy block names only what it buys
 
 - **`show_error_codes` goes from the sample** — issue #170. mypy has no
@@ -484,6 +500,7 @@ audit has no revision to compare against.
   to go or for the command that re-derives it to take its place, and
   for a comment or a document that tells what the code used to be to
   stop — section 9's rules, named where the reviewer reads them.
+
 ### This tree answers the rows the suite held against it
 
 - **The gate runs `check-toml`, `toml-comment-width` and
@@ -743,6 +760,7 @@ audit has no revision to compare against.
   carries none answers instead. `.gitattributes` keeps its
   `RELEASE_NOTES.md` line: an attribute on a path that is not there is
   inert, and the file stays the same in every tree.
+
 ### COPYRIGHT is transcribed into the gate, and the transcription is checked
 
 - **Section 14 says what the file is.** It said one line naming the
