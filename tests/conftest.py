@@ -28,14 +28,26 @@ def repositories() -> list[str]:
     repository, and the one place nobody would think to look: a tree that
     joins the organization is in scope for this suite the moment it
     exists. Archived repositories are out -- what they agree with is the
-    standard of the day they were archived -- and so are forks, whose
-    conventions are upstream's.
+    standard of the day they were archived.
+
+    Forks are not, though they were: the reason given was that a fork's
+    conventions are upstream's, and that is false for a fork the
+    organization has taken over. `bbt` is one -- its upstream has not
+    been pushed since 2022, every commit since is the organization's, and
+    the forks downstream are of this copy rather than of that one.
+    Excluding it meant the one repository furthest from the standard was
+    the one nothing measured.
+
+    The filter is right in general and was wrong for one repository, so
+    it comes back the day that repository is detached from its upstream:
+    btclib-org/bbt#13 carries the request GitHub's support grants, and
+    the last box on it is this line.
 
     :returns: the repository names, `.github` among them.
     """
     return gh(
         f"orgs/{ORG}/repos?per_page=100",
-        ".[] | select(.archived == false and .fork == false) | .name",
+        ".[] | select(.archived == false) | .name",
     )
 
 

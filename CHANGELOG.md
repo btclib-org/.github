@@ -1,0 +1,70 @@
+# Changelog
+
+What changed in the standard, and why. Nothing here is released — this
+repository ships by being read — so the entries are grouped by subject
+rather than by version, and the record they make is the one section 15's
+audit has no revision to compare against.
+
+## Unreleased
+
+### The repository that owns the standard carries what it names
+
+- **`REVIEWING.md` and `.claude/commands/review.md` are section 14
+  entries.** Where the standard had reached, the copies were one file
+  but for their H1 and the section whose title says it is not generic:
+  that was the measurement this change rests on, taken before
+  `btclib-org/btclib-benchmarks#159` moved one of them mid-branch. What
+  the entry can still say without a claim that ages is what the shape
+  became — the per-tree half is now that file's own last section, and
+  `.claude/commands/review.md` follows it for the same reason, staying a
+  file of its own rather than folding into `CLAUDE.md`, which every
+  session loads including the one that wrote the diff.
+
+- **A review need not deliver a verdict.** The ack of record is what a
+  landing reads and ends in `ACK <sha>` or `CHANGES REQUESTED <sha>`. A
+  reading that says what it found and stops is a review too: requiring a
+  verdict of every reading prices each thing worth saying at a judgement
+  on the whole change.
+
+- **Two rules a reviewer had and the standard did not.** That a cited
+  fact exists is not that the citation is honest, and a search for the
+  cited term cannot tell the two apart. And a review says what it did
+  *not* check — a command it could not run, an issue it could not read —
+  because a review that answered whether a diff closes its issues against
+  the pull request's own account of them is reasoning in a circle nobody
+  reading the last line would see.
+
+- **`CONTRIBUTING.md` and `REVIEWING.md` are one file up to their last
+  section**, which is the tree's own and holds the commands, the gates
+  and what a review of that tree checks beyond the generic. A human
+  should not open an agent's file to learn how to run a gate, and
+  section 2 calls `CONTRIBUTING.md` *"how to work"*.
+
+- **Some of the files section 2 names and this repository lacked**:
+  `COPYRIGHT`, `AUTHORS.md`, `CONTRIBUTING.md`, `REVIEWING.md`,
+  `CHANGELOG.md`, `RELEASE_NOTES.md` and `.gitattributes`. Others it
+  still lacks — `SECURITY.md` and `RELEASING.md` among them — and what a
+  repository that publishes nothing owes of that table is not settled
+  here. `CODE_OF_CONDUCT.md` and `LICENSE`
+  take the text the siblings have yet to adopt, so both leave this
+  repository out of group until they do; `LICENSE` also loses its year
+  range, `COPYRIGHT` naming the holder without one, so the two disagreed
+  the first January nobody remembered.
+
+- **`AUTHORS.md` points at this repository's own contributors.** Section
+  14 said the file was kept for the organization rather than per package;
+  that holds today only because one graph happens to be a superset of the
+  others, which nothing re-derives.
+
+- **A shared file may answer for the tree it is in.** `CONTRIBUTING.md`
+  and `REVIEWING.md` carry `## This repository in particular` as their
+  last heading, and `tests/verbatim_test.py` compares what precedes it
+  where a file carries one and the whole file where it does not. Without
+  that rule those two would have been declared byte-identical while
+  differing by construction, so the sentinel would have reported them
+  drifted for ever — an alarm with no state in which it closes.
+
+- **Section 9 states the rule for a cross-repository reference.** A bare
+  `#123` resolves inside the repository it is written in. The rule was
+  written in a per-tree section of `REVIEWING.md` and would have been
+  lost when that section left.

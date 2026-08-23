@@ -1,4 +1,4 @@
-"""The files section 14 calls verbatim are byte-identical.
+"""The files section 14 calls verbatim agree where it says they do.
 
 The list is prose with a reason under each entry, which is what a person
 reading it needs; the subject of each bullet is a path, which is what
@@ -19,16 +19,38 @@ from .tables import subjects
 pytestmark = pytest.mark.integration
 
 
+MARKER = b"\n## This repository in particular\n"
+"""The heading a shared file puts its own tree's half under.
+
+A file that carries it is compared up to it and not past it, which is
+what lets `CONTRIBUTING.md` and `REVIEWING.md` be one file everywhere and
+still answer for the tree they are in. The marker lives in the file
+rather than in a list here: a second list is one more thing to keep in
+step with the first, and the file is the thing being compared anyway.
+"""
+
+
 def verbatim() -> list[str]:
-    """Read the whole-file half of section 14.
+    """Read both halves of section 14 that name a whole path.
 
     :returns: the paths, relative to a repository root.
     """
     return subjects(
         ROOT / "README.md",
         "**The same file in every repository**",
-        "**Verbatim in part**",
+        "**Decided per repository**",
     )
+
+
+def shared(path: Path) -> bytes:
+    """Read the half of a copy that every repository is meant to share.
+
+    :param path: the file to read.
+    :returns: everything before the marker, or the whole file without one.
+    """
+    body = path.read_bytes()
+    cut = body.find(MARKER)
+    return body if cut < 0 else body[:cut]
 
 
 def test_section_14_names_files(trees: dict[str, Path]) -> None:
@@ -61,7 +83,7 @@ def test_every_copy_of_a_verbatim_file_is_the_same_copy(
         for repository, root in sorted(trees.items()):
             here = root / path
             if here.is_file():
-                copies.setdefault(here.read_bytes(), []).append(repository)
+                copies.setdefault(shared(here), []).append(repository)
         if len(copies) > 1:
             drifted[path] = [", ".join(holders) for holders in copies.values()]
     assert not drifted, f"verbatim files that differ between trees: {drifted}"

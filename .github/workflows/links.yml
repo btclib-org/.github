@@ -114,7 +114,7 @@ jobs:
             --cache
             --max-cache-age 1d
             --accept 100..=103,200..=299,429
-            "*.md" "profile/*.md"
+            "*.md" "profile/*.md" ".claude/commands/*.md"
           # fail the job rather than only summarizing: a green run that
           # found dead links is the state this workflow exists to end
           fail: true

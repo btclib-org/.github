@@ -109,9 +109,11 @@ uv run pre-commit run --all-files    # the whole lint gate
 ```
 
 Every documented command is a `uv run` command, and every workflow step
-runs the same command verbatim. `CONTRIBUTING.md` carries each CI job's
-command literally, so a workflow change that does not update it makes
-that file wrong rather than merely stale.
+runs the same command verbatim. `CONTRIBUTING.md`'s last section carries
+the commands a developer runs, so a workflow change that leaves one of
+them behind makes that file wrong rather than merely stale. A workflow
+whose command lives only in the workflow says so where it is written,
+rather than being copied into prose that nothing re-runs.
 
 **`--locked`, never `--frozen`.** `--locked` fails when `uv.lock` and
 `pyproject.toml` disagree; `--frozen` takes the lock as it finds it and
@@ -186,13 +188,13 @@ which, and on what:
 | `AUTHORS.md` | a pointer to the contributor graph, not a list |
 | `CODE_OF_CONDUCT.md` | a pointer to the PSF code of conduct |
 | `SECURITY.md` | reporting, supported versions, known limitations |
-| `CONTRIBUTING.md` | how to work: commands, conventions, pull requests |
+| `CONTRIBUTING.md` | how to work, this tree's commands in its last section |
 | `REVIEWING.md` | the standard a review is written against |
 | `REPOSITORY.md` | the settings that live outside the tree |
 | `RELEASING.md` | how a release is cut, and how one is recovered |
 | `CHANGELOG.md` | every user-visible change, by group |
 | `RELEASE_NOTES.md` | what a user has to *act* on, on top of it |
-| `CLAUDE.md` | what an agent needs and cannot read off the tree |
+| `CLAUDE.md` | what a session needs and no human document holds |
 | `MANIFEST.in` | what the sdist carries, where setuptools reads it |
 | `pyproject.toml` | the project and every tool's configuration |
 | `uv.lock` | the pinned resolution |
@@ -842,6 +844,11 @@ weighed against.
   same wrong number merge without a conflict.
 - **One fact in one place.** Two files stating the same thing become two
   files disagreeing about it; the second points at the first.
+- **A reference to another repository is qualified.** A bare `#123`
+  resolves inside the repository it is written in, so a cross-repository
+  reference is `owner/repo#123` or it points somewhere else in silence.
+  The one exemption is mechanical: a pull request's closing keyword is
+  read by the forge, so it takes the forge's own form.
 - **No history in the prose.** Comments say why the code is as it is, in
   the present tense. History has two files of its own.
 - **80 columns everywhere prose lives** — markdown by MD013, tables
@@ -1144,9 +1151,13 @@ answering to nothing.
 
 A pull request needs an approving review from somebody other than its
 author; GitHub refuses a self-approval, which is why the record of a
-review is a comment whose last line is `ACK <sha>` or
-`CHANGES REQUESTED <sha>`, naming a sha because an ack belongs to a tree
-and not to a branch.
+review is a comment rather than a forge approval.
+
+**What a landing reads is the ack of record**: a comment whose last line
+is `ACK <sha>` or `CHANGES REQUESTED <sha>`, naming a sha because an ack
+belongs to a tree and not to a branch. A review that delivers no verdict
+is a reading and not an unfinished review; `REVIEWING.md` states that
+distinction, and why, for whoever reviews.
 
 **The ack of record is `claude-review.yml`'s**, and an author's own is
 not one. A comment from the account that opened the pull request is a
@@ -1474,8 +1485,7 @@ environment whatever the hook does. It reads the project's instead, which
 mirror, and the version equality section 4 asks for is what makes the two
 the same mypy rather than merely both present.
 
-`CLAUDE.md` carries what an agent cannot read off the tree: where the
-gates are, which local run is the gate and which is only a report, the
+`CLAUDE.md` carries what an agent cannot read off the tree — the
 non-obvious failure modes, and the rule that a session never works in the
 maintainer's own checkout — a worktree per session, and never `git stash`
 in one, `refs/stash` being shared across worktrees. `.claude/` is tracked
@@ -1488,27 +1498,66 @@ configuration move between them, and a paragraph that lints in one has to
 lint in the others. Each bullet's subject is the path, which is what lets
 `tests/verbatim_test.py` of this repository compare the copies it finds:
 
-- `.markdownlint.jsonc` — no rule disabled; what it names is a style
-  where markdownlint's default is "consistent", which asks each file to
-  agree with itself and therefore lets two files disagree.
-- `.yamllint.yaml` — two rules of the default set enabled, `line-length`
-  at 100 and `document-start`. The rest report a convention rather than a
-  defect, each with the reason it stays off.
-- `.taplo.toml` — four-space indent, `reorder_keys` left false because
-  the order of a table is an argument, `array_auto_collapse` false so
-  that adding an entry is a one-line diff.
-- `COPYRIGHT` — one line naming the holder, and what every header in
-  every tree points at instead of repeating it.
-- `AUTHORS.md` — who has contributed, kept for the organization rather
-  than per package, a contributor to one being a contributor.
-- `CODE_OF_CONDUCT.md` — where a repository has none GitHub falls back
-  to this one's, so a repository that does carry its own carries the
-  same one or advertises a second policy.
+- `.markdownlint.jsonc` — owed by every repository; no rule disabled.
+  What it names is a style where markdownlint's default is "consistent",
+  which asks each file to agree with itself and therefore lets two files
+  disagree.
+- `.yamllint.yaml` — owed by every repository; two rules of the default
+  set enabled, `line-length` at 100 and `document-start`. The rest report
+  a convention rather than a defect, each with the reason it stays off.
+- `.taplo.toml` — owed by every repository that holds a `toml`;
+  four-space indent, `reorder_keys` left false because the order of a
+  table is an argument, `array_auto_collapse` false so that adding an
+  entry is a one-line diff.
+- `COPYRIGHT` — owed by every repository; one line naming the holder, and
+  what every header in every tree points at instead of repeating it.
+- `CODE_OF_CONDUCT.md` — owed by every repository. Where one carries
+  none GitHub falls back to this repository's copy, so a repository that
+  does carry its own carries the same one or the organization advertises
+  two policies.
+- `LICENSE` — owed by every repository: MIT, the holder named and no year
+  range. A range is a line nobody updates, and `COPYRIGHT` states the
+  holder without one, so the two would disagree the first January nobody
+  remembered.
+- `.claude/commands/review.md` — owed wherever `REVIEWING.md` is: it is
+  the invocation and not a second copy of the standard, and it stays a
+  file of its own rather than folding into `CLAUDE.md`, which is read by
+  every session including the one that wrote the diff.
 
 **Verbatim in part**, the file around it being the repository's own and
 so nothing a comparison can do: the `ci:` block of
 `.pre-commit-config.yaml`, the mypy strictness block, the ruff width and
 complexity settings, the pytest strictness flags, and `fail_under = 100`.
+
+Whole files are here too, and these say in themselves where the
+comparison stops:
+
+- `CONTRIBUTING.md` — owed by every repository, and the same file in each
+  **up to `## This repository in particular`**. Under that heading are
+  the commands and the gates of that tree, because a human should not
+  open an agent's file to learn how to run one — which is what holding
+  them in `CLAUDE.md` asked.
+- `REVIEWING.md` — owed by every repository this file governs, and the
+  same file in each up to the same heading, a review that means one thing
+  in one tree and another in the next being no standard. Under it is what
+  a review of that tree checks beyond the generic.
+
+`tests/verbatim_test.py` compares what precedes that heading where a file
+carries one, and the whole file where it does not — so the marker is the
+declaration, and there is no second list of exceptions to keep in step.
+
+`AUTHORS.md` is owed by every repository and differs in two ways that
+are the repository's own. It points at **that repository's** contributor
+graph: a single shared pointer would be accurate only while one graph
+stays a superset of the others, and would leave the first person to
+contribute somewhere else uncredited in silence. And a tree that vendors
+somebody else's work attributes it here, which is what the file is for —
+`btclib-secp256k1` says that the vendored libsecp256k1 is not its work,
+carries its own licence and its own authors, and is only ever read from.
+
+It is named in prose and not as a bullet deliberately: a file meant to
+differ per repository can never satisfy a byte comparison, so listing it
+above would buy an assert with no state in which it closes.
 
 A per-file exception belongs in that file's own
 `markdownlint-configure-file` comment, not in the shared config read by
