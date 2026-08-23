@@ -1731,9 +1731,8 @@ gh api orgs/<org>/dependabot/secrets \
 
 The first answers with the name or with nothing, and its exit code is the
 answer: `--silent` sends a 404 to stderr, where `--jq .name` puts its
-*body* on stdout — a JSON document in a column of filenames, which is
-how a repository without the workflow survived a sweep that should have
-named it. Section 15 has the sweep.
+*body* on stdout — a JSON document in a column of filenames. Section 15
+has the sweep.
 
 The token is an **organization** secret at `visibility=all`, so a
 repository adopting the workflow configures nothing for it. That is worth
