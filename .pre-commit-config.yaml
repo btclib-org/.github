@@ -51,6 +51,12 @@ repos:
       - id: check-vcs-permalinks
       - id: detect-private-key
       - id: check-yaml
+      # the toml here is read by taplo every run, but a format is not a
+      # parse: taplo rewrites what it can read and says nothing the gate
+      # hears about what it cannot, and uv refusing pyproject.toml is the
+      # next thing that would, at the point where uv was being run for
+      # another reason. Section 4 puts the question in the gate
+      - id: check-toml
       - id: check-added-large-files
       # there are none, and a submodule is the one dependency that would
       # be pinned by nothing here
@@ -122,6 +128,30 @@ repos:
     hooks:
       - id: taplo-format
         name: taplo (toml, in place fixes)
+  # the width of a toml comment, which taplo above does not settle: it
+  # aligns a comment that trails a value and rewraps none. Section 3 names
+  # this hook as what holds pyproject.toml's comments to 80 columns, and
+  # until here this tree was at the width by hand, which is the case the
+  # section does not describe. A trailing unbreakable link is exempt, the
+  # pattern asking for whitespace after the eightieth column
+  - repo: local
+    hooks:
+      - id: toml-comment-width
+        name: toml comment width (80 columns, unbreakable links exempt)
+        language: pygrep
+        entry: '^(?=[ \t]*#).{80}\S*[ \t]'
+        files: \.toml$
+      # a decoded child process names its encoding. text=True decodes
+      # with the locale's, which is the defect ruff's unspecified-encoding
+      # catches one layer in and no linter here has an opinion on at this
+      # keyword. What this suite runs is git and gh, and every call here
+      # that decodes an answer passes encoding="utf-8" already; the hook
+      # is what refuses the first that does not
+      - id: decoded-subprocess-encoding
+        name: a decoded subprocess names its encoding, not text=True
+        language: pygrep
+        entry: '\b(text|universal_newlines)=True'
+        files: \.py$
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.3
     hooks:

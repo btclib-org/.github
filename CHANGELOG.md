@@ -35,6 +35,18 @@ audit has no revision to compare against.
   to go or for the command that re-derives it to take its place, and
   for a comment or a document that tells what the code used to be to
   stop — section 9's rules, named where the reviewer reads them.
+### This tree answers the rows the suite held against it
+
+- **The gate runs `check-toml`, `toml-comment-width` and
+  `decoded-subprocess-encoding`.** Section 4 lists the first among the
+  syntax hooks and the other two among the local ones, section 3 names
+  `toml-comment-width` as what holds a `pyproject.toml`'s comments to 80
+  columns, and `.pre-commit-config.yaml` here ran none of the three:
+  taplo formatted the toml without parsing it for the gate, the comment
+  width was kept by hand, and the suite's own subprocess calls named
+  their encoding with nothing refusing the first that would not. The
+  cells `tests/hooks_test.py` reported on this repository against issues
+  #153 and #134 go from the backlog.
 
 ### Section 15's audit runs as the suite, one row per repository
 

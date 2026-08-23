@@ -215,13 +215,12 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         134,
         "test_the_local_hooks_run",
         (
-            ".github",
             "bbt",
             "bitcoin-core-rpc",
             "btclib-secp256k1",
         ),
     ),
-    (153, "test_the_syntax_hooks_run", (".github", "portanode")),
+    (153, "test_the_syntax_hooks_run", ("portanode",)),
 )
 """What the tracker already knows, read by `conftest.py` at collection."""
 
