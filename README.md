@@ -500,6 +500,19 @@ their reasoning needs more room than a hook argument has.
   what its sdist carries and says that instead. A constant copied from
   another project is a requirement the build does not use.
 
+    **`license-files` names `LICENSE` and `AUTHORS.md`, and nothing
+    else**, in a file that declares a build backend: where nothing is
+    built the key would name files into an archive that does not exist.
+    The MIT notice names *The btclib developers*, and `AUTHORS.md` is
+    where the archive says the members of that collective are listed —
+    section 14 has what the file is, the vendored attribution it carries
+    included, and why `COPYRIGHT` is not named beside it. The
+    alternative is `LICENSE` alone: what it saves is shipping a file
+    whose text is a pointer to github.com, which a reader who has the
+    archive and not the site cannot follow, and what it costs is an
+    archive that names the collective and never says where its members
+    are listed.
+
     **Nothing local refuses the classifier beside the expression**,
     which is why this is a rule rather than something a build catches.
     One file carrying both, built under each backend — the probe and

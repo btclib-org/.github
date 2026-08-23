@@ -160,9 +160,9 @@ def test_the_licence_is_an_expression_with_its_files(
     A tree declaring the deprecated table, or no key at all, passes
     `classifiers_test.py` -- which reads `license` to refuse the
     classifier beside an expression and so asks nothing of a tree that
-    has none -- and is refused here. What the list may name is section
-    3's question rather than this one's, btclib-org/.github#200, so what
-    is asked of it here is that it is declared.
+    has none -- and is refused here. What the list holds is section 3's
+    rule; this asks that the key is declared, and asserting the names is
+    what btclib-org/btclib-node#235 has to be closed for.
 
     :param repository: the repository asked about.
     :param pyprojects: the parsed files.
