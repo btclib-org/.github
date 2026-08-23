@@ -321,8 +321,12 @@ files come with it.
 ### Root files
 
 Each is one fact in one place, and the last column is which tiers owe
-the row. The paragraph under the table is the reason where a row is not
-every tier's:
+the row. Where a row is not every tier's, the reason is beside whatever
+decides the tier — `SECURITY.md`'s under the table, the two release
+documents' in the paragraph above that keeps them out of a tier-2 tree,
+and `pyproject.toml`'s and `uv.lock`'s in the measurement this section
+opens with, a tree with no `pyproject.toml` being no Python project and
+having nothing to lock:
 
 | file | what it is | tiers |
 | --- | --- | --- |
