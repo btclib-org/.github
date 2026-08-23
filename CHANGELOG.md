@@ -1,3 +1,9 @@
+<!-- markdownlint-disable MD022 MD032 -->
+<!-- This file is merge=union, so a rebase joins two sections and drops
+     the blank line between them without a conflict: the rule is off
+     here for the duration of btclib-org/.github#33, and goes back on
+     when that queue is empty. btclib-org/.github#138 is the record. -->
+
 # Changelog
 
 What changed in the standard, and why. Nothing here is released — this
