@@ -13,6 +13,21 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The tree's own comments say what the rule is, in the present tense
+
+- **Comments stop telling the tree's history** — issue #167.
+  `.github/dependabot.yml`, `.github/workflows/links.yml`,
+  `.pre-commit-config.yaml` and `tests/__init__.py` each carried a clause
+  about what this tree used to be, which stays grammatical after it stops
+  being true. Section 9's *No history in the prose* puts the
+  before in this file, and the present-tense remainder of each comment
+  carries the reason on its own.
+- **The reason beside `check-toml` names the case the hook catches** —
+  issue #166. It said taplo says nothing about what it cannot read: what
+  taplo cannot read fails `taplo-format`, and what `check-toml` adds is
+  the other class, a key or a table declared twice, which taplo formats
+  and passes.
+
 ### Section 1's groups, section 6's error codes, section 11's ecosystems
 
 - **`build` and `check` are two rows, and `bindings` is a third.** The
@@ -67,7 +82,7 @@ audit has no revision to compare against.
   syntax hooks and the other two among the local ones, section 3 names
   `toml-comment-width` as what holds a `pyproject.toml`'s comments to 80
   columns, and `.pre-commit-config.yaml` here ran none of the three:
-  taplo formatted the toml without parsing it for the gate, the comment
+  taplo formatted the toml and passed a key declared twice, the comment
   width was kept by hand, and the suite's own subprocess calls named
   their encoding with nothing refusing the first that would not. The
   cells `tests/hooks_test.py` reported on this repository against issues

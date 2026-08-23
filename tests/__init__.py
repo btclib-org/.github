@@ -32,8 +32,8 @@ The shared code is here rather than in modules of its own, for the
 reason section 7 gives: `name-tests-test` runs at its default, so every
 Python file under `tests/` is a test file but the two basenames the hook
 exempts, and a helper named any other way is either a test pytest never
-collects or shared code in the wrong file. What is shared was modules
-once, and is these parts:
+collects or shared code in the wrong file. What is shared is these
+parts:
 
 - **the organization, and how this suite asks GitHub about it** --
   `ORG`, `SELF`, `ROOT`, the two `gh` callers, `by_hand` and `tracked`;
@@ -238,12 +238,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         165,
         "test_enable_error_code_is_section_6_s_list",
-        (
-            "bbt",
-            "bitcoin-core-rpc",
-            "btclib-benchmarks",
-            "btclib-secp256k1",
-        ),
+        ("bbt",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection."""

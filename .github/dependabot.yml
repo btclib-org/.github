@@ -4,9 +4,9 @@
 # ecosystem, and the `ci:` block of .pre-commit-config.yaml has
 # pre-commit.ci bumping them weekly instead.
 #
-# This tree publishes nothing and is mostly prose, which is why the file
-# was not here: section 2's layout lists it for a repository that ships
-# a package. But `.github/` is every tier's and holds what the sections
+# Section 2's layout lists this file for a repository that ships a
+# package, and this tree publishes nothing and is mostly prose. But
+# `.github/` is every tier's and holds what the sections
 # the tier binds ask of it, section 11 names `github-actions` and `uv`
 # among its ecosystems, and this tree has both a `uv.lock` and actions
 # pinned to a commit SHA -- a pin nothing else moves.
