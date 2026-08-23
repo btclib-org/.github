@@ -1945,9 +1945,10 @@ own docstring, and there is no second copy of the list here to keep in
 step with it. Which repositories a question is asked of is section 2's
 tier, measured off each tree as that section measures it, and a tree the
 tier does not bind is skipped with the reason. Which failures the
-tracker already records is `tests/repositories.py`: those run as strict
-expected failures naming the issue, so a repository that catches up is
-reported until its row is deleted. `alignment.yml` runs it weekly.
+tracker already records is the backlog in `tests/__init__.py`: those run
+as strict expected failures naming the issue, so a repository that
+catches up is reported until its row is deleted. `alignment.yml` runs it
+weekly.
 
 The commands below are the same questions for the tree in front of you,
 and the questions the suite does not ask yet or cannot. Which it asks is

@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import pytest
 
-from .organization import ORG, by_hand, gh_json
+from . import ORG, by_hand, gh_json
 
 pytestmark = pytest.mark.integration
 

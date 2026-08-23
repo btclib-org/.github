@@ -19,7 +19,7 @@ from typing import Any
 
 import pytest
 
-from .organization import by_hand
+from . import by_hand
 from .workflows_test import steps
 
 pytestmark = pytest.mark.integration

@@ -19,8 +19,7 @@ from pathlib import Path
 
 import pytest
 
-from .organization import ORG, by_hand, gh_json
-from .repositories import Tier
+from . import ORG, Tier, by_hand, gh_json
 
 pytestmark = pytest.mark.integration
 

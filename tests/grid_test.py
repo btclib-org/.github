@@ -20,8 +20,7 @@ from typing import Any
 import pytest
 import yaml
 
-from .organization import ROOT
-from .tables import name, rows
+from . import ROOT, name, rows
 
 # cron numbers the weekday from Sunday, and the table spells the day out
 WEEKDAYS = {

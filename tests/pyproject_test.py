@@ -17,9 +17,7 @@ from typing import Any
 
 import pytest
 
-from .organization import ROOT, by_hand
-from .repositories import Tier
-from .tables import name, rows
+from . import ROOT, Tier, by_hand, name, rows
 
 pytestmark = pytest.mark.integration
 

@@ -18,7 +18,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from .organization import by_hand
+from . import by_hand
 
 pytestmark = pytest.mark.integration
 

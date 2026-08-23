@@ -79,6 +79,22 @@ audit has no revision to compare against.
   The cell `tests/dependabot_test.py` reported on this repository
   against issue #107 goes from the backlog.
 
+- **The suite's shared code is `tests/__init__.py`, and the gate runs
+  `name-tests-test` at its default.** `tests/organization.py`,
+  `tests/repositories.py` and `tests/tables.py` were the helpers, and
+  section 7 puts shared test code in the package `__init__.py` because
+  the hook at its default reads every other basename under `tests/` as
+  a test module; this tree ran no such hook, which is how they stayed.
+  They are one module now, imported as `from . import ...`, with
+  each former docstring kept as a part of the package's. What moves
+  with them is every name that pointed at one: the backlog is
+  `BACKLOG` in `tests/__init__.py`, and section 15, `pyproject.toml`'s
+  marker comments and `conftest.py`'s messages say so. The cells
+  `tests/hooks_test.py` and `tests/layout_test.py` reported on this
+  repository against issue #131 go from the backlog; the spelling
+  question that issue holds open is untouched, this tree having been on
+  `*_test.py` throughout.
+
 ### Section 15's audit runs as the suite, one row per repository
 
 - **Section 15's commands are tests, asked of every repository at

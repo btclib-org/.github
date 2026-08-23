@@ -22,7 +22,7 @@ from typing import Any
 
 import pytest
 
-from .organization import ORG, by_hand, gh_json
+from . import ORG, by_hand, gh_json
 
 MAIN = "refs/heads/main"
 TAGS = "refs/tags/v*"

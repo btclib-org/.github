@@ -23,8 +23,7 @@ from typing import Any
 
 import pytest
 
-from .organization import by_hand
-from .repositories import Tier
+from . import Tier, by_hand
 
 pytestmark = pytest.mark.integration
 

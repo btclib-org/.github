@@ -17,8 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from .organization import ROOT
-from .tables import subjects
+from . import ROOT, subjects
 
 pytestmark = pytest.mark.integration
 

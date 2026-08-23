@@ -57,6 +57,14 @@ repos:
       # next thing that would, at the point where uv was being run for
       # another reason. Section 4 puts the question in the gate
       - id: check-toml
+      # at its default, *_test.py, which is section 7's spelling and the
+      # one this suite already used: what the hook adds is the refusal of
+      # a module under tests/ named any other way, a test pytest never
+      # collects or shared code in a file of its own. The helpers this
+      # tree kept in modules of their own are in tests/__init__.py now,
+      # which is where section 7 puts shared test code and one of the
+      # two basenames the hook passes over
+      - id: name-tests-test
       - id: check-added-large-files
       # there are none, and a submodule is the one dependency that would
       # be pinned by nothing here

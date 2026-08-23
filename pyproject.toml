@@ -180,11 +180,11 @@ xfail_strict = true
 markers = [
     "integration: reaches GitHub, opt-in via BTCLIB_INTEGRATION",
     # section 2's tier a per-repository test applies down to, read off
-    # each tree by tests/repositories.py as that section measures it
+    # each tree by tests/__init__.py as that section measures it
     "tier(asked): skip a repository this tier does not bind, with the reason",
-    # the issues a row of tests/repositories.py carries, put on the cell
-    # beside the expected failure so conftest.py can tell a skip on an
-    # excused cell from any other skip
+    # the issues a row of the backlog in tests/__init__.py carries, put
+    # on the cell beside the expected failure so conftest.py can tell a
+    # skip on an excused cell from any other skip
     "backlog(*issues): the cell is a row of the backlog, excused by these issues",
 ]
 filterwarnings = ["error"]

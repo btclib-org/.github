@@ -22,7 +22,7 @@ from typing import Any
 
 import pytest
 
-from .organization import ORG, by_hand
+from . import ORG, by_hand
 
 CAP = 20
 """How many topics GitHub keeps. Not a choice of the organization's."""

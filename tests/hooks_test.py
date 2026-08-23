@@ -20,8 +20,7 @@ from typing import Any
 import pytest
 import yaml
 
-from .organization import by_hand, tracked
-from .repositories import Tier
+from . import Tier, by_hand, tracked
 
 pytestmark = pytest.mark.integration
 

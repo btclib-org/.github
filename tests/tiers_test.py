@@ -15,9 +15,7 @@ from __future__ import annotations
 
 import pytest
 
-from .organization import ORG, ROOT, by_hand
-from .repositories import Tier
-from .tables import name, rows
+from . import ORG, ROOT, Tier, by_hand, name, rows
 
 pytestmark = pytest.mark.integration
 
