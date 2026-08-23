@@ -88,15 +88,10 @@ select = [
 ]
 ignore = [
     # __init__ is documented by its class, and a magic method by the data
-    # model it implements: the two pep257 does not ask for, and the same
-    # two every sibling ignores
+    # model it implements: section 5's two exemptions, which pep257
+    # itself does not ask for
     "undocumented-magic-method",
     "undocumented-public-init",
-    # each of these is one half of a pair ruff reports as incompatible,
-    # and the half every sibling drops: a class gets no blank line before
-    # its docstring, and a multi-line summary starts on the first line
-    "incorrect-blank-line-before-class",
-    "multi-line-summary-second-line",
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -129,7 +124,9 @@ max-doc-length = 80
 # runs. At pep257 the family is what that document asks for; unset, it
 # is every rule ruff writes under D, `missing-terminal-punctuation`
 # among them -- a second rule over the end of a summary line, reporting
-# the docstring `missing-trailing-period` has already reported
+# the docstring `missing-trailing-period` has already reported. It is
+# also what settles the pairs ruff calls incompatible, so no entry above
+# names the half it disables
 convention = "pep257"
 
 [tool.ruff.lint.flake8-copyright]

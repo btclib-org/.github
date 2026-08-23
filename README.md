@@ -768,12 +768,18 @@ preview rule then runs only where `extend-select` names it exactly.
 - **Docstrings are gated**: the `D` family with `convention = "pep257"`,
   every public module, class, method and function carrying one.
   `__init__` and the magic methods are the two exemptions pep257 itself
-  does not ask for.
+  does not ask for. The convention is also what settles the pairs ruff
+  calls incompatible, so `ignore` does not name the half it disables:
+  beside a declared convention that entry changes no diagnostic and
+  silences no warning. The warning ruff prints over such a pair appears
+  only where nothing has settled it.
 - **Two widths, and both are enforced**: `ruff-format` reflows code to
   88, and `[tool.ruff.lint.pycodestyle] max-doc-length = 80` holds the
   comments and docstrings — the half of a file the formatter never
   touches — to the width markdown is already held to. A comment ending
-  in a URL is exempt.
+  in a URL is exempt. The key is half the switch: `W505` is the rule that
+  reads it, so a tree leaving `W` out of `select` states a width and
+  enforces none.
 - **`max-complexity = 10`**, ruff's default, with a `# noqa` and a reason
   at each site over it rather than a global bound at the tree's worst.
   `RUF100` then fails the noqa as unused the moment a refactor brings the
