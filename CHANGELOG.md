@@ -69,6 +69,29 @@ audit has no revision to compare against.
   builds none holds no subject for it, which is what section 2 says of
   a rule whose subject a tree does not have.
 
+### Section 5 names the rule behind each of its two ruff keys
+
+- **The width bullet names `W505`** — issue #180. It stated
+  `max-doc-length` as the whole of the second width, and the key
+  configures a rule that has to be selected: a tree may keep the key and
+  leave `W` out, which states a width and enforces none.
+  `test_w_is_selected_with_max_doc_length_at_80` already asks a tree for
+  both halves, and the section now says what that test reads it as.
+- **An `ignore` entry beside a declared convention decides nothing** —
+  issue #178. Measured with the pinned ruff, over a class docstring
+  shaped to trip both pairs: `convention = "pep257"` alone and the same
+  convention beside an `ignore` naming
+  `incorrect-blank-line-before-class` and
+  `multi-line-summary-second-line` report the same diagnostics, and
+  neither prints the incompatibility warning ruff gives where nothing
+  has settled the pair. The section says `ignore` names none of them and
+  this tree's `pyproject.toml` names neither. What that issue records in
+  the other repositories is theirs to answer.
+- **The reason beside the two `D` exemptions stops claiming a sibling.**
+  It said every sibling ignores the same two, and `btclib-secp256k1`
+  ignores neither. The comment names the section that grants the
+  exemptions instead, that being where the reason belongs.
+
 ### The test-file spelling and the public surface each state one rule
 
 - **The test-file spelling is a choice between two patterns pytest
