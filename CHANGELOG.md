@@ -36,6 +36,24 @@ audit has no revision to compare against.
   what makes the omission a gap rather than a saving: the first
   checklist is the sections' own list without the reasoning.
 
+### Section 7's escape clause is stated once and pointed at twice
+
+- **Section 14's *Decided per repository* entry points rather than
+  restates** — issue #194. It gave the criterion — the convention tests
+  follow the conventions that project's prose states — which is section
+  7's clause without the condition that clause now carries, in the place
+  a reader goes to find out what is per-repository. The entry names
+  section 7's terms instead.
+- **Section 15's reading of `tests/README.md` asks section 7 which
+  bullets are owed.** The instruction made a finding out of a bullet the
+  repository's prose states and the declaration does not claim, which no
+  longer reaches a tier-1 tree that neither states the public surface nor
+  claims it — btclib-org/bitcoin-core-rpc#235 is that tree. Owed and not
+  claimed is the finding, and what is owed is section 7's to say.
+- **Section 7 no longer glosses its own clause four lines below it.**
+  The paraphrase carried the same gap; the sentence names the clause and
+  says where it reaches.
+
 ### The test-file spelling and the public surface each state one rule
 
 - **The test-file spelling is a choice between two patterns pytest

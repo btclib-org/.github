@@ -1032,11 +1032,11 @@ itself, and it is forced rather than chosen. The suites do not agree on
 names and are right not to: a package of many modules wants a module per
 bullet, where a package that is one module folds several of these checks
 into the one file that is about it, which is the honest shape for it.
-And this section's own escape clause — a repository needs the ones its
-conventions state — makes an *absent* convention test indistinguishable
-from a convention the repository does not have. A declaration is what
-tells those two apart; a `grep` over `tests/` cannot, which is why the
-audit below reads the declarations.
+And this section's own escape clause, wherever it reaches, makes an
+*absent* convention test indistinguishable from a convention the
+repository does not have. A declaration is what tells those two apart; a
+`grep` over `tests/` cannot, which is why the audit below reads the
+declarations.
 
 **A convention test moves with the code it walks.** These tests walk a
 package: a module carved out into a repository of its own stops being
@@ -2050,10 +2050,9 @@ repository checks about its package contents past section 12's floor —
 the sdist allowlist, and the script a wheel that is not one package tree
 needs — which follows the shape of that project's own distribution and
 is settled by measuring it, not by copying what a sibling does; the
-convention tests, which follow the conventions that project's prose
-states; and the
-`[tool.uv.sources]` table, which exists only while a dependency is not on
-the index and goes the day it is.
+convention tests, which each project chooses on section 7's terms; and
+the `[tool.uv.sources]` table, which exists only while a dependency is
+not on the index and goes the day it is.
 
 ## 15. Auditing a repository against this file
 
@@ -2244,11 +2243,11 @@ their own. Check exit codes, not filtered output.
 
 `tests/README.md` is section 7's answer, and it is the only one of these
 a command cannot compute — that section says why. Read it against
-section 7's list: a bullet the repository's prose states and this file
-does not claim is the finding, and a bullet it claims is answered by the
-test in that repository that asserts the claim. Across the organization
-the same command run in each tree is the matrix, and there is no shorter
-way to it.
+section 7's list and that section's rule for which bullets a repository
+owes: a bullet owed and not claimed is the finding, and a bullet claimed
+is answered by the test in that repository that asserts the claim. Across
+the organization the same command run in each tree is the matrix, and
+there is no shorter way to it.
 
 What the package-content lines have to say: where the wheel is one
 package tree, a `package` naming it, whose absence is section 12's
