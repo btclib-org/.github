@@ -72,6 +72,14 @@ audit has no revision to compare against.
   `--silent` buys and what `--jq .name` would put on stdout instead. The
   pointer is what stays.
 
+### Section 11's `--silent` paragraph ends at the reason
+
+- **The account of one run goes from it** — issue #232. The paragraph
+  gives the mechanism in the present tense — `--silent` sends a 404 to
+  stderr, where `--jq .name` puts its body on stdout, a JSON document in
+  a column of filenames — and then told what that had cost once. The
+  harm is in the clause before it, so the sentence ends there.
+
 ### Section 2 says where it states a rule, and its ceiling is asked
 
 - **The root-files table's opening sends a reader to where each reason
