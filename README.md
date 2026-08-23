@@ -628,14 +628,11 @@ pre-commit.ci does not have — the lint workflow covers it. No
     rule leaves every one of them writable. A prefix refuses all four
     where they are written.
 
-    **A badge hides its destination behind an image, and the first
-    version of this hook could not reach it.** `bitcoin-core-rpc`'s
-    README linking its licence file was cited as the live case for the
-    rule, and that link is `[![license: MIT](…)](./LICENSE)` — a link
-    text written `[^]]*` stops at the `]` closing the alt text, so the
-    scan checked the image `src` and never the badge's own href. The
-    cited evidence was the one destination the rule did not cover, in
-    every repository that carries badges. Link text is therefore
+    **A badge nests a link inside a link**, and
+    `bitcoin-core-rpc`'s `[![license: MIT](…)](./LICENSE)` is the
+    shape: the image is the link text, so a link text written `[^]]*`
+    stops at the `]` closing the alt text and reads the image `src` in
+    place of the badge's own href. Link text is therefore
     `(?:[^]]|\]\([^)]*\))*`, a character that is not `]` or a whole
     `](…)` group, which steps over the image and still checks the `src`
     by backtracking. Measured: a badge href renders exactly what a
@@ -748,10 +745,21 @@ preview rule then runs only where `extend-select` names it exactly.
   `RUF100` then fails the noqa as unused the moment a refactor brings the
   function under the line, so the list can only shrink.
 - **The copyright notice is a ruff rule**, `CPY` with a `notice-rgx`
-  spelling out all three lines of `COPYRIGHT` and anchored with `^`. It
-  replaces the copyright-notice hook, which checked only staged files
-  unless given `--enforce-all` and therefore checked nothing under
-  `--all-files`.
+  that is `COPYRIGHT` transcribed: each line with its regex
+  metacharacters escaped, the lines joined by `\n`, the whole anchored
+  with `^`, so that a source file opens with the file's text and not
+  with a line resembling it. The rule rather than the copyright-notice
+  hook, which checks only staged files unless given `--enforce-all` and
+  so checks nothing under `--all-files`.
+
+    **ruff reads the regex and never the file**, so the transcription is
+    a copy that can drift from its source with every gate green: `CPY`
+    checks the headers against the regex, and nothing in the tree checks
+    the regex against `COPYRIGHT`. `tests/copyright_test.py` of this
+    repository does, deriving the regex from each tree's `COPYRIGHT` and
+    refusing one that is not it byte for byte — one spelling rather than
+    any regex that matches, so that the copies are comparable and a
+    drifted one names its own difference.
 - **`per-file-ignores`** covers `__init__.py` re-exports and the test
   tree's `assert`, non-cryptographic `random` and the pytest-style rules
   a test legitimately trips. The `D` rules are **not** among them: a
@@ -1816,8 +1824,13 @@ lint in the others. Each bullet's subject is the path, which is what lets
   four-space indent, `reorder_keys` left false because the order of a
   table is an argument, `array_auto_collapse` false so that adding an
   entry is a one-line diff.
-- `COPYRIGHT` — owed by every repository; one line naming the holder, and
-  what every header in every tree points at instead of repeating it.
+- `COPYRIGHT` — owed by every repository: the notice every source file
+  opens with, three lines naming the holder and pointing at `LICENSE`,
+  and the source the `notice-rgx` of section 5 is transcribed from. A
+  repository file and not a distributed one, so it is not in
+  `license-files`: `LICENSE` carries the holder for whoever has the
+  archive, and a header's source text is read by the gate and by nobody
+  who installs the package.
 - `LICENSE` — owed by every repository: MIT, the holder named and no year
   range. A range is a line nobody updates, and `COPYRIGHT` states the
   holder without one, so the two would disagree the first January nobody
@@ -1828,9 +1841,17 @@ lint in the others. Each bullet's subject is the path, which is what lets
   every session including the one that wrote the diff.
 
 **Verbatim in part**, the file around it being the repository's own and
-so nothing a comparison can do: the `ci:` block of
+so nothing a comparison by path can do: the `ci:` block of
 `.pre-commit-config.yaml`, the mypy strictness block, the ruff width and
 complexity settings, the pytest strictness flags, and `fail_under = 100`.
+Of the `ci:` block, `autofix_prs`, `autoupdate_commit_msg` and
+`autoupdate_schedule` are the shared part, with the values section 4
+gives; `skip:` is the repository's own, because it names hooks of that
+file that pre-commit.ci cannot run, and a hook the repository does not
+define has no place in it. `tests/verbatim_test.py` compares none of
+these, its subject being a path: what holds a part equal across the
+copies is that each was written from this file, and that a command of
+section 15 greps for it, which none does for the `ci:` block.
 
 Whole files are here too, and these say in themselves where the
 comparison stops:
@@ -1844,6 +1865,13 @@ comparison stops:
   same file in each up to the same heading, a review that means one thing
   in one tree and another in the next being no standard. Under it is what
   a review of that tree checks beyond the generic.
+- `.gitattributes` — owed by every repository: the two `merge=union`
+  entries, the reasoning beside them, and section 9 as where the rule is
+  stated. The attributes a tree needs for files only it carries —
+  `portanode`'s binaries and line endings — go under the same heading,
+  which is a comment to git and the marker to the comparison, so that a
+  rule for one repository's paths is not a copy for every other to drift
+  from.
 
 `tests/verbatim_test.py` compares what precedes that heading where a file
 carries one, and the whole file where it does not — so the marker is the
@@ -2232,8 +2260,8 @@ written before the gate that judges it.
    gate above that runs it. Every silencing `type: ignore` names its
    code.
 1. **ruff** with the widths, the docstring family and `max-complexity`,
-   the copyright rule, which reads `COPYRIGHT` — so that file lands here
-   and not with the root files below — and `FIX`, whose subject is an
+   the copyright rule, transcribed from `COPYRIGHT` — so that file lands
+   here and not with the root files below — and `FIX`, whose subject is an
    empty backlog: it arrives once the markers it refuses, and any
    `TODO.md`, are issues.
 1. **pytest strictness** — `--strict-config`, `--strict-markers`,
