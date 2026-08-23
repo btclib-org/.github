@@ -295,7 +295,7 @@ every tier's:
 
 | file | what it is | tiers |
 | --- | --- | --- |
-| `README.md` | the package's long description and the site homepage | 1, 2, 3 |
+| `README.md` | what the repository is, to whoever arrives at it | 1, 2, 3 |
 | `LICENSE` | MIT, referred to by SPDX from `pyproject.toml` | 1, 2, 3 |
 | `COPYRIGHT` | the three-line notice every source file opens with | 1, 2, 3 |
 | `AUTHORS.md` | a pointer to the contributor graph, not a list | 1, 2, 3 |
