@@ -66,6 +66,19 @@ audit has no revision to compare against.
   too. The cell `tests/pyproject_test.py` reported on this repository
   against issue #119 goes from the backlog.
 
+- **`.github/dependabot.yml` exists, watching `github-actions` and
+  `uv`, and `check-dependabot` validates it.** The layout bullet of
+  section 2 lists the file for a repository that ships a package, and
+  this one ships none; but the section also says `.github/` is every
+  tier's and holds what the sections the tier binds ask of it, and this
+  tree pins actions to commit SHAs and commits a `uv.lock` that nothing
+  moved. Weekly on Thursday with the seven-day cooldown, grouped, as
+  section 11 asks; the file's header says why no sentinel pre-validates
+  what it opens. The gate runs section 4's `check-dependabot` over it,
+  since `check-yaml` alone reads the file as yaml and not as what it is.
+  The cell `tests/dependabot_test.py` reported on this repository
+  against issue #107 goes from the backlog.
+
 ### Section 15's audit runs as the suite, one row per repository
 
 - **Section 15's commands are tests, asked of every repository at

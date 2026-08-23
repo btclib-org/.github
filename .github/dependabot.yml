@@ -1,0 +1,63 @@
+---
+# Two of the three things this repository pins, and the third is
+# somebody else's job: the pre-commit hook revisions have no Dependabot
+# ecosystem, and the `ci:` block of .pre-commit-config.yaml has
+# pre-commit.ci bumping them weekly instead.
+#
+# This tree publishes nothing and is mostly prose, which is why the file
+# was not here: section 2's layout lists it for a repository that ships
+# a package. But `.github/` is every tier's and holds what the sections
+# the tier binds ask of it, section 11 names `github-actions` and `uv`
+# among its ecosystems, and this tree has both a `uv.lock` and actions
+# pinned to a commit SHA -- a pin nothing else moves.
+#
+# Grouped, one pull request per ecosystem: every one of them runs the
+# lint gate, and reading a group is the same reading as one entry plus
+# a diff. Weekly, and no target-branch on either: without one Dependabot
+# opens against the default branch, which is the only branch a change
+# lands on -- and a target-branch naming a branch that is not there is
+# not an error anywhere, it is a repository where nothing is ever
+# proposed. Nothing pre-validates these upgrades -- there is no
+# `deps-latest` sentinel here -- so a Dependabot pull request is the
+# first run that tries one, and what reads it is the same gate a human
+# pull request waits for.
+#
+# The seven-day cooldown is what the interval is really trading against:
+# a compromised release is usually yanked within days, and nothing here
+# is offered before it has been public a week. The interval decides how
+# long after that week the offer comes, not whether it waits at all.
+version: 2
+updates:
+  # every action in .github/workflows is pinned to a commit SHA, and
+  # nothing but this moves one: without it a pin is frozen for good, and
+  # a fix -- or an advisory -- upstream never reaches this repository
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      # Thursday, the day section 10 gives Dependabot across the
+      # organization. Actions move rarely, so a week where none did
+      # opens no pull request at all
+      day: thursday
+    groups:
+      actions:
+        patterns: ["*"]
+    cooldown:
+      default-days: 7
+
+  # uv.lock is committed, and the gate and the suite's workflow install
+  # from it with --locked, while the dependency groups declare no
+  # version: the whole drift of pytest, PyYAML, mypy and the rest lives
+  # in the lock file, and this is the only thing that moves it. The
+  # uv-lock pre-commit hook re-locks what pyproject.toml changed; it
+  # does not upgrade
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+      day: thursday
+    groups:
+      dev-tooling:
+        patterns: ["*"]
+    cooldown:
+      default-days: 7

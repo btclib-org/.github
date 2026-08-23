@@ -128,10 +128,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         107,
         "test_dependabot_watches_only_the_ecosystems_section_11_names",
-        (
-            ".github",
-            "bbt",
-        ),
+        ("bbt",),
     ),
     (
         110,

@@ -152,6 +152,17 @@ repos:
         language: pygrep
         entry: '\b(text|universal_newlines)=True'
         files: \.py$
+  # .github/dependabot.yml is validated by nothing else here: check-yaml
+  # above asks whether it is yaml and nothing reads it as what it is. A
+  # typo in a package-ecosystem or a directory is not an error to GitHub
+  # -- it silently updates nothing, and the evidence is a pull request
+  # that never arrives, which is the one failure a file whose job is to
+  # open them must not have. Section 4's schemas bullet; check-readthedocs
+  # is not beside it, there being no .readthedocs.yaml to read
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.38.0
+    hooks:
+      - id: check-dependabot
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.3
     hooks:
