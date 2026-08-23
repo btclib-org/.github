@@ -1504,7 +1504,9 @@ lint in the others. Each bullet's subject is the path, which is what lets
   disagree.
 - `.yamllint.yaml` — owed by every repository; the default set, extended
   rather than listed, with `line-length` raised to 100 and two rules
-  disabled. Extending is what makes it a rule set at all: yamllint enables
+  disabled, and `document-start` raised from the default's warning to an
+  error because the hook runs no `--strict` and a warning exits 0.
+  Extending is what makes it a rule set at all: yamllint enables
   no rule a configuration does not name, so a file that lists rules and
   extends nothing runs those alone and leaves indentation, trailing
   whitespace and duplicate keys off under a gate that still passes. The two
