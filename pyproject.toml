@@ -141,18 +141,20 @@ CPY = "CPY"
 strict = true
 show_column_numbers = true
 show_error_codes = true
+# section 6's list, the same in every tree of the organization
 enable_error_code = [
     "deprecated",
     "exhaustive-match",
+    "explicit-override",
     "ignore-without-code",
     "mutable-override",
-    "narrowed-type-not-subtype",
     "possibly-undefined",
     "redundant-expr",
     "redundant-self",
     "truthy-bool",
     "truthy-iterable",
     "unimported-reveal",
+    "unused-awaitable",
 ]
 warn_unreachable = true
 # what requires-python says, for the reason a sibling's own comment

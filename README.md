@@ -154,7 +154,9 @@ alone would leave `uv sync` resolving a project without it.
 | `harness` | the test runner and its plugins, nothing else |
 | `test` | `harness` plus whatever the suite delegates to |
 | `lint` | mypy, pre-commit, ruff |
-| `build` | what inspects a distribution before it is published |
+| `bindings` | an optional native dependency that is also an extra |
+| `build` | what builds a distribution, cibuildwheel included |
+| `check` | what inspects a distribution before it is published |
 | `docs` | sphinx and the theme |
 | `mutation` | the mutation runner |
 | `dev` | every group above, and the default of `uv sync` |
@@ -162,8 +164,15 @@ alone would leave `uv sync` resolving a project without it.
 The `harness`/`test` split is what lets a job ask for the suite *without*
 the optional native dependency, since uv's `--no-group` suppresses a
 group that was selected and not one another group includes. A project
-with no such dependency still keeps the two names, so the workflows are
-the same file everywhere.
+with no such dependency keeps the two names or not as its own workflows
+ask: the split is paid for by the tree whose `test.yml` asks for
+`--group harness`.
+
+`build` and `check` are two names because one tree holds both and they
+mean different things there: `--only-group build` compiles wheels,
+`--only-group check` reads them without compiling anything. A tree with
+no build step of its own still names its inspection tools `check`, so
+the command means the same thing everywhere.
 
 Where a package is both an extra and a group, the specifier is written
 twice and a test refuses the day the two disagree.
@@ -505,9 +514,10 @@ pre-commit.ci does not have — the lint workflow covers it. No
   scripts.
 - **submodules** — the rule is *pinned*, not *forbidden*.
   `forbid-submodules` where there are none, a submodule being the one
-  dependency that would sit in neither the lock file nor Dependabot's
-  reach nor an sdist; where one is legitimate, a local hook refusing an
-  unpinned or moved submodule takes its place.
+  dependency that sits in neither the lock file nor an sdist; where one
+  is legitimate, a local hook refusing an unpinned or moved submodule
+  takes its place, and section 11's `gitsubmodule` ecosystem says when
+  upstream moved.
 - **syntax** — `check-yaml`, `check-json`, `check-toml`,
   `pretty-format-json`.
 - **Python shape** — `debug-statements`, `check-docstring-first`,
@@ -782,7 +792,20 @@ warn_unreachable = true
 python_version = "<the requires-python floor>"
 show_column_numbers = true
 show_error_codes = true
-enable_error_code = [...]
+enable_error_code = [
+    "deprecated",
+    "exhaustive-match",
+    "explicit-override",
+    "ignore-without-code",
+    "mutable-override",
+    "possibly-undefined",
+    "redundant-expr",
+    "redundant-self",
+    "truthy-bool",
+    "truthy-iterable",
+    "unimported-reveal",
+    "unused-awaitable",
+]
 ```
 
 **The setting is not narrowed.** Not a lower one while the annotations
@@ -807,14 +830,18 @@ a repository can hold every line above and have nothing that has ever
 type checked it. Which hook runs it, and the shapes it comes in, is
 section 4's, and this points there rather than restating them.
 
-`strict = true` is the floor, not the ceiling: the optional error codes
-strict does not turn on are surveyed one by one and enabled — among them
+`strict = true` is the floor, not the ceiling, and the codes above are
+the ceiling: **the same list in every tree**, not a survey each one
+runs for itself, because a code that finds nothing today is a ratchet —
+what it catches is the line written after the survey, and a tree that
+skipped it finds out later than the others. Among them
 `ignore-without-code`, so a `type: ignore` names the rule it silences and
 a blanket one cannot creep in; `deprecated`, which is the early warning
 `filterwarnings = ["error"]` buys at runtime; and `redundant-expr`,
 `possibly-undefined` and `warn_unreachable`, each of which finds the
 runtime guard whose static type promises more than an untrusted source
-can.
+can. A code mypy enables on its own under the version the lock pins is
+not in the list: naming it states a check the list does not buy.
 
 A site that needs any of this relaxed — a check, never the annotation
 itself — carries its own `# type: ignore[code]`, never a second global
@@ -1554,9 +1581,15 @@ push or a `close`/`reopen`.
 
 ### Dependabot and pre-commit.ci
 
-Three ecosystems: `github-actions`, `uv`, and `bundler` where a site
-Gemfile exists. Pre-commit hook revisions are the fourth and have no
-Dependabot ecosystem — pre-commit.ci updates them weekly instead.
+`github-actions` and `uv` everywhere, and two more where the tree has
+what they watch: `bundler` where a site Gemfile exists, `gitsubmodule`
+where a submodule does. Pre-commit hook revisions have no Dependabot
+ecosystem — pre-commit.ci updates them weekly instead.
+
+`gitsubmodule` follows upstream's *default branch*, so its pull request
+says that upstream moved and is not the bump: a release pins the tagged
+commit by hand. It answers the half the local hook does not — the hook
+refuses an unpinned or moved pointer, and says nothing about upstream.
 
 Each ecosystem groups its updates into one pull request, since every pull
 request runs the whole matrix. Weekly with a seven-day cooldown: a

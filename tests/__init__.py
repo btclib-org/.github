@@ -228,104 +228,23 @@ def names() -> list[str]:
 
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
-    # the issue, the test it is the subject of, and the repositories
-    # whose failure that issue already records. A row here is a finding
-    # somebody has read and filed, not one excused: the test still runs,
-    # and a repository that stops failing -- by passing, or by the run
-    # skipping it, the file it read gone or its tier moved -- is
-    # reported until its name is taken out, which is what closes the
-    # checkbox on the issue. conftest.py is what makes the skip a report
-    (
-        105,
-        "test_the_newest_tag_is_an_object_a_signature_can_sit_on",
-        (
-            "btclib-node",
-            "portanode",
-        ),
-    ),
-    (
-        107,
-        "test_dependabot_watches_only_the_ecosystems_section_11_names",
-        ("bbt",),
-    ),
-    (
-        110,
-        "test_lychee_accepts_every_success_code",
-        (
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-benchmarks",
-            "btclib-node",
-            "btclib-secp256k1",
-        ),
-    ),
-    (
-        111,
-        "test_a_lychee_cache_is_kept_between_runs",
-        (
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-benchmarks",
-            "btclib-node",
-            "btclib-secp256k1",
-            "portanode",
-        ),
-    ),
     (112, "test_the_gate_runs_mypy", ("bbt",)),
-    (119, "test_every_notice_rgx_is_its_copyright_transcribed", ("bitcoin-core-rpc",)),
-    (128, "test_no_step_passes_frozen", ("btclib-secp256k1",)),
-    (
-        129,
-        "test_every_dependency_group_is_a_row_of_section_1",
-        (
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-secp256k1",
-        ),
-    ),
-    (
-        130,
-        "test_the_syntax_hooks_run",
-        (
-            "bbt",
-            "bitcoin-core-rpc",
-            "btclib-benchmarks",
-            "btclib-secp256k1",
-            "portanode",
-        ),
-    ),
-    (
-        131,
-        "test_name_tests_test_runs_at_its_default",
-        (
-            "btclib-node",
-            "btclib-secp256k1",
-        ),
-    ),
+    (131, "test_name_tests_test_runs_at_its_default", ("btclib-node",)),
     (
         131,
         "test_every_test_file_is_named_so_pytest_collects_it",
-        (
-            "btclib-node",
-            "btclib-secp256k1",
-        ),
+        ("btclib-node",),
     ),
     (
-        132,
-        "test_dependabot_watches_only_the_ecosystems_section_11_names",
-        ("btclib-secp256k1",),
-    ),
-    (133, "test_the_project_urls_are_the_seven_section_3_names", ("bitcoin-core-rpc",)),
-    (
-        134,
-        "test_the_local_hooks_run",
+        165,
+        "test_enable_error_code_is_section_6_s_list",
         (
             "bbt",
             "bitcoin-core-rpc",
+            "btclib-benchmarks",
             "btclib-secp256k1",
         ),
     ),
-    (153, "test_the_syntax_hooks_run", ("portanode",)),
 )
 """What the tracker already knows, read by `conftest.py` at collection."""
 
@@ -400,6 +319,39 @@ def sole(document: Path, lines: list[str], text: str) -> int:
         msg = f"{document.name} has {len(found)} lines holding {text!r}"
         raise LookupError(msg)
     return found[0]
+
+
+def fenced(document: Path, opening: str, language: str) -> str:
+    """Read the one fenced block of a language that a section shows.
+
+    A block a section gives as the configuration to copy is what the
+    trees are compared against, so it is read rather than transcribed:
+    a transcription is the copy that goes stale.
+
+    :param document: the markdown file to read.
+    :param opening: a substring of the line the section opens with.
+    :param language: the fence's language, `toml` and the like.
+    :returns: the block's text, the fences excluded.
+    :raises LookupError: if the section does not hold exactly one.
+    """
+    lines = document.read_text(encoding="utf-8").splitlines()
+    fence = f"```{language}"
+    blocks: list[list[str]] = []
+    inside = False
+    for line in lines[sole(document, lines, opening) + 1 :]:
+        if line.startswith("## ") and not inside:
+            break
+        if not inside and line == fence:
+            inside = True
+            blocks.append([])
+        elif inside and line == "```":
+            inside = False
+        elif inside:
+            blocks[-1].append(line)
+    if len(blocks) != 1:
+        msg = f"{document.name} has {len(blocks)} {fence} blocks under {opening!r}"
+        raise LookupError(msg)
+    return "\n".join(blocks[0]) + "\n"
 
 
 def subjects(document: Path, opening: str, closing: str) -> list[str]:

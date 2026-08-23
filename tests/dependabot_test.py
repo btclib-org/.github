@@ -22,8 +22,8 @@ from . import by_hand
 
 pytestmark = pytest.mark.integration
 
-NAMED = {"github-actions", "uv", "bundler"}
-"""Section 11's three, `bundler` where a site Gemfile exists."""
+NAMED = {"github-actions", "uv", "bundler", "gitsubmodule"}
+"""Section 11's ecosystems, the last two conditional on the tree."""
 
 
 def test_dependabot_watches_only_the_ecosystems_section_11_names(

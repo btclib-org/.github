@@ -13,11 +13,12 @@ is the finding whichever side is wrong.
 
 from __future__ import annotations
 
+import tomllib
 from typing import Any
 
 import pytest
 
-from . import ROOT, Tier, by_hand, name, rows
+from . import ROOT, Tier, by_hand, fenced, name, rows
 
 pytestmark = pytest.mark.integration
 
@@ -126,6 +127,42 @@ def test_cpy_is_selected_with_a_notice_rgx(
     assert "CPY" in lint.get("select", []), "CPY is not selected; " + command
     pattern = lint.get("flake8-copyright", {}).get("notice-rgx")
     assert pattern, "CPY is selected with no notice-rgx; " + command
+
+
+def enabled() -> list[str]:
+    """Read the error codes section 6's `[tool.mypy]` block enables.
+
+    :returns: the codes, in the order the section gives them.
+    """
+    block = fenced(ROOT / "README.md", "## 6. The code is typed", "toml")
+    codes = tomllib.loads(block)["tool"]["mypy"]["enable_error_code"]
+    return [str(code) for code in codes]
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_enable_error_code_is_section_6_s_list(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 6: the same optional codes in every tree, and no others.
+
+    A code that finds nothing today is a ratchet on the line written
+    after it, so a tree that skipped one finds out later than the rest;
+    and a code mypy turns on itself states a check the list does not
+    buy. Both directions are the finding.
+
+    :param repository: the repository asked about.
+    :param pyprojects: the parsed files.
+    """
+    mypy = parsed(repository, pyprojects).get("tool", {}).get("mypy", {})
+    declared = sorted(str(code) for code in mypy.get("enable_error_code", []))
+    apart = {
+        "missing": sorted(set(enabled()) - set(declared)),
+        "not section 6's": sorted(set(declared) - set(enabled())),
+    }
+    assert not any(apart.values()), f"enable_error_code is {apart}; " + by_hand(
+        repository, "sed -nE '/^enable_error_code/,/^]/p' pyproject.toml"
+    )
 
 
 @pytest.mark.tier(Tier.PYTHON)

@@ -13,6 +13,31 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 1's groups, section 6's error codes, section 11's ecosystems
+
+- **`build` and `check` are two rows, and `bindings` is a third.** The
+  table said `build` held what inspects a distribution, which is what
+  three trees call `check`, while the one tree holding both names uses
+  `build` for what compiles wheels. Each row now says what its group
+  holds, and the paragraph beside them says why the two names are worth
+  keeping apart — issue #129.
+- **The `harness`/`test` split is paid for by the tree that asks for
+  it.** The section claimed the split kept the workflows the same file
+  everywhere; one tree's workflows name the group.
+- **Section 6 states the optional error codes, and they are the same
+  list in every tree** — issue #165. A code that finds nothing today is
+  a ratchet on the line written after it, and a code mypy turns on
+  itself is not in the list, naming it stating a check the list does
+  not buy. `tests/pyproject_test.py` reads the block as data and asks
+  every tree for exactly it.
+- **`gitsubmodule` is an ecosystem section 11 names**, conditional on
+  the tree having a submodule the way `bundler` is on a site Gemfile,
+  with the limit beside it: Dependabot follows upstream's default
+  branch, so its pull request says upstream moved and the release bump
+  stays by hand. Section 4 stops saying a submodule is beyond
+  Dependabot's reach — the local hook and the ecosystem answer
+  different halves — issue #132.
+
 ### A review reads the prose that stays
 
 - **A suite is run whole, by whoever runs it.** `REVIEWING.md` asked
