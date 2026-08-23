@@ -77,6 +77,48 @@ audit has no revision to compare against.
   version, and not `uv build` under a pinned `requires`, which answers
   for the backend it bundles. Issue #143 has the table.
 
+### Section 2 says which repositories the standard binds, and how far
+
+- **Three tiers, measured by two files.** A repository is Python where
+  it holds a `pyproject.toml` and publishes where it holds
+  `release.yml`; tier 1 is both and owes the whole file, tier 2 is the
+  first alone and owes everything but section 12 and the two release
+  workflows, tier 3 is neither and owes sections 9 and 11 with what
+  they name. The tiers nest, a rule with no subject in a tree asks
+  nothing of it at any tier, and a tier is a floor: `portanode` cuts a
+  signed tag by hand above its tier, and a repository short of its tier
+  is a gap unless the reason is written where a reader meets it. Issue
+  #37 proposed the three.
+
+- **Every repository has a row, and a loop re-derives the table.** The
+  three that publish are tier 1, `btclib-benchmarks`, `btclib-node`,
+  `bbt` and this repository are tier 2, `portanode` is tier 3 — the
+  loop beside the table is what was run, and a new repository is a row
+  in the pull request that creates it, now section 16's first step. The
+  root-files table gained a column saying which tiers owe each row, in
+  place of the prose that named `SECURITY.md` as the one conditional
+  row.
+
+- **A tier-2 repository carries neither `RELEASING.md` nor
+  `RELEASE_NOTES.md`.** A release document in a tree that cuts no
+  release says only that it does not — `bbt`'s and `btclib-node`'s open
+  so — and that is a sentence in `README.md`, not a file; the release
+  notes have nothing to be on top of where no version is cut. The
+  alternative, carrying both ready because a tier-2 repository could
+  release tomorrow, is recorded beside the rule with why it lost: the
+  day a release arrives it arrives with `release.yml`, and the files
+  with it. This reverses what issue #37's body had ticked as decided,
+  and the reason is in section 2 rather than in the issue.
+
+- **This repository keeps the rule it states.** Its `RELEASE_NOTES.md`
+  is gone, its `README.md` says it releases nothing, and issue #120,
+  which asked it for a `RELEASING.md`, is answered by the tier rather
+  than by the file. `SECURITY.md`, which sent a reader to `RELEASING.md`
+  for what a release is in a given tree, now says where a tree that
+  carries none answers instead. `.gitattributes` keeps its
+  `RELEASE_NOTES.md` line: an attribute on a path that is not there is
+  inert, and the file stays the same in every tree.
+
 ### The review check reports the verdict, not that the review ran
 
 - **Green means an ack of the head.** `claude-review.yml`'s job was
