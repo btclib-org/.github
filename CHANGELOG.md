@@ -57,6 +57,21 @@ audit has no revision to compare against.
   `Lint` context put the aggregate down to a matrix, which is the
   reading section 10 no longer carries; the one job it names is the
   context because the workflow has one job.
+### The suite refuses a `License ::` classifier beside the expression
+
+- **`classifiers_test.py` asks the other rule section 3 states about the
+  list** — issue #126. Such a classifier is a current entry of PyPI's
+  list, so the comparison that module already makes passes it, and the
+  build backends this standard keeps put the pair into an archive
+  without refusing it. It reads the parsed `classifiers` and not the
+  file: in this organization the string occurs in a `pyproject.toml`
+  only in the comment explaining the classifier's absence. A failure
+  names the repository and the grep that shows those lines in its
+  checkout.
+- **The expression the classifier duplicates is asked by nothing** —
+  issue #173. A tree declaring the classifier and no `license` string is
+  short of the expression rather than carrying the pair, which is that
+  issue's question and not this test's.
 
 ### The tree's own comments say what the rule is, in the present tense
 
