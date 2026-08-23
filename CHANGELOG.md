@@ -23,6 +23,19 @@ audit has no revision to compare against.
   an index renders is stated where that tier is argued, in the
   support-line paragraph under the same table.
 
+### Section 16's checklists write the editor and agent configuration
+
+- **`.vscode/` and `.claude/` are on both lists** — issue #174. Section
+  2 tracks them, section 13 records that a wrong
+  `mypy-type-checker.importStrategy` is silent both ways, and section 14
+  owes `.claude/commands/review.md` wherever `REVIEWING.md` is; neither
+  checklist named any of them, so a repository worked end to end from
+  section 16 finished without them. The settings file follows the step
+  that chooses the mypy hook, whose branch its value reads, and the
+  review command lands with `REVIEWING.md`. *How to use this file* is
+  what makes the omission a gap rather than a saving: the first
+  checklist is the sections' own list without the reasoning.
+
 ### The test-file spelling and the public surface each state one rule
 
 - **The test-file spelling is a choice between two patterns pytest

@@ -2326,6 +2326,9 @@ independent and the checklist the same for each.
 1. `.pre-commit-config.yaml`, including the mypy hook section 4's
    criterion chooses and the `pinned-rev` guard; `uv run pre-commit run
    --all-files` until clean; generate `.secrets.baseline`.
+1. `.vscode/settings.json` and `.vscode/extensions.json`,
+   `mypy-type-checker.importStrategy` taking section 13's value for the
+   hook the step above chose.
 1. `uv sync`, commit `uv.lock`.
 1. `tests/` with the naming convention, a `conftest.py` carrying the
    selective-run coverage hook, the first convention tests, and the
@@ -2342,10 +2345,11 @@ independent and the checklist the same for each.
    `docs`, `claude-review`, then the periodic ones the project earns.
 1. `.github/dependabot.yml`, `ISSUE_TEMPLATE/`,
    `PULL_REQUEST_TEMPLATE.md`.
-1. `CONTRIBUTING.md`, `REVIEWING.md`, `REPOSITORY.md`, `CHANGELOG.md`,
-   `CLAUDE.md`; and `SECURITY.md`, `RELEASING.md` and `RELEASE_NOTES.md`
-   where the repository publishes, the rows section 2's table marks for
-   tier 1 alone.
+1. `CONTRIBUTING.md`, `REVIEWING.md` with the
+   `.claude/commands/review.md` that invokes it, `REPOSITORY.md`,
+   `CHANGELOG.md`, `CLAUDE.md`; and `SECURITY.md`, `RELEASING.md` and
+   `RELEASE_NOTES.md` where the repository publishes, the rows section
+   2's table marks for tier 1 alone.
 1. GitHub, in this order: default branch `main`; squash-only;
    `delete_branch_on_merge`; the three rulesets; classic protection with
    the required checks bound to the Actions app; the publishing
@@ -2380,6 +2384,8 @@ written before the gate that judges it.
    proposed: section 11 is where the ack of record is that workflow's,
    and the workflow's prompt reads `REVIEWING.md` by name — so a
    repository holding neither has no ack available to it.
+   `.claude/commands/review.md` lands with them, section 14 owing it
+   wherever `REVIEWING.md` is.
    This is not the costliest gap, it is the one every step that lands as
    a pull request waits on, which is every step below that changes the
    tree. The settings applied straight to the repository — section 11's,
@@ -2423,7 +2429,9 @@ written before the gate that judges it.
    lands with them — `.markdownlint.jsonc`, `.yamllint.yaml`,
    `.taplo.toml` — as does `.gitattributes`, whose `merge=union` entries
    wait for the two history files below. Then run it `--all-files`, over
-   everything the steps above added.
+   everything the steps above added. `.vscode/` lands with it, section
+   13's recommendations being the gate's own tools and `importStrategy`
+   following the mypy hook the step below writes.
 1. **mypy `strict = true`** aimed at the `requires-python` floor, with
    the optional error codes surveyed one at a time, and the hook in the
    gate above that runs it. Every silencing `type: ignore` names its
