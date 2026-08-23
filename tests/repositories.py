@@ -114,15 +114,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     # reported until its name is taken out, which is what closes the
     # checkbox on the issue. conftest.py is what makes the skip a report
     (
-        88,
-        "test_main_requires_a_check_and_the_rest_of_classic_protection",
-        (
-            "bbt",
-            "btclib-node",
-            "portanode",
-        ),
-    ),
-    (
         105,
         "test_the_newest_tag_is_an_object_a_signature_can_sit_on",
         (
