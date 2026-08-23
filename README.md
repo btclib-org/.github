@@ -2462,10 +2462,7 @@ done
 ```
 
 Silent where the rule is kept, one line per repository where it is not,
-and `--silent` for the reason the publishing sweep gives: the rule was
-stated and its check printed a 404's body where a name was expected,
-and the one repository that failed it stayed in the column for as long
-as nobody read the JSON.
+and `--silent` for the reason the publishing sweep gives.
 
 The calendar of section 10, across the organization, an audit no single
 tree can answer:

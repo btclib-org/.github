@@ -54,6 +54,15 @@ audit has no revision to compare against.
   scanning switches: a tree brought up to the standard owes it as much
   as a new one.
 
+### Section 15 gives the reason for `--silent` once
+
+- **The `claude-review.yml` sweep points at that reason rather than
+  telling the story of a run** — issue #205. It carried an anecdote, a
+  count of the repositories the check had missed and a past tense, where
+  the publishing sweep two blocks above says in the present what
+  `--silent` buys and what `--jq .name` would put on stdout instead. The
+  pointer is what stays.
+
 ### Section 2 says where it states a rule, and its ceiling is asked
 
 - **The root-files table's opening sends a reader to where each reason
