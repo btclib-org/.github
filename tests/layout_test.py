@@ -37,8 +37,8 @@ def test_every_test_file_is_named_so_pytest_collects_it(
     Every `.py` under `tests/` but the two exempt names, which is the
     hook's own reading of the rule: a helper module goes in the package
     `__init__.py` by section 7's next bullet, so a module named any
-    other way is either a test pytest never collects or shared code in
-    the wrong file.
+    other way is what the hook refuses -- a test spelled some other way,
+    or shared code in the wrong file.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.

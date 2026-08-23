@@ -117,9 +117,11 @@ def test_name_tests_test_runs_at_its_default(
 ) -> None:
     """Sections 4 and 7: `name-tests-test` at its default, `*_test.py`.
 
-    The default is what the hook enforces when given no argument, so an
-    argument selecting another pattern is the same finding as the hook
-    being absent. Asked only of a tree with a `tests/` directory: the
+    The default is what the hook enforces when given no argument, and
+    section 7 makes it the one spelling of the organization rather than
+    the only one pytest collects, so an argument selecting the other
+    collection pattern is a divergence the hook's presence does not
+    answer. Asked only of a tree with a `tests/` directory: the
     hook matches nothing elsewhere, and `check-hooks-apply` would refuse
     it there.
 

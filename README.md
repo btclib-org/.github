@@ -544,8 +544,8 @@ pre-commit.ci does not have — the lint workflow covers it. No
   upstream moved.
 - **syntax** — `check-yaml`, `check-json`, `check-toml`,
   `pretty-format-json`.
-- **Python shape** — `debug-statements`, `check-docstring-first`,
-  `name-tests-test` at its default, `*_test.py`.
+- **Python shape** — `debug-statements`, `check-docstring-first`, and
+  `name-tests-test` at its default, which is section 7's `*_test.py`.
 - **secrets** — `detect-private-key` and `detect-secrets` against a
   committed `.secrets.baseline`. A baseline rather than an exclusion: an
   excluded file is unwatched, where a baseline entry is a finding
@@ -898,9 +898,13 @@ check the same code where no source is conditional on the version.
 ### Layout and naming
 
 - `tests/` mirrors the package, directory for directory.
-- **`*_test.py`**, enforced by `name-tests-test` at its default. A file
-  named so that pytest never collects it is not a red test, it is no
-  test, and nothing but the report's count moves.
+- **`*_test.py`**, enforced by `name-tests-test` at its default. What
+  the hook is for is the file named neither way: pytest's `python_files`
+  collects `test_*.py` and `*_test.py` alike, and a file named outside
+  both is not a red test but no test, nothing but the report's count
+  moving. Between the two, one is the organization's, for
+  `local-link-prefix`'s reason — one spelling is what lets a check
+  downstream key on one pattern — and the hook's default is which.
 - Shared test code lives in a package `__init__.py` — vector loaders,
   helpers — never in a module whose name says "test" and holds none.
 - `tests/_data/` holds vendored vectors, with a `README.md` recording
@@ -988,8 +992,15 @@ convention that drifts; each of these turns one into a red test, and none
 of them carries an exemption list that is allowed to grow:
 
 - **the public surface** — `__all__` is declared by every module and
-  package at every depth, and a census walks the tree rather than listing
-  it, so a new public name fails until it is exported or recorded;
+  package at every depth, a module under a private name excepted as no
+  part of that surface, and a census walks the tree rather than listing
+  it, so a new public name fails until it is exported or recorded. A
+  module declaring none answers `import *` with every name it does not
+  underscore, the ones it imported included, so what a caller may rely
+  on is settled by an import list. Where the package is published this
+  is not a bullet the clause below excuses: `py.typed` says the types
+  are supported, and which names are public is the other half of that
+  sentence;
 - **the copyright header** — `LICENSE`, `__copyright__` and the project
   metadata checked *together*, each having drifted alone before;
 - **the documentation** — every shipped module appears in the sphinx
@@ -1010,22 +1021,22 @@ of them carries an exemption list that is allowed to grow:
 
 A new repository does not need all of these. It needs the ones its own
 conventions state in prose, and the rule that a convention worth stating
-is worth a test.
+is worth a test — the public surface excepted, which a repository
+publishing an importable package has whether its prose states it or not.
 
 **Which of them a repository implements is declared, not inferred.**
 `tests/README.md` names each bullet above that this repository tests and
 the module that tests it, and a test in the same suite asserts that
 declaration is true — the rule one paragraph up, applied to this section
 itself, and it is forced rather than chosen. The suites do not agree on
-names and are right not to: one repository writes a module per bullet,
-another `test_`-prefixes throughout, and a third folds several of these
-checks into the one file that is about its single module, which is the
-honest shape for a package that is one module. And this section's own
-escape clause — a repository needs the ones its conventions state — makes
-an *absent* convention test indistinguishable from a convention the
-repository does not have. A declaration is what tells those two apart; a
-`grep` over `tests/` cannot, which is why the audit below reads the
-declarations.
+names and are right not to: a package of many modules wants a module per
+bullet, where a package that is one module folds several of these checks
+into the one file that is about it, which is the honest shape for it.
+And this section's own escape clause — a repository needs the ones its
+conventions state — makes an *absent* convention test indistinguishable
+from a convention the repository does not have. A declaration is what
+tells those two apart; a `grep` over `tests/` cannot, which is why the
+audit below reads the declarations.
 
 **A convention test moves with the code it walks.** These tests walk a
 package: a module carved out into a repository of its own stops being
