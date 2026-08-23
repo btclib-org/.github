@@ -54,6 +54,31 @@ audit has no revision to compare against.
   scanning switches: a tree brought up to the standard owes it as much
   as a new one.
 
+### Section 2 says where it states a rule, and its ceiling is asked
+
+- **The root-files table's opening sends a reader to where each reason
+  is** — issue #209. It sent them under the table for every row that is
+  not every tier's, and only `SECURITY.md`'s reason is there: the
+  release documents' is the paragraph above that keeps them out of a
+  tier-2 tree, and the two Python files' is the measurement the section
+  opens with, whose consequence the sentence now states — a tree with no
+  `pyproject.toml` is no Python project and has nothing to lock.
+- **`root_files_test.py` reads that paragraph's rule and asks it of a
+  tier-2 tree** — issue #218. The table's column says which tiers *owe*
+  a row and a tier is a floor, so no cell of it forbids a file:
+  `portanode` carries both release documents at tier 3 and contradicts
+  neither statement. The rule is read out of the section by the phrase
+  that opens it and the bold that closes it, in its own paragraph, and a
+  sentence this cannot read is an error rather than a run that asks
+  nothing.
+- **The two statements are asked of each other.** What the sentence
+  keeps out of a tier-2 repository is what the table gives to tier 1
+  alone, so a row moved down is reported as the standard contradicting
+  itself rather than as every tier-2 tree failing at once.
+- **The module says which of its rows are asked for presence twice**,
+  `verbatim_test.py` asking the same of the rows section 14 owes of
+  every repository.
+
 ### The root-files table says what a README is at every tier it binds
 
 - **Section 2's `README.md` row describes the file rather than a
