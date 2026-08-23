@@ -40,6 +40,30 @@ audit has no revision to compare against.
   `__all__` off the checkout rather than importing a package nothing
   here installs. `btclib-secp256k1` is a backlog row against issue #79,
   which stays open for the modules and the census it owes.
+### Who owes a verbatim copy is section 14's to say, and the suite asks
+
+- **Each bullet of section 14 opens with one of two spellings of who
+  owes a copy** — issue #89. The clause was each bullet's own prose, so
+  `tests/verbatim_test.py` could not read it and answered for the copies
+  it found alone: a tree short of a file it owes read like a tree the
+  file does not apply to. `owed by every repository` is asked of every
+  tree by `test_a_repository_carries_the_verbatim_files_owed_of_it`, and
+  `owed where` and its condition are left to the reader.
+- **`subjects` in `tests/__init__.py` answers with each bullet's clause
+  beside its subject**, and refuses a list naming one subject twice,
+  which a mapping would otherwise read as one bullet and drop the other.
+- **The shared half of a copy ends at one newline** — issue #160. The
+  cut is made at a marker opening with a newline of its own, so a copy
+  that leaves a blank line before the marker and one that does not
+  differed by a byte a diff renders as nothing.
+- **The shared `.gitattributes` reasoning says that both `merge=union`
+  lines are in every copy** — issue #157. Section 2 gives
+  `RELEASE_NOTES.md` to a repository that publishes, and the reasoning
+  section 14 makes verbatim spoke of *these two files* to a tree holding
+  one; an attribute on a path the tree does not hold matches nothing,
+  which is what the comment now says. Sweeping the other copies is issue
+  #192, named in `EXPECTED_DRIFT` so that the drift is an expected
+  failure rather than a red row.
 
 ### The new-repository checklist chooses no mypy hook shape
 

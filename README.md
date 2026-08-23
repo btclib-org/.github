@@ -1907,8 +1907,13 @@ beside it, with the same argument as `.vscode/`.
 
 **The same file in every repository**, and deliberately so — prose and
 configuration move between them, and a paragraph that lints in one has to
-lint in the others. Each bullet's subject is the path, which is what lets
-`tests/verbatim_test.py` of this repository compare the copies it finds:
+lint in the others. Each bullet opens with its subject, the path, and
+then with who owes a copy: `owed by every repository`, or `owed where`
+and the condition. The first is what `tests/verbatim_test.py` of this
+repository asks of every tree, so that one short of a copy is a finding
+rather than a tree the comparison passes over; the second is prose, and
+a tree the condition does not reach is absent and correctly so. The
+paths are what that test compares:
 
 - `.markdownlint.jsonc` — owed by every repository; no rule disabled.
   What it names is a style where markdownlint's default is "consistent",
@@ -1925,10 +1930,10 @@ lint in the others. Each bullet's subject is the path, which is what lets
   disabled rules carry the reason beside them, `comments` because dependabot
   writes the spacing it objects to and `truthy` because the `on:` a workflow
   opens with is the spelling GitHub Actions requires.
-- `.taplo.toml` — owed by every repository that holds a `toml`;
-  four-space indent, `reorder_keys` left false because the order of a
-  table is an argument, `array_auto_collapse` false so that adding an
-  entry is a one-line diff.
+- `.taplo.toml` — owed where the tree holds a `toml`; four-space indent,
+  `reorder_keys` left false because the order of a table is an argument,
+  `array_auto_collapse` false so that adding an entry is a one-line
+  diff.
 - `COPYRIGHT` — owed by every repository: the notice every source file
   opens with, three lines naming the holder and pointing at `LICENSE`,
   and the source the `notice-rgx` of section 5 is transcribed from. A
@@ -1940,8 +1945,8 @@ lint in the others. Each bullet's subject is the path, which is what lets
   range. A range is a line nobody updates, and `COPYRIGHT` states the
   holder without one, so the two would disagree the first January nobody
   remembered.
-- `.claude/commands/review.md` — owed wherever `REVIEWING.md` is: it is
-  the invocation and not a second copy of the standard, and it stays a
+- `.claude/commands/review.md` — owed where `REVIEWING.md` is: it is the
+  invocation and not a second copy of the standard, and it stays a
   file of its own rather than folding into `CLAUDE.md`, which is read by
   every session including the one that wrote the diff.
 
@@ -1966,10 +1971,10 @@ comparison stops:
   the commands and the gates of that tree, because a human should not
   open an agent's file to learn how to run one — which is what holding
   them in `CLAUDE.md` asked.
-- `REVIEWING.md` — owed by every repository this file governs, and the
-  same file in each up to the same heading, a review that means one thing
-  in one tree and another in the next being no standard. Under it is what
-  a review of that tree checks beyond the generic.
+- `REVIEWING.md` — owed by every repository, and the same file in each
+  up to the same heading, a review that means one thing in one tree and
+  another in the next being no standard. Under it is what a review of
+  that tree checks beyond the generic.
 - `.gitattributes` — owed by every repository: the two `merge=union`
   entries, the reasoning beside them, and section 9 as where the rule is
   stated. The attributes a tree needs for files only it carries —
@@ -1979,8 +1984,10 @@ comparison stops:
   from.
 
 `tests/verbatim_test.py` compares what precedes that heading where a file
-carries one, and the whole file where it does not — so the marker is the
-declaration, and there is no second list of exceptions to keep in step.
+carries one, and the whole file where it does not, each ending at a
+single newline — so the marker is the declaration, the blank line a copy
+puts before it is a spelling rather than content, and there is no second
+list of exceptions to keep in step.
 
 `AUTHORS.md` is owed by every repository and differs in two ways that
 are the repository's own. It points at **that repository's** contributor
