@@ -298,6 +298,35 @@ audit has no revision to compare against.
   #192, named in `EXPECTED_DRIFT` so that the drift is an expected
   failure rather than a red row.
 
+### Section 4's docstring key, section 12's installer, section 13's mypy
+
+- **`skip-checking-short-docstrings` is decided by the form a docstring's
+  contract takes** — issue #114. The setting was each repository's to set
+  and to say why, which left the reasons beside it answering two
+  different questions. Section 9 asks a docstring for the contract and
+  does not ask for a section, so `false` is the answer where a section is
+  how a tree's docstrings state it and the default is the answer where
+  prose is, pydoclint reading a section and not a sentence. What changing
+  the setting would cost stays with the issues tracking it.
+- **Section 13 says what the mirror branch leaves the editor reading** —
+  issue #82. Under `useBundled` the extension's mypy is not the hook's:
+  it is the version the extension ships rather than the one the `rev`
+  pins, and it has none of the stub packages `additional_dependencies`
+  installs, so an import the hook resolves is unresolved in the editor.
+- **Section 12 asks the sdist gate for `--installer=pip`** — issue #145.
+  `uv build` builds with the copy of the backend bundled in the running
+  uv whenever `build-backend = "uv_build"` — isolation disabled or not,
+  and with no `uv_build` in the environment at all — so the
+  `additional_dependencies` the section asks for decides nothing on
+  `check-sdist`'s default path. Under the pip installer the archive is
+  `build --no-isolation`'s, and a hook environment that does not satisfy
+  `requires` fails the gate rather than warning, so the backend that
+  packs it is one `[build-system]` admits. What that failure does not
+  catch is a `requires` widened past the hook's line, which the older
+  line still satisfies; the section keeps that as the half issue #145
+  leaves open. Section 16's checklist step names the installer beside the
+  inclusion table.
+
 ### Section 9 says what to cut, and what union costs the gate
 
 - **The habits that lengthen prose without adding to it are named where

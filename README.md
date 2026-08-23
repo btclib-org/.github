@@ -638,26 +638,33 @@ pre-commit.ci does not have — the lint workflow covers it. No
   `D` family checks that a docstring *exists*; this checks that it
   describes the parameters and the return the signature declares, which
   is the half that goes wrong silently when a signature changes.
-  `skip-checking-short-docstrings` is **each repository's to set and to
-  say why**, and this is a position rather than an omission. Left at its
-  default, a one-line docstring is taken at its word; set `false`, every
-  docstring owes its parameters and its return whatever its length. The
-  cost of `false` is not the standard's to spend: btclib-org/btclib#1178
-  measured 4404 findings over 111 files there, which is a rewrite of
-  that package's prose and not a lint fix, while
-  btclib-org/btclib-benchmarks#128 argues against it from this file's
-  own rule — a `Returns:` under a one-line summary that already states
-  the return writes the summary a second time, buying conformance with
-  noise. btclib-org/bitcoin-core-rpc#172 holds the question open with
-  its own for-and-against, and under this rule that is where its answer
-  belongs. Where the answer goes is section 3's rule and not a new one:
-  `[tool.pydoclint]` in `pyproject.toml`, which every one of the four
-  already writes explicitly rather than inheriting, and what each owes
-  beside it is the reason. What is *not*
-  offered is `false` for the public API and the default elsewhere:
-  pydoclint has no such split, so it would take two invocations over two
-  file lists plus a rule about which files are public that nothing
-  checks.
+  `skip-checking-short-docstrings` is **each repository's to set, and
+  what decides it is the form a docstring's contract takes there**. Left
+  at its default, a docstring carrying sections is held against the
+  signature and one carrying none is taken at its word, its length making
+  no difference to that; set `false`, a docstring owes an `Args` and a
+  `Returns` section for whatever the signature declares. Section 9 asks a
+  docstring for the contract and does not ask for a section, so the
+  answer is `false` where a section is how that tree's docstrings say
+  what the call takes and returns, and the default where they say it in
+  prose — a paragraph naming each parameter, or a summary that already
+  states the return. pydoclint reads a section and not a sentence, so
+  `false` over prose asks for the same fact a second time, which section
+  9's *One fact in one place* refuses. Prose that leaves a parameter
+  unmentioned is a docstring that does not state the contract, which
+  section 9 asks for whatever this key says, and no value of the key
+  finds it: the default holds nothing against a docstring carrying no
+  section, and `false` reports the prose that names every parameter and
+  the prose that names none alike. What a repository writes beside the
+  key is which of the two its docstrings are; what changing the setting
+  would cost belongs to the issues tracking it — btclib-org/btclib#1178,
+  btclib-org/btclib-benchmarks#128 and btclib-org/bitcoin-core-rpc#172 —
+  cost being a reason to defer a decision rather than one that decides
+  it. Where the answer goes is section 3's rule and not a new one:
+  `[tool.pydoclint]` in `pyproject.toml`. What is *not* offered is
+  `false` for the public API and the default elsewhere: pydoclint has no
+  such split, so it would take two invocations over two file lists plus a
+  rule about which files are public that nothing checks.
 - **types** — a mypy hook, below.
 - **packaging** — `uv-lock`, `pyroma`, and `check-sdist` wherever an
   sdist is built, which is section 12's condition rather than a second
@@ -1998,29 +2005,52 @@ corrected in none of the ones that shipped.
   distribution's metadata — is the escalation a repository takes when its
   archive carries more than the package.
 - **A hook that builds the project builds it with the backend
-  `[build-system]` admits.** `check-sdist` builds the archive and
-  `pyroma` builds the project to read its metadata, both without
-  isolation, pre-commit.ci being unable to create the isolated
-  environment, so the backend each uses is whatever the hook's own
-  environment holds — and `check-sdist`'s manifest installs `uv`
-  unpinned. `uv build` handed a `requires` its
-  own version does not satisfy falls back to the backend it bundles and
-  only warns, so from the day the next minor of uv ships the gate
-  compares against git an archive built by a backend the project
-  declares out of range, and stays green doing it. What has to agree
-  with `requires` is the backend and not the `uv` that drives it, so the
-  hook carries `additional_dependencies` naming the backend at
-  `[build-system]`'s own specifier: the hook's environment then
-  satisfies the declaration by construction, and `build` takes its
-  non-isolated path because the environment already does. Measured on
-  `pyroma`, whose isolated build is a fallback taken only when the
-  environment does not satisfy `requires`, and whose rating was unchanged
-  once it did; btclib-org/.github#145 has the run. Pinning `uv` on the
-  hook was the alternative: it overrides a manifest that already passes
-  the flags the hook needs, and it pins the driver where the declaration
-  is about the backend. A specifier written in two files is still a
-  range that drifts when the ceiling is raised in one of them, and that
-  half the same issue leaves open.
+  `[build-system]` admits**, and what that takes differs between the two
+  hooks, because only one of them builds through PEP 517 at all. Both
+  build without isolation, pre-commit.ci being unable to create the
+  isolated environment.
+
+    `pyroma` reads the metadata through `build`, which takes its
+    non-isolated path exactly where the environment satisfies `requires`
+    and falls back to an isolated build otherwise. So the hook carries
+    `additional_dependencies` naming the backend at `[build-system]`'s
+    own specifier: the environment satisfies the declaration by
+    construction, and the fallback — a virtual environment pre-commit.ci
+    cannot create — is never asked for. btclib-org/.github#145 has the
+    run.
+
+    `check-sdist` drives `uv build`, and that is not PEP 517 for this
+    backend: given `build-backend = "uv_build"` it builds with the copy
+    bundled in the running uv, whether or not isolation is disabled and
+    whether or not the environment holds a `uv_build` at all, and where
+    `requires` excludes that uv it warns and builds anyway. So naming
+    the backend there decides nothing, and what packs the archive the
+    gate compares against git is the hook environment's `uv`, which the
+    manifest installs unpinned. `args: [--inject-junk, --installer=pip]`
+    is what brings the hook under the rule: check-sdist then builds
+    through `build --no-isolation`, which does read the environment, so
+    the backend `additional_dependencies` names is the one that packs
+    the archive. `--inject-junk` is repeated because `args:` replaces
+    the manifest's list rather than adding to it, and uv's own
+    `--force-pep517` is out of reach, check-sdist writing that command
+    line itself.
+
+    **What the failure keeps is the hook environment inside `requires`**,
+    which is the whole of what this bullet asks: `build --no-isolation`
+    refuses an environment that does not satisfy it — `ERROR Missing
+    dependencies` — so the backend that packs the archive is one
+    `[build-system]` admits or there is no archive. It does not keep the
+    two specifiers equal, and nothing does: a specifier written in two
+    files is still a range that drifts when the ceiling is raised in one
+    of them, and a `requires` widened past the hook's line leaves that
+    line satisfying it and green. That half btclib-org/.github#145 leaves
+    open, there being no bot to close it — section 10 has why hook
+    revisions have no Dependabot ecosystem, and what bumps a `rev` leaves
+    an `additional_dependencies` specifier where it is. Pinning `uv` on
+    the hook is the alternative, and it is what the default path would
+    need, the driver being the backend there; it is refused because it
+    leaves even the first half silent, a `uv` pinned outside `requires`
+    warning where the `pip` installer refuses.
 - **The smoke test runs again in the release job, without constraints**,
   after the upload rather than before: installing a dependency executes
   its code, and a compromised one must not reach a `dist/` still to be
@@ -2073,6 +2103,10 @@ from the locked one, and an `enable_error_code` name it does not know is
 dropped with a warning no extension surfaces. With the mirror it is
 `useBundled`, there being no project mypy to point at — `fromEnvironment`
 against a `.venv` without one reports nothing at all rather than failing.
+That branch leaves the editor reading a different mypy from the hook's:
+the bundled one is not the version the `rev` pins either, and it has none
+of the stub packages `additional_dependencies` installs, so an import the
+hook resolves is unresolved there.
 
 The exception is a package that is a **compiled extension**, and it goes
 the other way: the mirror's isolated environment has no built extension,
@@ -2572,8 +2606,8 @@ independent and the checklist the same for each.
    naming the package where the wheel is one package tree, and the page,
    the script and the test where it is not; `check-sdist` wherever an
    sdist is built, reading the inclusion from the table section 3's
-   backend declares it in. A `dist` job that inspects what would be
-   published.
+   backend declares it in and building through the installer section 12
+   names. A `dist` job that inspects what would be published.
 1. Workflows: `test` (with its aggregate and its `changes` job), `lint`,
    `docs`, `claude-review`, then the periodic ones the project earns.
 1. `.github/dependabot.yml`, `ISSUE_TEMPLATE/`,
