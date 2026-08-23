@@ -41,6 +41,22 @@ audit has no revision to compare against.
   failed assertion**, the shape `hooks_test.py` uses for a tree with no
   lint gate: a backlog row excuses an assertion, and a file that is gone
   is not one.
+### An aggregate job answers to a branch rule, not to a matrix
+
+- **Section 10 states one rule for when a workflow needs an aggregate
+  job** — issue #90. Its first sentence asked every matrix workflow for
+  one, a later bullet conditioned it on the workflow's answer becoming
+  required, and a repository adding a `codeql.yml` chose between the two
+  readings in a comment of its own. What the aggregate is for decides
+  it: a branch rule can name only a context a pull request produces, so
+  a workflow triggered by `push` and `schedule` alone has no name a rule
+  could hold, and how many cells it runs changes nothing. The
+  conditional reading goes with the sentence that carried it.
+
+- **`REPOSITORY.md` reads the corrected rule.** Its note beside the
+  `Lint` context put the aggregate down to a matrix, which is the
+  reading section 10 no longer carries; the one job it names is the
+  context because the workflow has one job.
 
 ### The tree's own comments say what the rule is, in the present tense
 
