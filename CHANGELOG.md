@@ -73,6 +73,16 @@ audit has no revision to compare against.
   short of the expression rather than carrying the pair, which is that
   issue's question and not this test's.
 
+### The ack step's comment reads in any tree that carries it
+
+- **`claude-review.yml`'s ack-of-this-head comment cites what every
+  copy has** — issue #151. It cited `README.md`'s section 11, which is
+  this repository's standard rather than the file beside a copy of the
+  workflow, and it names `REVIEWING.md` for where a verdict sits and the
+  btclib-org repository standard for the half `REVIEWING.md` does not
+  state. The commands in it take `{owner}/{repo}` and a placeholder
+  number, so `gh` resolves them against the checkout they are run in.
+
 ### The tree's own comments say what the rule is, in the present tense
 
 - **Two backlog rows are spent and go.** Every tree that runs mypy
