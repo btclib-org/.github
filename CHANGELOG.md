@@ -13,6 +13,70 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 12 states what a publisher owes, in the terms of its backend
+
+- **A published sdist reproduces from its tag, as a property.** Section
+  12 stated the reproducible build as setuptools' two mechanisms —
+  `SOURCE_DATE_EPOCH` from the tagged commit and a normalization step —
+  on a standard whose section 3 keeps no setuptools. It now states what
+  the attestation makes every publisher owe, a rebuild of a released tag
+  giving the bytes the attestation names, and says what the normalizer
+  is in that: not a belt over a backend that already writes fixed member
+  metadata but the step that decides the bytes, since it rewrites every
+  member's mtime from the backend's constant to the commit's date and
+  the digest with it. Issue #140 has the measurement on
+  `bitcoin-core-rpc`, member mtimes `0` before the step and the commit's
+  second after. So every publisher carries the step, and the alternative
+  — each tree weighing whether its backend has made the step inert — is
+  named as the reading under which a migration dropped it. The compiled
+  case is exempted with its reason beside it: `btclib-secp256k1`'s
+  wheels are built by cibuildwheel against a toolchain nothing pins. The
+  variable is exported for what reads it, the normalizer and the bill of
+  materials, and not for the archives.
+
+- **The bill of materials is owed, not presupposed.** The same bullet
+  said the bill of materials was reproducible "for the same reason", of
+  publishers of which one produces a document. It is now a bullet
+  of its own: every publisher attaches one and the attestation signs it,
+  with what makes it reproducible — `SOURCE_DATE_EPOCH` as its timestamp
+  and the distribution files' digests under its serial number — beside
+  the rule, and the two exemptions that were argued weighed in it. Issue
+  #144 is the tracker for the trees that still owe one and is not closed
+  by this.
+
+- **`check-sdist` runs wherever an sdist is built.** Section 12 asked for
+  it only where the inclusion is an include list, on the reasoning that
+  an exclude list's failure is an archive too wide and not silent. That
+  conditional was `check-manifest`'s, which read a setuptools include
+  list and had nothing without one; `check-sdist` compares the archive
+  against what git tracks in both directions and its exit code says
+  which way, so the case the conditional exempted is one it answers,
+  and nothing else in a release path reads the archive's members. The
+  condition leaves sections 4, 12, 15 and 16 together, and the worked
+  answer for `btclib-secp256k1` says what the check costs an exclude-list
+  tree, the `[tool.check-sdist]` table, rather than that the question is
+  not its own.
+
+- **A hook that builds the project builds it with the declared backend.**
+  `check-sdist` and `pyroma` build without isolation, so the backend is
+  the hook environment's, and `uv build` handed a `requires` its own
+  version does not satisfy falls back to the backend it bundles and only
+  warns. Section 12 asks the hook to carry `additional_dependencies`
+  naming the backend at `[build-system]`'s own specifier, which is what
+  has to agree with `requires` — the backend, not the `uv` that drives
+  it — and records pinning `uv` on the hook as the alternative. Issue
+  #145 measured it on `pyroma`; that a specifier written twice is a
+  range that drifts stays open there.
+
+- **Section 3 separates a floor from the boundary it keeps.** The floor's
+  reason named a property that arrives in `0.12.0`, `pyproject.toml.orig`
+  beside the normalized copy in the sdist, for a floor at `0.12.5`. The
+  section now states them as two facts — the boundary, and a floor above
+  it being alignment with the `uv` the gate pins — with the measurement
+  that locates a boundary: the backend's own `build_sdist` hook at each
+  version, and not `uv build` under a pinned `requires`, which answers
+  for the backend it bundles. Issue #143 has the table.
+
 ### The review check reports the verdict, not that the review ran
 
 - **Green means an ack of the head.** `claude-review.yml`'s job was
