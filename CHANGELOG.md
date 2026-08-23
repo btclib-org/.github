@@ -65,6 +65,27 @@ audit has no revision to compare against.
   #192, named in `EXPECTED_DRIFT` so that the drift is an expected
   failure rather than a red row.
 
+### Section 9 says what to cut, and what union costs the gate
+
+- **The habits that lengthen prose without adding to it are named where
+  a reader cuts them** — issue #104. The sentence that only introduces
+  the next one is decoration, and the negative result a comment carries
+  is the rejected alternative and what rejects it rather than a tour of
+  the others, which is where the section's demand for the negative
+  result stops. The copy in the half of `btclib`'s `CONTRIBUTING.md`
+  that is its own is btclib-org/btclib#1300.
+- **Section 9 states `merge=union`'s mechanical price beside its
+  semantic one** — issue #138. Two branches each adding a `###` section
+  under `## Unreleased` produce a file whose second heading sits against
+  the bullet above it, which MD022 and MD032 both refuse. What puts the
+  line back is reading the file after a rebase: the hook reports without
+  fixing, and this file has the two rules off at its head.
+- **A package upstream of another does not name the one downstream** —
+  issue #81. The organization that publishes a package and where it sits
+  in the family are what a consumer chose it for and stay; the prose of
+  each repository upstream of `btclib` is a box of that issue of its own,
+  and it stays open for them.
+
 ### The new-repository checklist chooses no mypy hook shape
 
 - **Section 16's `.pre-commit-config.yaml` step points at section 4's

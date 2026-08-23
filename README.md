@@ -1117,10 +1117,12 @@ fail_under = 100.0
 
 Nothing checks prose the way the suite checks code, so every line of it
 is one a later change can falsify in silence. That is what its length is
-weighed against.
+weighed against, and what lengthens it without adding to it is deleted on
+sight rather than weighed.
 
 - **Tone: neutral, factual, dry.** Explanatory detail is wanted;
-  decoration is not.
+  decoration is not, and the sentence that only introduces the next one
+  is decoration.
 - **A docstring states the contract** — what the call takes, what it
   returns or raises, and the rule the behaviour comes from. Not a
   restatement of the name.
@@ -1128,7 +1130,8 @@ weighed against.
   why the code is as it is, and why *not* the obvious alternative. The
   second half is what stops the next reader from "fixing" a deliberate
   choice, and it is what makes a configuration file reviewable rather
-  than merely readable.
+  than merely readable. The negative result is the rejected alternative
+  and what rejects it, and the tour of the others is not part of it.
 - **Cite the authority.** Where behaviour comes from a standard, name it;
   where the project deviates, say so and say why.
 - **Measure, don't assert.** A number in prose comes from a command, and
@@ -1138,6 +1141,11 @@ weighed against.
   same wrong number merge without a conflict.
 - **One fact in one place.** Two files stating the same thing become two
   files disagreeing about it; the second points at the first.
+- **A package upstream of another does not name the one downstream.**
+  What a consumer of it reads has to stand on its own: the organization
+  that publishes it and where it sits in the family are context, and
+  everything else about a dependent is a cross-reference to a project
+  that reader does not have.
 - **A reference to another repository is qualified.** A bare `#123`
   resolves inside the repository it is written in, so a cross-repository
   reference is `owner/repo#123` or it points somewhere else in silence.
@@ -1163,6 +1171,12 @@ weighed against.
   on rebases included. Its price is that the two files never conflict at
   all, so the *same* entry edited on two branches merges in silence —
   which is the second reason neither file states a count.
+- **Union drops the blank line between two sections it joins.** Two
+  branches each adding a `###` section under `## Unreleased` produce a
+  file whose second heading sits against the bullet above it, which
+  MD022 and MD032 both refuse. Reading the file after a rebase is what
+  puts the line back: the hook reports and does not fix, and where a
+  file disables the two rules at its head the gate says nothing either.
 
 ## 10. Workflows
 
