@@ -122,7 +122,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "portanode",
         ),
     ),
-    (105, "test_a_repository_has_topics", (".github", "bbt", "portanode")),
     (
         105,
         "test_the_newest_tag_is_an_object_a_signature_can_sit_on",
