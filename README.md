@@ -815,7 +815,6 @@ strict = true
 warn_unreachable = true
 python_version = "<the requires-python floor>"
 show_column_numbers = true
-show_error_codes = true
 enable_error_code = [
     "deprecated",
     "exhaustive-match",
@@ -865,7 +864,12 @@ a blanket one cannot creep in; `deprecated`, which is the early warning
 `possibly-undefined` and `warn_unreachable`, each of which finds the
 runtime guard whose static type promises more than an untrusted source
 can. A code mypy enables on its own under the version the lock pins is
-not in the list: naming it states a check the list does not buy.
+not in the list, and a key already at the value the block would give it
+is not in the block: naming either states a check it does not buy.
+`mypy --help` writes the flag that changes a default and gives the
+default direction as its inverse, so a setting reachable only as an
+inverse — `--show-error-codes`, under `--hide-error-codes` — is one
+mypy has already.
 
 A site that needs any of this relaxed — a check, never the annotation
 itself — carries its own `# type: ignore[code]`, never a second global
@@ -874,6 +878,17 @@ exemption.
 **Scope is the package, the tests and `.github/scripts`.** What lives
 under `.github/scripts` imports the package and no test collects it, so
 strict mode is the only thing that reads it between workflow dispatches.
+
+**`docs/source/conf.py` is outside it.** Sphinx is the `docs` group's
+and no shape of section 4's mypy hook installs it, so what that file
+imports is unresolved in the hook's environment, which strict mode
+reports rather than reading as `Any`; and `python_version` is one value
+for the whole table — mypy takes no per-module version — so the file
+would be checked at the floor the library declares and never runs on.
+Every documentation build executes `conf.py`, so a defect in it reaches
+the published site with the gate green: a repository that brings the
+file into scope answers the version question first, and that answer is
+its own.
 
 One run, at the floor. A second pass at the newest interpreter would
 check the same code where no source is conditional on the version.
