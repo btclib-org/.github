@@ -1872,9 +1872,8 @@ corrected in none of the ones that shipped.
   check. It is stated as a property because the mechanisms setuptools
   needed are not what section 3's backends need: `uv_build` ignores
   `SOURCE_DATE_EPOCH` and writes fixed member metadata into both
-  archives, hatchling reads the variable and writes a constant without
-  it, so under either a commit gives one digest whether the variable is
-  exported or not. What "reproduces" still names is the normalization
+  archives, where hatchling reads the variable and writes a constant of
+  its own without it. What "reproduces" still names is the normalization
   step, and it is not a belt over that: `normalize_sdist.py` rewrites
   every member of the sdist from the backend's constant to
   `SOURCE_DATE_EPOCH`, the tagged commit's date, ownership cleared and
@@ -1890,13 +1889,15 @@ corrected in none of the ones that shipped.
   a migration could drop the step as inert is the one this sentence
   exists to refuse. `SOURCE_DATE_EPOCH` itself is exported from the
   tagged commit for what reads it — the normalizer, and the bill of
-  materials below — and not for the archives, which are the same bytes
-  either way. The compiled case stays outside the property:
-  `btclib-secp256k1`'s wheels are built by cibuildwheel against a
-  compiler and a toolchain nothing pins, so there the property is stated
-  of the sdist and not of the wheels. Nothing yet re-derives it on a
-  released tag — the command that rebuilds one and verifies it against
-  the attestation is one a person runs — and that half is
+  materials below — and under `uv_build` for nothing else, its archives
+  being the same bytes either way. Under hatchling the variable reaches
+  the archives too, so exporting it for the bill of materials moves the
+  digests the attestation vouches for. The compiled case stays outside
+  the property: `btclib-secp256k1`'s wheels are built by cibuildwheel
+  against a compiler and a toolchain nothing pins, so there the property
+  is stated of the sdist and not of the wheels. Nothing yet re-derives
+  it on a released tag — the command that rebuilds one and verifies it
+  against the attestation is one a person runs — and that half is
   btclib-org/.github#140's.
 - **A bill of materials is published beside the distribution files**,
   by every publisher, and the attestation signs it with them. One answer

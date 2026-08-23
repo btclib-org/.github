@@ -150,6 +150,22 @@ audit has no revision to compare against.
   against the tree like the other two, and the backlog row that carried
   the disagreement goes with the assertion that made it fail.
 
+### Section 12 says which archives the release variable reaches
+
+- **`SOURCE_DATE_EPOCH` reaches hatchling's archives and not
+  `uv_build`'s** — issue #140. Section 12 stated of both backends that a
+  commit gives one digest whether the variable is exported or not, which
+  is `uv_build`'s answer alone: hatchling writes the exported value into
+  the sdist and the wheel, and a constant of its own where nothing
+  exports it. Measured by building a project under each backend twice,
+  once with the variable unset and once set to an arbitrary second, and
+  comparing the archives' digests and member timestamps.
+- **A publisher on hatchling that exports the variable for its bill of
+  materials moves the digests its attestation vouches for** — issue
+  #144. The document's timestamp is the variable, so a tree gaining the
+  document exports it, and the bullet above it now says what that
+  reaches.
+
 ### The test-file spelling and the public surface each state one rule
 
 - **The test-file spelling is a choice between two patterns pytest
