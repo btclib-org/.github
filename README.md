@@ -220,8 +220,8 @@ naming who supports the work:
 ```markdown
 ---
 
-btclib is actively supported by [DGI](https://dgi.io) and
-[CheckSig](https://checksig.com).
+The btclib organization and its projects are actively supported by
+[DGI](https://dgi.io) and [CheckSig](https://checksig.com).
 ```
 
 Identical everywhere, this repository's own README and the organization
@@ -229,7 +229,10 @@ profile included, and identical on purpose: a reader arriving at any one
 of these repositories should not have to work out whether it is somebody's
 weekend project. Reworded per repository it would be several claims to
 keep true instead of one, and the `links` workflow is what notices if
-either URL stops resolving.
+either URL stops resolving. It is the organization the line names, not
+`btclib`: that is the library's name, and a line carried by a node, a
+benchmark suite and a course would otherwise credit the support to one
+of the things being supported.
 
 Dotfiles: `.pre-commit-config.yaml`, `.python-version`, `.gitattributes`,
 `.gitignore`, `.markdownlint.jsonc`, `.taplo.toml`, `.yamllint.yaml`,
@@ -1988,5 +1991,5 @@ written before the gate that judges it.
 
 ---
 
-btclib is actively supported by [DGI](https://dgi.io) and
-[CheckSig](https://checksig.com).
+The btclib organization and its projects are actively supported by
+[DGI](https://dgi.io) and [CheckSig](https://checksig.com).

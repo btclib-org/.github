@@ -94,5 +94,5 @@ Everything here is MIT licensed.
 
 ---
 
-btclib is actively supported by [DGI](https://dgi.io) and
-[CheckSig](https://checksig.com).
+The btclib organization and its projects are actively supported by
+[DGI](https://dgi.io) and [CheckSig](https://checksig.com).
