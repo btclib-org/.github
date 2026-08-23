@@ -37,6 +37,17 @@ audit has no revision to compare against.
   states the convention or not. The new-repository checklist above it
   leaves the criterion to section 7.
 
+### The `allowed_bots` comment cites a section a port's README has
+
+- **The citation names the standard it means** — issue #184. It ended on
+  `README.md`'s section 11, and the `README.md` beside a copy of this
+  workflow is that repository's own, with no section 11 in it; section 11
+  of the btclib-org repository standard is the same pointer with the
+  repository named, and `CONTRIBUTING.md` carries the link to it in every
+  tree. The clause excusing the input as deciding nothing in this
+  repository goes with it: `.github/dependabot.yml` is in the tree, and
+  the runs it opens are what the input admits.
+
 ### `REPOSITORY.md` says what Dependabot proposes here
 
 - **The Dependabot paragraph describes the file this tree holds** —
