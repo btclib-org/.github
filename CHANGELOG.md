@@ -7,6 +7,40 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The review check reports the verdict, not that the review ran
+
+- **Green means an ack of the head.** `claude-review.yml`'s job was
+  green whether the review acked, refused, or wrote nothing at all, so
+  the row that reports the ack of record reported only that the action
+  had started: the guard the job ended with tests whether an execution
+  file was produced, which is a question about the invocation. A step
+  past it reads the pull request's comments back, and fails on a
+  refusal, on a verdict never written, and on an ack naming a sha the
+  head has moved past. Issue #136 has all three measured, the last of
+  them on two runs of one sha of pull request 139 that concluded success
+  alike, the first having posted nothing and the second the review.
+
+- **The last verdict decides, and the sha is the whole of the
+  condition.** A second reading of the same tree can refuse what an
+  earlier one acked, so it is the newest verdict that is read rather
+  than an ack wherever it sits. It is matched against the head sha and
+  not against the run's own clock: an ack belongs to a tree, so a push
+  turns a stale ack red with nothing to compare times against, and a
+  re-run of an unchanged commit stays green.
+
+- **Section 11 says what a green row means.** It said that a green check
+  was not an ack and that the check and the verdict were independent,
+  which is what the step above makes false. The paragraph that named the
+  guard's blind spot as a failure no copy's comments carried goes with
+  it, that reason now being in this copy's comments.
+
+- **The check still gates nothing.** It is not a required check and its
+  own header says it must not become one; what the colour buys is a
+  reader who sees a refusal in the checks instead of under the fold at
+  the foot of a comment. Requiring it is a decision of its own, and the
+  workflow's copy in every other repository of the organization is
+  where the rule section 11 now states is not yet kept.
+
 ### Section 6 states the typing rule, and asks for the gate that runs it
 
 - **The heading is the rule and the table is what applies it.** Section 6

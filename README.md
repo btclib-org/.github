@@ -1257,11 +1257,12 @@ workflow runs on `opened`, `reopened`, `synchronize` and
 last is how a head that moved after the review gets a fresh one, since
 the ack does not follow the branch.
 
-**A green check is not an ack.** The check says the job ran; the verdict
-is the last line of the comment it wrote, and the two are independent —
-a review that requests changes is a job that succeeded. Read the comment,
-never the tick: green does not mean a review exists either, for the two
-reasons below.
+**A green check is an ack of the head, and nothing weaker.** The job's
+last step reads back what was posted and refuses to report anything
+else: a refusal, a verdict never written, and an ack naming a sha the
+branch has moved past are a red row each. What the row cannot say is
+what the review found, which is the comment's to say and is read
+whatever the colour.
 
 It is deliberately **not a required check**, and its own header says it
 must not become one. Requiring it would make a review a gate to be
@@ -1347,19 +1348,12 @@ the default branch. That is not something to work around — it is the
 honest shape of "no review happened" — so such a pull request lands on
 its gates and on a description saying so.
 
-**Two failures are in no copy's comments**, both of them cases where the
-job is green and a reader takes it for a review:
-
-- **The guard tests the invocation, not the artifact.** It fires when
-  the action produced no execution file, so a run that starts, finishes
-  green and posts no comment at all passes it. What a reader needs to
-  know is whether a review *exists*, which is a question about the pull
-  request's comments and not about the job's outputs.
-- **A review reads more than the sha.** The tree it judges is the
-  commit's; the title and description it judges are fetched separately,
-  so a correction made after the push can be invisible to it — and with
-  no `edited` trigger nothing re-fires, so the finding cannot clear
-  itself except through a further push or a `close`/`reopen`.
+**What is in no copy's comments** is that a review reads more than the
+sha. The tree it judges is the commit's; the title and description it
+judges are fetched separately, so a correction made after the push can
+be invisible to it — and with no `edited` trigger nothing re-fires, so
+the finding cannot clear itself except through a further push or a
+`close`/`reopen`.
 
 ### Tokens, publishing, scanning
 
