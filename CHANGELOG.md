@@ -13,6 +13,17 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The new-repository checklist chooses no mypy hook shape
+
+- **Section 16's `.pre-commit-config.yaml` step points at section 4's
+  criterion** — issue #121. Section 4 states the mypy hook as a
+  trade-off with two right answers and gives what chooses between them,
+  and section 13 keys `mypy-type-checker.importStrategy` off whichever
+  shape a repository took; the step named one of the two, so a
+  repository built from the checklist had the choice made for it by a
+  list that does not say it is choosing. Section 16's normalizing
+  checklist names no shape either.
+
 ### The tree's own comments say what the rule is, in the present tense
 
 - **The backlog is down to what one repository still owes.** Every tree

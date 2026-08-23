@@ -2229,9 +2229,9 @@ independent and the checklist the same for each.
 1. Copy `.markdownlint.jsonc`, `.yamllint.yaml`, `.taplo.toml`,
    `.gitattributes` (with the two `merge=union` entries),
    `.python-version`, `.gitignore`.
-1. `.pre-commit-config.yaml`, including the local mypy hook and the
-   `pinned-rev` guard; `uv run pre-commit run --all-files` until clean;
-   generate `.secrets.baseline`.
+1. `.pre-commit-config.yaml`, including the mypy hook section 4's
+   criterion chooses and the `pinned-rev` guard; `uv run pre-commit run
+   --all-files` until clean; generate `.secrets.baseline`.
 1. `uv sync`, commit `uv.lock`.
 1. `tests/` with the naming convention, a `conftest.py` carrying the
    selective-run coverage hook, the first convention tests, and the
