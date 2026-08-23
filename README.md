@@ -279,6 +279,29 @@ their reasoning needs more room than a hook argument has.
     under a backend nobody checked it against, with no release of this
     project in between. Each bound carries the reason that chose it, and
     PEP 639 below is one such reason.
+
+    A floor and the boundary of the property it keeps are two facts, and
+    the comment states both rather than giving the second's number the
+    first's reason. Under `uv_build` the sdist's own `pyproject.toml`
+    became a normalized copy of the file with the verbatim one kept
+    beside it as `pyproject.toml.orig` in `0.12.0`, and a floor above
+    that is alignment — with the `uv` the gate pins through
+    `uv-pre-commit`, and with the sibling the number was copied from —
+    which is the number to lower first if a resolver ever wants it
+    lower. The boundary is measured by calling the backend's own hook at
+    each version,
+
+    ```shell
+    uv run --no-project --with uv_build==<version> python -c \
+      "import uv_build; print(uv_build.build_sdist('<outdir>'))"
+    ```
+
+    and not with `uv build` under a pinned `requires`: handed a
+    requirement its own version does not satisfy, `uv build` falls back
+    to the backend it bundles and only warns, so it answers for that copy
+    and not for the pin, and the same command on a machine with another
+    `uv` answers differently. btclib-org/.github#143 has the table, the
+    boundary read off the last `0.11` release and the first `0.12`.
 - **The version is declared once**, in `[project]`. The package reads it
   back with `importlib.metadata`; the sphinx `conf.py` parses this file,
   metadata not being available to an uninstalled build. Two declarations
@@ -432,9 +455,9 @@ pre-commit.ci does not have — the lint workflow covers it. No
   file lists plus a rule about which files are public that nothing
   checks.
 - **types** — a mypy hook, below.
-- **packaging** — `uv-lock`, `pyroma`, and `check-sdist` wherever the
-  sdist's inclusion is an include list, which is section 12's condition
-  rather than a second one.
+- **packaging** — `uv-lock`, `pyroma`, and `check-sdist` wherever an
+  sdist is built, which is section 12's condition rather than a second
+  one.
 
 ### The local hooks
 
@@ -1467,10 +1490,58 @@ corrected in none of the ones that shipped.
   release it rehearses.
 - **The tag is signed**, is checked to be an ancestor of `main`, and is
   checked to say what `pyproject.toml` says.
-- **The build is reproducible**: `SOURCE_DATE_EPOCH` from the tagged
-  commit, and a normalization step for the sdist. The bill of materials
-  is reproducible for the same reason, so a rebuild verifies against the
-  attestation exactly as the distribution files do.
+- **A published sdist reproduces from its tag.** The attestation every
+  publisher attaches vouches for bytes, so a release rebuilt from the
+  commit its tag names — by running what the release ran — gives those
+  bytes back, or the attestation vouches for something no rebuild can
+  check. It is stated as a property because the mechanisms setuptools
+  needed are not what section 3's backends need: `uv_build` ignores
+  `SOURCE_DATE_EPOCH` and writes fixed member metadata into both
+  archives, hatchling reads the variable and writes a constant without
+  it, so under either a commit gives one digest whether the variable is
+  exported or not. What "reproduces" still names is the normalization
+  step, and it is not a belt over that: `normalize_sdist.py` rewrites
+  every member of the sdist from the backend's constant to
+  `SOURCE_DATE_EPOCH`, the tagged commit's date, ownership cleared and
+  the gzip header stamped alike, so the digest the attestation signs is
+  the script's output and not the backend's. A publisher with the step
+  and one without are not making one guarantee in two styles: they
+  attest different bytes of the same tree, which is why every publisher
+  carries it rather than each weighing whether its backend has made it
+  redundant. That weighing was the alternative, and it was measured as
+  the wrong question — on `bitcoin-core-rpc` the step moved every
+  member's mtime from `0` to the commit's second and the digest with it,
+  btclib-org/.github#140 having the figures — so the reading under which
+  a migration could drop the step as inert is the one this sentence
+  exists to refuse. `SOURCE_DATE_EPOCH` itself is exported from the
+  tagged commit for what reads it — the normalizer, and the bill of
+  materials below — and not for the archives, which are the same bytes
+  either way. The compiled case stays outside the property:
+  `btclib-secp256k1`'s wheels are built by cibuildwheel against a
+  compiler and a toolchain nothing pins, so there the property is stated
+  of the sdist and not of the wheels. Nothing yet re-derives it on a
+  released tag — the command that rebuilds one and verifies it against
+  the attestation is one a person runs — and that half is
+  btclib-org/.github#140's.
+- **A bill of materials is published beside the distribution files**,
+  by every publisher, and the attestation signs it with them. One answer
+  rather than an answer and its exemptions, for the reason every
+  publisher signs: a consumer reading the organization's releases should
+  not have to learn which of them describes itself and why. What makes
+  it reproducible is the variable the bullet above exports for it: its
+  timestamp is `SOURCE_DATE_EPOCH` and its serial number derives from
+  the distribution files' digests, so a rebuild of a released tag writes
+  the same document and the attestation verifies it exactly as it does
+  the archives. The exemption that carried weight was
+  `btclib-secp256k1`'s — a document naming only
+  `cffi` where the package's content is a C library at a pinned commit
+  invites a reader to trust a silence — and it is an argument about the
+  generator, which btclib-org/btclib#1280 has describe what a
+  distribution contains rather than what it declares, not one against
+  the document. `bitcoin-core-rpc`'s was weaker: `components: []` is
+  true rather than misleading, and a signed statement a consumer can
+  read is not the assertion inside a run that consumer never sees.
+  btclib-org/.github#144 carries the trees that still owe one.
 - **What is published is inspected first** — `twine check --strict`,
   `check-wheel-contents` and `pyroma --min 10` on the files the release
   will publish; then the wheel is installed from an empty directory and
@@ -1495,25 +1566,61 @@ corrected in none of the ones that shipped.
   where the flag applies: that is the same assertion bought with code to
   maintain, and it moves what the `dist` job knows about the artifact
   into a chain that holds only while every link runs.
-- **The sdist's half follows from how its inclusion is declared.** An
-  include list drops a tracked file nobody added to it, silently, and
-  `check-sdist` — which builds the archive and compares it against what
-  git tracks — is what answers that; an exclude-list sdist target ships
-  a new file by default, so its failure is an archive too wide, which is
-  not silent. Which table declares the inclusion is the backend's:
-  `uv_build` reads `[tool.uv.build-backend]` and hatchling
+- **The sdist is diffed against what git tracks**, in both directions,
+  by `check-sdist` in the gate of every repository that builds one. It
+  builds the archive and compares it against the index, and its exit
+  code says which way the two differ: a tracked file the archive dropped,
+  or a member git does not track. The first is an include list's failure
+  — a tracked file nobody added to `source-include` — and it is silent.
+  The second is an exclude list's, and it is not loud either: an archive
+  too wide is noticed by whoever reads the archive, and nothing else in
+  a release path does, `twine check`, `check-wheel-contents` and `pyroma`
+  each reading a distribution's account of itself, so a local build
+  artifact or a vendored tree mid-update reaches the index with nothing
+  asking. The rule used to ask for the check only where the inclusion is
+  an include list, on the reasoning that the other failure is not silent.
+  That conditional was `check-manifest`'s, which read a setuptools
+  include list and had nothing to read without one; the tool that
+  replaced it answers both cases, so the conditional went with the tool,
+  and what the check costs an exclude-list tree is a `[tool.check-sdist]`
+  table naming the tracked files its archive leaves out on purpose. Which
+  table declares the inclusion is the backend's: `uv_build` reads
+  `[tool.uv.build-backend]` and hatchling
   `[tool.hatch.build.targets.sdist]`, neither reads the other's, and a
   table the declared backend does not read is configuration that looks
-  like a rule and governs nothing. So the check follows the backend
-  rather than the table: `check-sdist` keys a plugin on `[build-system]`
-  and reads that backend's own exclusions, which is what leaves
-  `[tool.check-sdist]` holding only what no include pattern added in the
-  first place. Past that, an
+  like a rule and governs nothing. So `check-sdist` keys a plugin on
+  `[build-system]` and reads that backend's own exclusions, which is what
+  leaves `[tool.check-sdist]` holding only what no pattern of the
+  backend's accounts for. Past that, an
   allowlist for the sdist — which members may sit at the archive's root,
   that every member is a regular file or a directory where a tar can
   carry a symlink or a device node, that no directory holds another
   distribution's metadata — is the escalation a repository takes when its
   archive carries more than the package.
+- **A hook that builds the project builds it with the backend
+  `[build-system]` admits.** `check-sdist` builds the archive and
+  `pyroma` builds the project to read its metadata, both without
+  isolation, pre-commit.ci being unable to create the isolated
+  environment, so the backend each uses is whatever the hook's own
+  environment holds — and `check-sdist`'s manifest installs `uv`
+  unpinned. `uv build` handed a `requires` its
+  own version does not satisfy falls back to the backend it bundles and
+  only warns, so from the day the next minor of uv ships the gate
+  compares against git an archive built by a backend the project
+  declares out of range, and stays green doing it. What has to agree
+  with `requires` is the backend and not the `uv` that drives it, so the
+  hook carries `additional_dependencies` naming the backend at
+  `[build-system]`'s own specifier: the hook's environment then
+  satisfies the declaration by construction, and `build` takes its
+  non-isolated path because the environment already does. Measured on
+  `pyroma`, whose isolated build is a fallback taken only when the
+  environment does not satisfy `requires`, and whose rating was unchanged
+  once it did; btclib-org/.github#145 has the run. Pinning `uv` on the
+  hook was the alternative: it overrides a manifest that already passes
+  the flags the hook needs, and it pins the driver where the declaration
+  is about the backend. A specifier written in two files is still a
+  range that drifts when the ceiling is raised in one of them, and that
+  half the same issue leaves open.
 - **The smoke test runs again in the release job, without constraints**,
   after the upload rather than before: installing a dependency executes
   its code, and a compromised one must not reach a `dist/` still to be
@@ -1536,13 +1643,17 @@ compiled artifact at the wheel's own root, so it keeps `ignore = ["W003",
 "W009"]` for the top-level member that is not a mistake, and its script
 asks what the flag has no wording for — which artifact a wheel of that
 tag must carry, and that it is not the zero-byte one a half-finished
-build step leaves behind. Its sdist target is an exclude list, so the
-sdist half is not its question. `btclib` owes that half: the
-`source-include` of its `[tool.uv.build-backend]` is a glob include list
-and its archive carries the suite and the vendored vectors, so
-`check-sdist` runs in its gate, where which files may sit at the root and
-what kind of member the tar holds are questions nothing it runs otherwise
-asks.
+build step leaves behind. Its sdist target is an exclude list, so what
+`check-sdist` costs it is the `[tool.check-sdist]` table naming the
+tracked files its archive leaves out on purpose, and what the check buys
+it is the case the old conditional exempted: a file git does not track
+reaching the index through an archive nothing else reads, the vendored
+library's tree included, since the check lists a submodule's files with
+git's own. `btclib`'s `source-include` is a glob include list and its
+archive carries the suite and the vendored vectors, so what the same
+check catches there is the silent half — a tracked file the list never
+named — and which files may sit at the root and what kind of member the
+tar holds are the questions nothing it runs otherwise asks.
 
 ## 13. Editor and agent configuration
 
@@ -1845,12 +1956,12 @@ What the package-content lines have to say: where the wheel is one
 package tree, a `package` naming it, whose absence is section 12's
 finding; where the wheel is not one, the codes the tool is told to
 ignore, and the page, the script and the test that a repository which
-escalates owes together rather than singly. An include list says the
-sdist half is owed and `check-sdist` in the gate is what answers it; an
-sdist target that only excludes says it is not. A `build-backend` other
+escalates owes together rather than singly. `check-sdist` in the gate
+wherever an sdist is built, and a `[tool.check-sdist]` table beside an
+sdist target that only excludes. A `build-backend` other
 than `uv_build` in a project that compiles nothing is section 3's
-finding, and it is the one to read first: which table holds the include
-list follows from it.
+finding, and it is the one to read first: which table declares the
+inclusion follows from it.
 
 ### Reading the workflow comments
 
@@ -1920,10 +2031,10 @@ independent and the checklist the same for each.
 1. `docs/source` and `.readthedocs.yaml`, built with `-W --keep-going`.
 1. Section 12's package-content floor: `[tool.check-wheel-contents]`
    naming the package where the wheel is one package tree, and the page,
-   the script and the test where it is not; `check-sdist`, only where
-   the sdist's inclusion is declared as an include list, which under
-   section 3's backend is `source-include`. A `dist` job that inspects
-   what would be published.
+   the script and the test where it is not; `check-sdist` wherever an
+   sdist is built, reading the inclusion from the table section 3's
+   backend declares it in. A `dist` job that inspects what would be
+   published.
 1. Workflows: `test` (with its aggregate and its `changes` job), `lint`,
    `docs`, `claude-review`, then the periodic ones the project earns.
 1. `.github/dependabot.yml`, `ISSUE_TEMPLATE/`,
@@ -1993,8 +2104,8 @@ written before the gate that judges it.
    follows from it, then section 12's floor:
    `[tool.check-wheel-contents]` naming the package where the wheel is
    one package tree, the page, the script and the test where it is not,
-   and `check-sdist` against the archive, only where the inclusion is
-   declared as an include list. A backend move is checked by the archive
+   and `check-sdist` against the archive wherever an sdist is built. A
+   backend move is checked by the archive
    it produces and not by the file it edits — an sdist built each way,
    with the member lists compared — since what the outgoing include
    language expressed and the incoming one cannot shows up there and
