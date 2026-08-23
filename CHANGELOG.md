@@ -13,6 +13,34 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The test-file spelling and the public surface each state one rule
+
+- **The test-file spelling is a choice between two patterns pytest
+  collects alike** — issue #131. Sections 4 and 7 named
+  `name-tests-test`'s default as the rule and gave "a file pytest never
+  collects" as the reason, which is the argument against a third
+  spelling and not against `test_*.py`. Section 7 now says what picking
+  one buys — `local-link-prefix`'s reason, one spelling for a check
+  downstream to key on — and section 4 points at it instead of restating
+  it.
+- **Section 7's *Convention tests* paragraph no longer names a
+  `test_`-prefixed suite.** It illustrated the freedom each tree has
+  over its module names with a roll-call of the trees; what it gives
+  now is the shape that decides it, a package of one module folding
+  checks that elsewhere want a module each.
+- **The public surface is not a convention a published package may
+  decline** — issue #79. Section 7's closing clause let a repository out
+  of any bullet its own prose does not state, and a package shipping
+  `py.typed` has a public surface whether its prose states one or not: a
+  module declaring no `__all__` answers `import *` with the names it
+  imported, private modules' included. The bullet gains the condition,
+  and states the exception `btclib`'s own census keeps: a module under a
+  private name is no part of the surface. The clause keeps its shape.
+- **`surface_test.py` asks it of every tree that publishes**, reading
+  `__all__` off the checkout rather than importing a package nothing
+  here installs. `btclib-secp256k1` is a backlog row against issue #79,
+  which stays open for the modules and the census it owes.
+
 ### The new-repository checklist chooses no mypy hook shape
 
 - **Section 16's `.pre-commit-config.yaml` step points at section 4's

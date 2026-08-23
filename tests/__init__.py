@@ -31,9 +31,9 @@ a marker being a label rather than a condition::
 The shared code is here rather than in modules of its own, for the
 reason section 7 gives: `name-tests-test` runs at its default, so every
 Python file under `tests/` is a test file but the two basenames the hook
-exempts, and a helper named any other way is either a test pytest never
-collects or shared code in the wrong file. What is shared is these
-parts:
+exempts, and a helper named any other way is what the hook refuses --
+a test spelled some other way, or shared code in the wrong file. What is
+shared is these parts:
 
 - **the organization, and how this suite asks GitHub about it** --
   `ORG`, `SELF`, `ROOT`, the two `gh` callers, `by_hand` and `tracked`;
@@ -228,6 +228,11 @@ def names() -> list[str]:
 
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    (
+        79,
+        "test_every_published_module_declares_its_public_surface",
+        ("btclib-secp256k1",),
+    ),
     (131, "test_name_tests_test_runs_at_its_default", ("btclib-node",)),
     (
         131,
