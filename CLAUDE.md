@@ -92,12 +92,13 @@ Do not use Fable unless explicitly instructed.
   is what github.com/btclib-org renders. Treat a change to it as a change
   to the organization's front page, because it is one.
 - **The community health files are inherited, not copied.**
-  `CODE_OF_CONDUCT.md` and `PULL_REQUEST_TEMPLATE.md` here are what
-  GitHub shows for a *public* repository of the organization that has
-  none of its own. Nothing is written into those repositories, no hook
-  reads it, and a repository that wants the file gated keeps its own —
-  so a change here changes what a reader sees on repositories nobody is
-  looking at.
+  `CODE_OF_CONDUCT.md`, `SECURITY.md` and `PULL_REQUEST_TEMPLATE.md`
+  here are what GitHub shows for a *public* repository of the
+  organization that has none of its own, and section 2 of `README.md` is
+  what says which repositories have one. The inheritance is display
+  only: nothing is written into those repositories and no hook reads it,
+  so a repository that wants the file gated keeps its own. A change here
+  is a change to what a reader of every repository inheriting it sees.
 
 ## Conventions to match
 
