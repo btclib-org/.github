@@ -98,6 +98,23 @@ audit has no revision to compare against.
   owe a pull request adding the line.
 - **This repository's `README.md` ends without the line.** It publishes
   nothing, so `profile/README.md` carries the organization's only copy.
+### Section 6's mypy block names only what it buys
+
+- **`show_error_codes` goes from the sample** — issue #170. mypy has no
+  such option: `Options` carries `hide_error_codes`, `False` before a
+  config file is read, and the key reaches it through the config
+  parser's `show_`/`hide_` inversion, so a tree copying the block gets a
+  line that reads as a check and is none. The rule stated beside the
+  error codes now covers a key already at the value the block would give
+  it, with `mypy --help`'s inverse form as what says which those are;
+  this repository's own `pyproject.toml` drops the key with the sample.
+- **`docs/source/conf.py` is named as outside the scope** — issue #149.
+  Sphinx is the `docs` group's and no shape of the mypy hook installs
+  it, and `python_version` is one value for a whole table, so asking for
+  the file means answering which version to check it at. The exemption
+  carries what it costs: every documentation build executes that file,
+  and a repository bringing it into scope answers the version question
+  first.
 
 ### The ack step's comment reads in any tree that carries it
 
