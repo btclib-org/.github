@@ -72,6 +72,20 @@ audit has no revision to compare against.
   issue #173. A tree declaring the classifier and no `license` string is
   short of the expression rather than carrying the pair, which is that
   issue's question and not this test's.
+### Section 5's two ruff settings, kept here and asked of every tree
+
+- **`pyproject.toml` declares `max-doc-length` and the pep257
+  convention** — issue #163. The section states both for every Python
+  tree, and the tree holding the section set neither: W505 is inert
+  without the width, ruff having no default doc length, and the `D`
+  family runs the whole of what ruff writes under that letter without
+  the convention. A docstring in `tests/protection_test.py` that sat
+  over the width now fits inside it.
+- **`tests/pyproject_test.py` asks both of every repository**, in the
+  shape it already asks section 5's `CPY`: the family and the key
+  together, since either half alone gates nothing. bbt sets the width
+  and selects no `W` — issue #176 — and bbt and btclib-node select no
+  `D` — issue #177 — so those cells are rows of the backlog.
 
 ### The tree's own comments say what the rule is, in the present tense
 

@@ -115,6 +115,23 @@ ignore = [
 # ruff's default, as everywhere in the organization
 max-complexity = 10
 
+[tool.ruff.lint.pycodestyle]
+# section 5's second width, and the one the formatter cannot reach:
+# ruff-format reflows code to 88 columns and rewrites neither a comment
+# nor a docstring, so this is the other half of a file, held to the
+# width MD013 already holds the markdown here to. W505 is in the "W"
+# family selected above and is inert without this key, ruff having no
+# default doc length
+max-doc-length = 80
+
+[tool.ruff.lint.pydocstyle]
+# section 5's convention, which decides which of the "D" family above
+# runs. At pep257 the family is what that document asks for; unset, it
+# is every rule ruff writes under D, `missing-terminal-punctuation`
+# among them -- a second rule over the end of a summary line, reporting
+# the docstring `missing-trailing-period` has already reported
+convention = "pep257"
+
 [tool.ruff.lint.flake8-copyright]
 # COPYRIGHT transcribed, the way section 5 spells the transcription:
 # each line with its regex metacharacters escaped, the lines joined by a

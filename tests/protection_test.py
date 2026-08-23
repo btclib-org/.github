@@ -38,7 +38,7 @@ UNPROTECTED = "Branch not protected"
 """What `gh api` reports for a `main` with no classic protection."""
 
 UNREADABLE = "Not Found"
-"""What `gh api` reports for a repository, or a document, the token cannot see."""
+"""What `gh api` reports for a repository or document the token cannot see."""
 
 
 @pytest.fixture(scope="session")

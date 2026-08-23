@@ -239,6 +239,12 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_dependabot_watches_what_section_11_gives_every_tree",
         ("portanode",),
     ),
+    (176, "test_w_is_selected_with_max_doc_length_at_80", ("bbt",)),
+    (
+        177,
+        "test_d_is_selected_with_the_pep257_convention",
+        ("bbt", "btclib-node"),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection."""
 
