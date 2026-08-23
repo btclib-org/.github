@@ -32,6 +32,32 @@ audit has no revision to compare against.
   include list is refused because neither direction's failure is loud,
   which the sentences above it establish.
 
+### The interpreter window is compared from here for a tree with no module
+
+- **Section 15 says why `interpreters_test.py` is a library's** — issue
+  #206. Section 3 states that a library carries the convention as that
+  module and gives no reason for the qualification, so the answer to
+  whether an application owes one was written nowhere. A library's
+  classifiers are what an index shows whoever is choosing the package,
+  where an application's declarations are read by whoever opens the
+  repository, and the ends of its window are compared from here instead.
+  The other answer weighed is beside it: dropping the classifiers a tree
+  publishing nothing shows to no index costs the comparison itself, the
+  floor and the matrix being declared either way.
+- **The floor is the lowest classifier, asked of every tree that
+  declares both.** The two are ends of one window written twice in one
+  file, and a tree holding no module of its own compares them nowhere.
+  What stays a reading is the classifiers against the interpreters a
+  workflow runs: a job naming one outside the window is correct where
+  the reason is beside it.
+- **A classifier set is a set.** The window each library declares is
+  compared sorted, so the same versions written in another order are one
+  window rather than two.
+- **`.python-version` answers with a version.** A `t` suffix asks for
+  that version built without the GIL, which is the version a classifier
+  names, so the pin is read without it — and section 15 says the same of
+  the column its command prints, where it had said the opposite.
+
 ### The blank lines the union driver ate are back
 
 - **`CHANGELOG.md` would pass MD022 and MD032 with the directive at its
