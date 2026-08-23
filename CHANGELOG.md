@@ -22,6 +22,16 @@ audit has no revision to compare against.
   declares `github-actions` and `uv`, the second because the tree holds
   the lock file section 11 makes that ecosystem conditional on.
 
+### The sdist bullet says what the rule is, not what it was
+
+- **The `check-sdist` bullet states its rule rather than its history** —
+  issue #219. It gave the condition the rule once carried and the tool
+  that carried it, which section 9's *No history in the prose* leaves to
+  this file. The rejected alternative stays, in the form section 9 asks a
+  negative result to take: a check conditional on the inclusion being an
+  include list is refused because neither direction's failure is loud,
+  which the sentences above it establish.
+
 ### The blank lines the union driver ate are back
 
 - **`CHANGELOG.md` would pass MD022 and MD032 with the directive at its
