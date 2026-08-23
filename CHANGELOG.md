@@ -86,6 +86,18 @@ audit has no revision to compare against.
   together, since either half alone gates nothing. bbt sets the width
   and selects no `W` — issue #176 — and bbt and btclib-node select no
   `D` — issue #177 — so those cells are rows of the backlog.
+### The support line is asked of the repositories that publish
+
+- **Section 2 asks for the support line at tier 1** — issue #98. The
+  README is the long description an index renders, so a reader who has
+  that page and not the repository has nothing of the organization
+  beside it; where nothing is published the README is read on github.com
+  under `btclib-org`, and `profile/README.md` is where the organization
+  says it. The rule stands beside the loop that checks it, over the
+  repositories the tier binds, and the repositories that publish each
+  owe a pull request adding the line.
+- **This repository's `README.md` ends without the line.** It publishes
+  nothing, so `profile/README.md` carries the organization's only copy.
 
 ### The tree's own comments say what the rule is, in the present tense
 

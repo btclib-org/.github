@@ -321,8 +321,8 @@ knowing: an inherited policy cannot name the flaws that are that tree's,
 or the project a report about it should go to instead, so a tree
 with either to say says it in its `README.md` and its issue tracker.
 
-**Every `README.md` ends with the same line**, under a thematic break,
-naming who supports the work:
+**A publishing repository's `README.md` ends with the line naming who
+supports the work**, under a thematic break:
 
 ```markdown
 ---
@@ -331,15 +331,39 @@ The btclib organization and its projects are actively supported by
 [DGI](https://dgi.io) and [CheckSig](https://checksig.com).
 ```
 
-Identical everywhere, this repository's own README and the organization
-profile included, and identical on purpose: a reader arriving at any one
-of these repositories should not have to work out whether it is somebody's
-weekend project. Reworded per repository it would be several claims to
-keep true instead of one, and the `links` workflow is what notices if
-either URL stops resolving. It is the organization the line names, not
-`btclib`: that is the library's name, and a line carried by a node, a
-benchmark suite and a course would otherwise credit the support to one
-of the things being supported.
+It is tier 1's for the reason `SECURITY.md` is: the archive leaves
+github.com. The README is the long description an index renders, so a
+reader who has that page and not the repository meets the project with
+no organization beside it, and should not have to work out whether it is
+somebody's weekend project. Where nothing is published the README is
+read on github.com under `btclib-org`, and `profile/README.md` — the
+page the owner link reaches — is where the organization says it, once
+and for all of them. The alternative weighed was every tier: what that
+buys below tier 1 is a second copy of a sentence a reader is one click
+from, and what it costs is a claim whose subject is the organization
+kept true in every tree separately. This repository publishes nothing,
+so `profile/README.md` is its only copy.
+
+Identical wherever it appears, and identical on purpose: reworded per
+repository it would be several claims to keep true instead of one, and
+the `links` workflow is what notices if either URL stops resolving. It
+is the organization the line names, not `btclib`: that is one package's
+name, and the siblings that publish beside it would otherwise credit the
+support to one of the things being supported.
+
+The rule is a claim about the repositories, and the loop is what checks
+it:
+
+```shell
+for r in <every repository that publishes>; do
+  printf '%s\t' "$r"
+  gh api "repos/<org>/$r/contents/README.md" --jq .content \
+    | base64 -d | grep -c 'actively supported'
+done
+```
+
+`1` from each is the answer; a `0` is a repository short of what its
+tier binds, filed here.
 
 Dotfiles, each owed by the tiers that owe the section reading it:
 `.pre-commit-config.yaml`, `.python-version`, `.gitattributes`,
@@ -2367,8 +2391,3 @@ written before the gate that judges it.
 1. **The prose pass** — 80 columns, the reasoning and its negative
    results in the configuration comments, no stated counts, and history
    moved to the two files that carry it.
-
----
-
-The btclib organization and its projects are actively supported by
-[DGI](https://dgi.io) and [CheckSig](https://checksig.com).
