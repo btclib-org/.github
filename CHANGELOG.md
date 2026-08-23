@@ -246,9 +246,11 @@ audit has no revision to compare against.
   `portanode`'s and `btclib`'s add rules for paths only they carry. The
   bullet puts those under `## This repository in particular`, a comment
   to git and the marker the comparison already stops at, so the
-  comparison covers the file without a second rule for it — issue #102,
-  which the path names from `verbatim_test.py`'s own `EXPECTED_DRIFT`
-  on the same terms as above until the copies agree.
+  comparison covers the file without a second rule for it — issue #102.
+  The path sat in `verbatim_test.py`'s own `EXPECTED_DRIFT` on the same
+  terms as above while the seven copies were aligned one pull request
+  each; with the last landed the entry is gone and the comparison runs
+  red on the next drift.
 
 - **The `ci:` block's verbatim part is named.** Section 14 called the
   block verbatim in part without saying which part: `autofix_prs`,
