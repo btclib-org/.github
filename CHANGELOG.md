@@ -11,13 +11,13 @@ audit has no revision to compare against.
 
 - **Section 10's rows follow the file names the organization now uses.**
   `tests/grid_test.py` keys the calendar on a workflow's file stem, and
-  the alignment that landed across the eight repositories renamed the
-  scheduled ones so that a prefix groups a family and a name says its own
-  subject: `os-ubuntu`, `os-macos`, `os-windows`, `deps-latest`,
-  `pypi-install`, `integration-bitcoind`, `integration-hwi`,
-  `py-arm-authority`. Until the rows followed, the test failed in both
-  directions at once — rows no repository schedules, and workflows no row
-  names. No cron moved: each fires in the slot its old name held.
+  the alignment that landed across the organization renamed the scheduled
+  ones so that a prefix groups a family and a name says its own subject:
+  `os-ubuntu`, `os-macos`, `os-windows`, `deps-latest`, `pypi-install`,
+  `integration-bitcoind`, `integration-hwi`, `py-arm-authority`. Until the
+  rows followed, the test failed in both directions at once — rows no
+  repository schedules, and workflows no row names. No cron moved: each
+  fires in the slot its old name held.
 
 - **`portanode` and `bbt` have a minute.** Neither schedules anything
   today, so the reservations buy nothing yet; what they avoid is the
