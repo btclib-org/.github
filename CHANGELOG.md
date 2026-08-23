@@ -13,6 +13,68 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The tree's own comments say what the rule is, in the present tense
+
+- **The backlog is down to what one repository still owes.** Every tree
+  that runs mypy carries section 6's error codes now — issue #165 — and
+  bbt's gate runs mypy since btclib-org/bbt#24, so the rows recording
+  those two against issues #165 and #112 are spent and go. What is left
+  is issue #131's pair against btclib-node, suspended on the
+  maintainer's decision while another session annotates that tree.
+
+- **`dependabot_test.py`'s docstring says what section 11 says now.**
+  Section 11 stopped closing the count at three ecosystems in this same
+  change, and the module that enforces it went on stating the closed
+  count — the exact sentence issue #132 was filed against, left standing
+  in the test while the standard was corrected. Section 15 makes a
+  module's docstring the statement of which section it reads, so that is
+  where a reader sent by the audit is told. It now names the two an
+  ecosystem-carrying tree has whatever it holds and the two it earns,
+  and points at #171 for the conditional half nothing measures.
+- **An unclosed fence is no block.** `fenced()` promised to raise where a
+  section does not hold exactly one, and a fence opened and never closed
+  read to the end of the file and came back as one — past the section
+  that was asked for. It is discarded instead, and the docstring says
+  what a fence has to look like to be read.
+
+- **Comments stop telling the tree's history** — issue #167.
+  `.github/dependabot.yml`, `.github/workflows/links.yml`,
+  `.pre-commit-config.yaml` and `tests/__init__.py` each carried a clause
+  about what this tree used to be, which stays grammatical after it stops
+  being true. Section 9's *No history in the prose* puts the
+  before in this file, and the present-tense remainder of each comment
+  carries the reason on its own.
+- **The reason beside `check-toml` names the case the hook catches** —
+  issue #166. It said taplo says nothing about what it cannot read: what
+  taplo cannot read fails `taplo-format`, and what `check-toml` adds is
+  the other class, a key or a table declared twice, which taplo formats
+  and passes.
+
+### Section 1's groups, section 6's error codes, section 11's ecosystems
+
+- **`build` and `check` are two rows, and `bindings` is a third.** The
+  table said `build` held what inspects a distribution, which is what
+  three trees call `check`, while the one tree holding both names uses
+  `build` for what compiles wheels. Each row now says what its group
+  holds, and the paragraph beside them says why the two names are worth
+  keeping apart — issue #129.
+- **The `harness`/`test` split is paid for by the tree that asks for
+  it.** The section claimed the split kept the workflows the same file
+  everywhere; one tree's workflows name the group.
+- **Section 6 states the optional error codes, and they are the same
+  list in every tree** — issue #165. A code that finds nothing today is
+  a ratchet on the line written after it, and a code mypy turns on
+  itself is not in the list, naming it stating a check the list does
+  not buy. `tests/pyproject_test.py` reads the block as data and asks
+  every tree for exactly it.
+- **`gitsubmodule` is an ecosystem section 11 names**, conditional on
+  the tree having a submodule the way `bundler` is on a site Gemfile,
+  with the limit beside it: Dependabot follows upstream's default
+  branch, so its pull request says upstream moved and the release bump
+  stays by hand. Section 4 stops saying a submodule is beyond
+  Dependabot's reach — the local hook and the ecosystem answer
+  different halves — issue #132.
+
 ### A review reads the prose that stays
 
 - **A suite is run whole, by whoever runs it.** `REVIEWING.md` asked
@@ -35,6 +97,65 @@ audit has no revision to compare against.
   to go or for the command that re-derives it to take its place, and
   for a comment or a document that tells what the code used to be to
   stop — section 9's rules, named where the reviewer reads them.
+### This tree answers the rows the suite held against it
+
+- **The gate runs `check-toml`, `toml-comment-width` and
+  `decoded-subprocess-encoding`.** Section 4 lists the first among the
+  syntax hooks and the other two among the local ones, section 3 names
+  `toml-comment-width` as what holds a `pyproject.toml`'s comments to 80
+  columns, and `.pre-commit-config.yaml` here ran none of the three:
+  taplo formatted the toml and passed a key declared twice, the comment
+  width was kept by hand, and the suite's own subprocess calls named
+  their encoding with nothing refusing the first that would not. The
+  cells `tests/hooks_test.py` reported on this repository against issues
+  #153 and #134 go from the backlog.
+
+- **`links.yml` no longer passes `--cache`.** No step restored the
+  cache file between runs, so the flag decided nothing across them, and
+  it would decide nothing with the step added: the run is weekly and the
+  cache age passed beside it was a day. Within one run lychee asks each
+  URL once whatever the flag says -- `lychee --offline` over this tree's
+  markdown reports the unique count beside the total. The cell
+  `tests/links_test.py` reported on this repository against issue #111
+  goes from the backlog.
+
+- **`CPY` is selected, with `COPYRIGHT` transcribed as its
+  `notice-rgx`, and every source file here opens with the notice.**
+  `pyproject.toml` left the rule out as one only a package answers for,
+  and section 5's rule is about every source file: a suite is source.
+  The regex is the one `tests/copyright_test.py` derives, byte for byte
+  the siblings', so the test that compares the two now reads this tree
+  too. The cell `tests/pyproject_test.py` reported on this repository
+  against issue #119 goes from the backlog.
+
+- **`.github/dependabot.yml` exists, watching `github-actions` and
+  `uv`, and `check-dependabot` validates it.** The layout bullet of
+  section 2 lists the file for a repository that ships a package, and
+  this one ships none; but the section also says `.github/` is every
+  tier's and holds what the sections the tier binds ask of it, and this
+  tree pins actions to commit SHAs and commits a `uv.lock` that nothing
+  moved. Weekly on Thursday with the seven-day cooldown, grouped, as
+  section 11 asks; the file's header says why no sentinel pre-validates
+  what it opens. The gate runs section 4's `check-dependabot` over it,
+  since `check-yaml` alone reads the file as yaml and not as what it is.
+  The cell `tests/dependabot_test.py` reported on this repository
+  against issue #107 goes from the backlog.
+
+- **The suite's shared code is `tests/__init__.py`, and the gate runs
+  `name-tests-test` at its default.** `tests/organization.py`,
+  `tests/repositories.py` and `tests/tables.py` were the helpers, and
+  section 7 puts shared test code in the package `__init__.py` because
+  the hook at its default reads every other basename under `tests/` as
+  a test module; this tree ran no such hook, which is how they stayed.
+  They are one module now, imported as `from . import ...`, with
+  each former docstring kept as a part of the package's. What moves
+  with them is every name that pointed at one: the backlog is
+  `BACKLOG` in `tests/__init__.py`, and section 15, `pyproject.toml`'s
+  marker comments and `conftest.py`'s messages say so. The cells
+  `tests/hooks_test.py` and `tests/layout_test.py` reported on this
+  repository against issue #131 go from the backlog; the spelling
+  question that issue holds open is untouched, this tree having been on
+  `*_test.py` throughout.
 
 ### Section 15's audit runs as the suite, one row per repository
 

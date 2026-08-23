@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """A repository's topics and its package's keywords name the same things.
 
 Both are what somebody searching finds the project by, and they live in
@@ -18,7 +22,7 @@ from typing import Any
 
 import pytest
 
-from .organization import ORG, by_hand
+from . import ORG, by_hand
 
 CAP = 20
 """How many topics GitHub keeps. Not a choice of the organization's."""

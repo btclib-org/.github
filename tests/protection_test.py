@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """The half of section 11's settings that classic protection carries.
 
 Rulesets carry the integrity rules and the review requirement, and
@@ -24,7 +28,7 @@ from typing import Any
 
 import pytest
 
-from .organization import ORG, by_hand, gh_json
+from . import ORG, by_hand, gh_json
 
 pytestmark = pytest.mark.integration
 

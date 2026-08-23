@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """The alignment suite: whether the repositories still agree with README.md.
 
 Section 7 of README.md says a test never reaches the network, and every
@@ -10,7 +14,7 @@ states it now, and asks it of every repository at once. Section 15 of
 that file is the audit this is the running half of.
 
 A test that takes a `repository` argument is asked once per repository,
-`conftest.py` parametrizing it at collection, and `repositories.py` says
+`conftest.py` parametrizing it at collection, and this module says
 which tier of repository a question reaches and which failures the
 tracker already records. A test that takes the session fixtures instead
 asks what no single tree can answer -- the calendar, the verbatim
@@ -23,4 +27,375 @@ run selects or deselects them by name -- `backlog_test.py` asks
 a marker being a label rather than a condition::
 
     BTCLIB_INTEGRATION=1 uv run --locked --group test pytest
+
+The shared code is here rather than in modules of its own, for the
+reason section 7 gives: `name-tests-test` runs at its default, so every
+Python file under `tests/` is a test file but the two basenames the hook
+exempts, and a helper named any other way is either a test pytest never
+collects or shared code in the wrong file. What is shared is these
+parts:
+
+- **the organization, and how this suite asks GitHub about it** --
+  `ORG`, `SELF`, `ROOT`, the two `gh` callers, `by_hand` and `tracked`;
+- **which repositories the standard applies to, how far, and what is
+  owed** -- kept together, so that a change to any of them is made in
+  one place: *which repositories
+  there are*, asked of the API rather than listed, for the reason
+  `names` gives; *how far the standard reaches each one*, section 2's
+  tier, measured off the tree by the two files that section names, the
+  section's own table being a claim `tiers_test.py` checks against this
+  measurement; and *which findings are already filed*, the backlog,
+  one row per issue, so that a failure the tracker knows about is
+  reported as expected and a repository that catches up is reported as
+  a row to delete, `xfail_strict` in `pyproject.toml` being what turns
+  the second into a failure;
+- **reading a table of README.md as data** -- section 10's calendar is
+  prose a person reads and a rule a machine has to enforce, and those
+  are the same table rather than two copies of it: the file is the
+  source, `rows` is how the suite reads it. A row added there is
+  checked from the moment it is added, and a row nobody maintains
+  fails against the trees instead of going quietly stale.
 """
+
+from __future__ import annotations
+
+import enum
+import functools
+import json
+import re
+import subprocess
+from pathlib import Path
+from typing import Any
+
+ORG = "btclib-org"
+
+SELF = ".github"
+"""The organization's profile repository, and the tree this file is in.
+
+Cloning it would fetch a second copy of what is already on the machine,
+and the wrong copy: a pull request that edits the calendar has to be
+checked against the calendar it proposes. The `trees` fixture maps this
+name to `ROOT` instead.
+"""
+
+ROOT = Path(__file__).parents[1]
+
+
+def gh(endpoint: str, jq: str) -> list[str]:
+    """Ask the GitHub API and return one line of its answer per element.
+
+    :param endpoint: the path after `gh api`, its query string included.
+    :param jq: the `--jq` filter, whose output is split on newlines.
+    :returns: the non-empty lines, in the order the API answered.
+    """
+    out = subprocess.run(
+        ["gh", "api", endpoint, "--paginate", "--jq", jq],
+        capture_output=True,
+        check=True,
+        encoding="utf-8",
+    ).stdout
+    return [line for line in out.splitlines() if line]
+
+
+def gh_json(endpoint: str) -> Any:
+    """Ask the GitHub API for one document and parse it.
+
+    :param endpoint: the path after `gh api`.
+    :returns: whatever the endpoint answers, parsed.
+    """
+    out = subprocess.run(
+        ["gh", "api", endpoint],
+        capture_output=True,
+        check=True,
+        encoding="utf-8",
+    ).stdout
+    return json.loads(out)
+
+
+def by_hand(repository: str, command: str) -> str:
+    """Say how a failure is decided without this suite.
+
+    Section 15 gives every question of the standard as a command a
+    person runs in one checkout, and a failure here names that command
+    so the reader can take it there: the message is the section's line
+    for that repository rather than a restatement of it.
+
+    :param repository: the repository the assertion was asked of.
+    :param command: the shell that decides it in a checkout of that tree.
+    :returns: the text an assertion message ends with.
+    """
+    return f"by hand, in a checkout of {ORG}/{repository}: {command}"
+
+
+def tracked(root: Path, *patterns: str) -> list[str]:
+    """List the files a tree tracks under some pathspecs.
+
+    `git ls-files` rather than a walk, so a checkout's own environment
+    -- the `.venv` this tree keeps beside its suite -- is not read as
+    part of it.
+
+    :param root: the root of the checkout.
+    :param patterns: git pathspecs, `*.toml` and the like.
+    :returns: the paths, relative to the root, in git's order.
+    """
+    out = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "--", *patterns],
+        capture_output=True,
+        check=True,
+        encoding="utf-8",
+    ).stdout
+    return out.splitlines()
+
+
+class Tier(enum.IntEnum):
+    """Section 2's three tiers, numbered as that section numbers them.
+
+    Tier 1 owes the whole file and tier 3 the least, so the number goes
+    up as what is owed goes down. A test names the tier it applies down
+    to, and a repository of a higher number is skipped with the reason
+    rather than failed: a checklist about a wheel is not a finding
+    against a tree that builds none.
+    """
+
+    PUBLISHER = 1
+    """A Python package that publishes, which is the standard entire."""
+
+    PYTHON = 2
+    """A Python project that publishes nothing."""
+
+    ANY = 3
+    """Any repository, whatever it is written in."""
+
+    def binds(self, repository_tier: Tier) -> bool:
+        """Say whether a rule of this tier reaches a repository of that one.
+
+        :param repository_tier: the repository's tier.
+        :returns: whether the repository owes what this tier owes.
+        """
+        return repository_tier <= self
+
+
+def tier(root: Path) -> Tier:
+    """Measure a repository's tier off its tree, as section 2 does.
+
+    A repository is Python where it holds a `pyproject.toml`, and
+    publishes where it holds `release.yml`; the section's loop asks the
+    API for the same two files.
+
+    :param root: the root of the checkout.
+    :returns: the tier the tree answers to.
+    """
+    if not (root / "pyproject.toml").is_file():
+        return Tier.ANY
+    if (root / ".github" / "workflows" / "release.yml").is_file():
+        return Tier.PUBLISHER
+    return Tier.PYTHON
+
+
+@functools.cache
+def names() -> list[str]:
+    """Ask the API for every repository, rather than listing them here.
+
+    A list written down here would be one more place to remember a new
+    repository, and the one place nobody would think to look: a tree that
+    joins the organization is in scope for this suite the moment it
+    exists. Archived repositories are out -- what they agree with is the
+    standard of the day they were archived.
+
+    Forks are not, though they were: the reason given was that a fork's
+    conventions are upstream's, and that is false for a fork the
+    organization has taken over. `bbt` is one -- its upstream has not
+    been pushed since 2022, every commit since is the organization's, and
+    the forks downstream are of this copy rather than of that one.
+    Excluding it meant the one repository furthest from the standard was
+    the one nothing measured.
+
+    The filter is right in general and was wrong for one repository, so
+    it comes back the day that repository is detached from its upstream:
+    btclib-org/bbt#13 carries the request GitHub's support grants, and
+    the last box on it is this line.
+
+    Cached, because the list is read once at collection to parametrize
+    the per-repository tests and once more by the `repositories` fixture,
+    and the two have to be the same list.
+
+    :returns: the repository names, `.github` among them.
+    """
+    return gh(
+        f"orgs/{ORG}/repos?per_page=100",
+        ".[] | select(.archived == false) | .name",
+    )
+
+
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    (131, "test_name_tests_test_runs_at_its_default", ("btclib-node",)),
+    (
+        131,
+        "test_every_test_file_is_named_so_pytest_collects_it",
+        ("btclib-node",),
+    ),
+)
+"""What the tracker already knows, read by `conftest.py` at collection."""
+
+
+def filed(test: str, repository: str) -> list[int]:
+    """Return the issues recording that a test fails on a repository.
+
+    :param test: the test function's name.
+    :param repository: the repository's name.
+    :returns: the issue numbers, empty where none is filed.
+    """
+    return [
+        issue
+        for issue, subject, repositories in BACKLOG
+        if subject == test and repository in repositories
+    ]
+
+
+def rows(document: Path, *columns: str) -> list[dict[str, str]]:
+    """Read the one markdown table whose header is exactly these columns.
+
+    :param document: the markdown file to read.
+    :param columns: the header cells, in order, naming the table.
+    :returns: one mapping per body row, column name against cell text.
+    :raises LookupError: if no table, or more than one, has that header.
+    """
+    header = "| " + " | ".join(columns) + " |"
+    lines = document.read_text(encoding="utf-8").splitlines()
+    starts = [i for i, line in enumerate(lines) if line == header]
+    if len(starts) != 1:
+        msg = f"{document.name} has {len(starts)} tables headed {header}"
+        raise LookupError(msg)
+    out: list[dict[str, str]] = []
+    # the header, then the delimiter row, then the body until a line that
+    # is not a row -- a blank line, prose, or the next table's header
+    for line in lines[starts[0] + 2 :]:
+        if not line.startswith("|"):
+            break
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        out.append(dict(zip(columns, cells, strict=True)))
+    return out
+
+
+def name(cell: str) -> str:
+    """Take the name out of a cell that quotes it as code.
+
+    :param cell: the cell text, `like this` or plain.
+    :returns: the text with the backticks removed.
+    """
+    return cell.strip("`")
+
+
+SUBJECT = re.compile(r"^- `([^`]+)` — ")
+"""How a bullet of a list this module reads names what it is about.
+
+The backticks and the spaced em dash are the shape, and a bullet written
+any other way is one this cannot answer for.
+"""
+
+
+def sole(document: Path, lines: list[str], text: str) -> int:
+    """Return the index of the one line holding a piece of prose.
+
+    :param document: the file the lines came from, for the message.
+    :param lines: the file's lines.
+    :param text: the substring naming the line.
+    :returns: the index of the line holding it.
+    :raises LookupError: if no line, or more than one, holds it.
+    """
+    found = [i for i, line in enumerate(lines) if text in line]
+    if len(found) != 1:
+        msg = f"{document.name} has {len(found)} lines holding {text!r}"
+        raise LookupError(msg)
+    return found[0]
+
+
+def fenced(document: Path, opening: str, language: str) -> str:
+    """Read the one fenced block of a language that a section shows.
+
+    A block a section gives as the configuration to copy is what the
+    trees are compared against, so it is read rather than transcribed:
+    a transcription is the copy that goes stale.
+
+    A block is a line that is exactly the opening fence, a run of lines,
+    and a line that is exactly ``` — at column zero and with nothing
+    trailing, which is every fence this file's markdownlint accepts. A
+    fence the section opens and does not close is no block: it would
+    otherwise read to the end of the file, past the section that was
+    asked for, and return that.
+
+    :param document: the markdown file to read.
+    :param opening: a substring of the line the section opens with.
+    :param language: the fence's language, `toml` and the like.
+    :returns: the block's text, the fences excluded.
+    :raises LookupError: if the section does not hold exactly one.
+    """
+    lines = document.read_text(encoding="utf-8").splitlines()
+    fence = f"```{language}"
+    blocks: list[list[str]] = []
+    inside = False
+    for line in lines[sole(document, lines, opening) + 1 :]:
+        if line.startswith("## ") and not inside:
+            break
+        if not inside and line == fence:
+            inside = True
+            blocks.append([])
+        elif inside and line == "```":
+            inside = False
+        elif inside:
+            blocks[-1].append(line)
+    if inside:
+        blocks.pop()
+    if len(blocks) != 1:
+        msg = f"{document.name} has {len(blocks)} {fence} blocks under {opening!r}"
+        raise LookupError(msg)
+    return "\n".join(blocks[0]) + "\n"
+
+
+def subjects(document: Path, opening: str, closing: str) -> list[str]:
+    """Read the backticked subject of every bullet between two lines.
+
+    A bullet's subject is what it is about, and a list whose subjects are
+    paths is a list a test can act on. `opening` and `closing` are the
+    prose either side of it, so moving the list within its section does
+    not need this call changed.
+
+    Every way of reading nothing here is an error rather than an empty
+    answer, for the reason `rows` refuses a header it finds twice: a
+    caller that gets `[]` compares no files and reports that as agreement.
+    So both ends have to be found exactly once and in that order, the
+    list between them has to hold a bullet, and every bullet it holds has
+    to carry a subject -- a list rewritten into a shape this cannot read
+    is the failure, not a run that quietly checks nothing.
+
+    :param document: the markdown file to read.
+    :param opening: a substring of the line the list follows.
+    :param closing: a substring of the line the list stops at.
+    :returns: the subjects, in the order the list gives them.
+    :raises LookupError: where either end is not found exactly once, the
+        closing line comes first, or a bullet between them has no
+        backticked subject.
+    """
+    lines = document.read_text(encoding="utf-8").splitlines()
+    start = sole(document, lines, opening)
+    end = sole(document, lines, closing)
+    if end < start:
+        msg = f"{document.name} holds {closing!r} before {opening!r}"
+        raise LookupError(msg)
+    out: list[str] = []
+    unread: list[str] = []
+    for line in lines[start + 1 : end]:
+        if not line.startswith("- "):
+            continue
+        found = SUBJECT.match(line)
+        if found:
+            out.append(found.group(1))
+        else:
+            unread.append(line)
+    if unread or not out:
+        msg = (
+            f"{document.name} names {len(out)} subjects between {opening!r}"
+            f" and {closing!r}, and these bullets name none: {unread}"
+        )
+        raise LookupError(msg)
+    return out

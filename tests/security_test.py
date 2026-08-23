@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """The private channel `SECURITY.md` promises, and the file that promises it.
 
 Two things about reporting a vulnerability that drift apart in silence:
@@ -15,8 +19,7 @@ from pathlib import Path
 
 import pytest
 
-from .organization import ORG, by_hand, gh_json
-from .repositories import Tier
+from . import ORG, Tier, by_hand, gh_json
 
 pytestmark = pytest.mark.integration
 

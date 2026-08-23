@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """The hooks section 4 says every lint gate runs, read off each gate.
 
 `.pre-commit-config.yaml` is the lint gate, and a hook it does not name
@@ -16,8 +20,7 @@ from typing import Any
 import pytest
 import yaml
 
-from .organization import by_hand, tracked
-from .repositories import Tier
+from . import Tier, by_hand, tracked
 
 pytestmark = pytest.mark.integration
 
@@ -145,7 +148,9 @@ def test_the_local_hooks_run(repository: str, trees: dict[str, Path]) -> None:
     holds that file's comments to 80 columns.
     `decoded-subprocess-encoding` has one wherever a child process is
     decoded, and a tree that decodes none today is the tree in which the
-    first `text=True` is refused by nothing.
+    first locale-decoded call is refused by nothing. Not spelled as the
+    keyword here: the hook is a pygrep over every Python line, a
+    docstring's included, and this one is in its own file set.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.

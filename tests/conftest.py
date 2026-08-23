@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """What every module here needs fetched, fetched once."""
 
 from __future__ import annotations
@@ -13,8 +17,7 @@ from typing import Any
 
 import pytest
 
-from .organization import ORG, ROOT, SELF, gh_json
-from .repositories import BACKLOG, Tier, filed, names, tier
+from . import BACKLOG, ORG, ROOT, SELF, Tier, filed, gh_json, names, tier
 
 SWITCH = "BTCLIB_INTEGRATION"
 """The environment variable without which this suite skips itself."""
@@ -127,7 +130,7 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
         if test not in defined or repository not in names()
     ]
     if orphans:
-        msg = f"tests/repositories.py lists rows no test answers to: {orphans}"
+        msg = f"BACKLOG in tests/__init__.py lists rows no test answers to: {orphans}"
         raise pytest.UsageError(msg)
 
 
@@ -175,7 +178,7 @@ def pytest_runtest_makereport(
     reason = reason.removeprefix("Skipped: ")
     report.outcome = "failed"
     report.longrepr = (
-        f"tests/repositories.py excuses {item.nodeid} for {cited(marker.args)}, "
+        f"the backlog excuses {item.nodeid} for {cited(marker.args)}, "
         f"and this run did not ask it: {reason}. A row excuses a failure; "
         "take the repository out of the row, or the test's question "
         "has changed under it."

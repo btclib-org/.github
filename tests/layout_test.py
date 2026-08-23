@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """Section 7's layout, read off the tree rather than off the hook.
 
 The hook is section 4's and `hooks_test.py` asks whether it runs; this
@@ -11,8 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from .organization import by_hand
-from .repositories import Tier
+from . import Tier, by_hand
 
 pytestmark = pytest.mark.integration
 

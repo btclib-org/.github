@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """The rulesets, the merge method and the token section 11 describes.
 
 These are the rules that live in no tree: a repository setting is
@@ -18,7 +22,7 @@ from typing import Any
 
 import pytest
 
-from .organization import ORG, by_hand, gh_json
+from . import ORG, by_hand, gh_json
 
 MAIN = "refs/heads/main"
 TAGS = "refs/tags/v*"

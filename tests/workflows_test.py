@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """What section 10 says every workflow does, asked of every workflow.
 
 The three findings section 15 names as findings on their own -- an
@@ -17,7 +21,7 @@ from typing import Any
 import pytest
 import yaml
 
-from .organization import by_hand
+from . import by_hand
 
 pytestmark = pytest.mark.integration
 

@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """The files section 14 calls verbatim agree where it says they do.
 
 The list is prose with a reason under each entry, which is what a person
@@ -13,8 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from .organization import ROOT
-from .tables import subjects
+from . import ROOT, subjects
 
 pytestmark = pytest.mark.integration
 

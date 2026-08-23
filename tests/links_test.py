@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """The `links` workflow asks lychee a question its flags let it answer.
 
 `links.yml` gates nothing, so its whole value is that a red run means a
@@ -15,7 +19,7 @@ from typing import Any
 
 import pytest
 
-from .organization import by_hand
+from . import by_hand
 from .workflows_test import steps
 
 pytestmark = pytest.mark.integration

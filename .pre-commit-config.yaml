@@ -51,6 +51,19 @@ repos:
       - id: check-vcs-permalinks
       - id: detect-private-key
       - id: check-yaml
+      # the toml here is read by taplo every run, but a format is not a
+      # parse: what taplo cannot read fails its own hook, and what it can
+      # read it rewrites and passes -- a key or a table declared twice
+      # among it, which parses as grammar and is not a TOML document.
+      # Section 4 puts that question in the gate
+      - id: check-toml
+      # at its default, *_test.py, which is section 7's spelling: what
+      # the hook adds is the refusal of a module under tests/ named any
+      # other way, a test pytest never collects or shared code in a file
+      # of its own. This tree's shared helpers are in tests/__init__.py,
+      # which is where section 7 puts shared test code and one of the
+      # two basenames the hook passes over
+      - id: name-tests-test
       - id: check-added-large-files
       # there are none, and a submodule is the one dependency that would
       # be pinned by nothing here
@@ -122,6 +135,41 @@ repos:
     hooks:
       - id: taplo-format
         name: taplo (toml, in place fixes)
+  # the width of a toml comment, which taplo above does not settle: it
+  # aligns a comment that trails a value and rewraps none. Section 3 names
+  # this hook as what holds pyproject.toml's comments to 80 columns, a
+  # width a tree can be at by hand with nothing saying so. A trailing
+  # unbreakable link is exempt, the
+  # pattern asking for whitespace after the eightieth column
+  - repo: local
+    hooks:
+      - id: toml-comment-width
+        name: toml comment width (80 columns, unbreakable links exempt)
+        language: pygrep
+        entry: '^(?=[ \t]*#).{80}\S*[ \t]'
+        files: \.toml$
+      # a decoded child process names its encoding. text=True decodes
+      # with the locale's, which is the defect ruff's unspecified-encoding
+      # catches one layer in and no linter here has an opinion on at this
+      # keyword. What this suite runs is git and gh, and every call here
+      # that decodes an answer passes encoding="utf-8" already; the hook
+      # is what refuses the first that does not
+      - id: decoded-subprocess-encoding
+        name: a decoded subprocess names its encoding, not text=True
+        language: pygrep
+        entry: '\b(text|universal_newlines)=True'
+        files: \.py$
+  # .github/dependabot.yml is validated by nothing else here: check-yaml
+  # above asks whether it is yaml and nothing reads it as what it is. A
+  # typo in a package-ecosystem or a directory is not an error to GitHub
+  # -- it silently updates nothing, and the evidence is a pull request
+  # that never arrives, which is the one failure a file whose job is to
+  # open them must not have. Section 4's schemas bullet; check-readthedocs
+  # is not beside it, there being no .readthedocs.yaml to read
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.38.0
+    hooks:
+      - id: check-dependabot
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.3
     hooks:

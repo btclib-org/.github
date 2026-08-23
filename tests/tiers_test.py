@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """Section 2's table of repositories and tiers is what the trees measure.
 
 The section says the table is a claim and its loop is what checks it,
@@ -11,9 +15,7 @@ from __future__ import annotations
 
 import pytest
 
-from .organization import ORG, ROOT, by_hand
-from .repositories import Tier
-from .tables import name, rows
+from . import ORG, ROOT, Tier, by_hand, name, rows
 
 pytestmark = pytest.mark.integration
 

@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """The `notice-rgx` of every repository is its `COPYRIGHT`, transcribed.
 
 Section 5 makes the copyright header a ruff rule: `CPY` checks every
@@ -19,8 +23,7 @@ from typing import Any
 
 import pytest
 
-from .organization import by_hand
-from .repositories import Tier
+from . import Tier, by_hand
 
 pytestmark = pytest.mark.integration
 
