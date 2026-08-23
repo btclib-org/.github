@@ -21,8 +21,12 @@ audit has no revision to compare against.
 
 - **`portanode` and `bbt` have a minute.** Neither schedules anything
   today, so the reservations buy nothing yet; what they avoid is the
-  first cron landing in either tree with nowhere to be named, which is
-  how the drift above began.
+  other way `tests/grid_test.py` fails —
+  `test_every_repository_that_schedules_anything_has_a_minute`, which a
+  first cron landing in either tree would answer, where the rows above
+  answer `test_every_cron_is_the_instant_the_calendar_names`. Issue #97
+  names both: the rows because a rename left them behind, the minutes
+  because `portanode` was never on that table at all.
 
 - **`verbatim_test.py` passes.** Every path section 14 owes is one file
   across every tree that owes it, which
