@@ -13,6 +13,16 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### `bbt` selects `W`, so the row for it goes
+
+- **The backlog row for `bbt`'s unselected `W` is deleted** — issue
+  #176. That tree sets `max-doc-length = 80` and now selects the family
+  the key configures, so `test_w_is_selected_with_max_doc_length_at_80`
+  asks it and is answered. The row was a strict expected failure, so it
+  had to go in the same round the tree changed: an expected failure that
+  passes is a red suite, which is what makes the row a record of a gap
+  rather than a way of ignoring one.
+
 ### The package directory follows the package, and section 16 asks section 7
 
 - **Section 2 asks the package directory of a tree that installs an
