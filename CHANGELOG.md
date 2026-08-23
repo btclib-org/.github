@@ -154,6 +154,21 @@ audit has no revision to compare against.
   state. The commands in it take `{owner}/{repo}` and a placeholder
   number, so `gh` resolves them against the checkout they are run in.
 
+### A review runs before the push, and one workflow's change gets none
+
+- **Section 11 says a review pass runs locally before the branch is
+  pushed, and names what runs it.** `.claude/commands/review.md` with no
+  argument reads the branch's diff against `origin/main`; what the pass
+  reaches is the class of finding no gate and no pattern does, and what
+  it buys is that the forge's round is the last rather than the first —
+  issue #45.
+- **The exception to the ack of record now stands beside the rule.** A
+  pull request adding or editing `claude-review.yml` gets no verdict and
+  lands on its gates carrying that change alone — issue #58. The
+  consequence was under the subsection on porting the workflow, which
+  keeps the mechanism it defers to and points at the rule for what it
+  costs.
+
 ### The tree's own comments say what the rule is, in the present tense
 
 - **Two backlog rows are spent and go.** Every tree that runs mypy

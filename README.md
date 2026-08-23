@@ -1473,6 +1473,16 @@ workflow runs on `opened`, `reopened`, `synchronize` and
 last is how a head that moved after the review gets a fresh one, since
 the ack does not follow the branch.
 
+**A pull request that adds or edits `claude-review.yml` gets no ack**,
+that being the exception the rule above has, until the change is on
+`main`; what refuses it is in the workflow's own header, below. That is
+not something to work around — it is the honest shape of "no review
+happened" — and such a pull request lands on its gates and on a
+description saying so. It carries that change alone, since anything
+travelling with it lands unreviewed too. The refusal is keyed on that
+file, so a pull request touching another workflow is reviewed like any
+other.
+
 **A green check is an ack of the head, and nothing weaker.** The job's
 last step reads back what was posted and refuses to report anything
 else: a refusal, a verdict never written, and an ack naming a sha the
@@ -1491,6 +1501,19 @@ it leaves the tree better than it found it, a matter of taste is not a
 finding, and work the diff never set out to do becomes an issue rather
 than a comment. Every finding is labelled blocking, non-blocking, nit or
 question.
+
+**A review pass runs locally against the branch before it is pushed**,
+and `.claude/commands/review.md` with no argument is what runs it: the
+diff of the current branch against `origin/main`, read against
+`REVIEWING.md` as the workflow reads a pull request. It posts nothing,
+replaces no round on the forge and is not the ack of record; what it buys
+is that the forge's round is the last rather than the first. What it
+reaches is what the gates do not — a count nothing re-derives, a bare
+cross-repository reference, a paragraph a change elsewhere falsified —
+and the count is not reachable by a pattern either, a number being a
+defect for what it counts rather than for the string it is. The
+distinction the ack of record rests on holds here too: a pass run from
+the session that wrote the diff re-performs the author's reading.
 
 **A gate already run on this sha is relied on, and the run is named.**
 Where the required checks run beside the review on that commit, or an
@@ -1568,14 +1591,8 @@ what makes that red, why the fork condition is a fact about secrets
 rather than a policy, and why `id-token: write` is required for
 something other than what it looks like. That file is where each was
 written by whoever was bitten by it, and repeating them here would make
-this the second place either can be wrong.
-
-One consequence belongs here rather than there, because it is about
-landing rather than about the job: **the pull request that adds or edits
-this workflow is red by design and gets no ack**, until the change is on
-the default branch. That is not something to work around — it is the
-honest shape of "no review happened" — so such a pull request lands on
-its gates and on a description saying so.
+this the second place either can be wrong. What that refusal costs a
+landing is above, with the rule it excepts.
 
 **A review reads more than the sha.** The tree it judges is the
 commit's; the title and description it judges are what the forge
