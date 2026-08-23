@@ -233,6 +233,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_every_published_module_declares_its_public_surface",
         ("btclib-secp256k1",),
     ),
+    (
+        79,
+        "test_the_package_directory_is_typed_and_declares_its_surface",
+        ("btclib-secp256k1",),
+    ),
     (131, "test_name_tests_test_runs_at_its_default", ("btclib-node",)),
     (
         131,
@@ -244,6 +249,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         177,
         "test_d_is_selected_with_the_pep257_convention",
         ("bbt", "btclib-node"),
+    ),
+    (
+        239,
+        "test_the_package_directory_is_typed_and_declares_its_surface",
+        ("btclib-node",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection."""

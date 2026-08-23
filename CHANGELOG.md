@@ -13,6 +13,30 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The package directory follows the package, and section 16 asks section 7
+
+- **Section 2 asks the package directory of a tree that installs an
+  importable package** — issue #193. The bullet was tiers 1 and 2's,
+  where a Python project that publishes nothing may install nothing:
+  `package = false`, or a build backend given no module to build. Where
+  there is no package the bullet has no subject, a floor being over the
+  rules whose subject a tree holds.
+- **`tests/surface_test.py` asks that bullet of every tree that has a
+  package** — `py.typed` in the directory and `__all__` in its
+  `__init__.py`, skipped where a tree installs none and carrying no tier
+  marker, that being the answer above. The directory is found by the
+  `__init__.py` at the root of the tree: found by `py.typed` it would
+  report a tree missing that file as an error rather than as the
+  finding. `btclib-secp256k1` and `btclib-node` are backlog rows against
+  issues #79 and #239.
+- **Section 16's migration step points at section 7 for which convention
+  tests are owed** — issue #215. It gave the criterion as one test per
+  convention the prose states, which is section 7's clause without the
+  condition that clause carries, and a migrating tree publishing an
+  importable package owes the public-surface test whether its prose
+  states the convention or not. The new-repository checklist above it
+  leaves the criterion to section 7.
+
 ### `REPOSITORY.md` says what Dependabot proposes here
 
 - **The Dependabot paragraph describes the file this tree holds** —

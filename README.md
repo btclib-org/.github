@@ -252,10 +252,9 @@ what tier 2 owes and more.
 A rule whose subject the tree does not hold asks nothing of it, at any
 tier: section 14 says so of `.taplo.toml` and a tree with no `toml`, and
 it is the same sentence for a section 11 ecosystem with no lock file to
-read or a section 2 row for a package directory a tree does not have.
-What the tier adds to that sentence is the difference between a rule
-with no subject here and a rule with a subject that is declined, which
-is the difference an alignment finding has to state.
+read. What the tier adds to that sentence is the difference between a
+rule with no subject here and a rule with a subject that is declined,
+which is the difference an alignment finding has to state.
 
 **A tier is a floor, not a ceiling.** Above it, a repository carries
 what its own practice needs: `portanode` cuts a signed tag and a GitHub
@@ -436,8 +435,14 @@ both tracked.
 - `.github/` — `workflows/`, `dependabot.yml`, `ISSUE_TEMPLATE/`,
   `PULL_REQUEST_TEMPLATE.md`, `scripts/` and `mutation/`.
 
-The first three are a Python tree's, so tiers 1 and 2's; `.github/` is
-every tier's, and holds what the sections the tier binds ask of it.
+`tests/` and `docs/source/` are a Python tree's, so tiers 1 and 2's;
+`.github/` is every tier's, and holds what the sections the tier binds
+ask of it. The package directory is asked of a tree that installs an
+importable package rather than of a tier: tier 1 is a package by what
+that tier is, and a project that publishes nothing may install nothing —
+`package = false`, or a build backend given no module to build. Where
+there is no package the bullet has no subject: a floor is over the rules
+whose subject a tree holds, and does not supply one.
 
 ## 3. `pyproject.toml` is the configuration
 
@@ -2731,8 +2736,8 @@ written before the gate that judges it.
    cover` with a reason where the line is unreachable, and set
    `fail_under = 100` only once the tree is there. Include the tests in
    `source` from the start.
-1. **The convention tests**, one per convention the prose already states,
-   and `tests/README.md` declaring which of section 7's bullets those
+1. **The convention tests**, which section 7's terms decide, and
+   `tests/README.md` declaring which of that section's bullets those
    are. An older repository is where the declaration earns most: it is
    the step that says which conventions this tree has decided it does
    not have, which is otherwise indistinguishable from having forgotten

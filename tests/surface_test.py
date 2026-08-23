@@ -2,15 +2,17 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Section 7's public surface, asked of the packages that publish.
+"""What a package directory holds, and what its modules declare.
 
-A repository needs the convention tests its own prose states, and
-section 7 takes the public surface out of that clause where the package
-is published: `py.typed` promises the types are supported, and which
-names are public is the other half of that promise. What is asked here
-is the standard's side of it -- that the modules declare `__all__` at
-all. The census section 7 asks for beside it walks an installed package
-and belongs to the suite of the tree that ships it.
+Section 2 asks the package directory for `py.typed` and an `__init__.py`
+that declares `__all__`, of a tree that installs an importable package
+and of no tier in particular. Section 7 asks the rest of the surface --
+`__all__` in every module -- of a package that publishes, taking that
+bullet out of its escape clause there: `py.typed` promises the types are
+supported, and which names are public is the other half of that promise.
+What is asked here is the standard's side of it, that the modules
+declare `__all__` at all. The census section 7 asks for beside it walks
+an installed package and belongs to the suite of the tree that ships it.
 """
 
 from __future__ import annotations
@@ -24,8 +26,8 @@ from . import Tier, by_hand, tracked
 
 pytestmark = pytest.mark.integration
 
-MARKER = "*py.typed"
-"""The pathspec that finds the package directory, as section 2 names it."""
+TYPED = "py.typed"
+"""The marker file section 2 asks the package directory to hold."""
 
 DECLARED = re.compile(r"^__all__\s*(?::[^=]+)?=", re.MULTILINE)
 """A module-level `__all__`, read rather than imported.
@@ -50,22 +52,65 @@ def is_public(path: str) -> bool:
     return not any(part.startswith("_") for part in parts if part != "__init__")
 
 
-def package(repository: str, trees: dict[str, Path]) -> Path:
-    """Return the package directory of a repository that publishes.
+def package(repository: str, trees: dict[str, Path]) -> Path | None:
+    """Return the package directory of a tree, where it installs one.
+
+    A directory of the root carrying an `__init__.py`, `tests/`
+    excepted, that being the shape section 2's list gives. The
+    `py.typed` the same bullet asks for is not what finds it: a tree
+    missing that file is what this module reports, and locating the
+    directory by it would report the absence as an error instead.
 
     :param repository: the repository's name.
     :param trees: the checkouts.
-    :returns: the directory, relative to the checkout.
-    :raises FileNotFoundError: where no one directory holds `py.typed`,
-        section 2 giving the package directory that file.
+    :returns: the directory relative to the checkout, or None where the
+        tree installs no importable package.
+    :raises LookupError: where more than one directory answers, the
+        bullet naming one.
     """
-    markers = tracked(trees[repository], MARKER)
-    if len(markers) != 1:
-        msg = f"{repository} has {markers} and section 2 asks for one; " + by_hand(
-            repository, f"git ls-files '{MARKER}'"
+    found = sorted(
+        {
+            Path(path).parent
+            for path in tracked(trees[repository], "*__init__.py")
+            if Path(path).parent.parent == Path() and Path(path).parent != Path("tests")
+        }
+    )
+    if len(found) > 1:
+        msg = f"{repository} has {found} and section 2 names one; " + by_hand(
+            repository, "git ls-files '*__init__.py'"
         )
-        raise FileNotFoundError(msg)
-    return Path(markers[0]).parent
+        raise LookupError(msg)
+    return found[0] if found else None
+
+
+def test_the_package_directory_is_typed_and_declares_its_surface(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 2: `py.typed` and an `__init__.py` that declares `__all__`.
+
+    Asked of every tree and skipped where there is no package, that
+    being the condition the bullet carries rather than a tier.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    root = trees[repository]
+    directory = package(repository, trees)
+    if directory is None:
+        pytest.skip(f"{repository} installs no importable package")
+    command = by_hand(
+        repository,
+        f"git ls-files '{directory}/{TYPED}';"
+        f" grep -n '^__all__' {directory}/__init__.py",
+    )
+    assert tracked(root, f"{directory}/{TYPED}"), (
+        f"{directory} holds no {TYPED}; " + command
+    )
+    declaration = (root / directory / "__init__.py").read_text(encoding="utf-8")
+    assert DECLARED.search(declaration), (
+        f"{directory}/__init__.py declares no __all__; " + command
+    )
 
 
 @pytest.mark.tier(Tier.PUBLISHER)
@@ -84,6 +129,10 @@ def test_every_published_module_declares_its_public_surface(
     """
     root = trees[repository]
     directory = package(repository, trees)
+    assert directory is not None, (
+        f"{repository} publishes a package and the tree holds none; "
+        + by_hand(repository, "git ls-files '*__init__.py'")
+    )
     silent = sorted(
         path
         for path in tracked(root, f"{directory}/*.py")
