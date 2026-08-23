@@ -2,13 +2,16 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""The files section 14 calls verbatim agree where it says they do.
+"""The files section 14 calls verbatim are carried where it says, and agree.
 
 The list is prose with a reason under each entry, which is what a person
-reading it needs; the subject of each bullet is a path, which is what
-this needs. Nothing else in the organization compares those copies, and
-the failure they hide is silent by construction: a hook config that
-drifts still lints, it just stops asking the same question everywhere.
+reading it needs; each bullet opens with a path and with who owes a copy,
+which is what this needs. Nothing else in the organization compares those
+copies, and the failure they hide is silent by construction: a hook config
+that drifts still lints, it just stops asking the same question everywhere.
+A tree with no copy at all hides the same way -- a comparison of what is
+there has nothing to say about it, and the clause is what separates the
+tree that owes one from the tree the file does not apply to.
 """
 
 from __future__ import annotations
@@ -32,7 +35,20 @@ rather than in a list here: a second list is one more thing to keep in
 step with the first, and the file is the thing being compared anyway.
 """
 
-EXPECTED_DRIFT: dict[str, str] = {}
+EVERYWHERE = "owed by every repository"
+"""How a bullet of section 14 says a copy is owed of every tree.
+
+The other spelling is `owed where` and a condition, which is prose this
+does not read: a tree the condition does not reach carries no copy and
+is short of nothing. Reading the clause off the bullet is what keeps the
+answer where the standard states it, rather than in a list here that
+would have to be kept in step with that one.
+"""
+
+CONDITIONAL = "owed where "
+"""How a bullet of section 14 opens where a copy is owed on a condition."""
+
+EXPECTED_DRIFT: dict[str, str] = {".gitattributes": "btclib-org/.github#192"}
 """A path section 14 names whose copies are known not to agree yet.
 
 The value is the issue that decides it. An entry here is a strict
@@ -43,10 +59,11 @@ entry.
 """
 
 
-def verbatim() -> list[str]:
+def verbatim() -> dict[str, str]:
     """Read both halves of section 14 that name a whole path.
 
-    :returns: the paths, relative to a repository root.
+    :returns: each path, relative to a repository root, against the
+        clause its bullet opens with.
     """
     return subjects(
         ROOT / "README.md",
@@ -58,12 +75,41 @@ def verbatim() -> list[str]:
 def shared(path: Path) -> bytes:
     """Read the half of a copy that every repository is meant to share.
 
+    Both halves end at one newline, so a copy that leaves a blank line
+    before the marker and one that does not say the same thing here. The
+    marker opens with a newline of its own, so the two spellings
+    otherwise differ by the last byte of the half -- a difference a diff
+    renders as nothing, in a report naming two groups of copies that look
+    identical.
+
     :param path: the file to read.
-    :returns: everything before the marker, or the whole file without one.
+    :returns: everything before the marker, or the whole file without
+        one, ending at a single newline.
     """
     body = path.read_bytes()
     cut = body.find(MARKER)
-    return body if cut < 0 else body[:cut]
+    if cut >= 0:
+        body = body[:cut]
+    return body.rstrip(b"\n") + b"\n"
+
+
+def owed(path: str, clause: str) -> bool:
+    """Say whether section 14 owes a file of every repository.
+
+    :param path: the file the bullet is about, for the message.
+    :param clause: what the bullet says after its subject.
+    :returns: whether every repository is meant to carry a copy.
+    :raises LookupError: where the bullet opens with neither spelling.
+    """
+    if clause.startswith(CONDITIONAL):
+        return False
+    if clause.startswith(EVERYWHERE):
+        return True
+    msg = (
+        f"section 14's bullet for {path} opens with neither {EVERYWHERE!r}"
+        f" nor {CONDITIONAL!r}: {clause!r}"
+    )
+    raise LookupError(msg)
 
 
 def test_section_14_names_files(trees: dict[str, Path]) -> None:
@@ -99,10 +145,10 @@ def test_every_copy_of_a_verbatim_file_is_the_same_copy(
 ) -> None:
     """Where two repositories carry one of these files, it is one file.
 
-    A repository that carries none of a given file is not a finding:
-    section 14 is about what the copies agree on, and which repositories
-    need a copy at all is that file's own bullet to say. A path in
-    `EXPECTED_DRIFT` is the test below's.
+    A repository that carries none of a given file is not this test's
+    finding: this one is about what the copies agree on, and whether a
+    tree owes a copy at all is what the test below asks of that file's
+    bullet. A path in `EXPECTED_DRIFT` is the last test's.
 
     :param trees: the checkouts.
     """
@@ -114,6 +160,29 @@ def test_every_copy_of_a_verbatim_file_is_the_same_copy(
         if len(found) > 1:
             drifted[path] = [", ".join(holders) for holders in found.values()]
     assert not drifted, f"verbatim files that differ between trees: {drifted}"
+
+
+def test_a_repository_carries_the_verbatim_files_owed_of_it(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """A file section 14 owes of every repository is missing from none.
+
+    Every other question about these files is asked of the copies that
+    exist, so a tree with none reads as one the standard passes over.
+    `EXPECTED_DRIFT` is not consulted: an entry there records copies that
+    disagree, which is a different finding from a copy that is not there.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    root = trees[repository]
+    missing = [
+        path
+        for path, clause in verbatim().items()
+        if owed(path, clause) and not (root / path).is_file()
+    ]
+    assert not missing, f"section 14 files this tree does not carry: {missing}"
 
 
 @pytest.mark.parametrize(

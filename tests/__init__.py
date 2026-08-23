@@ -302,11 +302,13 @@ def name(cell: str) -> str:
     return cell.strip("`")
 
 
-SUBJECT = re.compile(r"^- `([^`]+)` — ")
+SUBJECT = re.compile(r"^- `([^`]+)` — (.+)")
 """How a bullet of a list this module reads names what it is about.
 
 The backticks and the spaced em dash are the shape, and a bullet written
-any other way is one this cannot answer for.
+any other way is one this cannot answer for. What follows the dash is
+the rest of that line, for a caller reading the clause the bullet opens
+with.
 """
 
 
@@ -368,29 +370,34 @@ def fenced(document: Path, opening: str, language: str) -> str:
     return "\n".join(blocks[0]) + "\n"
 
 
-def subjects(document: Path, opening: str, closing: str) -> list[str]:
-    """Read the backticked subject of every bullet between two lines.
+def subjects(document: Path, opening: str, closing: str) -> dict[str, str]:
+    """Read every bullet between two lines, by its backticked subject.
 
     A bullet's subject is what it is about, and a list whose subjects are
-    paths is a list a test can act on. `opening` and `closing` are the
-    prose either side of it, so moving the list within its section does
-    not need this call changed.
+    paths is a list a test can act on; what the bullet then says about it
+    is the caller's to read. `opening` and `closing` are the prose either
+    side of it, so moving the list within its section does not need this
+    call changed.
 
     Every way of reading nothing here is an error rather than an empty
     answer, for the reason `rows` refuses a header it finds twice: a
-    caller that gets `[]` compares no files and reports that as agreement.
-    So both ends have to be found exactly once and in that order, the
-    list between them has to hold a bullet, and every bullet it holds has
-    to carry a subject -- a list rewritten into a shape this cannot read
-    is the failure, not a run that quietly checks nothing.
+    caller that gets `{}` compares no files and reports that as
+    agreement. So both ends have to be found exactly once and in that
+    order, the list between them has to hold a bullet, and every bullet
+    it holds has to carry a subject of its own -- a list rewritten into a
+    shape this cannot read is the failure, not a run that quietly checks
+    nothing. Of its own, because a subject named twice would leave one
+    bullet read and the other dropped, which is the same silence one
+    line down.
 
     :param document: the markdown file to read.
     :param opening: a substring of the line the list follows.
     :param closing: a substring of the line the list stops at.
-    :returns: the subjects, in the order the list gives them.
+    :returns: each subject against the rest of its bullet's first line,
+        in the order the list gives them.
     :raises LookupError: where either end is not found exactly once, the
-        closing line comes first, or a bullet between them has no
-        backticked subject.
+        closing line comes first, a bullet between them has no backticked
+        subject, or two bullets carry the same one.
     """
     lines = document.read_text(encoding="utf-8").splitlines()
     start = sole(document, lines, opening)
@@ -398,20 +405,22 @@ def subjects(document: Path, opening: str, closing: str) -> list[str]:
     if end < start:
         msg = f"{document.name} holds {closing!r} before {opening!r}"
         raise LookupError(msg)
-    out: list[str] = []
+    read: list[tuple[str, str]] = []
     unread: list[str] = []
     for line in lines[start + 1 : end]:
         if not line.startswith("- "):
             continue
         found = SUBJECT.match(line)
         if found:
-            out.append(found.group(1))
+            read.append((found.group(1), found.group(2)))
         else:
             unread.append(line)
-    if unread or not out:
+    out = dict(read)
+    if unread or not out or len(out) != len(read):
         msg = (
-            f"{document.name} names {len(out)} subjects between {opening!r}"
-            f" and {closing!r}, and these bullets name none: {unread}"
+            f"{document.name} names {len(read)} bullets between {opening!r}"
+            f" and {closing!r}, {len(out)} of them by a subject of their"
+            f" own, and these name none: {unread}"
         )
         raise LookupError(msg)
     return out
