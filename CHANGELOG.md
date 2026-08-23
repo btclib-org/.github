@@ -84,6 +84,57 @@ audit has no revision to compare against.
   `no-untyped-call` and `no-any-return`. That run is what the opening
   paragraph's widest claim rests on.
 
+### One code of conduct, and a security policy where a package carries it
+
+- **`CODE_OF_CONDUCT.md` is kept in this repository and nowhere else.**
+  The file is a pointer to the PSF code of conduct: one policy for the
+  organization rather than anything a tree has to say about itself, so a
+  copy per repository is a copy of a pointer. GitHub shows this one for
+  any public repository of the organization carrying none of its own,
+  which section 2 says is display only, and display is the whole of what
+  the file was doing in each tree. Section 16's first step no longer
+  writes one into a new repository.
+
+- **Section 14 no longer lists it**, and `tests/verbatim_test.py`
+  therefore no longer compares it: the list's subject is a path that two
+  or more trees carry, and a comparison of one copy has no state in which
+  it fails. What the entry bought is had another way — the organization
+  advertises a single policy because there is a single file, not because
+  the copies were checked to be the same one. The repositories that still
+  carry one drop it in pull requests of their own, and each may land on
+  its own schedule now that nothing compares them.
+
+- **`SECURITY.md` is owed by a repository that publishes and inherited
+  everywhere else**, which makes it section 2's conditional row. What
+  decides it is that the sdist carries the file, so a reader who has the
+  archive and not github.com still reads the policy, and what such a file
+  says — what belongs to that project, what its distributions attest to,
+  what it is known not to do — is that tree's own. Which repositories
+  those are is a measurement, and section 15 gains the command that
+  takes it rather than this entry keeping a second copy of one. It
+  answers `btclib`, `btclib-secp256k1` and `bitcoin-core-rpc` today. The
+  `bbt` that PyPI serves under that name is a different project — this
+  organization's sets `version = "0"` and says in `pyproject.toml` that
+  there is no upload — which is why that command reads a distribution's
+  project urls rather than its status code.
+
+- **This repository carries the `SECURITY.md` the rest inherit.** It
+  holds what is true wherever it is displayed — that an issue is public
+  from the moment it is filed, the advisory route and the address beside
+  it, that a defect belongs to the project whose code decides the wrong
+  thing, and that a report goes wherever the reporter found it because
+  routing one is the maintainers' job. What it cannot hold is the half a
+  policy exists for: which flaws are that tree's, and what it is known
+  not to do. That half is why a publishing repository keeps its own.
+
+- **`MANIFEST.in` leaves section 2's table.** Which file declares the
+  sdist's include list is the build backend's to say, which section 12
+  settles and section 15's audit reads back, so the row was a third place
+  for one fact. Nothing about a tree changes, and the row's departure
+  asserts nothing about one: whether a given repository tracks a
+  `MANIFEST.in` is answered by `git ls-files MANIFEST.in` in it, not by
+  its backend.
+
 ### The calendar names the workflows that exist
 
 - **Section 10's rows follow the file names the organization now uses.**

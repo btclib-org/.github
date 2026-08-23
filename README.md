@@ -51,8 +51,14 @@ file is the third of:
   `SECURITY.md`, `SUPPORT.md`, `FUNDING.yml`, or issue and pull request
   templates placed here are shown for any *public* repository of the
   organization that has none of its own. The inheritance is display
-  only: nothing is copied into a tree, so no hook reads it, no sdist
+  only: an inherited file is in no tree, so no hook reads it, no sdist
   carries it, and a repository that wants the file gated keeps its own.
+  `CODE_OF_CONDUCT.md` is kept here and nowhere else: it points at the
+  PSF code of conduct, which is one policy for the organization rather
+  than anything a tree says about itself, so a copy per repository is a
+  copy of a pointer. `SECURITY.md` is kept here *and* in each repository
+  that publishes, the table below saying when and why, and section 15
+  the command that answers which.
 - **This file** is inherited by nothing and is the point: one statement
   of the standard, linked from each repository's `CONTRIBUTING.md`,
   rather than a copy per repository for the copies to drift apart in.
@@ -186,7 +192,6 @@ which, and on what:
 | `LICENSE` | MIT, referred to by SPDX from `pyproject.toml` |
 | `COPYRIGHT` | the three-line notice every source file opens with |
 | `AUTHORS.md` | a pointer to the contributor graph, not a list |
-| `CODE_OF_CONDUCT.md` | a pointer to the PSF code of conduct |
 | `SECURITY.md` | reporting, supported versions, known limitations |
 | `CONTRIBUTING.md` | how to work, this tree's commands in its last section |
 | `REVIEWING.md` | the standard a review is written against |
@@ -195,16 +200,19 @@ which, and on what:
 | `CHANGELOG.md` | every user-visible change, by group |
 | `RELEASE_NOTES.md` | what a user has to *act* on, on top of it |
 | `CLAUDE.md` | what a session needs and no human document holds |
-| `MANIFEST.in` | what the sdist carries, where setuptools reads it |
 | `pyproject.toml` | the project and every tool's configuration |
 | `uv.lock` | the pinned resolution |
 
-**`MANIFEST.in` is the conditional row**, and what it is conditional on
-is the build backend: which file carries the sdist's include list is the
-backend's to say, which section 12 settles and section 15's audit reads
-back. `btclib-secp256k1` is on hatchling and tracks no `MANIFEST.in`,
-correctly; a tree on setuptools tracks one. A normalizer reaching this
-table from section 16 owes the row only once that question is answered.
+**`SECURITY.md` is the conditional row**, and what it is conditional on
+is whether the repository publishes. The sdist carries the file, so a
+reader who has the archive and not github.com reads the policy from it,
+and a published package's own provenance — what its distributions attest
+to, and which of them is supported — is not something a file shared with
+every other repository can state. Where nothing is published there is no
+archive, and GitHub shows this repository's copy. What that costs is
+worth knowing: an inherited policy cannot name the flaws that are that
+tree's, or the project a report about it should go to instead, so a tree
+with either to say says it in its `README.md` and its issue tracker.
 
 **Every `README.md` ends with the same line**, under a thematic break,
 naming who supports the work:
@@ -1553,10 +1561,6 @@ lint in the others. Each bullet's subject is the path, which is what lets
   entry is a one-line diff.
 - `COPYRIGHT` — owed by every repository; one line naming the holder, and
   what every header in every tree points at instead of repeating it.
-- `CODE_OF_CONDUCT.md` — owed by every repository. Where one carries
-  none GitHub falls back to this repository's copy, so a repository that
-  does carry its own carries the same one or the organization advertises
-  two policies.
 - `LICENSE` — owed by every repository: MIT, the holder named and no year
   range. A range is a line nobody updates, and `COPYRIGHT` states the
   holder without one, so the two would disagree the first January nobody
@@ -1600,6 +1604,12 @@ carries its own licence and its own authors, and is only ever read from.
 It is named in prose and not as a bullet deliberately: a file meant to
 differ per repository can never satisfy a byte comparison, so listing it
 above would buy an assert with no state in which it closes.
+
+`CODE_OF_CONDUCT.md` is out of the list for the opposite reason: there is
+one copy of it, in this repository, and a comparison needs two. What the
+bullet was for is had another way — the organization advertises a single
+policy because there is a single file, rather than because every copy of
+it agrees with this one.
 
 A per-file exception belongs in that file's own
 `markdownlint-configure-file` comment, not in the shared config read by
@@ -1702,6 +1712,36 @@ print([c for c in declared if c not in classifiers])'
 
 An empty list is the answer. A string in it is one PyPI would refuse on
 upload, at the point where a version is already being consumed.
+
+Which repositories publish, which is what section 2's conditional row
+turns on and so what decides whether a `SECURITY.md` is owed or
+inherited:
+
+```shell
+for r in <every repository>; do
+  gh api "repos/<org>/$r/contents/.github/workflows/release.yml" \
+    --silent 2>/dev/null && w=release.yml || w=none
+  printf '%s\trelease=%s\n' "$r" "$w"
+done
+curl -s https://pypi.org/pypi/<name>/json | python3 -c 'import json, sys
+d = json.load(sys.stdin).get("info")
+if d is None:
+    print("absent from the index")
+else:
+    u = [v for v in (d.get("project_urls") or {}).values()
+         if "github.com/<org>/" in v]
+    print(u[0] if u else "on the index, another project")'
+```
+
+Both halves are the question, and neither answers alone. The first is
+asked by the exit code: `--silent` prints nothing on success and sends
+the failure to stderr, where `--jq .name` would put a 404's *body* on
+stdout and `|| echo none` would append to it. The second reads the
+project urls rather than the status code, because a name this
+organization does not publish may be served by somebody else's project
+of the same name — so the discriminator is a link back to the
+organization and not a `200`. `<name>` is what `pyproject.toml`
+declares, which is not always the repository's.
 
 The calendar of section 10, across the organization, which is the one
 audit no single tree can answer:
@@ -1812,8 +1852,7 @@ independent and the checklist the same for each.
 
 ### A new repository
 
-1. `git init`, MIT `LICENSE`, `COPYRIGHT`, `AUTHORS.md`,
-   `CODE_OF_CONDUCT.md`.
+1. `git init`, MIT `LICENSE`, `COPYRIGHT`, `AUTHORS.md`.
 1. `pyproject.toml`: metadata, PEP 639 licence, keywords matching the
    topics, urls, dependency groups, and the tool tables of sections 5, 6,
    7 and 8.
@@ -1840,8 +1879,9 @@ independent and the checklist the same for each.
    `docs`, `claude-review`, then the periodic ones the project earns.
 1. `.github/dependabot.yml`, `ISSUE_TEMPLATE/`,
    `PULL_REQUEST_TEMPLATE.md`.
-1. `CONTRIBUTING.md`, `REVIEWING.md`, `REPOSITORY.md`, `SECURITY.md`,
-   `RELEASING.md`, `CHANGELOG.md`, `RELEASE_NOTES.md`, `CLAUDE.md`.
+1. `CONTRIBUTING.md`, `REVIEWING.md`, `REPOSITORY.md`, `RELEASING.md`,
+   `CHANGELOG.md`, `RELEASE_NOTES.md`, `CLAUDE.md`; and `SECURITY.md`
+   where the repository publishes, section 2's conditional row.
 1. GitHub, in this order: default branch `main`; squash-only;
    `delete_branch_on_merge`; the three rulesets; classic protection with
    the required checks bound to the Actions app; the publishing
