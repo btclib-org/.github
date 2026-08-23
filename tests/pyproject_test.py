@@ -67,6 +67,28 @@ def parsed(repository: str, pyprojects: dict[str, dict[str, Any]]) -> dict[str, 
     return pyprojects[repository]
 
 
+def distribution(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Return the `[project]` table of a tree that builds a distribution.
+
+    Skipped where the file names no build backend: section 3's metadata
+    is a distribution's and a file that builds none holds no subject for
+    it, which is section 2's sentence about a rule whose subject the
+    tree does not have.
+
+    :param repository: the repository's name.
+    :param pyprojects: the parsed files.
+    :returns: the table, empty where the tree declares none.
+    """
+    document = parsed(repository, pyprojects)
+    if "build-system" not in document:
+        pytest.skip(f"{repository} names no build backend")
+    project: dict[str, Any] = document.get("project", {})
+    return project
+
+
 def ruff_lint(
     repository: str,
     pyprojects: dict[str, dict[str, Any]],
@@ -126,6 +148,31 @@ def test_the_project_urls_are_the_seven_section_3_names(
         f"missing {sorted(URLS - spelled)}, unexpected {sorted(spelled - URLS)}; "
         + by_hand(repository, "sed -n '/^\\[project.urls\\]/,/^\\[/p' pyproject.toml")
     )
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_the_licence_is_an_expression_with_its_files(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 3: PEP 639's two keys, the SPDX string and `license-files`.
+
+    A tree declaring the deprecated table, or no key at all, passes
+    `classifiers_test.py` -- which reads `license` to refuse the
+    classifier beside an expression and so asks nothing of a tree that
+    has none -- and is refused here. What the list may name is section
+    3's question rather than this one's, btclib-org/.github#200, so what
+    is asked of it here is that it is declared.
+
+    :param repository: the repository asked about.
+    :param pyprojects: the parsed files.
+    """
+    project = distribution(repository, pyprojects)
+    command = by_hand(repository, "grep -n '^license' pyproject.toml")
+    expression = project.get("license")
+    assert isinstance(expression, str), f"license is {expression!r}; " + command
+    files = project.get("license-files")
+    assert files, f"license-files is {files!r}; " + command
 
 
 @pytest.mark.tier(Tier.PYTHON)
