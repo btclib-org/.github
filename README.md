@@ -1552,7 +1552,13 @@ for a particular signer.
 
 Two settings hold the door, not one: the classic review requirement is
 cleared for the maintainer by `enforce_admins: false` *plus* admin, and
-turning `enforce_admins` on would deadlock every solo merge.
+turning `enforce_admins` on would deadlock every solo merge. That setting
+clears the whole of classic protection for that account rather than its
+review rule alone, `strict` included, so being up to date with `main` is
+a rebase somebody runs and not a rule the forge holds. A branch merged
+behind `main` lands a tree nothing has run: the branch is green against
+the base it was gated on, `main` is green against its own tip, and the
+squash produces neither.
 
 When patching required checks, use the `checks` array and a JSON body on
 stdin: `contexts` has no field for an app, so sending it silently

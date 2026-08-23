@@ -75,8 +75,10 @@ JSON
 ```
 
 `enforce_admins: false` is not a relaxation but what makes a solo merge
-possible at all, the ruleset bypass reaching only the ruleset's own rule;
-[section 11 pairs the two settings][s11-branch].
+possible at all, the ruleset bypass reaching only the ruleset's own rule.
+It exempts an administrator from the required checks as well as from the
+review, so the `strict` above is not what makes the landing tree current;
+[section 11 pairs the two settings and has what does][s11-branch].
 
 The `checks` array and a JSON body on stdin, never `contexts` and never
 `-f`, and a later change to the list is a `PATCH` of
@@ -92,7 +94,7 @@ request. Rules [aggregate rather than replace each other][s11-branch], so
 what holds is what the call below answers **together with** the classic
 protection two headings up: that one requires a review, a linear history,
 resolved conversations and the `Lint` check, and refuses a force push or a
-deletion, and it exempts an administrator where these rulesets do not.
+deletion — under the exemption above, which these rulesets do not carry.
 Where the two overlap, the stricter answer is the one that applies:
 
 ```shell

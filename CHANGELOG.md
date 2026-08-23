@@ -48,6 +48,16 @@ audit has no revision to compare against.
   repository goes with it: `.github/dependabot.yml` is in the tree, and
   the runs it opens are what the input admits.
 
+### Section 11 says what `enforce_admins: false` clears
+
+- **The setting clears the required checks and not the review rule
+  alone** — issue #185. `strict` is among them, so being up to date with
+  `main` is a rebase somebody runs before landing rather than a rule the
+  forge holds, and a branch merged behind `main` lands a tree nothing has
+  run. `REPOSITORY.md` says that of the `strict` in the protection body
+  it records, and points at the section for the rest; the exemption it
+  stated a second time under the rulesets points at the same place.
+
 ### `REPOSITORY.md` says what Dependabot proposes here
 
 - **The Dependabot paragraph describes the file this tree holds** —
