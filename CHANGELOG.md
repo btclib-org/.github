@@ -48,6 +48,15 @@ audit has no revision to compare against.
   cells `tests/hooks_test.py` reported on this repository against issues
   #153 and #134 go from the backlog.
 
+- **`links.yml` no longer passes `--cache`.** No step restored the
+  cache file between runs, so the flag decided nothing across them, and
+  it would decide nothing with the step added: the run is weekly and the
+  cache age passed beside it was a day. Within one run lychee asks each
+  URL once whatever the flag says -- `lychee --offline` over this tree's
+  markdown reports the unique count beside the total. The cell
+  `tests/links_test.py` reported on this repository against issue #111
+  goes from the backlog.
+
 ### Section 15's audit runs as the suite, one row per repository
 
 - **Section 15's commands are tests, asked of every repository at

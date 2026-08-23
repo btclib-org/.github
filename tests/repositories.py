@@ -144,7 +144,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         111,
         "test_a_lychee_cache_is_kept_between_runs",
         (
-            ".github",
             "bitcoin-core-rpc",
             "btclib",
             "btclib-benchmarks",
