@@ -2228,9 +2228,9 @@ weekly.
 
 The commands below are the same questions for the tree in front of you,
 and the questions the suite does not ask yet or cannot. Which it asks is
-each module's docstring; two it never will, each being a reading rather
-than a comparison — `tests/README.md` against section 7, and the
-workflow comments, below. A repository answers for itself where it can —
+each module's docstring; what it never will is a reading rather than a
+comparison — `tests/README.md` against section 7, and the workflow
+comments, below. A repository answers for itself where it can —
 `interpreters_test.py`, `conventions_test.py`, the hook-pin tests — and
 this file is where the rest is written down.
 
@@ -2472,13 +2472,13 @@ An action not pinned to forty hex digits, a workflow with no
 `permissions:` block, and a `--frozen` anywhere are each a finding on
 their own. Check exit codes, not filtered output.
 
-`tests/README.md` is section 7's answer, and it is the only one of these
-a command cannot compute — that section says why. Read it against
-section 7's list and that section's rule for which bullets a repository
-owes: a bullet owed and not claimed is the finding, and a bullet claimed
-is answered by the test in that repository that asserts the claim. Across
-the organization the same command run in each tree is the matrix, and
-there is no shorter way to it.
+`tests/README.md` is section 7's answer, and no command computes it —
+that section says why. Read it against section 7's list and that
+section's rule for which bullets a repository owes: a bullet owed and
+not claimed is the finding, and a bullet claimed is answered by the test
+in that repository that asserts the claim. Across the organization the
+same command run in each tree is the matrix, and there is no shorter way
+to it.
 
 What the package-content lines have to say: where the wheel is one
 package tree, a `package` naming it, whose absence is section 12's
@@ -2493,12 +2493,11 @@ inclusion follows from it.
 
 ### Reading the workflow comments
 
-The one audit here that is a reading rather than a command, and the one
-nothing else covers. `actionlint` reads the workflow, `zizmor` reads it
-for injection, the gate reads the code — and a sentence asserting that a
-job "calls three reusable workflows" sits unchallenged beside a file that
-calls six. It reads as authoritative precisely because it sits next to
-the thing it describes.
+A reading rather than a command, and no tool covers it: `actionlint`
+reads the workflow, `zizmor` reads it for injection, the gate reads the
+code — and a sentence asserting that a job "calls three reusable
+workflows" sits unchallenged beside a file that calls six. It reads as
+authoritative precisely because it sits next to the thing it describes.
 
 1. **Read every comment, end to end.** Not a grep for suspicious words:
    the stale ones read exactly like the true ones.
@@ -2583,7 +2582,9 @@ independent and the checklist the same for each.
 1. GitHub, in this order: default branch `main`; squash-only;
    `delete_branch_on_merge`; the three rulesets; classic protection with
    the required checks bound to the Actions app; the publishing
-   environments; the read-only default token.
+   environments; the read-only default token; secret scanning, its push
+   protection and Dependabot security updates; private vulnerability
+   reporting.
 1. Read each setting back with the commands `REPOSITORY.md` records, and
    write the answers into it.
 
@@ -2632,6 +2633,9 @@ written before the gate that judges it.
    each is a switch and each starts paying the moment it is on — section
    11 has which of the two refuses and which reports — and neither reads
    a lock file.
+   **Private vulnerability reporting** goes on beside them, section 2
+   owing it at every tier: it is what makes the route a `SECURITY.md`
+   links exist, and it waits for nothing.
    **Dependabot's updates wait** for the lock below — turned on over the
    outgoing resolution, they propose bumps to a file that step deletes,
    and one landed there is a conflict on the migration rather than a

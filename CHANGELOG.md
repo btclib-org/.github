@@ -35,6 +35,25 @@ audit has no revision to compare against.
   declining one is not drift. Requiring them of every tree is the
   rejected alternative: it asks a tree to drop a gate it passes.
 
+### Section 15 stops counting its readings, and section 16 names the switches
+
+- **Section 15 says once what the suite never asks** — issue #203. The
+  intro named the readings and counted them, the `tests/README.md`
+  paragraph called itself the only one a command cannot compute, and the
+  workflow-comments subsection called itself the one audit that is a
+  reading. The intro keeps the members and drops the number, and the
+  other places say what they are rather than how many there are.
+- **The new-repository checklist names every GitHub setting it owes** —
+  issue #204. Section 16's first checklist is *How to use this file*'s
+  same list without the reasoning, so it carries what section 11 asks —
+  secret scanning, its push protection and Dependabot security updates —
+  and what section 2 asks of every tier, private vulnerability
+  reporting. `tests/security_test.py` asks that setting of every
+  repository, so a list omitting it builds a tree the suite fails.
+- **The normalizing checklist gains that setting too**, beside the
+  scanning switches: a tree brought up to the standard owes it as much
+  as a new one.
+
 ### The root-files table says what a README is at every tier it binds
 
 - **Section 2's `README.md` row describes the file rather than a
