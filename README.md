@@ -1972,35 +1972,31 @@ corrected in none of the ones that shipped.
   where the flag applies: that is the same assertion bought with code to
   maintain, and it moves what the `dist` job knows about the artifact
   into a chain that holds only while every link runs.
-- **The sdist is diffed against what git tracks**, in both directions,
-  by `check-sdist` in the gate of every repository that builds one. It
-  builds the archive and compares it against the index, and its exit
-  code says which way the two differ: a tracked file the archive dropped,
-  or a member git does not track. The first is an include list's failure
-  — a tracked file nobody added to `source-include` — and it is silent.
-  The second is an exclude list's, and it is not loud either: an archive
-  too wide is noticed by whoever reads the archive, and nothing else in
-  a release path does, `twine check`, `check-wheel-contents` and `pyroma`
+- **The sdist is diffed against what git tracks**, in both directions, by
+  `check-sdist` in the gate of every repository that builds one. It
+  builds the archive and compares it against the index, and its exit code
+  says which way the two differ: a tracked file the archive dropped, or a
+  member git does not track. The first is an include list's failure — a
+  tracked file nobody added to `source-include` — and it is silent. The
+  second is an exclude list's, and it is not loud either: an archive too
+  wide is noticed by whoever reads the archive, and nothing else in a
+  release path does, `twine check`, `check-wheel-contents` and `pyroma`
   each reading a distribution's account of itself, so a local build
   artifact or a vendored tree mid-update reaches the index with nothing
-  asking. The rule used to ask for the check only where the inclusion is
-  an include list, on the reasoning that the other failure is not silent.
-  That conditional was `check-manifest`'s, which read a setuptools
-  include list and had nothing to read without one; the tool that
-  replaced it answers both cases, so the conditional went with the tool,
-  and what the check costs an exclude-list tree is a `[tool.check-sdist]`
-  table naming the tracked files its archive leaves out on purpose. Which
-  table declares the inclusion is the backend's: `uv_build` reads
-  `[tool.uv.build-backend]` and hatchling
-  `[tool.hatch.build.targets.sdist]`, neither reads the other's, and a
-  table the declared backend does not read is configuration that looks
-  like a rule and governs nothing. So `check-sdist` keys a plugin on
-  `[build-system]` and reads that backend's own exclusions, which is what
-  leaves `[tool.check-sdist]` holding only what no pattern of the
-  backend's accounts for. Past that, an
-  allowlist for the sdist — which members may sit at the archive's root,
-  that every member is a regular file or a directory where a tar can
-  carry a symlink or a device node, that no directory holds another
+  asking. Both directions being quiet is why the check is not conditional
+  on the inclusion being an include list, and what it costs an
+  exclude-list tree is a `[tool.check-sdist]` table naming the tracked
+  files its archive leaves out on purpose. Which table declares the
+  inclusion is the backend's: `uv_build` reads `[tool.uv.build-backend]`
+  and hatchling `[tool.hatch.build.targets.sdist]`, neither reads the
+  other's, and a table the declared backend does not read is
+  configuration that looks like a rule and governs nothing. So
+  `check-sdist` keys a plugin on `[build-system]` and reads that
+  backend's own exclusions, which is what leaves `[tool.check-sdist]`
+  holding only what no pattern of the backend's accounts for. Past that,
+  an allowlist for the sdist — which members may sit at the archive's
+  root, that every member is a regular file or a directory where a tar
+  can carry a symlink or a device node, that no directory holds another
   distribution's metadata — is the escalation a repository takes when its
   archive carries more than the package.
 - **A hook that builds the project builds it with the backend
@@ -2075,14 +2071,14 @@ tag must carry, and that it is not the zero-byte one a half-finished
 build step leaves behind. Its sdist target is an exclude list, so what
 `check-sdist` costs it is the `[tool.check-sdist]` table naming the
 tracked files its archive leaves out on purpose, and what the check buys
-it is the case the old conditional exempted: a file git does not track
-reaching the index through an archive nothing else reads, the vendored
-library's tree included, since the check lists a submodule's files with
-git's own. `btclib`'s `source-include` is a glob include list and its
-archive carries the suite and the vendored vectors, so what the same
-check catches there is the silent half — a tracked file the list never
-named — and which files may sit at the root and what kind of member the
-tar holds are the questions nothing it runs otherwise asks.
+it is the case a check conditional on an include list would exempt: a
+file git does not track reaching the index through an archive nothing
+else reads, the vendored library's tree included, since the check lists a
+submodule's files with git's own. `btclib`'s `source-include` is a glob
+include list and its archive carries the suite and the vendored vectors,
+so what the same check catches there is the silent half — a tracked file
+the list never named — and which files may sit at the root and what kind
+of member the tar holds are the questions nothing it runs otherwise asks.
 
 ## 13. Editor and agent configuration
 
