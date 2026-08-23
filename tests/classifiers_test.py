@@ -79,8 +79,9 @@ def test_no_license_classifier_beside_the_expression(
 
     The pair is what an archive carries into the index as two
     declarations of one fact. A tree declaring the classifier and no
-    expression is short of the expression, which is section 3's other
-    half and a question nothing here asks -- btclib-org/.github#173.
+    expression is short of the expression instead, which is
+    `pyproject_test.py`'s question: PEP 639's own two keys are read
+    there.
 
     The `classifiers` list is what is read, and not the file: a tree
     whose comment explains the classifier's absence holds the string

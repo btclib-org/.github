@@ -54,6 +54,21 @@ audit has no revision to compare against.
   The paraphrase carried the same gap; the sentence names the clause and
   says where it reaches.
 
+### PEP 639's two keys are read, in every tree that builds an archive
+
+- **`pyproject_test.py` asks section 3 for the licence expression and
+  for `license-files`** — issue #173. `license` has to be the SPDX
+  string: the deprecated table is what PEP 639 replaced, and it is also
+  what passes `classifiers_test.py`, whose refusal of a `License ::`
+  classifier beside the expression reads that same key and so asks
+  nothing of a tree declaring no string. `license-files` has to be
+  declared, and what it may name is section 3's own question — issue
+  #200.
+- **A tree that names no build backend is skipped with the reason.**
+  Section 3's metadata is a distribution's, so a `pyproject.toml` that
+  builds none holds no subject for it, which is what section 2 says of
+  a rule whose subject a tree does not have.
+
 ### The test-file spelling and the public surface each state one rule
 
 - **The test-file spelling is a choice between two patterns pytest
