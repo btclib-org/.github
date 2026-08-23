@@ -239,11 +239,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_every_test_file_is_named_so_pytest_collects_it",
         ("btclib-node",),
     ),
-    (
-        175,
-        "test_dependabot_watches_what_section_11_gives_every_tree",
-        ("portanode",),
-    ),
     (176, "test_w_is_selected_with_max_doc_length_at_80", ("bbt",)),
     (
         177,

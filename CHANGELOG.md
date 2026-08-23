@@ -134,6 +134,22 @@ audit has no revision to compare against.
   none of its own. Reading the table in reverse would report both, and
   section 2 states each of them.
 
+### A Dependabot ecosystem is owed where its subject is in the tree
+
+- **Section 11 puts on `uv` the condition section 2 already states for
+  it** — issue #175. The section gave `github-actions` and `uv` to every
+  tree, where section 2's *a rule whose subject the tree does not hold
+  asks nothing of it* names a section 11 ecosystem with no lock file to
+  read as its own example. `uv` now sits with `bundler` and
+  `gitsubmodule`, declared where the tree holds a `uv.lock`, and
+  `github-actions` is what every tree declares, workflows for it to read
+  being every tier's.
+- **portanode declares `github-actions` alone and is keeping the
+  section.** It holds no `pyproject.toml` and no `uv.lock`, so the `uv`
+  ecosystem has nothing to read there; `dependabot_test.py` asks `uv`
+  against the tree like the other two, and the backlog row that carried
+  the disagreement goes with the assertion that made it fail.
+
 ### The test-file spelling and the public surface each state one rule
 
 - **The test-file spelling is a choice between two patterns pytest

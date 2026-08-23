@@ -1725,10 +1725,15 @@ push or a `close`/`reopen`.
 
 ### Dependabot and pre-commit.ci
 
-`github-actions` and `uv` everywhere, and two more where the tree has
-what they watch: `bundler` where a site Gemfile exists, `gitsubmodule`
-where a submodule does. Pre-commit hook revisions have no Dependabot
-ecosystem — pre-commit.ci updates them weekly instead.
+`github-actions` everywhere — the required check and the review workflow
+are every tier's, so every tree has workflows for it to read — and three
+more where the tree has what they watch: `uv` where a `uv.lock` exists,
+`bundler` where a site Gemfile does, `gitsubmodule` where a submodule
+does. The three are conditional by section 2's rule for a subject the
+tree does not hold, so a tree with no lock file and no `uv` entry is
+keeping this section rather than departing from it. Pre-commit hook
+revisions have no Dependabot ecosystem — pre-commit.ci updates them
+weekly instead.
 
 `gitsubmodule` follows upstream's *default branch*, so its pull request
 says that upstream moved and is not the bump: a release pins the tagged

@@ -4,13 +4,13 @@
 
 """Section 11's Dependabot ecosystems, read off each `dependabot.yml`.
 
-The section names two the tree carries whatever it holds, `github-actions`
-and `uv`, and two more a tree earns by holding what they watch; pre-commit
-hook revisions have no ecosystem at all, pre-commit.ci updating them.
-Section 2 lists the file among what `.github/` holds. The section gives
-the first two without a condition, so where a tree declines one the
-finding is either the tree's or the section's, and the issue the backlog
-names is where that is decided.
+The section gives `github-actions` to every tree, workflows for it to
+read being every tier's, and makes the other three conditional on what
+the tree holds: a lock file, a site Gemfile, a submodule. So an ecosystem
+is owed exactly where its subject is there to be read, which is section
+2's rule for a subject a tree does not hold. Pre-commit hook revisions
+have no ecosystem at all, pre-commit.ci updating them; section 2 lists
+the file among what `.github/` holds.
 """
 
 from __future__ import annotations
@@ -29,17 +29,19 @@ CONFIG = ".github/dependabot.yml"
 DECLARED = f"sed -n 's/^ *- *package-ecosystem: *//p' {CONFIG}"
 """How a reader takes the ecosystems out of the file in a checkout."""
 
-EVERY_TREE = {"github-actions", "uv"}
-"""Section 11's ecosystems every tree declares, whatever it holds."""
+EVERY_TREE = {"github-actions"}
+"""Section 11's ecosystem every tree declares, whatever else it holds."""
 
 WATCHED = {
+    "uv": ("uv.lock", "*/uv.lock"),
     "bundler": ("Gemfile", "*/Gemfile"),
     "gitsubmodule": (".gitmodules",),
 }
 """Section 11's conditional ecosystems, each against what it watches.
 
-The pathspecs are `git ls-files`'s, so a site Gemfile is found wherever
-the site keeps it and a submodule by the file git writes at the root.
+The pathspecs are `git ls-files`'s, so a lock file and a site Gemfile are
+found wherever the tree keeps them and a submodule by the file git writes
+at the root.
 """
 
 PATHSPECS = " ".join(
@@ -87,7 +89,7 @@ def test_dependabot_watches_what_section_11_gives_every_tree(
     repository: str,
     trees: dict[str, Path],
 ) -> None:
-    """`github-actions` and `uv`, which the section makes no tree earn.
+    """`github-actions`, the one ecosystem the section makes no tree earn.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -103,7 +105,7 @@ def test_dependabot_watches_a_conditional_ecosystem_where_its_subject_is_there(
     repository: str,
     trees: dict[str, Path],
 ) -> None:
-    """`bundler` where the tree has a Gemfile, `gitsubmodule` where a submodule.
+    """`uv` where the tree has a lock file, and the other two likewise.
 
     Both directions, since an ecosystem watching what the tree does not
     have and a subject nothing watches are the same disagreement with
