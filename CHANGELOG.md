@@ -7,6 +7,83 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 6 states the typing rule, and asks for the gate that runs it
+
+- **The heading is the rule and the table is what applies it.** Section 6
+  said what `[tool.mypy]` holds and never that a function carries
+  annotations, so it read as a section about a configuration table
+  alongside sections 5, 7 and 8, and the rule an author owes was legible
+  only to whoever wrote that file. It now opens with the obligation —
+  every function declares the types of its parameters and of what it
+  returns — and the table follows as how it is enforced, which is the
+  shape section 8 already had for coverage. The alternative was a
+  section of its own, which renumbers every heading below it and every
+  anchor under them, and the cost of that is not only the anchors: every
+  repository names sections of this file by number in prose as well —
+  in `CONTRIBUTING.md` and `REVIEWING.md`, which section 14 copies
+  verbatim into each of them, and in `tests/README.md`, in workflow
+  comments, in `pyproject.toml` comments and in the changelogs.
+  `grep -rnIE "section (1[0-6]|[6-9])"` over a checkout of each finds
+  a reference at 6 or above in every one, `bbt`'s `pyproject.toml` naming
+  section 6 itself, where no anchor check reaches a toml comment at all.
+  A heading would be a coordinated pull request per repository.
+
+- **Nothing links the old anchor**, which is what made retitling free.
+  Measured over a checkout of every repository in the organization
+  rather than with code search, which answers 0 for an anchor `bbt` does
+  carry because it skips forks: `grep -rhoI '\.github#[0-9]*-[a-z0-9-]*'`
+  over all of them names `11-github-settings`,
+  `9-prose-comments-and-docstrings`, `8-coverage-at-100` and
+  `3-pyprojecttoml-is-the-configuration`, and no other.
+
+- **The setting is not narrowed**, and the reason had to reach the
+  honest case as well as the dishonest one. A lower setting, or an
+  override switching a strict flag off for the directory that fails it,
+  leaves `[tool.mypy]` stating a strictness the tree does not have. The
+  bundle enumerated flag by flag does the opposite — it states exactly
+  the severity the tree has — and is refused anyway, because what the
+  section requires is the strictness and a trajectory toward it is not
+  the strictness: `strict = true` tells a reader every function in that
+  tree declares its types, where a subset tells them which checks it
+  passes and leaves what is annotated to be read tree by tree.
+
+- **A line that genuinely cannot be typed still carries its own
+  `# type: ignore[code]`**, and that clause now reads *any of this*
+  rather than *one of those*, which had pointed at the optional error
+  codes alone. What is actually silenced across the organization is not
+  those at all — `arg-type`, `assignment`, `list-item`,
+  `no-untyped-call`, `no-any-return` — where among the optional ones
+  only `redundant-expr` appears, so the narrow wording was wrong about
+  nearly every site it governed. It is bounded to a check and never the
+  annotation itself, so the heading above cannot be met by a bare
+  signature behind `# type: ignore[no-untyped-def]`; no site in the
+  organization silences that code today.
+
+- **A configured severity that nothing runs is not this rule met.** A
+  `pyproject.toml` can carry `strict = true` with no mypy hook in the
+  lint gate, which holds every line of the section while nothing has
+  ever type checked the tree. The clause went to section 6 and not to
+  section 4, where the hook list is: section 4 already asks the gate for
+  a mypy hook, and what was missing is not that the hook exists but that
+  the declaration alone does not meet this rule — which is a statement
+  about the rule, and belongs where whoever is held to it reads it.
+  Section 4 keeps the hook and its shapes, and section 6 points there
+  rather than restating them.
+
+- **The audit follows.** Section 15's tree block gains
+  `grep -n 'id: mypy' .pre-commit-config.yaml` beside the
+  `strict = true` grep, and the sentence that names the pair of answers
+  as the finding; section 16's normalizing step asks for the hook
+  alongside the table, the new-repository checklist having named it
+  already.
+
+- **Measured, not asserted.** `uvx mypy` over an unannotated `def`
+  reveals it as `Any` in and `Any` out, says nothing about a body that
+  reads an attribute no object has, hands its caller `Any`, and exits 0;
+  `uvx mypy --strict` over the same file exits 1 with `no-untyped-def`,
+  `no-untyped-call` and `no-any-return`. That run is what the opening
+  paragraph's widest claim rests on.
+
 ### The calendar names the workflows that exist
 
 - **Section 10's rows follow the file names the organization now uses.**

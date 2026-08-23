@@ -579,7 +579,15 @@ preview rule then runs only where `extend-select` names it exactly.
   a test legitimately trips. The `D` rules are **not** among them: a
   public test function states what it verifies.
 
-## 6. mypy, strict
+## 6. The code is typed, and mypy is strict
+
+**Every function declares the types of its parameters and of what it
+returns**, and `strict = true` is what refuses one that does not. The
+obligation and the setting are one rule and not two: without it an
+unannotated `def` is not the absence of a claim but the widest one —
+mypy takes every parameter and the return as `Any`, leaves the body
+unchecked, and hands each caller back `Any` — so a bare signature
+loosens the code around it and not only itself.
 
 ```toml
 [tool.mypy]
@@ -591,6 +599,28 @@ show_error_codes = true
 enable_error_code = [...]
 ```
 
+**The setting is not narrowed.** Not a lower one while the annotations
+are caught up on, and not an override switching a strict flag off for
+the directory that fails it: either leaves `[tool.mypy]` stating a
+strictness the tree does not have, which is the one thing a reader of
+that table takes from it. Nor is the same bundle enumerated flag by
+flag in its place: that table is honest — it states exactly the severity
+the tree has, rather than overstating it — and it is still not this
+rule, because what is required is the strictness and a trajectory
+toward it is not the strictness. `strict = true` tells a reader that
+every function in the tree declares its types; a subset of the flags
+tells them which checks it passes, and leaves what is annotated to be
+read tree by tree. Where a single line genuinely cannot be typed the
+answer is at that line and never in this table, the
+`# type: ignore[code]` below being it.
+
+**Configured is not enforced, and this section asks for both.** The
+rule is met where the lint gate runs mypy over the tree, so a
+`[tool.mypy]` no hook reads sets a severity rather than applying one —
+a repository can hold every line above and have nothing that has ever
+type checked it. Which hook runs it, and the shapes it comes in, is
+section 4's, and this points there rather than restating them.
+
 `strict = true` is the floor, not the ceiling: the optional error codes
 strict does not turn on are surveyed one by one and enabled — among them
 `ignore-without-code`, so a `type: ignore` names the rule it silences and
@@ -600,8 +630,9 @@ a blanket one cannot creep in; `deprecated`, which is the early warning
 runtime guard whose static type promises more than an untrusted source
 can.
 
-A site that needs one of those relaxed carries its own
-`# type: ignore[code]`, never a second global exemption.
+A site that needs any of this relaxed — a check, never the annotation
+itself — carries its own `# type: ignore[code]`, never a second global
+exemption.
 
 **Scope is the package, the tests and `.github/scripts`.** What lives
 under `.github/scripts` imports the package and no test collects it, so
@@ -1630,6 +1661,7 @@ The tree:
 ```shell
 grep -n 'strict = true\|fail_under = 100\|branch = true\|"FIX"\|"TD"' \
     pyproject.toml
+grep -n 'id: mypy' .pre-commit-config.yaml
 git ls-files 'TODO*' '**/TODO*'
 grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'
 grep -L '^permissions:' .github/workflows/*.yml
@@ -1704,6 +1736,11 @@ done
 One line per repository where every ecosystem agrees, more than one
 where they do not — which is itself the finding, an ecosystem opening on
 a day the sentinel before it does not precede.
+
+`strict = true` in `pyproject.toml` with no `id: mypy` in
+`.pre-commit-config.yaml` is section 6's finding and a finding on its
+own: the strictness is configured and nothing runs it, which is the half
+of that section a tool table cannot answer for.
 
 An action not pinned to forty hex digits, a workflow with no
 `permissions:` block, and a `--frozen` anywhere are each a finding on
@@ -1878,8 +1915,9 @@ written before the gate that judges it.
    wait for the two history files below. Then run it `--all-files`, over
    everything the steps above added.
 1. **mypy `strict = true`** aimed at the `requires-python` floor, with
-   the optional error codes surveyed one at a time. Every silencing
-   `type: ignore` names its code.
+   the optional error codes surveyed one at a time, and the hook in the
+   gate above that runs it. Every silencing `type: ignore` names its
+   code.
 1. **ruff** with the widths, the docstring family and `max-complexity`,
    the copyright rule, which reads `COPYRIGHT` — so that file lands here
    and not with the root files below — and `FIX`, whose subject is an
