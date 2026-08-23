@@ -51,9 +51,10 @@ is published as a new release. What a release *is* differs between these
 repositories — a distribution on an index, or a signed tag and a GitHub
 release with the source archive attached to it, or nothing yet — and
 `RELEASING.md` is what says which of those a given repository cuts, and
-therefore what upgrading means there. Where it says nothing is released,
-what anybody runs is a checkout of `main` and a fix reaches them when
-they pull it.
+therefore what upgrading means there; a repository that carries none
+releases nothing, and its `README.md` says so. Where nothing is
+released, what anybody runs is a checkout of `main` and a fix reaches
+them when they pull it.
 
 **A copy receives nothing automatically.** Vendoring a source file, or
 unpacking an archive into a folder, is a supported way to use some of

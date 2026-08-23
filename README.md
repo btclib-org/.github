@@ -25,10 +25,10 @@ them has answered. That is the same argument as above, and it is what
 makes this a project rather than a document.
 
 What follows is that standard: what every repository in the organization
-is configured to do, and why. It is written to be read twice: once when
-a repository is created, so that the shape is right from the first
-commit, and once when an existing one is normalized, so that the gap is
-a list rather than an impression.
+is configured to do, as far as its tier in section 2 binds it, and why.
+It is written to be read twice: once when a repository is created, so
+that the shape is right from the first commit, and once when an existing
+one is normalized, so that the gap is a list rather than an impression.
 
 The reference implementations are `btclib`, `btclib-secp256k1`,
 `bitcoin-core-rpc` and `btclib-benchmarks`. Where they agree, this file
@@ -67,6 +67,9 @@ file is the third of:
   stays open until every one of them answers — which is the thing an
   issue filed on a single repository cannot do, its checkboxes being
   invisible from the others.
+
+Nothing here is released: this repository ships by being read, and
+section 2's table has it in the tier that publishes nothing.
 
 **A finding that spans repositories is filed here, and only here.** Not
 here *as well*: the same divergence written up once per repository is
@@ -180,38 +183,133 @@ CI needs no second pin.
 
 ## 2. The tree
 
+### Which repositories, and how far
+
+This file is written for a Python package that publishes, and the
+organization holds repositories that are not one. How far it binds a
+repository is that repository's **tier**, and a tier is measured rather
+than declared, by two files:
+
+- a repository **is Python** where it holds a `pyproject.toml`;
+- it **publishes** where it holds `.github/workflows/release.yml`,
+  which is section 12's machine.
+
+The tiers nest: tier 2 owes what tier 3 owes and more, and tier 1 owes
+what tier 2 owes and more.
+
+- **Tier 3 — any repository, whatever it is written in.** Sections 9,
+  11 and 14: the prose; the settings, together with what they name — a
+  required check, which is section 4's gate over the file types the tree
+  holds, and the review workflow whose verdict is the ack of record —
+  and the files every repository carries the same. Of the root-files
+  table below, the rows marked for it.
+- **Tier 2 — a Python project that publishes nothing.** Everything but
+  section 12 and the two workflows that exist for a release, `release`
+  and `pypi-install`, the second reading what the first put on the
+  index.
+- **Tier 1 — a Python package that publishes.** The whole file.
+
+A rule whose subject the tree does not hold asks nothing of it, at any
+tier: section 14 says so of `.taplo.toml` and a tree with no `toml`, and
+it is the same sentence for a section 11 ecosystem with no lock file to
+read or a section 2 row for a package directory a tree does not have.
+What the tier adds to that sentence is the difference between a rule
+with no subject here and a rule with a subject that is declined, which
+is the difference an alignment finding has to state.
+
+**A tier is a floor, not a ceiling.** Above it, a repository carries
+what its own practice needs: `portanode` cuts a signed tag and a GitHub
+release by hand, and carries the `RELEASING.md` that says how, which its
+tier does not ask for. Below it, a repository short of what its tier
+binds is a gap, filed here. A gap with the reason beside it, where a
+reader meets the repository — its `CLAUDE.md` or its `REPOSITORY.md` —
+is a decision rather than a gap; a sentence that declines a rule and
+gives no reason is a gap with a sentence in front of it, this file's
+own *a rule with no reason beside it* read from the other side.
+
+| repository | tier |
+| --- | --- |
+| `btclib` | 1 |
+| `btclib-secp256k1` | 1 |
+| `bitcoin-core-rpc` | 1 |
+| `btclib-benchmarks` | 2 |
+| `btclib-node` | 2 |
+| `.github` | 2 |
+| `bbt` | 2 |
+| `portanode` | 3 |
+
+The table is a claim, and the loop below is what checks it, in either
+direction — a row the loop contradicts is the finding, and so is a
+repository the loop names and the table does not. A new repository is a
+row here in the pull request that creates it, section 16's first step.
+
+```shell
+for r in $(gh repo list <org> --json name --jq '.[].name'); do
+  t=3
+  gh api "repos/<org>/$r/contents/pyproject.toml" --silent \
+    2>/dev/null && t=2
+  [ "$t" = 2 ] && gh api \
+    "repos/<org>/$r/contents/.github/workflows/release.yml" --silent \
+    2>/dev/null && t=1
+  printf '%s\t%s\n' "$r" "$t"
+done
+```
+
+`.github` is this repository, and its row is measured like the others:
+a `pyproject.toml`, a suite, and no `release.yml`. What it declines of
+tier 2 — there is no coverage here, and section 3 describes a file its
+`pyproject.toml` is not — its `CLAUDE.md` says, with the reason.
+
+**A tier-2 repository carries neither `RELEASING.md` nor
+`RELEASE_NOTES.md`.** What the first would say is that there is no
+release — `bbt`'s opens *Nothing here is released* and `btclib-node`'s
+*There is no release, and no machinery for one* — and a file whose
+content is its own absence is one sentence in `README.md`, not a file:
+the file's being there tells every reader who has not opened it that
+there is a procedure here, and `SECURITY.md`, which sends a reader to
+it for what a release is in a given tree, sends them instead to a line
+the `README.md` can hold. The second is what a user has to act on *at
+a release*, on top of the changelog, so where no release is cut it has
+nothing to be on top of; `CHANGELOG.md` stays, a change being noticed
+whether or not a version names it. The alternative weighed was carrying
+both ready, on the ground that a tier-2 repository could release
+tomorrow. What that buys is a procedure nobody runs, kept in step with
+section 12 by nobody; and the day a release arrives it arrives with
+`release.yml`, which is the day the repository is tier 1 and the two
+files come with it.
+
 ### Root files
 
-Every repository carries these, and each is one fact in one place. One
-row is conditional and no other is; the paragraph under the table is
-which, and on what:
+Each is one fact in one place, and the last column is which tiers owe
+the row. The paragraph under the table is the reason where a row is not
+every tier's:
 
-| file | what it is |
-| --- | --- |
-| `README.md` | the package's long description, and the site homepage |
-| `LICENSE` | MIT, referred to by SPDX from `pyproject.toml` |
-| `COPYRIGHT` | the three-line notice every source file opens with |
-| `AUTHORS.md` | a pointer to the contributor graph, not a list |
-| `SECURITY.md` | reporting, supported versions, known limitations |
-| `CONTRIBUTING.md` | how to work, this tree's commands in its last section |
-| `REVIEWING.md` | the standard a review is written against |
-| `REPOSITORY.md` | the settings that live outside the tree |
-| `RELEASING.md` | how a release is cut, and how one is recovered |
-| `CHANGELOG.md` | every user-visible change, by group |
-| `RELEASE_NOTES.md` | what a user has to *act* on, on top of it |
-| `CLAUDE.md` | what a session needs and no human document holds |
-| `pyproject.toml` | the project and every tool's configuration |
-| `uv.lock` | the pinned resolution |
+| file | what it is | tiers |
+| --- | --- | --- |
+| `README.md` | the package's long description and the site homepage | 1, 2, 3 |
+| `LICENSE` | MIT, referred to by SPDX from `pyproject.toml` | 1, 2, 3 |
+| `COPYRIGHT` | the three-line notice every source file opens with | 1, 2, 3 |
+| `AUTHORS.md` | a pointer to the contributor graph, not a list | 1, 2, 3 |
+| `SECURITY.md` | reporting, supported versions, known limitations | 1 |
+| `CONTRIBUTING.md` | how to work; its last section is this tree's | 1, 2, 3 |
+| `REVIEWING.md` | the standard a review is written against | 1, 2, 3 |
+| `REPOSITORY.md` | the settings that live outside the tree | 1, 2, 3 |
+| `RELEASING.md` | how a release is cut, and how one is recovered | 1 |
+| `CHANGELOG.md` | every user-visible change, by group | 1, 2, 3 |
+| `RELEASE_NOTES.md` | what a user has to *act* on, on top of it | 1 |
+| `CLAUDE.md` | what a session needs and no human document holds | 1, 2, 3 |
+| `pyproject.toml` | the project and every tool's configuration | 1, 2 |
+| `uv.lock` | the pinned resolution | 1, 2 |
 
-**`SECURITY.md` is the conditional row**, and what it is conditional on
-is whether the repository publishes. The sdist carries the file, so a
-reader who has the archive and not github.com reads the policy from it,
-and a published package's own provenance — what its distributions attest
-to, and which of them is supported — is not something a file shared with
-every other repository can state. Where nothing is published there is no
-archive, and GitHub shows this repository's copy. What that costs is
-worth knowing: an inherited policy cannot name the flaws that are that
-tree's, or the project a report about it should go to instead, so a tree
+**`SECURITY.md` is tier 1's row**, and what it turns on is that the
+repository publishes. The sdist carries the file, so a reader who has
+the archive and not github.com reads the policy from it, and a published
+package's own provenance — what its distributions attest to, and which
+of them is supported — is not something a file shared with every other
+repository can state. Where nothing is published there is no archive,
+and GitHub shows this repository's copy. What that costs is worth
+knowing: an inherited policy cannot name the flaws that are that tree's,
+or the project a report about it should go to instead, so a tree
 with either to say says it in its `README.md` and its issue tracker.
 
 **Every `README.md` ends with the same line**, under a thematic break,
@@ -234,7 +332,8 @@ either URL stops resolving. It is the organization the line names, not
 benchmark suite and a course would otherwise credit the support to one
 of the things being supported.
 
-Dotfiles: `.pre-commit-config.yaml`, `.python-version`, `.gitattributes`,
+Dotfiles, each owed by the tiers that owe the section reading it:
+`.pre-commit-config.yaml`, `.python-version`, `.gitattributes`,
 `.gitignore`, `.markdownlint.jsonc`, `.taplo.toml`, `.yamllint.yaml`,
 `.readthedocs.yaml`, `.secrets.baseline`, and `.vscode/` and `.claude/`,
 both tracked.
@@ -248,6 +347,9 @@ both tracked.
   documented;
 - `.github/` — `workflows/`, `dependabot.yml`, `ISSUE_TEMPLATE/`,
   `PULL_REQUEST_TEMPLATE.md`, `scripts/` and `mutation/`.
+
+The first three are a Python tree's, so tiers 1 and 2's; `.github/` is
+every tier's, and holds what the sections the tier binds ask of it.
 
 ## 3. `pyproject.toml` is the configuration
 
@@ -1871,9 +1973,8 @@ print([c for c in declared if c not in classifiers])'
 An empty list is the answer. A string in it is one PyPI would refuse on
 upload, at the point where a version is already being consumed.
 
-Which repositories publish, which is what section 2's conditional row
-turns on and so what decides whether a `SECURITY.md` is owed or
-inherited:
+Which repositories publish, which is what section 2's first tier turns
+on and so what decides whether a `SECURITY.md` is owed or inherited:
 
 ```shell
 for r in <every repository>; do
@@ -2013,6 +2114,11 @@ independent and the checklist the same for each.
 
 ### A new repository
 
+1. Its tier, measured as section 2 measures it, and its row in section
+   2's table, in the pull request that creates the repository. The tier
+   is which of the steps below the tree owes, and a step for a section
+   the tier does not bind is not a gap skipped but a step that does not
+   exist for that tree.
 1. `git init`, MIT `LICENSE`, `COPYRIGHT`, `AUTHORS.md`.
 1. `pyproject.toml`: section 3's build backend, metadata, PEP 639
    licence, keywords matching the topics, urls, dependency groups, and
@@ -2039,9 +2145,10 @@ independent and the checklist the same for each.
    `docs`, `claude-review`, then the periodic ones the project earns.
 1. `.github/dependabot.yml`, `ISSUE_TEMPLATE/`,
    `PULL_REQUEST_TEMPLATE.md`.
-1. `CONTRIBUTING.md`, `REVIEWING.md`, `REPOSITORY.md`, `RELEASING.md`,
-   `CHANGELOG.md`, `RELEASE_NOTES.md`, `CLAUDE.md`; and `SECURITY.md`
-   where the repository publishes, section 2's conditional row.
+1. `CONTRIBUTING.md`, `REVIEWING.md`, `REPOSITORY.md`, `CHANGELOG.md`,
+   `CLAUDE.md`; and `SECURITY.md`, `RELEASING.md` and `RELEASE_NOTES.md`
+   where the repository publishes, the rows section 2's table marks for
+   tier 1 alone.
 1. GitHub, in this order: default branch `main`; squash-only;
    `delete_branch_on_merge`; the three rulesets; classic protection with
    the required checks bound to the Actions app; the publishing
@@ -2060,7 +2167,8 @@ say what they wait for: it has nothing to say about mypy against ruff
 against pytest, so ordering the whole list by it would settle those by
 nothing at all. Cost settles them, and cost is what makes any prefix of
 this list the right prefix — a normalization lands over many pull
-requests and stops wherever it stops.
+requests and stops wherever it stops. The tier comes before the list,
+section 2's table: it says which of these steps the tree owes at all.
 
 Not every constraint is an order between two steps, and the ones that
 are not hold over all of them. **A rule arrives with its subject**: a
