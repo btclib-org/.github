@@ -1502,9 +1502,17 @@ lint in the others. Each bullet's subject is the path, which is what lets
   What it names is a style where markdownlint's default is "consistent",
   which asks each file to agree with itself and therefore lets two files
   disagree.
-- `.yamllint.yaml` — owed by every repository; two rules of the default
-  set enabled, `line-length` at 100 and `document-start`. The rest report
-  a convention rather than a defect, each with the reason it stays off.
+- `.yamllint.yaml` — owed by every repository; the default set, extended
+  rather than listed, with `line-length` raised to 100 and two rules
+  disabled, and `document-start` raised from the default's warning to an
+  error because the hook runs no `--strict` and a warning exits 0.
+  Extending is what makes it a rule set at all: yamllint enables
+  no rule a configuration does not name, so a file that lists rules and
+  extends nothing runs those alone and leaves indentation, trailing
+  whitespace and duplicate keys off under a gate that still passes. The two
+  disabled rules carry the reason beside them, `comments` because dependabot
+  writes the spacing it objects to and `truthy` because the `on:` a workflow
+  opens with is the spelling GitHub Actions requires.
 - `.taplo.toml` — owed by every repository that holds a `toml`;
   four-space indent, `reorder_keys` left false because the order of a
   table is an argument, `array_auto_collapse` false so that adding an

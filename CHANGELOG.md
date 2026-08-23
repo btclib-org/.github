@@ -7,6 +7,26 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The shared yamllint configuration runs the default set
+
+- **`.yamllint.yaml` extends `default` here too.** The copy this
+  repository keeps is the one section 14 compares the others against, and
+  it was the copy that had never been fixed: it listed two rules and
+  extended nothing, which runs those two alone and leaves indentation,
+  trailing whitespace and duplicate keys unchecked under a gate that
+  passes because a check nobody runs cannot fail. The repositories that
+  already carried the fixed file are what this takes it from, verbatim;
+  `gh api repos/btclib-org/{}/contents/.yamllint.yaml --jq .size` names
+  them. Every yaml file in this repository, and in every sibling that
+  copies it, is now linted against the whole default set rather than
+  against two rules of it.
+
+- **`document-start` gates rather than reports.** The default set carries
+  the rule at warning, and the hook runs `yamllint` without `--strict`,
+  where a warning exits 0: the convention every file already follows was
+  never enforced by anything. It is an error now, which no tracked yaml
+  file in the organization currently trips.
+
 ### The repository that owns the standard carries what it names
 
 - **`REVIEWING.md` and `.claude/commands/review.md` are section 14
