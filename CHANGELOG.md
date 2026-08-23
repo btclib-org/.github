@@ -223,6 +223,33 @@ audit has no revision to compare against.
   each repository upstream of `btclib` is a box of that issue of its own,
   and it stays open for them.
 
+### Test data is vendored, and section 7 says what that means
+
+- **Section 7 states the rule and names the two kinds of file** — issue
+  #80, which stays open for the boxes that are each repository's. The
+  data a test reads is committed beside it and the suite opens no
+  socket. A vendored upstream file is a copy of a file in somebody
+  else's repository, which a commit and a git blob SHA-1 identify;
+  recorded or constructed data is written from a project's source, so
+  there is no upstream blob and nothing for a pin to name. A rule
+  conflating the two asks for a pin that cannot exist, or lets a copy go
+  unchecked among files that cannot be.
+- **The pin format is the standard's now, written once**: the fields
+  the pinning trees already use, under a heading naming the file, in
+  one `README.md` in the `_data` directory. `blob` is the git blob
+  SHA-1, which a tree entry already carries and `git hash-object`
+  reproduces locally, where a digest of the bytes says only that the
+  copy has not changed here.
+- **A `_data` directory sits beside whatever reads it**, `tests/_data/`
+  where the suite is the only reader, and the underscore is what says
+  the directory is not a package.
+- **A tree with vendored upstream files runs `vendored-vectors`; one
+  with only recorded data says so where the workflow would be**, an
+  absent check otherwise reading as an omission.
+- **Two rules the vendoring trees keep and this file did not carry.** A
+  vector the tree fails is vendored anyway and marked `xfail`, and a
+  licence travels with the file it covers.
+
 ### The new-repository checklist chooses no mypy hook shape
 
 - **Section 16's `.pre-commit-config.yaml` step points at section 4's

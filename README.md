@@ -964,8 +964,7 @@ check the same code where no source is conditional on the version.
   downstream key on one pattern — and the hook's default is which.
 - Shared test code lives in a package `__init__.py` — vector loaders,
   helpers — never in a module whose name says "test" and holds none.
-- `tests/_data/` holds vendored vectors, with a `README.md` recording
-  where each came from and what pins it.
+- `tests/_data/` holds the data the suite reads, under the rule below.
 
 ### pytest configuration
 
@@ -1030,6 +1029,74 @@ it runs on pre-commit.ci as well, where `uv` is absent. `always_run`
 rather than a `files:` pattern, because an artifact goes stale from an
 edit to any of its inputs, and a pattern narrow enough to name them all
 is a pattern that stops matching one day.
+
+### Test data is vendored, never fetched
+
+Every file a test reads is committed beside it. A suite that fetches its
+input has a verdict that depends on somebody else's uptime, and one that
+cannot run offline cannot run in a sandbox either — so the data is in the
+tree and the suite opens no socket.
+
+**Two kinds of file, and only one of them can be pinned.** A *vendored
+upstream file* is a copy of a file that exists in somebody else's
+repository: a commit and a git blob SHA-1 identify the original, so
+whether the copy still matches it is a question with an answer.
+*Recorded or constructed data* is written from a project's source rather
+than copied from it — a reply built the way the code that sends it builds
+one, values transcribed from a specification that publishes no file — so
+there is no upstream blob and nothing for a pin to name, and the entry
+says instead which source it was written from and how a reader
+reproduces it. A rule conflating the two asks a repository for a pin that
+cannot exist, or lets a copy go unchecked among files that cannot be.
+What the tree derives from its own code is neither, and the subsection
+above has it.
+
+**A `_data` directory beside whatever reads it**, which is `tests/_data/`
+where the suite is the only reader and a directory beside the package or
+the script where it is not. The underscore says the directory is not a
+package: it holds no `__init__.py`, nothing imports it, and the way in is
+a path built from `__file__` — the mark the language already puts on a
+private module, applied where it is literally true.
+
+**The pins are one `README.md` in that directory**, covering every
+`_data` directory the suite reads rather than one file per directory,
+with an entry per file headed by its path:
+
+```text
+repo    <owner/repo>
+path    <the path in that repository>
+commit  <the commit pinned to>  <its date>
+blob    <the git blob SHA-1 compared>
+pulled  <the date this content entered this tree>
+behind  <revisions of that path since the pin>
+```
+
+`blob` is the git blob SHA-1 rather than a digest of the bytes, because
+it is what a tree entry already carries: nothing has to be downloaded to
+compare against, `git hash-object` reproduces it locally, and a digest
+answers whether the copy changed here and never whether upstream moved.
+`pulled` is the date the current content entered this tree, which
+`git log --follow --diff-filter=A` answers and nobody's memory does;
+`behind` counts upstream revisions of the path since the pin, which is
+staleness rather than a defect, taking a newer revision being a decision.
+Under the block a verdict says how the copy stands to that blob —
+identical, identical but for what a fixer in the gate rewrote, or
+transcribed where the upstream is prose and there is no blob to compare
+at all. A fixer that would rewrite those bytes for nothing is excluded
+from the directory, a reformat voiding the pin and the verdict together.
+
+**A repository with vendored upstream files runs `vendored-vectors`**,
+which re-checks every pin on section 10's schedule and opens an issue on
+drift rather than refreshing anything. One whose data is all recorded
+says so where the workflow would be, an absent check otherwise reading
+as an omission.
+
+A vector the tree fails is vendored anyway and marked `xfail`, never left
+out — an absent vector hides the defect it would have shown, and
+`xfail_strict` turns the marker red the day the defect is fixed. A
+licence travels with what it covers: where upstream ships one beside the
+file, the copy takes it too, under a name that cannot be read as
+licensing the directory around it.
 
 ### Integration tests
 
