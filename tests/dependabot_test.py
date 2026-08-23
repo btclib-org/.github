@@ -4,11 +4,14 @@
 
 """Section 11's Dependabot ecosystems, read off each `dependabot.yml`.
 
-The section closes the count -- three ecosystems, and pre-commit
-revisions the fourth with none -- and section 2 lists the file among
-what `.github/` holds. A tree without the file and a tree declaring an
-ecosystem the section does not name are the two ways the trees can
-disagree with it, and the backlog names the issue for each.
+The section names two the tree carries whatever it holds, `github-actions`
+and `uv`, and two more a tree earns by holding what they watch; pre-commit
+hook revisions have no ecosystem at all, pre-commit.ci updating them.
+Section 2 lists the file among what `.github/` holds. A tree without the
+file, and a tree declaring an ecosystem the section does not name, are the
+two ways a tree can disagree with the section, and what this module asks.
+Which of the four a tree is owed is the half the section makes conditional
+and this module does not measure -- btclib-org/.github#171.
 """
 
 from __future__ import annotations

@@ -323,6 +323,13 @@ def fenced(document: Path, opening: str, language: str) -> str:
     trees are compared against, so it is read rather than transcribed:
     a transcription is the copy that goes stale.
 
+    A block is a line that is exactly the opening fence, a run of lines,
+    and a line that is exactly ``` — at column zero and with nothing
+    trailing, which is every fence this file's markdownlint accepts. A
+    fence the section opens and does not close is no block: it would
+    otherwise read to the end of the file, past the section that was
+    asked for, and return that.
+
     :param document: the markdown file to read.
     :param opening: a substring of the line the section opens with.
     :param language: the fence's language, `toml` and the like.
@@ -343,6 +350,8 @@ def fenced(document: Path, opening: str, language: str) -> str:
             inside = False
         elif inside:
             blocks[-1].append(line)
+    if inside:
+        blocks.pop()
     if len(blocks) != 1:
         msg = f"{document.name} has {len(blocks)} {fence} blocks under {opening!r}"
         raise LookupError(msg)

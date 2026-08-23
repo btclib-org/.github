@@ -15,6 +15,21 @@ audit has no revision to compare against.
 
 ### The tree's own comments say what the rule is, in the present tense
 
+- **`dependabot_test.py`'s docstring says what section 11 says now.**
+  Section 11 stopped closing the count at three ecosystems in this same
+  change, and the module that enforces it went on stating the closed
+  count — the exact sentence issue #132 was filed against, left standing
+  in the test while the standard was corrected. Section 15 makes a
+  module's docstring the statement of which section it reads, so that is
+  where a reader sent by the audit is told. It now names the two an
+  ecosystem-carrying tree has whatever it holds and the two it earns,
+  and points at #171 for the conditional half nothing measures.
+- **An unclosed fence is no block.** `fenced()` promised to raise where a
+  section does not hold exactly one, and a fence opened and never closed
+  read to the end of the file and came back as one — past the section
+  that was asked for. It is discarded instead, and the docstring says
+  what a fence has to look like to be read.
+
 - **Comments stop telling the tree's history** — issue #167.
   `.github/dependabot.yml`, `.github/workflows/links.yml`,
   `.pre-commit-config.yaml` and `tests/__init__.py` each carried a clause
