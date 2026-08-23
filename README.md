@@ -1740,19 +1740,16 @@ gh api orgs/<org>/dependabot/secrets \
   --jq '.secrets[] | "\(.name) \(.visibility)"'
 ```
 
-The first answers with the name or with nothing, and its exit code is the
-answer: `--silent` sends a 404 to stderr, where `--jq .name` puts its
-*body* on stdout — a JSON document in a column of filenames. Section 15
-has the sweep.
+The first answers with the name or with nothing, and `--silent` is for
+the reason section 15's publishing sweep gives.
 
 The token is an **organization** secret at `visibility=all`, so a
 repository adopting the workflow configures nothing for it. That is worth
 stating because the answer *nothing* is invisible from a repository's own
 settings page, and it is the first question a port asks. It is in both
-stores because a run Dependabot initiates reads the Dependabot one and
-not the Actions one: under the same name, and a repository that
-configures Dependabot gets a red review on every pull request Dependabot
-opens while the second is missing.
+stores for the reason *Dependabot and pre-commit.ci* gives below, and a
+repository that configures Dependabot gets a red review on every pull
+request Dependabot opens while the second is missing.
 
 **Two things a port must adapt**, and both are claims about the receiving
 tree rather than settings. The prompt names `REVIEWING.md`, and it tells

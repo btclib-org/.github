@@ -23,6 +23,21 @@ audit has no revision to compare against.
   passes is a red suite, which is what makes the row a record of a gap
   rather than a way of ignoring one.
 
+### Section 11 points instead of restating, at two more sites
+
+- **The port subsection points at section 15 for `--silent`** — issue
+  #236. The paragraph gave the same three claims section 15's publishing
+  sweep already gives; the subsection is about what a port must adapt,
+  and this mechanism is not one of those two things, so it points
+  instead, as the other `--silent` sites already do.
+- **The two-secret-stores rule is *Dependabot and pre-commit.ci*'s** —
+  issue #241. *The workflow, and what a port of it has to adapt* stated
+  the same mechanism for the `claude-review.yml` token: that a
+  Dependabot-initiated run reads the Dependabot secret store rather than
+  the Actions one. It keeps the token's own consequence — a red review
+  on every Dependabot pull request while the second store is missing —
+  and points at the subsection below for the mechanism.
+
 ### The package directory follows the package, and section 16 asks section 7
 
 - **Section 2 asks the package directory of a tree that installs an
