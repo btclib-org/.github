@@ -48,14 +48,38 @@ audit has no revision to compare against.
   records, applied at collection, and only an assertion counts as the
   failure expected. A repository that catches up turns its row into a
   failure until the row is deleted, which is what closes the checkbox
-  on the issue; a row naming a test no module defines, or a repository
-  the API does not list, refuses the collection rather than excusing
-  nothing in silence. The alternative, a cell left red until its issue
-  closes, would keep every run red for as long as the tracker holds a
-  finding, and the first run held one for every row of the backlog.
-  `tests/copyright_test.py`'s table of one repository moves into it,
-  and its test is asked per repository like the rest; `verbatim_test.py`
-  keeps its own, that one being keyed on a path and not on a tree.
+  on the issue; a row naming a test no module asks per repository, or a
+  repository the API does not list, refuses the collection rather than
+  excusing nothing in silence. The alternative, a cell left red until
+  its issue closes, would keep every run red for as long as the tracker
+  holds a finding, and the first run held one for every row of the
+  backlog. `tests/copyright_test.py`'s table of one repository moves
+  into it, and its test is asked per repository like the rest;
+  `verbatim_test.py` keeps its own, that one being keyed on a path and
+  not on a tree.
+
+  A row on a cell the run skips is reported as a failure too, naming
+  the row. A repository that stops failing by losing the file the test
+  reads, or by moving to a tier the test does not ask, is skipped
+  before the assertion, and a skip is neither the expected failure nor
+  the pass that would have turned the row red: on this branch before
+  the hook, two such rows gave `2 skipped` and exit 0. `conftest.py`
+  rewrites that report, and `tests/backlog_test.py` runs the hook on a
+  suite of its own to show it does -- the one module whose subject is
+  this tree rather than the organization, and the reason `pytester`
+  is loaded.
+
+- **A `main` with no classic protection fails the list, and only a
+  repository the token cannot read is skipped.** The protection
+  endpoint answers 404 to both, and `tests/protection_test.py` took
+  both for a token without access and skipped: a repository that moved
+  to rulesets alone, which is the very drift #88 is about, would have
+  been reported as unreadable. The two are told apart on what `gh`
+  wrote -- `Branch not protected` against `Not Found` -- and the first
+  is the document with every field off, failing the one assertion the
+  backlog excuses. `tests/links_test.py` reads `--accept=<list>` as
+  well as `--accept <list>`, the one-word spelling having read as the
+  default.
 
 - **The run without the switch reaches nothing.** `BTCLIB_INTEGRATION`
   was read by an autouse fixture, which runs after the session fixtures

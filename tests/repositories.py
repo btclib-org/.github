@@ -109,8 +109,10 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     # the issue, the test it is the subject of, and the repositories
     # whose failure that issue already records. A row here is a finding
     # somebody has read and filed, not one excused: the test still runs,
-    # and a repository that stops failing is reported until its name is
-    # taken out, which is what closes the checkbox on the issue
+    # and a repository that stops failing -- by passing, or by the run
+    # skipping it, the file it read gone or its tier moved -- is
+    # reported until its name is taken out, which is what closes the
+    # checkbox on the issue. conftest.py is what makes the skip a report
     (
         88,
         "test_main_requires_a_check_and_the_rest_of_classic_protection",
@@ -137,7 +139,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "bbt",
         ),
     ),
-    (109, "test_security_md_gives_the_one_address_spelled_out", ("btclib-benchmarks",)),
     (
         110,
         "test_lychee_accepts_every_success_code",

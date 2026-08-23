@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import importlib
+import inspect
 import os
 import subprocess
 import tomllib
+from collections.abc import Generator
 from pathlib import Path
 from typing import Any
 
@@ -47,7 +49,8 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     not to keep it yet. Only an assertion counts as the expected
     failure: a repository that errors before the assertion -- a file it
     no longer has, a key it dropped -- is reported as the error it is
-    rather than passing for the wrong reason.
+    rather than passing for the wrong reason, and one that skips before
+    it is failed by `pytest_runtest_makereport`.
 
     Without the switch the parameter is one placeholder, which
     `pytest_collection_modifyitems` then skips with everything else: the
@@ -67,9 +70,11 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
         issues = filed(test, name)
         marks = []
         if issues:
-            reason = ", ".join(f"btclib-org/.github#{issue}" for issue in issues)
+            marks.append(pytest.mark.backlog(*issues))
             marks.append(
-                pytest.mark.xfail(strict=True, raises=AssertionError, reason=reason)
+                pytest.mark.xfail(
+                    strict=True, raises=AssertionError, reason=cited(issues)
+                )
             )
         params.append(pytest.param(name, id=name, marks=marks))
     metafunc.parametrize(REPOSITORY, params)
@@ -89,11 +94,13 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     that was, would match nothing and excuse nothing, and the strict
     expected failure it was meant to be would never be asked: the run
     would be green with a finding unfiled. So a row naming a test no
-    module of this suite defines, or a repository the API does not
-    list, is an error of the collection and not a quiet no-op. The
-    modules are read rather than the collected items, so that a run
-    narrowed to one test by its id is not refused for the rows it left
-    out.
+    module of this suite asks per repository, or a repository the API
+    does not list, is an error of the collection and not a quiet no-op.
+    Per repository, because a test that runs once has no cell for the
+    row to excuse, and a row naming one would pass this check and
+    change nothing. The modules are read rather than the collected
+    items, so that a run narrowed to one test by its id is not refused
+    for the rows it left out.
 
     :param items: the collected tests, parametrized.
     :raises pytest.UsageError: where a backlog row names nothing.
@@ -107,8 +114,11 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     defined = {
         attribute
         for path in sorted(Path(__file__).parent.glob("*_test.py"))
-        for attribute in vars(importlib.import_module(f"{__package__}.{path.stem}"))
+        for attribute, function in vars(
+            importlib.import_module(f"{__package__}.{path.stem}")
+        ).items()
         if attribute.startswith("test_")
+        and REPOSITORY in inspect.signature(function).parameters
     }
     orphans = [
         f"#{issue}: {test} on {repository}"
@@ -119,6 +129,58 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     if orphans:
         msg = f"tests/repositories.py lists rows no test answers to: {orphans}"
         raise pytest.UsageError(msg)
+
+
+def cited(issues: tuple[int, ...] | list[int]) -> str:
+    """Name the issues a backlog row carries, qualified.
+
+    :param issues: the issue numbers.
+    :returns: the numbers as section 9 spells a reference to this tree.
+    """
+    return ", ".join(f"btclib-org/.github#{issue}" for issue in issues)
+
+
+@pytest.hookimpl(wrapper=True, tryfirst=True)
+def pytest_runtest_makereport(
+    item: pytest.Item,
+    call: pytest.CallInfo[None],
+) -> Generator[None, pytest.TestReport, pytest.TestReport]:
+    """Fail a backlog cell this run skipped instead of asking.
+
+    A row excuses a failure, and a strict expected failure is what turns
+    a repository that catches up into a red cell. A cell the run skips
+    -- the tree dropped the file the test reads, or its tier moved past
+    the one the test asks -- is neither: pytest reports a skip, the
+    expected failure is never asked, and the row excuses nothing while
+    reading as a finding. So a skip on a cell the `backlog` marker names
+    is reported as a failure naming the row, in whichever phase it
+    happens: the tier fixture skips at setup, a test at call. An
+    expected failure that held is a skip too in pytest's report,
+    `wasxfail` telling it apart; and the marker is what keeps this off
+    the expected failures `verbatim_test.py` marks on its own.
+
+    `tryfirst` makes this the outermost wrapper, so the report it reads
+    is the one pytest's own xfail handling has finished with.
+
+    :param item: the test asked.
+    :param call: the phase that ran.
+    :returns: the report, its outcome rewritten where the row excuses
+        a cell the run did not ask.
+    """
+    report = yield
+    marker = item.get_closest_marker("backlog")
+    if marker is None or not report.skipped or hasattr(report, "wasxfail"):
+        return report
+    reason = report.longrepr[2] if isinstance(report.longrepr, tuple) else ""
+    reason = reason.removeprefix("Skipped: ")
+    report.outcome = "failed"
+    report.longrepr = (
+        f"tests/repositories.py excuses {item.nodeid} for {cited(marker.args)}, "
+        f"and this run did not ask it: {reason}. A row excuses a failure; "
+        "take the repository out of the row, or the test's question "
+        "has changed under it."
+    )
+    return report
 
 
 @pytest.fixture(autouse=True)

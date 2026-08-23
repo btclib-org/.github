@@ -72,14 +72,24 @@ def arguments(step: dict[str, Any]) -> list[str]:
 def accepted(words: list[str]) -> set[int]:
     """Read the status codes an argument list makes lychee accept.
 
+    Both spellings clap takes, `--accept <list>` and `--accept=<list>`:
+    a list the second way is one word, and reading only the first would
+    take it for the default and pass a list that drops half of it.
+
     :param words: the action's arguments.
     :returns: the codes, lychee's default where `--accept` is not passed.
     :raises ValueError: where an entry is neither a code nor a range.
     """
-    if "--accept" not in words:
+    given = None
+    for index, word in enumerate(words):
+        if word == "--accept":
+            given = words[index + 1]
+        elif word.startswith("--accept="):
+            given = word.removeprefix("--accept=")
+    if given is None:
         return set(SUCCESS)
     out: set[int] = set()
-    for entry in words[words.index("--accept") + 1].split(","):
+    for entry in given.split(","):
         found = RANGE.match(entry)
         if not found:
             msg = f"--accept entry {entry!r} is neither a code nor a range"
