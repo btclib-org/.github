@@ -118,6 +118,57 @@ audit has no revision to compare against.
   carries none answers instead. `.gitattributes` keeps its
   `RELEASE_NOTES.md` line: an attribute on a path that is not there is
   inert, and the file stays the same in every tree.
+### COPYRIGHT is transcribed into the gate, and the transcription is checked
+
+- **Section 14 says what the file is.** It said one line naming the
+  holder, which every header points at instead of repeating; the file is
+  three lines, and every source file repeats them, which is what `CPY`
+  with an anchored `notice-rgx` enforces. The bullet now says so, and
+  that the file is a repository's and not a distribution's: `LICENSE`
+  carries the holder for whoever has the archive, so `COPYRIGHT` leaves
+  `license-files` — issue #135, where the three packages that ship it
+  are measured.
+
+- **`tests/copyright_test.py` compares the regex against the file.**
+  `CPY` checks every header against `notice-rgx`, and nothing checked
+  `notice-rgx` against the `COPYRIGHT` it was copied from, so a tree
+  whose two disagreed passed its own gate. The test derives the regex
+  from each repository's `COPYRIGHT` the way section 5 now spells out —
+  metacharacters escaped, lines joined by `\n`, anchored with `^` — and
+  refuses a declared one that is not it. Measured against the tip of
+  every repository: five declare the derived regex byte for byte, and
+  `bitcoin-core-rpc` declares the MIT notice in full by a departure its
+  own file records, which is issue #119's and not this one's. That
+  repository is an entry in the module's `EXPECTED_DRIFT`, a strict
+  expected failure naming the issue: the suite stays green on a drift
+  already filed, and the day the tree aligns the unexpected pass turns
+  red, which is the signal to delete the entry.
+
+- **`.gitattributes` is a section 14 file.** Every repository carries
+  it and every copy sets the same two files to `merge=union`, and the
+  section did not name the path, so `tests/verbatim_test.py` never
+  compared the copies: the eight are seven distinct files, differing in
+  the comment's wording and in the order of the two lines, and
+  `portanode`'s and `btclib`'s add rules for paths only they carry. The
+  bullet puts those under `## This repository in particular`, a comment
+  to git and the marker the comparison already stops at, so the
+  comparison covers the file without a second rule for it — issue #102,
+  which the path names from `verbatim_test.py`'s own `EXPECTED_DRIFT`
+  on the same terms as above until the copies agree.
+
+- **The `ci:` block's verbatim part is named.** Section 14 called the
+  block verbatim in part without saying which part: `autofix_prs`,
+  `autoupdate_commit_msg` and `autoupdate_schedule` are shared, and
+  `skip:` is the repository's own because it can only name hooks that
+  repository defines. It also says that no test and no section 15
+  command compares the shared part — issue #103.
+
+- **The badge paragraph states the reason and not the repair.** Section
+  4's local-link-prefix bullet said what the first version of the hook
+  could not reach and what had been cited; section 9 asks for why the
+  pattern is as it is, in the present tense. A badge nests a link inside
+  a link, and that is now the whole of the paragraph's argument — issue
+  #117.
 
 ### The review check reports the verdict, not that the review ran
 
