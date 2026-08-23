@@ -133,17 +133,14 @@ jobs:
           # the action refuses a run a bot initiated unless that bot is
           # named -- "Workflow initiated by non-human actor" -- so a
           # pull request Dependabot opens would otherwise never carry
-          # the ack of record. Nothing opens one here: this tree has no
-          # dependabot.yml, so this input decides nothing in this
-          # repository and is carried because this file is the copy the
-          # others port, and the ones that configure Dependabot need it.
-          # Named rather than `*`, which the input's
+          # the ack of record. Named rather than `*`, which the input's
           # own description warns against on a public repository: with
           # it an external App could invoke this action carrying a
           # prompt it wrote. The credential for such a run is a second
           # fact a port has to know: a Dependabot-initiated run reads
           # the organization's *Dependabot* secret store, not the
-          # Actions one, and README.md's section 11 has both.
+          # Actions one, and section 11 of the btclib-org repository
+          # standard has both.
           # The mention job below takes no such input, deliberately --
           # what triggers it is somebody writing @claude
           allowed_bots: "dependabot[bot]"
