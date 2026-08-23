@@ -2267,6 +2267,21 @@ comments, below. A repository answers for itself where it can —
 `interpreters_test.py`, `conventions_test.py`, the hook-pin tests — and
 this file is where the rest is written down.
 
+Section 3 states the convention that the classifiers name the
+interpreters a tree runs, and says a library carries it as
+`interpreters_test.py`; this file is what carries it for a tree that
+does not: a library's classifiers are what an index shows whoever is
+choosing the package, where an application's declarations are read by
+whoever opens the repository. So the ends of an application's window are
+compared here rather than by a module of its own. The other answer
+weighed was dropping the classifiers a tree that publishes nothing shows
+to no index, and what that costs is the comparison itself — the floor
+and the matrix are declared either way, and nothing would be left to
+read them against. What no command here compares is the classifiers
+against the interpreters a workflow runs, which stays a reading: a job
+naming one outside the window is correct where the reason is beside it,
+and no command here can read a reason.
+
 The settings, which is where the defects have actually been:
 
 ```shell
@@ -2369,10 +2384,13 @@ dependency that set the ceiling.
 
 The matrix column is empty where no workflow names a list of them,
 which is a tree whose workflows name no interpreter at all and a tree
-that runs a single one as a key: either way the pin is what runs.
-`3.14t` and `pypy3.11` are in the column and are not versions to compare
-against a classifier — the first is CPython 3.14 built without the GIL,
-and PyPy is a classifier of its own under `Implementation`.
+that runs a single one as a key: either way the pin is what runs. A `t`
+suffix, in that column or in the pin's, is that version built without
+the GIL and so the version a classifier names; a `pypy` prefix is an
+implementation, which carries a classifier of its own under
+`Implementation` rather than a version. Reading the matrix against the
+classifiers is this command's work: what the suite compares them with is
+the floor and the pin, and no workflow.
 
 Which repositories publish, which is what section 2's first tier turns
 on and so what decides whether a `SECURITY.md` is owed or inherited:

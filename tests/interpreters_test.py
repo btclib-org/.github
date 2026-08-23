@@ -11,12 +11,19 @@ the reason the two halves are asked differently here.
 Each library holds a module of this name reading its own declarations
 against one another -- `requires-python` against the classifiers,
 the classifiers against the platform sweeps -- which is what section 15
-means by a repository answering for itself. That leaves the half no tree
-can ask: the window a library covers is python.org's release cycle
-rather than that library's choice, so the libraries name one window and
-a tree that disagrees with the others is out of step with the cycle.
-Which tree is a library is section 2's tier, for the reason section 1
-gives at the rule.
+means by a repository answering for itself. It is a library's, which
+section 3 states where it states the convention and section 15 gives the
+reason for.
+
+Two questions are left here. The one no tree can ask: the window a
+library covers is python.org's release cycle rather than that library's
+choice, so the libraries name one window and a tree that disagrees with
+the others is out of step with the cycle. And the ends of that window,
+where the tree that would compare them holds no module of its own: they
+are declared in `pyproject.toml` and in `.python-version` whatever the
+tree is, and this reads them against one another. Which tree is a
+library is section 2's tier, for the reason section 1 gives at the
+rule.
 
 The calendar itself is asked of nothing here. What decides it is
 python.org's, a date in it is a date this suite would have to be told,
@@ -62,10 +69,12 @@ def versions(parsed: dict[str, Any]) -> tuple[str, tuple[str, ...]]:
 
 
 def pinned(root: Path) -> str:
-    """Read the interpreter `.python-version` names.
+    """Read the interpreter version `.python-version` names.
 
     Whole-line comments are what that file takes, section 1 saying why,
-    so what is left of it once they are dropped is the version.
+    so what is left of it once they are dropped is the pin. A `t` suffix
+    is dropped with them: it asks for that version built without the
+    GIL, which is the same version as far as a classifier is concerned.
 
     :param root: the root of the checkout.
     :returns: the version, empty where the tree holds no such file.
@@ -78,7 +87,7 @@ def pinned(root: Path) -> str:
         for line in path.read_text(encoding="utf-8").splitlines()
         if line.strip() and not line.lstrip().startswith("#")
     ]
-    return lines[0] if lines else ""
+    return lines[0].removesuffix("t") if lines else ""
 
 
 def ordered(version: str) -> tuple[int, ...]:
@@ -108,7 +117,8 @@ def test_the_libraries_name_one_interpreter_window(
         if not Tier.PUBLISHER.binds(tiers[repository]):
             continue
         floor, classified = versions(parsed)
-        window = f">={floor}, classifiers {','.join(classified) or 'none'}"
+        listed = ",".join(sorted(classified, key=ordered))
+        window = f">={floor}, classifiers {listed or 'none'}"
         declared.setdefault(window, []).append(repository)
     assert declared, "no repository is tier 1, and this compared nothing"
     assert len(declared) == 1, f"section 1's one window, declared as {declared}"
@@ -131,6 +141,34 @@ def test_every_library_holds_the_module_that_reads_its_declarations(
     """
     assert tracked(trees[repository], OWN_MODULE), f"no {OWN_MODULE}; " + by_hand(
         repository, f"git ls-files {OWN_MODULE}"
+    )
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_the_floor_is_the_lowest_interpreter_the_tree_declares(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 1: `requires-python` is the oldest interpreter supported.
+
+    A floor and a classifier list in one file are two statements of one
+    end of the window, whatever the tree is, so the lowest classifier is
+    what the floor names. Section 15 is where a tree holding no module
+    of its own is answered for, and why.
+
+    :param repository: the repository asked about.
+    :param pyprojects: the parsed files.
+    """
+    floor, classified = versions(pyprojects[repository])
+    if not classified:
+        pytest.skip(f"{repository} declares no per-version Python classifier")
+    lowest = min(classified, key=ordered)
+    command = by_hand(
+        repository, "grep -n 'requires-python\\|Python :: 3\\.' pyproject.toml"
+    )
+    assert floor == lowest, (
+        f"requires-python is >={floor} and the lowest classifier is {lowest}; "
+        + command
     )
 
 
