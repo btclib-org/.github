@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """Which repositories the standard applies to, how far, and what is owed.
 
 Three things about the organization kept in one module, so that a
@@ -154,7 +158,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     ),
     (112, "test_mypy_is_strict", ("btclib-node",)),
     (112, "test_the_gate_runs_mypy", ("bbt",)),
-    (119, "test_cpy_is_selected_with_a_notice_rgx", (".github",)),
     (119, "test_every_notice_rgx_is_its_copyright_transcribed", ("bitcoin-core-rpc",)),
     (128, "test_no_step_passes_frozen", ("btclib-secp256k1",)),
     (

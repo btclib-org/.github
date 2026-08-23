@@ -52,17 +52,19 @@ package = false
 preview = true
 explicit-preview-rules = true
 # The tree is a test suite and nothing else, so the select list is the
-# organization's minus what only a library has to answer for: no CPY,
-# there being no package to carry a copyright header; no D on top of the
-# defaults beyond what a test module needs. What is here is what finds
-# something in test code -- a bare except, a mutable default, an
-# undocumented module, a path built with os.path.
+# organization's minus what only a library has to answer for: no D on
+# top of the defaults beyond what a test module needs. What is here is
+# what finds something in test code -- a bare except, a mutable default,
+# an undocumented module, a path built with os.path. CPY is in: section
+# 5's rule is about every source file and says nothing about a package,
+# and this tree's Python is source whoever imports it, which nobody does.
 select = [
     "A",   # flake8-builtins
     "B",   # flake8-bugbear
     "BLE", # flake8-blind-except
     "C4",  # flake8-comprehensions
     "C90", # mccabe
+    "CPY", # flake8-copyright
     "D",   # pydocstyle
     "E",   # pycodestyle errors
     "ERA", # eradicate
@@ -112,6 +114,17 @@ ignore = [
 [tool.ruff.lint.mccabe]
 # ruff's default, as everywhere in the organization
 max-complexity = 10
+
+[tool.ruff.lint.flake8-copyright]
+# COPYRIGHT transcribed, the way section 5 spells the transcription:
+# each line with its regex metacharacters escaped, the lines joined by a
+# literal \n, the whole anchored with ^ so that the notice opens the
+# file rather than sitting anywhere in its first 4096 bytes. ruff reads
+# this string and never the file, so tests/copyright_test.py is what
+# compares the two, here as in every tree that declares one; its
+# `transcribed` is what wrote this value, byte for byte the one the
+# sibling repositories declare
+notice-rgx = "^# Copyright \\(c\\) The btclib developers\\n# Distributed under the MIT software license, see the accompanying\\n# LICENSE file or https://opensource\\.org/license/mit for the full text\\."
 
 # typos' configuration, where section 4 says both spell checkers are
 # configured and where every sibling keeps this one. What is *not* here

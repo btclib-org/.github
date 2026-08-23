@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """What sections 1, 3, 5 and 6 say a `pyproject.toml` holds, per tree.
 
 Each of these is one line of section 15's tree block, asked of every

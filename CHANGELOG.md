@@ -57,6 +57,15 @@ audit has no revision to compare against.
   `tests/links_test.py` reported on this repository against issue #111
   goes from the backlog.
 
+- **`CPY` is selected, with `COPYRIGHT` transcribed as its
+  `notice-rgx`, and every source file here opens with the notice.**
+  `pyproject.toml` left the rule out as one only a package answers for,
+  and section 5's rule is about every source file: a suite is source.
+  The regex is the one `tests/copyright_test.py` derives, byte for byte
+  the siblings', so the test that compares the two now reads this tree
+  too. The cell `tests/pyproject_test.py` reported on this repository
+  against issue #119 goes from the backlog.
+
 ### Section 15's audit runs as the suite, one row per repository
 
 - **Section 15's commands are tests, asked of every repository at

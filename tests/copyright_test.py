@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """The `notice-rgx` of every repository is its `COPYRIGHT`, transcribed.
 
 Section 5 makes the copyright header a ruff rule: `CPY` checks every

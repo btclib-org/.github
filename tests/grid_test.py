@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """Every scheduled run in the organization is on section 10's calendar.
 
 The calendar is two tables: a workflow owns a day and an hour, a

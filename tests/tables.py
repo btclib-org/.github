@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """Reading a table of README.md as data.
 
 Section 10's calendar is prose a person reads and a rule a machine has

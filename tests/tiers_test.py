@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """Section 2's table of repositories and tiers is what the trees measure.
 
 The section says the table is a claim and its loop is what checks it,

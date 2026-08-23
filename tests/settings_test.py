@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """The rulesets, the merge method and the token section 11 describes.
 
 These are the rules that live in no tree: a repository setting is

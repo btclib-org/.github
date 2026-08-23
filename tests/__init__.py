@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """The alignment suite: whether the repositories still agree with README.md.
 
 Section 7 of README.md says a test never reaches the network, and every

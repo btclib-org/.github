@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """A backlog row on a cell the run skips is a failure, not a skip.
 
 The one module here whose subject is this tree's own `conftest.py`

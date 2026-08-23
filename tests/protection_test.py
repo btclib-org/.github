@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """The half of section 11's settings that classic protection carries.
 
 Rulesets carry the integrity rules and the review requirement, and

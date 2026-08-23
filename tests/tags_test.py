@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """A release tag is an object a signature can sit on.
 
 The organization's rule is that a tag is signed, and `settings_test.py`

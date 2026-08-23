@@ -1,3 +1,7 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
 """Section 11's Dependabot ecosystems, read off each `dependabot.yml`.
 
 The section closes the count -- three ecosystems, and pre-commit
