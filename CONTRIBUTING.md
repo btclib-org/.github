@@ -170,7 +170,10 @@ this heading.
 
 uv is the only thing that has to be installed; it fetches interpreters
 and tools itself. There is a project here, and nothing installs it:
-`package = false`, its only Python being one test suite.
+`package = false`, its only Python being one test suite. So the gate
+below is a `uvx` and not the `uv run` section 1 describes: there is no
+project environment for pre-commit to be a dependency group of, and
+`--locked` would have nothing to check against.
 
 `gh` and `git` are the other two prerequisites and neither is a wheel:
 both are on every GitHub-hosted runner already, and the suite shells out
@@ -183,11 +186,10 @@ uvx pre-commit validate-config .pre-commit-config.yaml
 ```
 
 `uvx` and not the `uv run` a sibling's lint job uses, and `lint.yml` runs
-this same command: a workflow invoking pre-commit some other way is the
-second declaration section 4 refuses, one version behind the author's or
-ahead of it. The last one is worth running before pushing a change to the
-hook config — it catches what a wrong `types_or` tag or a malformed entry
-would otherwise turn into a red lint job.
+this same command for the reason its own header gives. The last one is
+worth running before pushing a change to the hook config: it catches what
+a wrong `types_or` tag or a malformed entry would otherwise turn into a
+red lint job.
 
 **Check exit codes, not filtered output.** `pre-commit run ... | grep -v
 Passed` hides a failure, and `grep` finding nothing exits 1, which is not

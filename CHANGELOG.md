@@ -45,10 +45,11 @@ audit has no revision to compare against.
   `CHANGELOG.md`, `RELEASE_NOTES.md` and `.gitattributes`. Others it
   still lacks — `SECURITY.md` and `RELEASING.md` among them — and what a
   repository that publishes nothing owes of that table is not settled
-  here. `CODE_OF_CONDUCT.md` takes the
-  shared text, and `LICENSE` loses its year range — `COPYRIGHT` names the
-  holder without one, so the two disagreed the first January nobody
-  remembered.
+  here. `CODE_OF_CONDUCT.md` and `LICENSE`
+  take the text the siblings have yet to adopt, so both leave this
+  repository out of group until they do; `LICENSE` also loses its year
+  range, `COPYRIGHT` naming the holder without one, so the two disagreed
+  the first January nobody remembered.
 
 - **`AUTHORS.md` points at this repository's own contributors.** Section
   14 said the file was kept for the organization rather than per package;
