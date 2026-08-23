@@ -116,6 +116,24 @@ audit has no revision to compare against.
   files, and asks every library whether it holds the module section 15
   names as reading its own three declarations against one another.
 
+### Section 2's root files are asked of the tier that owes them
+
+- **`root_files_test.py` reads the table's `tiers` column and asks each
+  row of every tree it reaches** — issue #195. The column is what says
+  which tiers owe a file, and the only row a test asked of a tree was
+  `SECURITY.md`'s, as the file `security_test.py` reads an address out
+  of. The tiers nest, so a row is the last tier its cell names and
+  `Tier.binds` answers for it as it does for a `tier` marker; a cell
+  that is not the tiers from 1 down, and a file the table rows twice,
+  are refused rather than read as whatever they parse to.
+- **That direction and not the reverse.** A tier is a floor rather than
+  a ceiling, so a row that does not reach a repository says nothing
+  about a tree that carries the file anyway: `portanode` is tier 3 with
+  the release documents its own practice needs, and this repository is
+  tier 2 with the `SECURITY.md` GitHub shows for a repository that has
+  none of its own. Reading the table in reverse would report both, and
+  section 2 states each of them.
+
 ### The test-file spelling and the public surface each state one rule
 
 - **The test-file spelling is a choice between two patterns pytest
