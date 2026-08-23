@@ -234,6 +234,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_every_test_file_is_named_so_pytest_collects_it",
         ("btclib-node",),
     ),
+    (
+        175,
+        "test_dependabot_watches_what_section_11_gives_every_tree",
+        ("portanode",),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection."""
 
