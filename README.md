@@ -819,11 +819,18 @@ preview rule then runs only where `extend-select` names it exactly.
 - **Docstrings are gated**: the `D` family with `convention = "pep257"`,
   every public module, class, method and function carrying one.
   `__init__` and the magic methods are the two exemptions pep257 itself
-  does not ask for. The convention is also what settles the pairs ruff
-  calls incompatible, so `ignore` does not name the half it disables:
-  beside a declared convention that entry changes no diagnostic and
-  silences no warning. The warning ruff prints over such a pair appears
-  only where nothing has settled it.
+  does not ask for, and the `ignore` entry is the whole of each: the
+  convention leaves `undocumented-public-init` and
+  `undocumented-magic-method` enabled, so a tree naming neither is asked
+  for a docstring at every such site. Both entries are the default, and
+  declining one is not drift: the rule is then answered with a docstring,
+  or with a `# noqa` that `RUF100` retires as soon as one arrives.
+  Requiring them of every tree was the alternative, rejected because it
+  asks a tree to drop a gate it passes. The convention is also what
+  settles the pairs ruff calls incompatible, so `ignore` does not name
+  the half it disables: beside a declared convention that entry changes
+  no diagnostic and silences no warning. The warning ruff prints over
+  such a pair appears only where nothing has settled it.
 - **Two widths, and both are enforced**: `ruff-format` reflows code to
   88, and `[tool.ruff.lint.pycodestyle] max-doc-length = 80` holds the
   comments and docstrings — the half of a file the formatter never

@@ -22,6 +22,19 @@ audit has no revision to compare against.
   them; every heading that lost one has it back. The directive itself
   stays, its removal being issue #190's.
 
+### The two `D` exemptions are a default a tree may decline
+
+- **Section 5 says what declining one means** — issue #208. The bullet
+  named `__init__` and the magic methods as exemptions and left open
+  whether a tree taking neither is drift. Measured with the pinned ruff:
+  `convention = "pep257"` leaves `undocumented-public-init` and
+  `undocumented-magic-method` enabled, so the `ignore` entry is the whole
+  of each, and a tree without it is asked for the docstring at every such
+  site — answering with one, or with a `# noqa` that `RUF100` retires the
+  moment the docstring arrives. Both entries are the default and
+  declining one is not drift. Requiring them of every tree is the
+  rejected alternative: it asks a tree to drop a gate it passes.
+
 ### The root-files table says what a README is at every tier it binds
 
 - **Section 2's `README.md` row describes the file rather than a
