@@ -39,6 +39,13 @@ is compared case-insensitively with spaces read as underscores, so the
 one spelling the comparison refuses is a different name for the link.
 """
 
+DOC_WIDTH = 80
+"""Section 5's width for the half of a file `ruff-format` never rewrites.
+
+The section's reason for this number rather than the 88 the formatter
+reflows code to is that it is the width markdown is already held to.
+"""
+
 
 def groups() -> set[str]:
     """Read the dependency-group table of section 1.
@@ -58,6 +65,22 @@ def parsed(repository: str, pyprojects: dict[str, dict[str, Any]]) -> dict[str, 
     :returns: the document.
     """
     return pyprojects[repository]
+
+
+def ruff_lint(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Return the `[tool.ruff.lint]` table of one repository.
+
+    :param repository: the repository's name.
+    :param pyprojects: the parsed files.
+    :returns: the table, empty where the tree declares none.
+    """
+    tool: dict[str, Any] = parsed(repository, pyprojects).get("tool", {})
+    ruff: dict[str, Any] = tool.get("ruff", {})
+    lint: dict[str, Any] = ruff.get("lint", {})
+    return lint
 
 
 @pytest.mark.tier(Tier.PYTHON)
@@ -120,13 +143,57 @@ def test_cpy_is_selected_with_a_notice_rgx(
     :param repository: the repository asked about.
     :param pyprojects: the parsed files.
     """
-    lint = (
-        parsed(repository, pyprojects).get("tool", {}).get("ruff", {}).get("lint", {})
-    )
+    lint = ruff_lint(repository, pyprojects)
     command = by_hand(repository, "grep -n 'notice-rgx\\|\"CPY\"' pyproject.toml")
     assert "CPY" in lint.get("select", []), "CPY is not selected; " + command
     pattern = lint.get("flake8-copyright", {}).get("notice-rgx")
     assert pattern, "CPY is selected with no notice-rgx; " + command
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_w_is_selected_with_max_doc_length_at_80(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 5: the second width, on the half a formatter never touches.
+
+    `ruff-format` reflows code and rewrites neither a comment nor a
+    docstring, so what holds those to the width is W505 -- a rule of the
+    "W" family, and inert without the key, ruff having no default doc
+    length. Either half on its own gates nothing, which is why both are
+    asked here.
+
+    :param repository: the repository asked about.
+    :param pyprojects: the parsed files.
+    """
+    lint = ruff_lint(repository, pyprojects)
+    command = by_hand(repository, "grep -n 'max-doc-length\\|\"W\"' pyproject.toml")
+    assert "W" in lint.get("select", []), "W is not selected; " + command
+    width = lint.get("pycodestyle", {}).get("max-doc-length")
+    assert width == DOC_WIDTH, f"max-doc-length is {width!r}; " + command
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_d_is_selected_with_the_pep257_convention(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 5: docstrings are gated, at the convention it names.
+
+    The convention decides which of the family runs, so a tree selecting
+    `D` without one asks its docstrings the whole of what ruff writes
+    under that letter rather than what pep257 states --
+    `missing-terminal-punctuation` among it, over the end of a summary
+    line `missing-trailing-period` has already reported.
+
+    :param repository: the repository asked about.
+    :param pyprojects: the parsed files.
+    """
+    lint = ruff_lint(repository, pyprojects)
+    command = by_hand(repository, "grep -n 'convention\\|\"D\"' pyproject.toml")
+    assert "D" in lint.get("select", []), "D is not selected; " + command
+    convention = lint.get("pydocstyle", {}).get("convention")
+    assert convention == "pep257", f"convention is {convention!r}; " + command
 
 
 def enabled() -> list[str]:
