@@ -13,6 +13,21 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### A review reads the prose that stays
+
+- **Prose is reviewed where a reader of the tree will meet it.**
+  `REVIEWING.md` said a commit message was tree prose answering for
+  itself; it now says what a review reads for truth is the
+  documentation that stays — `README.md`, `CONTRIBUTING.md`, a
+  docstring, a comment — and that a commit message or a pull request's
+  body, read once at the landing, is a finding only where it decides
+  something.
+- **A count, a measurement nobody re-derives, and the history of the
+  code are findings.** The check every review makes asks for the figure
+  to go or for the command that re-derives it to take its place, and
+  for a comment or a document that tells what the code used to be to
+  stop — section 9's rules, named where the reviewer reads them.
+
 ### Section 15's audit runs as the suite, one row per repository
 
 - **Section 15's commands are tests, asked of every repository at
