@@ -15,12 +15,14 @@ audit has no revision to compare against.
 
 ### A review reads the prose that stays
 
-- **The suite is run whole, by the reviewer, every time.** `REVIEWING.md`
-  let a reviewer rely on an author's run of the gates; the test suite is
-  now excepted — it is run whole on the sha under review, never a
-  module, a `-k` or a `--lf` in its place, and a narrowed run is
-  reported as no run. What a change breaks is found by the test that
-  did not expect it.
+- **A suite is run whole, by whoever runs it.** `REVIEWING.md` asked
+  for no run at all where the author's gates were on the record; it now
+  says what a run has to be — never a module, a `-k`, a `--lf`, a
+  deselect or a marker in its place, because what a change breaks is
+  found by the test that did not expect it, and a subset is chosen by
+  what the author expected. A narrowed or cut-short run is reported as
+  no run. The suite is not excepted from the paragraph below it: a
+  reviewer relying on an author's run relies on a whole one.
 - **Prose is reviewed where a reader of the tree will meet it.**
   `REVIEWING.md` said a commit message was tree prose answering for
   itself; it now says what a review reads for truth is the
