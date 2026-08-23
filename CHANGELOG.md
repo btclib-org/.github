@@ -7,6 +7,31 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The calendar names the workflows that exist
+
+- **Section 10's rows follow the file names the organization now uses.**
+  `tests/grid_test.py` keys the calendar on a workflow's file stem, and
+  the alignment that landed across the organization renamed the scheduled
+  ones so that a prefix groups a family and a name says its own subject:
+  `os-ubuntu`, `os-macos`, `os-windows`, `deps-latest`, `pypi-install`,
+  `integration-bitcoind`, `integration-hwi`, `py-arm-authority`. Until the
+  rows followed, the test failed in both directions at once — rows no
+  repository schedules, and workflows no row names. No cron moved: each
+  fires in the slot its old name held.
+
+- **`portanode` and `bbt` have a minute.** Neither schedules anything
+  today, so the reservations buy nothing yet; what they avoid is the
+  other way `tests/grid_test.py` fails —
+  `test_every_repository_that_schedules_anything_has_a_minute`, which a
+  first cron landing in either tree would answer, where the rows above
+  answer `test_every_cron_is_the_instant_the_calendar_names`. Issue #97
+  names both: the rows because a rename left them behind, the minutes
+  because `portanode` was never on that table at all.
+
+- **`verbatim_test.py` passes.** Every path section 14 owes is one file
+  across every tree that owes it, which
+  `BTCLIB_INTEGRATION=1 uv run pytest tests/` answers for whole.
+
 ### The shared yamllint configuration runs the default set
 
 - **`.yamllint.yaml` extends `default` here too.** The copy this
