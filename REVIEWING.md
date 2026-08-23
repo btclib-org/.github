@@ -47,6 +47,20 @@ directions:
   as a nit, if it is worth saying at all.
 - **Work the diff never set out to do is not a finding either.** It is
   an issue; the section below is the whole of what to do with it.
+- **Prose that does not land is a finding only where it decides
+  something.** Squash carries the branch's commit messages into the
+  landing commit, so those are tree prose and answer for themselves like
+  any other. A pull request's body does not land: it is read once, by
+  whoever presses the button. A false claim there is worth a round when
+  it is the account the landing rests on — what the change costs, what
+  it leaves owed — and is not worth one when correcting it changes
+  neither `main` nor a decision.
+
+  The reason to draw the line is that a body describes a tip that keeps
+  moving: a measurement written into it is stale by the next commit, and
+  a round spent restating it buys nothing that the next round does not
+  undo. Where a figure is worth having, the command that re-derives it
+  belongs there instead of the figure.
 
 ## What is under review
 
