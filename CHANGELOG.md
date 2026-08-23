@@ -170,6 +170,84 @@ audit has no revision to compare against.
   a link, and that is now the whole of the paragraph's argument — issue
   #117.
 
+### A review that ran out of time, or that the action refused, says so
+
+- **The budget is the review step's, and running out of it is said.**
+  `claude-review.yml` held its fifteen minutes at the job, and a job that
+  hits its limit is *cancelled*: nothing after the killed step runs unless
+  it asked to run on a cancellation, and nothing here did, so the pull
+  request shows a failed check with nothing from this file beside it —
+  issue #60 measured two reviews that had read as reviews that found
+  something, and the jobs API was what said they had run out of time. The
+  limit is now on the step, which *fails* it with the runner's own line
+  saying it timed out, and the guard after it runs on any outcome but a
+  cancellation and says what that means: no verdict was written, and no
+  verdict is no ack, so the row is red without being a finding against the
+  tree. The job keeps a larger ceiling for the steps around the review,
+  which read the API and post. A review that is going to exceed its budget
+  still cannot post what it has, the action being killed rather than
+  asked; that half of the issue is not answered here.
+
+- **A review that ends without a verdict line is red, and was measured to
+  be.** Issue #56's case — a summary declaring a finding blocking and
+  ending on no `ACK` or `CHANGES REQUESTED` line — is what the step landed
+  for issue #136 reports as *no verdict*, replayed against the comments
+  pull request 53 carried at the time. The message now says that a comment
+  whose last line is not a verdict is one of the things it reports, rather
+  than only a job that wrote no comment.
+
+- **The reviewer is told to read the title and description again.** The
+  review of pull request 67 reported a title that `gh pr view` had been
+  answering differently for most of the run: the correction landed after
+  the push that fired the event and after the reviewer had started
+  reading, by the issue timeline's `renamed` event against the run's own
+  log — issue #69 had placed it a second after the push, before the job
+  started, which the timeline does not support. Reading the title at job
+  start, which the issue proposed, reads it *earlier* than the reviewer
+  does and would have answered the old title too; and at the pinned
+  revision the action, given a prompt, fetches nothing about the pull
+  request and hands the prompt over as written, so what the reviewer reads
+  is already the forge's answer at the moment it asks. What closes the
+  window is asking again before a finding about the title or description
+  is written, and the prompt now says so. An `edited` trigger, the change
+  under which a correction re-fires the review, is not taken here: the App
+  that appends its summary to a description edits it after opening, and
+  what its run would do to the review in flight — a bot actor the action
+  refuses, a concurrency group that may or may not cancel for a job
+  skipped by its condition — cannot be tested on the branch that proposes
+  it, for the reason issue #58 records. Section 11 says what a review
+  reads beyond the sha in those terms.
+
+- **Dependabot is named to the action, and the second secret store is in
+  the standard.** Issue #77 began as a credential in the wrong store and,
+  once the maintainer had added `CLAUDE_CODE_OAUTH_TOKEN` to the
+  organization's Dependabot secrets, ended one step later at the action
+  refusing a run a bot initiated. The four repositories the issue names
+  carry `allowed_bots: "dependabot[bot]"` since 2026-08-23 — not
+  `btclib-node`, which configures Dependabot since the day before and is a
+  finding against that tree, not this one; this copy carries it too, inert
+  here where no `dependabot.yml` opens anything, because this is the file
+  the others port. Named rather than `*` for the reason the input's own
+  description gives on a public repository. Section 11 reads both stores
+  back, and says why a repository that configures Dependabot needs the
+  second. Skipping Dependabot's pull requests as a fork is skipped was the
+  alternative, and it turns a missing credential into a missing review for
+  a class of pull request whose whole value is landing promptly.
+
+- **The command that checks a repository has the workflow answers.**
+  Section 11's `gh api … --jq .name` put a 404's body on stdout, so a
+  sweep over the organization read as a column of filenames with one JSON
+  document in it, and the repository without the workflow survived for as
+  long as nobody read the JSON — issue #137, and `bbt` was the repository.
+  The line is now `--silent` with the exit code as the answer, the shape
+  section 15's publishing sweep already had, and section 15 gains the
+  sweep section 11's rule had no command for: one line per repository that
+  lacks the file, silence where the rule is kept. Section 15's Dependabot
+  calendar loop, which also reads a path a repository may lack, was run
+  against one that lacks it: it writes its 404 to stderr and a `null` into
+  `base64`, which complains there too — noise, and nothing false on
+  stdout.
+
 ### The review check reports the verdict, not that the review ran
 
 - **Green means an ack of the head.** `claude-review.yml`'s job was

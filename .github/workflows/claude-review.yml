@@ -64,8 +64,16 @@ jobs:
           && github.event.pull_request.head.repo.full_name
              == github.repository }}
     runs-on: ubuntu-latest
-    # a diff read and a comment posted; a job past this is hung on the API
-    timeout-minutes: 15
+    # the review's own budget is on its step below, and this is the
+    # ceiling for the steps around it, which read the API and post. It
+    # has to be the larger of the two: a job that hits its own limit is
+    # *cancelled*, which the pull request shows as a failed check with
+    # nothing from this file beside it -- two reviews that ran out of
+    # time read as reviews that had found something, and the jobs API
+    # was what said otherwise. The step's limit *fails* the step, with
+    # the runner's own line saying it timed out, and the guard below it
+    # then runs and says what that means for the verdict
+    timeout-minutes: 20
     # per job rather than per workflow, so that a push cancelling a
     # superseded review does not also cancel somebody's @claude question
     # running beside it. Named literally rather than through
@@ -115,8 +123,30 @@ jobs:
       - name: Review against REVIEWING.md
         id: review
         uses: anthropics/claude-code-action@d40ddef4c030e508327d6e35a9c45f3368482c50 # v1
+        # a diff read and a comment posted; a review past this is hung
+        # on the API or on its own reasoning, and either way it has
+        # written no verdict. On the step rather than on the job for the
+        # reason the job's ceiling gives
+        timeout-minutes: 15
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # the action refuses a run a bot initiated unless that bot is
+          # named -- "Workflow initiated by non-human actor" -- so a
+          # pull request Dependabot opens would otherwise never carry
+          # the ack of record. Nothing opens one here: this tree has no
+          # dependabot.yml, so this input decides nothing in this
+          # repository and is carried because this file is the copy the
+          # others port, and the ones that configure Dependabot need it.
+          # Named rather than `*`, which the input's
+          # own description warns against on a public repository: with
+          # it an external App could invoke this action carrying a
+          # prompt it wrote. The credential for such a run is a second
+          # fact a port has to know: a Dependabot-initiated run reads
+          # the organization's *Dependabot* secret store, not the
+          # Actions one, and README.md's section 11 has both.
+          # The mention job below takes no such input, deliberately --
+          # what triggers it is somebody writing @claude
+          allowed_bots: "dependabot[bot]"
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
@@ -127,6 +157,12 @@ jobs:
             finding cites, this repository being the one that holds the
             rules; CONTRIBUTING.md's last section has the gates, and
             CLAUDE.md the facts about this tree a review has to know.
+
+            The title and description are the forge's, `gh pr view`,
+            and are read again before a finding about either is written:
+            a correction to them lands seconds behind the push that
+            fired this run, and a finding about a title the pull request
+            no longer carries is a finding about nothing.
 
             The summary's last line is the verdict, `ACK <sha>` or
             `CHANGES REQUESTED <sha>`, naming the sha because an ack
@@ -185,10 +221,27 @@ jobs:
       # edits this file, this job is red until the change is on `main`.
       # It gates nothing, and a red check that says "no review happened"
       # is the honest shape of that.
+      #
+      # Run when the step above failed too, which is what `!cancelled()`
+      # buys over the default: a review that hit its budget, or that the
+      # action refused, ended without writing a verdict, and that is
+      # the fact to report rather than leave to the step's own error. A
+      # job cancelled by the concurrency group is the one case this
+      # still skips, a superseded review having nothing to say.
       - name: Refuse to report a review that never ran
+        if: ${{ !cancelled() }}
         env:
+          OUTCOME: ${{ steps.review.outcome }}
           EXECUTION: ${{ steps.review.outputs.execution_file }}
         run: |
+          if [ "$OUTCOME" != success ]; then
+            echo "::error::the review step ended in $OUTCOME, so no" \
+                 "verdict was written -- the runner's line above says" \
+                 "whether it ran out of its timeout-minutes or failed" \
+                 "another way. No verdict is no ack: that is why this" \
+                 "is red, and it is not a finding against the tree."
+            exit 1
+          fi
           if [ -z "$EXECUTION" ]; then
             echo "::error::the action produced no execution file, so no" \
                  "review was written. The usual cause is workflow" \
@@ -257,7 +310,8 @@ jobs:
             echo "::error::the review posted no verdict on this pull" \
                  "request, so nothing says whether $HEAD_SHA was read at" \
                  "all. A job that finishes green having written no" \
-                 "comment is what this reports."
+                 "comment, or a comment whose last line is not a" \
+                 "verdict, is what this reports."
             exit 1
           fi
           sha=${verdict##* }
