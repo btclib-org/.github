@@ -252,21 +252,23 @@ jobs:
       # Green here means an ack of this tree, and nothing weaker. The
       # guard above answers whether the action started, and a run that
       # starts, finishes green and posts nothing at all walks through
-      # it: on pull request 139 two runs of the same sha both concluded
-      # success, the first having written no comment and the second the
-      # review.
+      # it: on btclib-org/.github#139 two runs of the same sha both
+      # concluded success, the first having written no comment and the
+      # second the review. The commands below take the tree they are
+      # run in, `gh` resolving the braces from its checkout.
       #
-      #   gh api "repos/btclib-org/.github/actions/runs?head_sha=<sha>" \
+      #   gh api "repos/{owner}/{repo}/actions/runs?head_sha=<sha>" \
       #     --jq '.workflow_runs[] | select(.name == "claude-review")
       #           | {id, conclusion, run_started_at, updated_at}'
       #
       # So what is read here is what was posted rather than what the
       # action produced: the verdict is the last line of a comment on
-      # the pull request, which is where README.md's section 11 puts the
-      # ack of record, and only what claude[bot] wrote is one -- an
-      # author's own ack is not.
+      # the pull request, which is where REVIEWING.md puts it, and only
+      # what claude[bot] wrote is the ack of record -- the btclib-org
+      # repository standard's *Review* is what says an author's own is
+      # not.
       #
-      #   gh api repos/btclib-org/.github/issues/139/comments \
+      #   gh api repos/{owner}/{repo}/issues/<number>/comments \
       #     --jq '.[] | "\(.user.login) \(.body | split("\n") | last)"'
       #
       # The last verdict decides, rather than any verdict naming the
