@@ -29,11 +29,7 @@ rather than in a list here: a second list is one more thing to keep in
 step with the first, and the file is the thing being compared anyway.
 """
 
-EXPECTED_DRIFT = {
-    ".gitattributes": (
-        "btclib-org/.github#102: seven distinct copies; per-repo sweeps align them"
-    ),
-}
+EXPECTED_DRIFT: dict[str, str] = {}
 """A path section 14 names whose copies are known not to agree yet.
 
 The value is the issue that decides it. An entry here is a strict
