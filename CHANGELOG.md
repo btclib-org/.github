@@ -135,6 +135,27 @@ audit has no revision to compare against.
   `MANIFEST.in` is answered by `git ls-files MANIFEST.in` in it, not by
   its backend.
 
+### The support line names the organization
+
+- **Every `README.md` ends by crediting the btclib organization and its
+  projects**, where the line named `btclib` alone. That is the library's
+  name, and section 2 asks for the line from a node, a benchmark suite
+  and a course as well, where naming the library would credit the
+  support to one of the things being supported. That section asks for it
+  identical everywhere — this repository's own `README.md` and the
+  organization profile included — and the wording is what makes that
+  argument hold for a repository that is not the library.
+
+- **Whether the line is owed at all is issue #98, and this does not
+  settle it.** That issue's point is the choice between section 2 going
+  on asking for the line and section 2 ceasing to ask, and it names
+  `bbt` and `portanode` as repositories a support claim right for
+  `btclib` may be wrong for. What changes here is how the line reads
+  where section 2 asks for it; were that issue to decide the section
+  should stop asking, the specimen goes and this wording goes with it.
+  The copies that move are the specimen, the line this repository's own
+  `README.md` carries and the one on the organization profile.
+
 ### The calendar names the workflows that exist
 
 - **Section 10's rows follow the file names the organization now uses.**
