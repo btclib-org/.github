@@ -1447,14 +1447,27 @@ stays right is a rebase carrying no new work.
 credential is not a repository's to hold:
 
 ```shell
-gh api repos/<org>/<repo>/contents/.github/workflows/claude-review.yml --jq .name
+gh api repos/<org>/<repo>/contents/.github/workflows/claude-review.yml \
+  --silent 2>/dev/null && echo claude-review.yml
 gh api orgs/<org>/actions/secrets --jq '.secrets[] | "\(.name) \(.visibility)"'
+gh api orgs/<org>/dependabot/secrets \
+  --jq '.secrets[] | "\(.name) \(.visibility)"'
 ```
+
+The first answers with the name or with nothing, and its exit code is the
+answer: `--silent` sends a 404 to stderr, where `--jq .name` puts its
+*body* on stdout — a JSON document in a column of filenames, which is
+how a repository without the workflow survived a sweep that should have
+named it. Section 15 has the sweep.
 
 The token is an **organization** secret at `visibility=all`, so a
 repository adopting the workflow configures nothing for it. That is worth
 stating because the answer *nothing* is invisible from a repository's own
-settings page, and it is the first question a port asks.
+settings page, and it is the first question a port asks. It is in both
+stores because a run Dependabot initiates reads the Dependabot one and
+not the Actions one: under the same name, and a repository that
+configures Dependabot gets a red review on every pull request Dependabot
+opens while the second is missing.
 
 **Two things a port must adapt**, and both are claims about the receiving
 tree rather than settings. The prompt names `REVIEWING.md`, and it tells
@@ -1481,12 +1494,15 @@ the default branch. That is not something to work around — it is the
 honest shape of "no review happened" — so such a pull request lands on
 its gates and on a description saying so.
 
-**What is in no copy's comments** is that a review reads more than the
-sha. The tree it judges is the commit's; the title and description it
-judges are fetched separately, so a correction made after the push can
-be invisible to it — and with no `edited` trigger nothing re-fires, so
-the finding cannot clear itself except through a further push or a
-`close`/`reopen`.
+**A review reads more than the sha.** The tree it judges is the
+commit's; the title and description it judges are what the forge
+answered when the reviewer asked, and a correction to either lands
+seconds behind the push that fired the run — behind the reviewer's first
+read, on the pull request that measured it — so the prompt here has the
+reviewer ask again before a finding about them. A correction landing
+after that read is invisible to it, and with no `edited` trigger nothing
+re-fires, so such a finding cannot clear itself except through a further
+push or a `close`/`reopen`.
 
 ### Tokens, publishing, scanning
 
@@ -2029,6 +2045,22 @@ organization does not publish may be served by somebody else's project
 of the same name — so the discriminator is a link back to the
 organization and not a `200`. `<name>` is what `pyproject.toml`
 declares, which is not always the repository's.
+
+Section 11's rule that `claude-review.yml` is in every repository, which
+no single tree can answer for the others and nothing in `tests/` asks:
+
+```shell
+for r in <every repository>; do
+  gh api "repos/<org>/$r/contents/.github/workflows/claude-review.yml" \
+    --silent 2>/dev/null || echo "$r has no claude-review.yml"
+done
+```
+
+Silent where the rule is kept, one line per repository where it is not,
+and `--silent` for the reason the publishing sweep gives: the rule was
+stated and its check printed a 404's body where a name was expected,
+and the one repository that failed it stayed in the column for as long
+as nobody read the JSON.
 
 The calendar of section 10, across the organization, which is the one
 audit no single tree can answer:
