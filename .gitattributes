@@ -10,6 +10,7 @@
 # the same existing entry edited on two branches merges in silence rather
 # than being flagged. That is why neither states how many entries it has —
 # a count is exactly such an edit, and union would have kept both numbers.
-# Section 9 of README.md is where this rule is recorded.
+# Section 9 of the organization standard, btclib-org/.github's README.md,
+# is where this rule is recorded.
 CHANGELOG.md merge=union
 RELEASE_NOTES.md merge=union
