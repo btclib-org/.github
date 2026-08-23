@@ -23,15 +23,33 @@ audit has no revision to compare against.
   repository built from the checklist had the choice made for it by a
   list that does not say it is choosing. Section 16's normalizing
   checklist names no shape either.
+### A Dependabot ecosystem is asked of the tree that would carry it
+
+- **`dependabot_test.py` asks the two halves of section 11's sentence
+  nothing asked** — issue #171. Membership in the four ecosystems the
+  section names was the whole of the question, leaving the pair the
+  section gives every tree, and the condition it puts on the other two,
+  measured by nothing. `github-actions` and `uv` are now asked of every
+  tree, and `bundler` and `gitsubmodule` are asked in both directions
+  against what `git ls-files` finds — a Gemfile at any depth, a
+  `.gitmodules` at the root.
+- **portanode is a backlog row against issue #175.** It declares
+  `github-actions` alone, and whether the tree owes `uv` or the section
+  owes `uv` the condition it already states for the other two is what
+  that issue decides.
+- **A tree with no `.github/dependabot.yml` is an error rather than a
+  failed assertion**, the shape `hooks_test.py` uses for a tree with no
+  lint gate: a backlog row excuses an assertion, and a file that is gone
+  is not one.
 
 ### The tree's own comments say what the rule is, in the present tense
 
-- **The backlog is down to what one repository still owes.** Every tree
-  that runs mypy carries section 6's error codes now — issue #165 — and
-  bbt's gate runs mypy since btclib-org/bbt#24, so the rows recording
-  those two against issues #165 and #112 are spent and go. What is left
-  is issue #131's pair against btclib-node, suspended on the
-  maintainer's decision while another session annotates that tree.
+- **Two backlog rows are spent and go.** Every tree that runs mypy
+  carries section 6's error codes now — issue #165 — and bbt's gate runs
+  mypy since btclib-org/bbt#24, so the rows recording those two against
+  issues #165 and #112 record nothing. Issue #131's pair against
+  btclib-node stays, suspended on the maintainer's decision while
+  another session annotates that tree.
 
 - **`dependabot_test.py`'s docstring says what section 11 says now.**
   Section 11 stopped closing the count at three ecosystems in this same
@@ -40,8 +58,7 @@ audit has no revision to compare against.
   in the test while the standard was corrected. Section 15 makes a
   module's docstring the statement of which section it reads, so that is
   where a reader sent by the audit is told. It now names the two an
-  ecosystem-carrying tree has whatever it holds and the two it earns,
-  and points at #171 for the conditional half nothing measures.
+  ecosystem-carrying tree has whatever it holds and the two it earns.
 - **An unclosed fence is no block.** `fenced()` promised to raise where a
   section does not hold exactly one, and a fence opened and never closed
   read to the end of the file and came back as one — past the section
