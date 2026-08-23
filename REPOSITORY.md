@@ -249,13 +249,13 @@ on the author's own machine.
 What answers `disabled` is [plan-gated rather than declined][s11-tokens],
 so this call reports the setting and not the request.
 
-There is no `.github/dependabot.yml`, where [the standard asks for the
-`github-actions` ecosystem at least][s11-bots]: the actions these
-workflows pin have nothing proposing their next SHA, and `uv.lock` has
-nothing proposing its next resolution. The pre-commit
-revisions do have pre-commit.ci's weekly autoupdate, per the `ci:` block
-of `.pre-commit-config.yaml`. The missing file is a gap rather than a
-choice.
+Version bumps are the other half of what Dependabot does here, and they
+are a file rather than a setting: `.github/dependabot.yml` declares
+`github-actions`, which [the standard gives every tree][s11-bots], and
+`uv`, which it gives a tree holding what that ecosystem reads — this one
+holds `uv.lock`. The pre-commit hook revisions have no Dependabot
+ecosystem, and are pre-commit.ci's weekly autoupdate instead, per the
+`ci:` block of `.pre-commit-config.yaml`.
 
 ## Private vulnerability reporting
 

@@ -13,6 +13,15 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### `REPOSITORY.md` says what Dependabot proposes here
+
+- **The Dependabot paragraph describes the file this tree holds** —
+  issue #211. It recorded an absence, and the reasoning under it went
+  with it: that the actions these workflows pin, and `uv.lock`, had
+  nothing proposing their next revision. `.github/dependabot.yml`
+  declares `github-actions` and `uv`, the second because the tree holds
+  the lock file section 11 makes that ecosystem conditional on.
+
 ### The blank lines the union driver ate are back
 
 - **`CHANGELOG.md` would pass MD022 and MD032 with the directive at its
