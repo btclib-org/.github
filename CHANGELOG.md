@@ -188,6 +188,19 @@ audit has no revision to compare against.
   document exports it, and the bullet above it now says what that
   reaches.
 
+### Section 3 says what `license-files` names
+
+- **The list is `LICENSE` and `AUTHORS.md`, in a file that declares a
+  build backend** — issue #200. The section asked for the key and not
+  for its contents, so section 14's clause keeping `COPYRIGHT` out was
+  the only statement about what the list holds. `LICENSE` alone is
+  weighed beside it: the notice names a collective, and `AUTHORS.md` is
+  where the archive says its members are listed.
+- **The test reading the key says what asserting the two names waits
+  on** — btclib-org/btclib-node#235. `pyproject_test.py` asks that
+  `license-files` is declared, the section being where what it holds is
+  stated.
+
 ### The test-file spelling and the public surface each state one rule
 
 - **The test-file spelling is a choice between two patterns pytest
