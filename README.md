@@ -256,14 +256,54 @@ configured in it. Two tools have files of their own — yamllint and
 taplo — because they are found by name from the working directory and
 their reasoning needs more room than a hook argument has.
 
+- **The build backend is `uv_build` where the project is pure Python.**
+  What the choice buys is where the sdist's inclusion is then declared:
+  glob patterns in `[tool.uv.build-backend]`, in this file and beside
+  the rest of the configuration, rather than in a file of its own with
+  an include and exclude language of its own. One backend across the
+  ordinary case is also one such language to learn rather than one per
+  project. What makes a project the exception is what it compiles:
+  `btclib-secp256k1` builds a vendored C library through cffi and cmake,
+  which hatchling answers with a build hook and a pure-Python backend
+  does not answer at all.
+
+    `requires` names that backend with a floor and, under `uv_build`, a
+    **ceiling at the next minor**, where the bullet below refuses an
+    upper bound to a sibling dependency. What differs is what the bound
+    costs: on a runtime dependency it makes a published artifact refuse
+    a version somebody already has, where on a build requirement it only
+    narrows what an isolated build resolves for itself, and that build
+    resolves whatever the bound allows. What it buys is that uv bumps
+    its minor for a breaking change and releases this backend with
+    itself, so an unbounded requirement lets a published sdist build
+    under a backend nobody checked it against, with no release of this
+    project in between. Each bound carries the reason that chose it, and
+    PEP 639 below is one such reason.
 - **The version is declared once**, in `[project]`. The package reads it
   back with `importlib.metadata`; the sphinx `conf.py` parses this file,
   metadata not being available to an uninstalled build. Two declarations
   are two things a release has to compare.
 - **PEP 639 licensing**: `license = "MIT"` as an SPDX string and
   `license-files`, not the deprecated table and not a `License ::`
-  classifier. `requires = ["setuptools>=77"]` is the floor both halves
-  need.
+  classifier. The floor that carries them is the backend's own:
+  `btclib-secp256k1` writes `hatchling>=1.27` because an older hatchling
+  rejects both halves above outright, where `uv_build`'s floor is set by
+  what its sdist carries and says that instead. A constant copied from
+  another project is a requirement the build does not use.
+
+    **Nothing local refuses the classifier beside the expression**,
+    which is why this is a rule rather than something a build catches.
+    One file carrying both, built under each backend — the probe and
+    what it printed are btclib-org/.github#113's — leaves `uv_build`
+    warning, hatchling saying nothing at all, and both archives carrying
+    `License-Expression: MIT` and the deprecated `Classifier:` line
+    together. `setuptools>=77` is what fails the build, and it is not a
+    backend this standard keeps. `twine check` passes both archives, and
+    so does the `trove-classifiers` comparison the `classifiers` bullet
+    names, which asks whether a string is a classifier at all: this one
+    is a current entry of that list and not a deprecated one. Whether
+    PyPI's upload endpoint refuses the pair is unmeasured, asking it
+    meaning publishing a version.
 - **`keywords` are the GitHub topics**, the same names in the same
   lowercase spelling. The keywords carry an order and the topics do not:
   PyPI shows keywords as given, so they are ordered by relevance, while
@@ -392,7 +432,9 @@ pre-commit.ci does not have — the lint workflow covers it. No
   file lists plus a rule about which files are public that nothing
   checks.
 - **types** — a mypy hook, below.
-- **packaging** — `uv-lock`, `check-manifest`, `pyroma`.
+- **packaging** — `uv-lock`, `pyroma`, and `check-sdist` wherever the
+  sdist's inclusion is an include list, which is section 12's condition
+  rather than a second one.
 
 ### The local hooks
 
@@ -1461,15 +1503,18 @@ corrected in none of the ones that shipped.
   into a chain that holds only while every link runs.
 - **The sdist's half follows from how its inclusion is declared.** An
   include list drops a tracked file nobody added to it, silently, and
-  `check-manifest` gating the tree against the archive is what answers
-  that; an exclude-list sdist target ships a new file by default, so its
-  failure is an archive too wide, which is not silent. Which file
-  declares it is the backend's: setuptools reads `MANIFEST.in`,
-  hatchling reads `[tool.hatch.build.targets.sdist]` and never reads a
-  `MANIFEST.in` at all, so a manifest in a tree whose backend ignores
-  it is a file that looks like a rule and governs nothing. The question
-  is what the backend reads, and `check-manifest` follows the include
-  list into whichever file that is. Past that, an
+  `check-sdist` — which builds the archive and compares it against what
+  git tracks — is what answers that; an exclude-list sdist target ships
+  a new file by default, so its failure is an archive too wide, which is
+  not silent. Which table declares the inclusion is the backend's:
+  `uv_build` reads `[tool.uv.build-backend]` and hatchling
+  `[tool.hatch.build.targets.sdist]`, neither reads the other's, and a
+  table the declared backend does not read is configuration that looks
+  like a rule and governs nothing. So the check follows the backend
+  rather than the table: `check-sdist` keys a plugin on `[build-system]`
+  and reads that backend's own exclusions, which is what leaves
+  `[tool.check-sdist]` holding only what no include pattern added in the
+  first place. Past that, an
   allowlist for the sdist — which members may sit at the archive's root,
   that every member is a regular file or a directory where a tar can
   carry a symlink or a device node, that no directory holds another
@@ -1491,17 +1536,19 @@ decides it rather than as a shape to copy, and each re-derived by section
 wheel built with `py.typed` stripped and `RECORD` edited to match, which
 installs and imports cleanly and which the unconfigured tool passes —
 because a single-module package with no data directory has no member that
-the flag and `check-manifest` between them leave unpinned.
+the flag and the sdist check between them leave unpinned.
 `btclib-secp256k1` has no package to name: every wheel it ships carries a
 compiled artifact at the wheel's own root, so it keeps `ignore = ["W003",
 "W009"]` for the top-level member that is not a mistake, and its script
 asks what the flag has no wording for — which artifact a wheel of that
 tag must carry, and that it is not the zero-byte one a half-finished
 build step leaves behind. Its sdist target is an exclude list, so the
-sdist half is not its question. `btclib` owes that half: its `MANIFEST.in`
-is an include list, and its archive carries the suite and the vendored
-vectors, where which files may sit at the root and what kind of member the
-tar holds are questions nothing it runs otherwise asks.
+sdist half is not its question. `btclib` owes that half: the
+`source-include` of its `[tool.uv.build-backend]` is a glob include list
+and its archive carries the suite and the vendored vectors, so
+`check-sdist` runs in its gate, where which files may sit at the root and
+what kind of member the tar holds are questions nothing it runs otherwise
+asks.
 
 ## 13. Editor and agent configuration
 
@@ -1680,9 +1727,12 @@ grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'
 grep -L '^permissions:' .github/workflows/*.yml
 grep -rn -- '--frozen' .github/workflows/
 grep -rn 'merge=union' .gitattributes
-git ls-files MANIFEST.in '*package-content-policy*' '*_contents*'
+git ls-files '*package-content-policy*' '*_contents*'
+sed -nE '/^\[build-system\]/,/^\[/{/^\[/!p;}' pyproject.toml
+grep -n 'check-sdist' .pre-commit-config.yaml
 sed -nE '/^\[tool\.check-wheel-contents\]/,/^\[/{/^[a-z]/p;}' pyproject.toml
-sed -nE '/^\[.*targets\.sdist\]/,/^\[/{/^[a-z]/p;}' pyproject.toml
+sed -nE '/^\[.*(targets\.sdist|uv\.build-backend)\]/,/^\[/{/^[a-z]/p;}' \
+    pyproject.toml
 uv run pre-commit run --all-files
 cat tests/README.md
 ```
@@ -1801,9 +1851,12 @@ What the package-content lines have to say: where the wheel is one
 package tree, a `package` naming it, whose absence is section 12's
 finding; where the wheel is not one, the codes the tool is told to
 ignore, and the page, the script and the test that a repository which
-escalates owes together rather than singly. A tracked `MANIFEST.in` says
-the sdist half is owed; an sdist target that only excludes says it is
-not.
+escalates owes together rather than singly. An include list says the
+sdist half is owed and `check-sdist` in the gate is what answers it; an
+sdist target that only excludes says it is not. A `build-backend` other
+than `uv_build` in a project that compiles nothing is section 3's
+finding, and it is the one to read first: which table holds the include
+list follows from it.
 
 ### Reading the workflow comments
 
@@ -1856,9 +1909,9 @@ independent and the checklist the same for each.
 ### A new repository
 
 1. `git init`, MIT `LICENSE`, `COPYRIGHT`, `AUTHORS.md`.
-1. `pyproject.toml`: metadata, PEP 639 licence, keywords matching the
-   topics, urls, dependency groups, and the tool tables of sections 5, 6,
-   7 and 8.
+1. `pyproject.toml`: section 3's build backend, metadata, PEP 639
+   licence, keywords matching the topics, urls, dependency groups, and
+   the tool tables of sections 5, 6, 7 and 8.
 1. Copy `.markdownlint.jsonc`, `.yamllint.yaml`, `.taplo.toml`,
    `.gitattributes` (with the two `merge=union` entries),
    `.python-version`, `.gitignore`.
@@ -1873,11 +1926,10 @@ independent and the checklist the same for each.
 1. `docs/source` and `.readthedocs.yaml`, built with `-W --keep-going`.
 1. Section 12's package-content floor: `[tool.check-wheel-contents]`
    naming the package where the wheel is one package tree, and the page,
-   the script and the test where it is not; `check-manifest`, only
-   where the sdist's inclusion is declared as an include list, in the
-   file the backend reads it from — `MANIFEST.in` under setuptools,
-   the backend's own sdist target otherwise. A `dist` job that
-   inspects what would be published.
+   the script and the test where it is not; `check-sdist`, only where
+   the sdist's inclusion is declared as an include list, which under
+   section 3's backend is `source-include`. A `dist` job that inspects
+   what would be published.
 1. Workflows: `test` (with its aggregate and its `changes` job), `lint`,
    `docs`, `claude-review`, then the periodic ones the project earns.
 1. `.github/dependabot.yml`, `ISSUE_TEMPLATE/`,
@@ -1943,11 +1995,16 @@ written before the gate that judges it.
 1. **`uv` and a committed lock**, `--locked` in every job, and one
    documented command per job.
 1. **What the distribution carries, where the repository publishes** —
-   section 12's floor: `[tool.check-wheel-contents]` naming the package
-   where the wheel is one package tree, the page, the script and the
-   test where it is not, and `check-manifest` against the include list
-   — `MANIFEST.in` under setuptools, the backend's own sdist target
-   otherwise — only where the inclusion is declared that way.
+   section 3's backend first, since which table declares the inclusion
+   follows from it, then section 12's floor:
+   `[tool.check-wheel-contents]` naming the package where the wheel is
+   one package tree, the page, the script and the test where it is not,
+   and `check-sdist` against the archive, only where the inclusion is
+   declared as an include list. A backend move is checked by the archive
+   it produces and not by the file it edits — an sdist built each way,
+   with the member lists compared — since what the outgoing include
+   language expressed and the incoming one cannot shows up there and
+   nowhere else.
    Everything else the `dist` job runs reads a distribution's account
    of itself, which a `py.typed` lost to a `package-data` typo passes.
 1. **`.pre-commit-config.yaml` as the single lint gate**, and the lint

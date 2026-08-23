@@ -156,6 +156,84 @@ audit has no revision to compare against.
   The copies that move are the specimen, the line this repository's own
   `README.md` carries and the one on the organization profile.
 
+### A pure-Python project builds with `uv_build`
+
+- **Section 3 states the backend.** `uv_build` where the project is pure
+  Python, and what decides the exception is what a project compiles:
+  `btclib-secp256k1` builds a vendored C library through cffi and cmake,
+  which hatchling answers with a build hook and a pure-Python backend
+  does not answer at all. What the move buys is where the sdist's
+  inclusion is then declared — glob patterns in
+  `[tool.uv.build-backend]`, beside the rest of the configuration,
+  rather than in a file of its own with a language of its own. The
+  requirement carries a ceiling at the next minor, uv bumping its minor
+  for a breaking change and releasing the backend with itself, where the
+  same section refuses an upper bound to a sibling dependency: what
+  differs is that a bound on a build requirement narrows what an
+  isolated build resolves for itself rather than what a published
+  artifact accepts.
+
+- **`MANIFEST.in` and `check-manifest` leave the standard with
+  setuptools.** That hook gates a tree against a setuptools include list
+  and has no subject without one. `check-sdist` takes its place: it
+  builds the archive and compares it against what git tracks, and keys a
+  backend plugin on the `[build-system]` string, so the include list is
+  read from whichever table the declared backend reads and the
+  exclusions are not written twice. Sections 4, 12, 15 and 16 name it
+  where they named the tool that is leaving.
+
+- **Section 12's example named a repository that had neither.** It said
+  `btclib` owes the sdist half because "its `MANIFEST.in` is an include
+  list": `btclib` builds with `uv_build` and tracks no `MANIFEST.in`,
+  which the tree endpoint answers with an empty list:
+
+  ```shell
+  gh api 'repos/btclib-org/btclib/git/trees/main?recursive=1' \
+    --jq '[.tree[].path | select(. == "MANIFEST.in")]'
+  ```
+
+  The paragraph's rule — which table declares the inclusion is the
+  backend's — was sound, and the example was left behind by the backend
+  move. The question under it is answered rather than dropped with the
+  tool: a glob include list drops a tracked file as silently as a
+  manifest does, and `check-sdist` in `btclib`'s gate is what catches
+  it.
+
+- **The PEP 639 floor is the backend's own, not `setuptools>=77`.** That
+  constant was one backend's, and the projects not on that backend
+  already declared something else: `btclib-secp256k1` writes
+  `hatchling>=1.27`, where an older hatchling rejects the SPDX string
+  and `license-files` outright, and `btclib` a `uv_build` floor chosen
+  by what its sdist carries. A repository following the old sentence
+  literally onto either backend wrote a requirement its build does not
+  use.
+
+- **Nothing local refuses the deprecated classifier beside the
+  expression.** One file carrying `license = "MIT"`, `license-files` and
+  a `License ::` classifier at once, built under each backend: the run
+  is issue #113's, whose body carries the probe script and whose comment
+  carries what it printed, and this change re-derived neither.
+  `setuptools>=77` fails the build, `hatchling>=1.27` builds with no
+  diagnostic at all, `uv_build` builds with a warning, and both archives
+  that build carry `License-Expression: MIT` and the deprecated
+  `Classifier:` line together, `twine check` passing both.
+
+  What this change did re-derive is the half a command answers here: the
+  `trove-classifiers` comparison passes the classifier too, asking
+  whether a string is a classifier at all, and this one is a current
+  entry of that list rather than a deprecated one:
+
+  ```shell
+  uvx --with trove-classifiers python -c \
+    'from trove_classifiers import deprecated_classifiers as d
+  print("License :: OSI Approved :: MIT License" in d)'
+  ```
+
+  So the backend that enforced the rule is the one leaving the standard,
+  and section 3 says the rule stands on being read. Whether PyPI's
+  upload endpoint refuses such an archive is still unmeasured: asking it
+  means publishing a version.
+
 ### The calendar names the workflows that exist
 
 - **Section 10's rows follow the file names the organization now uses.**
