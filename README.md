@@ -1245,10 +1245,17 @@ commits nothing.
 
 ### The aggregate job, and the required check
 
-A matrix workflow ends in a job that `needs` every other job in it and is
-named with its workflow — `test: every job passed` — because a check
-context is keyed by name alone and two workflows with a job of the same
-name produce one ambiguous check.
+A workflow whose answer gates a pull request ends in a job that `needs`
+every other job in it and is named with its workflow — `test: every job
+passed` — because a check context is keyed by name alone and two
+workflows with a job of the same name produce one ambiguous check.
+
+**A matrix is not what asks for one.** A branch rule can name only a
+context a pull request produces, so a workflow triggered by `push` and
+`schedule` alone is one no rule can require, however many cells it runs,
+and an aggregate there is a name nothing can hold. Where such a workflow
+is to gate, the trigger and the aggregate arrive in the same pull
+request, and the rule follows them.
 
 - **Never name a matrix cell in the branch rule.** The rule lives outside
   the repository, so a context that stops being produced blocks every
@@ -1258,14 +1265,13 @@ name produce one ambiguous check.
   expression a skipped step could leave unevaluated.
 - `skipped` is legitimate on purpose: when the run was superseded by its
   concurrency group, and when a `changes` job decided the diff touches
-  nothing the matrix reads.
+  nothing those jobs read.
 - **A `changes` job** is the cheapest job in the workflow and decides
   whether the rest runs. It answers `true` on every trigger that has no
   base to diff against, and the files it counts as prose are narrower
   than they look: the README is the package's long description, the docs
   are read by tests, and the history files are parsed by the suite.
-- Where a single job is what gates, **that job is the context**. A
-  workflow whose whole answer becomes required needs an aggregate.
+- Where a single job is what gates, **that job is the context**.
 - **Renaming a required check cannot be done in a pull request**: the
   branch stops producing the old name while the rule still waits for it.
   The rule moves first, against the branch, and the pull request follows.

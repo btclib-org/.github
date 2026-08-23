@@ -39,13 +39,13 @@ protection needs the whole object rather than the answer above.
 | --- | --- |
 | `Lint` | `lint.yml`'s only job |
 
-`lint.yml` has one job, so that job is the context: the [aggregate job a
-required check needs][s10-check] is for a matrix, and there is none here.
-The name is not the sibling repositories' `Lint and type-check`, though
-the hook config it runs carries a mypy hook as theirs do: a context is
-keyed by name alone and bound outside the tree, so changing one is not
-something a pull request can do. The direction that would matter is the
-other one, a name promising a check nobody runs.
+`lint.yml` has one job, so that job is the context and there is no
+[aggregate job][s10-check] here to name. The name is not the sibling
+repositories' `Lint and type-check`, though the hook config it runs
+carries a mypy hook as theirs do: a context is keyed by name alone and
+bound outside the tree, so changing one is not something a pull request
+can do. The direction that would matter is the other one, a name
+promising a check nobody runs.
 
 **`links.yml` is not a required check and must not become one.** It asks
 whether somebody else's server answered, which is a question a merge
