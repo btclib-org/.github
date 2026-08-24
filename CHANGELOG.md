@@ -25,6 +25,7 @@ audit has no revision to compare against.
   `wt-<tracker>-<issue>-<repo>-<role>`, most general part first: the
   repository whose tracker holds the issue, the issue, the repository
   this worktree is for, and what the worker is doing in it.
+
 ### `tests/pyproject_test.py` gains a check for section 1's uv floor
 
 - **`[tool.uv] required-version` names the oldest uv that may read the
