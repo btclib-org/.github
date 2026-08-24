@@ -13,7 +13,23 @@ audit has no revision to compare against.
 
 ## Unreleased
 
-### The row for `btclib-node`'s `name-tests-test` argument goes
+### The calendar gains a row for `btclib-node`'s DNS-seed sentinel
+
+- **`bootstrap-dns` takes Thursday, 05** — issue #201. It is the only
+  workflow shape section 10's tables had no row for: a sentinel unique
+  to `btclib-node`, resolving each chain's bootstrap DNS seeds against
+  the live network, the same slot `py-arm-authority` already holds as a
+  row one repository alone answers to. Thursday's `05` was the grid's
+  only open cell, `alignment` alone occupying that day, at `04`.
+- **`tests/grid_test.py::test_every_row_of_the_calendar_names_something_that_exists`
+  fails until `btclib-node` schedules it.** The row and the cron are two
+  repositories' changes, and `btclib-node`'s own `bootstrap-dns.yml`
+  already runs on `workflow_dispatch` alone, waiting on this row before
+  it adds a `schedule:`. The test takes the session fixtures rather than
+  a `repository` one, so the backlog's per-repository `xfail` cannot
+  excuse it; the row is a real, temporary gap the audit is right to
+  report, and `alignment.yml` says of itself why that is a backlog
+  entry and not a block.
 
 - **`btclib-node` runs the hook at its default, so its row is deleted**
   — issue #131. `btclib-org/btclib-node@640af71` renamed that tree's

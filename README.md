@@ -1426,6 +1426,7 @@ owns a day and an hour, the repository owns the minute:
 | `deps-latest` | Wednesday | 04 |
 | `pypi-install` | Wednesday | 05 |
 | `alignment` | Thursday | 04 |
+| `bootstrap-dns` | Thursday | 05 |
 | `os-ubuntu` | Friday | 04 |
 | `integration-hwi` | Friday | 05 |
 | `os-macos` | Saturday | 04 |
