@@ -59,10 +59,26 @@ the permitted side of *never work in it*, not an exception to it. Stop
 if the checkout is not on `main` or is not clean: that is no longer
 bringing it forward.
 
-**Every session works in a worktree**, its own, from the first edit:
+**Every session works in a worktree**, its own, from the first edit,
+named `wt-<tracker>-<issue>-<repo>-<role>` rather than after the issue
+alone: a worktree's administrative directory lives in the one shared
+`.git`, keyed on its path's basename, and the scratchpad a session's
+workers share is one directory, so a name that collides collides
+silently — a worktree checked out at one sha has already been found
+sitting on another session's commit, with an empty reflog. An issue
+filed in this tracker is the key and the repository is a detail of
+it — `#255` is one issue owed by seven repositories, `#177` by two — so
+the repository is what varies underneath an issue rather than the other
+way round, which is why it comes after `<issue>` rather than before it:
+naming it that way also sorts every worktree of one issue together,
+which is what a port leaves behind. `issue` is what prevents the
+collision that has actually happened, two worktrees of different issues
+both named `wt-review`; `role` covers the narrower case of a coder and
+its reviewer holding a worktree at once, which the ordinary sequence
+avoids by each removing its own.
 
 ```shell
-WT=<scratchpad>/wt<issue>
+WT=<scratchpad>/wt-<tracker>-<issue>-<repo>-<role>  # wt-github-255-btclib-coder
 git worktree add -b <branch> "$WT" origin/main
 cd "$WT"                              # no uv sync: the gate does it
 # edit, gate and commit here, then
