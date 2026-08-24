@@ -69,7 +69,8 @@ file is the third of:
   invisible from the others.
 
 Nothing here is released: this repository ships by being read, and
-section 2's table has it in the tier that publishes nothing.
+`CONTRIBUTING.md`'s *A version, and no release* is what the placeholder
+version in `pyproject.toml` is for.
 
 **A finding that spans repositories is filed here, and only here.** Not
 here *as well*: the same divergence written up once per repository is

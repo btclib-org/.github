@@ -35,9 +35,6 @@ read back from the endpoint, and `tests/` is the half of section 15's
 audit a machine can run — its subject being the other repositories rather
 than this tree.
 
-Nothing here is installed, imported or released. What this repository
-ships, it ships by being read.
-
 ## The primary checkout is the maintainer's
 
 **Never work in it.** No edit, no `git add`, no commit, no branch
