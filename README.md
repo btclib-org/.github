@@ -2335,11 +2335,13 @@ bullet here would put this repository's own copy in the comparison too, and it
 would fail forever rather than the way `EXPECTED_DRIFT` expects: that table
 records a copy a fix converges, not one that cannot by design.
 
-What section 11 asks a port to get right — that its prompt's two claims about
-the receiving tree hold — is answered by that copy alone; nothing here or in
-section 11 asks the receiving copies to otherwise read alike. A difference
-between them past those two claims is therefore not this file's finding, and no
-command here re-derives one.
+Whether the receiving copies must otherwise read alike is open, not decided
+here: `btclib-org/.github#267` raised it, with a drift that has no named
+adaptation behind it — a boilerplate cross-reference worded three ways, and one
+tree missing the qualifier section 9 requires — and `btclib-org/.github#35`'s
+reusable-workflow consolidation could make the question moot by removing the
+copies rather than by comparing them. No command in this repository checks it
+either way.
 
 A per-file exception belongs in that file's own
 `markdownlint-configure-file` comment, not in the shared config read by

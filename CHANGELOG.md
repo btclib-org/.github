@@ -25,6 +25,7 @@ audit has no revision to compare against.
   `wt-<tracker>-<issue>-<repo>-<role>`, most general part first: the
   repository whose tracker holds the issue, the issue, the repository
   this worktree is for, and what the worker is doing in it.
+
 ### Section 14 says why `claude-review.yml` has no verbatim bullet
 
 - **Section 11 says `claude-review.yml` is in every repository and section 15
@@ -33,9 +34,10 @@ audit has no revision to compare against.
   `REVIEWING.md`** — issue #267. Section 14 now says why one is absent:
   `tests/verbatim_test.py`'s comparison needs a copy in this repository the
   others were made from, and this repository's own copy is the workflow's
-  origin rather than a receiver of it, so there is none. The receiving
-  copies' own agreement with each other, past the two adaptations section 11
-  names, is still nothing any command here re-derives.
+  origin rather than a receiver of it, so there is none. Whether the
+  receiving copies must otherwise agree is left open, for issue #35's
+  reusable-workflow consolidation to possibly settle by removing the copies
+  rather than by comparing them.
 
 ### `tests/pyproject_test.py` gains a check for section 1's uv floor
 
