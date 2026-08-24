@@ -13,6 +13,28 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 1 names the uv floor's owners, section 15 its ceiling
+
+- **`[tool.uv] required-version` said the floor was "low enough for
+  Dependabot's own bundled uv," with no command beside it and no statement
+  of which trees owe it** — issue #312. Section 1 now names the trees that
+  owe a floor — every one `uv.lock`'s row binds, tiers 1 and 2 — and says
+  the floor sits at the ceiling rather than below it, since the ceiling
+  only rises and the failure guarded against is an *older* uv rewriting
+  the lock.
+- **Section 15 gained the command that measures the ceiling** — issue
+  #312: the uv Dependabot's own bundled updater ships, read off
+  `dependabot-core`'s `uv/Dockerfile`, beside the loop that reads each
+  tree's own declared floor against it.
+- **This repository's own `pyproject.toml` gained `required-version =
+  ">=0.12.1"`, the ceiling measured today** — issue #312. It held a
+  `[tool.uv]` table and commits a `uv.lock`, with no floor declared.
+- **`tests/pyproject_test.py`'s check only refused a floor above the
+  ceiling, leaving a tree that named none exempt by silence** — issue
+  #312. It now fails a tree that commits a `uv.lock` and names no floor at
+  all; `bbt` and `btclib-node` are the two, carried as a `BACKLOG` row
+  under this issue until both land.
+
 ### `CHANGELOG.md`'s derogation directive names its condition alone
 
 - **The directive carried two issue pointers — `#33` as the condition

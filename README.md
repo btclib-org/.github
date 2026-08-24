@@ -217,10 +217,18 @@ whole drift of ruff, mypy, pytest and sphinx lives in the lock file, so
 one pull request a week carries all of it, pre-validated by the
 `deps-latest` workflow.
 
-`[tool.uv] required-version` names the oldest uv that may read the lock —
-low enough for Dependabot's own bundled uv, since it re-locks with that
-version regardless. `setup-uv` given no version input reads that key, so
-CI needs no second pin.
+`[tool.uv] required-version` names the oldest uv that may read the
+lock. Every tree the root-files table above binds to `uv.lock` — tiers
+1 and 2 — carries it. The floor is set at the ceiling rather than
+below it: the newest uv that Dependabot's own bundled updater still
+reads, since that updater runs `uv lock` with exactly the uv it ships
+and refuses rather than upgrading itself, so a floor above the ceiling
+would silently stop every lock update it attempts, security ones
+included. Raising the floor as the ceiling moves is always safe: the
+failure guarded against is an *older* uv rewriting the lock, and the
+ceiling only rises. Section 15 carries the command that measures it.
+`setup-uv` given no version input reads that key, so CI needs no
+second pin.
 
 ## 2. The tree
 
@@ -2547,6 +2555,31 @@ the second, there being no version string for an implementation to
 match. Reading the matrix against the classifiers is this command's
 work: what the suite compares them with is the floor and the pin, and
 no workflow.
+
+Section 1's uv floor, and the ceiling it may not exceed:
+
+```shell
+gh api repos/dependabot/dependabot-core/contents/uv/Dockerfile \
+  -H 'Accept: application/vnd.github.raw' \
+  | grep -oE 'ghcr\.io/astral-sh/uv:[0-9.]+'
+for r in <every repository>; do
+  req=$(gh api "repos/<org>/$r/contents/pyproject.toml" --jq .content \
+    2>/dev/null | base64 -d 2>/dev/null \
+    | sed -nE 's/^required-version = "(.*)"/\1/p')
+  gh api "repos/<org>/$r/contents/uv.lock" --silent 2>/dev/null \
+    && lock=yes || lock=no
+  printf '%s\tlock=%s\tfloor=%s\n' "$r" "$lock" "$req"
+done
+```
+
+The first line is the ceiling: the uv Dependabot's own bundled updater
+ships, above which it refuses to re-lock rather than upgrading itself.
+`lock=yes` names a tree that owes the floor; `floor=` empty beside it is
+the finding, a tree committing a lock with nothing capping the uv that
+reads it. `lock=no` owes no floor, so an empty `floor=` beside it is
+silent rather than a finding, whatever the ceiling is that day. A floor
+below the ceiling is safe by section 1's own argument, and only one above
+it is the other finding this loop can print.
 
 Which repositories publish, which is what section 2's first tier turns
 on and so what decides whether a `SECURITY.md` is owed or inherited:
