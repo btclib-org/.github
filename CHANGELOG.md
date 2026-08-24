@@ -13,6 +13,19 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### `CLAUDE.md`'s worktree recipe is `wt-<tracker>-<issue>-<repo>-<role>`
+
+- **The recipe named the worktree after the issue alone, `wt<issue>`, in
+  every repository of the organization** — issue #292. A worktree's
+  administrative directory lives in the one shared `.git`, keyed on its
+  path's basename, and one issue is routinely owed by several trees —
+  `#255` by seven repositories, `#177` by two — so a session working one
+  of them computed the same name for every tree it touched, with no
+  error and a silent collision. The recipe now names the worktree
+  `wt-<tracker>-<issue>-<repo>-<role>`, most general part first: the
+  repository whose tracker holds the issue, the issue, the repository
+  this worktree is for, and what the worker is doing in it.
+
 ### Section 3 answers `[project].name`'s spelling, both directions
 
 - **Section 3 stated the repository-naming rule but not which spelling
