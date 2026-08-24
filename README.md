@@ -450,10 +450,17 @@ namespace package sharing a distribution between them, and that is a
 shape this file does not state: one tree here is one distribution
 carrying one package, and a project wanting several stays several
 repositories or several `module-name`s of its own rather than one tree
-answering to two directories. `tests/surface_test.py`'s `package()`
-reads the key rather than resolving it, so a tree declaring the list
-meets a message naming the repository and the key instead of a
-directory this file never promised it one.
+answering to two directories. The same key also reads a dot as that
+backend's other namespace-package shape -- `module-name = "foo.bar"`
+builds the module `bar` under the shared namespace `foo`, at
+`src/foo/bar`, rather than naming this tree's own package -- and that is
+a shape this file does not state either, for the same reason: the
+package a tree here carries is its own, not a leaf sharing a namespace
+with a module another distribution installs beside it.
+`tests/surface_test.py`'s `package()` reads the key rather than
+resolving it, so a tree declaring either shape meets a message naming
+the repository and the key instead of a directory this file never
+promised it one.
 
 A tree without a package may still keep `tests/` above the floor:
 `.github`'s own suite is over the organization rather than over a

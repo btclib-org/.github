@@ -77,9 +77,9 @@ def package(
     :returns: the directory relative to the checkout, or None where the
         tree installs no importable package.
     :raises LookupError: where more than one directory answers, the
-        bullet naming one -- `module-name` as a list included, which is
-        `uv_build`'s own shape for a namespace package naming more than
-        one module, a shape section 2 does not allow.
+        bullet naming one -- `module-name` as a list or with a dot
+        included, both being `uv_build`'s own namespace-package shapes,
+        which section 2 does not allow.
     """
     config = pyprojects.get(repository, {})
     uv = config.get("tool", {}).get("uv", {})
@@ -95,6 +95,14 @@ def package(
             msg = (
                 f"{repository} sets module-name to {name}, and section 2"
                 " names the package directory rather than several; "
+                + by_hand(repository, "grep -n module-name pyproject.toml")
+            )
+            raise LookupError(msg)
+        if "." in name:
+            msg = (
+                f"{repository} sets module-name to {name}, and section 2"
+                " names one tree's own package rather than a module"
+                " sharing a namespace with another; "
                 + by_hand(repository, "grep -n module-name pyproject.toml")
             )
             raise LookupError(msg)
@@ -127,6 +135,27 @@ def test_package_refuses_a_module_name_list() -> None:
         "a-namespace-package": {
             "build-system": {"build-backend": "uv_build"},
             "tool": {"uv": {"build-backend": {"module-name": ["foo", "bar"]}}},
+        }
+    }
+    with pytest.raises(LookupError, match="module-name"):
+        package("a-namespace-package", {}, pyprojects)
+
+
+def test_package_refuses_a_dotted_module_name() -> None:
+    """A dot in `module-name` is `uv_build`'s namespace-package shape.
+
+    No repository in the organization declares one, so this is a
+    synthetic `pyproject.toml` rather than one read off a tree:
+    `uv_build` reads `module-name = "foo.bar"` as the module `bar` in
+    the shared namespace `foo`, built at `src/foo/bar`, not the literal
+    `Path("src") / "foo.bar"` a plain join would produce. What is asked
+    is that `package()` names the repository and the key rather than
+    resolving either path.
+    """
+    pyprojects = {
+        "a-namespace-package": {
+            "build-system": {"build-backend": "uv_build"},
+            "tool": {"uv": {"build-backend": {"module-name": "foo.bar"}}},
         }
     }
     with pytest.raises(LookupError, match="module-name"):
