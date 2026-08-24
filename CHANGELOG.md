@@ -59,6 +59,18 @@ audit has no revision to compare against.
   repository's real tree, resolving the same directories and outcomes as
   before the change.
 
+### Section 12's two `build` bullets say what each path actually reads
+
+- **The `pyroma` bullet stops claiming `build` checks `requires` on the
+  non-isolated path** — issue #251. `build.util.project_wheel_metadata`
+  has no `check_dependencies` call on that branch; the bullet now says
+  what decides pyroma's own fallback, which is whether the backend's
+  PEP 517 hook raises, not whether the environment satisfies the list.
+- **The `check-sdist` bullet's `uv build` warning is scoped to one
+  shape of `requires`** — issue #242. A ceiling below the running uv
+  warns and builds with the bundled backend anyway; a floor above it
+  fails instead, `uv` unable to import a `uv_build` meeting that floor.
+
 ### `bbt` selects `W`, so the row for it goes
 
 - **The backlog row for `bbt`'s unselected `W` is deleted** — issue
