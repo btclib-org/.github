@@ -1157,7 +1157,7 @@ is a pattern that stops matching one day.
 Every file a test reads is committed beside it. A suite that fetches its
 input has a verdict that depends on somebody else's uptime, and one that
 cannot run offline cannot run in a sandbox either — so the data is in the
-tree and the suite opens no socket.
+tree.
 
 **Two kinds of file, and only one of them can be pinned.** A *vendored
 upstream file* is a copy of a file that exists in somebody else's
@@ -1263,7 +1263,12 @@ of them carries an exemption list that is allowed to grow:
   the call answers;
 - **input validation** — every public function refuses what it does not
   declare, driven by a walk over the public surface rather than by a
-  hand-written list.
+  hand-written list;
+- **the suite opens no socket** — every construction that could reach the
+  network carries the argument that keeps it hermetic, driven by a walk
+  over the call sites rather than a fixed list of them, so a
+  construction that forgot the argument is what turns red instead of a
+  test that passes offline and fails the day it is not.
 
 A new repository does not need all of these. It needs the ones its own
 conventions state in prose, and the rule that a convention worth stating
@@ -2654,6 +2659,31 @@ not claimed is the finding, and a bullet claimed is answered by the test
 in that repository that asserts the claim. Across the organization the
 same command run in each tree is the matrix, and there is no shorter way
 to it.
+
+Section 7's vendored-data pins, across every tree that carries any —
+`tests/_data/README.md` where the data has a directory of its own,
+`tests/README.md` where it does not:
+
+```shell
+for r in <every repository>; do
+  readme=$(gh api "repos/<org>/$r/contents/tests/_data/README.md" \
+      --jq .content 2>/dev/null | base64 -d 2>/dev/null)
+  [ -n "$readme" ] || readme=$(gh api \
+      "repos/<org>/$r/contents/tests/README.md" --jq .content \
+      2>/dev/null | base64 -d 2>/dev/null)
+  pins=$(printf '%s' "$readme" | grep -c '^commit  ')
+  gh api "repos/<org>/$r/contents/.github/workflows/vendored-vectors.yml" \
+    --silent 2>/dev/null && wf=yes || wf=no
+  printf '%s\tpins=%s\tworkflow=%s\n' "$r" "$pins" "$wf"
+done
+```
+
+`pins` above zero and `workflow=no` is section 7's finding: a tree
+pinning an upstream commit with nothing rechecking it on section 10's
+schedule. The reverse — a workflow present where `pins` is zero — is
+the same finding read from the other side. A tree with neither file is
+silent rather than a finding: it has no test data to vendor, so it owes
+neither.
 
 What the package-content lines have to say: where the wheel is one
 package tree, a `package` naming it, whose absence is section 12's
