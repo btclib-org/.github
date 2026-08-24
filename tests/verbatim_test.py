@@ -48,7 +48,7 @@ would have to be kept in step with that one.
 CONDITIONAL = "owed where "
 """How a bullet of section 14 opens where a copy is owed on a condition."""
 
-EXPECTED_DRIFT: dict[str, str] = {}
+EXPECTED_DRIFT: dict[str, str] = {"CONTRIBUTING.md": "btclib-org/.github#281"}
 """A path section 14 names whose copies are known not to agree yet.
 
 The value is the issue that decides it. An entry here is a strict

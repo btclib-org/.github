@@ -1684,3 +1684,18 @@ audit has no revision to compare against.
   `#123` resolves inside the repository it is written in. The rule was
   written in a per-tree section of `REVIEWING.md` and would have been
   lost when that section left.
+
+### `CONTRIBUTING.md` names the landing queue
+
+- **A repository with more than one pull request open lands one at a
+  time** — issue #34. Rebasing every waiting pull request after each
+  landing queues this repository's whole check matrix again, against the
+  organization's ceiling on concurrent jobs, spending it on runs the next
+  landing invalidates anyway; *The landing queue* now states the rule
+  this cost taught, distinct from *One subject, opened as soon as it is
+  written*, which governs when a finished pull request is opened rather
+  than which of several already open ones reaches `main` next.
+- **`EXPECTED_DRIFT` names `CONTRIBUTING.md`** — issue #281. The new
+  subsection is `.github`'s alone until the other seven repositories
+  carry it too, which section 14's own comparison would otherwise report
+  as this organization's only verbatim-file drift.
