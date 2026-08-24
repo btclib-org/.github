@@ -28,6 +28,16 @@ audit has no revision to compare against.
   since PEP 503 normalizes `.github` to `-github`, not a distribution
   name.
 
+### `CONTRIBUTING.md` gains this tree's own *A version, and no release*
+
+- **The three other tier-2 repositories keep the fact that nothing is
+  released under a `### A version, and no release` heading in
+  `CONTRIBUTING.md`'s last section, and this one stated it twice
+  instead, in `README.md`'s *What this repository is* and in
+  `CLAUDE.md`'s *Architecture*** — issue #276. `CONTRIBUTING.md`'s last
+  section now carries the heading, `README.md` points to it in place of
+  restating the fact, and `CLAUDE.md` drops its copy.
+
 ### Two of section 3's rules get commands that re-derive them
 
 - **`pyproject_test.py` asked only that `license-files` was declared,
