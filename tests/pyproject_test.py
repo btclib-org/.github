@@ -58,6 +58,14 @@ UV_DOCKERFILE = "repos/dependabot/dependabot-core/contents/uv/Dockerfile"
 the same `gh api` this suite already asks it with.
 """
 
+UNREADABLE = "Not Found"
+"""What `gh api` reports for a document the token cannot see or that moved.
+
+The same message `protection_test.py` tells apart from every other `gh`
+failure: a document missing is this suite's business, a throttled or
+failing API is not, and the two are not the same finding.
+"""
+
 FLOOR = re.compile(r"^>=\s*(?P<version>[0-9]+(?:\.[0-9]+)*)$")
 """`required-version`, restricted to the bare floor every tree writes.
 
@@ -68,29 +76,50 @@ a different question than the one this test answers.
 
 
 @functools.cache
-def bundled_uv() -> str | None:
-    """Read the uv version `dependabot-core`'s updater runs.
+def dockerfile() -> str | None:
+    """Fetch `dependabot-core`'s `uv/Dockerfile`, as text.
 
     Cached for the run, the way `names()` in `tests/__init__.py` caches
     the organization's own repository list: every tree asks the same
     question of the same file.
 
-    :returns: the version dotted as `required-version` is, or `None`
-        where the file could not be read or did not hold the pin --
-        `dependabot-core` reorganising `uv/Dockerfile` is a tree this
-        suite does not own, so a test reading it skips rather than
-        fails on that day.
+    :returns: the file's text, or `None` where `gh` reports it or its
+        repository missing -- `dependabot-core` reorganising
+        `uv/Dockerfile` is a tree this suite does not own, so a test
+        reading it skips rather than fails on that day.
+    :raises subprocess.CalledProcessError: any other `gh` failure --
+        a throttled or failing API being neither this suite's business
+        nor a reason to read the fetch as having found nothing.
     """
     try:
-        out = subprocess.run(
+        return subprocess.run(
             ["gh", "api", "-H", "Accept: application/vnd.github.raw", UV_DOCKERFILE],
             capture_output=True,
             check=True,
             encoding="utf-8",
         ).stdout
-    except OSError, subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as error:
+        if UNREADABLE in error.stderr:
+            return None
+        raise
+
+
+def bundled_uv() -> str | None:
+    """Read the uv version `dependabot-core`'s updater runs off `dockerfile()`.
+
+    Kept apart from the fetch so a caller can tell "the file could not
+    be read" from "the file was read and held no pin" -- the second is
+    not the first, and skipping both alike would hide the day the
+    Dockerfile changed shape out from under the regex.
+
+    :returns: the version dotted as `required-version` is, or `None`
+        where `dockerfile()` did, or where its text held no
+        `astral-sh/uv:` pin.
+    """
+    text = dockerfile()
+    if text is None:
         return None
-    match = re.search(r"astral-sh/uv:(?P<version>[0-9]+(?:\.[0-9]+)*)", out)
+    match = re.search(r"astral-sh/uv:(?P<version>[0-9]+(?:\.[0-9]+)*)", text)
     return match["version"] if match else None
 
 
@@ -198,9 +227,12 @@ def test_the_uv_floor_is_not_above_what_dependabot_bundles(
     )
     if declared is None:
         pytest.skip(f"{repository} names no [tool.uv] required-version")
+    text = dockerfile()
+    if text is None:
+        pytest.skip(f"could not read {UV_DOCKERFILE}")
     bundled = bundled_uv()
     if bundled is None:
-        pytest.skip(f"could not read {UV_DOCKERFILE}")
+        pytest.skip(f"{UV_DOCKERFILE} holds no astral-sh/uv: pin to read")
     match = FLOOR.match(declared)
     assert match, (
         f"required-version is {declared!r}, not a bare >=X.Y.Z floor; "

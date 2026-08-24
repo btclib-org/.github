@@ -32,7 +32,8 @@ audit has no revision to compare against.
   bundles stops that tree's uv-driven Dependabot updates with no error
   anywhere** — issue #27. `tests/pyproject_test.py` now reads
   `dependabot-core`'s `uv/Dockerfile` through `gh api` and skips, rather
-  than failing, where that file cannot be read.
+  than failing, where the file cannot be read or is read with no
+  `astral-sh/uv:` pin in it.
 
 ### Section 3 answers `[project].name`'s spelling, both directions
 
