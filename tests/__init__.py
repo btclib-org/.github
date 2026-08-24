@@ -238,7 +238,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_the_package_directory_is_typed_and_declares_its_surface",
         ("btclib-secp256k1",),
     ),
-    (131, "test_name_tests_test_runs_at_its_default", ("btclib-node",)),
     (
         131,
         "test_every_test_file_is_named_so_pytest_collects_it",

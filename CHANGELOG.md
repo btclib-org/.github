@@ -13,6 +13,18 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The row for `btclib-node`'s `name-tests-test` argument goes
+
+- **`btclib-node` runs the hook at its default, so its row is deleted**
+  — issue #131. `btclib-org/btclib-node@640af71` renamed that tree's
+  test modules to `*_test.py` and dropped the argument selecting the
+  other pattern, so `test_name_tests_test_runs_at_its_default` asks it
+  and is answered. The issue stays open: what it asks for is sections 4
+  and 7 saying one thing about test-file naming, which no tree's rename
+  settles, and its other row —
+  `test_every_test_file_is_named_so_pytest_collects_it` — still records
+  a real gap there.
+
 ### `btclib-node` closed two filed gaps, so both records go
 
 - **`EXPECTED_DRIFT` no longer names `.gitattributes`** — issue #192.
