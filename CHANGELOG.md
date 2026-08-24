@@ -13,6 +13,16 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### `btclib-secp256k1`'s two backlog rows for issue #79 are gone
+
+- **`btclib-secp256k1` declares `__all__` in every published module, so
+  the two `BACKLOG` rows holding `surface_test.py`'s pair for that tree
+  turned red** — issue #79. A row is an `xfail(strict=True)` against a
+  tree cloned at its default-branch tip, so it fails the moment the tree
+  it names starts passing, which is what it is for. Issue #79 stays open
+  for the rest of its record: what section 7's escape clause says, and
+  the two trees it has not verified.
+
 ### `REPOSITORY.md` points at the release fact instead of restating it
 
 - **`REPOSITORY.md` restated that nothing here is released, once in the
