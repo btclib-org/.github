@@ -26,6 +26,16 @@ audit has no revision to compare against.
   repository whose tracker holds the issue, the issue, the repository
   this worktree is for, and what the worker is doing in it.
 
+### `tests/pyproject_test.py` gains a check for section 1's uv floor
+
+- **`[tool.uv] required-version` names the oldest uv that may read the
+  lock, and a floor above the version `dependabot-core`'s updater
+  bundles stops that tree's uv-driven Dependabot updates with no error
+  anywhere** — issue #27. `tests/pyproject_test.py` now reads
+  `dependabot-core`'s `uv/Dockerfile` through `gh api` and skips, rather
+  than failing, where the file cannot be read or is read with no
+  `astral-sh/uv:` pin in it.
+
 ### Section 3 answers `[project].name`'s spelling, both directions
 
 - **Section 3 stated the repository-naming rule but not which spelling

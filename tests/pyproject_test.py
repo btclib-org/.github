@@ -13,7 +13,9 @@ is the finding whichever side is wrong.
 
 from __future__ import annotations
 
+import functools
 import re
+import subprocess
 import tomllib
 from typing import Any
 
@@ -49,6 +51,76 @@ DOC_WIDTH = 80
 The section's reason for this number rather than the 88 the formatter
 reflows code to is that it is the width markdown is already held to.
 """
+
+UV_DOCKERFILE = "repos/dependabot/dependabot-core/contents/uv/Dockerfile"
+"""Where the updater's own bundled uv is pinned, read the way section 1's
+`required-version` line points at it: not this organization's API, but
+the same `gh api` this suite already asks it with.
+"""
+
+UNREADABLE = "Not Found"
+"""What `gh api` reports for a document the token cannot see or that moved.
+
+The same message `protection_test.py` tells apart from every other `gh`
+failure: a document missing is this suite's business, a throttled or
+failing API is not, and the two are not the same finding.
+"""
+
+FLOOR = re.compile(r"^>=\s*(?P<version>[0-9]+(?:\.[0-9]+)*)$")
+"""`required-version`, restricted to the bare floor every tree writes.
+
+Section 1 calls the key the oldest uv that may read the lock, which is
+`>=` or nothing checkable at all -- an exact pin or an upper bound asks
+a different question than the one this test answers.
+"""
+
+
+@functools.cache
+def dockerfile() -> str | None:
+    """Fetch `dependabot-core`'s `uv/Dockerfile`, as text.
+
+    Cached for the run, the way `names()` in `tests/__init__.py` caches
+    the organization's own repository list: every tree asks the same
+    question of the same file.
+
+    :returns: the file's text, or `None` where `gh` reports it or its
+        repository missing -- `dependabot-core` reorganising
+        `uv/Dockerfile` is a tree this suite does not own, so a test
+        reading it skips rather than fails on that day.
+    :raises subprocess.CalledProcessError: any other `gh` failure --
+        a throttled or failing API being neither this suite's business
+        nor a reason to read the fetch as having found nothing.
+    """
+    try:
+        return subprocess.run(
+            ["gh", "api", "-H", "Accept: application/vnd.github.raw", UV_DOCKERFILE],
+            capture_output=True,
+            check=True,
+            encoding="utf-8",
+        ).stdout
+    except subprocess.CalledProcessError as error:
+        if UNREADABLE in error.stderr:
+            return None
+        raise
+
+
+def bundled_uv() -> str | None:
+    """Read the uv version `dependabot-core`'s updater runs off `dockerfile()`.
+
+    Kept apart from the fetch so a caller can tell "the file could not
+    be read" from "the file was read and held no pin" -- the second is
+    not the first, and skipping both alike would hide the day the
+    Dockerfile changed shape out from under the regex.
+
+    :returns: the version dotted as `required-version` is, or `None`
+        where `dockerfile()` did, or where its text held no
+        `astral-sh/uv:` pin.
+    """
+    text = dockerfile()
+    if text is None:
+        return None
+    match = re.search(r"astral-sh/uv:(?P<version>[0-9]+(?:\.[0-9]+)*)", text)
+    return match["version"] if match else None
 
 
 def groups() -> set[str]:
@@ -128,6 +200,53 @@ def test_every_dependency_group_is_a_row_of_section_1(
             "sed -n '/^\\[dependency-groups\\]/,/^\\[[a-z]/p' pyproject.toml"
             " | grep -oE '^[a-z-]+ ='",
         )
+    )
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_the_uv_floor_is_not_above_what_dependabot_bundles(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 1: `required-version` names an uv Dependabot's updater has.
+
+    A floor above the pin in `dependabot-core`'s `uv/Dockerfile` makes
+    every lock update the `uv` ecosystem attempts a silent no-op --
+    `tool_version_not_supported`, with no pull request and nothing red
+    -- so a repository past this line is one whose Dependabot uv updates
+    are not running, and finds out from no error anywhere.
+
+    :param repository: the repository asked about.
+    :param pyprojects: the parsed files.
+    """
+    declared = (
+        parsed(repository, pyprojects)
+        .get("tool", {})
+        .get("uv", {})
+        .get("required-version")
+    )
+    if declared is None:
+        pytest.skip(f"{repository} names no [tool.uv] required-version")
+    text = dockerfile()
+    if text is None:
+        pytest.skip(f"could not read {UV_DOCKERFILE}")
+    bundled = bundled_uv()
+    if bundled is None:
+        pytest.skip(f"{UV_DOCKERFILE} holds no astral-sh/uv: pin to read")
+    match = FLOOR.match(declared)
+    assert match, (
+        f"required-version is {declared!r}, not a bare >=X.Y.Z floor; "
+        + by_hand(repository, "grep -n required-version pyproject.toml")
+    )
+    floor = tuple(int(part) for part in match["version"].split("."))
+    ceiling = tuple(int(part) for part in bundled.split("."))
+    assert floor <= ceiling, (
+        f"required-version is {declared!r}, above the uv dependabot-core"
+        f" bundles ({bundled}), so {repository}'s uv-driven Dependabot"
+        " updates are not running; "
+        + by_hand(repository, "grep -n required-version pyproject.toml")
+        + "; dependabot-core's own pin: gh api -H"
+        " 'Accept: application/vnd.github.raw' " + UV_DOCKERFILE
     )
 
 
