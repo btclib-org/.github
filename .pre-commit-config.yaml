@@ -72,12 +72,19 @@ repos:
     rev: v2.4.3
     hooks:
       - id: codespell
+        name: codespell (in place fixes)
+        args: [--write-changes]
   # a release tag, not the `v1` beside it: that one is a major-version
   # alias upstream moves onto each release, so `pre-commit autoupdate`
   # picks it as the newest tag and the pin stops being one
   - repo: https://github.com/crate-ci/typos
     rev: v1.49.0
     hooks:
+      # in place fixes already, by upstream's own .pre-commit-hooks.yaml:
+      # args: [--write-changes, --force-exclude], inherited because this
+      # file passes no args: of its own. An args: added here later for a
+      # different reason would silently drop that default and turn the
+      # fixing off
       - id: typos
   # MD013 at 80 columns, tables included, and the shared configuration is
   # the one every repository of the organization carries: prose moves
@@ -86,6 +93,8 @@ repos:
     rev: v0.23.2
     hooks:
       - id: markdownlint-cli2
+        name: markdownlint-cli2 (in place fixes)
+        args: [--fix]
   # how a link destination is spelled, which markdownlint has no rule
   # for. Section 4 of README.md is the rule, why the prefix and not the
   # extension, why a badge needed the link text to step over an image,
@@ -200,6 +209,7 @@ repos:
     hooks:
       # keep uv.lock in sync with pyproject.toml
       - id: uv-lock
+  # check-only: yamllint has no fix mode, and its own README names none
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.38.0
     hooks:

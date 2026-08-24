@@ -1,9 +1,3 @@
-<!-- markdownlint-disable MD022 MD032 -->
-<!-- This file is merge=union, so a rebase joins two sections and drops
-     the blank line between them without a conflict: the rule is off
-     here for the duration of btclib-org/.github#33, and goes back on
-     when that queue is empty. -->
-
 # Changelog
 
 What changed in the standard, and why. Nothing here is released — this
@@ -34,6 +28,26 @@ audit has no revision to compare against.
   #312. It now fails a tree that commits a `uv.lock` and names no floor at
   all; `bbt` and `btclib-node` are the two, carried as a `BACKLOG` row
   under this issue until both land.
+
+### Every fixable hook now fixes, and `CHANGELOG.md`'s derogation is gone
+
+- **A check-only hook reports a defect a machine could have repaired
+  instead, and section 4 now states the rule that keeps that from
+  happening again: every hook with a fix mode runs with it turned on.**
+  `markdownlint-cli2` gains `--fix` and `codespell` gains
+  `--write-changes`; `typos` already fixes in place through its own
+  upstream default, which `.pre-commit-config.yaml` now says so that an
+  `args:` added later for another reason cannot silently turn it off.
+  `yamllint` is noted where it is configured as having no fix mode to
+  turn on.
+- **With `markdownlint-cli2` fixing in place, `CHANGELOG.md`'s directive
+  disabling MD022 and MD032 no longer has anything to absorb: a rebase
+  that drops the blank line between two joined sections is repaired on
+  the next hook run instead of failing a gate with nothing to fix it**
+  — issue #190. The two-comment directive at the head of the file is
+  gone, the two rules apply to this file again, and section 9 states the
+  mechanism the directive used to work around instead of the derogation
+  that stood in for it.
 
 ### `CHANGELOG.md`'s derogation directive names its condition alone
 
@@ -93,6 +107,7 @@ audit has no revision to compare against.
   why*, instead of pointing at `CONTRIBUTING.md`'s *A version, and no
   release*** — issue #291. Both spots now carry the pointer, in the
   shape `bbt`'s `REPOSITORY.md` already uses.
+
 ### `package()` refuses a dotted `module-name` instead of joining it literally
 
 - **`package()` did `Path(root) / name` on a dotted `module-name`, giving
@@ -146,6 +161,7 @@ audit has no revision to compare against.
   `dependabot-core`'s `uv/Dockerfile` through `gh api` and skips, rather
   than failing, where the file cannot be read or is read with no
   `astral-sh/uv:` pin in it.
+
 ### The naming bullet states the identifier's grammar and the wheel's escape
 
 - **The naming bullet said an import package takes underscores instead
