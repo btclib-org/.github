@@ -13,6 +13,14 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### `REPOSITORY.md` points at the release fact instead of restating it
+
+- **`REPOSITORY.md` restated that nothing here is released, once in the
+  `tag-integrity` reasoning and once in *What is not configured, and
+  why*, instead of pointing at `CONTRIBUTING.md`'s *A version, and no
+  release*** — issue #291. Both spots now carry the pointer, in the
+  shape `bbt`'s `REPOSITORY.md` already uses.
+
 ### `CLAUDE.md`'s worktree recipe is `wt-<tracker>-<issue>-<repo>-<role>`
 
 - **The recipe named the worktree after the issue alone, `wt<issue>`, in
