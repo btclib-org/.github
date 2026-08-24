@@ -1752,3 +1752,10 @@ audit has no revision to compare against.
   subsection is `.github`'s alone until the other seven repositories
   carry it too, which section 14's own comparison would otherwise report
   as this organization's only verbatim-file drift.
+
+### The `D`-family backlog row names `btclib-node` alone
+
+- **`tests/__init__.py`'s `BACKLOG` row for issue #177 records the
+  strict xfail against `btclib-node`** — `bbt` selects `D` with the
+  `pep257` convention (btclib-org/bbt#45), and issue #177 stays open on
+  `btclib-node`'s own instance of the family.
