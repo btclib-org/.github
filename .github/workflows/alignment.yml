@@ -62,6 +62,20 @@ on:
       # calendar, or a file added to the verbatim list, is checked by
       # the run on the commit that adds it
       - README.md
+      # section 14's verbatim files themselves, so a pull request that
+      # edits one is checked against the copies it would leave behind
+      # rather than waiting for the Thursday cron --
+      # tests/verbatim_test.py::test_alignment_triggers_on_every_verbatim_file
+      # is what keeps this list and section 14's in step
+      - .markdownlint.jsonc
+      - .yamllint.yaml
+      - .taplo.toml
+      - COPYRIGHT
+      - LICENSE
+      - .claude/commands/review.md
+      - CONTRIBUTING.md
+      - REVIEWING.md
+      - .gitattributes
 
 # least privilege: this reads the organization's repositories and writes
 # nothing, files nothing and publishes nothing
