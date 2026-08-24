@@ -523,9 +523,18 @@ their reasoning needs more room than a hook argument has.
   503 normalizes runs of `-`, `_` and `.` in a distribution name to a
   single `-`, so the hyphen is the canonical spelling; an import
   package is a Python identifier and takes underscores instead, so the
-  two are spelled differently on purpose. `bitcoin-core-rpc` declares
-  `name = "bitcoin-core-rpc"` and imports as `bitcoin_core_rpc`; the
-  repository takes the first spelling, not the second.
+  two are spelled differently on purpose. The two rules do not carry
+  the same weight: the language's own grammar has no hyphen in an
+  identifier at all — `name_start` and `name_continue` admit letters,
+  digits and `_`, never `-` — where PEP 8's *Package and Module Names*
+  only discourages the underscore, as a matter of style. `bitcoin-core-rpc`
+  declares `name = "bitcoin-core-rpc"` and imports as `bitcoin_core_rpc`;
+  the repository takes the first spelling, not the second. The built
+  artifact escapes both the same way regardless: PEP 427's escaping
+  rule normalizes any run of `-`, `_` and `.` in a distribution name to
+  `_` for the wheel filename and the `.dist-info` directory, so
+  `bitcoin-core-rpc` and `bitcoin_core_rpc` would both name the same
+  `bitcoin_core_rpc-<version>` wheel.
 
     **`name` itself takes that same canonical spelling.** Folding the
     family together is right for asking whether a distribution and its
@@ -534,7 +543,9 @@ their reasoning needs more room than a hook argument has.
     it picks the hyphen too. `btclib-secp256k1` declares
     `name = "btclib_secp256k1"`, an underscore where the other four
     publishers write a hyphen, tracked as btclib-org/.github#277 until
-    that tree's own pull request corrects it.
+    that tree's own pull request corrects it. The correction changes
+    nothing downstream: the escaping rule above already sends both
+    spellings to the same `btclib_secp256k1-<version>` wheel.
 
     **The bullet has no subject where a tree builds no distribution.**
     `bbt` and `.github` both declare `package = false` and a

@@ -35,6 +35,22 @@ audit has no revision to compare against.
   `dependabot-core`'s `uv/Dockerfile` through `gh api` and skips, rather
   than failing, where the file cannot be read or is read with no
   `astral-sh/uv:` pin in it.
+### The naming bullet states the identifier's grammar and the wheel's escape
+
+- **The naming bullet said an import package takes underscores instead
+  of the hyphen, without saying the two rules carry different weight**
+  — issue #294. The language's own grammar excludes the hyphen from an
+  identifier outright — `name_start` and `name_continue` admit letters,
+  digits and `_`, never `-` — where PEP 8's *Package and Module Names*
+  only discourages the underscore, as a matter of style, and the bullet
+  now states that asymmetry.
+- **The naming bullet said nothing about what a distribution name
+  becomes in the built artifact** — the same issue. PEP 427's escaping
+  rule normalizes any run of `-`, `_` and `.` in a distribution name to
+  `_` for the wheel filename and the `.dist-info` directory, so
+  `bitcoin-core-rpc` and `bitcoin_core_rpc` already name the same
+  wheel; the `#277` paragraph tracking `btclib-secp256k1`'s pending
+  rename now points at that rule instead of restating it.
 
 ### Section 3 answers `[project].name`'s spelling, both directions
 
