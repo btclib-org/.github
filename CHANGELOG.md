@@ -31,6 +31,25 @@ audit has no revision to compare against.
   report, and `alignment.yml` says of itself why that is a backlog
   entry and not a block.
 
+### Section 3 names the free-threaded classifier and scopes the build fallback
+
+- **The classifiers bullet says what a `3.14t` matrix row is declared
+  as** — issue #244. The organization already runs that row in its
+  platform sweeps and the bullet named no classifier for it; a `t`
+  suffix asks for the same version built without the GIL rather than a
+  version of its own, unlike a `pypy` prefix's own implementation, so it
+  names the same `X.Y` classifier and not PyPI's `Free Threading`
+  maturity classifiers, which a sweep passing is not evidence for.
+- **The `uv build` fallback the bullet cites is scoped to the shape it
+  relies on** — issue #258. The bullet stated unconditionally what
+  section 12 now states by direction: a ceiling below the running uv
+  warns and builds with the bundled backend, where a floor above it
+  fails outright. Asking for an older backend than the one running is
+  always the first shape, so the bullet now says that rather than
+  restating both.
+
+### The row for `btclib-node`'s `name-tests-test` argument goes
+
 - **`btclib-node` runs the hook at its default, so its row is deleted**
   — issue #131. `btclib-org/btclib-node@640af71` renamed that tree's
   test modules to `*_test.py` and dropped the argument selecting the

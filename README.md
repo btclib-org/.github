@@ -497,12 +497,13 @@ their reasoning needs more room than a hook argument has.
       "import uv_build; print(uv_build.build_sdist('<outdir>'))"
     ```
 
-    and not with `uv build` under a pinned `requires`: handed a
-    requirement its own version does not satisfy, `uv build` falls back
-    to the backend it bundles and only warns, so it answers for that copy
-    and not for the pin, and the same command on a machine with another
-    `uv` answers differently. btclib-org/.github#143 has the table, the
-    boundary read off the last `0.11` release and the first `0.12`.
+    and not with `uv build` under a pinned `requires`: asking for a
+    backend older than the one running is always section 12's
+    ceiling-below case, where `uv build` falls back to the backend it
+    bundles and only warns, so it answers for that copy and not for the
+    pin, and the same command on a machine with another `uv` answers
+    differently. btclib-org/.github#143 has the table, the boundary read
+    off the last `0.11` release and the first `0.12`.
 - **The version is declared once**, in `[project]`. The package reads it
   back with `importlib.metadata`; the sphinx `conf.py` parses this file,
   metadata not being available to an uninstalled build. Two declarations
@@ -564,10 +565,16 @@ their reasoning needs more room than a hook argument has.
   disagree; an `Operating System` only where the package is built for it
   and `OS Independent` only where nothing is compiled, and one
   `Programming Language :: Python :: X.Y` per interpreter the matrix
-  runs. That last one is a convention this section states, so section 7's
-  closing rule makes it a test rather than a hope: a library carries it as
-  `interpreters_test.py`, which reads the floor, the
-  classifiers and the matrix and refuses a disagreement. Nothing local
+  runs. A `t` suffix in the matrix names that same `X.Y`, free-threading
+  being a build of one version and not a version of its own — unlike a
+  `pypy` prefix, a different implementation with a classifier of its own
+  under `Implementation`. PyPI's own `Free Threading` classifiers are a
+  maturity level an author claims for the code, which a sweep passing is
+  not evidence of, so none is declared on that strength. That last one
+  is a convention this section states, so section 7's closing rule makes
+  it a test rather than a hope: a library carries it as
+  `interpreters_test.py`, which reads the floor, the classifiers and the
+  matrix and refuses a disagreement. Nothing local
   refuses a classifier that is not a classifier at all — `twine check`
   reads the long description and not this list, and a build accepts
   whatever the file says; PyPI's upload endpoint is what rejects one, at
@@ -2413,13 +2420,13 @@ dependency that set the ceiling.
 
 The matrix column is empty where no workflow names a list of them,
 which is a tree whose workflows name no interpreter at all and a tree
-that runs a single one as a key: either way the pin is what runs. A `t`
-suffix, in that column or in the pin's, is that version built without
-the GIL and so the version a classifier names; a `pypy` prefix is an
-implementation, which carries a classifier of its own under
-`Implementation` rather than a version. Reading the matrix against the
-classifiers is this command's work: what the suite compares them with is
-the floor and the pin, and no workflow.
+that runs a single one as a key: either way the pin is what runs.
+Section 3 has what a `t` suffix and a `pypy` prefix each name a
+classifier as; this command reads the first as its own `X.Y` and drops
+the second, there being no version string for an implementation to
+match. Reading the matrix against the classifiers is this command's
+work: what the suite compares them with is the floor and the pin, and
+no workflow.
 
 Which repositories publish, which is what section 2's first tier turns
 on and so what decides whether a `SECURITY.md` is owed or inherited:
