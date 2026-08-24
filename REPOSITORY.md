@@ -136,8 +136,9 @@ command exists to catch.
 
 There is no `tag-integrity` ruleset, and no `refs/tags/v*` for one to
 target. What it buys the sibling repositories is [a signed release
-tag][s11-sigs], and nothing here is released, so there is no tag for the
-rule to hold.
+tag][s11-sigs]; `CONTRIBUTING.md`'s *A version, and no release* is where
+there being no tag for the rule to hold is explained rather than
+removed.
 
 ## Signed commits
 
@@ -270,10 +271,11 @@ On, [as the standard asks of every tier][s2-root].
 
 ## What is not configured, and why
 
-- **No publishing, and no release workflow.** Nothing here is installed
-  or downloaded; what this repository ships, it ships by being read on
-  github.com. So there is no `pypi` environment, no OIDC trusted
-  publisher, and no tag to protect.
+- **No publishing, and no release workflow.** `CONTRIBUTING.md`'s *A
+  version, and no release* is the whole of that answer. There is no
+  `pypi` environment, no OIDC trusted publisher, and no tag to protect:
+  `gh api repos/btclib-org/.github/environments --jq .total_count`
+  answers `0`.
 - **No CodeQL.** The reason recorded here was that there is no code, and
   `tests/` is code. What stands in its place is narrower: that suite is
   neither installed nor imported by anything, and what it reads is this
