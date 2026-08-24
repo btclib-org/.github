@@ -38,6 +38,22 @@ audit has no revision to compare against.
   nothing rechecking it monthly is a line in the audit rather than a
   reading nobody runs.
 
+### Section 11 names the two closing-keyword forms and their hazard
+
+- **Section 11 said neither form of a closing keyword works across
+  repositories; the qualified `owner/repo#N` form does** — issue #304.
+  Measured on `btclib-org/btclib-secp256k1#366`'s squash commit,
+  `592f1bc`: its message named `btclib-org/.github#81` after a keyword,
+  and the issue closed on that merge. That qualified form is also this
+  organization's own citation style for another tracker's issue, so the
+  sentence disclaiming a keyword is the sentence most likely to carry
+  one, as at #81 and #291 — the section now says to name such an issue
+  with no keyword verb beside it, negated or not. The manual-link
+  paragraph is corrected too: `btclib-org/bitcoin-core-rpc#178` did not
+  close `btclib-org/btclib#1160` on merge, that issue having already
+  been closed by hand, deliberately, to defuse a race between three
+  pull requests carrying the same undisclosed link.
+
 ### `btclib-secp256k1`'s two backlog rows for issue #79 are gone
 
 - **`btclib-secp256k1` declares `__all__` in every published module, so

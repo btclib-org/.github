@@ -1690,21 +1690,45 @@ it. A pull request that closes nothing carries no parentheses, and
 adding some because the shape looks right is how a wrong number gets
 in.
 
-The title is not the closing mechanism. `Closes #N` in the *description*
-is what GitHub acts on, and both are wanted: the description closes the
-issue, the title records which one. Neither works across repositories —
-a keyword naming another repository's issue is a link and not a close —
-so a cross-repository task keeps its tracking issue open until every one
-of its pull requests has landed, and somebody closes it by hand.
+The title is not the closing mechanism. `Closes #N` in the
+*description* is what GitHub acts on, and both are wanted: the
+description closes the issue, the title records which one. The bare
+`#N` form is repository-local: written in another repository it names
+that repository's own issue N, not this one's. The qualified
+`owner/repo#N` form closes across repositories exactly as `#N` closes
+within one — measured on `btclib-org/btclib-secp256k1#366`'s squash
+commit, `592f1bc`, whose message named `btclib-org/.github#81` after a
+keyword: the issue closed on that merge, its timeline crediting the
+commit rather than a Development-panel link.
 
-**That is true of keywords and false of manual links**, which is what
-makes it a trap rather than a rule with an exception. A link made by
-hand in the Development panel closes its issue on merge exactly as a
-keyword does, across repositories included — and it appears in no diff,
-no commit message and no description, so every surface a reviewer reads
-can say the opposite of what merging will do. It has happened here:
-`btclib-org/bitcoin-core-rpc#178`'s body says in as many words that it
-does not close `btclib-org/btclib#1160`, and it closed it.
+That qualified form is also section 9's own citation style for another
+tracker's issue, so an ordinary cross-repository mention already
+carries what a keyword needs to fire — and GitHub does not parse
+negation, so the sentence declaring that a keyword closes nothing is
+the sentence most likely to hold one: the commit above read `No keyword
+closes btclib-org/.github#81 here`, and a same-repository pull request
+body read `I close #291 by hand once the last lands` — each put a
+keyword verb directly in front of the number it meant to spare. So a
+mention that must not close names the issue with no verb beside it,
+negated or not — `tracking issue: owner/repo#N`, never `<verb> ...
+owner/repo#N` — and a cross-repository task keeps its tracking issue
+open this way until every one of its pull requests has landed, and
+somebody closes it by hand.
+
+**A manual link carries no form to get right and no keyword to omit**,
+which is what makes it the sharper trap: made by hand in the
+Development panel, it closes its issue on merge regardless of
+repository, and it appears in no diff, no commit message and no
+description, so every surface a reviewer reads can say the opposite of
+what merging will do. `btclib-org/bitcoin-core-rpc#178` carried exactly
+such a link to `btclib-org/btclib#1160`, confirmed by
+`closingIssuesReferences`, while its own body said in as many words
+that it did not close that issue. Merging #178 did not close #1160
+either: the issue had already been closed by hand, deliberately, once a
+maintainer found the same undisclosed link on two more pull requests
+racing it. What kept the sentence from being false is a person noticing
+in time, not the mechanism — the link would have closed #1160 on merge
+had #178 landed first.
 
 So **what a pull request closes is read before it is merged**, from the
 one place that answers:
