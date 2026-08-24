@@ -229,16 +229,6 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
-        79,
-        "test_every_published_module_declares_its_public_surface",
-        ("btclib-secp256k1",),
-    ),
-    (
-        79,
-        "test_the_package_directory_is_typed_and_declares_its_surface",
-        ("btclib-secp256k1",),
-    ),
-    (
         131,
         "test_every_test_file_is_named_so_pytest_collects_it",
         ("btclib-node",),
