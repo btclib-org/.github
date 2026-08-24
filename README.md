@@ -2322,6 +2322,25 @@ bullet was for is had another way — the organization advertises a single
 policy because there is a single file, rather than because every copy of
 it agrees with this one.
 
+`claude-review.yml` is owed by every repository section 11 governs, and section
+15's existence loop is what checks that — not this list. `CONTRIBUTING.md` and
+`REVIEWING.md` earn a bullet because this repository's own copy of each is a
+receiver exactly like every other tree's, which is what
+`tests/verbatim_test.py`'s comparison assumes. `claude-review.yml` has no such
+copy here: this repository is the standard the workflow reviews, so its prompt
+names `REVIEWING.md` and `CONTRIBUTING.md`'s last section directly, where a
+receiving copy names section 11 of the standard instead — the asymmetry section
+11's *The workflow, and what a port of it has to adapt* already states. A
+bullet here would put this repository's own copy in the comparison too, and it
+would fail forever rather than the way `EXPECTED_DRIFT` expects: that table
+records a copy a fix converges, not one that cannot by design.
+
+What section 11 asks a port to get right — that its prompt's two claims about
+the receiving tree hold — is answered by that copy alone; nothing here or in
+section 11 asks the receiving copies to otherwise read alike. A difference
+between them past those two claims is therefore not this file's finding, and no
+command here re-derives one.
+
 A per-file exception belongs in that file's own
 `markdownlint-configure-file` comment, not in the shared config read by
 files that never trip the rule it relaxes.
