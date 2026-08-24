@@ -23,6 +23,21 @@ audit has no revision to compare against.
   itself is unchanged: the two rules stay off for `CHANGELOG.md` until
   that issue's queue is empty.
 
+### Section 7 gains a socket-free bullet, section 15 a vendored-pins audit
+
+- **Section 7's *Convention tests* catalogue named every kind but the one
+  two repositories' own docstrings already claim: that a suite reaches
+  no socket** — issue #80. The catalogue now carries **the suite opens
+  no socket**, so a repository whose transport argument is missing at a
+  call site has a stated convention to write a test against, instead of
+  a docstring nothing checks.
+- **Section 15 had no command reading section 7's vendored-data pins**
+  — issue #80. It gains the loop that reads each repository's
+  `tests/_data/README.md` or `tests/README.md` against its
+  `vendored-vectors.yml`, so a tree pinning an upstream commit with
+  nothing rechecking it monthly is a line in the audit rather than a
+  reading nobody runs.
+
 ### `btclib-secp256k1`'s two backlog rows for issue #79 are gone
 
 - **`btclib-secp256k1` declares `__all__` in every published module, so
