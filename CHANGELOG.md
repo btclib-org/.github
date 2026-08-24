@@ -17,14 +17,19 @@ audit has no revision to compare against.
 
 - **The recipe named the worktree after the issue alone, `wt<issue>`, in
   every repository of the organization** — issue #292. A worktree's
-  administrative directory lives in the one shared `.git`, keyed on its
-  path's basename, and one issue is routinely owed by several trees —
-  `#255` by seven repositories, `#177` by two — so a session working one
-  of them computed the same name for every tree it touched, with no
-  error and a silent collision. The recipe now names the worktree
-  `wt-<tracker>-<issue>-<repo>-<role>`, most general part first: the
-  repository whose tracker holds the issue, the issue, the repository
-  this worktree is for, and what the worker is doing in it.
+  administrative directory lives in the `.git` of the repository
+  `git worktree add` was run from, one per repository, so two
+  repositories cannot collide there; what the recipe left uncovered was
+  a same-repository collision, between two worktrees of different work
+  sharing a generic basename, and a *path* collision across
+  repositories, since the workers of one session share one scratchpad
+  directory and a session carrying one issue into several repositories
+  computed the same target path for each. The recipe now names the
+  worktree `wt-<tracker>-<issue>-<repo>-<role>`, most general part
+  first: `tracker` because an issue number is unique only within one
+  tracker, `issue` against the same-repository collision, `repo` against
+  the cross-repository path collision, and `role` against a coder and
+  its reviewer holding a worktree at once.
 
 ### Section 14 says why `claude-review.yml` has no verbatim bullet
 
