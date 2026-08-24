@@ -31,6 +31,18 @@ audit has no revision to compare against.
   `tests/verbatim_test.py` already holds against issue #281, so nothing
   here changes that entry.
 
+### `CLAUDE.md` gains what a session here kept rediscovering
+
+- **`CLAUDE.md` sends a shared-file drift to `EXPECTED_DRIFT`, not `BACKLOG`**
+  — `tests/verbatim_test.py` holds the first and excuses one path;
+  `tests/__init__.py` holds the second and excuses a whole test.
+- **`CLAUDE.md` sends a "every tier-2 repository" claim to be checked against
+  this tree too** — issue #276 is open on what it finds here, in
+  `CONTRIBUTING.md`'s own `### A version, and no release` section.
+- **`CLAUDE.md` records that cloning `tests/conftest.py`'s `trees` fixture by
+  `--reference` against the local checkouts was measured and declined** —
+  issue #272.
+
 ### Two more sections point instead of restating
 
 - **Section 11's merge-method fact has one site** — issue #252.

@@ -116,6 +116,31 @@ Do not use Fable unless explicitly instructed.
   only: nothing is written into those repositories and no hook reads it,
   so a repository that wants the file gated keeps its own. A change here
   is a change to what a reader of every repository inheriting it sees.
+- **A branch touching the shared half of `CONTRIBUTING.md` or `REVIEWING.md` —
+  the text above `## This repository in particular` — owes
+  `tests/verbatim_test.py`'s `EXPECTED_DRIFT` an entry and the issue it names,
+  in the same diff.** Not `tests/__init__.py`'s `BACKLOG`, which excuses a
+  whole test rather than one path. The precedent is `.gitattributes`:
+  `90faad8` added the entry and `6bf5e5c` deleted it once the eighth tree
+  converged, its message giving the reason — "a drift filed later still wants
+  an entry here and not a row there".
+- **A claim about "every tier-2 repository" has to hold of this tree too**,
+  section 2 saying its own row is measured the same way as the others. `grep
+  -c '^### A version, and no release' CONTRIBUTING.md`, run against every
+  tier-2 repository including this one, is the check; issue
+  btclib-org/.github#276 is open on what it finds here.
+- **Replacing `tests/conftest.py`'s per-session clone with `--reference`
+  against the local checkouts was measured and declined:
+  btclib-org/.github#272.** The shrunk clone still contacts the forge for the
+  tip, so it removes no network dependency, and its object store is borrowed
+  from a checkout that a `git gc` there can break — for a saving the issue's
+  own numbers call not worth the hazard. `git grep -lE 'gh_json|settings:
+  dict' tests/*_test.py` names `protection_test.py`, `security_test.py`,
+  `settings_test.py`, `tags_test.py` and `topics_test.py` — what asks the API
+  for state with no on-disk representation. `tiers` is not one of them:
+  `tests/__init__.py`'s `tier()` reads `pyproject.toml` and `release.yml` off
+  the checkout, which `tiers_test.py` asks through the `tiers` fixture —
+  `conftest.py`'s one-liner over `trees` — rather than through `gh_json`.
 
 ## Conventions to match
 
