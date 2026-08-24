@@ -435,14 +435,20 @@ both tracked.
 - `.github/` — `workflows/`, `dependabot.yml`, `ISSUE_TEMPLATE/`,
   `PULL_REQUEST_TEMPLATE.md`, `scripts/` and `mutation/`.
 
-`tests/` and `docs/source/` are a Python tree's, so tiers 1 and 2's;
 `.github/` is every tier's, and holds what the sections the tier binds
-ask of it. The package directory is asked of a tree that installs an
-importable package rather than of a tier: tier 1 is a package by what
-that tier is, and a project that publishes nothing may install nothing —
-`package = false`, or a build backend given no module to build. Where
-there is no package the bullet has no subject: a floor is over the rules
-whose subject a tree holds, and does not supply one.
+ask of it. The other three name a package as their subject rather than a
+tier — the package directory *is* the package, `tests/` mirrors it, and
+`docs/source/` documents what it ships — so a tree installing none owes
+none of the three: tier 1 is a package by what that tier is, and a
+project that publishes nothing may install nothing — `package = false`,
+or a build backend given no module to build. Where there is no package a
+bullet has no subject: a floor is over the rules whose subject a tree
+holds, and does not supply one.
+
+A tree without a package may still keep `tests/` above the floor:
+`.github`'s own suite is over the organization rather than over a
+package this repository does not hold, and a tier is free to carry more
+than it is asked for.
 
 ## 3. `pyproject.toml` is the configuration
 

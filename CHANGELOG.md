@@ -37,6 +37,28 @@ audit has no revision to compare against.
   — issue #239. That package now ships the marker and declares
   `__all__`, so the test asks it and is answered.
 
+### `tests/` and `docs/source/` follow the package, and its locator too
+
+- **Section 2's `tests/` and `docs/source/` bullets are asked of a tree
+  that installs an importable package, rather than of a tier** — issue
+  #240. Both name a package as their subject already, `tests/` mirroring
+  it and `docs/source/` documenting what it ships, so a tree installing
+  none owes neither, the same reading issue #193 gave the package
+  directory. `.github`'s own `tests/` stays: it is over the organization
+  rather than over a package this repository does not hold, which a tier
+  being a floor and not a ceiling already allows.
+- **`tests/surface_test.py`'s `package()` reads a tree's declared layout
+  instead of inferring one from where an `__init__.py` sits** — issue
+  #246. `src/` is `uv_build`'s own default and section 2 states no
+  layout, so a tree building under that default resolved to no package
+  and the assertion skipped silently. The function now reads
+  `module-root` and `module-name` off `[tool.uv.build-backend]` for a
+  `uv_build` project, and keeps the old root-level scan for a backend
+  that defaults there instead, `btclib-secp256k1`'s hatchling among them.
+  Verified against both layouts built as fixtures, and against every
+  repository's real tree, resolving the same directories and outcomes as
+  before the change.
+
 ### `bbt` selects `W`, so the row for it goes
 
 - **The backlog row for `bbt`'s unselected `W` is deleted** — issue
