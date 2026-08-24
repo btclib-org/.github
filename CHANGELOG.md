@@ -13,6 +13,18 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### `btclib-node` closed two filed gaps, so both records go
+
+- **`EXPECTED_DRIFT` no longer names `.gitattributes`** — issue #192.
+  The last of the eight trees now carries the standard's comment, so the
+  table described copies that agree. The table itself stays. An entry
+  there excuses one path and leaves every other verbatim file compared,
+  where a backlog row would excuse the whole comparison — which is why a
+  drift filed later gets an entry here and not a row there.
+- **The backlog row for `btclib_node`'s missing `py.typed` is deleted**
+  — issue #239. That package now ships the marker and declares
+  `__all__`, so the test asks it and is answered.
+
 ### `bbt` selects `W`, so the row for it goes
 
 - **The backlog row for `bbt`'s unselected `W` is deleted** — issue

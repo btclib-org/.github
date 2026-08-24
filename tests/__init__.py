@@ -249,11 +249,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_d_is_selected_with_the_pep257_convention",
         ("bbt", "btclib-node"),
     ),
-    (
-        239,
-        "test_the_package_directory_is_typed_and_declares_its_surface",
-        ("btclib-node",),
-    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection."""
 
