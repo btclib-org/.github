@@ -176,9 +176,9 @@ gh api repos/btclib-org/.github \
 `main-self-merge` ruleset above names it too, so the constraint holds
 even if this repository setting is flipped back.
 
-`COMMIT_OR_PR_TITLE` with `COMMIT_MESSAGES` is what makes [a pull
-request's title the landing commit's subject][s11-title] and the branch's
-own messages its body.
+`COMMIT_OR_PR_TITLE` with `COMMIT_MESSAGES` is the pair
+[Merge method][s11-merge] asks for, and which of the two titles lands is
+that subsection's rule.
 
 `delete_branch_on_merge` fires on its own, every landing here being a
 merged pull request, so a branch still standing is one that was closed
@@ -297,7 +297,6 @@ On, [as the standard asks of every tier][s2-root].
 [s11-merge]: ./README.md#merge-method
 [s11-review]: ./README.md#review
 [s11-sigs]: ./README.md#signatures
-[s11-title]: ./README.md#what-a-pull-request-says-it-is
 [s11-tokens]: ./README.md#tokens-publishing-scanning
 [s11]: ./README.md#11-github-settings
 [s15]: ./README.md#15-auditing-a-repository-against-this-file

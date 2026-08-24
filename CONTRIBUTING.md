@@ -36,9 +36,9 @@ restated here: a second wording is the one that goes stale, which is
 that section's own *One fact in one place*.
 
 A commit message is prose this tree ships too, though section 9 does not
-say so: squash is the only merge method and the landing commit carries
-the messages, so what is written in one is read on `main` long after the
-branch is gone.
+say so: [the only merge method the rule accepts][s11] puts it on `main`
+as the landing commit's body, so what is written in one is read there
+long after the branch is gone.
 
 ## Pull requests
 
