@@ -23,6 +23,19 @@ audit has no revision to compare against.
   re-derived it** — issue #278. A new test compares the distribution's
   `name`, normalized per PEP 503, against the repository.
 
+### `alignment.yml` triggers on the verbatim files, not the list of them
+
+- **`alignment.yml`'s `pull_request` trigger admitted `README.md`, which
+  is where section 14's verbatim list lives, but not the files that list
+  names** — issue #279. A pull request editing one of them —
+  `CONTRIBUTING.md` or `REVIEWING.md`'s shared half, most often — got no
+  run of `tests/verbatim_test.py` until the Thursday cron. The `paths:`
+  block now names them explicitly, and a new test,
+  `test_alignment_triggers_on_every_verbatim_file`, reads the workflow
+  and section 14 together and fails where the two disagree, so a path
+  added to or dropped from the list is a failure here rather than a
+  second copy nobody keeps in step.
+
 ### The landing-subject fact is conditional, and CONTRIBUTING.md points at it
 
 - **The landing-subject fact was stated unconditionally, in section 11

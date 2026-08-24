@@ -21,9 +21,19 @@ from pathlib import Path
 import pytest
 
 from . import ROOT, subjects
+from .grid_test import triggers
 
 pytestmark = pytest.mark.integration
 
+
+ALIGNMENT = ROOT / ".github" / "workflows" / "alignment.yml"
+"""The workflow whose `pull_request` trigger is compared against section 14.
+
+Read rather than named a second time as a list of paths: what a pull
+request has to touch to be checked is the workflow's own `paths:`, and
+this asks that block the same question `test_section_14_names_files`
+asks of the checkouts.
+"""
 
 MARKER = b"\n## This repository in particular\n"
 """The heading a shared file puts its own tree's half under.
@@ -123,6 +133,22 @@ def test_section_14_names_files(trees: dict[str, Path]) -> None:
         if not any((root / path).is_file() for root in trees.values())
     ]
     assert not unknown, f"section 14 names paths no repository has: {unknown}"
+
+
+def test_alignment_triggers_on_every_verbatim_file() -> None:
+    """A pull request editing one of these files gets checked on that commit.
+
+    `alignment.yml`'s own `paths:` admits the section of `README.md` that
+    lists these files, which is not the same trigger as the files
+    themselves -- a pull request editing one waits for the Thursday cron
+    otherwise.
+
+    :raises AssertionError: where a path section 14 names is missing from
+        the trigger.
+    """
+    admitted = triggers(ALIGNMENT)["pull_request"]["paths"]
+    missing = sorted(set(verbatim()) - set(admitted))
+    assert not missing, f"alignment.yml's paths trigger admits none of: {missing}"
 
 
 def copies(trees: dict[str, Path], path: str) -> dict[bytes, list[str]]:
