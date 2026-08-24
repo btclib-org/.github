@@ -61,21 +61,31 @@ bringing it forward.
 
 **Every session works in a worktree**, its own, from the first edit,
 named `wt-<tracker>-<issue>-<repo>-<role>` rather than after the issue
-alone: a worktree's administrative directory lives in the one shared
-`.git`, keyed on its path's basename, and the scratchpad a session's
-workers share is one directory, so a name that collides collides
-silently — a worktree checked out at one sha has already been found
-sitting on another session's commit, with an empty reflog. An issue
-filed in this tracker is the key and the repository is a detail of
-it — `#255` is one issue owed by seven repositories, `#177` by two — so
-the repository is what varies underneath an issue rather than the other
-way round, which is why it comes after `<issue>` rather than before it:
-naming it that way also sorts every worktree of one issue together,
-which is what a port leaves behind. `issue` is what prevents the
-collision that has actually happened, two worktrees of different issues
-both named `wt-review`; `role` covers the narrower case of a coder and
-its reviewer holding a worktree at once, which the ordinary sequence
-avoids by each removing its own.
+alone, most general part first: an issue filed in this tracker is the
+key and the repository is a detail of it — `#255` is one issue owed by
+seven repositories, `#177` by two — so the repository is what varies
+underneath an issue rather than the other way round, which is why
+`repo` comes after `issue`. Naming it that way also sorts every
+worktree of one issue together, which is what a port leaves behind.
+
+Each of the four parts earns its place against a different collision,
+and none of them is the same collision. `tracker` is the repository
+whose issue tracker holds the issue: an issue number is unique only
+within one tracker, so `btclib-org/.github#45` and
+`btclib-org/btclib#45` are different issues that would otherwise name
+the same worktree. `issue` is what prevents the collision that has
+actually happened — two worktrees of different work sharing a generic
+basename in one repository's own `.git`, keyed on its path's basename,
+which is what `wt-review` hit. `repo` prevents a different collision, a
+*path* one rather than a `.git` one: two repositories each keep their
+own `.git/worktrees/<basename>` and cannot collide there, but the
+workers of one session share one scratchpad directory, so a session
+carrying one issue into several repositories computes the same target
+path for each of them, and `git worktree add` refuses a directory that
+already exists — or worse, a second worker reads the first one's tree.
+`role` covers the narrower case of a coder and its reviewer holding a
+worktree at once, which the ordinary sequence avoids by each removing
+its own.
 
 ```shell
 WT=<scratchpad>/wt-<tracker>-<issue>-<repo>-<role>  # wt-github-255-btclib-coder
