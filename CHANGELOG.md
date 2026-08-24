@@ -2,7 +2,7 @@
 <!-- This file is merge=union, so a rebase joins two sections and drops
      the blank line between them without a conflict: the rule is off
      here for the duration of btclib-org/.github#33, and goes back on
-     when that queue is empty. btclib-org/.github#138 is the record. -->
+     when that queue is empty. btclib-org/.github#190 is the record. -->
 
 # Changelog
 
@@ -70,6 +70,23 @@ audit has no revision to compare against.
   shape of `requires`** — issue #242. A ceiling below the running uv
   warns and builds with the bundled backend anyway; a floor above it
   fails instead, `uv` unable to import a `uv_build` meeting that floor.
+
+### Two records are corrected to name what is still true
+
+- **The derogation's record is now the issue that outlives it** — issue
+  #190. #138 asked section 9 to state `merge=union`'s mechanical price
+  and closed against the prose that answered it, but the derogation it
+  also carried stays live until #33's queue empties, so the head of this
+  file was pointing at something closed. #190 is the issue that found
+  that, and it closes when the directive goes.
+- **`CLAUDE.md`'s primary-checkout paragraph names the read that
+  cannot go stale** — issue #248. `git fetch` moves
+  `refs/remotes/origin/main` and leaves the work tree where it was, so
+  the paragraph told a session enough to read the checkout but not
+  enough to read it current. It now says the checkout is a local
+  reference kept on `main`, names `git show origin/main:<path>` as the
+  read a stale checkout cannot affect, and gives the fast-forward that
+  brings the checkout forward without working in it.
 
 ### `bbt` selects `W`, so the row for it goes
 
