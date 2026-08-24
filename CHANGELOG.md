@@ -2,7 +2,7 @@
 <!-- This file is merge=union, so a rebase joins two sections and drops
      the blank line between them without a conflict: the rule is off
      here for the duration of btclib-org/.github#33, and goes back on
-     when that queue is empty. btclib-org/.github#190 is the record. -->
+     when that queue is empty. -->
 
 # Changelog
 
@@ -12,6 +12,16 @@ rather than by version, and the record they make is the one section 15's
 audit has no revision to compare against.
 
 ## Unreleased
+
+### `CHANGELOG.md`'s derogation directive names its condition alone
+
+- **The directive carried two issue pointers — `#33` as the condition
+  that gates the removal, and a second naming "the record" — but only
+  the condition decides anything** — issue #190. Section 9's *One fact
+  in one place* refuses a restated fact as much as an invented one. The
+  directive now names `btclib-org/.github#33` alone. The derogation
+  itself is unchanged: the two rules stay off for `CHANGELOG.md` until
+  that issue's queue is empty.
 
 ### `btclib-secp256k1`'s two backlog rows for issue #79 are gone
 
