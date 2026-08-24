@@ -48,7 +48,7 @@ they say that too.
 
 ## Around them
 
-- **[btclib_node](https://github.com/btclib-org/btclib_node)** — a
+- **[btclib-node](https://github.com/btclib-org/btclib-node)** — a
   bitcoin node, consensus and network code in Python, built on btclib.
   Its author reports it downloading and validating the whole chain.
 - **[bbt](https://github.com/btclib-org/bbt)** — the course the library
