@@ -17,6 +17,7 @@ import functools
 import re
 import subprocess
 import tomllib
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -206,17 +207,23 @@ def test_every_dependency_group_is_a_row_of_section_1(
 @pytest.mark.tier(Tier.PYTHON)
 def test_the_uv_floor_is_not_above_what_dependabot_bundles(
     repository: str,
+    trees: dict[str, Path],
     pyprojects: dict[str, dict[str, Any]],
 ) -> None:
-    """Section 1: `required-version` names an uv Dependabot's updater has.
+    """Section 1: every tree with a lock names a floor, capped at the ceiling.
 
     A floor above the pin in `dependabot-core`'s `uv/Dockerfile` makes
     every lock update the `uv` ecosystem attempts a silent no-op --
     `tool_version_not_supported`, with no pull request and nothing red
     -- so a repository past this line is one whose Dependabot uv updates
-    are not running, and finds out from no error anywhere.
+    are not running, and finds out from no error anywhere. A tree with
+    no floor at all is not exempt from that failure, only unmeasured
+    against it: section 1 owes the key to every tree that commits
+    `uv.lock`, so a repository holding one and naming none fails here
+    rather than skipping past the question.
 
     :param repository: the repository asked about.
+    :param trees: the checkouts.
     :param pyprojects: the parsed files.
     """
     declared = (
@@ -226,6 +233,11 @@ def test_the_uv_floor_is_not_above_what_dependabot_bundles(
         .get("required-version")
     )
     if declared is None:
+        assert not (trees[repository] / "uv.lock").is_file(), (
+            f"{repository} commits uv.lock and names no [tool.uv] "
+            "required-version; "
+            + by_hand(repository, "grep -n required-version pyproject.toml")
+        )
         pytest.skip(f"{repository} names no [tool.uv] required-version")
     text = dockerfile()
     if text is None:
