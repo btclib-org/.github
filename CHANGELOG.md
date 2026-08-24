@@ -13,6 +13,22 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Two more sections point instead of restating
+
+- **Section 11's merge-method fact has one site** — issue #252.
+  *Branch protection and rulesets* keeps squash as `main-self-merge`'s
+  own rule, a settings enumeration and not itself in question; *What a
+  pull request says it is* restated the fact to reach
+  `squash_merge_commit_title`'s consequence, and now points at *Merge
+  method* instead.
+- **Section 4 points at section 7 for the test-file spelling instead of
+  naming it again** — issue #131. The *Python shape* bullet named
+  `*_test.py` beside `name-tests-test` at its default; *Layout and
+  naming* is where the spelling and the reason for choosing it live, so
+  the bullet points there instead. Section 7's *Convention tests*
+  paragraph and *Layout and naming* bullet agree with each other, so
+  this is the rule's only remaining second site.
+
 ### The calendar gains a row for `btclib-node`'s DNS-seed sentinel
 
 - **`bootstrap-dns` takes Thursday, 05** — issue #201. It is the only

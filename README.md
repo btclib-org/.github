@@ -661,7 +661,7 @@ pre-commit.ci does not have — the lint workflow covers it. No
 - **syntax** — `check-yaml`, `check-json`, `check-toml`,
   `pretty-format-json`.
 - **Python shape** — `debug-statements`, `check-docstring-first`, and
-  `name-tests-test` at its default, which is section 7's `*_test.py`.
+  `name-tests-test` at its default, the spelling section 7 states.
 - **secrets** — `detect-private-key` and `detect-secrets` against a
   committed `.secrets.baseline`. A baseline rather than an exclusion: an
   excluded file is unwatched, where a baseline entry is a finding
@@ -1634,10 +1634,10 @@ body — never the pull request's description.
 
 **A pull request that closes an issue names it in its title, in
 parentheses**: `Say when github-release runs instead of relying on no if
-(issue #1142)`. Squash is the only merge method, and
-`squash_merge_commit_title` is `COMMIT_OR_PR_TITLE`, so that title is
-what the landing commit's subject says — the number reaches `git log`
-and stays reachable from a checkout with no forge in front of it. A pull
+(issue #1142)`. `squash_merge_commit_title` is `COMMIT_OR_PR_TITLE`,
+squash being *Merge method*'s only method, so that title is what the
+landing commit's subject says — the number reaches `git log` and stays
+reachable from a checkout with no forge in front of it. A pull
 request that closes nothing carries no parentheses, and adding some
 because the shape looks right is how a wrong number gets in.
 
