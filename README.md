@@ -674,6 +674,15 @@ their reasoning needs more room than a hook argument has.
 of the same tools in a workflow: what CI enforces is exactly what a
 commit enforces, and a hook cannot be gated by pre-commit.ci alone.
 
+**Every hook that has a fix mode runs with it turned on.** A check-only
+hook reports a defect a machine already knows how to repair and spends a
+human round reading a finding a flag would have applied; a fixer instead
+leaves the correction already made, in the tree, for whoever committed to
+read before the commit lands — a pre-commit hook that fixes a file fails
+the run rather than applying itself unseen. A hook stays check-only where
+it has none to turn on: a validator has nothing to rewrite, and neither
+does a rule with no mechanical repair for what it finds.
+
 ### The `ci:` block
 
 ```yaml
@@ -1433,9 +1442,9 @@ sight rather than weighed.
 - **Union drops the blank line between two sections it joins.** Two
   branches each adding a `###` section under `## Unreleased` produce a
   file whose second heading sits against the bullet above it, which
-  MD022 and MD032 both refuse. Reading the file after a rebase is what
-  puts the line back: the hook reports and does not fix, and where a
-  file disables the two rules at its head the gate says nothing either.
+  MD022 and MD032 both refuse. Section 4's autofix rule has
+  `markdownlint-cli2` write the line back on the next hook run, rather
+  than only reporting it missing.
 
 ## 10. Workflows
 
