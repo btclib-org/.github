@@ -2019,23 +2019,33 @@ corrected in none of the ones that shipped.
   build without isolation, pre-commit.ci being unable to create the
   isolated environment.
 
-    `pyroma` reads the metadata through `build`, which takes its
-    non-isolated path exactly where the environment satisfies `requires`
-    and falls back to an isolated build otherwise. So the hook carries
-    `additional_dependencies` naming the backend at `[build-system]`'s
-    own specifier: the environment satisfies the declaration by
-    construction, and the fallback — a virtual environment pre-commit.ci
-    cannot create — is never asked for. btclib-org/.github#145 has the
-    run.
+    `pyroma` reads the metadata through
+    `build.util.project_wheel_metadata`, and its non-isolated path never
+    reads `requires` at all: there is no `check_dependencies` call on
+    that branch, so it returns metadata once the backend's own PEP 517
+    hook does, whatever else the list names. What falls back to an
+    isolated build is pyroma's own wrapper, on a `BuildException` from
+    that first attempt — so the hook carries `additional_dependencies`
+    naming the backend at `[build-system]`'s own specifier: that keeps
+    the backend importable, which is what the first, requires-blind
+    attempt needs in order not to raise, and the fallback — a virtual
+    environment pre-commit.ci cannot create — is never asked for.
+    btclib-org/.github#145 has the run.
 
     `check-sdist` drives `uv build`, and that is not PEP 517 for this
     backend: given `build-backend = "uv_build"` it builds with the copy
     bundled in the running uv, whether or not isolation is disabled and
-    whether or not the environment holds a `uv_build` at all, and where
-    `requires` excludes that uv it warns and builds anyway. So naming
-    the backend there decides nothing, and what packs the archive the
-    gate compares against git is the hook environment's `uv`, which the
-    manifest installs unpinned. `args: [--inject-junk, --installer=pip]`
+    whether or not the environment holds a `uv_build` at all. Where
+    `requires` excludes that uv with a ceiling below it, it warns and
+    builds with the bundled copy anyway; where the exclusion is a floor
+    above it, uv looks past its own copy for a `uv_build` meeting that
+    floor instead and the build fails when none does — `import uv_build`
+    raising `ModuleNotFoundError` under `--no-build-isolation`, the shape
+    this hook takes. Either way naming the backend there decides
+    nothing, the target environment's own `uv_build` being what neither
+    branch consults, and what packs the archive the gate compares
+    against git is the hook environment's `uv`, which the manifest
+    installs unpinned. `args: [--inject-junk, --installer=pip]`
     is what brings the hook under the rule: check-sdist then builds
     through `build --no-isolation`, which does read the environment, so
     the backend `additional_dependencies` names is the one that packs
