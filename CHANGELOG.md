@@ -13,6 +13,24 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The landing-subject fact is conditional, and CONTRIBUTING.md points at it
+
+- **The landing-subject fact was stated unconditionally, in section 11
+  and in `REPOSITORY.md`** — issue #273. *Merge method* already states
+  which of the pull request's title and the branch's own commit subject
+  lands; *What a pull request says it is* now points at that rule
+  instead of asserting the title unconditionally, so the parentheses
+  belong on whichever one lands, not only on the title.
+  `REPOSITORY.md`'s own sentence now points at *Merge method* too,
+  instead of restating its two cases.
+- **CONTRIBUTING.md's commit-message paragraph restated the merge
+  method three lines under its own explanation of why it does not
+  restate section 9** — issue #274. It now links section 11 instead,
+  matching the shape *Landing it* already uses for the same fact. The
+  edit falls inside the shared half `EXPECTED_DRIFT` in
+  `tests/verbatim_test.py` already holds against issue #281, so nothing
+  here changes that entry.
+
 ### Two more sections point instead of restating
 
 - **Section 11's merge-method fact has one site** — issue #252.

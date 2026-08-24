@@ -1643,12 +1643,13 @@ body — never the pull request's description.
 
 **A pull request that closes an issue names it in its title, in
 parentheses**: `Say when github-release runs instead of relying on no if
-(issue #1142)`. `squash_merge_commit_title` is `COMMIT_OR_PR_TITLE`,
-squash being *Merge method*'s only method, so that title is what the
-landing commit's subject says — the number reaches `git log` and stays
-reachable from a checkout with no forge in front of it. A pull
-request that closes nothing carries no parentheses, and adding some
-because the shape looks right is how a wrong number gets in.
+(issue #1142)`. Which of the title and the branch's own commit subject
+lands is *Merge method*'s rule, so the parentheses belong on whichever
+one that is — not only on the title. Either way the number reaches
+`git log` and stays reachable from a checkout with no forge in front of
+it. A pull request that closes nothing carries no parentheses, and
+adding some because the shape looks right is how a wrong number gets
+in.
 
 The title is not the closing mechanism. `Closes #N` in the *description*
 is what GitHub acts on, and both are wanted: the description closes the
