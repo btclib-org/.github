@@ -300,24 +300,21 @@ a `pyproject.toml`, a suite, and no `release.yml`. What it declines of
 tier 2 — there is no coverage here, and section 3 describes a file its
 `pyproject.toml` is not — its `CLAUDE.md` says, with the reason.
 
-**A tier-2 repository carries neither `RELEASING.md` nor
-`RELEASE_NOTES.md`.** What the first would say is that there is no
-release — `bbt`, `btclib-node` and `btclib-benchmarks` each carry that
-under their own `CONTRIBUTING.md`'s *A version, and no release* — and
-a file whose content is its own absence is one sentence in
-`README.md`, not a file:
-the file's being there tells every reader who has not opened it that
-there is a procedure here, and `SECURITY.md`, which sends a reader to
-it for what a release is in a given tree, sends them instead to a line
-the `README.md` can hold. The second is what a user has to act on *at
-a release*, on top of the changelog, so where no release is cut it has
-nothing to be on top of; `CHANGELOG.md` stays, a change being noticed
-whether or not a version names it. The alternative weighed was carrying
-both ready, on the ground that a tier-2 repository could release
-tomorrow. What that buys is a procedure nobody runs, kept in step with
-section 12 by nobody; and the day a release arrives it arrives with
-`release.yml`, which is the day the repository is tier 1 and the two
-files come with it.
+**A tier-2 repository carries neither `RELEASING.md` nor `RELEASE_NOTES.md`.**
+What the first would say is that there is no release — `bbt`, `btclib-node`,
+`btclib-benchmarks` and `.github` each carry that under their own
+`CONTRIBUTING.md`'s *A version, and no release* — and a file whose content is
+its own absence is one sentence in `README.md`, not a file: the file's being
+there tells every reader who has not opened it that there is a procedure here,
+and `SECURITY.md`, which sends a reader to it for what a release is in a given
+tree, sends them instead to a line the `README.md` can hold. The second is what
+a user has to act on *at a release*, on top of the changelog, so where no
+release is cut it has nothing to be on top of; `CHANGELOG.md` stays, a change
+being noticed whether or not a version names it. The alternative weighed was
+carrying both ready, on the ground that a tier-2 repository could release
+tomorrow. What that buys is a procedure nobody runs, kept in step with section
+12 by nobody; and the day a release arrives it arrives with `release.yml`,
+which is the day the repository is tier 1 and the two files come with it.
 
 ### Root files
 

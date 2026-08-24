@@ -27,6 +27,7 @@ audit has no revision to compare against.
   `.github` unable to take the repository-naming half in any case
   since PEP 503 normalizes `.github` to `-github`, not a distribution
   name.
+
 ### `CONTRIBUTING.md` gains this tree's own *A version, and no release*
 
 - **The three other tier-2 repositories keep the fact that nothing is

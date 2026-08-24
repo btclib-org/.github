@@ -124,8 +124,9 @@ Do not use Fable unless explicitly instructed.
 - **A claim about "every tier-2 repository" has to hold of this tree too**,
   section 2 saying its own row is measured the same way as the others. `grep
   -c '^### A version, and no release' CONTRIBUTING.md`, run against every
-  tier-2 repository including this one, is the check; issue
-  btclib-org/.github#276 is open on what it finds here.
+  tier-2 repository including this one, is the check. `tests/` asks no
+  such thing — this tree has no coverage, so a repository that drops the
+  heading again is a reader's catch, not a red run.
 - **Replacing `tests/conftest.py`'s per-session clone with `--reference`
   against the local checkouts was measured and declined:
   btclib-org/.github#272.** The shrunk clone still contacts the forge for the
