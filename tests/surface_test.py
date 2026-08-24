@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -52,22 +53,44 @@ def is_public(path: str) -> bool:
     return not any(part.startswith("_") for part in parts if part != "__init__")
 
 
-def package(repository: str, trees: dict[str, Path]) -> Path | None:
+def package(
+    repository: str,
+    trees: dict[str, Path],
+    pyprojects: dict[str, dict[str, Any]],
+) -> Path | None:
     """Return the package directory of a tree, where it installs one.
 
-    A directory of the root carrying an `__init__.py`, `tests/`
-    excepted, that being the shape section 2's list gives. The
-    `py.typed` the same bullet asks for is not what finds it: a tree
-    missing that file is what this module reports, and locating the
-    directory by it would report the absence as an error instead.
+    Read off what the tree's own `pyproject.toml` declares rather than
+    inferred from where an `__init__.py` happens to sit: under
+    `uv_build`, `module-root` and `module-name` say the directory
+    outright, `src/` being that backend's own default and not a layout
+    section 2 states, so a tree using it holds no root-level
+    `__init__.py` for a scan to find. A backend the standard does not
+    configure this way -- `btclib-secp256k1`'s hatchling -- keeps a
+    directory of the root carrying an `__init__.py`, `tests/` excepted,
+    which is that backend's own default and the shape every such tree
+    here uses.
 
     :param repository: the repository's name.
     :param trees: the checkouts.
+    :param pyprojects: each tree's parsed `pyproject.toml`.
     :returns: the directory relative to the checkout, or None where the
         tree installs no importable package.
     :raises LookupError: where more than one directory answers, the
         bullet naming one.
     """
+    config = pyprojects.get(repository, {})
+    uv = config.get("tool", {}).get("uv", {})
+    if uv.get("package") is False:
+        return None
+    if config.get("build-system", {}).get("build-backend") == "uv_build":
+        settings = uv.get("build-backend", {})
+        default = config.get("project", {}).get("name", repository).replace("-", "_")
+        name = settings.get("module-name", default)
+        if name == []:
+            return None
+        root = settings.get("module-root", "src")
+        return Path(root) / name if root else Path(name)
     found = sorted(
         {
             Path(path).parent
@@ -86,6 +109,7 @@ def package(repository: str, trees: dict[str, Path]) -> Path | None:
 def test_the_package_directory_is_typed_and_declares_its_surface(
     repository: str,
     trees: dict[str, Path],
+    pyprojects: dict[str, dict[str, Any]],
 ) -> None:
     """Section 2: `py.typed` and an `__init__.py` that declares `__all__`.
 
@@ -94,9 +118,10 @@ def test_the_package_directory_is_typed_and_declares_its_surface(
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
+    :param pyprojects: each tree's parsed `pyproject.toml`.
     """
     root = trees[repository]
-    directory = package(repository, trees)
+    directory = package(repository, trees, pyprojects)
     if directory is None:
         pytest.skip(f"{repository} installs no importable package")
     command = by_hand(
@@ -117,6 +142,7 @@ def test_the_package_directory_is_typed_and_declares_its_surface(
 def test_every_published_module_declares_its_public_surface(
     repository: str,
     trees: dict[str, Path],
+    pyprojects: dict[str, dict[str, Any]],
 ) -> None:
     """Section 7: `__all__` in every public module of a published package.
 
@@ -126,9 +152,10 @@ def test_every_published_module_declares_its_public_surface(
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
+    :param pyprojects: each tree's parsed `pyproject.toml`.
     """
     root = trees[repository]
-    directory = package(repository, trees)
+    directory = package(repository, trees, pyprojects)
     assert directory is not None, (
         f"{repository} publishes a package and the tree holds none; "
         + by_hand(repository, "git ls-files '*__init__.py'")
