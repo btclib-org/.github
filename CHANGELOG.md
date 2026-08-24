@@ -13,6 +13,16 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Two of section 3's rules get commands that re-derive them
+
+- **`pyproject_test.py` asked only that `license-files` was declared,
+  not what it named** — issue #200. Section 3 already states the key
+  names `LICENSE` and `AUTHORS.md` and nothing else; the test now
+  asserts those two names.
+- **Section 3's repository-naming rule had no command in `tests/` that
+  re-derived it** — issue #278. A new test compares the distribution's
+  `name`, normalized per PEP 503, against the repository.
+
 ### The landing-subject fact is conditional, and CONTRIBUTING.md points at it
 
 - **The landing-subject fact was stated unconditionally, in section 11

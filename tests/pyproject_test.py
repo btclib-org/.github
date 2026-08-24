@@ -13,6 +13,7 @@ is the finding whichever side is wrong.
 
 from __future__ import annotations
 
+import re
 import tomllib
 from typing import Any
 
@@ -21,6 +22,9 @@ import pytest
 from . import ROOT, Tier, by_hand, fenced, name, rows
 
 pytestmark = pytest.mark.integration
+
+RUNS = re.compile(r"[-_.]+")
+"""PEP 503's normalization: runs of `-`, `_` and `.` folded to one `-`."""
 
 URLS = {
     "homepage",
@@ -151,18 +155,38 @@ def test_the_project_urls_are_the_seven_section_3_names(
 
 
 @pytest.mark.tier(Tier.PYTHON)
+def test_the_name_normalizes_to_the_repository(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 3: the repository is named after the distribution, hyphenated.
+
+    PEP 503 folds `-`, `_` and `.` in a distribution name to a single
+    `-` before comparing, so a `name` spelled with an underscore
+    compares equal to the repository's hyphenated spelling.
+
+    :param repository: the repository asked about.
+    :param pyprojects: the parsed files.
+    """
+    project = distribution(repository, pyprojects)
+    command = by_hand(repository, "grep -n '^name = ' pyproject.toml")
+    declared = project.get("name")
+    assert isinstance(declared, str), f"name is {declared!r}; " + command
+    normalized = RUNS.sub("-", declared).lower()
+    assert normalized == repository, f"name normalizes to {normalized!r}; " + command
+
+
+@pytest.mark.tier(Tier.PYTHON)
 def test_the_licence_is_an_expression_with_its_files(
     repository: str,
     pyprojects: dict[str, dict[str, Any]],
 ) -> None:
-    """Section 3: PEP 639's two keys, the SPDX string and `license-files`.
+    """Section 3: PEP 639's two keys, the SPDX string and the two names.
 
     A tree declaring the deprecated table, or no key at all, passes
     `classifiers_test.py` -- which reads `license` to refuse the
     classifier beside an expression and so asks nothing of a tree that
-    has none -- and is refused here. What the list holds is section 3's
-    rule; this asks that the key is declared, and asserting the names is
-    what btclib-org/btclib-node#235 has to be closed for.
+    has none -- and is refused here.
 
     :param repository: the repository asked about.
     :param pyprojects: the parsed files.
@@ -172,7 +196,8 @@ def test_the_licence_is_an_expression_with_its_files(
     expression = project.get("license")
     assert isinstance(expression, str), f"license is {expression!r}; " + command
     files = project.get("license-files")
-    assert files, f"license-files is {files!r}; " + command
+    named = set(files) if isinstance(files, list) else files
+    assert named == {"LICENSE", "AUTHORS.md"}, f"license-files is {files!r}; " + command
 
 
 @pytest.mark.tier(Tier.PYTHON)
