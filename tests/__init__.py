@@ -248,11 +248,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_d_is_selected_with_the_pep257_convention",
         ("btclib-node",),
     ),
-    (
-        277,
-        "test_the_name_is_the_canonical_spelling",
-        ("btclib-secp256k1",),
-    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection."""
 

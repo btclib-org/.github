@@ -548,11 +548,10 @@ their reasoning needs more room than a hook argument has.
     repository agree, and says nothing about which member of the
     family the `[project]` table may pick for itself; this states that
     it picks the hyphen too. `btclib-secp256k1` declares
-    `name = "btclib_secp256k1"`, an underscore where the other four
-    publishers write a hyphen, tracked as btclib-org/.github#277 until
-    that tree's own pull request corrects it. The correction changes
-    nothing downstream: the escaping rule above already sends both
-    spellings to the same `btclib_secp256k1-<version>` wheel.
+    `name = "btclib-secp256k1"`, the same hyphen the other four
+    publishers write. The wheel and the `.dist-info` directory read
+    `btclib_secp256k1-<version>` either way: the escaping rule above
+    already folds both spellings to the one string.
 
     **The bullet has no subject where a tree builds no distribution.**
     `bbt` and `.github` both declare `package = false` and a
