@@ -556,10 +556,14 @@ their reasoning needs more room than a hook argument has.
     inside the file, so both are read against the tree rather than
     against the list they were copied from.
 - **`classifiers` are present**, and each is a claim about this tree
-  rather than a line taken from a sibling's: `Typing :: Typed` only where
-  a `py.typed` ships, an `Operating System` only where the package is
-  built for it and `OS Independent` only where nothing is compiled, and
-  one `Programming Language :: Python :: X.Y` per interpreter the matrix
+  rather than a line taken from a sibling's: `Typing :: Typed` and
+  `py.typed` ship together or neither ships, the marker being PEP 561's
+  promise to a downstream consumer that the installed package carries
+  types and the classifier that same promise on the index page, so one
+  without the other is a package whose two statements of one fact
+  disagree; an `Operating System` only where the package is built for it
+  and `OS Independent` only where nothing is compiled, and one
+  `Programming Language :: Python :: X.Y` per interpreter the matrix
   runs. That last one is a convention this section states, so section 7's
   closing rule makes it a test rather than a hope: a library carries it as
   `interpreters_test.py`, which reads the floor, the

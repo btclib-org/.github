@@ -22,16 +22,22 @@ question, and one a repository can answer about itself: that is
 `interpreters_test.py`, in each library, reading its own floor and its
 own matrix. What is here is what a tree is not relied on to ask of
 itself, asked of every tree at once.
+
+`Typing :: Typed` is asked against `py.typed` rather than against the
+list alone: `surface_test.py` is what locates the package directory a
+tree installs, and its `package` is reused here rather than re-derived.
 """
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import pytest
 from trove_classifiers import classifiers
 
-from . import Tier, by_hand
+from . import Tier, by_hand, tracked
+from .surface_test import TYPED, package
 
 pytestmark = pytest.mark.integration
 
@@ -48,6 +54,9 @@ LICENSE_CLASSIFIER = "License ::"
 PyPI's list holds them as current entries, so the comparison below
 passes them and the rule that refuses them is section 3's alone.
 """
+
+TYPING_CLASSIFIER = "Typing :: Typed"
+"""The classifier `py.typed` promises the index page, and vice versa."""
 
 
 def test_every_classifier_is_a_classifier(
@@ -100,4 +109,37 @@ def test_no_license_classifier_beside_the_expression(
     assert not (isinstance(expression, str) and beside), (
         f"license = {expression!r} beside {beside}; "
         + by_hand(repository, "grep -n 'License ::' pyproject.toml")
+    )
+
+
+def test_the_typing_classifier_and_the_marker_agree(
+    repository: str,
+    trees: dict[str, Path],
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 3: `Typing :: Typed` and `py.typed` ship together or not.
+
+    Skipped where the tree installs no importable package, the condition
+    `surface_test.py`'s own reading of the bullet carries rather than a
+    tier: such a tree owes neither half.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    :param pyprojects: the parsed files.
+    """
+    root = trees[repository]
+    directory = package(repository, trees, pyprojects)
+    if directory is None:
+        pytest.skip(f"{repository} installs no importable package")
+    marker = bool(tracked(root, f"{directory}/{TYPED}"))
+    classifier = TYPING_CLASSIFIER in pyprojects.get(repository, {}).get(
+        "project", {}
+    ).get("classifiers", [])
+    assert marker == classifier, (
+        f"py.typed={marker} classifier={classifier}; "
+        + by_hand(
+            repository,
+            f"git ls-files '{directory}/{TYPED}';"
+            " grep -n 'Typing :: Typed' pyproject.toml",
+        )
     )

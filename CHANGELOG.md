@@ -88,6 +88,21 @@ audit has no revision to compare against.
   read a stale checkout cannot affect, and gives the fast-forward that
   brings the checkout forward without working in it.
 
+### The `Typing :: Typed` pairing with `py.typed` is stated both ways
+
+- **Section 3's `classifiers` bullet states the pairing in both
+  directions** — issue #256. It refused the classifier on a tree with
+  no marker and said nothing about a tree with the marker and no
+  classifier; the marker is PEP 561's promise to a downstream consumer
+  that the installed package carries types, and the classifier is that
+  same promise on the index page, so the bullet now gives the reason
+  the pairing holds bidirectionally.
+- **`classifiers_test.py` refuses either half without the other** — the
+  same issue. `test_the_typing_classifier_and_the_marker_agree` reuses
+  `surface_test.py`'s `package` to skip a tree that installs no
+  importable package, and asks the rest against `py.typed` and the
+  classifier together.
+
 ### `bbt` selects `W`, so the row for it goes
 
 - **The backlog row for `bbt`'s unselected `W` is deleted** — issue
