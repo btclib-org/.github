@@ -20,6 +20,18 @@ audit has no revision to compare against.
   why*, instead of pointing at `CONTRIBUTING.md`'s *A version, and no
   release*** — issue #291. Both spots now carry the pointer, in the
   shape `bbt`'s `REPOSITORY.md` already uses.
+### `package()` refuses a dotted `module-name` instead of joining it literally
+
+- **`package()` did `Path(root) / name` on a dotted `module-name`, giving
+  `src/foo.bar` where `uv_build` builds `src/foo/bar`** — issue #268.
+  `uv_build` reads a dot in that key as its other namespace-package
+  shape, a module sharing a namespace with a module another distribution
+  installs beside it; `package()` now raises `LookupError` naming the
+  repository and the key instead of resolving either path. Section 2's
+  *the package directory is singular by the rule and not by omission*
+  now states this shape too, for the same reason as the sibling list
+  shape #264 corrected: a tree here carries its own package, not a leaf
+  of a namespace shared with another distribution.
 
 ### `CLAUDE.md`'s worktree recipe is `wt-<tracker>-<issue>-<repo>-<role>`
 
