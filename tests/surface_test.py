@@ -77,7 +77,9 @@ def package(
     :returns: the directory relative to the checkout, or None where the
         tree installs no importable package.
     :raises LookupError: where more than one directory answers, the
-        bullet naming one.
+        bullet naming one -- `module-name` as a list included, which is
+        `uv_build`'s own shape for a namespace package naming more than
+        one module, a shape section 2 does not allow.
     """
     config = pyprojects.get(repository, {})
     uv = config.get("tool", {}).get("uv", {})
@@ -89,6 +91,13 @@ def package(
         name = settings.get("module-name", default)
         if name == []:
             return None
+        if isinstance(name, list):
+            msg = (
+                f"{repository} sets module-name to {name}, and section 2"
+                " names the package directory rather than several; "
+                + by_hand(repository, "grep -n module-name pyproject.toml")
+            )
+            raise LookupError(msg)
         root = settings.get("module-root", "src")
         return Path(root) / name if root else Path(name)
     found = sorted(
@@ -104,6 +113,24 @@ def package(
         )
         raise LookupError(msg)
     return found[0] if found else None
+
+
+def test_package_refuses_a_module_name_list() -> None:
+    """`module-name` as a list is uv_build's namespace-package shape.
+
+    No repository in the organization declares it, so this is a
+    synthetic `pyproject.toml` rather than one read off a tree: what is
+    asked is that `package()` names the repository and the key rather
+    than joining a `Path` to a `list` and raising `TypeError`.
+    """
+    pyprojects = {
+        "a-namespace-package": {
+            "build-system": {"build-backend": "uv_build"},
+            "tool": {"uv": {"build-backend": {"module-name": ["foo", "bar"]}}},
+        }
+    }
+    with pytest.raises(LookupError, match="module-name"):
+        package("a-namespace-package", {}, pyprojects)
 
 
 def test_the_package_directory_is_typed_and_declares_its_surface(

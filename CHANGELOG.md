@@ -48,6 +48,26 @@ audit has no revision to compare against.
   always the first shape, so the bullet now says that rather than
   restating both.
 
+### `package()` and the two `py.typed` bullets say what they can reach
+
+- **`package()` refuses a `module-name` list instead of raising
+  `TypeError`** — issue #264. `uv_build` allows that key to be a list,
+  for a namespace package naming more than one module, and the helper
+  joined a `Path` to it; it now raises `LookupError` naming the
+  repository and the key. Section 2 now states the package directory is
+  singular by the rule rather than by omission, that shape being one
+  this file does not allow.
+- **Section 2's `py.typed` bullet and section 3's `classifiers` bullet
+  say the suite reads a tracked marker, not an installed one** — issue
+  #266. `surface_test.py` and `classifiers_test.py` both ask
+  `git ls-files`, holding no checkout of the audited trees to build an
+  archive from. Measured by building a tree with the marker excluded
+  once from the wheel and once from the sdist: `check-sdist` drives no
+  wheel at all and passed the sdist that still carried the marker while
+  the wheel built beside it did not, so a wheel dropping the marker is
+  `check-wheel-contents`'s catch and not this suite's, for a tree that
+  publishes; a tree short of tier 1 has no gate over either archive.
+
 ### The row for `btclib-node`'s `name-tests-test` argument goes
 
 - **`btclib-node` runs the hook at its default, so its row is deleted**

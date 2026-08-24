@@ -445,6 +445,17 @@ or a build backend given no module to build. Where there is no package a
 bullet has no subject: a floor is over the rules whose subject a tree
 holds, and does not supply one.
 
+**The package directory is singular by the rule and not by omission.**
+`uv_build` lets a project name more than one module in `module-name`, a
+namespace package sharing a distribution between them, and that is a
+shape this file does not state: one tree here is one distribution
+carrying one package, and a project wanting several stays several
+repositories or several `module-name`s of its own rather than one tree
+answering to two directories. `tests/surface_test.py`'s `package()`
+reads the key rather than resolving it, so a tree declaring the list
+meets a message naming the repository and the key instead of a
+directory this file never promised it one.
+
 A tree without a package may still keep `tests/` above the floor:
 `.github`'s own suite is over the organization rather than over a
 package this repository does not hold, and a tier is free to carry more
@@ -581,6 +592,21 @@ their reasoning needs more room than a hook argument has.
   the point where a version is already being consumed. `trove-classifiers`
   is the same list as a package, and comparing against it is the check
   that can run before then.
+
+    Both halves of that pairing, and section 2's own `py.typed` bullet
+    before it, are a promise about an installed package, and `.github`'s
+    own suite reads a tracked one instead: `surface_test.py` and
+    `classifiers_test.py` ask `git ls-files`, holding no checkout of the
+    trees it audits to build an archive from. What verifies the promise
+    where a tree publishes is section 12's `check-sdist` and
+    `check-wheel-contents` — measured by building a tree with the marker
+    excluded once from the wheel and once from the sdist:
+    `check-sdist` drives no wheel at all, and passes an sdist that still
+    carries the marker while the wheel built alongside it does not, so
+    that half is `check-wheel-contents`'s, once
+    `[tool.check-wheel-contents]` names the package. A tree short of
+    tier 1 owes the marker with no gate over whether a build carries it,
+    this suite included.
 - **`[project.urls]`** carries homepage, documentation, download,
   changelog, repository, issues and pull requests.
 - **No upper bound on a sibling dependency.** Two projects developed
