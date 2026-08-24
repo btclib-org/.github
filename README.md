@@ -301,9 +301,10 @@ tier 2 — there is no coverage here, and section 3 describes a file its
 
 **A tier-2 repository carries neither `RELEASING.md` nor
 `RELEASE_NOTES.md`.** What the first would say is that there is no
-release — each tier-2 repository's own `CONTRIBUTING.md` states that
-once, under *A version, and no release* — and a file whose content is
-its own absence is one sentence in `README.md`, not a file:
+release — `bbt`, `btclib-node` and `btclib-benchmarks` each carry that
+under their own `CONTRIBUTING.md`'s *A version, and no release* — and
+a file whose content is its own absence is one sentence in
+`README.md`, not a file:
 the file's being there tells every reader who has not opened it that
 there is a procedure here, and `SECURITY.md`, which sends a reader to
 it for what a release is in a given tree, sends them instead to a line
@@ -524,9 +525,9 @@ their reasoning needs more room than a hook argument has.
   503 normalizes runs of `-`, `_` and `.` in a distribution name to a
   single `-`, so the hyphen is the canonical spelling; an import
   package is a Python identifier and takes underscores instead, so the
-  two are spelled differently on purpose. `btclib-secp256k1` installs
-  and imports as `btclib_secp256k1`; the repository takes the first
-  spelling, not the second.
+  two are spelled differently on purpose. `bitcoin-core-rpc` declares
+  `name = "bitcoin-core-rpc"` and imports as `bitcoin_core_rpc`; the
+  repository takes the first spelling, not the second.
 - **PEP 639 licensing**: `license = "MIT"` as an SPDX string and
   `license-files`, not the deprecated table and not a `License ::`
   classifier. The floor that carries them is the backend's own:

@@ -28,13 +28,16 @@ audit has no revision to compare against.
   the bullet points there instead. Section 7's *Convention tests*
   paragraph and *Layout and naming* bullet agree with each other, so
   this is the rule's only remaining second site.
+
 ### Section 2 drops a dead quote, and section 3 gains a naming rule
 
-- **Section 2 points to each tier-2 repository's own `CONTRIBUTING.md`
-  instead of quoting `RELEASING.md`** — issue #159. `btclib-node` and
-  `bbt` no longer carry that file, so the paragraph quoted its opening
-  line from a page that answers 404; it now names the section each
-  repository keeps the same sentence in.
+- **Section 2 points to `bbt`'s, `btclib-node`'s and
+  `btclib-benchmarks`'s own `CONTRIBUTING.md` instead of quoting
+  `RELEASING.md`** — issue #159. `btclib-node` and `bbt` no longer
+  carry that file, so the paragraph quoted its opening line from a
+  page that answers 404; it now names the section each of the three
+  keeps the same sentence in. `.github`'s own `CONTRIBUTING.md` has no
+  such section, tracked as issue #276.
 - **Section 3 states that a repository is named after the distribution
   it publishes, hyphenated, never after the import package** — issue
   #30. The rule was nowhere in the standard.
