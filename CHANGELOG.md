@@ -25,6 +25,14 @@ audit has no revision to compare against.
   `wt-<tracker>-<issue>-<repo>-<role>`, most general part first: the
   repository whose tracker holds the issue, the issue, the repository
   this worktree is for, and what the worker is doing in it.
+### `tests/pyproject_test.py` gains a check for section 1's uv floor
+
+- **`[tool.uv] required-version` names the oldest uv that may read the
+  lock, and a floor above the version `dependabot-core`'s updater
+  bundles stops that tree's uv-driven Dependabot updates with no error
+  anywhere** — issue #27. `tests/pyproject_test.py` now reads
+  `dependabot-core`'s `uv/Dockerfile` through `gh api` and skips, rather
+  than failing, where that file cannot be read.
 
 ### Section 3 answers `[project].name`'s spelling, both directions
 
