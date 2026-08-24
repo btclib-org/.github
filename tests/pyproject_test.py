@@ -177,6 +177,29 @@ def test_the_name_normalizes_to_the_repository(
 
 
 @pytest.mark.tier(Tier.PYTHON)
+def test_the_name_is_the_canonical_spelling(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 3: `name` itself takes PEP 503's canonical hyphen.
+
+    The test above folds the family together before comparing, which
+    answers whether the repository and the distribution agree and
+    nothing about which member of the family `name` itself picked;
+    this asks that question directly.
+
+    :param repository: the repository asked about.
+    :param pyprojects: the parsed files.
+    """
+    project = distribution(repository, pyprojects)
+    command = by_hand(repository, "grep -n '^name = ' pyproject.toml")
+    declared = project.get("name")
+    assert isinstance(declared, str), f"name is {declared!r}; " + command
+    canonical = RUNS.sub("-", declared).lower()
+    assert declared == canonical, f"name is {declared!r}, not {canonical!r}; " + command
+
+
+@pytest.mark.tier(Tier.PYTHON)
 def test_the_licence_is_an_expression_with_its_files(
     repository: str,
     pyprojects: dict[str, dict[str, Any]],

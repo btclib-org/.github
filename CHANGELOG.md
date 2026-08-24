@@ -13,6 +13,21 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 3 answers `[project].name`'s spelling, both directions
+
+- **Section 3 stated the repository-naming rule but not which spelling
+  `name` itself takes** — issue #277. It now states the canonical
+  hyphen, `btclib-secp256k1` recorded as the exception until its own
+  pull request corrects it — a `BACKLOG` row in `tests/__init__.py`
+  excusing it from the new `tests/pyproject_test.py` test that checks
+  it.
+- **The naming bullet's subject is a distribution, and two trees
+  declare `[project].name` while building none** — issue #286. The
+  bullet now says so explicitly: `bbt` and `.github` are outside it,
+  `.github` unable to take the repository-naming half in any case
+  since PEP 503 normalizes `.github` to `-github`, not a distribution
+  name.
+
 ### Two of section 3's rules get commands that re-derive them
 
 - **`pyproject_test.py` asked only that `license-files` was declared,
