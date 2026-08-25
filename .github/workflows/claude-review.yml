@@ -231,7 +231,32 @@ jobs:
           OUTCOME: ${{ steps.review.outcome }}
           EXECUTION: ${{ steps.review.outputs.execution_file }}
         run: |
+          # A failing review names no cause in the log: the action
+          # prints the result message with `api_error_status`, the stop
+          # reason and the error text sanitized out of it, and writes
+          # every message
+          # unsanitized to the execution file this step already names.
+          # What it drops is read from there rather than turned on with
+          # `show_full_output: true`, which prints every message
+          # including tool results and whose own description warns
+          # against that on a public repository. The debug rerun the
+          # action also suggests is no third option: it keys on
+          # ACTIONS_STEP_DEBUG in the step's environment, which
+          # `gh run rerun --debug` does not put there.
+          #
+          # An error subtype's own `errors` are not read here, the
+          # action printing those itself.
+          #
+          # `|| true` because the step runs under `bash -e`: a jq that
+          # fails on a half-written file would exit before the
+          # annotation below, losing the one line this guard exists to
+          # write.
           if [ "$OUTCOME" != success ]; then
+            if [ -f "$EXECUTION" ]; then
+              jq -r '.[] | select(.type == "result")
+                     | "api_error_status \(.api_error_status), stop_reason \(.stop_reason)",
+                       (.result // empty)' "$EXECUTION" || true
+            fi
             echo "::error::the review step ended in $OUTCOME, so no" \
                  "verdict was written -- the runner's line above says" \
                  "whether it ran out of its timeout-minutes or failed" \
