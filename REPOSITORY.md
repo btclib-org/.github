@@ -91,22 +91,28 @@ reported by anything else.
 
 `main` is the only branch, and everything reaches it through a pull
 request. Rules [aggregate rather than replace each other][s11-branch], so
-what holds is what the call below answers **together with** the classic
-protection two headings up: that one requires a review, a linear history,
-resolved conversations and the `Lint` check, and refuses a force push or a
-deletion — under the exemption above, which these rulesets do not carry.
-Where the two overlap, the stricter answer is the one that applies:
+what holds on `main` is what the call below answers for that target
+**together with** the classic protection two headings up: that one
+requires a review, a linear history, resolved conversations and the
+`Lint` check, and refuses a force push or a deletion — under the
+exemption above, which these rulesets do not carry. Where the two
+overlap, the stricter answer is the one that applies:
 
 ```shell
 gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
   | xargs -I{} gh api repos/btclib-org/.github/rulesets/{} \
-    --jq '{name, target, enforcement, rules: [.rules[].type],
+    --jq '{name, target, enforcement, refs: .conditions.ref_name.include,
+           rules: [.rules[].type],
            bypass: [.bypass_actors[]?.bypass_mode]}'
 # {"bypass":[],"enforcement":"active","name":"main-integrity",
+#  "refs":["refs/heads/main"],
 #  "rules":["required_signatures","required_linear_history",
 #           "non_fast_forward","deletion"],"target":"branch"}
 # {"bypass":["pull_request"],"enforcement":"active",
-#  "name":"main-self-merge","rules":["pull_request"],"target":"branch"}
+#  "name":"main-self-merge","refs":["refs/heads/main"],
+#  "rules":["pull_request"],"target":"branch"}
+# {"bypass":[],"enforcement":"active","name":"tag-integrity",
+#  "refs":["refs/tags/v*"],"rules":["required_signatures"],"target":"tag"}
 ```
 
 - `main-integrity` — required signatures, required linear history, no
@@ -116,16 +122,20 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
   dismissed on push, conversations resolved, and `squash` as the only
   merge method it accepts — bypassed by the maintainer in
   **`pull_request` mode**.
+- `tag-integrity` — required signatures and nothing else, over
+  `refs/tags/v*` rather than over a branch, with **no bypass actor**.
 
 ```shell
 gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
   | xargs -I{} gh api repos/btclib-org/.github/rulesets/{} \
     --jq '.rules[] | select(.type=="pull_request") | .parameters'
 # {"allowed_merge_methods":["squash"],
-#  "dismiss_stale_reviews_on_push":true,"require_code_owner_review":false,
+#  "dismiss_stale_reviews_on_push":true,
+#  "dismissal_restriction":{"allowed_actors":[],"enabled":false},
+#  "require_code_owner_review":false,
 #  "require_extra_approval_for_unattributed_changes":true,
 #  "require_last_push_approval":false,"required_approving_review_count":1,
-#  "required_review_thread_resolution":true}
+#  "required_review_thread_resolution":true,"required_reviewers":[]}
 ```
 
 The bypass reaches that whole block and not the approving review alone,
@@ -133,17 +143,17 @@ and every landing here is made by the account it names:
 `dismiss_stale_reviews_on_push` is on and reaches none of them.
 [Section 11 has what stands in for it][s11-branch].
 
-The `bypass` field is what the first call above is read for. It answers
-`["pull_request"]`, and [that mode against `always` is the whole of the
-design][s11-branch]; `always` in that field would mean a direct push to
-`main` had become possible for its holder, which is the drift this
-command exists to catch.
+`main-self-merge`'s `bypass` is one of the fields the first call above
+is read for. It answers `["pull_request"]`, and [that mode against
+`always` is the whole of the design][s11-branch]; `always` in that field
+would mean a direct push to `main` had become possible for its holder,
+which is a drift the call is there to catch.
 
-There is no `tag-integrity` ruleset, and no `refs/tags/v*` for one to
-target. What it buys the sibling repositories is [a signed release
-tag][s11-sigs]; `CONTRIBUTING.md`'s *A version, and no release* is where
-there being no tag for the rule to hold is explained rather than
-removed.
+`tag-integrity` matches no ref: `CONTRIBUTING.md`'s *A version, and no
+release* is where nothing being tagged is measured. What the rule buys
+is [a signed release tag][s11-sigs], and it stands ahead of that tag
+rather than being created alongside one, so a `v*` pushed to this
+repository meets it.
 
 ## Signed commits
 
@@ -178,9 +188,19 @@ gh api repos/btclib-org/.github \
 #  "title":"COMMIT_OR_PR_TITLE"}
 ```
 
-[Squash is the only method the standard enables][s11-merge], and the
-`main-self-merge` ruleset above names it too, so the constraint holds
-even if this repository setting is flipped back.
+[Squash is the only method the standard enables][s11-merge], and
+`allowed_merge_methods` above holds it for every account the
+`main-self-merge` bypass does not cover. For the maintainer, who is
+covered, what stands against this setting being flipped back is
+`main-integrity`'s `required_linear_history`: no bypass actor, and a
+merge commit refused for everybody. Rebase-and-merge is linear, so that
+rule does not reach it, and [the reason it is not enabled is section
+11's][s11-merge].
+
+Whether a bypass holder is offered a merge method `allowed_merge_methods`
+excludes is not read back here: measuring it means flipping
+`allow_rebase_merge` and pressing the button on a live pull request,
+which is a settings change and a landing rather than a call.
 
 `COMMIT_OR_PR_TITLE` with `COMMIT_MESSAGES` is the pair
 [Merge method][s11-merge] asks for, and which of the two titles lands is
@@ -278,7 +298,7 @@ On, [as the standard asks of every tier][s2-root].
 
 - **No publishing, and no release workflow.** `CONTRIBUTING.md`'s *A
   version, and no release* is the whole of that answer. There is no
-  `pypi` environment, no OIDC trusted publisher, and no tag to protect:
+  `pypi` environment, no OIDC trusted publisher and nothing tagged:
   `gh api repos/btclib-org/.github/environments --jq .total_count`
   answers `0`.
 - **No CodeQL.** The reason recorded here was that there is no code, and
