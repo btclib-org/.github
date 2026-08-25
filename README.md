@@ -189,7 +189,7 @@ alone would leave `uv sync` resolving a project without it.
 | `bindings` | an optional native dependency that is also an extra |
 | `build` | what builds a distribution, cibuildwheel included |
 | `check` | what inspects a distribution before it is published |
-| `docs` | sphinx and the theme |
+| `docs` | sphinx and `furo` |
 | `mutation` | the mutation runner |
 | `dev` | every group above, and the default of `uv sync` |
 
@@ -382,6 +382,122 @@ that is not answered is the failure they never learn about. It names
 the subject rather than a team, so who answers a report can change
 without the policy changing.
 
+**The badges at a `README.md`'s head are a function of what the tree
+is**, decided by a property of the repository and never curated. A
+curated list has no answer to *should this tree carry that badge*, so
+two trees curate differently and neither of them is wrong, which is how
+one file comes to open a different way in each tree.
+
+What that gives up is the head as a summary. A badge per sentinel means
+the row grows with section 10's calendar rather than staying the handful
+a reader takes in at once, so the tree running the most sentinels
+carries the longest row and this repository, which today opens with no
+badge at all, acquires one. That is the trade and it is deliberate: a
+row long enough to be an audit is worth more here than a row short
+enough to be decoration, because the rule below is what makes it an
+audit. A tree that wants the shorter row drops a sentinel, not its
+badge.
+
+Which property decides which badge:
+
+- **every repository** — the licence, derived from the repository's own
+  `LICENSE` by `img.shields.io/github/license/<org>/<repo>`; the `lint`
+  workflow; and a link to the repository on GitHub;
+- **publishes** — from the index, the version, the downloads, the
+  development status, the supported Python versions, `wheel` and
+  `implementation`; and from the forge, `github/v/release`;
+- **holds a suite** — the `test` workflow;
+- **on pre-commit.ci** — its badge;
+- **builds documentation** — the `docs` workflow, and Read the Docs at
+  `app.readthedocs.org`;
+- **runs a sentinel** — that sentinel's badge.
+
+**The order is fixed**, and it is: the version, the downloads, the
+development status, the licence, the supported Python versions, `wheel`,
+`implementation`, `github/v/release`, `test`, `lint`, `docs`,
+pre-commit.ci, then the sentinels in the order section 10's calendar
+gives them, then Read the Docs, and last the link to the repository. A
+tree skips what it does not own and keeps the rest in that order, so a
+reader comparing two `README.md` files compares like with like instead
+of hunting. Taking the sentinels' order from the calendar is one order
+to maintain rather than two, and what it costs is that a workflow moved
+to another day moves its badge in every `README.md` that carries it.
+
+`img.shields.io/pypi/wheel` and `img.shields.io/pypi/implementation`
+are read off the files a release uploaded rather than off anything the
+project declares: `iniconfig` names no `Implementation` classifier and
+the second renders `cpython` for it anyway. `github/v/release` is read
+in a **pair** with the PyPI version badge beside it: where the two
+disagree, a release reached the forge and not the index.
+
+The link to the repository is the one item above that measures nothing,
+and it is a link rather than a claim: the README is the long description
+an index renders and the file an unpacked sdist carries, so it is read
+where the repository is not one click away. It says the repository's
+name and nothing else, which is a claim a reader settles by following
+it.
+
+**A badge that answers with anything but a measurement is a question
+with two answers**, and which one is the point: either the thing it
+reads has not happened yet — a workflow short of its first scheduled
+run, a project not yet built — which is datable and not a defect, or it
+should have happened and did not, which is. That is what keeps the row
+an audit rather than decoration, and it is what catches a workflow
+renamed out from under a badge still pointing at the old file.
+
+Reading it is a reading and not a pattern, because each service says so
+in its own words and changes them without telling anybody: a GitHub
+workflow badge answers `no status`, pre-commit.ci and Read the Docs
+`unknown`, the Scorecard `invalid repo path`, and shields a phrase per
+family — `repo not found`, `package or version not found`, `no releases
+or repo not found`. A pattern written from that list passes the day a
+service rewords its own failure, and passes silently, which is the one
+way this rule can fail without anybody noticing. What a command settles
+is the narrower half: a badge not served at all, which is what a renamed
+workflow and a deleted project both answer with. Section 15 has both.
+
+What is refused, and the reason is nearly the same one each time:
+
+- **a badge that asserts a tool rather than measuring one** —
+  `linted with ruff`, `code style: black` and the rest. The string is
+  written into the URL, so it renders the same the day the tool is
+  removed;
+- **`img.shields.io/badge/license-MIT-blue`**, which is that defect in
+  small: it renders `license MIT` because the URL says so, where the
+  derived form renders it because `LICENSE` does. The derived form
+  replaces it rather than sitting beside it, two badges of one fact
+  being two things to keep true;
+- **`last-commit`, `commit-activity` and `contributors`** — derived, and
+  the objection is not that: they measure activity rather than the tree,
+  so a quiet month on a finished library reads as decay;
+- **a coverage badge** — section 8's floor already refuses a fall, so
+  the badge would restate what a gate enforces in exchange for an upload
+  to a third party;
+- **REUSE compliance** — it renders `reuse unregistered`, which is a
+  registration with that service and not a property of the tree;
+- **`img.shields.io/pypi/types`**, which looks like the one badge
+  reading the **shipped artifact** and is not: it reads the
+  `Typing :: Typed` classifier. `urllib3` ships `urllib3/py.typed` in
+  its wheel, declares no such classifier, and the badge renders
+  `untyped`. So it restates section 3's classifier, which section 3
+  already pairs with `py.typed` by rule, and a badge restating a rule
+  the tree gates is the objection made of a coverage badge two entries
+  up. What that gives up is a reader of the index page seeing the
+  typing promise at a glance, which the classifier list on that same
+  page carries anyway.
+
+The Read the Docs host is `app.readthedocs.org` and not `readthedocs.org`
+because the second answers `307` and redirects to the first: one spelling
+because two are two things to keep true, and that one because it is where
+the other lands, a redirect being something its owner can retire.
+
+The downloads badge is pepy's rather than `img.shields.io/pypi/dm`, and
+both of them render: the first answers with the project's whole life and
+the second with the last month, so the second is a figure that falls
+without anything having happened to the tree. What that gives up is the
+reading `pypi/dm` is better at, whether the package is being taken up
+now.
+
 **A publishing repository's `README.md` ends with the line naming who
 supports the work**, under a thematic break:
 
@@ -484,6 +600,62 @@ A tree without a package may still keep `tests/` above the floor:
 `.github`'s own suite is over the organization rather than over a
 package this repository does not hold, and a tier is free to carry more
 than it is asked for.
+
+### The documentation
+
+What `docs/source/` holds is a few hand-written pages around a reference
+sphinx generates from the docstrings of a typed public API, one set per
+tree and none of them large.
+
+**The theme is `furo`**, declared in the `docs` group and named in
+`docs/source/conf.py`. It is built for that shape: the content first,
+the navigation in the left sidebar and the page's own contents in the
+right, light and dark from one setting. It is also what the part of the
+Python ecosystem these projects sit in reads as ordinary — `pip`, which
+it was written for, `black`, `urllib3`, `attrs` and the Python
+developer's guide. The alternative weighed was `shibuya`, which
+Emscripten, Sentry's Python libraries and Authlib use: it is the better
+theme for a product site, and its announcement bars, landing pages and
+`sphinx-design` components are what decides against it here, being
+surface these trees would carry and not use. That surface is what
+choosing `furo` gives up, so a tree that later wants a landing page
+changes theme rather than extending this one. `sphinx_rtd_theme` is
+where a Read the Docs project starts by default, which is a reason to
+find it in a tree and not a reason to keep it.
+
+Whether sphinx stays the generator is open and not decided here: a tree
+that left it would take its theme with it, so nothing above turns on the
+answer.
+
+**The build runs `-n` as well as `-W`.** `-W` turns a warning into an
+error and never sees a cross-reference that resolves to nothing: a
+renamed class in a `:class:` role, a parameter type no longer in the
+tree, a moved function is not a warning at all, so the build is green
+and the link goes nowhere. For documentation generated from the
+docstrings of a typed public API that is the documentation half of
+running mypy without `strict` — the tool is there, the flag that makes
+it strict is not, and the gap is invisible because the gate passes. `-n`
+is what makes an unresolved reference a warning for `-W` to refuse.
+
+**`sphinx.ext.intersphinx` comes first**, with a mapping for python and
+for whatever else the annotations reach. Without an inventory to resolve
+against, a name from outside the tree resolves to nothing and is
+reported as the tree's own broken link: sphinx's own domain answers for
+the builtins, so `int` and `bytes` are silent, but
+`collections.abc.Sequence`, `pathlib.Path` and `os.getcwd` each draw a
+`reference target not found` with nowhere to look. Turning `-n` on
+before the mapping exists therefore measures the standard library rather
+than the documentation, and fills `nitpick_ignore` with entries whose
+reason is that sphinx was not told where python's objects live.
+
+**`nitpick_ignore` holds only entries whose reason is written beside
+them**, an entry being a reference that genuinely cannot resolve rather
+than one nothing was pointed at. What `-n` costs is paid there and
+nowhere else: every entry is a reference the build stops checking, so a
+broad `nitpick_ignore_regex` buys a green build by giving up the check
+itself. That is the same trade section 5 makes over `ignore` and section
+8 over `exclude_also`, and it is why the first run of `-n` is triage
+rather than a pass.
 
 ## 3. `pyproject.toml` is the configuration
 
@@ -1652,6 +1824,108 @@ whose result is already known: it upgrades everything the resolver
 touches, runs the suite, the lint gate and the packaging checks, and
 commits nothing.
 
+**A sentinel's row arrives with the workflow.** `tests/grid_test.py`
+reads the calendar against the trees in both directions, so a row naming
+a workflow nothing in the organization schedules fails there exactly as
+a `cron:` no row names does. A sentinel adopted here therefore takes its
+row in the pull request that gives the first tree the workflow, and the
+subsection below is what says which tree that will be. The alternative
+is a row written the day the rule is, which reads as the calendar being
+a plan rather than a description; and that direction of the test is the
+only thing anywhere that catches a row for a workflow nobody wrote, so
+spending it on a rollout leaves it catching nothing.
+
+### Which trees owe which sentinel
+
+Section 14 leaves *which optional workflows exist* to each repository,
+and these are not left there: what a tree owes is decided once and
+ported, a repository deciding for itself whether its own parser is
+fuzzed being a repository deciding what the organization's exposure is.
+Each is keyed on a property of the tree, so the answer for a new
+repository is read off the tree rather than argued.
+
+- **`mutation` follows a suite over code the tree ships.** A coverage
+  floor at 100 says every line and branch ran and says nothing about
+  whether any assertion would have noticed the line being wrong — a
+  module imported and never asserted about reaches 100% of itself — so
+  the sentinel is worth most exactly where the floor is highest and
+  coverage has stopped saying anything new. Publishing is the wrong
+  property to key it on: `btclib-benchmarks` publishes nothing, holds a
+  suite and holds `fail_under = 100.0`, which is the tree where the
+  measurement has the most to say rather than the least. What owes it
+  nothing owes it for one reason rather than several: a mutant needs
+  code of the tree's own to change. `bbt` holds no suite at all, its material
+  being course notebooks and scripts, and gains the sentinel the day it
+  gains a suite over that material, which is btclib-org/.github#301's
+  question. `.github`'s suite is over the other repositories rather than
+  over anything this tree ships, so a mutant here would land in the
+  measuring instrument and the number would be the suite reporting on
+  itself.
+- **`scorecard` follows a repository that is public and is not a
+  fork.** Public is what the OpenSSF Scorecard reads at all, and
+  `ossf/scorecard-action`'s own README says running it on a fork is not
+  supported — so `gh api repos/<org>/<repo> --jq .fork` is the second
+  half of the question, and it answers `true` for `bbt`, which is
+  outside this rule for a reason of its own rather than the one that
+  keeps it out of `mutation` above. What the sentinel buys is an opinion
+  of the tree's supply-chain posture formed outside the organization:
+  this file is a standard the organization holds itself to and every
+  command in section 15 asks a question somebody here chose, where a
+  score computed by a third party is the one reading that can find what
+  nobody thought to ask for. **A check scoring below its maximum is an
+  issue against what it found**, never a sentence in section 14 saying
+  why this organization scores it that way — it aligns by adopting the
+  practice rather than by explaining the score, and a derogation would
+  make the outside opinion answerable to the thing it measures. What
+  that gives up is the case where a check is simply wrong about this
+  organization, which then costs an issue closed on the measurement
+  rather than a paragraph nobody revisits.
+
+    The badge and the published score want `publish_results: true`, and
+    the job wants `id-token: write` for the transparency-log entry,
+    `security-events: write` to file what it finds as code scanning
+    alerts, and `actions: read` with `contents: read` — the
+    elevation-per-job rule above, applied to a workflow that writes
+    nothing to the tree.
+
+    **Its triggers are the action's and not this section's**, which is
+    the one exception to *`workflow_dispatch` on everything* above: that
+    README names `push` and `schedule` on the default branch as
+    supported and calls `workflow_dispatch` experimental, so a tree
+    following this section there would be asking for a trigger its
+    action does not stand behind. The same README reads repository rules
+    with the workflow's own `GITHUB_TOKEN` and wants an administrative
+    one where a repository's protection is the classic kind instead;
+    every repository here carries a ruleset set *and* classic
+    protection, section 16's checklist asking for both, so which of the
+    two the score rests on is a question a port answers and this
+    sentence does not.
+- **`fuzz` follows a tree that parses whatever a stranger sends.** Not
+  merely input the tree does not produce: the property is that nobody
+  stands between the parser and an adversary who chooses the bytes.
+  `btclib` and `btclib-secp256k1` read transactions, scripts, PSBTs,
+  signatures and extended keys off the wire, and `btclib-node` speaks
+  the peer-to-peer protocol, where the sender is by definition a
+  stranger. `bitcoin-core-rpc` reads a Bitcoin Core instance its own
+  operator runs, so the party on the other side is chosen rather than
+  arbitrary and the property does not reach it; that is a weaker threat
+  model and it is the reason, not an omission. Section 7's convention tests and
+  the property tests beside them answer *does this hold over the domain
+  I described*; a fuzzer answers *what is in the domain I did not
+  describe* — a length prefix larger than the buffer, a truncated
+  multibyte sequence, a varint that overflows, a recursion depth that
+  exhausts the stack — so neither substitutes for the other and the
+  second is the one that finds the crash before somebody else does.
+  A crash the sentinel finds is an issue against the parser
+  and never a suppression, that being the whole of what it was run for.
+  What fills the workflow is the tree's — which entry points are targets
+  and which harness runs them, `atheris` under ClusterFuzzLite in
+  Actions or under OSS-Fuzz, and for `btclib-secp256k1` whether a target
+  is allowed to reach the vendored C library at all, which would be
+  fuzzing upstream's work rather than these bindings.
+  btclib-org/.github#342 is where that is decided; what is fixed here is
+  the name the calendar keys on and which trees owe one.
+
 ### The aggregate job, and the required check
 
 A workflow whose answer gates a pull request ends in a job that `needs`
@@ -1849,14 +2123,41 @@ answering to nothing.
 ### Review
 
 A pull request needs an approving review from somebody other than its
-author; GitHub refuses a self-approval, which is why the record of a
-review is a comment rather than a forge approval.
+author. GitHub refuses a self-approval, which is why an *author's* own
+verdict is a comment and can be nothing else.
 
-**What a landing reads is the ack of record**: a comment whose last line
+**What a landing reads is the ack of record**: a verdict whose last line
 is `ACK <sha>` or `CHANGES REQUESTED <sha>`, naming a sha because an ack
 belongs to a tree and not to a branch. A review that delivers no verdict
 is a reading and not an unfinished review; `REVIEWING.md` states that
 distinction, and why, for whoever reviews.
+
+**The ack of record is posted as a review and not as a comment** —
+`APPROVE` carrying the `ACK <sha>` body, `REQUEST_CHANGES` carrying the
+`CHANGES REQUESTED <sha>` one. The self-approval refusal above does not
+reach it, `claude-review.yml` not running as the author. A verdict
+posted as a comment leaves the forge holding no record of the review
+this file requires, and a rule stated here and visible in no artifact is
+a rule whose only witness is this file: an outside reader then reads
+this organization as merging unreviewed, correctly on the evidence
+available to them. The OpenSSF Scorecard's `Code-Review` check is that
+reader, crediting an approval on the forge or a merger different from
+the committer, and a comment is neither.
+
+**The alternative is a second human approving every pull request**, and
+what this gives up is that a model's judgement then sits where a branch
+rule reads. It is chosen because nothing lands while nobody is
+available, and because the model is the reviewer of record in substance
+already — which is what the paragraph below says. The alternative is
+written down rather than dropped, being what stops the next reader from
+undoing this.
+
+**It lands before the bypass goes.** btclib-org/.github#341 holds the
+removal of the ruleset's `bypass_actors`, after which an approving
+review is what unblocks a merge and a workflow that fails to post one
+stops every repository. The margin between the two is where that
+failure mode is found, a missing approval costing nothing while the
+bypass is still there.
 
 **The ack of record is `claude-review.yml`'s**, and an author's own is
 not one. A comment from the account that opened the pull request is a
@@ -1890,7 +2191,11 @@ It is deliberately **not a required check**, and its own header says it
 must not become one. Requiring it would make a review a gate to be
 satisfied rather than a reading to be answered, and would hand the merge
 button to whatever the workflow happened to say. What it is instead is
-the thing a human landing the pull request reads before pressing.
+the thing a human landing the pull request reads before pressing. That
+is a different mechanism from the review it posts: a required check is a
+context a branch rule names and nothing else can supply, where the
+approval a `pull_request` rule counts is satisfied by whoever reviews,
+so the workflow is one route to it rather than the only one.
 
 `REVIEWING.md` is the standard: a diff is acked when
 it leaves the tree better than it found it, a matter of taste is not a
@@ -2280,6 +2585,44 @@ corrected in none of the ones that shipped.
     need, the driver being the backend there; it is refused because it
     leaves even the first half silent, a `uv` pinned outside `requires`
     warning where the `pip` installer refuses.
+- **A release is checked against the last one for a break in the public
+  surface**, by `griffe check` in the release path, comparing the tag
+  being cut against the tag before it. Section 7's public-surface census
+  asserts that `__all__` is declared and that what it names exists,
+  which answers *is this module's surface stated* and never *did this
+  release take something the last one gave*; `RELEASE_NOTES.md` is where
+  a caller is told to act and is written by hand, so nothing in the tree
+  can tell that an entry is missing. `griffe check` walks the public API
+  of two git references and reports what broke, each finding named by
+  the kind of break it is — a public object removed, a parameter's
+  default or kind changed, a parameter added as required, a return or
+  attribute type no longer compatible, a public name now pointing at a
+  different kind of thing — and it exits non-zero having found any. It
+  loads each reference from a git worktree of its own rather than from
+  an installed distribution, so a pure-Python tree needs nothing built;
+  and it is the loader `mkdocstrings` reads a Python API with, which is
+  what makes it a maintained tool rather than a script somebody wrote
+  once — it is a dependency taken on for this and nothing else here, and
+  that is the cost. What it reports is either a
+  `RELEASE_NOTES.md` entry or a reason for not being one, written where
+  the release is being written.
+
+    **The release path and not the merge gate**, which is the choice
+    worth stating because the second is the one that reads as stricter.
+    A gate comparing the branch against the last release makes a
+    caller-visible break a decision taken in the pull request that makes
+    it, and before 1.0 a package breaks its surface deliberately: a gate
+    that reports every such break has nothing to say about which of them
+    are allowed, so every run ends in a human deciding — which is the
+    release path's answer arriving earlier and more often rather than a
+    stricter check. It becomes a gate the day btclib-org/btclib#651
+    settles a deprecation policy and not before, that policy being the
+    missing half — the question stops being *did the surface change* and
+    becomes *did it change without the release of warning the policy
+    owes*, which a command can answer on its own. So the release path's
+    invocation is written to take a second reference pair rather than to
+    be replaced by one.
+
 - **The smoke test runs again in the release job, without constraints**,
   after the upload rather than before: installing a dependency executes
   its code, and a compromised one must not reach a `dist/` still to be
@@ -2498,7 +2841,8 @@ accretion is exactly how a standard stops being one, and it is how the
 the first place.
 
 **Decided per repository**: `requires-python` and `.python-version`; the
-matrix breadth; which optional workflows exist; the ruff `ignore` list's
+matrix breadth; which optional workflows exist past those section 10
+keys on a property of the tree; the ruff `ignore` list's
 entries a tree declines on its own merits and its `per-file-ignores`; what
 a publishing repository checks about its package contents past section
 12's floor —
@@ -2761,6 +3105,49 @@ no further: a pattern taking any spelled-out address would report the
 one `btclib-secp256k1` gives for the C library it binds, which is
 upstream's and correctly there.
 
+Section 2's badge rule, whose subject is the head of a file no tree can
+read for another. The first loop is membership and order, one line per
+badge and none at all for a `README.md` that carries no badge:
+
+```shell
+for r in <every repository>; do
+  gh api "repos/<org>/$r/contents/README.md" \
+    -H 'Accept: application/vnd.github.raw' \
+    | sed -nE "s|^\[!\[[^]]*\]\(([^)]*)\).*|$r\t\1|p"
+done
+```
+
+The badge's **source** and not its alt text, which is prose its author
+chose: `bitcoin-core-rpc` writes `license: MIT` over
+`img.shields.io/badge/license-MIT-blue.svg`, which the rule refuses by
+name, and a loop reading the alt text reports a licence badge and stops.
+Read the sources against that rule's list, in the order they arrive: a
+badge the tree's properties do not ask for, one they ask for and the row
+does not carry, and a row out of order are each a finding, and no
+command tells them apart from each other.
+
+The second asks what each badge renders, which is what a reader of the
+rendered file sees and a reader of its source cannot:
+
+```shell
+R=<org>/<repo>
+gh api "repos/$R/contents/README.md" -H 'Accept: application/vnd.github.raw' \
+  | sed -nE 's|^\[!\[[^]]*\]\(([^)]*)\).*|\1|p' \
+  | while read -r src; do
+      body=$(curl -sL -w '\n%{http_code}' "$src")
+      says=$(printf '%s' "$body" | tr -d '\n' \
+        | grep -oE '<title>[^<]*</title>' | sed -E 's|</?title>||g')
+      printf '%s\t%s\t%s\n' "$(printf '%s' "$body" | tail -1)" \
+        "${says:-(no title)}" "$src"
+    done
+```
+
+One line per badge, and it prints rather than judging: anything but
+`200` is the finding a command can decide, and the message beside it is
+the reading the rule above asks for. Read the Docs and pepy carry no
+`<title>` and print `(no title)`, so those two are read from the
+rendered image or from the page they link to.
+
 Section 11's rule that `claude-review.yml` is in every repository, which
 no single tree can answer for the others and nothing in `tests/` asks:
 
@@ -2933,7 +3320,9 @@ independent and the checklist the same for each.
    selective-run coverage hook, the first convention tests, and the
    `tests/README.md` that declares which of section 7's bullets they are
    — with the test that asserts the declaration.
-1. `docs/source` and `.readthedocs.yaml`, built with `-W --keep-going`.
+1. `docs/source` and `.readthedocs.yaml`, built with `-W -n
+   --keep-going`, and `sphinx.ext.intersphinx` in `extensions` before
+   `-n` is turned on.
 1. Section 12's package-content floor: `[tool.check-wheel-contents]`
    naming the package where the wheel is one package tree, and the page,
    the script and the test where it is not; `check-sdist` wherever an
