@@ -2003,3 +2003,11 @@ audit has no revision to compare against.
   list's project-specific additions; it now names `ignore`'s own
   entries**, the shape a tree's own choice actually varies under
   `ALL`.
+
+### The uv-floor backlog row is gone, and issue #312 with it
+
+- **`tests/__init__.py`'s `BACKLOG` row for the uv-floor test is
+  deleted** — closing issue #312: every repository committing a
+  `uv.lock` names a floor at or below what `dependabot-core`'s bundled
+  uv reads, so `test_the_uv_floor_is_not_above_what_dependabot_bundles`
+  needs no strict xfail to excuse anyone.
