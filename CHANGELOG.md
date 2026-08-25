@@ -118,6 +118,24 @@ audit has no revision to compare against.
   #339 and #342): *which optional workflows exist* now reads past those
   section 10 keys on a property of the tree.
 
+### Section 10 says what the calendar's hour is chosen on
+
+- **The calendar gave a workflow an hour and never said on what.** The
+  hour is chosen against this organization's own load and not GitHub's:
+  what GitHub documents about the delay and the drop it puts at the
+  start of an hour, and the remedy it names is a minute, which the
+  repository already holds — so an hour picked to miss a published peak
+  is picked against nothing. What an hour decides is what the run
+  competes with here, a row starting its workflow in every tree that has
+  it and each matrix running whole, so the rows sit before the working
+  day, where the concurrency ceiling is not owed to a review.
+- **The hour is UTC and the band grows downward, so `03` is the next one
+  the grid takes**, and the sentinels this section names without a row
+  have an hour to arrive in. A `cron:` here names no `timezone:`, and a
+  fixed UTC hour falls later in the morning here for as long as the
+  clocks are forward, so the late end of the band is what reaches the
+  working day first. What that declines is `06`.
+
 ### Section 11 makes the ack of record a review
 
 - **The ack of record was posted as a comment, which the forge does not

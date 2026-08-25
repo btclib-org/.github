@@ -1805,13 +1805,32 @@ repository that asked for one, and a long enough queue drops a run
 outright; minute `:00` is in no row for the same reason, being the
 minute everybody else's cron picks.
 
+**The hour is chosen against this organization's own load, not
+GitHub's.** The queue the minute answers is the one GitHub documents,
+and GitHub documents it at the start of an hour: the remedy its note on
+`schedule` gives against the delay and the drop is a minute — "schedule
+your workflow to run at a different time of the hour" — and it names no
+hour of the day at all. An hour picked to miss a published peak is
+therefore picked against nothing. What an hour does decide is what the
+run competes with here: a row starts its workflow in every tree that has
+it, each running its matrix whole, so the rows sit in the hours before
+the working day, where the ceiling above is not being spent on a pull
+request somebody is waiting for and a failure is waiting to be read
+rather than arriving in the middle of one.
+
+**The hour is UTC, and the band grows downward: the next hour the grid
+takes is `03`.** A `cron:` here names no `timezone:`, which is what
+leaves it UTC, and a fixed UTC hour falls later in the morning here for
+as long as the clocks are forward. The band's late end is what reaches
+the working day first, so the grid takes the hour below `04` rather than
+the one above `05`.
+
 A day is a slot rather than a census: it says when that workflow runs
 where a repository has it, not that every repository does. Dependabot is
 in neither table and runs Thursday, that being the day `deps-latest`
-reports
-on the upgrade before the pull request arrives — it states its own
-schedule in `dependabot.yml`, in a different shape, and picks its own
-minute.
+reports on the upgrade before the pull request arrives — it states its
+own schedule in `dependabot.yml`, in a different shape, and picks its
+own minute.
 
 `tests/grid_test.py` of this repository reads both tables and every
 `cron:` of every repository, in both directions: a schedule no row names
