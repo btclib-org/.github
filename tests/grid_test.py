@@ -85,16 +85,24 @@ def schedules(root: Path) -> dict[str, list[str]]:
     Both suffixes are read because GitHub runs both, and the stem is what
     the calendar names either way: a `links.yml` and a `links.yaml` in one
     tree are two runs of one row, so their crons are answered for
-    together.
+    together. A `timezone:` beside a `cron:` is refused rather than read:
+    section 10's calendar means UTC and states no exception, so a
+    schedule entry naming a zone is not an instant the calendar can
+    compare against.
 
     :param root: the root of the checkout.
     :returns: each workflow's file stem against the crons it declares.
+    :raises AssertionError: where a schedule entry carries a `timezone:`.
     """
     here = root / ".github" / "workflows"
     files = sorted(path for suffix in ("*.yml", "*.yaml") for path in here.glob(suffix))
     out: dict[str, list[str]] = {}
     for workflow in files:
         entries = triggers(workflow).get("schedule") or []
+        for entry in entries:
+            assert "timezone" not in entry, (
+                f"{workflow}: a timezone beside a cron is off section 10's calendar"
+            )
         crons = [entry["cron"] for entry in entries]
         if crons:
             out.setdefault(workflow.stem, []).extend(crons)
@@ -159,9 +167,10 @@ def test_every_row_of_the_calendar_names_something_that_exists(
     The other tests read the trees and ask the calendar; this reads the
     calendar and asks the trees, which is the direction that catches a
     row for a workflow nobody wrote and a minute for a repository nobody
-    has. Both are reported rather than raised: a row added ahead of the
-    workflow it schedules is a backlog entry until the rollout reaches
-    the last tree, and this suite gates nothing.
+    has. Both are reported rather than raised: a row takes its place in
+    the pull request that gives the first tree the workflow, so nothing
+    excuses one added ahead of that landing -- it fails here until the
+    tree it names exists, and this suite gates nothing.
 
     :param trees: the checkouts.
     """
