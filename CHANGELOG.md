@@ -2011,3 +2011,21 @@ audit has no revision to compare against.
   `uv.lock` names a floor at or below what `dependabot-core`'s bundled
   uv reads, so `test_the_uv_floor_is_not_above_what_dependabot_bundles`
   needs no strict xfail to excuse anyone.
+
+### Section 14 states the default, and section 9 the CHANGELOG citation
+
+- **Section 14 named what a repository copies verbatim and what it
+  decides for itself, and said nothing about a convention that fits
+  neither list.** It now states the default: one answer for every tree,
+  with a differing convention filed here as a defect rather than kept as
+  a choice; and what earns a place on the per-repository list is a
+  reason true of that repository, not that the trees already differ.
+- **`CHANGELOG.md` entries answering an issue have spelled the relation
+  between the entry and the issue several different ways across the
+  repositories, and section 9 named none of them** (closes #331): it now
+  states the citation as `(closes #N)` where the change closes the
+  issue, `(issue #N)` where it does not, qualified `owner/repo#N` across
+  repositories — checkable against the landing commit's own subject,
+  which the bare `(#N)` form some repositories use is not, GitHub
+  numbering issues and pull requests in one sequence. The entries
+  already landed keep whichever form they used.
