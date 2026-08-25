@@ -177,8 +177,18 @@ the merge button asks:
 
 ```shell
 gh api -X PUT repos/{owner}/{repo}/pulls/<n>/merge \
-  -f merge_method=squash
+  -f merge_method=squash -f sha=<the head the checks ran on>
 ```
+
+**The `sha` is not optional.** Reading the ack and merging are two
+calls, and the head is free to move between them — the push that would
+move it comes out of the same round the verdict does. Unpinned, the
+command takes whatever sits at the head when it runs; pinned, [the
+endpoint answers `409` where the head has moved][gh-merge], and a round
+lost that way is cheaper than a tree nobody has read reaching `main`.
+*The review* above anchors the exchange to a sha and [section 11][s11]
+has an ack name one: the pin is that rule reaching the call that
+performs the landing.
 
 **Verify what landed rather than trusting the answer**, the signature
 [the standard asks for][s-sigs] being a valid one rather than a
@@ -202,6 +212,7 @@ settings and why they are what they are.
 [s-title]: https://github.com/btclib-org/.github#what-a-pull-request-says-it-is
 [s-rev]: https://github.com/btclib-org/.github#review
 [s-sigs]: https://github.com/btclib-org/.github#signatures
+[gh-merge]: https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request
 
 ## This repository in particular
 
