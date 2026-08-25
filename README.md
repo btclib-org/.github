@@ -661,9 +661,12 @@ rather than a pass.
 ## 3. `pyproject.toml` is the configuration
 
 One file holds the project metadata and every tool that can be
-configured in it. Two tools have files of their own — yamllint and
-taplo — because they are found by name from the working directory and
-their reasoning needs more room than a hook argument has.
+configured in it. Where a tool the lint gate runs looks for its
+configuration by name from the working directory and `pyproject.toml` is
+not among the names, it keeps a file of its own: the tool finds that
+file, so the hook passes no path, and a file has the room for reasoning
+that a hook argument has not. Section 14 names each of those files and
+what it holds.
 
 - **The build backend is `uv_build` where the project is pure Python.**
   What the choice buys is where the sdist's inclusion is then declared:
