@@ -15,8 +15,8 @@ name: claude-review
 # review of type COMMENT, an opinion for the author to weigh; a review
 # that gated a merge would make a model's judgement a branch rule.
 #
-# It is the only job in this repository, which is what makes it cheap: it
-# reads a diff of prose, it builds nothing, and it skips a draft.
+# It is cheap: it reads a diff of prose, it builds nothing, and it skips
+# a draft.
 
 on:
   pull_request:
