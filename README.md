@@ -923,6 +923,32 @@ pre-commit.ci does not have — the lint workflow covers it. No
 - **spelling** — `codespell` and `typos`, both configured in
   `pyproject.toml`, both skipping vendored vectors: a typo inside an
   upstream vector is part of the vector.
+
+    **`codespell --version` answers `0.1.dev1+g<sha>` and not the
+    release its `rev:` names.** pre-commit fetches the pinned ref by
+    name, shallowly, and checks out `FETCH_HEAD`; the other strategy in
+    `pre_commit/store.py` fetches `--tags` and is reached only where
+    that one raises. Each half of that fetch sets a field of the string
+    `setuptools_scm` computes at install time. The clone holds no tag to
+    describe, so `0.1.dev` stands where the release number would be; the
+    number after `dev` is the clone's own commit count, which the depth
+    holds at one — a full-history fetch of the same ref is equally
+    tagless and puts the whole history's count there instead. What
+    follows the `g` is the commit the `rev:` resolved to, abbreviated,
+    and this names it in full:
+
+    ```shell
+    gh api repos/codespell-project/codespell/commits/<rev> --jq .sha
+    ```
+
+    The commits endpoint and not `git/ref/tags`, so that the command
+    holds whichever way the pinned repository tags: an annotated tag
+    resolves to the tag object there and to the commit here.
+
+    `typos --version` answers its release, and the difference is the
+    install and not the fetch: its clone carries no tag either, and the
+    `setup.py` in it declares the released wheel as a dependency, so
+    what the hook runs comes from the index.
 - **prose and markup** — `markdownlint-cli2`, `prettier` (yaml and
   jsonc), `taplo-format`, `yamllint`.
 - **schemas** — `check-dependabot` and `check-readthedocs`, because a

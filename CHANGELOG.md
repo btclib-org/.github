@@ -28,6 +28,19 @@ audit has no revision to compare against.
   outcome the paragraph is about. What is measured is the ruleset's own
   shape, read back from the endpoint `REPOSITORY.md` records.
 
+### Section 4 says what `codespell --version` reports
+
+- **The spelling bullet says why that string names no release, and what
+  recovers the release from it** (closes #346). The version is
+  `setuptools_scm`'s reading of the clone pre-commit builds the hook
+  from, which carries no tag to describe, and the string's last field is
+  the commit the `rev:` resolved to.
+- **Section 15 was the alternative** (closes #346), that being where a
+  claim about the repositories sits beside the command re-deriving it.
+  What a command there prints is a finding a repository can answer for,
+  and no repository can deviate here: the string is decided by how
+  pre-commit installs the hook, which is the spelling bullet's subject.
+
 ### Section 12's worked answer names no package path
 
 - **`bitcoin-core-rpc`'s worked answer quoted the value of `package`**
