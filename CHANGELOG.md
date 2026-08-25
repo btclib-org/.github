@@ -7,6 +7,15 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### `tests/__init__.py`'s `BACKLOG` row for issue #313 is gone
+
+- **The row excusing `test_the_package_directory_sits_under_src` for
+  `btclib` and `bitcoin-core-rpc` outlived both trees' moves** (closes
+  #313): `bitcoin-core-rpc` moved its package under `src/`, the last
+  tree in the organization that had not, so every cell the row named
+  now passes without the strict xfail, and the row is deleted rather
+  than narrowed.
+
 ### Section 2 states where the package directory sits
 
 - **The package directory sat at the repository root, and no file in
