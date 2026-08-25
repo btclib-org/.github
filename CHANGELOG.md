@@ -17,18 +17,27 @@ audit has no revision to compare against.
   pre-commit.ci where it is on it; and a badge for each sentinel it
   runs. A curated list has no answer to whether a given tree should
   carry a given badge, which is what let one file open a different way
-  in each tree.
+  in each tree. What it gives up is the head as a summary: a badge per
+  sentinel means the row grows with section 10's calendar, and this
+  repository, which opens with none, acquires one.
 - **The order is fixed, and the sentinels take section 10's calendar
   order** (issue #338): one order to maintain rather than two, at the
   price of a workflow moved to another day moving its badge in every
   `README.md` that carries it.
-- **A badge rendering `no status`, `invalid` or `unknown` is a question
-  with two answers** (issue #338): a workflow that has not reached its
-  first scheduled run, which is datable and not a defect, or one that
-  should have run and did not. Section 15 carries the commands — one
-  reading each `README.md`'s row and its order, one fetching every
-  badge, where the status code catches a badge pointing at a workflow
-  the tree no longer has and the pattern catches one served and empty.
+- **A badge answering with anything but a measurement is a question
+  with two answers** (issue #338): the thing it reads has not happened
+  yet, which is datable and not a defect, or it should have and did not.
+  Which of the two is a reading and not a pattern — each service says so
+  in its own words, a workflow badge `no status`, pre-commit.ci and Read
+  the Docs `unknown`, the Scorecard `invalid repo path`, shields a
+  phrase per family — so section 15's loop prints the status code and
+  the message rather than judging, and only a badge not served at all is
+  decided by the command.
+- **Section 15's first badge loop reads the source and not the alt text**
+  (issue #338), the alt text being prose its author chose:
+  `bitcoin-core-rpc` writes `license: MIT` over the hand-written badge
+  the rule refuses by name, so a loop reading alt text reports a licence
+  badge and stops.
 - **What is refused, each with its reason** (issue #338): a badge
   asserting a tool rather than measuring one, which renders the same the
   day the tool is removed; the hand-written licence badge, which renders
@@ -37,7 +46,15 @@ audit has no revision to compare against.
   `contributors`, which measure activity rather than the tree; a
   coverage badge, which restates what section 8's floor enforces in
   exchange for an upload to a third party; and REUSE compliance, which
-  renders `unregistered`.
+  renders `unregistered`; and `img.shields.io/pypi/types`, which reads
+  the `Typing :: Typed` classifier rather than the wheel — `urllib3`
+  ships `urllib3/py.typed`, declares no such classifier and renders
+  `untyped` — so it restates a classifier section 3 already pairs with
+  the marker by rule. `wheel` and `implementation` stay: `iniconfig`
+  names no `Implementation` classifier and the badge renders `cpython`
+  for it, so those two are read off the files a release uploaded.
+- **Read the Docs is `app.readthedocs.org`** (issue #338), the other
+  spelling answering `307` and redirecting to it.
 - **The downloads badge is pepy's** (issue #338), and the reason is not
   that `img.shields.io/pypi/dm` fails to render, since it does: what it
   renders is a month, which falls without anything having happened to
@@ -79,19 +96,19 @@ audit has no revision to compare against.
   code of the tree's own to change, which `bbt` has no suite over and
   `.github` has none of, its suite being over the other repositories.
 - **Nothing gave an outside opinion of supply-chain posture** (issue
-  #339). `scorecard` is a sentinel every repository owes, each being
-  public, and a check scoring below its maximum is an issue against what
+  #339). `scorecard` is a sentinel a public repository that is not a
+  fork owes — `ossf/scorecard-action` does not support a fork, and
+  `bbt` is one — and a check scoring below its maximum is an issue against what
   it found rather than a section 14 derogation: this organization aligns
   by adopting the practice, and a derogation would make the outside
   opinion answerable to the thing it measures. What that gives up is the
   case where the check is wrong about this organization, which then
   costs an issue closed on the measurement.
 - **Nothing fuzzes a parser of untrusted serialized data** (issue #342).
-  `fuzz` follows a tree that parses data arriving from a party it does
-  not control, which reaches `btclib`, `btclib-secp256k1` and
-  `btclib-node`; whether it reaches `bitcoin-core-rpc` is left open,
-  that tree's input arriving from an instance its operator runs. A crash
-  it finds is an issue against the parser and never a suppression.
+  `fuzz` follows a tree that parses whatever a stranger sends, which
+  reaches `btclib`, `btclib-secp256k1` and `btclib-node` and not
+  `bitcoin-core-rpc`, whose peer is an instance its own operator runs. A
+  crash it finds is an issue against the parser and never a suppression.
 - **A sentinel's calendar row arrives with the workflow** (issues #339
   and #342): `tests/grid_test.py` fails a row nothing in the
   organization schedules, and that direction of the test is the only
@@ -117,6 +134,12 @@ audit has no revision to compare against.
 - **It lands before the ruleset bypass goes** (issue #340), that being
   where the failure mode is found while a missing approval still costs
   nothing.
+- **`REVIEWING.md` said a forge approval is not an ack** (issue #340,
+  and btclib-org/.github#353 for the copies), giving as the reason a
+  refusal that reaches only the author's own. Its shared half now says
+  the ack of record is an approving review and points at section 11 for
+  whose; `tests/verbatim_test.py`'s `EXPECTED_DRIFT` carries the path
+  and the issue until the seven other trees take it.
 
 ### Section 12 states the public-surface check
 

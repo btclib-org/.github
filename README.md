@@ -386,24 +386,35 @@ without the policy changing.
 is**, decided by a property of the repository and never curated. A
 curated list has no answer to *should this tree carry that badge*, so
 two trees curate differently and neither of them is wrong, which is how
-one file comes to open a different way in each tree. Which property
-decides which badge:
+one file comes to open a different way in each tree.
+
+What that gives up is the head as a summary. A badge per sentinel means
+the row grows with section 10's calendar rather than staying the handful
+a reader takes in at once, so the tree running the most sentinels
+carries the longest row and this repository, which today opens with no
+badge at all, acquires one. That is the trade and it is deliberate: a
+row long enough to be an audit is worth more here than a row short
+enough to be decoration, because the rule below is what makes it an
+audit. A tree that wants the shorter row drops a sentinel, not its
+badge.
+
+Which property decides which badge:
 
 - **every repository** — the licence, derived from the repository's own
   `LICENSE` by `img.shields.io/github/license/<org>/<repo>`; the `lint`
   workflow; and a link to the repository on GitHub;
 - **publishes** — from the index, the version, the downloads, the
-  development status, the supported Python versions, `wheel`, `types`
-  and `implementation`; and from the forge, `github/v/release`;
+  development status, the supported Python versions, `wheel` and
+  `implementation`; and from the forge, `github/v/release`;
 - **holds a suite** — the `test` workflow;
 - **on pre-commit.ci** — its badge;
-- **builds documentation** — the `docs` workflow, and Read the Docs in
-  one spelling of its host;
+- **builds documentation** — the `docs` workflow, and Read the Docs at
+  `app.readthedocs.org`;
 - **runs a sentinel** — that sentinel's badge.
 
 **The order is fixed**, and it is: the version, the downloads, the
 development status, the licence, the supported Python versions, `wheel`,
-`types`, `implementation`, `github/v/release`, `test`, `lint`, `docs`,
+`implementation`, `github/v/release`, `test`, `lint`, `docs`,
 pre-commit.ci, then the sentinels in the order section 10's calendar
 gives them, then Read the Docs, and last the link to the repository. A
 tree skips what it does not own and keeps the rest in that order, so a
@@ -412,13 +423,12 @@ of hunting. Taking the sentinels' order from the calendar is one order
 to maintain rather than two, and what it costs is that a workflow moved
 to another day moves its badge in every `README.md` that carries it.
 
-`img.shields.io/pypi/types` is what asserts the **shipped artifact**
-carries `py.typed`, where section 6's rule and section 3's classifier
-each claim it of the tree instead; it is derived from the uploaded
-wheel, so it cannot disagree with what was published.
-`github/v/release` is read in a **pair** with the PyPI version badge
-beside it: where the two disagree, a release reached the forge and not
-the index.
+`img.shields.io/pypi/wheel` and `img.shields.io/pypi/implementation`
+are read off the files a release uploaded rather than off anything the
+project declares: `iniconfig` names no `Implementation` classifier and
+the second renders `cpython` for it anyway. `github/v/release` is read
+in a **pair** with the PyPI version badge beside it: where the two
+disagree, a release reached the forge and not the index.
 
 The link to the repository is the one item above that measures nothing,
 and it is a link rather than a claim: the README is the long description
@@ -427,12 +437,24 @@ where the repository is not one click away. It says the repository's
 name and nothing else, which is a claim a reader settles by following
 it.
 
-**A badge rendering `no status`, `invalid` or `unknown` is a question
-with two answers**, and which one is the point: either the workflow has
-not reached its first scheduled run, which is datable and not a defect,
-or it should have run and did not, which is. That is what keeps the row
+**A badge that answers with anything but a measurement is a question
+with two answers**, and which one is the point: either the thing it
+reads has not happened yet — a workflow short of its first scheduled
+run, a project not yet built — which is datable and not a defect, or it
+should have happened and did not, which is. That is what keeps the row
 an audit rather than decoration, and it is what catches a workflow
 renamed out from under a badge still pointing at the old file.
+
+Reading it is a reading and not a pattern, because each service says so
+in its own words and changes them without telling anybody: a GitHub
+workflow badge answers `no status`, pre-commit.ci and Read the Docs
+`unknown`, the Scorecard `invalid repo path`, and shields a phrase per
+family — `repo not found`, `package or version not found`, `no releases
+or repo not found`. A pattern written from that list passes the day a
+service rewords its own failure, and passes silently, which is the one
+way this rule can fail without anybody noticing. What a command settles
+is the narrower half: a badge not served at all, which is what a renamed
+workflow and a deleted project both answer with. Section 15 has both.
 
 What is refused, and the reason is nearly the same one each time:
 
@@ -452,7 +474,22 @@ What is refused, and the reason is nearly the same one each time:
   the badge would restate what a gate enforces in exchange for an upload
   to a third party;
 - **REUSE compliance** — it renders `reuse unregistered`, which is a
-  registration with that service and not a property of the tree.
+  registration with that service and not a property of the tree;
+- **`img.shields.io/pypi/types`**, which looks like the one badge
+  reading the **shipped artifact** and is not: it reads the
+  `Typing :: Typed` classifier. `urllib3` ships `urllib3/py.typed` in
+  its wheel, declares no such classifier, and the badge renders
+  `untyped`. So it restates section 3's classifier, which section 3
+  already pairs with `py.typed` by rule, and a badge restating a rule
+  the tree gates is the objection made of a coverage badge two entries
+  up. What that gives up is a reader of the index page seeing the
+  typing promise at a glance, which the classifier list on that same
+  page carries anyway.
+
+The Read the Docs host is `app.readthedocs.org` and not `readthedocs.org`
+because the second answers `307` and redirects to the first: one spelling
+because two are two things to keep true, and that one because it is where
+the other lands, a redirect being something its owner can retire.
 
 The downloads badge is pepy's rather than `img.shields.io/pypi/dm`, and
 both of them render: the first answers with the project's whole life and
@@ -1824,42 +1861,62 @@ repository is read off the tree rather than argued.
   over anything this tree ships, so a mutant here would land in the
   measuring instrument and the number would be the suite reporting on
   itself.
-- **`scorecard` follows every repository**, that being the whole of what
-  the OpenSSF Scorecard needs — a public repository, which each of these
-  is — and what it buys is an opinion of the tree's supply-chain posture
-  formed outside the organization, against checks nothing here wrote.
-  This file is a standard the organization holds itself to and every
-  command in section 15 asks a question somebody here chose; a score
-  computed by a third party is the one reading that can find what nobody
-  thought to ask for. Its badge and its published score want
-  `publish_results: true`, and the job wants `id-token: write` for the
-  transparency-log entry, `security-events: write` to file what it finds
-  as code scanning alerts, and `actions: read` with `contents: read` —
-  the one elevation-per-job rule above, applied to a workflow that
-  writes nothing to the tree. **A check scoring below its maximum is an
+- **`scorecard` follows a repository that is public and is not a
+  fork.** Public is what the OpenSSF Scorecard reads at all, and
+  `ossf/scorecard-action`'s own README says running it on a fork is not
+  supported — so `gh api repos/<org>/<repo> --jq .fork` is the second
+  half of the question, and it answers `true` for `bbt`, which is
+  outside this rule for a reason of its own rather than the one that
+  keeps it out of `mutation` above. What the sentinel buys is an opinion
+  of the tree's supply-chain posture formed outside the organization:
+  this file is a standard the organization holds itself to and every
+  command in section 15 asks a question somebody here chose, where a
+  score computed by a third party is the one reading that can find what
+  nobody thought to ask for. **A check scoring below its maximum is an
   issue against what it found**, never a sentence in section 14 saying
-  why this organization scores it that way: this organization aligns by
-  adopting the practice rather than by explaining the score, and a
-  derogation here would make the outside opinion answerable to the thing
-  it is measuring. What that gives up is the case where the check is
-  simply wrong about this organization, which then costs an issue that
-  is closed on the measurement rather than a paragraph nobody revisits.
-- **`fuzz` follows a tree that parses serialized data arriving from a
-  party it does not control.** `btclib` and `btclib-secp256k1` read
-  transactions, scripts, PSBTs, signatures and extended keys, and
-  `btclib-node` speaks the peer-to-peer protocol, where the input is by
-  definition whatever a stranger sends. Section 7's convention tests and
+  why this organization scores it that way — it aligns by adopting the
+  practice rather than by explaining the score, and a derogation would
+  make the outside opinion answerable to the thing it measures. What
+  that gives up is the case where a check is simply wrong about this
+  organization, which then costs an issue closed on the measurement
+  rather than a paragraph nobody revisits.
+
+    The badge and the published score want `publish_results: true`, and
+    the job wants `id-token: write` for the transparency-log entry,
+    `security-events: write` to file what it finds as code scanning
+    alerts, and `actions: read` with `contents: read` — the
+    elevation-per-job rule above, applied to a workflow that writes
+    nothing to the tree.
+
+    **Its triggers are the action's and not this section's**, which is
+    the one exception to *`workflow_dispatch` on everything* above: that
+    README names `push` and `schedule` on the default branch as
+    supported and calls `workflow_dispatch` experimental, so a tree
+    following this section there would be asking for a trigger its
+    action does not stand behind. The same README reads repository rules
+    with the workflow's own `GITHUB_TOKEN` and wants an administrative
+    one where a repository's protection is the classic kind instead;
+    every repository here carries a ruleset set *and* classic
+    protection, section 16's checklist asking for both, so which of the
+    two the score rests on is a question a port answers and this
+    sentence does not.
+- **`fuzz` follows a tree that parses whatever a stranger sends.** Not
+  merely input the tree does not produce: the property is that nobody
+  stands between the parser and an adversary who chooses the bytes.
+  `btclib` and `btclib-secp256k1` read transactions, scripts, PSBTs,
+  signatures and extended keys off the wire, and `btclib-node` speaks
+  the peer-to-peer protocol, where the sender is by definition a
+  stranger. `bitcoin-core-rpc` reads a Bitcoin Core instance its own
+  operator runs, so the party on the other side is chosen rather than
+  arbitrary and the property does not reach it; that is a weaker threat
+  model and it is the reason, not an omission. Section 7's convention tests and
   the property tests beside them answer *does this hold over the domain
   I described*; a fuzzer answers *what is in the domain I did not
   describe* — a length prefix larger than the buffer, a truncated
   multibyte sequence, a varint that overflows, a recursion depth that
   exhausts the stack — so neither substitutes for the other and the
   second is the one that finds the crash before somebody else does.
-  Whether the property reaches `bitcoin-core-rpc` is open and not
-  decided here: its input arrives from a Bitcoin Core instance the
-  operator runs, which is a weaker threat model than a peer's, and the
-  difference is worth measuring rather than assuming in either
-  direction. A crash the sentinel finds is an issue against the parser
+  A crash the sentinel finds is an issue against the parser
   and never a suppression, that being the whole of what it was run for.
   What fills the workflow is the tree's — which entry points are targets
   and which harness runs them, `atheris` under ClusterFuzzLite in
@@ -2543,8 +2600,10 @@ corrected in none of the ones that shipped.
   different kind of thing — and it exits non-zero having found any. It
   loads each reference from a git worktree of its own rather than from
   an installed distribution, so a pure-Python tree needs nothing built;
-  and it is the loader `mkdocstrings` reads a Python API with, so it is
-  not a dependency taken on for this alone. What it reports is either a
+  and it is the loader `mkdocstrings` reads a Python API with, which is
+  what makes it a maintained tool rather than a script somebody wrote
+  once — it is a dependency taken on for this and nothing else here, and
+  that is the cost. What it reports is either a
   `RELEASE_NOTES.md` entry or a reason for not being one, written where
   the release is being written.
 
@@ -3047,46 +3106,47 @@ one `btclib-secp256k1` gives for the C library it binds, which is
 upstream's and correctly there.
 
 Section 2's badge rule, whose subject is the head of a file no tree can
-read for another. The first loop is the row and its order, one line per
-repository and a blank one where a `README.md` carries none:
+read for another. The first loop is membership and order, one line per
+badge and none at all for a `README.md` that carries no badge:
 
 ```shell
 for r in <every repository>; do
-  row=$(gh api "repos/<org>/$r/contents/README.md" \
+  gh api "repos/<org>/$r/contents/README.md" \
     -H 'Accept: application/vnd.github.raw' \
-    | sed -nE 's/^\[!\[([^]]*)\]\(([^)]*)\).*/\1\t\2/p')
-  printf '%s\t%s\n' "$r" "$(printf '%s' "$row" | cut -f1 | paste -sd, -)"
+    | sed -nE "s|^\[!\[[^]]*\]\(([^)]*)\).*|$r\t\1|p"
 done
 ```
 
-Read against that rule's own list: a badge the tree's properties do not
-ask for, one they ask for and the row does not carry, and a row in
-another order are each a finding, and no command tells them apart from
-each other. The second asks what each badge renders, which is the
-half a reader of the `README.md` sees and a reader of its source does
-not:
+The badge's **source** and not its alt text, which is prose its author
+chose: `bitcoin-core-rpc` writes `license: MIT` over
+`img.shields.io/badge/license-MIT-blue.svg`, which the rule refuses by
+name, and a loop reading the alt text reports a licence badge and stops.
+Read the sources against that rule's list, in the order they arrive: a
+badge the tree's properties do not ask for, one they ask for and the row
+does not carry, and a row out of order are each a finding, and no
+command tells them apart from each other.
+
+The second asks what each badge renders, which is what a reader of the
+rendered file sees and a reader of its source cannot:
 
 ```shell
 R=<org>/<repo>
 gh api "repos/$R/contents/README.md" -H 'Accept: application/vnd.github.raw' \
-  | sed -nE 's/^\[!\[[^]]*\]\(([^)]*)\).*/\1/p' \
+  | sed -nE 's|^\[!\[[^]]*\]\(([^)]*)\).*|\1|p' \
   | while read -r src; do
-      body=$(curl -sL -w '\n%{http_code}' "$src" | tr -d '\n')
-      case "$body" in
-        *200) ;;
-        *) echo "$src is not served"; continue;;
-      esac
-      printf '%s' "$body" | grep -qE 'no status|invalid|unknown' \
-        && echo "$src renders nothing measured"
+      body=$(curl -sL -w '\n%{http_code}' "$src")
+      says=$(printf '%s' "$body" | tr -d '\n' \
+        | grep -oE '<title>[^<]*</title>' | sed -E 's|</?title>||g')
+      printf '%s\t%s\t%s\n' "$(printf '%s' "$body" | tail -1)" \
+        "${says:-(no title)}" "$src"
     done
 ```
 
-Silent where every badge answers with a measurement. The status code is
-the half that catches a badge pointing at a workflow the tree no longer
-has — the forge answers `404` there rather than rendering a word — and
-the pattern is the half that catches one served and empty, a workflow
-that has not reached its first run and one that should have run and did
-not being the two readings the rule tells apart.
+One line per badge, and it prints rather than judging: anything but
+`200` is the finding a command can decide, and the message beside it is
+the reading the rule above asks for. Read the Docs and pepy carry no
+`<title>` and print `(no title)`, so those two are read from the
+rendered image or from the page they link to.
 
 Section 11's rule that `claude-review.yml` is in every repository, which
 no single tree can answer for the others and nothing in `tests/` asks:
