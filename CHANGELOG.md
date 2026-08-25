@@ -20,6 +20,27 @@ audit has no revision to compare against.
   commands rather than taken on trust, so the value has a place that
   reads it and a copy here is the second statement of one fact.
 
+### The `BACKLOG` row for `btclib-node`'s test-file naming cites an open issue
+
+- **The row excusing
+  `test_every_test_file_is_named_so_pytest_collects_it` for
+  `btclib-node` cites #371** (closes #367). `conftest.py`'s `cited()`
+  writes a row's number into the strict expected failure's reason, so
+  that number is where a red cell sends a reader, and a closed issue
+  sends them to a record that holds nothing. What the row excuses is
+  `btclib-node` keeping its shared test code in `tests/helpers.py` and
+  excluding that path from `name-tests-test`, which is what #371
+  records.
+- **The gap is filed in this tracker rather than in `btclib-node`'s**
+  (closes #367). *What this repository is* files an alignment finding
+  here, and a row names a tuple of repositories, so an issue belonging
+  to one tree could not be cited for a second tree's cell in the same
+  row.
+- **`BACKLOG`'s docstring names the tracker a row's number is from.**
+  What spells a row's number is `conftest.py`'s `cited()`, a file away
+  from where a row is written, and the trees this suite measures number
+  their own issues in the same range as this one.
+
 ### `CONTRIBUTING.md`'s merge command pins the head that lands
 
 - **The command merged whatever sat at the head when it ran**
