@@ -7,6 +7,133 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 2 states the badges at a `README.md` head
+
+- **Nothing said which badges a `README.md` carries** (issue #338).
+  Membership is now a property of the repository: the licence in its
+  derived form, the `lint` workflow and a link to the repository in
+  every tree; the index badges where the tree publishes; `test` where it
+  holds a suite; `docs` and Read the Docs where it builds documentation;
+  pre-commit.ci where it is on it; and a badge for each sentinel it
+  runs. A curated list has no answer to whether a given tree should
+  carry a given badge, which is what let one file open a different way
+  in each tree.
+- **The order is fixed, and the sentinels take section 10's calendar
+  order** (issue #338): one order to maintain rather than two, at the
+  price of a workflow moved to another day moving its badge in every
+  `README.md` that carries it.
+- **A badge rendering `no status`, `invalid` or `unknown` is a question
+  with two answers** (issue #338): a workflow that has not reached its
+  first scheduled run, which is datable and not a defect, or one that
+  should have run and did not. Section 15 carries the commands — one
+  reading each `README.md`'s row and its order, one fetching every
+  badge, where the status code catches a badge pointing at a workflow
+  the tree no longer has and the pattern catches one served and empty.
+- **What is refused, each with its reason** (issue #338): a badge
+  asserting a tool rather than measuring one, which renders the same the
+  day the tool is removed; the hand-written licence badge, which renders
+  `MIT` because its URL says so where the derived form renders it
+  because `LICENSE` does; `last-commit`, `commit-activity` and
+  `contributors`, which measure activity rather than the tree; a
+  coverage badge, which restates what section 8's floor enforces in
+  exchange for an upload to a third party; and REUSE compliance, which
+  renders `unregistered`.
+- **The downloads badge is pepy's** (issue #338), and the reason is not
+  that `img.shields.io/pypi/dm` fails to render, since it does: what it
+  renders is a month, which falls without anything having happened to
+  the tree, where pepy answers with the project's whole life. What that
+  gives up is the reading `pypi/dm` is better at.
+
+### Section 2 states what the documentation is built with
+
+- **The `docs` group named "the theme" and never which one** (issue
+  #329). It names `furo`, which is built for a reference generated from
+  the docstrings of a typed public API with a few pages of prose around
+  it. The alternative weighed was `shibuya`, whose announcement bars,
+  landing pages and `sphinx-design` components are the reason against
+  it here: they are surface these trees would carry and not use, and
+  that surface is what choosing `furo` gives up.
+- **`sphinx-build -W` does not see a cross-reference that resolves to
+  nothing** (issue #324), so a renamed class in a `:class:` role leaves
+  the build green and the link dead. Section 2 states `-n` alongside
+  `-W`, and section 16's checklist with it.
+- **`sphinx.ext.intersphinx` comes before `-n`** (issue #324): sphinx's
+  own domain answers for the builtins, so `int` and `bytes` are silent
+  without a mapping, but `collections.abc.Sequence`, `pathlib.Path` and
+  `os.getcwd` each draw a `reference target not found` with nowhere to
+  look — measured on the sphinx the trees pin. Turning `-n` on first
+  therefore measures the standard library.
+- **`nitpick_ignore` holds only entries whose reason is written beside
+  them** (issue #324). Every entry is a reference the build stops
+  checking, so a broad `nitpick_ignore_regex` buys a green build by
+  giving up the check itself.
+
+### Section 10 says which trees owe which sentinel
+
+- **Mutation testing followed publishing, and the property is holding a
+  suite over code the tree ships** (issue #327). A floor at 100 says
+  every line ran and nothing about whether an assertion would have
+  noticed the line being wrong, so the sentinel is worth most where the
+  floor is highest — which reaches `btclib-benchmarks`, that publishes
+  nothing. What owes it nothing owes it for one reason: a mutant needs
+  code of the tree's own to change, which `bbt` has no suite over and
+  `.github` has none of, its suite being over the other repositories.
+- **Nothing gave an outside opinion of supply-chain posture** (issue
+  #339). `scorecard` is a sentinel every repository owes, each being
+  public, and a check scoring below its maximum is an issue against what
+  it found rather than a section 14 derogation: this organization aligns
+  by adopting the practice, and a derogation would make the outside
+  opinion answerable to the thing it measures. What that gives up is the
+  case where the check is wrong about this organization, which then
+  costs an issue closed on the measurement.
+- **Nothing fuzzes a parser of untrusted serialized data** (issue #342).
+  `fuzz` follows a tree that parses data arriving from a party it does
+  not control, which reaches `btclib`, `btclib-secp256k1` and
+  `btclib-node`; whether it reaches `bitcoin-core-rpc` is left open,
+  that tree's input arriving from an instance its operator runs. A crash
+  it finds is an issue against the parser and never a suppression.
+- **A sentinel's calendar row arrives with the workflow** (issues #339
+  and #342): `tests/grid_test.py` fails a row nothing in the
+  organization schedules, and that direction of the test is the only
+  thing anywhere catching a row for a workflow nobody wrote, so spending
+  it on a rollout leaves it catching nothing.
+- **Section 14 no longer leaves these to the repository** (issues #327,
+  #339 and #342): *which optional workflows exist* now reads past those
+  section 10 keys on a property of the tree.
+
+### Section 11 makes the ack of record a review
+
+- **The ack of record was posted as a comment, which the forge does not
+  record** (issue #340), so a rule this file states was visible in no
+  artifact and an outside reader was left concluding nothing here is
+  reviewed. It is now a review — `APPROVE` carrying the `ACK <sha>`
+  body, `REQUEST_CHANGES` carrying the other. GitHub's refusal of a
+  self-approval explains why an *author's* verdict is a comment and had
+  been doing duty for why the workflow's was.
+- **The rejected alternative is a second human approving every pull
+  request** (issue #340), and what this gives up is that a model's
+  judgement now sits where a branch rule reads. It is chosen because
+  nothing lands while nobody is available.
+- **It lands before the ruleset bypass goes** (issue #340), that being
+  where the failure mode is found while a missing approval still costs
+  nothing.
+
+### Section 12 states the public-surface check
+
+- **Nothing detected a break in a published package's public surface**
+  (issue #326). Section 7's census asserts that `__all__` is declared
+  and that what it names exists, never that a release kept what the last
+  one gave, and `RELEASE_NOTES.md` is written by hand. `griffe check`
+  now runs in the release path, comparing the tag being cut against the
+  one before it, and what it reports is either an entry or a reason for
+  not being one.
+- **The release path and not the merge gate** (issue #326): before 1.0 a
+  package breaks its surface deliberately, so a gate reporting every
+  break has nothing to say about which are allowed and every run ends in
+  a human deciding. It becomes a gate the day a deprecation policy
+  supplies the missing half, and the invocation is written to take a
+  second reference pair rather than be replaced by one.
+
 ### `tests/__init__.py`'s `BACKLOG` row for issue #313 is gone
 
 - **The row excusing `test_the_package_directory_sits_under_src` for

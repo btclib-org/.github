@@ -383,10 +383,11 @@ the subject rather than a team, so who answers a report can change
 without the policy changing.
 
 **The badges at a `README.md`'s head are a function of what the tree
-is**, decided by a property of the repository and never curated: a list
-somebody keeps is a list nobody can be wrong about, so it drifts between
-trees with nothing to say which of them is right. Which property decides
-which badge:
+is**, decided by a property of the repository and never curated. A
+curated list has no answer to *should this tree carry that badge*, so
+two trees curate differently and neither of them is wrong, which is how
+one file comes to open a different way in each tree. Which property
+decides which badge:
 
 - **every repository** — the licence, derived from the repository's own
   `LICENSE` by `img.shields.io/github/license/<org>/<repo>`; the `lint`
@@ -411,19 +412,20 @@ of hunting. Taking the sentinels' order from the calendar is one order
 to maintain rather than two, and what it costs is that a workflow moved
 to another day moves its badge in every `README.md` that carries it.
 
-`img.shields.io/pypi/types` is the one that asserts the **shipped
-artifact** carries `py.typed`, where section 6's rule and section 3's
-classifier are both claims about the tree, and it is derived from the
-uploaded wheel so it cannot disagree with what was published.
-`github/v/release` is the only badge read in a **pair**: where it
-disagrees with the PyPI version badge beside it, a release reached the
-forge and not the index.
+`img.shields.io/pypi/types` is what asserts the **shipped artifact**
+carries `py.typed`, where section 6's rule and section 3's classifier
+each claim it of the tree instead; it is derived from the uploaded
+wheel, so it cannot disagree with what was published.
+`github/v/release` is read in a **pair** with the PyPI version badge
+beside it: where the two disagree, a release reached the forge and not
+the index.
 
-The link to the repository is the one badge that measures nothing, and
-it is a link: the README is the long description an index renders and
-the file an unpacked sdist carries, so it is read where the repository
-is not one click away. It says the repository's name and nothing else,
-which is a claim a reader settles by following it.
+The link to the repository is the one item above that measures nothing,
+and it is a link rather than a claim: the README is the long description
+an index renders and the file an unpacked sdist carries, so it is read
+where the repository is not one click away. It says the repository's
+name and nothing else, which is a claim a reader settles by following
+it.
 
 **A badge rendering `no status`, `invalid` or `unknown` is a question
 with two answers**, and which one is the point: either the workflow has
@@ -452,12 +454,12 @@ What is refused, and the reason is nearly the same one each time:
 - **REUSE compliance** — it renders `reuse unregistered`, which is a
   registration with that service and not a property of the tree.
 
-The downloads badge is pepy's rather than
-`img.shields.io/pypi/dm`, and both render: the first answers with the
-project's whole life and the second with the last month, so the second
-is a figure that falls without anything having happened to the tree.
-What that gives up is the reading `pypi/dm` is better at, whether the
-package is being taken up now.
+The downloads badge is pepy's rather than `img.shields.io/pypi/dm`, and
+both of them render: the first answers with the project's whole life and
+the second with the last month, so the second is a figure that falls
+without anything having happened to the tree. What that gives up is the
+reading `pypi/dm` is better at, whether the package is being taken up
+now.
 
 **A publishing repository's `README.md` ends with the line naming who
 supports the work**, under a thematic break:
@@ -581,7 +583,8 @@ theme for a product site, and its announcement bars, landing pages and
 surface these trees would carry and not use. That surface is what
 choosing `furo` gives up, so a tree that later wants a landing page
 changes theme rather than extending this one. `sphinx_rtd_theme` is
-where a Read the Docs project starts, and nothing else argues for it.
+where a Read the Docs project starts by default, which is a reason to
+find it in a tree and not a reason to keep it.
 
 Whether sphinx stays the generator is open and not decided here: a tree
 that left it would take its theme with it, so nothing above turns on the
@@ -1789,15 +1792,16 @@ reads the calendar against the trees in both directions, so a row naming
 a workflow nothing in the organization schedules fails there exactly as
 a `cron:` no row names does. A sentinel adopted here therefore takes its
 row in the pull request that gives the first tree the workflow, and the
-rows below the cadence tables are what say which trees that will be. The
-alternative is a row written the day the rule is, which reads as the
-calendar being the plan; what it costs is the one direction of that test
-that has nothing else to catch a row for a workflow nobody wrote.
+subsection below is what says which tree that will be. The alternative
+is a row written the day the rule is, which reads as the calendar being
+a plan rather than a description; and that direction of the test is the
+only thing anywhere that catches a row for a workflow nobody wrote, so
+spending it on a rollout leaves it catching nothing.
 
 ### Which trees owe which sentinel
 
 Section 14 leaves *which optional workflows exist* to each repository,
-and these three are not left there: what a tree owes is decided once and
+and these are not left there: what a tree owes is decided once and
 ported, a repository deciding for itself whether its own parser is
 fuzzed being a repository deciding what the organization's exposure is.
 Each is keyed on a property of the tree, so the answer for a new
@@ -1811,9 +1815,9 @@ repository is read off the tree rather than argued.
   coverage has stopped saying anything new. Publishing is the wrong
   property to key it on: `btclib-benchmarks` publishes nothing, holds a
   suite and holds `fail_under = 100.0`, which is the tree where the
-  measurement has the most to say rather than the least. Two trees owe
-  it nothing, and for one reason rather than two: a mutant needs code of
-  the tree's own to change. `bbt` holds no suite at all, its material
+  measurement has the most to say rather than the least. What owes it
+  nothing owes it for one reason rather than several: a mutant needs
+  code of the tree's own to change. `bbt` holds no suite at all, its material
   being course notebooks and scripts, and gains the sentinel the day it
   gains a suite over that material, which is btclib-org/.github#301's
   question. `.github`'s suite is over the other repositories rather than
@@ -2074,23 +2078,22 @@ distinction, and why, for whoever reviews.
 **The ack of record is posted as a review and not as a comment** —
 `APPROVE` carrying the `ACK <sha>` body, `REQUEST_CHANGES` carrying the
 `CHANGES REQUESTED <sha>` one. The self-approval refusal above does not
-reach it: `claude-review.yml` does not run as the author, so nothing
-stopped it from posting a review, and that clause was doing duty for
-why *its* verdict was a comment. What the comment costs is that the
-forge holds no record of the review this file requires — a rule stated
-here and visible in no artifact is a rule whose only witness is this
-file, and an outside reader is left to conclude that nothing here is
-reviewed. The OpenSSF Scorecard's `Code-Review` check is that reader:
-it credits an approval on the forge, or a merger different from the
-committer, and neither holds while the verdict is a comment.
+reach it, `claude-review.yml` not running as the author. A verdict
+posted as a comment leaves the forge holding no record of the review
+this file requires, and a rule stated here and visible in no artifact is
+a rule whose only witness is this file: an outside reader then reads
+this organization as merging unreviewed, correctly on the evidence
+available to them. The OpenSSF Scorecard's `Code-Review` check is that
+reader, crediting an approval on the forge or a merger different from
+the committer, and a comment is neither.
 
-**The alternative was a second human approving every pull request**, and
-it is what this gives up: making the verdict a review is what puts a
-model's judgement where a branch rule reads. It is chosen because
-nothing lands while nobody is available, and because the model is the
-reviewer of record in substance already — which is what the paragraph
-below says. The rejected alternative is written down rather than
-dropped, being what stops the next reader from undoing this.
+**The alternative is a second human approving every pull request**, and
+what this gives up is that a model's judgement then sits where a branch
+rule reads. It is chosen because nothing lands while nobody is
+available, and because the model is the reviewer of record in substance
+already — which is what the paragraph below says. The alternative is
+written down rather than dropped, being what stops the next reader from
+undoing this.
 
 **It lands before the bypass goes.** btclib-org/.github#341 holds the
 removal of the ruleset's `bypass_actors`, after which an approving
@@ -2533,14 +2536,17 @@ corrected in none of the ones that shipped.
   release take something the last one gave*; `RELEASE_NOTES.md` is where
   a caller is told to act and is written by hand, so nothing in the tree
   can tell that an entry is missing. `griffe check` walks the public API
-  of two git references and reports what broke, classified — a removed
-  object, a changed parameter default, a public name that is now a
-  different kind of thing, a narrowed annotation — and it exits non-zero
-  when it finds any. It reads each reference in a worktree of its own
-  and needs no built wheel for a pure-Python tree; it is the engine
-  `mkdocstrings` runs on, so it is not a dependency taken on for this.
-  What it reports is either a `RELEASE_NOTES.md` entry or a reason for
-  not being one, written where the release is being written.
+  of two git references and reports what broke, each finding named by
+  the kind of break it is — a public object removed, a parameter's
+  default or kind changed, a parameter added as required, a return or
+  attribute type no longer compatible, a public name now pointing at a
+  different kind of thing — and it exits non-zero having found any. It
+  loads each reference from a git worktree of its own rather than from
+  an installed distribution, so a pure-Python tree needs nothing built;
+  and it is the loader `mkdocstrings` reads a Python API with, so it is
+  not a dependency taken on for this alone. What it reports is either a
+  `RELEASE_NOTES.md` entry or a reason for not being one, written where
+  the release is being written.
 
     **The release path and not the merge gate**, which is the choice
     worth stating because the second is the one that reads as stricter.
@@ -2548,8 +2554,8 @@ corrected in none of the ones that shipped.
     caller-visible break a decision taken in the pull request that makes
     it, and before 1.0 a package breaks its surface deliberately: a gate
     that reports every such break has nothing to say about which of them
-    are allowed, so every run ends in a human deciding, which is the
-    release path's answer arriving earlier and oftener rather than a
+    are allowed, so every run ends in a human deciding — which is the
+    release path's answer arriving earlier and more often rather than a
     stricter check. It becomes a gate the day btclib-org/btclib#651
     settles a deprecation policy and not before, that policy being the
     missing half — the question stops being *did the surface change* and
@@ -2776,7 +2782,7 @@ accretion is exactly how a standard stops being one, and it is how the
 the first place.
 
 **Decided per repository**: `requires-python` and `.python-version`; the
-matrix breadth; which optional workflows exist past the three section 10
+matrix breadth; which optional workflows exist past those section 10
 keys on a property of the tree; the ruff `ignore` list's
 entries a tree declines on its own merits and its `per-file-ignores`; what
 a publishing repository checks about its package contents past section
@@ -3039,6 +3045,48 @@ that being the spelling the address is written to avoid. The grep reads
 no further: a pattern taking any spelled-out address would report the
 one `btclib-secp256k1` gives for the C library it binds, which is
 upstream's and correctly there.
+
+Section 2's badge rule, whose subject is the head of a file no tree can
+read for another. The first loop is the row and its order, one line per
+repository and a blank one where a `README.md` carries none:
+
+```shell
+for r in <every repository>; do
+  row=$(gh api "repos/<org>/$r/contents/README.md" \
+    -H 'Accept: application/vnd.github.raw' \
+    | sed -nE 's/^\[!\[([^]]*)\]\(([^)]*)\).*/\1\t\2/p')
+  printf '%s\t%s\n' "$r" "$(printf '%s' "$row" | cut -f1 | paste -sd, -)"
+done
+```
+
+Read against that rule's own list: a badge the tree's properties do not
+ask for, one they ask for and the row does not carry, and a row in
+another order are each a finding, and no command tells them apart from
+each other. The second asks what each badge renders, which is the
+half a reader of the `README.md` sees and a reader of its source does
+not:
+
+```shell
+R=<org>/<repo>
+gh api "repos/$R/contents/README.md" -H 'Accept: application/vnd.github.raw' \
+  | sed -nE 's/^\[!\[[^]]*\]\(([^)]*)\).*/\1/p' \
+  | while read -r src; do
+      body=$(curl -sL -w '\n%{http_code}' "$src" | tr -d '\n')
+      case "$body" in
+        *200) ;;
+        *) echo "$src is not served"; continue;;
+      esac
+      printf '%s' "$body" | grep -qE 'no status|invalid|unknown' \
+        && echo "$src renders nothing measured"
+    done
+```
+
+Silent where every badge answers with a measurement. The status code is
+the half that catches a badge pointing at a workflow the tree no longer
+has — the forge answers `404` there rather than rendering a word — and
+the pattern is the half that catches one served and empty, a workflow
+that has not reached its first run and one that should have run and did
+not being the two readings the rule tells apart.
 
 Section 11's rule that `claude-review.yml` is in every repository, which
 no single tree can answer for the others and nothing in `tests/` asks:
