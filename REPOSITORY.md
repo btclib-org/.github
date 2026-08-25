@@ -128,6 +128,11 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
 #  "required_review_thread_resolution":true}
 ```
 
+The bypass reaches that whole block and not the approving review alone,
+and every landing here is made by the account it names:
+`dismiss_stale_reviews_on_push` is on and reaches none of them.
+[Section 11 has what stands in for it][s11-branch].
+
 The `bypass` field is what the first call above is read for. It answers
 `["pull_request"]`, and [that mode against `always` is the whole of the
 design][s11-branch]; `always` in that field would mean a direct push to

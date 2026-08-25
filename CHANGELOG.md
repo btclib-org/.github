@@ -7,6 +7,27 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 11 says what the `pull_request` bypass suspends
+
+- **The paragraph had the bypass answer nothing beyond the approval**
+  (closes #368). What it excuses is the rule of that type, and
+  `dismiss_stale_reviews_on_push` — the forge's refusal of a merge whose
+  head has moved past its approval — is a parameter of that rule, so the
+  refusal reaches every merge except the ones made under the bypass.
+  GitHub's description of the mode and of the setting is linked on the
+  words that assert it.
+- **The `sha` on `CONTRIBUTING.md`'s merge call is named as what stands
+  in its place** (closes #368), the pin otherwise reading as a second
+  guard over a forge rule that would have refused the moved head anyway.
+- **`REPOSITORY.md` quoted the parameter with nothing beside it**
+  (closes #368), which reads as a guard this repository's own landings
+  have. The block now carries what the bypass does to it and points at
+  section 11 for the rest.
+- **The bypass was not exercised**: doing so means merging a head nobody
+  acked against a live pull request of this organization, which is the
+  outcome the paragraph is about. What is measured is the ruleset's own
+  shape, read back from the endpoint `REPOSITORY.md` records.
+
 ### Section 12's worked answer names no package path
 
 - **`bitcoin-core-rpc`'s worked answer quoted the value of `package`**
