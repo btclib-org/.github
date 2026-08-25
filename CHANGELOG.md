@@ -1983,18 +1983,17 @@ audit has no revision to compare against.
 
 ### Section 5's ruff `select` is `["ALL"]`, not a hand-picked list
 
-- **A hand-picked `select` list is a thing that rots: nothing forces a
-  second edit here the day ruff ships a family nobody has looked at.**
-  `select = ["ALL"]` replaces it, and every exclusion now lives in
-  `ignore` with the reason beside it, of one of three kinds: a rule the
-  formatter conflicts with, cited from ruff's own `docs/formatter.md`
-  rather than argued here; a rule this tree declines on its own merits
-  — `TD`, redundant with `FIX` and already argued in section 5, is the
-  new one; and a finding real enough to act on, closed at its own site
-  instead of silenced — typing-only imports moved under `if
-  TYPE_CHECKING:`, two implicit-concatenation literals parenthesized,
-  and `ANN401` and `ARG001` each answered with a `# noqa` and its own
-  reason.
+- **A hand-picked `select` list is a thing that rots: nothing forces a second
+  edit here the day ruff ships a family nobody has looked at.** `select =
+  ["ALL"]` replaces it, and every exclusion now lives in `ignore` with the
+  reason beside it, of one of three kinds: a rule the formatter conflicts with,
+  cited from ruff's own `docs/formatter.md` rather than argued here; a rule this
+  tree declines on its own merits — `TD` is the new entry of that kind, and
+  section 5's argument is that it disagrees with `FIX` rather than duplicating
+  it; and a finding real enough to act on, closed at its own site instead of
+  silenced — typing-only imports moved under `if TYPE_CHECKING:`, two
+  implicit-concatenation literals parenthesized, and `ANN401` and `ARG001` each
+  answered with a `# noqa` and its own reason.
 - **`tests/pyproject_test.py`'s checks for `CPY`, `W` and `D` read
   `select` for the family's own code; `ruff_selects()` now also reads
   `"ALL"` as every family selected**, so this repository's own tree —

@@ -85,17 +85,21 @@ ignore = [
     "unnecessary-escaped-quote",
     "missing-trailing-comma",
     "prohibited-trailing-comma",
-    # __init__ is documented by its class, and a magic method by the data
-    # model it implements: section 5's two exemptions, which pep257
-    # itself does not ask for
+    # a magic method is documented by the data model it implements, so a
+    # docstring on it only restates that model: section 5 gives the
+    # reason
     "undocumented-magic-method",
+    # the rule checks that __init__ carries a docstring, never that the
+    # docstring says anything a type-checked signature does not already
+    # show: section 5 gives the reason
     "undocumented-public-init",
     # flake8-todos disciplines the format of a marker FIX above already
     # refuses outright -- TD001 through TD007 are the whole family, and
-    # each is a question about a TODO/FIXME/XXX/HACK comment that a
-    # tree FIX holds clean cannot contain. The two are redundant over
-    # the same marker, and section 5 gives the reason this tree keeps
-    # the refusal over the formatting.
+    # each is a question about a TODO/FIXME/XXX/HACK comment that a tree
+    # FIX holds clean cannot contain. TD001 also steers a refused marker
+    # toward TODO, which FIX002 refuses just as hard, and TD is not even
+    # a superset: HACK draws no TD diagnostic at all. Section 5 gives the
+    # reason this tree keeps the refusal over the formatting.
     "invalid-todo-tag",
     "missing-todo-author",
     "missing-todo-link",

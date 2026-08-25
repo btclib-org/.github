@@ -971,31 +971,46 @@ preview rule then runs only where `extend-select` names it exactly.
   comment is a backlog nobody queries, sitting beside code that reads as
   finished. `FIX` refuses four of them — `TODO`, `FIXME`, `XXX` and
   `HACK` — wherever one opens a comment, on its own line or after code.
-  `TD` disciplines the format of the first three and says nothing about
-  the fourth, and every unsuppressed line it could discipline is a line
-  `FIX` already refuses. The two are redundant, so the choice is which
-  to keep: formatting a marker, or refusing it. A repository that
-  finishes what it starts keeps the refusal, and `TD`'s own rules in
-  `ignore` are where `ALL` is told so.
+  `TD` disciplines the format of the first three and is not even a
+  superset of what `FIX` refuses — `HACK` draws no `TD` diagnostic at
+  all — and where the two do overlap they disagree rather than agree:
+  `TD001` steers a refused `FIXME` toward `TODO`, which `FIX002` refuses
+  just as hard. A repository that finishes what it starts keeps the
+  refusal, and `TD`'s own rules in `ignore` are where `ALL` is told so.
+  The rejected alternative is ignoring `FIX` and keeping `TD003`
+  instead, so a marker stands provided it carries a link to an issue —
+  the mainstream choice, and a real argument in an organization whose
+  mechanism is the issue tracker. Rejected because `TD003` checks that
+  the link exists and never that the issue behind it is still open, so
+  a marker outlives the issue it cites in silence, and section 15's
+  audit does not enter a comment inside a `.py` file to catch it.
   What `FIX` does not read bounds what selecting it buys: a marker
   inside a docstring or a string literal is invisible to it, as is a
   mid-sentence mention that opens no comment, and a `TODO.md` at the
   root is the same defect in a file ruff never opens.
-- **Docstrings are gated**: the `D` family with `convention = "pep257"`,
-  every public module, class, method and function carrying one.
-  `__init__` and the magic methods are the two exemptions pep257 itself
-  does not ask for, and the `ignore` entry is the whole of each: the
-  convention leaves `undocumented-public-init` and
-  `undocumented-magic-method` enabled, so a tree naming neither is asked
-  for a docstring at every such site. Both entries are the default, and
-  declining one is not drift: the rule is then answered with a docstring,
-  or with a `# noqa` that `RUF100` retires as soon as one arrives.
-  Requiring them of every tree was the alternative, rejected because it
-  asks a tree to drop a gate it passes. The convention is also what
-  settles the pairs ruff calls incompatible, so `ignore` does not name
-  the half it disables: beside a declared convention that entry changes
-  no diagnostic and silences no warning. The warning ruff prints over
-  such a pair appears only where nothing has settled it.
+- **Docstrings are gated**: the `D` family with `convention = "pep257"`, every
+  public module, class, method and function carrying one. `__init__` and the
+  magic methods are the two exemptions pep257 itself does not ask for, and the
+  `ignore` entry is the whole of each: the convention leaves
+  `undocumented-public-init` and `undocumented-magic-method` enabled, so a tree
+  naming neither is asked for a docstring at every such site. A magic method is
+  documented by the data model it implements, so a docstring on `__repr__`
+  saying it returns `repr(self)` is the restatement section 9's *One fact in one
+  place* argues against. `undocumented-public-init` is declined for a different
+  reason: the rule checks that a docstring exists, never that it says anything,
+  and the cheapest line that satisfies it restates what the constructor's own
+  annotations and strict mypy already carry. PEP 257 places the constructor's
+  documentation in `__init__`'s own docstring, so declining the rule declines
+  that presence check, not the documentation — an argument's meaning, a raised
+  exception, an invariant the constructor establishes still has nowhere else to
+  go. Both entries are the default, and declining one is not drift: the rule is
+  then answered with a docstring, or with a `# noqa` that `RUF100` retires as
+  soon as one arrives. Requiring them of every tree was the alternative,
+  rejected because it asks a tree to drop a gate it passes. The convention is
+  also what settles the pairs ruff calls incompatible, so `ignore` does not name
+  the half it disables: beside a declared convention that entry changes no
+  diagnostic and silences no warning. The warning ruff prints over such a pair
+  appears only where nothing has settled it.
 - **Two widths, and both are enforced**: `ruff-format` reflows code to
   88, and `[tool.ruff.lint.pycodestyle] max-doc-length = 80` holds the
   comments and docstrings — the half of a file the formatter never
