@@ -127,7 +127,27 @@ Do not use Fable unless explicitly instructed.
   coverage**: what it would measure is a tree that ships nothing, so the
   number would be the suite measuring itself. What it cannot reach — a
   claim in this file or in `README.md` that no command re-derives — a
-  reader catches or nothing does.
+  reader catches or nothing does. That fact's operational half:
+  `tests/conftest.py` sets `SWITCH = "BTCLIB_INTEGRATION"`, its own
+  docstring calling it "the environment variable without which this
+  suite skips itself," so `uv run pytest` written the ordinary way
+  returns exit 0 with everything skipped and nothing measured.
+  *Verifying*, further down this file, says to trust the exit code over
+  the filtered output — here the exit code is the half that lies, and
+  `BTCLIB_INTEGRATION=1` is what a run needs before that trust is
+  earned.
+- **A `BACKLOG` row's red is often a sibling's success.** Its rows in
+  `tests/__init__.py` are `xfail(strict=True)` and keyed on this
+  tracker's issue numbers, while the trees they name move underneath
+  them: when another repository lands the fix a row excuses, the cell
+  starts passing and the strict xfail turns that success into a failure
+  here, with nothing in this tree having changed. That is the mechanism
+  working — it is what forces an expired exemption to be noticed rather
+  than left to rot — and the question it raises, *is this mine*, is
+  answered by two commands: `git diff origin/main..HEAD -- tests/`
+  empty says the branch did not cause it, and the same run against a
+  `git archive origin/main` snapshot says it was already red before the
+  branch existed.
 - **`profile/README.md` is public in a way no other file here is**: it
   is what github.com/btclib-org renders. Treat a change to it as a change
   to the organization's front page, because it is one.
