@@ -244,7 +244,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         313,
         "test_the_package_directory_sits_under_src",
-        ("btclib", "btclib-secp256k1", "bitcoin-core-rpc", "btclib-node"),
+        ("btclib", "bitcoin-core-rpc"),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection."""
