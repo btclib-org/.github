@@ -7,6 +7,25 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The review guard reads the SDK result the action's log leaves out
+
+- **A review that dies inside the action names no cause** (issue #364).
+  The log carries a summary of the SDK's result message with the error
+  text and `api_error_status` sanitized out of it, where the execution
+  file the guard step already names carries that message whole, so the
+  guard reads it from there where the review step did not succeed.
+- **`show_full_output: true` was the alternative** (issue #364): it
+  prints every message including tool results, which the input's own
+  description warns against on a public repository. The debug rerun the
+  action's log suggests beside it keys on `ACTIONS_STEP_DEBUG` in the
+  step's environment, which `gh run rerun --debug` does not put there.
+- **This does not make a failing review pass** (issue #364): what the
+  guard gains is the name of a failure the log does not carry. Nothing
+  in these repositories changed across the moment the runs turned red —
+  the action's pin, the model, the SDK and the CLI are the same on
+  either side — which is a narrower claim than the cause lying outside
+  them, and the field this guard now reads is what tells the two apart.
+
 ### Section 2's badge row drops the link to the repository
 
 - **The link to the repository is no longer a badge every repository
