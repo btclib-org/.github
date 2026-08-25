@@ -1784,6 +1784,87 @@ whose result is already known: it upgrades everything the resolver
 touches, runs the suite, the lint gate and the packaging checks, and
 commits nothing.
 
+**A sentinel's row arrives with the workflow.** `tests/grid_test.py`
+reads the calendar against the trees in both directions, so a row naming
+a workflow nothing in the organization schedules fails there exactly as
+a `cron:` no row names does. A sentinel adopted here therefore takes its
+row in the pull request that gives the first tree the workflow, and the
+rows below the cadence tables are what say which trees that will be. The
+alternative is a row written the day the rule is, which reads as the
+calendar being the plan; what it costs is the one direction of that test
+that has nothing else to catch a row for a workflow nobody wrote.
+
+### Which trees owe which sentinel
+
+Section 14 leaves *which optional workflows exist* to each repository,
+and these three are not left there: what a tree owes is decided once and
+ported, a repository deciding for itself whether its own parser is
+fuzzed being a repository deciding what the organization's exposure is.
+Each is keyed on a property of the tree, so the answer for a new
+repository is read off the tree rather than argued.
+
+- **`mutation` follows a suite over code the tree ships.** A coverage
+  floor at 100 says every line and branch ran and says nothing about
+  whether any assertion would have noticed the line being wrong — a
+  module imported and never asserted about reaches 100% of itself — so
+  the sentinel is worth most exactly where the floor is highest and
+  coverage has stopped saying anything new. Publishing is the wrong
+  property to key it on: `btclib-benchmarks` publishes nothing, holds a
+  suite and holds `fail_under = 100.0`, which is the tree where the
+  measurement has the most to say rather than the least. Two trees owe
+  it nothing, and for one reason rather than two: a mutant needs code of
+  the tree's own to change. `bbt` holds no suite at all, its material
+  being course notebooks and scripts, and gains the sentinel the day it
+  gains a suite over that material, which is btclib-org/.github#301's
+  question. `.github`'s suite is over the other repositories rather than
+  over anything this tree ships, so a mutant here would land in the
+  measuring instrument and the number would be the suite reporting on
+  itself.
+- **`scorecard` follows every repository**, that being the whole of what
+  the OpenSSF Scorecard needs — a public repository, which each of these
+  is — and what it buys is an opinion of the tree's supply-chain posture
+  formed outside the organization, against checks nothing here wrote.
+  This file is a standard the organization holds itself to and every
+  command in section 15 asks a question somebody here chose; a score
+  computed by a third party is the one reading that can find what nobody
+  thought to ask for. Its badge and its published score want
+  `publish_results: true`, and the job wants `id-token: write` for the
+  transparency-log entry, `security-events: write` to file what it finds
+  as code scanning alerts, and `actions: read` with `contents: read` —
+  the one elevation-per-job rule above, applied to a workflow that
+  writes nothing to the tree. **A check scoring below its maximum is an
+  issue against what it found**, never a sentence in section 14 saying
+  why this organization scores it that way: this organization aligns by
+  adopting the practice rather than by explaining the score, and a
+  derogation here would make the outside opinion answerable to the thing
+  it is measuring. What that gives up is the case where the check is
+  simply wrong about this organization, which then costs an issue that
+  is closed on the measurement rather than a paragraph nobody revisits.
+- **`fuzz` follows a tree that parses serialized data arriving from a
+  party it does not control.** `btclib` and `btclib-secp256k1` read
+  transactions, scripts, PSBTs, signatures and extended keys, and
+  `btclib-node` speaks the peer-to-peer protocol, where the input is by
+  definition whatever a stranger sends. Section 7's convention tests and
+  the property tests beside them answer *does this hold over the domain
+  I described*; a fuzzer answers *what is in the domain I did not
+  describe* — a length prefix larger than the buffer, a truncated
+  multibyte sequence, a varint that overflows, a recursion depth that
+  exhausts the stack — so neither substitutes for the other and the
+  second is the one that finds the crash before somebody else does.
+  Whether the property reaches `bitcoin-core-rpc` is open and not
+  decided here: its input arrives from a Bitcoin Core instance the
+  operator runs, which is a weaker threat model than a peer's, and the
+  difference is worth measuring rather than assuming in either
+  direction. A crash the sentinel finds is an issue against the parser
+  and never a suppression, that being the whole of what it was run for.
+  What fills the workflow is the tree's — which entry points are targets
+  and which harness runs them, `atheris` under ClusterFuzzLite in
+  Actions or under OSS-Fuzz, and for `btclib-secp256k1` whether a target
+  is allowed to reach the vendored C library at all, which would be
+  fuzzing upstream's work rather than these bindings.
+  btclib-org/.github#342 is where that is decided; what is fixed here is
+  the name the calendar keys on and which trees owe one.
+
 ### The aggregate job, and the required check
 
 A workflow whose answer gates a pull request ends in a job that `needs`
@@ -1981,14 +2062,42 @@ answering to nothing.
 ### Review
 
 A pull request needs an approving review from somebody other than its
-author; GitHub refuses a self-approval, which is why the record of a
-review is a comment rather than a forge approval.
+author. GitHub refuses a self-approval, which is why an *author's* own
+verdict is a comment and can be nothing else.
 
-**What a landing reads is the ack of record**: a comment whose last line
+**What a landing reads is the ack of record**: a verdict whose last line
 is `ACK <sha>` or `CHANGES REQUESTED <sha>`, naming a sha because an ack
 belongs to a tree and not to a branch. A review that delivers no verdict
 is a reading and not an unfinished review; `REVIEWING.md` states that
 distinction, and why, for whoever reviews.
+
+**The ack of record is posted as a review and not as a comment** —
+`APPROVE` carrying the `ACK <sha>` body, `REQUEST_CHANGES` carrying the
+`CHANGES REQUESTED <sha>` one. The self-approval refusal above does not
+reach it: `claude-review.yml` does not run as the author, so nothing
+stopped it from posting a review, and that clause was doing duty for
+why *its* verdict was a comment. What the comment costs is that the
+forge holds no record of the review this file requires — a rule stated
+here and visible in no artifact is a rule whose only witness is this
+file, and an outside reader is left to conclude that nothing here is
+reviewed. The OpenSSF Scorecard's `Code-Review` check is that reader:
+it credits an approval on the forge, or a merger different from the
+committer, and neither holds while the verdict is a comment.
+
+**The alternative was a second human approving every pull request**, and
+it is what this gives up: making the verdict a review is what puts a
+model's judgement where a branch rule reads. It is chosen because
+nothing lands while nobody is available, and because the model is the
+reviewer of record in substance already — which is what the paragraph
+below says. The rejected alternative is written down rather than
+dropped, being what stops the next reader from undoing this.
+
+**It lands before the bypass goes.** btclib-org/.github#341 holds the
+removal of the ruleset's `bypass_actors`, after which an approving
+review is what unblocks a merge and a workflow that fails to post one
+stops every repository. The margin between the two is where that
+failure mode is found, a missing approval costing nothing while the
+bypass is still there.
 
 **The ack of record is `claude-review.yml`'s**, and an author's own is
 not one. A comment from the account that opened the pull request is a
@@ -2022,7 +2131,11 @@ It is deliberately **not a required check**, and its own header says it
 must not become one. Requiring it would make a review a gate to be
 satisfied rather than a reading to be answered, and would hand the merge
 button to whatever the workflow happened to say. What it is instead is
-the thing a human landing the pull request reads before pressing.
+the thing a human landing the pull request reads before pressing. That
+is a different mechanism from the review it posts: a required check is a
+context a branch rule names and nothing else can supply, where the
+approval a `pull_request` rule counts is satisfied by whoever reviews,
+so the workflow is one route to it rather than the only one.
 
 `REVIEWING.md` is the standard: a diff is acked when
 it leaves the tree better than it found it, a matter of taste is not a
@@ -2412,6 +2525,39 @@ corrected in none of the ones that shipped.
     need, the driver being the backend there; it is refused because it
     leaves even the first half silent, a `uv` pinned outside `requires`
     warning where the `pip` installer refuses.
+- **A release is checked against the last one for a break in the public
+  surface**, by `griffe check` in the release path, comparing the tag
+  being cut against the tag before it. Section 7's public-surface census
+  asserts that `__all__` is declared and that what it names exists,
+  which answers *is this module's surface stated* and never *did this
+  release take something the last one gave*; `RELEASE_NOTES.md` is where
+  a caller is told to act and is written by hand, so nothing in the tree
+  can tell that an entry is missing. `griffe check` walks the public API
+  of two git references and reports what broke, classified — a removed
+  object, a changed parameter default, a public name that is now a
+  different kind of thing, a narrowed annotation — and it exits non-zero
+  when it finds any. It reads each reference in a worktree of its own
+  and needs no built wheel for a pure-Python tree; it is the engine
+  `mkdocstrings` runs on, so it is not a dependency taken on for this.
+  What it reports is either a `RELEASE_NOTES.md` entry or a reason for
+  not being one, written where the release is being written.
+
+    **The release path and not the merge gate**, which is the choice
+    worth stating because the second is the one that reads as stricter.
+    A gate comparing the branch against the last release makes a
+    caller-visible break a decision taken in the pull request that makes
+    it, and before 1.0 a package breaks its surface deliberately: a gate
+    that reports every such break has nothing to say about which of them
+    are allowed, so every run ends in a human deciding, which is the
+    release path's answer arriving earlier and oftener rather than a
+    stricter check. It becomes a gate the day btclib-org/btclib#651
+    settles a deprecation policy and not before, that policy being the
+    missing half — the question stops being *did the surface change* and
+    becomes *did it change without the release of warning the policy
+    owes*, which a command can answer on its own. So the release path's
+    invocation is written to take a second reference pair rather than to
+    be replaced by one.
+
 - **The smoke test runs again in the release job, without constraints**,
   after the upload rather than before: installing a dependency executes
   its code, and a compromised one must not reach a `dist/` still to be
@@ -2630,7 +2776,8 @@ accretion is exactly how a standard stops being one, and it is how the
 the first place.
 
 **Decided per repository**: `requires-python` and `.python-version`; the
-matrix breadth; which optional workflows exist; the ruff `ignore` list's
+matrix breadth; which optional workflows exist past the three section 10
+keys on a property of the tree; the ruff `ignore` list's
 entries a tree declines on its own merits and its `per-file-ignores`; what
 a publishing repository checks about its package contents past section
 12's floor —
@@ -3065,7 +3212,9 @@ independent and the checklist the same for each.
    selective-run coverage hook, the first convention tests, and the
    `tests/README.md` that declares which of section 7's bullets they are
    — with the test that asserts the declaration.
-1. `docs/source` and `.readthedocs.yaml`, built with `-W --keep-going`.
+1. `docs/source` and `.readthedocs.yaml`, built with `-W -n
+   --keep-going`, and `sphinx.ext.intersphinx` in `extensions` before
+   `-n` is turned on.
 1. Section 12's package-content floor: `[tool.check-wheel-contents]`
    naming the package where the wheel is one package tree, and the page,
    the script and the test where it is not; `check-sdist` wherever an
