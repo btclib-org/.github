@@ -1493,6 +1493,34 @@ sight rather than weighed.
   MD022 and MD032 both refuse. Section 4's autofix rule has
   `markdownlint-cli2` write the line back on the next hook run, rather
   than only reporting it missing.
+- **An entry answering an issue that the change closes cites it `(closes
+  #N)`.** An entry answering an issue the change does not close — a fix
+  that leaves a mechanism unexplained, one half of a bundle — cites it
+  `(issue #N)`. Across repositories the qualified `owner/repo#N` sits
+  inside the same parentheses, the qualifier rule above reaching a
+  changelog citation exactly as it reaches any other cross-repository
+  reference.
+- **The reason the pair has two spellings rather than one** is that it
+  is then checkable against the landing commit's own subject, written at
+  a different moment and the half that gets re-read before merging. One
+  spelling for both cases makes an entry inherited from a superseded
+  branch unfalsifiable, and such an entry has already told a reader an
+  issue was open on the day it closed.
+- **The rejected alternative is the bare `(#N)`**, which some
+  repositories use: GitHub numbers issues and pull requests in one
+  sequence, so `(#N)` does not say which it names — and a squash lands
+  with the pull request's own number appended to the commit subject
+  already, so the bare form in an entry reads as that number instead.
+- **Nothing already written is rewritten.** Both files are append-only
+  in practice and `merge=union` in fact; the rule binds what is written
+  next, not the entries that predate it.
+- **No command in section 15 audits this.** A citation the entry makes
+  and an issue merely named in its prose look identical to a pattern
+  match — both are a `#N` inside parentheses — and this organization's
+  own entries already use the second shape, a cross-repository pointer
+  beside the entry's own point rather than its citation. Telling the
+  two apart is a reading, the way this file already treats a claim no
+  command re-derives.
 
 ## 10. Workflows
 
@@ -1747,13 +1775,19 @@ body — never the pull request's description.
 
 **A pull request that closes an issue names it in its title, in
 parentheses**: `Say when github-release runs instead of relying on no if
-(issue #1142)`. Which of the title and the branch's own commit subject
+(closes #1142)`. Which of the title and the branch's own commit subject
 lands is *Merge method*'s rule, so the parentheses belong on whichever
 one that is — not only on the title. Either way the number reaches
 `git log` and stays reachable from a checkout with no forge in front of
 it. A pull request that closes nothing carries no parentheses, and
 adding some because the shape looks right is how a wrong number gets
-in.
+in. `(issue #N)` is reserved for a `CHANGELOG.md` entry naming an issue
+it does not close — section 9's citation, not the title's — one token
+holding one meaning across the standard rather than its opposite
+depending on which file it sits in. Nothing already landed is
+rewritten, a title and a landed commit subject included: section 9's
+*Nothing already written is rewritten* is this same rule, read from the
+title's side of it.
 
 The title is not the closing mechanism. `Closes #N` in the
 *description* is what GitHub acts on, and both are wanted: the
@@ -2446,6 +2480,22 @@ either way.
 A per-file exception belongs in that file's own
 `markdownlint-configure-file` comment, not in the shared config read by
 files that never trip the rule it relaxes.
+
+**The default is one answer for every tree.** A convention that differs
+between two repositories and appears on neither of section 14's two
+lists is a defect, not a choice either tree gets to keep: it is filed in
+this repository's issue tracker, by *What this repository is*'s shape
+for a cross-repository finding, and which answer is right is decided
+once, here, and ported.
+
+**Getting onto the per-repository list below takes a reason of one
+kind**: something true of that repository that makes the shared answer
+wrong — its Python floor, the shape of its distribution, what it ships,
+what its tests are about. Every entry on the list carries one. *This
+tree already does it differently* is not such a reason: precedent by
+accretion is exactly how a standard stops being one, and it is how the
+`CHANGELOG.md` citation forms section 9 now settles came to diverge in
+the first place.
 
 **Decided per repository**: `requires-python` and `.python-version`; the
 matrix breadth; which optional workflows exist; the ruff `ignore` list's
