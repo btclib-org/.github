@@ -63,6 +63,15 @@ audit has no revision to compare against.
   either side — which is a narrower claim than the cause lying outside
   them, and the field this guard now reads is what tells the two apart.
 
+### The review header's cheapness clause no longer leans on being the only job
+
+- **The header said the review was cheap because it is the only job in
+  this repository** (closes #391). It is not: `.github/workflows/`
+  holds jobs beyond it, `claude-review.yml` itself among the files
+  holding more than one. The header now gives the reason on its own
+  terms — it reads a diff of prose, it builds nothing, and it skips a
+  draft — instead of through a uniqueness claim.
+
 ### Section 3 points at section 14 instead of listing the tool files
 
 - **Section 3 said how many tools keep a configuration file of their
