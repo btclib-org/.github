@@ -21,6 +21,19 @@ audit has no revision to compare against.
   `tests/verbatim_test.py`'s `EXPECTED_DRIFT` already names for this
   path.
 
+### Section 2 gives `btclib-node` the tier its tree measures
+
+- **`btclib-node` is tier 1** (closes #351). It holds
+  `.github/workflows/release.yml`, which is the file the loop beside
+  section 2's table reads to tell a publisher from a Python project that
+  publishes nothing, and the row said tier 2.
+- **The paragraph keeping `RELEASING.md` out of a tier-2 tree names no
+  repository** (closes #351). It listed the trees that state the absence
+  of a release under their own `CONTRIBUTING.md`'s *A version, and no
+  release*, so a promotion made the list wrong without anything in this
+  file being touched; the sentence now says that of a tier-2 repository
+  rather than of the trees that were tier 2 when it was written.
+
 ### Section 2 states the badges at a `README.md` head
 
 - **Nothing said which badges a `README.md` carries** (issue #338).
