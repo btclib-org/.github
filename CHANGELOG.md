@@ -7,6 +7,20 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### `CONTRIBUTING.md` names the two spellings of an issue citation
+
+- **Its *Pull requests* names `(closes #N)` and `(issue #N)` rather than
+  only the section that defines them** (closes #332). The shared half is
+  what a contributor of every tree reads, where a pointer reaches
+  whoever follows it, and the forms are the half a citation is got wrong
+  in. The price is section 9's *One fact in one place*, taken
+  deliberately and stated in the sentence that takes it: a change to the
+  pair is then an edit here as well as in `README.md`.
+- **The other trees' copies are btclib-org/.github#281's** — the issue
+  that tracks a shared half this tree is ahead on, which
+  `tests/verbatim_test.py`'s `EXPECTED_DRIFT` already names for this
+  path.
+
 ### Section 2 states the badges at a `README.md` head
 
 - **Nothing said which badges a `README.md` carries** (issue #338).

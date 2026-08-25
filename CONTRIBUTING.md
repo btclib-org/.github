@@ -53,6 +53,19 @@ neither of them shows, is [the standard's *What a pull request says it
 is*][s-title]. Read it before opening one; it is the rule most often
 found broken after the fact.
 
+**The two spellings are named here as well as there, against [section 9's
+*One fact in one place*][s9]**, the paragraph above naming the section
+and not the forms, which are the half a citation is got wrong in:
+`(closes #N)` cites an issue the change closes, wherever the citation
+sits — the title, the commit subject where [*Merge method*][s11] makes
+that the thing that lands, and a `CHANGELOG.md` entry — and `(issue #N)`
+is reserved for a `CHANGELOG.md` entry naming an issue the change does
+*not* close. One token holds one meaning whichever file it sits in, so
+the pair is chosen by what is true of the change rather than by which
+file is being written, and a tree's own landed subjects are not what to
+copy it from: nothing already landed is rewritten, so what a repository
+wrote before the rule stays where it is.
+
 `REVIEWING.md` is the standard a review is written against, and is this
 file's other half. Read before opening a pull request, it is what the
 pull request will be answered against.
