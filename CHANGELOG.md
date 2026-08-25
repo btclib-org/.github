@@ -173,6 +173,26 @@ audit has no revision to compare against.
   whose; `tests/verbatim_test.py`'s `EXPECTED_DRIFT` carries the path
   and the issue until the seven other trees take it.
 
+### `REVIEWING.md` says which artifact carries the verdict
+
+- **The section opened by putting the verdict in a summary comment**
+  (closes #361), and the sentence reconciling that with the ack of
+  record being a review arrived later in the same section, reading as an
+  aside. *The verdict* now names the artifact where it first describes a
+  summary: a review that decides whether the pull request lands posts
+  that summary to the forge as a review, and every other summary is a
+  comment.
+- **`APPROVE` and `REQUEST_CHANGES` appeared nowhere in the file**
+  (closes #361), so the form section 11 requires of the ack of record
+  was missing from the document a reviewer writes a verdict against.
+  Each is now paired with the line it carries, and section 11 stays the
+  place that says whose verdict is the ack of record and why the forge
+  has to hold a review of it rather than a comment.
+- **The copies are already recorded as drifted** (issue #353):
+  `tests/verbatim_test.py`'s `EXPECTED_DRIFT` names `REVIEWING.md`, so
+  this widens the drift that entry excuses instead of owing a second
+  one.
+
 ### Section 12 states the public-surface check
 
 - **Nothing detected a break in a published package's public surface**
