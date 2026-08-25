@@ -13,11 +13,14 @@ each as a command, and this asks them of every repository at once.
 from __future__ import annotations
 
 import re
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
 from . import ORG, Tier, by_hand, gh_json
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 pytestmark = pytest.mark.integration
 

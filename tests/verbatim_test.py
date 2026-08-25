@@ -16,12 +16,15 @@ tree that owes one from the tree the file does not apply to.
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
 from . import ROOT, subjects
 from .grid_test import triggers
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 pytestmark = pytest.mark.integration
 

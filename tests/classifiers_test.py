@@ -30,14 +30,16 @@ tree installs, and its `package` is reused here rather than re-derived.
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from trove_classifiers import classifiers
 
 from . import Tier, by_hand, tracked
 from .surface_test import TYPED, package
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 pytestmark = pytest.mark.integration
 

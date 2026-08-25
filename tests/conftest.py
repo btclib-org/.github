@@ -11,13 +11,15 @@ import inspect
 import os
 import subprocess
 import tomllib
-from collections.abc import Generator
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from . import BACKLOG, ORG, ROOT, SELF, Tier, filed, gh_json, names, tier
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 SWITCH = "BTCLIB_INTEGRATION"
 """The environment variable without which this suite skips itself."""
@@ -143,10 +145,13 @@ def cited(issues: tuple[int, ...] | list[int]) -> str:
     return ", ".join(f"btclib-org/.github#{issue}" for issue in issues)
 
 
+# pytest's own hook spec names this parameter, and pluggy matches a
+# hook implementation's signature against it -- dropping the name is
+# dropping the hook, not narrowing an argument nothing here reads.
 @pytest.hookimpl(wrapper=True, tryfirst=True)
 def pytest_runtest_makereport(
     item: pytest.Item,
-    call: pytest.CallInfo[None],
+    call: pytest.CallInfo[None],  # noqa: ARG001
 ) -> Generator[None, pytest.TestReport, pytest.TestReport]:
     """Fail a backlog cell this run skipped instead of asking.
 

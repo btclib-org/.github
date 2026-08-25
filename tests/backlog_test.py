@@ -20,7 +20,10 @@ the hook and not a reading of it.
 
 from __future__ import annotations
 
-import pytest
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pytest
 
 
 def test_a_skip_on_an_excused_cell_fails(pytester: pytest.Pytester) -> None:
@@ -69,9 +72,15 @@ def test_a_skip_on_an_excused_cell_fails(pytester: pytest.Pytester) -> None:
     result.assert_outcomes(failed=1, errors=1, xfailed=1, skipped=1)
     result.stdout.fnmatch_lines(
         [
-            "*excuses test_a_skip_on_an_excused_cell_fails.py::test_skips_in_a_fixture"
-            " for btclib-org/.github#999*: tier 3, and this asks tier 2.*",
-            "*excuses test_a_skip_on_an_excused_cell_fails.py::test_skips_in_the_body"
-            " for btclib-org/.github#999*: no links.yml.*",
+            (
+                "*excuses"
+                " test_a_skip_on_an_excused_cell_fails.py::test_skips_in_a_fixture for"
+                " btclib-org/.github#999*: tier 3, and this asks tier 2.*"
+            ),
+            (
+                "*excuses"
+                " test_a_skip_on_an_excused_cell_fails.py::test_skips_in_the_body for"
+                " btclib-org/.github#999*: no links.yml.*"
+            ),
         ]
     )
