@@ -54,47 +54,55 @@ required-version = ">=0.12.1"
 # a preview rule runs only where this file names it exactly.
 preview = true
 explicit-preview-rules = true
-# The tree is a test suite and nothing else, so the select list is the
-# organization's minus what only a library has to answer for: no D on
-# top of the defaults beyond what a test module needs. What is here is
-# what finds something in test code -- a bare except, a mutable default,
-# an undocumented module, a path built with os.path. CPY is in: section
-# 5's rule is about every source file and says nothing about a package,
-# and this tree's Python is source whoever imports it, which nobody does.
-select = [
-    "A",   # flake8-builtins
-    "B",   # flake8-bugbear
-    "BLE", # flake8-blind-except
-    "C4",  # flake8-comprehensions
-    "C90", # mccabe
-    "CPY", # flake8-copyright
-    "D",   # pydocstyle
-    "E",   # pycodestyle errors
-    "ERA", # eradicate
-    "F",   # pyflakes
-    "FA",  # flake8-future-annotations
-    "FIX", # flake8-fixme
-    "I",   # isort
-    "PGH", # pygrep-hooks
-    "PIE", # flake8-pie
-    "PL",  # pylint
-    "PT",  # flake8-pytest-style
-    "PTH", # flake8-use-pathlib
-    "RET", # flake8-return
-    "RUF", # ruff-specific rules
-    "S",   # flake8-bandit
-    "SIM", # flake8-simplify
-    "T20", # flake8-print
-    "TID", # flake8-tidy-imports
-    "UP",  # pyupgrade
-    "W",   # pycodestyle warnings
-]
+# Every family ruff ships, present ones and a release's future ones
+# alike: a hand-picked list is what this key held until this file's
+# repository-specific measurement, and a list is a thing that rots --
+# nothing forces a second edit here the day ruff adds a family nobody
+# has looked at yet. "ALL" takes a new family in on the pull request
+# that bumps ruff's pinned rev instead, which is the day someone is
+# already looking at what changed. Section 5 has the rule this states;
+# this file is the tree it decided for.
+select = ["ALL"]
 ignore = [
+    # ruff's own docs/formatter.md, under "Conflicting lint rules":
+    # each of these is undone by the formatter's own rewriting, so
+    # selecting it is a lint failure the next `ruff format` produces
+    # again. The list is the vendor's, and does not change with this
+    # tree. D203 needs no entry here: the pep257 convention below
+    # already disables it in favour of D211 -- the other half of the
+    # pair ruff calls incompatible -- without printing the warning
+    # ruff reserves for a pair nothing has settled.
+    "tab-indentation",
+    "indentation-with-invalid-multiple",
+    "indentation-with-invalid-multiple-comment",
+    "over-indented",
+    "docstring-tab-indentation",
+    "triple-single-quotes",
+    "bad-quotes-inline-string",
+    "bad-quotes-multiline-string",
+    "bad-quotes-docstring",
+    "avoidable-escaped-quote",
+    "unnecessary-escaped-quote",
+    "missing-trailing-comma",
+    "prohibited-trailing-comma",
     # __init__ is documented by its class, and a magic method by the data
     # model it implements: section 5's two exemptions, which pep257
     # itself does not ask for
     "undocumented-magic-method",
     "undocumented-public-init",
+    # flake8-todos disciplines the format of a marker FIX above already
+    # refuses outright -- TD001 through TD007 are the whole family, and
+    # each is a question about a TODO/FIXME/XXX/HACK comment that a
+    # tree FIX holds clean cannot contain. The two are redundant over
+    # the same marker, and section 5 gives the reason this tree keeps
+    # the refusal over the formatting.
+    "invalid-todo-tag",
+    "missing-todo-author",
+    "missing-todo-link",
+    "missing-todo-colon",
+    "missing-todo-description",
+    "invalid-todo-capitalization",
+    "missing-space-after-todo-colon",
 ]
 
 [tool.ruff.lint.per-file-ignores]

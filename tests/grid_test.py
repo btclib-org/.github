@@ -14,13 +14,15 @@ day.
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 import yaml
 
 from . import ROOT, name, rows
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 # cron numbers the weekday from Sunday, and the table spells the day out
 WEEKDAYS = {

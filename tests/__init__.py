@@ -97,7 +97,10 @@ def gh(endpoint: str, jq: str) -> list[str]:
     return [line for line in out.splitlines() if line]
 
 
-def gh_json(endpoint: str) -> Any:
+# the API's own answer, its shape different at every call site: a
+# document, a list of them, a bare string. Any is what that is, not a
+# narrower type this function would have to lie about.
+def gh_json(endpoint: str) -> Any:  # noqa: ANN401
     """Ask the GitHub API for one document and parse it.
 
     :param endpoint: the path after `gh api`.

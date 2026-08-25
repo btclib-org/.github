@@ -945,15 +945,28 @@ The pair is what lets a rule be named in `ignore` — itself a preview
 feature — without turning on everything ruff is still designing. A
 preview rule then runs only where `extend-select` names it exactly.
 
-- **`select` is broad and measured.** Every unselected family was run
-  over the tree before it was left out, and what is left out is recorded
-  with the reason rather than with the count it reached. A family that
-  can never fire — datetime rules with no datetime, logging rules with no
-  logging — stays out: a rule that cannot fire reads as an enforced
-  invariant while enforcing nothing.
+- **`select = ["ALL"]`.** Every rule family ruff ships, present ones and
+  a release's future ones alike, rather than a hand-picked list: a list
+  is a thing that rots, since nothing forces a second edit here the day
+  ruff ships a family nobody has looked at yet. `ALL` takes a new family
+  in on the pull request that bumps ruff's own pinned rev instead, which
+  is the day somebody is already looking at what changed. The rejected
+  alternative is the hand-picked list this key held before: each family
+  named and commented here, and each later addition remembered by
+  whoever next opened this file rather than arriving on its own.
+- **`ignore` holds three kinds of entry, told apart by what its comment
+  argues.** A rule the formatter conflicts with, cited from ruff's own
+  `docs/formatter.md` and not argued here, since the list is the
+  vendor's and does not change with this tree. A rule this tree declines
+  on its own merits, argued in the comment beside it —
+  `undocumented-magic-method` and `undocumented-public-init` below are
+  two, and `TD`'s own rules further down are a third. And a finding that
+  is real and is simply not in `ignore` at all: fixed, or answered with a
+  `# noqa` and a reason at its own site, which `RUF100` retires the day
+  nothing needs it.
 - **`ignore` names rules, never codes.** The reason sits in the comment
   and the rule sits in the entry, with nothing to look up between them.
-- **`FIX` is selected and `TD` is not.** Unfinished work belongs in an
+- **`FIX` runs and `TD` is in `ignore`.** Unfinished work belongs in an
   issue, where it can be searched, assigned and closed; a marker in a
   comment is a backlog nobody queries, sitting beside code that reads as
   finished. `FIX` refuses four of them — `TODO`, `FIXME`, `XXX` and
@@ -962,7 +975,8 @@ preview rule then runs only where `extend-select` names it exactly.
   the fourth, and every unsuppressed line it could discipline is a line
   `FIX` already refuses. The two are redundant, so the choice is which
   to keep: formatting a marker, or refusing it. A repository that
-  finishes what it starts keeps the refusal.
+  finishes what it starts keeps the refusal, and `TD`'s own rules in
+  `ignore` are where `ALL` is told so.
   What `FIX` does not read bounds what selecting it buys: a marker
   inside a docstring or a string literal is invisible to it, as is a
   mid-sentence mention that opens no comment, and a `TODO.md` at the
@@ -986,9 +1000,9 @@ preview rule then runs only where `extend-select` names it exactly.
   88, and `[tool.ruff.lint.pycodestyle] max-doc-length = 80` holds the
   comments and docstrings — the half of a file the formatter never
   touches — to the width markdown is already held to. A comment ending
-  in a URL is exempt. The key is half the switch: `W505` is the rule that
-  reads it, so a tree leaving `W` out of `select` states a width and
-  enforces none.
+  in a URL is exempt. `W505` is the rule that reads the key and is inert
+  without it, ruff having no default doc length: a tree naming no
+  `max-doc-length` states a width and enforces none, `select` aside.
 - **`max-complexity = 10`**, ruff's default, with a `# noqa` and a reason
   at each site over it rather than a global bound at the tree's worst.
   `RUF100` then fails the noqa as unused the moment a refactor brings the
@@ -2419,9 +2433,10 @@ A per-file exception belongs in that file's own
 files that never trip the rule it relaxes.
 
 **Decided per repository**: `requires-python` and `.python-version`; the
-matrix breadth; which optional workflows exist; the ruff `select` list's
-project-specific additions and its `per-file-ignores`; what a publishing
-repository checks about its package contents past section 12's floor —
+matrix breadth; which optional workflows exist; the ruff `ignore` list's
+entries a tree declines on its own merits and its `per-file-ignores`; what
+a publishing repository checks about its package contents past section
+12's floor —
 the sdist allowlist, and the script a wheel that is not one package tree
 needs — which follows the shape of that project's own distribution and
 is settled by measuring it, not by copying what a sibling does; the

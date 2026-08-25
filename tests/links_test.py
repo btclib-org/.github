@@ -14,13 +14,15 @@ the arguments being one folded string the grep would have to reassemble.
 from __future__ import annotations
 
 import re
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from . import by_hand
 from .workflows_test import steps
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 pytestmark = pytest.mark.integration
 

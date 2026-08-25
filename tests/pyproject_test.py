@@ -17,12 +17,14 @@ import functools
 import re
 import subprocess
 import tomllib
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from . import ROOT, Tier, by_hand, fenced, name, rows
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 pytestmark = pytest.mark.integration
 
@@ -180,6 +182,25 @@ def ruff_lint(
     ruff: dict[str, Any] = tool.get("ruff", {})
     lint: dict[str, Any] = ruff.get("lint", {})
     return lint
+
+
+def ruff_selects(lint: dict[str, Any], family: str) -> bool:
+    """Say whether a `[tool.ruff.lint]` table turns a family's rules on.
+
+    Section 5 leaves a tree two shapes for `select`: naming the family,
+    or naming `"ALL"`, which turns every family on at once and is
+    `.github`'s own choice. A test asking whether one family runs reads
+    either.
+
+    :param lint: the table `ruff_lint` returns.
+    :param family: the family's code, spelled as `select` would hold it.
+    :returns: whether `select` turns the family on, `ignore` unread: a
+        family `select` turns on and `ignore` empties of every one of
+        its rules is a question of the config's effect and not of this
+        one key, and no test here asks it.
+    """
+    select = lint.get("select", [])
+    return family in select or "ALL" in select
 
 
 @pytest.mark.tier(Tier.PYTHON)
@@ -371,7 +392,7 @@ def test_cpy_is_selected_with_a_notice_rgx(
     """
     lint = ruff_lint(repository, pyprojects)
     command = by_hand(repository, "grep -n 'notice-rgx\\|\"CPY\"' pyproject.toml")
-    assert "CPY" in lint.get("select", []), "CPY is not selected; " + command
+    assert ruff_selects(lint, "CPY"), "CPY is not selected; " + command
     pattern = lint.get("flake8-copyright", {}).get("notice-rgx")
     assert pattern, "CPY is selected with no notice-rgx; " + command
 
@@ -394,7 +415,7 @@ def test_w_is_selected_with_max_doc_length_at_80(
     """
     lint = ruff_lint(repository, pyprojects)
     command = by_hand(repository, "grep -n 'max-doc-length\\|\"W\"' pyproject.toml")
-    assert "W" in lint.get("select", []), "W is not selected; " + command
+    assert ruff_selects(lint, "W"), "W is not selected; " + command
     width = lint.get("pycodestyle", {}).get("max-doc-length")
     assert width == DOC_WIDTH, f"max-doc-length is {width!r}; " + command
 
@@ -417,7 +438,7 @@ def test_d_is_selected_with_the_pep257_convention(
     """
     lint = ruff_lint(repository, pyprojects)
     command = by_hand(repository, "grep -n 'convention\\|\"D\"' pyproject.toml")
-    assert "D" in lint.get("select", []), "D is not selected; " + command
+    assert ruff_selects(lint, "D"), "D is not selected; " + command
     convention = lint.get("pydocstyle", {}).get("convention")
     assert convention == "pep257", f"convention is {convention!r}; " + command
 

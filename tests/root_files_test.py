@@ -22,11 +22,14 @@ against the tier here and once against the clause there.
 from __future__ import annotations
 
 import re
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
 from . import ROOT, Tier, name, rows, sole
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 pytestmark = pytest.mark.integration
 
