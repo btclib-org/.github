@@ -1809,6 +1809,7 @@ owns a day and an hour, the repository owns the minute:
 
 | workflow | day | hour |
 | --- | --- | --- |
+| `fuzz` | Monday | 03 |
 | `links` | Monday | 04 |
 | `vendored-vectors` | Monday | 05 |
 | `codeql` | Tuesday | 04 |
