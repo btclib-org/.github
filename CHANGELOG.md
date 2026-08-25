@@ -7,6 +7,43 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The ack of record is a COMMENT review, and the workflow is inert
+
+- **The verdict has three lines** (issue #340). `ACK <sha>` and `CHANGES
+  REQUESTED <sha>` are joined by `NACK <sha>`, Bitcoin's sense of the
+  word: the disagreement is with the change itself, so no alteration is
+  asked for, where `CHANGES REQUESTED` is a change right in principle
+  and wrong as written. `REVIEWING.md` carries the three lines and says
+  why a `NACK` and a review that ends without a verdict are not the same
+  thing (issue #353).
+- **The ack of record is posted as a review of type COMMENT** (issue
+  #340), and never as a forge approval or a forge request for changes.
+  `can_approve_pull_request_reviews` is false on the organization and on
+  this repository, which closes the route a `GITHUB_TOKEN` would take.
+  The action posts under a GitHub App's own identity rather than that
+  token, so what forbids `--approve` on the route actually taken is the
+  prompt; section 11 states both in place of the self-approval refusal,
+  which reaches an author and not a workflow.
+- **What that leaves unrecovered is the OpenSSF Scorecard's
+  `Code-Review` check** (issue #340). A COMMENT review is in
+  `pulls/<n>/reviews`, so the forge holds a record of the review the
+  standard requires, and it is not an approval. An approving review from
+  this workflow would not have recovered the check either: Scorecard's
+  own documentation says a review by a bot, one powered by a model
+  included, does not count as code review.
+- **`claude-review.yml` is present and neither of its jobs runs** (issue
+  #340). Both carry `if: vars.CLAUDE_REVIEW_ENABLED == 'true'`, an
+  organization variable that does not exist, and an undefined `vars.X`
+  is the empty string — so absence is the off state and creating the
+  variable is the whole of the activation. The gate is on the job
+  because a step-level one leaves the review step's outcome `skipped`,
+  which the guard beside it reads as a review that never ran and reports
+  as a red check on every pull request.
+- **The verification step reads `pulls/<n>/reviews`** (issue #340) and
+  matches the three verdict lines. The reviews and the issue comments
+  are two stores rather than two views of one, so a review posted with
+  `gh pr review` is in the first and in neither of the second.
+
 ### The review guard reads the SDK result the action's log leaves out
 
 - **A review that dies inside the action names no cause** (issue #364).

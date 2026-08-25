@@ -12,8 +12,8 @@ name: claude-review
 # length on. This is that rule applied to the file that states it.
 #
 # Not a required check, and it must not become one. What it produces is a
-# comment, which is an opinion for the author to weigh; a review that
-# gated a merge would make a model's judgement a branch rule.
+# review of type COMMENT, an opinion for the author to weigh; a review
+# that gated a merge would make a model's judgement a branch rule.
 #
 # It is the only job in this repository, which is what makes it cheap: it
 # reads a diff of prose, it builds nothing, and it skips a draft.
@@ -57,9 +57,21 @@ jobs:
     #
     # Compared by full_name rather than by `.fork`, which asks whether the
     # head repository is a fork of anything and is true of a branch of
-    # btclib-org/bbt, itself a fork
+    # btclib-org/bbt, itself a fork.
+    #
+    # CLAUDE_REVIEW_ENABLED is the switch, an *organization* variable,
+    # and README.md's *Review* is where what it does is stated rather
+    # than here a second time.
+    #
+    # On the job and not on a step. A step declining to run leaves
+    # `steps.review.outcome` at `skipped`, which the guard below reads as
+    # anything-but-success and reports as a review that never ran -- a
+    # deliberate switch-off turned into a permanent red check, pointing
+    # at a runner line no skipped step wrote. A skipped job costs nothing
+    # and says nothing
     if: >-
-      ${{ github.event_name == 'pull_request'
+      ${{ vars.CLAUDE_REVIEW_ENABLED == 'true'
+          && github.event_name == 'pull_request'
           && !github.event.pull_request.draft
           && github.event.pull_request.head.repo.full_name
              == github.repository }}
@@ -161,41 +173,45 @@ jobs:
             fired this run, and a finding about a title the pull request
             no longer carries is a finding about nothing.
 
-            The summary's last line is the verdict, `ACK <sha>` or
-            `CHANGES REQUESTED <sha>`, naming the sha because an ack
-            belongs to a tree and not to a branch. For this review it is
-            not optional: this is the ack of record, the one a landing
+            The summary's last line is the verdict, `ACK <sha>`,
+            `CHANGES REQUESTED <sha>` or `NACK <sha>`, naming the sha
+            because an ack belongs to a tree and not to a branch.
+            REVIEWING.md has the three lines and README.md's *Review*
+            what each concludes. For this review the line is not
+            optional: this is the ack of record, the one a landing
             reads, and it is the only part of a review that anything
             other than a person can read -- a review of record ending
             without it cannot be told apart from one that never
             finished. A person reading the same diff may say what they
-            found and deliver no verdict; REVIEWING.md has why the two
-            are not the same thing.
+            found and deliver no verdict; REVIEWING.md has why that is
+            not a NACK.
 
-            What this repository ships is mostly prose, so the findings
-            differ
-            in kind from a code review's. A rule that is stated without
-            the reason that chose it, a claim no command re-derives, a
-            count of anything, a second wording of a fact stated
-            elsewhere, and a rule whose own repository does not keep it
-            are the defects here -- README.md names each of them, and
-            they are what to look for.
+            What this repository ships is mostly prose, so the
+            findings differ in kind from a code review's. A rule that is
+            stated without the reason that chose it, a claim no command
+            re-derives, a count of anything, a second wording of a fact
+            stated elsewhere, and a rule whose own repository does not
+            keep it are the defects here -- README.md names each of
+            them, and they are what to look for.
 
-            Do not run the gates. lint.yml runs this repository's gate,
-            `uvx pre-commit run --all-files`, beside you on this same
-            sha, and CONTRIBUTING.md's last section is what makes
-            relying on it sound. Say in
-            the summary that no gates were run by this job and that the
-            author's own statement of what they ran is what stands --
-            and say so too when a pull request makes no such statement.
+            Do not run the gates. lint.yml runs this repository's
+            gate, `uvx pre-commit run --all-files`, beside you on this
+            same sha, and CONTRIBUTING.md's last section is what makes
+            relying on it sound. Say in the summary that no gates were
+            run by this job and that the author's own statement of what
+            they ran is what stands -- and say so too when a pull
+            request makes no such statement.
 
-            Do not file issues from here: a collateral finding goes in the
-            summary comment, under a line saying it is not a finding
+            Do not file issues from here: a collateral finding goes
+            in the summary, under a line saying it is not a finding
             against this pull request, and a person decides whether it
             becomes one.
 
-            Post GitHub comments only, never review text as a message.
-            `gh pr comment` for the summary,
+            Post to the forge and not as a message only this job's
+            log reads. `gh pr review --comment` for the summary, which
+            is what puts the ack of record in the forge's own record of
+            reviews; never `--approve` and never `--request-changes`,
+            README.md's *Review* having why.
             `mcp__github_inline_comment__create_inline_comment` (with
             `confirmed: true`) for a finding a line is the subject of.
           # folded rather than literal, and `gh pr` rather than the three
@@ -234,13 +250,12 @@ jobs:
           # A failing review names no cause in the log: the action
           # prints the result message with `api_error_status`, the stop
           # reason and the error text sanitized out of it, and writes
-          # every message
-          # unsanitized to the execution file this step already names.
-          # What it drops is read from there rather than turned on with
-          # `show_full_output: true`, which prints every message
-          # including tool results and whose own description warns
-          # against that on a public repository. The debug rerun the
-          # action also suggests is no third option: it keys on
+          # every message unsanitized to the execution file this step
+          # already names. What it drops is read from there rather than
+          # turned on with `show_full_output: true`, which prints every
+          # message including tool results and whose own description
+          # warns against that on a public repository. The debug rerun
+          # the action also suggests is no third option: it keys on
           # ACTIONS_STEP_DEBUG in the step's environment, which
           # `gh run rerun --debug` does not put there.
           #
@@ -284,13 +299,16 @@ jobs:
       #           | {id, conclusion, run_started_at, updated_at}'
       #
       # So what is read here is what was posted rather than what the
-      # action produced: the verdict is the last line of a comment on
-      # the pull request, which is where REVIEWING.md puts it, and only
-      # what claude[bot] wrote is the ack of record -- the btclib-org
-      # repository standard's *Review* is what says an author's own is
-      # not.
+      # action produced: the verdict is the last line of a review body,
+      # which is where REVIEWING.md puts it, and only what claude[bot]
+      # wrote is the ack of record -- the btclib-org repository
+      # standard's *Review* is what says an author's own is not.
       #
-      #   gh api repos/{owner}/{repo}/issues/<number>/comments \
+      # The reviews endpoint and not the issue comments one, those being
+      # two stores rather than two views: a review posted with `gh pr
+      # review` is in the first and in neither of the second.
+      #
+      #   gh api repos/{owner}/{repo}/pulls/<number>/reviews \
       #     --jq '.[] | "\(.user.login) \(.body | split("\n") | last)"'
       #
       # The last verdict decides, rather than any verdict naming the
@@ -317,30 +335,56 @@ jobs:
           NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          # --paginate because the API pages at thirty comments and the
+          # --paginate because the API pages at thirty reviews and the
           # newest sit on the last page; --jq answers once per page, so
           # the last line of the output is the last verdict posted.
-          verdict=$(gh api "repos/$REPO/issues/$NUMBER/comments" --paginate \
+          #
+          # `.body // ""` is for a null body: `null | split` aborts,
+          # and it aborts the filter over the whole page rather than
+          # skipping that one review, so a single such body loses every
+          # verdict beside it. The API description has that field
+          # required and carries no `nullable` on it, where `commit_id`
+          # beside it in the same schema does, and
+          #
+          #   gh api repos/{owner}/{repo}/pulls/<number>/reviews \
+          #     --jq '.[].body | type'
+          #
+          # answers `string` throughout this organization. It is
+          # guarded regardless: a description is no contract, and being
+          # wrong about one costs every verdict on the page where the
+          # guard costs nothing.
+          #
+          # An empty summary is a different shape and wants no guard,
+          # `split("\n")` answering `[]` for it. A body of whitespace
+          # or newlines alone is what `map(select(length > 0))` is for,
+          # splitting into fields that the `sub` before it then empties.
+          verdict=$(gh api "repos/$REPO/pulls/$NUMBER/reviews" --paginate \
             --jq '[ .[]
                     | select(.user.login == "claude[bot]")
-                    | .body
+                    | .body // ""
                     | split("\n")
                     | map(sub("\\s+$"; ""))
                     | map(select(length > 0))
                     | last // empty
-                    | select(test("^(ACK|CHANGES REQUESTED) [0-9a-f]{7,40}$"))
+                    | select(test("^(ACK|NACK|CHANGES REQUESTED) [0-9a-f]{7,40}$"))
                   ] | last // empty' | tail -1)
           if [ -z "$verdict" ]; then
             echo "::error::the review posted no verdict on this pull" \
                  "request, so nothing says whether $HEAD_SHA was read at" \
                  "all. A job that finishes green having written no" \
-                 "comment, or a comment whose last line is not a" \
-                 "verdict, is what this reports."
+                 "review, or a review whose last line is not a verdict," \
+                 "is what this reports."
             exit 1
           fi
           sha=${verdict##* }
           case "$verdict" in
             "ACK "*) ;;
+            "NACK "*)
+              echo "::error::the review nacked $sha: the change itself" \
+                   "is disagreed with, and no rewrite of it is asked" \
+                   "for. The review body has the argument."
+              exit 1
+              ;;
             *)
               echo "::error::the review requested changes on $sha."
               exit 1
@@ -364,13 +408,18 @@ jobs:
     # that triggered it and answers what was actually asked, where a
     # prompt of ours would answer something else. `github.event.issue.pull
     # _request` is what tells a comment on a pull request from a comment
-    # on an issue, the issue_comment event carrying both
+    # on an issue, the issue_comment event carrying both.
+    #
+    # Behind the same switch as the review job above: this job shares
+    # that job's credential and its action, so a file that is not to run
+    # is not to run here either
     if: >-
-      ${{ (github.event_name == 'issue_comment'
-           && github.event.issue.pull_request
-           && contains(github.event.comment.body, '@claude'))
-          || (github.event_name == 'pull_request_review_comment'
-              && contains(github.event.comment.body, '@claude')) }}
+      ${{ vars.CLAUDE_REVIEW_ENABLED == 'true'
+          && ((github.event_name == 'issue_comment'
+               && github.event.issue.pull_request
+               && contains(github.event.comment.body, '@claude'))
+              || (github.event_name == 'pull_request_review_comment'
+                  && contains(github.event.comment.body, '@claude'))) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

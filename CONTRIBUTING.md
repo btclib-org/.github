@@ -270,10 +270,9 @@ than restating it.
 Everything else reports. `alignment.yml` is a sentinel: what it finds is
 drift that happened days ago in a repository nobody is working in, and an
 API that is down is nothing a pull request introduced. `links.yml` asks
-whether somebody else's server answered. `claude-review.yml` writes the
-review and its own header says it must not become a required check —
-requiring it would make a review a gate to satisfy rather than a reading
-to answer.
+whether somebody else's server answered. `claude-review.yml`'s own
+header says it must not become a required check — requiring it would
+make a review a gate to satisfy rather than a reading to answer.
 
 ### A version, and no release
 

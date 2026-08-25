@@ -2187,48 +2187,90 @@ author. GitHub refuses a self-approval, which is why an *author's* own
 verdict is a comment and can be nothing else.
 
 **What a landing reads is the ack of record**: a verdict whose last line
-is `ACK <sha>` or `CHANGES REQUESTED <sha>`, naming a sha because an ack
-belongs to a tree and not to a branch. A review that delivers no verdict
-is a reading and not an unfinished review; `REVIEWING.md` states that
-distinction, and why, for whoever reviews.
+is `ACK <sha>`, `CHANGES REQUESTED <sha>` or `NACK <sha>`, naming a sha
+because an ack belongs to a tree and not to a branch. `CHANGES
+REQUESTED` is the change being right in principle and wrong as written,
+and what answers it is another push. `NACK` is Bitcoin's sense of the
+word: the disagreement is with the change itself, so no alteration is
+asked for and none would earn an ack, and what answers it is an argument
+or a closed pull request. A review that delivers no verdict is a reading
+and not an unfinished review; `REVIEWING.md` states that distinction,
+and why, for whoever reviews.
 
-**The ack of record is posted as a review and not as a comment** —
-`APPROVE` carrying the `ACK <sha>` body, `REQUEST_CHANGES` carrying the
-`CHANGES REQUESTED <sha>` one. The self-approval refusal above does not
-reach it, `claude-review.yml` not running as the author. A verdict
-posted as a comment leaves the forge holding no record of the review
-this file requires, and a rule stated here and visible in no artifact is
-a rule whose only witness is this file: an outside reader then reads
-this organization as merging unreviewed, correctly on the evidence
-available to them. The OpenSSF Scorecard's `Code-Review` check is that
-reader, crediting an approval on the forge or a merger different from
-the committer, and a comment is neither.
+**The ack of record is posted as a review of type COMMENT**, whichever
+of the three it carries — `gh pr review --comment` — and never as a
+forge approval or a forge request for changes:
 
-**The alternative is a second human approving every pull request**, and
-what this gives up is that a model's judgement then sits where a branch
-rule reads. It is chosen because nothing lands while nobody is
-available, and because the model is the reviewer of record in substance
-already — which is what the paragraph below says. The alternative is
-written down rather than dropped, being what stops the next reader from
-undoing this.
+```shell
+gh api orgs/<org>/actions/permissions/workflow \
+  --jq .can_approve_pull_request_reviews
+gh api repos/<org>/<repo>/pulls/<n>/reviews --jq '.[].user.login'
+```
 
-**It lands before the bypass goes.** btclib-org/.github#341 holds the
-removal of the ruleset's `bypass_actors`, after which an approving
-review is what unblocks a merge and a workflow that fails to post one
-stops every repository. The margin between the two is where that
-failure mode is found, a missing approval costing nothing while the
-bypass is still there.
+The first answers `false`, which closes the route a `GITHUB_TOKEN`
+would take, and *Tokens, publishing, scanning* below has why it is set
+that way. The second answers `claude[bot]` — a GitHub App's identity,
+not `github-actions[bot]` — so that setting is not what governs the
+credential in play. What forbids `--approve` here is the prompt saying
+never to, `Bash(gh pr:*)` in `claude_args` permitting it otherwise: a
+rule of this file held by a sentence in a prompt, and worth naming as
+that rather than as a setting. The self-approval refusal above is not
+the reason either — it reaches an author, and the workflow does not run
+as one.
+
+`--request-changes` is available and goes unused, one shape for the
+three keeping the answer in one place: the verdict is the body's last
+line, which is what the job's own verification step reads, and a review
+type saying something for one verdict of the three would be a second
+place for the answer to live and to disagree.
+
+**What the forge then holds is a record of the review and not an
+approval.** That second call lists a COMMENT review as it lists any
+other, so the rule this file states is visible in an artifact rather
+than only here. It does not buy the OpenSSF Scorecard's `Code-Review`
+check: that check credits an approval on the forge or a merger
+different from the committer, and its own documentation says that a
+review by a bot, one powered by a model included, does not count as
+code review — so the approval this workflow does not have would not
+have satisfied it either. What it asks for is a second person who
+understands the change, in its own words, and no workflow is one.
+
+**btclib-org/.github#341 holds the removal of the ruleset's
+`bypass_actors`.** The bypass is what lets a merge happen with no
+approving review on the pull request, and the workflow's verdict is not
+one, so removing it puts a person's approval on the critical path of
+every merge. What that buys is the rule enforced by the forge rather
+than by whoever is landing, and what it costs is that nothing lands
+while nobody is available. That is the trade the issue decides.
 
 **The ack of record is `claude-review.yml`'s**, and an author's own is
 not one. A comment from the account that opened the pull request is a
 statement that its gates were run — worth having, and not a reading. The
 distinction is the whole of why the review requirement exists: an author
 verifying their own work cannot find what they did not think to look
-for, which is the class of defect a second reader exists to catch. The
-workflow runs on `opened`, `reopened`, `synchronize` and
-`ready_for_review`, and on demand when a comment names `@claude` — that
-last is how a head that moved after the review gets a fresh one, since
-the ack does not follow the branch.
+for, which is the class of defect a second reader exists to catch. What
+triggers the workflow is `opened`, `reopened`, `synchronize` and
+`ready_for_review`, and a comment naming `@claude` — that last is how a
+head that moved after the review gets a fresh one, since the ack does
+not follow the branch.
+
+**The workflow is present and neither of its jobs runs.** Each carries
+`if: vars.CLAUDE_REVIEW_ENABLED == 'true'`, an organization variable:
+
+```shell
+gh api orgs/<org>/actions/variables --jq '.variables[].name'
+```
+
+It names nothing, and an undefined `vars.X` is the empty string, so the
+absence is the off state and creating it with that value is the whole of
+what a tree carrying the gate needs to start reviewing. Nothing else has
+to be written that day, which is why the file is kept current rather than
+deleted from a tree and written into it a second time. A tree whose gate
+is off carries no ack of record, and what a landing reads there is
+whatever reading a person made. The switch is the organization's rather
+than each repository's because one setting is one thing to remember: a
+variable per tree is one that can be set in some and forgotten in others,
+with nothing saying which.
 
 **A pull request that adds or edits `claude-review.yml` gets no ack**,
 that being the exception the rule above has, until the change is on
@@ -2252,10 +2294,9 @@ must not become one. Requiring it would make a review a gate to be
 satisfied rather than a reading to be answered, and would hand the merge
 button to whatever the workflow happened to say. What it is instead is
 the thing a human landing the pull request reads before pressing. That
-is a different mechanism from the review it posts: a required check is a
-context a branch rule names and nothing else can supply, where the
-approval a `pull_request` rule counts is satisfied by whoever reviews,
-so the workflow is one route to it rather than the only one.
+is a different mechanism from the review it posts: a required check is
+a context a branch rule names and nothing else can supply, where the
+approval a `pull_request` rule counts is satisfied by whoever reviews.
 
 `REVIEWING.md` is the standard: a diff is acked when
 it leaves the tree better than it found it, a matter of taste is not a

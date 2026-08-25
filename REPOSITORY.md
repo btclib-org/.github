@@ -244,7 +244,7 @@ gh api repos/btclib-org/.github/actions/permissions/workflow
 
 `read`, which is what every workflow here needs: `lint.yml` and
 `links.yml` read the tree, and `claude-review.yml`'s jobs elevate
-themselves to `pull-requests: write` to post a comment and to
+themselves to `pull-requests: write` to write on a pull request and to
 `id-token: write` for the OIDC token the action mints at startup. Nothing
 publishes, attests or writes to the repository's contents.
 
