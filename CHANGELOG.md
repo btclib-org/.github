@@ -2035,3 +2035,19 @@ audit has no revision to compare against.
   which the bare `(#N)` form some repositories use is not, GitHub
   numbering issues and pull requests in one sequence. The entries
   already landed keep whichever form they used.
+
+### CLAUDE.md names the suite's switch, and the backlog's sibling-red
+
+- **`CLAUDE.md`'s *Non-obvious facts* named the suite's subject and its
+  missing coverage, and said nothing about how a run measures anything**
+  (closes #343): the bullet now states `tests/conftest.py`'s
+  `BTCLIB_INTEGRATION` switch, and that `uv run pytest` written the
+  ordinary way exits 0 with everything skipped — the case *Verifying*'s
+  own advice, to trust the exit code over the filtered output, does not
+  cover.
+- **The same section said nothing about a `BACKLOG` row turning red
+  once a sibling repository lands the fix the row excuses** (closes
+  #343): a new bullet names the strict-xfail mechanism and the two
+  commands that tell a session's own branch apart from it —
+  `git diff origin/main..HEAD -- tests/` empty, and the same run against
+  a `git archive origin/main` snapshot.
