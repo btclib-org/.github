@@ -7,6 +7,21 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 2's badge row drops the link to the repository
+
+- **The link to the repository is no longer a badge every repository
+  carries.** It goes from the property list that decides membership and
+  from the fixed order, which now ends on Read the Docs, and it is named
+  in what section 2 refuses: a badge row is an audit, and this one
+  renders the repository's name because its own URL spells it.
+- **What that gives up is the reader who is not on the forge** — a
+  `README.md` met as the long description an index renders, or as the
+  file an unpacked sdist carries — and that reason had a paragraph of
+  its own, which goes with the badge rather than outliving it. Section
+  3's `[project.urls]` reaches that reader without a badge: `repository`
+  is a `Project-URL` line in the sdist's own `PKG-INFO` and a field the
+  index serves.
+
 ### Section 11 says what the `pull_request` bypass suspends
 
 - **The paragraph had the bypass answer nothing beyond the approval**
