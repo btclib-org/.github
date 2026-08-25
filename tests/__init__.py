@@ -232,17 +232,23 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
-        131,
-        "test_every_test_file_is_named_so_pytest_collects_it",
-        ("btclib-node",),
-    ),
-    (
         177,
         "test_d_is_selected_with_the_pep257_convention",
         ("btclib-node",),
     ),
+    (
+        371,
+        "test_every_test_file_is_named_so_pytest_collects_it",
+        ("btclib-node",),
+    ),
 )
-"""What the tracker already knows, read by `conftest.py` at collection."""
+"""What the tracker already knows, read by `conftest.py` at collection.
+
+The number is an issue of this repository's own tracker, which is what
+`conftest.py`'s `cited()` spells it as. A row keyed on a number from a
+tree this suite measures is not caught: those trackers number in the
+same range, so the citation names a real issue about something else.
+"""
 
 
 def filed(test: str, repository: str) -> list[int]:
