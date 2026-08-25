@@ -434,8 +434,8 @@ both tracked.
 
 ### Directories
 
-- the package directory, holding `py.typed` and a `__init__.py` that
-  declares `__all__`;
+- the package directory, under `src/`, holding `py.typed` and a
+  `__init__.py` that declares `__all__`;
 - `tests/`, mirroring the package;
 - `docs/source/`, hand-written, with a test that every shipped module is
   documented;
@@ -451,6 +451,16 @@ project that publishes nothing may install nothing — `package = false`,
 or a build backend given no module to build. Where there is no package a
 bullet has no subject: a floor is over the rules whose subject a tree
 holds, and does not supply one.
+
+**The package directory sits under `src/`.** A package at the
+repository root is on `sys.path` whenever anything runs from that
+root, so an import can resolve to the checkout instead of to the
+installed distribution, and section 7's convention tests exist to tell
+those two apart. Under `src/` the checkout root holds no importable
+package, so the suite tests what was built or fails outright, and the
+two cannot be silently confused. The root layout costs one directory
+less and puts the package where a reader of the repository listing
+meets it first; that is what this gives up.
 
 **The package directory is singular by the rule and not by omission.**
 `uv_build` lets a project name more than one module in `module-name`, a
@@ -492,6 +502,15 @@ their reasoning needs more room than a hook argument has.
   `btclib-secp256k1` builds a vendored C library through cffi and cmake,
   which hatchling answers with a build hook and a pure-Python backend
   does not answer at all.
+
+    Section 2's `src/` rule matches each backend's own default, so
+    neither needs a key that states it. `uv_build` already looks under
+    `src/` unless `[tool.uv.build-backend] module-root` overrides it, so
+    that key disappears under the rule rather than changing value.
+    Hatchling names no directory at all: `<name>/__init__.py` at the
+    root is its first file-selection heuristic and `src/<name>/__init__.py`
+    its second, so the rule is answered by which heuristic matches
+    rather than by a setting.
 
     `requires` names that backend with a floor and, under `uv_build`, a
     **ceiling at the next minor**, where the bullet below refuses an

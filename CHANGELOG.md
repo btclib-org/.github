@@ -7,6 +7,30 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 2 states where the package directory sits
+
+- **The package directory sat at the repository root, and no file in
+  the organization said why, or said `src/` instead** — issue #313.
+  Section 2 now says the package directory sits under `src/`: a package
+  at the root is on `sys.path` whenever anything runs from there, so an
+  import can resolve to the checkout instead of to the installed
+  distribution, which is what section 7's convention tests exist to
+  tell apart. The root layout costs one directory less and puts the
+  package where a reader of the listing meets it first; that is what
+  the rule gives up.
+- **Section 3's build-backend bullet says what the rule costs each
+  backend** — issue #313: under `uv_build` it is the default, so
+  `[tool.uv.build-backend] module-root` overriding it to the root
+  disappears rather than changes value; hatchling needs no key at all,
+  `src/<name>/__init__.py` already being its own second file-selection
+  heuristic.
+- **`tests/surface_test.py`'s `package()` located a hatchling package
+  only at the repository root, the one layout the rule now leaves
+  behind** — issue #313. It now finds one under `src/` too, and a new
+  test, `test_the_package_directory_sits_under_src`, fails a tree that
+  installs a package outside it, carried as a `BACKLOG` row keyed on
+  this issue until each moves.
+
 ### Section 1 names the uv floor's owners, section 15 its ceiling
 
 - **`[tool.uv] required-version` said the floor was "low enough for

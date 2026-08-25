@@ -243,6 +243,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_the_uv_floor_is_not_above_what_dependabot_bundles",
         ("bbt", "btclib-node"),
     ),
+    (
+        313,
+        "test_the_package_directory_sits_under_src",
+        ("btclib", "btclib-secp256k1", "bitcoin-core-rpc", "btclib-node"),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection."""
 
