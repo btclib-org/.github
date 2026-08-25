@@ -22,6 +22,33 @@ audit has no revision to compare against.
   is a `Project-URL` line in the sdist's own `PKG-INFO` and a field the
   index serves.
 
+### `REPOSITORY.md` records the tag ruleset and who squash binds
+
+- **The recorded rulesets were short of one** (closes #376). The call
+  that section writes answers `tag-integrity` as well, and it now asks
+  for each ruleset's ref condition, which is where `refs/tags/v*` is
+  read from rather than asserted. The `pull_request` parameter block the
+  second call answers carries `dismissal_restriction` and
+  `required_reviewers`.
+- **What that ruleset is for on a repository that cuts no release is
+  beside it** (closes #376). The paragraph points at `CONTRIBUTING.md`'s
+  *A version, and no release* for nothing being tagged, and says the
+  rule stands ahead of the tag rather than being created alongside one.
+- **The release bullet offered "no tag to protect" as an absence**
+  (closes #376). Under a heading saying what is not configured, that
+  reads as the reason `refs/tags/v*` is unprotected, where what is
+  absent is the tag.
+- **The squash constraint was recorded as holding against a flipped
+  repository setting, without saying for whom** (closes #375).
+  `allowed_merge_methods` is a parameter of the rule the maintainer
+  bypasses, so what refuses a merge commit for everybody is
+  `main-integrity`'s `required_linear_history`, and rebase-and-merge is
+  linear.
+- **The bypass was not exercised** (closes #375): offering it a merge
+  method the ruleset excludes means flipping `allow_rebase_merge` and
+  pressing the button on a live pull request, which is a settings change
+  and a landing rather than a call.
+
 ### Section 11 says what the `pull_request` bypass suspends
 
 - **The paragraph had the bypass answer nothing beyond the approval**
