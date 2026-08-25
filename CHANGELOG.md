@@ -52,6 +52,12 @@ audit has no revision to compare against.
   #312. It now fails a tree that commits a `uv.lock` and names no floor at
   all; `bbt` and `btclib-node` are the two, carried as a `BACKLOG` row
   under this issue until both land.
+- **Issue #312's `BACKLOG` row narrows to `btclib-node`** — `bbt`'s own
+  `required-version` is no longer above what `dependabot-core`'s
+  `uv/Dockerfile` bundles, so its cell in
+  `test_the_uv_floor_is_not_above_what_dependabot_bundles` passes under
+  the strict xfail. The issue stays open: `btclib-node` still owes the
+  tree a floor.
 
 ### Every fixable hook now fixes, and `CHANGELOG.md`'s derogation is gone
 
