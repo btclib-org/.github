@@ -26,6 +26,30 @@ audit has no revision to compare against.
   either side — which is a narrower claim than the cause lying outside
   them, and the field this guard now reads is what tells the two apart.
 
+### Section 3 points at section 14 instead of listing the tool files
+
+- **Section 3 said how many tools keep a configuration file of their
+  own, and named yamllint and taplo** (closes #377). `markdownlint-cli2`
+  answers that sentence's own criterion — it reads a file found by name
+  from the working directory, and `pyproject.toml` is not among the
+  names it looks for — so one file that the rule covers was outside the
+  sentence stating it.
+- **The criterion is discovery, and not whether a tool can read
+  `pyproject.toml` at all** (closes #377). `markdownlint-cli2` reads a
+  `[tool.markdownlint-cli2]` table where `--config` and `--configPointer`
+  point it at one, so what a file of its own buys is the flag pair the
+  hook then does not pass.
+- **What section 3 keeps is the rule and the reason for it, not the
+  enumeration** (closes #377). Section 14 names each such file with what
+  it holds, so section 9's *One fact in one place* puts the list there
+  and a pointer in section 3, and a file added later is entered where
+  the others' contents already are. Raising the count instead would have
+  left the same sentence one tool later, which section 9's *Measure,
+  don't assert* refuses.
+- **`CLAUDE.md`'s `pyproject.toml` bullet points at section 14 too**
+  (closes #377), in the shape `REPOSITORY.md` uses for
+  `CONTRIBUTING.md`'s *A version, and no release*.
+
 ### Section 2's badge row drops the link to the repository
 
 - **The link to the repository is no longer a badge every repository

@@ -118,11 +118,11 @@ Do not use Fable unless explicitly instructed.
 
 - **`pyproject.toml` is not a distribution's.** `package = false`, no
   build backend and no wheel, so section 3 describes a file this one is
-  not. The tools that read a `pyproject.toml` are configured in it, and
-  the ones that do not keep files of their own: `.taplo.toml`,
-  `.yamllint.yaml`, `.markdownlint.jsonc`. A word this file's own prose
-  needs — `CPY`, ruff's copyright rule — is a typo to the spell checker
-  until `[tool.typos]` names it, with the reason beside it.
+  not. Section 14 names the files kept by the gate's tools that do not
+  look in `pyproject.toml` for their configuration. A word this file's
+  own prose needs — `CPY`, ruff's copyright rule — is a typo to the
+  spell checker until `[tool.typos]` names it, with the reason beside
+  it.
 - **The suite's subject is the other repositories, and there is no
   coverage**: what it would measure is a tree that ships nothing, so the
   number would be the suite measuring itself. What it cannot reach — a
