@@ -30,6 +30,12 @@ audit has no revision to compare against.
   test, `test_the_package_directory_sits_under_src`, fails a tree that
   installs a package outside it, carried as a `BACKLOG` row keyed on
   this issue until each moves.
+- **`tests/__init__.py`'s `BACKLOG` row for the package-directory move
+  narrows to `btclib` and `bitcoin-core-rpc`** (issue #313):
+  `btclib-secp256k1` and `btclib-node` now sit their package under
+  `src/`, so their cells in `test_the_package_directory_sits_under_src`
+  pass without the strict xfail; `btclib` and `bitcoin-core-rpc` still
+  owe the tree the move.
 
 ### Section 1 names the uv floor's owners, section 15 its ceiling
 
