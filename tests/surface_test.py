@@ -2,11 +2,12 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""What a package directory holds, and what its modules declare.
+"""Where a package directory sits, and what it and its modules declare.
 
-Section 2 asks the package directory for `py.typed` and an `__init__.py`
-that declares `__all__`, of a tree that installs an importable package
-and of no tier in particular. Section 7 asks the rest of the surface --
+Section 2 asks the package directory to sit under `src/`, to hold
+`py.typed`, and to hold an `__init__.py` that declares `__all__`, of a
+tree that installs an importable package and of no tier in particular.
+Section 7 asks the rest of the surface --
 `__all__` in every module -- of a package that publishes, taking that
 bullet out of its escape clause there: `py.typed` promises the types are
 supported, and which names are public is the other half of that promise.
@@ -63,13 +64,12 @@ def package(
     Read off what the tree's own `pyproject.toml` declares rather than
     inferred from where an `__init__.py` happens to sit: under
     `uv_build`, `module-root` and `module-name` say the directory
-    outright, `src/` being that backend's own default and not a layout
-    section 2 states, so a tree using it holds no root-level
-    `__init__.py` for a scan to find. A backend the standard does not
-    configure this way -- `btclib-secp256k1`'s hatchling -- keeps a
-    directory of the root carrying an `__init__.py`, `tests/` excepted,
-    which is that backend's own default and the shape every such tree
-    here uses.
+    outright, `src/` being that backend's own default and section 2's
+    own rule alike. A backend the standard does not configure this way
+    -- hatchling -- names no directory of its own, so it is found by a
+    scan tried at the root first and under `src/` second, the order
+    hatchling's own file-selection heuristic tries them in; `tests/` is
+    excepted from either.
 
     :param repository: the repository's name.
     :param trees: the checkouts.
@@ -112,7 +112,8 @@ def package(
         {
             Path(path).parent
             for path in tracked(trees[repository], "*__init__.py")
-            if Path(path).parent.parent == Path() and Path(path).parent != Path("tests")
+            if Path(path).parent != Path("tests")
+            and Path(path).parent.parent in (Path(), Path("src"))
         }
     )
     if len(found) > 1:
@@ -191,6 +192,28 @@ def test_the_package_directory_is_typed_and_declares_its_surface(
     declaration = (root / directory / "__init__.py").read_text(encoding="utf-8")
     assert DECLARED.search(declaration), (
         f"{directory}/__init__.py declares no __all__; " + command
+    )
+
+
+def test_the_package_directory_sits_under_src(
+    repository: str,
+    trees: dict[str, Path],
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 2: the package directory sits under `src/`.
+
+    Asked of every tree and skipped where there is no package, the same
+    condition the bullet above carries.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    :param pyprojects: each tree's parsed `pyproject.toml`.
+    """
+    directory = package(repository, trees, pyprojects)
+    if directory is None:
+        pytest.skip(f"{repository} installs no importable package")
+    assert directory.parts[0] == "src", f"{directory} is not under src/; " + by_hand(
+        repository, "git ls-files '*__init__.py'"
     )
 
 
