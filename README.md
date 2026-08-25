@@ -401,8 +401,8 @@ badge.
 Which property decides which badge:
 
 - **every repository** — the licence, derived from the repository's own
-  `LICENSE` by `img.shields.io/github/license/<org>/<repo>`; the `lint`
-  workflow; and a link to the repository on GitHub;
+  `LICENSE` by `img.shields.io/github/license/<org>/<repo>`; and the
+  `lint` workflow;
 - **publishes** — from the index, the version, the downloads, the
   development status, the supported Python versions, `wheel` and
   `implementation`; and from the forge, `github/v/release`;
@@ -416,12 +416,12 @@ Which property decides which badge:
 development status, the licence, the supported Python versions, `wheel`,
 `implementation`, `github/v/release`, `test`, `lint`, `docs`,
 pre-commit.ci, then the sentinels in the order section 10's calendar
-gives them, then Read the Docs, and last the link to the repository. A
-tree skips what it does not own and keeps the rest in that order, so a
-reader comparing two `README.md` files compares like with like instead
-of hunting. Taking the sentinels' order from the calendar is one order
-to maintain rather than two, and what it costs is that a workflow moved
-to another day moves its badge in every `README.md` that carries it.
+gives them, and last Read the Docs. A tree skips what it does not own
+and keeps the rest in that order, so a reader comparing two `README.md`
+files compares like with like instead of hunting. Taking the sentinels'
+order from the calendar is one order to maintain rather than two, and
+what it costs is that a workflow moved to another day moves its badge in
+every `README.md` that carries it.
 
 `img.shields.io/pypi/wheel` and `img.shields.io/pypi/implementation`
 are read off the files a release uploaded rather than off anything the
@@ -429,13 +429,6 @@ project declares: `iniconfig` names no `Implementation` classifier and
 the second renders `cpython` for it anyway. `github/v/release` is read
 in a **pair** with the PyPI version badge beside it: where the two
 disagree, a release reached the forge and not the index.
-
-The link to the repository is the one item above that measures nothing,
-and it is a link rather than a claim: the README is the long description
-an index renders and the file an unpacked sdist carries, so it is read
-where the repository is not one click away. It says the repository's
-name and nothing else, which is a claim a reader settles by following
-it.
 
 **A badge that answers with anything but a measurement is a question
 with two answers**, and which one is the point: either the thing it
@@ -484,7 +477,15 @@ What is refused, and the reason is nearly the same one each time:
   the tree gates is the objection made of a coverage badge two entries
   up. What that gives up is a reader of the index page seeing the
   typing promise at a glance, which the classifier list on that same
-  page carries anyway.
+  page carries anyway;
+- **a link to the repository** — it renders the repository's name
+  because the URL says so, and the row is an audit, so the item that
+  measures nothing is the one that does not belong in it. What that
+  gives up is the reader who meets this file as the long description an
+  index renders or as the `README.md` an unpacked sdist carries, where
+  the repository is not one click away: section 3's `[project.urls]`
+  reaches that reader instead, `repository` being a `Project-URL` line
+  in the sdist's own `PKG-INFO` and a field the index serves.
 
 The Read the Docs host is `app.readthedocs.org` and not `readthedocs.org`
 because the second answers `307` and redirects to the first: one spelling
