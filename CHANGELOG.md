@@ -7,6 +7,24 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### `CONTRIBUTING.md`'s merge command pins the head that lands
+
+- **The command merged whatever sat at the head when it ran**
+  (closes #360). *Landing it* now passes the merge endpoint's `sha`,
+  the head the checks were read on: checking the ack and merging are
+  two calls, and the push that moves the head between them comes out
+  of the same round the verdict does. The endpoint is documented to
+  refuse a mismatch rather than land it, so a head that moved costs a
+  round instead of putting an unreviewed tree on `main`.
+- **The argument sits beside the parameter rather than in the issue that
+  filed it** (closes #360): the file already anchors a review's exchange
+  to a sha, and section 11 already has an ack name one, so an added
+  parameter reads as a keystroke until a sentence says which rule it is.
+- **The other trees' copies are btclib-org/.github#281's** — the issue
+  that tracks a shared half this tree is ahead on, which
+  `tests/verbatim_test.py`'s `EXPECTED_DRIFT` already names for this
+  path.
+
 ### `CONTRIBUTING.md` names the two spellings of an issue citation
 
 - **Its *Pull requests* names `(closes #N)` and `(issue #N)` rather than
