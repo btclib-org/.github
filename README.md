@@ -1801,6 +1801,7 @@ owns a day and an hour, the repository owns the minute:
 | `bootstrap-dns` | Thursday | 05 |
 | `os-ubuntu` | Friday | 04 |
 | `integration-hwi` | Friday | 05 |
+| `scorecard` | Saturday | 03 |
 | `os-macos` | Saturday | 04 |
 | `os-windows` | Saturday | 05 |
 | `mutation` | Sunday | 04 |

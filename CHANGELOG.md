@@ -41,6 +41,23 @@ audit has no revision to compare against.
   and no repository can deviate here: the string is decided by how
   pre-commit installs the hook, which is the spelling bullet's subject.
 
+### The calendar gains a row for scorecard, the OpenSSF Scorecard sentinel
+
+- **`scorecard` takes Saturday, 03** (issue #363). `04` and `05` were
+  full on every day, so `03` is the next hour the band grows into; `03`
+  is free on every day, and Saturday is `ossf/scorecard-action`'s own
+  upstream default day.
+- **The row does not make `tests/grid_test.py` green** (issue #363).
+  `portanode`'s `scorecard.yml` still runs with no `schedule:`, waiting
+  on this row before it adds one in a pull request of its own, and
+  `btclib-benchmarks`'s own `scorecard.yml` already schedules the
+  workflow on `ossf/scorecard-action`'s upstream default cron rather
+  than on this row's instant —
+  `test_every_cron_is_the_instant_the_calendar_names` was already
+  red on that cron before this row existed, naming it a workflow
+  section 10 had none for, and stays red after, naming it a cron
+  that disagrees with the row now that one exists.
+
 ### Section 12's worked answer names no package path
 
 - **`bitcoin-core-rpc`'s worked answer quoted the value of `package`**
