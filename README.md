@@ -2020,13 +2020,23 @@ and classic protection, taking the most restrictive combination:
   re-tags a failed release still works.
 
 **The bypass mode is the whole of the design.** `pull_request` excuses
-its holder from the review rule *while merging a pull request* and at no
-other time, which answers the one thing a solo-maintainer repository
-cannot do — produce someone else's approval — and answers nothing
-further. A direct push to `main` is refused for everyone. The other mode,
-`always`, would permit a direct push, and what it would buy is worth
-nothing once the rule is read as asking for a valid signature rather than
-for a particular signer.
+its holder *while merging a pull request* and at no other time, which
+answers the one thing a solo-maintainer repository cannot do — produce
+someone else's approval. A direct push to `main` is refused for everyone.
+The other mode, `always`, would permit a direct push, and what it would
+buy is worth nothing once the rule is read as asking for a valid
+signature rather than for a particular signer.
+
+**What it excuses is the rule, not the approval count.** Its holder [can
+then choose to bypass any branch protections and merge that pull
+request](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository#granting-bypass-permissions-for-your-branch-or-tag-ruleset),
+and the guard against merging a head an approval no longer covers is a
+parameter of that same rule: `dismiss_stale_reviews_on_push`, [the
+approval dismissed once a push changes the diff it was
+given](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#require-a-pull-request-before-merging).
+So the dismissal binds every merge except the ones this organization
+makes, and the `sha` on `CONTRIBUTING.md`'s merge call is not a second
+belt over a forge rule that would have refused the moved head anyway.
 
 Two settings hold the door, not one: the classic review requirement is
 cleared for the maintainer by `enforce_admins: false` *plus* admin, and
