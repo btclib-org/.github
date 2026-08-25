@@ -7,6 +7,19 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 12's worked answer names no package path
+
+- **`bitcoin-core-rpc`'s worked answer quoted the value of `package`**
+  (closes #321), which a move of the package directory falsifies while
+  the sentence around it stays true. The answer now names what the flag
+  points at — that repository's package directory — and section 15's
+  tree command reads the value off the `pyproject.toml` that holds it.
+- **Correcting the literal was the alternative** (closes #321), and what
+  it buys is a sentence right until the next layout change. The
+  paragraph already says its answers are re-derived by section 15's tree
+  commands rather than taken on trust, so the value has a place that
+  reads it and a copy here is the second statement of one fact.
+
 ### `CONTRIBUTING.md`'s merge command pins the head that lands
 
 - **The command merged whatever sat at the head when it ran**

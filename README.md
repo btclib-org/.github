@@ -2653,8 +2653,8 @@ corrected in none of the ones that shipped.
 
 Worked answers, each named for the property of its distribution that
 decides it rather than as a shape to copy, and each re-derived by section
-15's tree commands rather than taken on trust. `bitcoin-core-rpc` names
-`package = ["bitcoin_core_rpc"]` and stops there — measured against a
+15's tree commands rather than taken on trust. `bitcoin-core-rpc` points
+`package` at its package directory and stops there — measured against a
 wheel built with `py.typed` stripped and `RECORD` edited to match, which
 installs and imports cleanly and which the unconfigured tool passes —
 because a single-module package with no data directory has no member that
