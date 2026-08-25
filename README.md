@@ -189,7 +189,7 @@ alone would leave `uv sync` resolving a project without it.
 | `bindings` | an optional native dependency that is also an extra |
 | `build` | what builds a distribution, cibuildwheel included |
 | `check` | what inspects a distribution before it is published |
-| `docs` | sphinx and the theme |
+| `docs` | sphinx and `furo` |
 | `mutation` | the mutation runner |
 | `dev` | every group above, and the default of `uv sync` |
 
@@ -382,6 +382,83 @@ that is not answered is the failure they never learn about. It names
 the subject rather than a team, so who answers a report can change
 without the policy changing.
 
+**The badges at a `README.md`'s head are a function of what the tree
+is**, decided by a property of the repository and never curated: a list
+somebody keeps is a list nobody can be wrong about, so it drifts between
+trees with nothing to say which of them is right. Which property decides
+which badge:
+
+- **every repository** — the licence, derived from the repository's own
+  `LICENSE` by `img.shields.io/github/license/<org>/<repo>`; the `lint`
+  workflow; and a link to the repository on GitHub;
+- **publishes** — from the index, the version, the downloads, the
+  development status, the supported Python versions, `wheel`, `types`
+  and `implementation`; and from the forge, `github/v/release`;
+- **holds a suite** — the `test` workflow;
+- **on pre-commit.ci** — its badge;
+- **builds documentation** — the `docs` workflow, and Read the Docs in
+  one spelling of its host;
+- **runs a sentinel** — that sentinel's badge.
+
+**The order is fixed**, and it is: the version, the downloads, the
+development status, the licence, the supported Python versions, `wheel`,
+`types`, `implementation`, `github/v/release`, `test`, `lint`, `docs`,
+pre-commit.ci, then the sentinels in the order section 10's calendar
+gives them, then Read the Docs, and last the link to the repository. A
+tree skips what it does not own and keeps the rest in that order, so a
+reader comparing two `README.md` files compares like with like instead
+of hunting. Taking the sentinels' order from the calendar is one order
+to maintain rather than two, and what it costs is that a workflow moved
+to another day moves its badge in every `README.md` that carries it.
+
+`img.shields.io/pypi/types` is the one that asserts the **shipped
+artifact** carries `py.typed`, where section 6's rule and section 3's
+classifier are both claims about the tree, and it is derived from the
+uploaded wheel so it cannot disagree with what was published.
+`github/v/release` is the only badge read in a **pair**: where it
+disagrees with the PyPI version badge beside it, a release reached the
+forge and not the index.
+
+The link to the repository is the one badge that measures nothing, and
+it is a link: the README is the long description an index renders and
+the file an unpacked sdist carries, so it is read where the repository
+is not one click away. It says the repository's name and nothing else,
+which is a claim a reader settles by following it.
+
+**A badge rendering `no status`, `invalid` or `unknown` is a question
+with two answers**, and which one is the point: either the workflow has
+not reached its first scheduled run, which is datable and not a defect,
+or it should have run and did not, which is. That is what keeps the row
+an audit rather than decoration, and it is what catches a workflow
+renamed out from under a badge still pointing at the old file.
+
+What is refused, and the reason is nearly the same one each time:
+
+- **a badge that asserts a tool rather than measuring one** —
+  `linted with ruff`, `code style: black` and the rest. The string is
+  written into the URL, so it renders the same the day the tool is
+  removed;
+- **`img.shields.io/badge/license-MIT-blue`**, which is that defect in
+  small: it renders `license MIT` because the URL says so, where the
+  derived form renders it because `LICENSE` does. The derived form
+  replaces it rather than sitting beside it, two badges of one fact
+  being two things to keep true;
+- **`last-commit`, `commit-activity` and `contributors`** — derived, and
+  the objection is not that: they measure activity rather than the tree,
+  so a quiet month on a finished library reads as decay;
+- **a coverage badge** — section 8's floor already refuses a fall, so
+  the badge would restate what a gate enforces in exchange for an upload
+  to a third party;
+- **REUSE compliance** — it renders `reuse unregistered`, which is a
+  registration with that service and not a property of the tree.
+
+The downloads badge is pepy's rather than
+`img.shields.io/pypi/dm`, and both render: the first answers with the
+project's whole life and the second with the last month, so the second
+is a figure that falls without anything having happened to the tree.
+What that gives up is the reading `pypi/dm` is better at, whether the
+package is being taken up now.
+
 **A publishing repository's `README.md` ends with the line naming who
 supports the work**, under a thematic break:
 
@@ -484,6 +561,61 @@ A tree without a package may still keep `tests/` above the floor:
 `.github`'s own suite is over the organization rather than over a
 package this repository does not hold, and a tier is free to carry more
 than it is asked for.
+
+### The documentation
+
+What `docs/source/` holds is a few hand-written pages around a reference
+sphinx generates from the docstrings of a typed public API, one set per
+tree and none of them large.
+
+**The theme is `furo`**, declared in the `docs` group and named in
+`docs/source/conf.py`. It is built for that shape: the content first,
+the navigation in the left sidebar and the page's own contents in the
+right, light and dark from one setting. It is also what the part of the
+Python ecosystem these projects sit in reads as ordinary — `pip`, which
+it was written for, `black`, `urllib3`, `attrs` and the Python
+developer's guide. The alternative weighed was `shibuya`, which
+Emscripten, Sentry's Python libraries and Authlib use: it is the better
+theme for a product site, and its announcement bars, landing pages and
+`sphinx-design` components are what decides against it here, being
+surface these trees would carry and not use. That surface is what
+choosing `furo` gives up, so a tree that later wants a landing page
+changes theme rather than extending this one. `sphinx_rtd_theme` is
+where a Read the Docs project starts, and nothing else argues for it.
+
+Whether sphinx stays the generator is open and not decided here: a tree
+that left it would take its theme with it, so nothing above turns on the
+answer.
+
+**The build runs `-n` as well as `-W`.** `-W` turns a warning into an
+error and never sees a cross-reference that resolves to nothing: a
+renamed class in a `:class:` role, a parameter type no longer in the
+tree, a moved function is not a warning at all, so the build is green
+and the link goes nowhere. For documentation generated from the
+docstrings of a typed public API that is the documentation half of
+running mypy without `strict` — the tool is there, the flag that makes
+it strict is not, and the gap is invisible because the gate passes. `-n`
+is what makes an unresolved reference a warning for `-W` to refuse.
+
+**`sphinx.ext.intersphinx` comes first**, with a mapping for python and
+for whatever else the annotations reach. Without an inventory to resolve
+against, a name from outside the tree resolves to nothing and is
+reported as the tree's own broken link: sphinx's own domain answers for
+the builtins, so `int` and `bytes` are silent, but
+`collections.abc.Sequence`, `pathlib.Path` and `os.getcwd` each draw a
+`reference target not found` with nowhere to look. Turning `-n` on
+before the mapping exists therefore measures the standard library rather
+than the documentation, and fills `nitpick_ignore` with entries whose
+reason is that sphinx was not told where python's objects live.
+
+**`nitpick_ignore` holds only entries whose reason is written beside
+them**, an entry being a reference that genuinely cannot resolve rather
+than one nothing was pointed at. What `-n` costs is paid there and
+nowhere else: every entry is a reference the build stops checking, so a
+broad `nitpick_ignore_regex` buys a green build by giving up the check
+itself. That is the same trade section 5 makes over `ignore` and section
+8 over `exclude_also`, and it is why the first run of `-n` is triage
+rather than a pass.
 
 ## 3. `pyproject.toml` is the configuration
 
