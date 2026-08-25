@@ -7,6 +7,24 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 10 states the interpreter exception and refuses a schedule's timezone
+
+- **An interpreter axis is a gate cell exactly where its extra cell runs
+  in parallel with the ones already in the job and claims no interpreter
+  the package does not already claim** (closes #390). `btclib-node`'s
+  `test.yml` is the first tree to take the trade, running `3.14` and
+  `3.14t` as parallel cells of its `coverage` job; where either
+  condition fails, the row belongs in the weekly calendar instead, on
+  the same trade that keeps a platform row there.
+- **A `timezone:` beside a `cron:` fails `tests/grid_test.py`'s
+  `schedules()` outright** (closes #355), rather than being read and
+  ignored or converted, so a schedule cannot leave the calendar's UTC by
+  declaring one.
+- **`grid_test.py`'s docstring pointed a reader at a `BACKLOG` row
+  `conftest.py` refuses for a cross-repository test** (closes #348). It
+  now says a row takes its place in the pull request that gives the
+  first tree the workflow, which is what section 10 already states.
+
 ### The ack of record is a COMMENT review, and the workflow is inert
 
 - **The verdict has three lines** (issue #340). `ACK <sha>` and `CHANGES

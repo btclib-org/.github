@@ -1783,6 +1783,20 @@ answer at the price of every review. Everything else answers weekly and
 before a release instead — a regression sitting on `main` for at most a
 week, against every review paying for it.
 
+**An interpreter axis is a gate cell rather than a sentinel row exactly
+where the extra cell runs in parallel with the ones already in the job,
+so the ceiling absorbs it without lengthening the wait, and where what
+it claims is the same pinned interpreter run a second time rather than a
+version the package newly claims to support.** `btclib-node`'s
+`test.yml` carries `3.14` and `3.14t` in its `coverage` job on this
+ground: both cells are required by the job's own aggregate, run as
+parallel jobs rather than in sequence, and `3.14t` is `.python-version`'s
+own interpreter with the GIL off rather than a second interpreter the
+package claims to support. Where either condition fails — the cells run
+in sequence, or the second cell is a version the package does not
+already claim — the row belongs in the weekly calendar instead, on the
+same trade that keeps a platform row there.
+
 **What runs weekly does not also gate**, so nothing is asked twice at
 the price a gate charges. The converse does not hold: a sentinel runs
 its matrix whole, the cells a gate already covered included, because a
@@ -1854,7 +1868,9 @@ takes is `03`.** A `cron:` here names no `timezone:`, which is what
 leaves it UTC, and a fixed UTC hour falls later in the morning here for
 as long as the clocks are forward. The band's late end is what reaches
 the working day first, so the grid takes the hour below `04` rather than
-the one above `05`.
+the one above `05`. **A `timezone:` beside a `cron:` fails
+`tests/grid_test.py` outright**, rather than being converted before the
+calendar is compared, so a schedule cannot leave UTC by declaring one.
 
 A day is a slot rather than a census: it says when that workflow runs
 where a repository has it, not that every repository does. Dependabot is
