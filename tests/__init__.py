@@ -241,7 +241,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         312,
         "test_the_uv_floor_is_not_above_what_dependabot_bundles",
-        ("bbt", "btclib-node"),
+        ("btclib-node",),
     ),
     (
         313,
