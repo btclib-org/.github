@@ -2007,6 +2007,57 @@ branch it watches for, the coverage number on that image is
 legitimately not 100, and a cell that gated the floor would go red
 naming the floor where the finding is the platform's.
 
+**A sentinel's own work is not a pull request's business either, and
+*not required* is not the free half of that.** The rule above reads as
+though the cost were the gate's, so a job that runs on a pull request
+while gating nothing looks to have escaped it: it has not, because what
+a pull request charges is the wait, and a reader waits on the list
+rather than on the subset of it that gates. `btclib`'s `fuzz` is the
+case — a ten-minute exploration on every push to every branch, which no
+rule required, and which the pull request that cut a release was merged
+out from under, three minutes in, nobody having waited for it.
+
+**What decides is the clock, not the trigger** — provided the clock
+stays the thing the expensive work answers to, which is what a filter
+preserves and an unfiltered trigger destroys. `mutation.yml` has
+the discriminator in its own header: "No `pull_request` trigger, unlike
+`links.yml`, which does run itself when its own configuration changes.
+The difference is the clock: a link sweep is a couple of hundred
+requests, a mutation session is hours." So a `pull_request` trigger on a
+calendar workflow is not forbidden. It is `paths`-filtered to the
+workflow's own configuration and to what that configuration reads, and
+what then runs is the whole sweep rather than some cheaper check of it:
+the filter bounds how *often* a pull request pays for the sweep, not
+what the sweep is. That is the clock argument rather than an exception
+to it *where* those paths are ones an ordinary branch does not touch,
+and it is worth counting rather than assuming: a filter naming a file
+every branch edits selects every branch, and preserves no clock at all.
+This repository's own `alignment.yml` is that case — its list names
+`README.md`, which is this tree's product — and btclib-org/.github#467
+is where it is answered rather than here.
+Where even a filtered sweep is too much to hang off a pull request, as
+an hours-long session is, the calendar is the whole of it. Two triggers
+are outside the question entirely — `workflow_call`, where the release
+workflow reuses a sentinel as a gate, which this section asks for
+elsewhere, and `push: branches: [main]`, where a merge commit is a
+census no pull request took. An unfiltered `pull_request` needs a reason
+of its own, stated in the header, and the organization has two such
+reasons: `integration-bitcoind`, whose regtest job is a required check
+and where a required check that never runs blocks a merge, and `codeql`,
+whose result the OpenSSF Scorecard reads off a merged pull request's own
+commits.
+
+The half a pull request does owe is the deterministic one: an artifact
+committed to the tree and replayed by the suite costs milliseconds and
+no container, where the sentinel's question — what is in the domain
+nobody has described yet — is one an hour once a week answers better
+than ten minutes on every push. That is also why shortening the arm is
+not the answer, and the alternative is named rather than left to be
+guessed at: a minute of fresh exploration per pull request is still the
+sentinel's work, done where it is worth least and waited on by somebody.
+`workflow_dispatch` is what runs a sentinel by hand before a release
+rather than waiting for its day.
+
 Two tables make the calendar, and they are the calendar — the workflow
 owns a day and an hour, the repository owns the minute:
 
@@ -2205,6 +2256,26 @@ repository is read off the tree rather than argued.
   second is the one that finds the crash before somebody else does.
   A crash the sentinel finds is an issue against the parser
   and never a suppression, that being the whole of what it was run for.
+  The regression that crash becomes is the suite's and not the
+  sentinel's: an ordinary test, naming the input and what the parser is
+  now expected to do with it — which is usually to refuse it in the
+  tree's own exception rather than to accept it.
+  `fuzz/corpus/` is not that place, and a tree must not be told to put
+  it there. That directory is a *seed* corpus in the term's ordinary
+  sense — inputs committed beside a target so the fuzzer starts from
+  valid structures rather than from noise — and the gate over it,
+  `btclib`'s `tests/fuzz_corpus_test.py`, asks the opposite question:
+  that every seed is *still a valid serialization of what it parses*. A
+  crash input added there inverts that gate, because the hardening that
+  fixes the crash is exactly what makes the seed refused, and the only
+  way back to green would be to delete the regression. What the seed
+  gate does guarantee is acceptance by *one of* the entry points the
+  harness declares rather than by the intended one, and the module says
+  so itself, naming the harnesses where a parser narrowed to refuse its
+  own seed passes because a sibling still accepts it. That is a check on
+  the seeds — it keeps the fuzzer's starting point honest as the parsers
+  move under it — and what frees the sentinel from carrying a regression
+  suite is the ordinary test above rather than this gate.
   What fills the workflow is the tree's — which entry points are targets
   and which harness runs them, `atheris` under ClusterFuzzLite in
   Actions or under OSS-Fuzz, and for `btclib-secp256k1` whether a target

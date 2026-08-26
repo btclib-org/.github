@@ -22,6 +22,43 @@ audit has no revision to compare against.
   nothing here is a place a new failure belongs, a red cell being
   answered in the tree that is red.
 
+### A sentinel is not a pull request's business
+
+- **Section 10 said "what runs weekly does not also gate", and a job
+  that runs on a pull request while gating nothing slipped between the
+  words** (issue #460): the rule now says a sentinel's own *work* does
+  not go on a pull request, and says why *not required* is not the free
+  half of it — what a pull request charges is the wait, and a reader
+  waits on the list rather than on the subset of it that gates.
+  `btclib`'s `fuzz` is the case: a ten-minute exploration on every push
+  to every branch, which no rule required, and which the pull request
+  that cut a release was merged out from under, three minutes in.
+- **What decides is the clock, not the trigger** (issue #460), which
+  `mutation.yml`'s own header had already worked out and which an
+  earlier draft of this section would have contradicted: written as *a
+  sentinel does not run on a pull request at all*, the rule would have
+  put calendar workflows of `btclib`'s own out of compliance the day it
+  landed — the `paths`-filtered ones, and `integration-bitcoind`, whose
+  regtest job is a required check that blocks a merge if it never runs.
+  So the rule is what the clock says: the filtered trigger stays, the
+  hours-long job stays off a pull request, `workflow_call` and
+  `push: branches: [main]` are outside the
+  question, and an unfiltered `pull_request` states its reason in the
+  header as `codeql` and `integration-bitcoind` do.
+- **Section 10's `fuzz` bullet did not say where the regression half
+  lives**, so a tree taking the fuzzer had a reason to reach for a
+  `pull_request` trigger to get it (issue #460): the bullet now says
+  the regression is an ordinary test of the suite, and says where it
+  does *not* go — `fuzz/corpus/` is a seed corpus, and `btclib`'s
+  `tests/fuzz_corpus_test.py` asks that every seed there is still a
+  valid serialization, so a crash input put in it is refused by the
+  hardening that fixed the crash. The bullet says what that seed gate is
+  worth rather than overstating it: acceptance by one of the entry
+  points the harness declares, not by the intended one — the module
+  names the harnesses where a narrowed parser passes because a sibling
+  still accepts the seed. What is left to the sentinel is the question a
+  corpus cannot hold, which is the one it was added for.
+
 ### The fork filter comes back, and section 10's fork half loses its example
 
 - **`names()` asked the API for every unarchived repository, forks
