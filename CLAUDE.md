@@ -112,6 +112,16 @@ a change to what the standard *says* — a convention two repositories
 disagree about, a rule whose rejected alternative has to be weighed. Use
 `/model opus` for the session, then switch back.
 
+**A port of one file into every repository is that case, and reads as
+though it were not.** The work looks mechanical — the same edit,
+repository by repository — and the decision it rests on is what the
+standard says, because trees that each derive the rule for themselves
+land different answers and the tracker gets an issue per divergence. What
+settles it is one sentence here, written before the ports go out rather
+than after; a campaign that starts on Sonnet discovers mid-flight that
+it is rewriting a section, with branches already pushed against the
+answer it had then.
+
 Do not use Fable unless explicitly instructed.
 
 ## Non-obvious facts that will otherwise waste a session
@@ -185,6 +195,26 @@ Do not use Fable unless explicitly instructed.
   `tests/__init__.py`'s `tier()` reads `pyproject.toml` and `release.yml` off
   the checkout, which `tiers_test.py` asks through the `tiers` fixture —
   `conftest.py`'s one-liner over `trees` — rather than through `gh_json`.
+- **A sibling tree's documentation build reads its `CHANGELOG.md`, so a
+  changelog-only diff does not exempt the docs gate.** This tree has no
+  `docs/`, but a session driven from this tracker runs the gates of the
+  repository it is porting into, and in the five that have a
+  documentation build — `btclib`, `btclib-secp256k1`, `btclib-node`,
+  `btclib-benchmarks` and `bitcoin-core-rpc` — `docs/source/changelog_link.md`
+  pulls `../../CHANGELOG.md` through a MyST `include` and the
+  toctree lists it, under `-W`:
+
+  ```shell
+  git -C <checkout> grep -l 'include} \.\./\.\./CHANGELOG\.md' origin/main -- docs/
+  ```
+
+  answers in each of the five and nothing in `.github`, `bbt` or
+  `portanode`, which have no `docs/` at all; the same pattern against
+  `README.md` answers in all five, which is the control saying the zero
+  is an absence rather than a miss. The trap is that *`docs/` is
+  unchanged* is a true sentence answering the wrong question: what
+  decides is what the tool reads, not which of its inputs moved. Skipping
+  the docs gate on that reasoning was caught by a reviewer, not by a run.
 
 ## Conventions to match
 

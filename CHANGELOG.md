@@ -45,6 +45,26 @@ audit has no revision to compare against.
   and a review reported successful -- inside the job that reviews
   nothing. Both strings are `portanode`'s, taken from its blob.
 
+### CLAUDE.md names the docs gate a changelog diff reaches, and the Opus case
+
+- **A sibling tree's documentation build reads its `CHANGELOG.md`, so a
+  changelog-only diff does not exempt its docs gate.** `docs/source/changelog_link.md`
+  pulls `../../CHANGELOG.md` through a MyST `include` and the
+  toctree lists it, under `-W`, in each of the five repositories that
+  have a documentation build; the three that do not have no `docs/` at
+  all. The bullet carries the `git grep` that answers per tree and the
+  `README.md` control that says its zero is an absence. The reasoning it
+  refuses — *`docs/` is unchanged, so the docs gate has nothing new to
+  read* — is a true sentence answering the wrong question, what the tool
+  reads rather than which of its inputs moved.
+- **A port of one file into every repository is a change to what the
+  standard says**, so section *Model*'s Opus condition covers it. Trees
+  each deriving a convention for themselves land different answers and
+  file an issue per divergence; one sentence written before the ports go
+  out is what settles it, and a campaign that begins on Sonnet finds
+  itself rewriting a section with branches already pushed against the
+  answer it had then.
+
 ### The calendar gains a row for fuzz, the ClusterFuzzLite sentinel
 
 - **`fuzz` takes Monday, 03** (issue #372). `04` and `05` are full on
