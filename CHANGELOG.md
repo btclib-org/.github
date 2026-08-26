@@ -34,6 +34,40 @@ audit has no revision to compare against.
   says what it holds, the mark buying nothing where no sibling of it is
   a package.
 
+### Section 8 keeps one copy of the flags and section 10 ungates the sentinels
+
+- **The flags live in `pyproject.toml`, and a job types `pytest` with
+  nothing after it** (issue #433), the two job-own arguments named — a
+  sentinel's `--no-cov` and a combining job's `COVERAGE_FILE` — so the
+  local gate and the CI gate stay one measurement.
+- **A sentinel cell that runs the suite passes `--no-cov`**
+  (issue #429): the floor is section 8's claim about one interpreter on
+  one image, and the day a platform sentinel finds the branch it
+  watches for, a cell gating the floor would go red naming the wrong
+  claim.
+- **Coverage configuration is read from wherever the run starts**
+  (issue #443): run from `tests/` a suite reads none of it and passes
+  ungated, so a tree with a local floor points such a run at its
+  configuration or makes it say it is ungated, measured per tree.
+
+### Section 11 puts the keyword on one line and the subject on one line
+
+- **A subject is one physical line** (closes #403): `%s` joins a
+  wrapped subject where the squash does not, so the truncation it hides
+  is read off the first line of `%B`, and *Merge method* now says so
+  with the command.
+- **The keyword and its reference share a physical line, and a block of
+  several is written one keyword per line** (closes #420), the shape a
+  wrapper cannot split; what catches a loss is counting
+  `closingIssuesReferences` against the number intended, the failure
+  being stable rather than a lag.
+- **A title citing several issues joins them for the reader, and the
+  parser binds the verb to the first** (closes #437) — costless where
+  the description carries every keyword; a commit that had to close on
+  its own subject repeats the verb per reference, and everything
+  reaches `main` through a pull request whose description is what
+  closes.
+
 ### Section 15 marks a failed fetch wherever a filter would swallow it
 
 - **The badge-render command reads its `README.md` through

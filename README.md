@@ -1687,6 +1687,23 @@ fail_under = 100.0
   is enough at 100 only because no source branches on the version — a
   percentage below 100 could not promise that, the statement count moving
   between versions.
+- **The flags live in `pyproject.toml`, and a job types `pytest` with
+  nothing after it.** `addopts` carries the coverage flags,
+  `[tool.coverage.report]` the floor and the report options, and a copy
+  typed into a workflow is a copy a maintainer never runs, so the local
+  gate and the CI gate stop being the same measurement with nothing
+  turning red. Two arguments are a job's own rather than second copies:
+  the `--no-cov` a platform sentinel passes, and the `COVERAGE_FILE` of
+  a job that combines runs.
+- **The configuration is read from wherever the run starts.** coverage
+  looks for its configuration in the directory the process started in,
+  so a suite run from `tests/` finds no `source`, no `branch = true`
+  and no `fail_under`: it measures a different set of files and exits 0
+  whatever the number is. A tree with a local floor either points the
+  run at its configuration from wherever it starts, or makes such a run
+  say it is ungated rather than letting it pass as the gate — and
+  which of the two a tree does is measured on that tree, the pair of
+  runs from the root and from `tests/` being the measurement.
 - **A selective run is reported and not gated.** `fail_under` applies to
   every report coverage writes, so `pytest tests/foo` would fail on the
   tree's coverage rather than its own. A `conftest.py` hook drops the
@@ -1916,7 +1933,13 @@ the price a gate charges. The converse does not hold: a sentinel runs
 its matrix whole, the cells a gate already covered included, because a
 matrix with a hole in it is one nobody can read the shape of, and the
 hole would be re-derived from the gate every time somebody asked what
-ran.
+ran. A sentinel cell that runs the suite passes `--no-cov` for the same
+reason read from the other side: the floor is section 8's claim about
+one interpreter on one image, and a sentinel exists to ask whether the
+platform changes the answer — so the day it finds the `sys.platform`
+branch it watches for, the coverage number on that image is
+legitimately not 100, and a cell that gated the floor would go red
+naming the floor where the finding is the platform's.
 
 Two tables make the calendar, and they are the calendar — the workflow
 owns a day and an hour, the repository owns the minute:
@@ -2234,6 +2257,17 @@ that a single-commit branch lands under its own subject and a longer one
 under the pull request's title, with the branch's commit messages as the
 body — never the pull request's description.
 
+**A subject is one physical line.** `%s` joins a wrapped subject up to
+the first blank line where the squash does not, so `git log --oneline`
+and every read through `%s` show a whole sentence the landing will cut —
+a wrapped subject lands truncated at its first line, the citation it
+carried left behind in the body, and nothing turns red. The read that
+does not conceal the wrap is the first line of `%B`:
+
+```shell
+git show -s --format=%B <sha> | head -1
+```
+
 `delete_branch_on_merge` is on.
 
 ### What a pull request says it is
@@ -2253,6 +2287,17 @@ depending on which file it sits in. Nothing already landed is
 rewritten, a title and a landed commit subject included: section 9's
 *Nothing already written is rewritten* is this same rule, read from the
 title's side of it.
+
+**A title citing several issues joins them for the reader, and the
+parser binds the verb to the first.** `(closes #319, #388)` is, to the
+parser, a keyword on the adjacent number and a bare mention of the
+rest — which costs nothing where the description carries every keyword,
+the check below having counted them, and the landed subject's own
+keyword then meets issues already closed. That safety is the
+description's, not the subject's: a commit that had to close on its own
+subject would repeat the verb for each reference — `(closes #319)
+(closes #388)`, adjacency being the test — and everything here reaches
+`main` through a pull request whose description is what closes.
 
 The title is not the closing mechanism. `Closes #N` in the
 *description* is what GitHub acts on, and both are wanted: the
@@ -2295,6 +2340,25 @@ and that a newline alone breaks the binding, in a keyword meant to fire,
 is btclib-org/.github#420's subject. The measurement is there rather
 than here: the pull request it was taken on was corrected before it
 merged, so the forge no longer answers what it answered then.
+
+**The keyword and its reference share a physical line, and a block of
+several is written one keyword per line.** This section asks each issue
+for its own verb and section 9 wraps prose at eighty columns; a body
+that follows both as one long line loses precisely the keywords the
+wrap splits, every one of them individually well-formed, the text
+reading correctly to a person and only the API answering short. One
+keyword per line is the shape a wrapper cannot split, and no formatter
+is let reflow the block. What catches a loss is counting the
+registrations against the number intended:
+
+```shell
+gh pr view <n> --json closingIssuesReferences \
+  --jq '.closingIssuesReferences | length'
+```
+
+The failure is stable, so asking twice answers only the indexing lag —
+a five where eight were meant reads exactly like a correct answer for a
+smaller set, and only the count knows what was meant.
 
 **What is not measured here is a gap on one line**, a verb and a number
 with only text between them; no commit in this tracker isolates it, and
