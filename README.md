@@ -2150,21 +2150,23 @@ repository is read off the tree rather than argued.
   fork.** Public is what the OpenSSF Scorecard reads at all, and
   `ossf/scorecard-action`'s own README says running it on a fork is not
   supported — so `gh api repos/<org>/<repo> --jq .fork` is the second
-  half of the question, and it answers `true` for `bbt`, which is
-  outside this rule for a reason of its own rather than the one that
-  keeps it out of `mutation` above. What the sentinel buys is an opinion
-  of the tree's supply-chain posture formed outside the organization:
-  this file is a standard the organization holds itself to and every
-  command in section 15 asks a question somebody here chose, where a
-  score computed by a third party is the one reading that can find what
-  nobody thought to ask for. **A check scoring below its maximum is an
-  issue against what it found**, never a sentence in section 14 saying
-  why this organization scores it that way — it aligns by adopting the
-  practice rather than by explaining the score, and a derogation would
-  make the outside opinion answerable to the thing it measures. What
-  that gives up is the case where a check is simply wrong about this
-  organization, which then costs an issue closed on the measurement
-  rather than a paragraph nobody revisits.
+  half of the question, and no repository of the organization answers
+  `true` to it: that half is a rule with no instance, kept for the tree
+  that arrives as a fork rather than describing one that is here. `bbt`
+  is inside this rule and owes the sentinel, where the `mutation` rule
+  above leaves it out for a reason of its own. What the sentinel buys
+  is an opinion of the tree's supply-chain posture formed outside the
+  organization: this file is a standard the organization holds itself
+  to and every command in section 15 asks a question somebody here
+  chose, where a score computed by a third party is the one reading
+  that can find what nobody thought to ask for. **A check scoring below
+  its maximum is an issue against what it found**, never a sentence in
+  section 14 saying why this organization scores it that way — it
+  aligns by adopting the practice rather than by explaining the score,
+  and a derogation would make the outside opinion answerable to the
+  thing it measures. What that gives up is the case where a check is
+  simply wrong about this organization, which then costs an issue closed
+  on the measurement rather than a paragraph nobody revisits.
 
     The badge and the published score want `publish_results: true`, and
     the job wants `id-token: write` for the transparency-log entry,

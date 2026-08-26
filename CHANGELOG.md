@@ -7,6 +7,32 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The fork filter comes back, and section 10's fork half loses its example
+
+- **`names()` asked the API for every unarchived repository, forks
+  among them** (closes #454): the filter is back —
+  `select(.archived == false and .fork == false)` — `btclib-org/bbt`,
+  the repository it had been suspended for, being a fork no longer. Its
+  docstring keeps the argument for excluding a fork and the half of it
+  that does not hold for a fork the organization has taken over, says
+  that what the filter asks about is a state rather than the route a
+  repository took to it, and carries the command answering that the
+  organization holds no fork, so that a line selecting nothing out reads
+  as the guard it is. The citation of `btclib-org/bbt#13` goes with the
+  tracker that held it, the recreated repository resolving no such
+  number and the request it carried being moot.
+- **Section 10's `scorecard` bullet named `bbt` as the fork the rule
+  excludes** (closes #454): the fork half has no instance in the
+  organization, and the bullet says that rather than dropping the
+  clause, keeping `ossf/scorecard-action`'s own documented limitation
+  as the reason it is a rule at all. `bbt` is inside the rule and owes
+  the sentinel, which is btclib-org/bbt's own work to land.
+- **The `BACKLOG` row excusing `btclib-node` from section 5's `D`
+  selection outlived what it excused** (closes #454): the row is gone,
+  `test_d_is_selected_with_the_pep257_convention` passing on every
+  repository the suite asks it of, and a strict xfail over a passing
+  test being red here.
+
 ### Section 7 answers the suite-shape questions
 
 - **A suite that waits on anything outside its own process carries a
