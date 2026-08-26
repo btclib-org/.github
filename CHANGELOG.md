@@ -7,6 +7,44 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 11 names the citation a port of `claude-review.yml` adapts
+
+- **The prompt's citation of the standard is a third thing a port
+  adapts** (closes #396), and the only one that is not a claim about the
+  receiving tree. This repository's copy cites `README.md`, this being
+  the tree that holds the rules a finding is written against; everywhere
+  else `README.md` is what that repository is to whoever arrives at it,
+  so a citation carried over verbatim names the wrong file.
+- **A receiving copy names section 11 where section 11 holds the rule
+  cited, and the standard with no section number where it does not**
+  (closes #396); the subsection form, `section 11's *Review*`, is for
+  wherever a subsection does hold the rule. What chooses the shape is
+  what holds the rule and never where the sentence sits, since the two
+  secret stores a Dependabot-initiated run reads are stated in the
+  section's own prose and in *Dependabot and pre-commit.ci*, so a
+  citation of them names no subsection wherever it falls. Naming
+  section 11 for a rule that sits elsewhere in the standard is precise
+  and wrong, that section being *GitHub settings* where a finding about
+  the prose cites section 9.
+- **Section 14 points at section 11 rather than restating the
+  asymmetry** (closes #396). The sentence it replaced had a receiving
+  copy naming section 11 where this repository's copy names
+  `REVIEWING.md` and `CONTRIBUTING.md`'s last section directly, and a
+  receiving copy names those two directly as well.
+- **This repository's own `claude-review.yml` cites `README.md` at every
+  site** (issue #400). Two of its comments carried a receiving copy's
+  form, in the copy that is the standard.
+- **The `claude_args` comment names the `gh pr` subcommands the file
+  passes** (issue #398) -- `diff`, `review` and `view`.
+- **The `mention` job refuses a missing credential in the words of the
+  job it guards** (issue #402), that job answering an `@claude` mention
+  and reviewing nothing.
+- **The comment above that step points at the review job's reason
+  instead of restating it** (issue #410), the restatement having
+  narrated a measurement made on the review job -- a token found empty
+  and a review reported successful -- inside the job that reviews
+  nothing. Both strings are `portanode`'s, taken from its blob.
+
 ### The calendar gains a row for fuzz, the ClusterFuzzLite sentinel
 
 - **`fuzz` takes Monday, 03** (issue #372). `04` and `05` are full on

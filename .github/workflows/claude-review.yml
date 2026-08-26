@@ -151,8 +151,7 @@ jobs:
           # prompt it wrote. The credential for such a run is a second
           # fact a port has to know: a Dependabot-initiated run reads
           # the organization's *Dependabot* secret store, not the
-          # Actions one, and section 11 of the btclib-org repository
-          # standard has both.
+          # Actions one, and README.md's *GitHub settings* has both.
           # The mention job below takes no such input, deliberately --
           # what triggers it is somebody writing @claude
           allowed_bots: "dependabot[bot]"
@@ -216,7 +215,7 @@ jobs:
             `confirmed: true`) for a finding a line is the subject of.
           # folded rather than literal, and `gh pr` rather than the three
           # subcommands spelled out: the flag has to reach the CLI as one
-          # line, and the line that spells out comment, diff and view is
+          # line, and the line that spells out diff, review and view is
           # past the 100 columns yamllint holds this file to
           claude_args: >-
             --allowedTools
@@ -301,8 +300,8 @@ jobs:
       # So what is read here is what was posted rather than what the
       # action produced: the verdict is the last line of a review body,
       # which is where REVIEWING.md puts it, and only what claude[bot]
-      # wrote is the ack of record -- the btclib-org repository
-      # standard's *Review* is what says an author's own is not.
+      # wrote is the ack of record -- README.md's *Review* is what says
+      # an author's own is not.
       #
       # The reviews endpoint and not the issue comments one, those being
       # two stores rather than two views: a review posted with `gh pr
@@ -433,19 +432,16 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 1
-      # a missing credential is a silent pass without this, which is the
-      # worst shape a gate can take: measured on the first run after the
-      # organization secret was deleted -- the action found the token
-      # empty, reviewed nothing, and reported success. Fail loudly
-      # instead, and say which secret and where it lives
-      - name: Refuse to review without a credential
+      # a missing credential is a silent pass without this, for the
+      # reason the review job above gives
+      - name: Refuse to answer without a credential
         env:
           TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
           if [ -z "$TOKEN" ]; then
             echo "::error::CLAUDE_CODE_OAUTH_TOKEN is empty. It is an" \
                  "organization secret of btclib-org, visible to all" \
-                 "repositories; without it this workflow reviews nothing."
+                 "repositories; without it this workflow answers nothing."
             exit 1
           fi
       - name: Answer the mention
