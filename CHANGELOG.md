@@ -7,6 +7,55 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 9 says the union driver is a checkout's, not the forge's
+
+- **`merge=union` is a checkout's driver, and the forge does not apply
+  it** (closes #406). A pull request whose `CHANGELOG.md` or
+  `RELEASE_NOTES.md` overlaps its base is reported `CONFLICTING` however
+  cleanly `git merge-tree --write-tree` resolves the same pair under the
+  driver, and a rebase on a checkout is what clears it. So the driver's
+  price is one thing locally, where the same entry edited on two
+  branches merges in silence, and another on the forge, which refuses
+  the branch until it is rebased. `UNKNOWN` from `gh pr view --json
+  mergeable` is the forge still computing the merge rather than an
+  answer, and is asked again.
+
+### Section 11's closing keyword fires on the reference beside it
+
+- **The gloss for a mention that must not close drops its ellipsis**
+  (closes #414): `<verb> owner/repo#N`, with the verb immediately in
+  front of the reference, which is what the rule's own *no verb beside
+  it* says and what both of the precedents it rests on show. The wider
+  reading — a keyword verb anywhere ahead of the number — condemns a
+  shape the parser does not act on, and a sweep written to it reports
+  landings that closed nothing.
+- **An issue's timeline is what measures the parser** (closes #414).
+  `c6c1657` and `214ed5f` each carry a keyword verb further up the
+  sentence than the reference and entered their issue's timeline as
+  `referenced`, where `592f1bc`, whose verb sits directly in front of
+  the number, entered `#81`'s as `closed`. Where the distance is in
+  doubt the answer is `closingIssuesReferences` for the pull request in
+  hand rather than a wider rule.
+
+### Section 15's multi-field sweeps mark a call that did not answer
+
+- **A sweep reading another repository's file writes `unreadable` into
+  the field the call would have filled** (closes #397), where a blank is
+  what a repository owing nothing leaves. The interpreter window marks
+  its columns one at a time, so a `pin` that answered stands beside a
+  `floor` that did not, and `matrix` carries the marker among version
+  strings where one workflow of several could not be read; the uv
+  floor's `floor=` gains what its `lock=` already had.
+- **A sweep that prints a line only where it has something to say prints
+  one naming what could not be read** (closes #397), having no field to
+  mark: the cron calendar, the Dependabot day and section 2's badge row.
+  The badge row belongs with them because a fetch that fails there reads
+  as a `README.md` carrying no badge, which is the defect in the shape
+  the other two have.
+- **The three values are one shell function the sweeps share** (closes
+  #397), so a sweep reads a failed call the same way wherever it is
+  added.
+
 ### Section 11 names the citation a port of `claude-review.yml` adapts
 
 - **The prompt's citation of the standard is a third thing a port

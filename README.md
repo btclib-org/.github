@@ -1687,9 +1687,26 @@ sight rather than weighed.
 - **Both are `merge=union` in `.gitattributes`.** Two branches appending
   a bullet to the same group conflict on the insertion point, which is a
   conflict with nothing to decide; union keeps both sides' added lines,
-  on rebases included. Its price is that the two files never conflict at
-  all, so the *same* entry edited on two branches merges in silence —
-  which is the second reason neither file states a count.
+  on rebases included. Its price is that on a checkout the two files
+  never conflict at all, so the *same* entry edited on two branches
+  merges in silence — which is the second reason neither file states a
+  count.
+- **The driver is a checkout's, and the forge does not apply it**, so
+  the price has a second half no local command predicts. A pull request
+  whose `CHANGELOG.md` or `RELEASE_NOTES.md` overlaps its base is
+  reported `CONFLICTING` however cleanly the same pair merges under the
+  driver:
+
+  ```shell
+  git merge-tree --write-tree origin/main <branch>   # exits 0
+  gh pr view <n> --json mergeable --jq .mergeable    # CONFLICTING
+  ```
+
+  `UNKNOWN` from the second is the forge computing the merge rather than
+  an answer, so it is asked again. A rebase on a checkout is what clears
+  a `CONFLICTING`, and the driver applies during that rebase — so the
+  silence above is a rebase's, and what the merge button lands never had
+  the driver applied to it at all.
 - **Union drops the blank line between two sections it joins.** Two
   branches each adding a `###` section under `## Unreleased` produce a
   file whose second heading sits against the bullet above it, which
@@ -2160,11 +2177,47 @@ the sentence most likely to hold one: the commit above read `No keyword
 closes btclib-org/.github#81 here`, and a same-repository pull request
 body read `I close #291 by hand once the last lands` — each put a
 keyword verb directly in front of the number it meant to spare. So a
-mention that must not close names the issue with no verb beside it,
-negated or not — `tracking issue: owner/repo#N`, never `<verb> ...
-owner/repo#N` — and a cross-repository task keeps its tracking issue
-open this way until every one of its pull requests has landed, and
+mention that must not close names the issue with no verb immediately in
+front of it, negated or not — `tracking issue: owner/repo#N`, never
+`<verb> owner/repo#N` — and a cross-repository task keeps its tracking
+issue open this way until every one of its pull requests has landed, and
 somebody closes it by hand.
+
+**Adjacency is the test, and an issue's timeline is what measures it.**
+A verb the number does not immediately follow does not fire the parser:
+`btclib-org/.github`'s `c6c1657` reads `none is resolved here; what it
+found beyond them is #153`, and its `214ed5f` reads `Which of these
+fixes survives a future hand-copy, per #39`, and each entered its
+issue's timeline as `referenced` where `592f1bc` above entered
+`btclib-org/.github#81`'s as `closed`. Both are unconfounded, which is
+what a citation here has to be: `#153` stayed open four hours past
+`c6c1657` and was closed by a different landing, and `#39` is open
+still — where a commit whose own pull request closes the issue through
+its body records `referenced` whether the keyword bound or not, and
+proves neither. In both, a newline separates the verb from the number —
+and that a newline alone breaks the binding, in a keyword meant to fire,
+is btclib-org/.github#420's subject. The measurement is there rather
+than here: the pull request it was taken on was corrected before it
+merged, so the forge no longer answers what it answered then.
+
+**What is not measured here is a gap on one line**, a verb and a number
+with only text between them; no commit in this tracker isolates it, and
+not for one reason — a same-line instance closes at that same merge
+through its pull request's body, or lands against an issue closed hours
+earlier by something else, or names a pull request or another tree's
+number. Read the rule as adjacency and write to it, rather than as a
+licence to put a verb on the same line as a number it must not close:
+
+```shell
+gh api repos/<org>/<repo>/issues/<n>/timeline --paginate \
+  --jq '.[] | select(.commit_id != null) | {event, commit_id}'
+```
+
+So a rule forbidding a keyword verb anywhere ahead of a reference
+forbids a shape the forge does not act on, and a sweep written to it
+reports landings that closed nothing. What covers the doubt is the
+`closingIssuesReferences` read below rather than a wider rule, it being
+an answer about the pull request in front of you.
 
 **A manual link carries no form to get right and no keyword to omit**,
 which is what makes it the sharper trap: made by hand in the
@@ -3121,27 +3174,67 @@ print([c for c in declared if c not in classifiers])'
 An empty list is the answer. A string in it is one PyPI would refuse on
 upload, at the point where a version is already being consumed.
 
+Each sweep below that asks the API for a file or a directory of every
+repository tells a call that failed from a repository that owes nothing,
+the two being one blank otherwise. The reading is written once:
+
+```shell
+read_or_mark() {  # $1 the path in $r's tree; sets $content and $ok
+  if e=$(gh api "repos/<org>/$r/contents/$1" --jq .content 2>/dev/null)
+  then content=$(printf '%s' "$e" | base64 -d); ok=found
+  elif gh api "repos/<org>/$r/contents/$1" --jq .content 2>&1 1>/dev/null \
+      | grep -q '(HTTP 404)'; then content=; ok=absent
+  else content=; ok=unreadable
+  fi
+}
+list_or_mark() {  # names $r's workflows; sets $names and $ok
+  if names=$(gh api "repos/<org>/$r/contents/.github/workflows" \
+      --jq '.[].name' 2>/dev/null); then ok=found
+  elif gh api "repos/<org>/$r/contents/.github/workflows" 2>&1 1>/dev/null \
+      | grep -q '(HTTP 404)'; then names=; ok=absent
+  else names=; ok=unreadable
+  fi
+}
+```
+
+`found` is a file that answered, `absent` the `(HTTP 404)` a repository
+without that path gives, and `unreadable` anything else — a call that
+did not answer, which is no reading to act on until it is asked again. A
+sweep whose line has fields writes the marker into the field the call
+would have filled; one that prints a line only where it has something to
+say prints a line naming what could not be read, having no field to
+write into. The `--silent` existence checks reach the same three values
+by exit code, there being no content to decode.
+
 Section 1's interpreter window, declared once in `requires-python`,
 again in the classifiers, again in `.python-version` and a fourth time
 in the matrix the platform sweeps run:
 
 ```shell
 for r in <every repository>; do
-  toml=$(gh api "repos/<org>/$r/contents/pyproject.toml" --jq .content \
-    2>/dev/null | base64 -d 2>/dev/null)
-  matrix=$(gh api "repos/<org>/$r/contents/.github/workflows" \
-    --jq '.[].name' 2>/dev/null | while read -r f; do
-      gh api "repos/<org>/$r/contents/.github/workflows/$f" --jq .content |
-        base64 -d | sed -nE 's/^ +- "(3\.[0-9]+t?|pypy3\.[0-9]+)"$/\1/p'
+  read_or_mark pyproject.toml
+  floor=$(printf '%s' "$content" |
+    sed -nE 's/^requires-python = ">=(3\.[0-9]+)"/\1/p')
+  classifiers=$(printf '%s' "$content" |
+    sed -nE 's/^ +"Programming Language :: Python :: (3\.[0-9]+)",$/\1/p' |
+    paste -sd, -)
+  if [ "$ok" = unreadable ]; then floor=unreadable; classifiers=unreadable; fi
+  read_or_mark .python-version
+  pin=$(printf '%s' "$content" | grep -v '^#')
+  [ "$ok" = unreadable ] && pin=unreadable
+  list_or_mark
+  if [ "$ok" = unreadable ]; then matrix=unreadable
+  else matrix=$(printf '%s\n' "$names" | while read -r f; do
+      [ -n "$f" ] || continue
+      read_or_mark ".github/workflows/$f"
+      if [ "$ok" = found ]; then
+        printf '%s' "$content" |
+          sed -nE 's/^ +- "(3\.[0-9]+t?|pypy3\.[0-9]+)"$/\1/p'
+      else echo unreadable; fi
     done | sort -u | paste -sd, -)
-  printf '%s\tfloor %s\tclassifiers %s\tpin %s\tmatrix %s\n' "$r" \
-    "$(printf '%s' "$toml" |
-       sed -nE 's/^requires-python = ">=(3\.[0-9]+)"/\1/p')" \
-    "$(printf '%s' "$toml" |
-       sed -nE 's/^ +"Programming Language :: Python :: (3\.[0-9]+)",$/\1/p' \
-       | paste -sd, -)" \
-    "$(gh api "repos/<org>/$r/contents/.python-version" --jq .content \
-       2>/dev/null | base64 -d 2>/dev/null | grep -v '^#')" "$matrix"
+  fi
+  printf '%s\tfloor %s\tclassifiers %s\tpin %s\tmatrix %s\n' \
+    "$r" "$floor" "$classifiers" "$pin" "$matrix"
 done
 ```
 
@@ -3154,7 +3247,10 @@ dependency that set the ceiling.
 
 The matrix column is empty where no workflow names a list of them,
 which is a tree whose workflows name no interpreter at all and a tree
-that runs a single one as a key: either way the pin is what runs.
+that runs a single one as a key: either way the pin is what runs. A
+column reading `unreadable` is the call and not the declaration, and
+`matrix` carries the marker among version strings where one workflow of
+several could not be read.
 Section 3 has what a `t` suffix and a `pypy` prefix each name a
 classifier as; this command reads the first as its own `X.Y` and drops
 the second, there being no version string for an implementation to
@@ -3169,9 +3265,10 @@ gh api repos/dependabot/dependabot-core/contents/uv/Dockerfile \
   -H 'Accept: application/vnd.github.raw' \
   | grep -oE 'ghcr\.io/astral-sh/uv:[0-9.]+'
 for r in <every repository>; do
-  req=$(gh api "repos/<org>/$r/contents/pyproject.toml" --jq .content \
-    2>/dev/null | base64 -d 2>/dev/null \
+  read_or_mark pyproject.toml
+  req=$(printf '%s' "$content" \
     | sed -nE 's/^required-version = "(.*)"/\1/p')
+  [ "$ok" = unreadable ] && req=unreadable
   e=$(gh api "repos/<org>/$r/contents/uv.lock" --silent 2>&1) && lock=yes \
     || { printf '%s' "$e" | grep -q '(HTTP 404)' && lock=no \
          || lock=unreadable; }
@@ -3189,7 +3286,10 @@ below the ceiling is safe by section 1's own argument, and only one above
 it is the other finding this loop can print. `lock=unreadable` is
 neither: the call itself failed, told apart from a genuine `no` by the
 `(HTTP 404)` `--silent` would otherwise swallow, and `floor=` beside it
-answers nothing until the sweep is run again.
+answers nothing until the sweep is run again. `floor=unreadable` says it
+of the other call, which fails independently of this one: an empty
+`floor=` is the finding above, where `floor=unreadable` is nothing at
+all until the `pyproject.toml` fetch answers.
 
 Which repositories publish, which is what section 2's first tier turns
 on and so what decides whether a `SECURITY.md` is owed or inherited:
@@ -3246,16 +3346,10 @@ one='security at btclib dot org'
 any='[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
 for r in <every repository>; do
   printf '%-20s ' "$r"
-  if e=$(gh api "repos/<org>/$r/contents/SECURITY.md" --jq .content \
-      2>/dev/null); then
-    policy=$(printf '%s' "$e" | base64 -d)
-  elif gh api "repos/<org>/$r/contents/SECURITY.md" --jq .content \
-      2>&1 1>/dev/null | grep -q '(HTTP 404)'; then
-    echo 'no SECURITY.md'; continue
-  else
-    echo 'unreadable'; continue
-  fi
-  printf '%s\n' "$policy" | grep -o -i -E "$one|$any" \
+  read_or_mark SECURITY.md
+  [ "$ok" = absent ] && { echo 'no SECURITY.md'; continue; }
+  [ "$ok" = unreadable ] && { echo 'unreadable'; continue; }
+  printf '%s\n' "$content" | grep -o -i -E "$one|$any" \
     | sort -u | tr '\n' ' '
   echo
 done
@@ -3288,11 +3382,18 @@ badge and none at all for a `README.md` that carries no badge:
 
 ```shell
 for r in <every repository>; do
-  gh api "repos/<org>/$r/contents/README.md" \
-    -H 'Accept: application/vnd.github.raw' \
-    | sed -nE "s|^\[!\[[^]]*\]\(([^)]*)\).*|$r\t\1|p"
+  read_or_mark README.md
+  if [ "$ok" = found ]; then
+    printf '%s' "$content" \
+      | sed -nE "s|^\[!\[[^]]*\]\(([^)]*)\).*|$r\t\1|p"
+  else printf '%s\t(%s)\n' "$r" "$ok"; fi
 done
 ```
+
+A repository whose `README.md` did not answer takes the second column
+instead of a badge source: `(unreadable)` is the call, and `(absent)`
+the file, which section 2's *Root files* owes at every tier. The
+parentheses are what no source has, so neither reads as one.
 
 The badge's **source** and not its alt text, which is prose its author
 chose: `bitcoin-core-rpc` writes `license: MIT` over
@@ -3347,10 +3448,14 @@ tree can answer:
 
 ```shell
 for r in <every repository>; do
-  gh api "repos/<org>/$r/contents/.github/workflows" --jq '.[].name' |
-  while read -r f; do
-    gh api "repos/<org>/$r/contents/.github/workflows/$f" --jq '.content' |
-      base64 -d | sed -n "s/^ *- cron: /$r $f /p"
+  list_or_mark
+  [ "$ok" = found ] || { echo "$r workflows $ok"; continue; }
+  printf '%s\n' "$names" | while read -r f; do
+    [ -n "$f" ] || continue
+    read_or_mark ".github/workflows/$f"
+    if [ "$ok" = found ]; then
+      printf '%s' "$content" | sed -n "s/^ *- cron: /$r $f /p"
+    else echo "$r $f $ok"; fi
   done
 done | sort -k2
 ```
@@ -3360,6 +3465,11 @@ namesake in another tree is one line out of place. A minute shared by two
 repositories at the same day and hour is the other finding, for the
 reason section 10 gives beside the table.
 
+A repository with no schedule prints nothing, so the marker takes a line
+of its own rather than a field, and it sorts under the name of what did
+not answer: a workflow's, or `workflows` for the listing, whose `absent`
+is a repository with no `.github/workflows` at all.
+
 That loop reads `cron:` and reaches no further, so the calendar's
 Dependabot row is not in it: that schedule is an `interval` and a `day`
 in `.github/dependabot.yml`, a different shape in a different file, and
@@ -3367,14 +3477,17 @@ it takes a second command.
 
 ```shell
 for r in <every repository>; do
-  gh api "repos/<org>/$r/contents/.github/dependabot.yml" --jq '.content' \
-    | base64 -d | sed -n "s/^ *day: /$r dependabot /p" | sort -u
+  read_or_mark .github/dependabot.yml
+  [ "$ok" = found ] || { echo "$r dependabot $ok"; continue; }
+  printf '%s' "$content" | sed -n "s/^ *day: /$r dependabot /p" | sort -u
 done
 ```
 
 One line per repository where every ecosystem agrees, more than one
 where they do not — which is itself the finding, an ecosystem opening on
-a day the sentinel before it does not precede.
+a day the sentinel before it does not precede. `absent` in place of the
+day is a repository with no `.github/dependabot.yml`, which section 2's
+*Directories* owes, and `unreadable` is the call.
 
 `strict = true` in `pyproject.toml` with no `id: mypy` in
 `.pre-commit-config.yaml` is section 6's finding and a finding on its
@@ -3398,14 +3511,6 @@ Section 7's vendored-data pins, across every tree that carries any —
 `tests/README.md` where it does not:
 
 ```shell
-read_or_mark() {  # $1 the path; sets $content and $ok
-  if e=$(gh api "repos/<org>/$r/contents/$1" --jq .content 2>/dev/null)
-  then content=$(printf '%s' "$e" | base64 -d); ok=found
-  elif gh api "repos/<org>/$r/contents/$1" --jq .content 2>&1 1>/dev/null \
-      | grep -q '(HTTP 404)'; then content=; ok=absent
-  else content=; ok=unreadable
-  fi
-}
 for r in <every repository>; do
   read_or_mark tests/_data/README.md
   [ "$ok" = absent ] && read_or_mark tests/README.md
