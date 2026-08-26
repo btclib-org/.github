@@ -2,7 +2,10 @@
 # Two of the three things this repository pins, and the third is
 # somebody else's job: the pre-commit hook revisions have no Dependabot
 # ecosystem, and the `ci:` block of .pre-commit-config.yaml has
-# pre-commit.ci bumping them weekly instead.
+# pre-commit.ci bumping them weekly instead -- except `typos`, whose
+# `repo: local` hook `autoupdate` skips on purpose (see the comment
+# beside it), so the version pinned in its `additional_dependencies`
+# moves by nobody until a hand edit does.
 #
 # Section 2's layout lists this file for a repository that ships a
 # package, and this tree publishes nothing and is mostly prose. But

@@ -926,7 +926,9 @@ pre-commit.ci does not have — the lint workflow covers it. No
   `--all-files` it scans nothing and passes.
 - **spelling** — `codespell` and `typos`, both configured in
   `pyproject.toml`, both skipping vendored vectors: a typo inside an
-  upstream vector is part of the vector.
+  upstream vector is part of the vector. `typos` is a `local` hook,
+  pinned through `additional_dependencies` rather than `rev:`; the
+  comment beside the entry in `.pre-commit-config.yaml` says why.
 
     **`codespell --version` answers `0.1.dev1+g<sha>` and not the
     release its `rev:` names.** pre-commit fetches the pinned ref by
@@ -949,10 +951,9 @@ pre-commit.ci does not have — the lint workflow covers it. No
     holds whichever way the pinned repository tags: an annotated tag
     resolves to the tag object there and to the commit here.
 
-    `typos --version` answers its release, and the difference is the
-    install and not the fetch: its clone carries no tag either, and the
-    `setup.py` in it declares the released wheel as a dependency, so
-    what the hook runs comes from the index.
+    `typos --version` answers its release: a `local` hook's
+    `additional_dependencies` installs straight from the index, with no
+    upstream clone in the loop for a tag to be missing from.
 - **prose and markup** — `markdownlint-cli2`, `prettier` (yaml and
   jsonc), `taplo-format`, `yamllint`.
 - **schemas** — `check-dependabot` and `check-readthedocs`, because a
@@ -2477,7 +2478,9 @@ does. The three are conditional by section 2's rule for a subject the
 tree does not hold, so a tree with no lock file and no `uv` entry is
 keeping this section rather than departing from it. Pre-commit hook
 revisions have no Dependabot ecosystem — pre-commit.ci updates them
-weekly instead.
+weekly instead, except a hook whose `repo:` is `local`: `autoupdate`
+skips that value entirely, so a version pinned inside one, such as
+`.github`'s own `typos`, moves by hand alone.
 
 `gitsubmodule` follows upstream's *default branch*, so its pull request
 says that upstream moved and is not the bump: a release pins the tagged

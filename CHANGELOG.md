@@ -74,6 +74,26 @@ audit has no revision to compare against.
   says nothing at all about `.gitignore`, so none of the three is
   section 14's list to point at instead.
 
+### `typos` is a local hook now, out of reach of `autoupdate`
+
+- **Neither `ci: skip:` nor any per-repository key in pre-commit's own
+  config stops `autoupdate` from touching one `repo:` entry** (closes
+  #393): `skip:` only excuses a hook from running, and a `repo:` entry
+  takes no field of that kind at all. `crate-ci/typos` re-tags a moving
+  `v1` alias onto the same commit as each release, `git describe --tags`
+  breaks the tie between the two by creation date and names the alias,
+  and `autoupdate` proposed it on every run — with `pinned-rev` above
+  refusing it on every run in turn, so the pin stayed stuck rather than
+  moving.
+- **`local` and `meta` are the two `repo:` values `autoupdate` filters
+  out before it walks the rest** (closes #393), so the `typos` entry is
+  now one. `additional_dependencies: [typos==1.49.0]` carries the
+  version pin in place of `rev:`, and `language`, `entry`, `args` and
+  `types` are upstream's own hook definition, copied in rather than
+  fetched. The other repositories of the organization still pin
+  `crate-ci/typos` through `rev:` (issue #399), which section 14 does
+  not compare and section 15 has no command for.
+
 ### The ack of record is a COMMENT review, and the workflow is inert
 
 - **The verdict has three lines** (issue #340). `ACK <sha>` and `CHANGES
