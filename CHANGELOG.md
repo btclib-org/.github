@@ -7,6 +7,33 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 7 answers the suite-shape questions
+
+- **A suite that waits on anything outside its own process carries a
+  measured per-test timeout** (closes #425), the bound measured against
+  its own slowest test on a loaded machine, and the workflow's
+  `timeout-minutes` told apart from it: that one names a wedged runner,
+  the per-test bound a wedged test. A suite of pure functions does not
+  owe one.
+- **A tree that owes section 10's fuzzer owes a property layer first**
+  (issue #426), keyed on the same property, with hypothesis's profile
+  shape stated once — registered in `tests/conftest.py`, the default's
+  cost measured, the deep profile opt-in — and a hand-rolled answer
+  declared in `tests/README.md`.
+- **`tests/functional/` sits beside `integration/`** (issue #427) for a
+  suite whose subject is a running process, on terms: `unit/` carries
+  the mirror, every directory is in `testpaths`, and the split is
+  declared in `tests/README.md`. The two directories are told apart by
+  what they need rather than by how long they take.
+- **A suite that declines `pytest-randomly` declares it** (issue #428)
+  in `tests/README.md` with the reason, weighed against what the plugin
+  catches rather than against what it costs — an ordering plugin not
+  being that reason by itself.
+- **The `_data` underscore is `tests/_data/`'s alone** (closes #441): a
+  data directory beside the package or the script takes the name that
+  says what it holds, the mark buying nothing where no sibling of it is
+  a package.
+
 ### Section 15 marks a failed fetch wherever a filter would swallow it
 
 - **The badge-render command reads its `README.md` through
