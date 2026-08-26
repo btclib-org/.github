@@ -167,10 +167,16 @@ def test_every_row_of_the_calendar_names_something_that_exists(
     The other tests read the trees and ask the calendar; this reads the
     calendar and asks the trees, which is the direction that catches a
     row for a workflow nobody wrote and a minute for a repository nobody
-    has. Both are reported rather than raised: a row takes its place in
-    the pull request that gives the first tree the workflow, so nothing
-    excuses one added ahead of that landing -- it fails here until the
-    tree it names exists, and this suite gates nothing.
+    has. Both are reported rather than raised. A sentinel whose first
+    tree is this repository takes its row in the pull request that gives
+    it the workflow, so for those nothing excuses a row added ahead of
+    that landing. A sentinel whose first tree is another repository
+    cannot land both halves in one pull request -- section 10 says the
+    row lands first -- so this test is the one expected red in between,
+    bounded by the issue filed against the tree that owes the schedule;
+    a red with no such issue behind it is a row for a workflow nobody
+    wrote, which is what this direction exists to catch, and this suite
+    gates nothing either way.
 
     :param trees: the checkouts.
     """
