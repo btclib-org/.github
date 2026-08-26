@@ -1344,7 +1344,9 @@ check the same code where no source is conditional on the version.
 
 ### Layout and naming
 
-- `tests/` mirrors the package, directory for directory.
+- `tests/` mirrors the package, directory for directory — or
+  `tests/unit/` does, where the suite splits by kind under *Functional
+  tests* below.
 - **`*_test.py`**, enforced by `name-tests-test` at its default. What
   the hook is for is the file named neither way: pytest's `python_files`
   collects `test_*.py` and `*_test.py` alike, and a file named outside
@@ -1393,7 +1395,25 @@ markers = [...]
   prints the seed, which guards the one thing a green suite cannot tell
   you about itself: whether a test passes because of what ran before it.
   `-p no:randomly` puts the file order back when a failure has to be
-  reproduced.
+  reproduced. A suite that declines the shuffle declares it in
+  `tests/README.md`, with the reason, weighed against what the plugin
+  catches rather than against what it costs — and an ordering plugin is
+  not that reason by itself: a sequence two tests need can live inside
+  one test, where a plugin-imposed order makes the dependence invisible
+  at the call site.
+- **A suite that waits on anything outside its own process carries a
+  measured per-test timeout.** A hang is the one failure a suite cannot
+  report on itself: the run stops rather than fails, and what a reader
+  gets is a cancelled job at the workflow's `timeout-minutes`, naming
+  the job rather than the test — that bound is a wedged runner's, and a
+  per-test bound is what names a wedged test. So a suite that starts a
+  process, opens a socket or waits on a deadline sets pytest-timeout's
+  `timeout`, the bound measured against its own slowest test on a loaded
+  machine and the measurement written beside the number, the number
+  itself never being portable: what travels is the rule and the way it
+  was measured. A suite of pure functions does not owe one — a limit
+  nothing approaches costs a plugin and a number to keep true, and buys
+  nothing.
 - **No `slow` marker unless a measurement earns one.** A plain run is the
   run that has looked at everything, and the file a `-m "not slow"` loop
   would skip is usually the one worth keeping.
@@ -1441,12 +1461,17 @@ cannot exist, or lets a copy go unchecked among files that cannot be.
 What the tree derives from its own code is neither, and the subsection
 above has it.
 
-**A `_data` directory beside whatever reads it**, which is `tests/_data/`
+**A data directory beside whatever reads it**, which is `tests/_data/`
 where the suite is the only reader and a directory beside the package or
-the script where it is not. The underscore says the directory is not a
-package: it holds no `__init__.py`, nothing imports it, and the way in is
-a path built from `__file__` — the mark the language already puts on a
-private module, applied where it is literally true.
+the script where it is not. The underscore is `tests/_data/`'s alone. It
+says the directory is not a package — it holds no `__init__.py`, nothing
+imports it, and the way in is a path built from `__file__`, the mark the
+language already puts on a private module, applied where it is literally
+true — and that reason does its work inside `tests/`, where a sibling of
+`tests/__init__.py` would otherwise read as importable. At the repository
+root nothing is a package, so the mark buys nothing there and the
+directory takes the name that says what it holds, the way in built from
+`__file__` either way.
 
 **The pins are one `README.md` in that directory**, covering every
 `_data` directory the suite reads rather than one file per directory,
@@ -1497,6 +1522,53 @@ message, and the directory is omitted from the coverage ratchet: a body
 that skips itself would be an uncovered line at every commit rather than
 a defect. What covers them is an unattended job, and that job fails if
 its tests skipped rather than ran.
+
+### Functional tests
+
+`tests/functional/` sits beside `integration/` where a suite's subject
+is a running process rather than a module: a test that starts what the
+repository ships and drives it over a port has no module to sit beside,
+so the mirror has no place for it. The terms keep the concession from
+becoming a place to put anything. `tests/unit/` then carries the mirror,
+and nothing moves out of it to escape a rule; every directory is in
+`testpaths`, so a bare run is still the whole suite; and the split is
+declared in `tests/README.md` with its reason, this section's own rule
+for a convention only prose states. The two directories are told apart
+by what they need rather than by how long they take: `integration/`
+needs something the repository does not ship, `functional/` needs
+nothing it does not — it starts the thing itself. The rejected
+alternative is flattening, which moves the record of which tests hold a
+port into a marker or a naming convention, the same fact kept where a
+`testpaths` entry cannot see it.
+
+### Property tests
+
+A tree that owes section 10's fuzzer owes a property layer first, keyed
+on the same property — parsing what a stranger sends. The two answer
+different questions: a property test answers *does this hold over the
+domain I described*, a fuzzer answers *what is in the domain I did not
+describe* — and the second presupposes the first, a fuzzer extending no
+described domain having nothing to contradict. hypothesis is the named
+shape, its profiles registered once in `tests/conftest.py` rather than
+repeated on every `@given`:
+
+```python
+settings.register_profile("default", deadline=None, max_examples=500)
+settings.register_profile("thorough", deadline=None, max_examples=2_000)
+settings.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "default"))
+```
+
+`deadline=None`, because a per-example time limit is a timing flake on
+whichever cell of the matrix is slowest; the default example count set
+where a measurement of its cost on the whole suite says it is
+affordable; and the deep profile opt-in, because the search that finds a
+latent defect is not a search to run at every commit — and what it finds
+graduates into a vector test rather than staying in a search that may
+not repeat it. A tree that answers the property with hand-rolled
+properties over the same domain declares that in `tests/README.md`,
+where the reader meets it. A suite whose subject is a measurement rather
+than a parser does not owe the layer: generated inputs to a timing are
+the shape the tool is worst at.
 
 ### Convention tests
 
