@@ -3174,9 +3174,13 @@ print([c for c in declared if c not in classifiers])'
 An empty list is the answer. A string in it is one PyPI would refuse on
 upload, at the point where a version is already being consumed.
 
-Each sweep below that asks the API for a file or a directory of every
-repository tells a call that failed from a repository that owes nothing,
-the two being one blank otherwise. The reading is written once:
+`gh api` puts a failure's body on stdout and exits non-zero, so a
+command that filters nothing out of what it fetched reports its own
+failure, which is what the settings block above does. Where a `sed`
+reads the fetch instead, or a capture parses it as content, both signals
+are lost and a call that failed is one blank with a repository that owes
+nothing — a sweep's row and a single repository's answer alike. The
+reading is written once:
 
 ```shell
 read_or_mark() {  # $1 the path in $r's tree; sets $content and $ok
@@ -3408,8 +3412,10 @@ The second asks what each badge renders, which is what a reader of the
 rendered file sees and a reader of its source cannot:
 
 ```shell
-R=<org>/<repo>
-gh api "repos/$R/contents/README.md" -H 'Accept: application/vnd.github.raw' \
+r=<repo>
+read_or_mark README.md
+if [ "$ok" != found ]; then echo "README.md $ok"
+else printf '%s' "$content" \
   | sed -nE 's|^\[!\[[^]]*\]\(([^)]*)\).*|\1|p' \
   | while read -r src; do
       body=$(curl -sL -w '\n%{http_code}' "$src")
@@ -3418,13 +3424,16 @@ gh api "repos/$R/contents/README.md" -H 'Accept: application/vnd.github.raw' \
       printf '%s\t%s\t%s\n' "$(printf '%s' "$body" | tail -1)" \
         "${says:-(no title)}" "$src"
     done
+fi
 ```
 
 One line per badge, and it prints rather than judging: anything but
 `200` is the finding a command can decide, and the message beside it is
 the reading the rule above asks for. Read the Docs and pepy carry no
 `<title>` and print `(no title)`, so those two are read from the
-rendered image or from the page they link to.
+rendered image or from the page they link to. Where the `README.md`
+itself did not answer, the marker takes the whole line, there being no
+badge for it to sit beside.
 
 Section 11's rule that `claude-review.yml` is in every repository, which
 no single tree can answer for the others and nothing in `tests/` asks:
@@ -3506,32 +3515,52 @@ in that repository that asserts the claim. Across the organization the
 same command run in each tree is the matrix, and there is no shorter way
 to it.
 
-Section 7's vendored-data pins, across every tree that carries any —
-`tests/_data/README.md` where the data has a directory of its own,
-`tests/README.md` where it does not:
+Section 7's vendored-data pins, which sit in the data directory and so
+wherever that directory sits: the sweep asks the tree for its
+`README.md` paths rather than naming any, a tree whose data sits beside
+the script that reads it having no path a fixed list would hold. The
+root `README.md` is passed over, being section 2's rather than a data
+directory's, and this one carrying section 7's block as the shape to
+write, which no count tells from a pin:
 
 ```shell
 for r in <every repository>; do
-  read_or_mark tests/_data/README.md
-  [ "$ok" = absent ] && read_or_mark tests/README.md
-  if [ "$ok" = unreadable ]; then pins=unreadable
-  else pins=$(printf '%s' "$content" | grep -c '^commit  '); fi
+  if paths=$(gh api "repos/<org>/$r/git/trees/HEAD?recursive=1" \
+      --jq '.tree[] | select(.path | endswith("/README.md")) | .path' \
+      2>/dev/null)
+  then pins=$(printf '%s\n' "$paths" | while read -r p; do
+      [ -n "$p" ] || continue
+      read_or_mark "$p"
+      if [ "$ok" = found ]; then
+        n=$(printf '%s' "$content" | grep -c '^commit  ')
+        [ "$n" -gt 0 ] && echo "$p=$n"
+      else echo "$p=$ok"; fi
+    done | paste -sd, -)
+  else pins=unreadable
+  fi
   e=$(gh api "repos/<org>/$r/contents/.github/workflows/vendored-vectors.yml" \
     --silent 2>&1) && wf=yes \
     || { printf '%s' "$e" | grep -q '(HTTP 404)' && wf=no || wf=unreadable; }
-  printf '%s\tpins=%s\tworkflow=%s\n' "$r" "$pins" "$wf"
+  printf '%s\tpins=%s\tworkflow=%s\n' "$r" "${pins:-none}" "$wf"
 done
 ```
 
-`pins` above zero and `workflow=no` is section 7's finding: a tree
-pinning an upstream commit with nothing rechecking it on section 10's
-schedule. The reverse — a workflow present where `pins` is zero — is
-the same finding read from the other side. A tree with neither file is
-silent rather than a finding: it has no test data to vendor, so it owes
-neither. `pins=unreadable` and `workflow=unreadable` are neither of
-those: a call that did not answer, told apart from a genuine absence by
-the same `(HTTP 404)` capture the sweeps above use, and not a reading to
-act on until it is asked again.
+A path with a count beside it is a file carrying the block, which
+section 7 asks a tree for one of; the loop names a path only where the
+count is above zero. A path with `workflow=no` is section 7's finding: a
+tree pinning an upstream commit with nothing rechecking it on section
+10's schedule. The reverse — a workflow present where no path answers —
+is the same finding read from the other side.
+
+`pins=none` is no `README.md` of the tree carrying the block, which is a
+tree with nothing to vendor and equally a tree whose provenance is
+written some other way; this command does not tell those two apart, and
+what does is the reading section 7 asks of `tests/README.md` above.
+`pins=unreadable` is the tree listing failing, `unreadable` beside a
+path is that file's own fetch, and `workflow=unreadable` the third call;
+the last two are told from a genuine absence by the same `(HTTP 404)`
+capture the sweeps above use. None of the three is a reading to act on
+until it is asked again.
 
 What the package-content lines have to say: where the wheel is one
 package tree, a `package` naming it, whose absence is section 12's

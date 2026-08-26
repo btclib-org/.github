@@ -7,6 +7,34 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 15 marks a failed fetch wherever a filter would swallow it
+
+- **The badge-render command reads its `README.md` through
+  `read_or_mark`** (closes #419), so a call that did not answer prints
+  `README.md unreadable` where a file carrying no badge prints nothing.
+- **What decides which command owes the marker is the filter, not the
+  sweep** (closes #419). `gh api` puts a failure's body on stdout and
+  exits non-zero, so the settings block at the top of the section
+  reports its own failure by printing what it fetched; a `sed` that
+  selects lines drops the body and hands on its own exit code, and that
+  is a shape a single repository's answer shares with a sweep's row.
+
+### Section 15's pins sweep finds the file wherever section 7 puts it
+
+- **The sweep asks the tree for its `README.md` paths** (issue #434)
+  rather than reading `tests/_data/README.md` and falling back to
+  `tests/README.md`. Section 7 puts the pins in the data directory and
+  that directory beside whatever reads it, which is a script rather than
+  the suite in some trees, so a fixed pair of paths opens neither the
+  file that holds the pins nor anything that says so. The root
+  `README.md` is passed over: it is section 2's, and this one carries
+  section 7's block as the shape to write.
+- **`pins` names the file the block came from, and `none` where no file
+  of the tree carries one** (issue #434). A zero read as a tree with no
+  data to vendor, which is equally what a tree whose provenance is
+  written some other way leaves; the sweep says it cannot tell those two
+  apart and names the reading section 7 asks of `tests/README.md`.
+
 ### Section 9 says the union driver is a checkout's, not the forge's
 
 - **`merge=union` is a checkout's driver, and the forge does not apply
