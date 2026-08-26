@@ -36,6 +36,44 @@ audit has no revision to compare against.
   now says a row takes its place in the pull request that gives the
   first tree the workflow, which is what section 10 already states.
 
+### Section 15 tells a failed call from an answer
+
+- **Section 15's `uv.lock`, `release.yml`, `claude-review.yml` and
+  `vendored-vectors.yml` existence checks each folded a failed `gh api`
+  call into the same reading a genuine absence gets** (closes #319):
+  `--silent`'s failure fed the negative branch either way, so a rate
+  limit or a bad token read as `no`, as `none`, or as the file being
+  missing, exactly like a repository that genuinely lacks it.
+- **Each now captures the call's own stderr and reads `(HTTP 404)` out
+  of it** (closes #319), the signal that tells a genuine absence apart
+  from every other failure. The private vulnerability reporting sweep
+  needed no such capture: that endpoint has no legitimate absence of
+  its own, so its `unreadable` already covers every failure. Anything
+  else here prints `unreadable` rather than the negative reading.
+- **A repository this loop names but the endpoint cannot find still
+  answers `(HTTP 404)`** (closes #319), which this shape does not
+  close: GitHub's contents API gives a moved path, a stale roster entry
+  and a genuinely absent file the same status.
+- **The `SECURITY.md` sweep and the vendored-data pins sweep pipe a
+  fetch through `base64 -d 2>/dev/null`, where a failed fetch decodes to
+  the same blank a genuinely absent file does** (closes #319); both are
+  the same defect on the question the issue left open, and both now
+  tell the two apart the same way as the boolean sweeps.
+
+### Section 16 points at section 14 instead of naming its files
+
+- **Both of section 16's checklists named the lint-tool configuration
+  files section 14 already lists** (closes #388): `.markdownlint.jsonc`,
+  `.yamllint.yaml` and `.taplo.toml`, the files kept by the tools whose
+  configuration is not in `pyproject.toml`. A file section 14 gains
+  later would have reached neither checklist.
+- **Both now point at section 14 instead**, in the shape #377 gave
+  section 3 (closes #388). `.gitattributes`, `.python-version` and
+  `.gitignore` stay named in the new-repository step: section 14 lists
+  the first, reads `.python-version` as decided per repository, and
+  says nothing at all about `.gitignore`, so none of the three is
+  section 14's list to point at instead.
+
 ### The ack of record is a COMMENT review, and the workflow is inert
 
 - **The verdict has three lines** (issue #340). `ACK <sha>` and `CHANGES

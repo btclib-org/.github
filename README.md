@@ -3136,8 +3136,9 @@ for r in <every repository>; do
   req=$(gh api "repos/<org>/$r/contents/pyproject.toml" --jq .content \
     2>/dev/null | base64 -d 2>/dev/null \
     | sed -nE 's/^required-version = "(.*)"/\1/p')
-  gh api "repos/<org>/$r/contents/uv.lock" --silent 2>/dev/null \
-    && lock=yes || lock=no
+  e=$(gh api "repos/<org>/$r/contents/uv.lock" --silent 2>&1) && lock=yes \
+    || { printf '%s' "$e" | grep -q '(HTTP 404)' && lock=no \
+         || lock=unreadable; }
   printf '%s\tlock=%s\tfloor=%s\n' "$r" "$lock" "$req"
 done
 ```
@@ -3149,15 +3150,20 @@ the finding, a tree committing a lock with nothing capping the uv that
 reads it. `lock=no` owes no floor, so an empty `floor=` beside it is
 silent rather than a finding, whatever the ceiling is that day. A floor
 below the ceiling is safe by section 1's own argument, and only one above
-it is the other finding this loop can print.
+it is the other finding this loop can print. `lock=unreadable` is
+neither: the call itself failed, told apart from a genuine `no` by the
+`(HTTP 404)` `--silent` would otherwise swallow, and `floor=` beside it
+answers nothing until the sweep is run again.
 
 Which repositories publish, which is what section 2's first tier turns
 on and so what decides whether a `SECURITY.md` is owed or inherited:
 
 ```shell
 for r in <every repository>; do
-  gh api "repos/<org>/$r/contents/.github/workflows/release.yml" \
-    --silent 2>/dev/null && w=release.yml || w=none
+  e=$(gh api "repos/<org>/$r/contents/.github/workflows/release.yml" \
+    --silent 2>&1) && w=release.yml \
+    || { printf '%s' "$e" | grep -q '(HTTP 404)' && w=none \
+         || w=unreadable; }
   printf '%s\trelease=%s\n' "$r" "$w"
 done
 curl -s https://pypi.org/pypi/<name>/json | python3 -c 'import json, sys
@@ -3173,12 +3179,21 @@ else:
 Both halves are the question, and neither answers alone. The first is
 asked by the exit code: `--silent` prints nothing on success and sends
 the failure to stderr, where `--jq .name` would put a 404's *body* on
-stdout and `|| echo none` would append to it. The second reads the
-project urls rather than the status code, because a name this
+stdout and `|| echo none` would append to it. That stderr is now
+captured rather than let through: a `(HTTP 404)` in it is `release.yml`
+genuinely absent, and anything else is the call itself failing —
+`w=unreadable`, told apart from a real `none` rather than folded into
+it. The second reads the project urls rather than the status code,
+because a name this
 organization does not publish may be served by somebody else's project
 of the same name — so the discriminator is a link back to the
 organization and not a `200`. `<name>` is what `pyproject.toml`
 declares, which is not always the repository's.
+
+`(HTTP 404)` is what a genuinely absent `release.yml` answers with, and
+also what a repository this loop names but the endpoint cannot find
+answers with — a stale roster reads as `none` rather than
+`unreadable`, a gap this shape does not close.
 
 The private channel section 2 owes, which is a setting in every
 repository and an address in the files that carry the policy:
@@ -3195,9 +3210,15 @@ one='security at btclib dot org'
 any='[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
 for r in <every repository>; do
   printf '%-20s ' "$r"
-  policy=$(gh api "repos/<org>/$r/contents/SECURITY.md" --jq .content \
-    2>/dev/null | base64 -d 2>/dev/null)
-  [ -n "$policy" ] || { echo 'no SECURITY.md'; continue; }
+  if e=$(gh api "repos/<org>/$r/contents/SECURITY.md" --jq .content \
+      2>/dev/null); then
+    policy=$(printf '%s' "$e" | base64 -d)
+  elif gh api "repos/<org>/$r/contents/SECURITY.md" --jq .content \
+      2>&1 1>/dev/null | grep -q '(HTTP 404)'; then
+    echo 'no SECURITY.md'; continue
+  else
+    echo 'unreadable'; continue
+  fi
   printf '%s\n' "$policy" | grep -o -i -E "$one|$any" \
     | sort -u | tr '\n' ' '
   echo
@@ -3221,7 +3242,9 @@ policy that is not there. An `@` form is the finding wherever it prints,
 that being the spelling the address is written to avoid. The grep reads
 no further: a pattern taking any spelled-out address would report the
 one `btclib-secp256k1` gives for the C library it binds, which is
-upstream's and correctly there.
+upstream's and correctly there. *unreadable* is the call itself
+failing, the same `(HTTP 404)` capture the publishing sweep uses telling
+it apart from a genuine `no SECURITY.md`.
 
 Section 2's badge rule, whose subject is the head of a file no tree can
 read for another. The first loop is membership and order, one line per
@@ -3271,13 +3294,17 @@ no single tree can answer for the others and nothing in `tests/` asks:
 
 ```shell
 for r in <every repository>; do
-  gh api "repos/<org>/$r/contents/.github/workflows/claude-review.yml" \
-    --silent 2>/dev/null || echo "$r has no claude-review.yml"
+  e=$(gh api "repos/<org>/$r/contents/.github/workflows/claude-review.yml" \
+    --silent 2>&1) && continue
+  printf '%s' "$e" | grep -q '(HTTP 404)' \
+    && echo "$r has no claude-review.yml" \
+    || echo "$r: claude-review.yml unreadable"
 done
 ```
 
-Silent where the rule is kept, one line per repository where it is not,
-and `--silent` for the reason the publishing sweep gives.
+Silent where the rule is kept, one line naming a repository missing it,
+and a differently worded line where the call itself failed rather than
+answered — `--silent` for the reason the publishing sweep gives.
 
 The calendar of section 10, across the organization, an audit no single
 tree can answer:
@@ -3335,15 +3362,22 @@ Section 7's vendored-data pins, across every tree that carries any —
 `tests/README.md` where it does not:
 
 ```shell
+read_or_mark() {  # $1 the path; sets $content and $ok
+  if e=$(gh api "repos/<org>/$r/contents/$1" --jq .content 2>/dev/null)
+  then content=$(printf '%s' "$e" | base64 -d); ok=found
+  elif gh api "repos/<org>/$r/contents/$1" --jq .content 2>&1 1>/dev/null \
+      | grep -q '(HTTP 404)'; then content=; ok=absent
+  else content=; ok=unreadable
+  fi
+}
 for r in <every repository>; do
-  readme=$(gh api "repos/<org>/$r/contents/tests/_data/README.md" \
-      --jq .content 2>/dev/null | base64 -d 2>/dev/null)
-  [ -n "$readme" ] || readme=$(gh api \
-      "repos/<org>/$r/contents/tests/README.md" --jq .content \
-      2>/dev/null | base64 -d 2>/dev/null)
-  pins=$(printf '%s' "$readme" | grep -c '^commit  ')
-  gh api "repos/<org>/$r/contents/.github/workflows/vendored-vectors.yml" \
-    --silent 2>/dev/null && wf=yes || wf=no
+  read_or_mark tests/_data/README.md
+  [ "$ok" = absent ] && read_or_mark tests/README.md
+  if [ "$ok" = unreadable ]; then pins=unreadable
+  else pins=$(printf '%s' "$content" | grep -c '^commit  '); fi
+  e=$(gh api "repos/<org>/$r/contents/.github/workflows/vendored-vectors.yml" \
+    --silent 2>&1) && wf=yes \
+    || { printf '%s' "$e" | grep -q '(HTTP 404)' && wf=no || wf=unreadable; }
   printf '%s\tpins=%s\tworkflow=%s\n' "$r" "$pins" "$wf"
 done
 ```
@@ -3353,7 +3387,10 @@ pinning an upstream commit with nothing rechecking it on section 10's
 schedule. The reverse — a workflow present where `pins` is zero — is
 the same finding read from the other side. A tree with neither file is
 silent rather than a finding: it has no test data to vendor, so it owes
-neither.
+neither. `pins=unreadable` and `workflow=unreadable` are neither of
+those: a call that did not answer, told apart from a genuine absence by
+the same `(HTTP 404)` capture the sweeps above use, and not a reading to
+act on until it is asked again.
 
 What the package-content lines have to say: where the wheel is one
 package tree, a `package` naming it, whose absence is section 12's
@@ -3424,9 +3461,9 @@ independent and the checklist the same for each.
 1. `pyproject.toml`: section 3's build backend, metadata, PEP 639
    licence, keywords matching the topics, urls, dependency groups, and
    the tool tables of sections 5, 6, 7 and 8.
-1. Copy `.markdownlint.jsonc`, `.yamllint.yaml`, `.taplo.toml`,
-   `.gitattributes` (with the two `merge=union` entries),
-   `.python-version`, `.gitignore`.
+1. Copy the files section 14 names for the tools whose configuration is
+   not in `pyproject.toml`, `.gitattributes` (with the two
+   `merge=union` entries), `.python-version`, `.gitignore`.
 1. `.pre-commit-config.yaml`, including the mypy hook section 4's
    criterion chooses and the `pinned-rev` guard; `uv run pre-commit run
    --all-files` until clean; generate `.secrets.baseline`.
@@ -3537,12 +3574,13 @@ written before the gate that judges it.
 1. **`.pre-commit-config.yaml` as the single lint gate**, and the lint
    workflow reduced to running it. Delete any second list of the same
    tools from the workflows. The shared configuration its hooks read
-   lands with them — `.markdownlint.jsonc`, `.yamllint.yaml`,
-   `.taplo.toml` — as does `.gitattributes`, whose `merge=union` entries
-   wait for the two history files below. Then run it `--all-files`, over
-   everything the steps above added. `.vscode/` lands with it, section
-   13's recommendations being the gate's own tools and `importStrategy`
-   following the mypy hook the step below writes.
+   lands with them — the files section 14 names for the tools whose
+   configuration is not in `pyproject.toml` — as does `.gitattributes`,
+   whose `merge=union` entries wait for the two history files below.
+   Then run it `--all-files`, over everything the steps above added.
+   `.vscode/` lands with it, section 13's recommendations being the
+   gate's own tools and `importStrategy` following the mypy hook the
+   step below writes.
 1. **mypy `strict = true`** aimed at the `requires-python` floor, with
    the optional error codes surveyed one at a time, and the hook in the
    gate above that runs it. Every silencing `type: ignore` names its
