@@ -1618,11 +1618,35 @@ fail_under = 100.0
 - **A selective run is reported and not gated.** `fail_under` applies to
   every report coverage writes, so `pytest tests/foo` would fail on the
   tree's coverage rather than its own. A `conftest.py` hook drops the
-  threshold when the invocation selects a subset — paths, `-k`, `-m` —
-  and leaves it alone for `--lf`, `--deselect` or an early `-x`, which
-  are not selections. Setting it means writing to
+  threshold when the invocation asks for something other than the whole
+  suite — paths, `-k`, `-m`, `--deselect`, `--ignore`, `--ignore-glob`,
+  `--lf` — and never overrules an explicit `--cov-fail-under`. A path is
+  a selection only where it leaves a `testpaths` entry out, rather than
+  wherever one is named: `pytest tests` is what a bare run already
+  collects, so a hook reading any path as a subset switches the floor
+  off for the run that is the suite. The paths are
+  `config.option.file_or_dir`, which is `None` and not `[]` under
+  `--help` — the parse being abandoned before the positional is
+  consumed — so a containment test that iterates it ends `--help` in a
+  traceback. Setting the threshold means writing to
   `config.known_args_namespace`: pytest-cov reads that copy and never
   `config.option`, so the obvious spelling fails silently.
+
+  A run that leaves tests out measures the same source with fewer tests,
+  so what its report is short of is the tests it did not run: a
+  shortfall it reports cannot be told apart from one the tree has, and a
+  gate whose red cannot be read is what teaches whoever runs it to reach
+  for `--no-cov`.
+  The narrower reading — paths, `-k` and `-m` alone — is rejected: it
+  holds the rest to be the flags of an iteration whose next run is the
+  whole suite, and reading intent off all of them to make the hook a
+  second definition of what a real run is. What the wider set costs is
+  the occasion where such a run would have cleared 100 anyway — a `--lf`
+  that finds nothing to rerun and so is the whole suite, a `--deselect`
+  of one arm of a parametrization the others cover — and the next bare
+  run measures the tree again. An early `-x` is outside the set either
+  way: what cuts that run short is a failure and not what the invocation
+  asked for.
 - **Where an optional native dependency splits the code**, coverage is
   measured twice — with it and without — and the *union* is gated at 100
   beside the delegated run's own gate, not instead of it, so a line
