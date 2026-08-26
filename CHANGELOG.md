@@ -7,6 +7,21 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The last backlog row expired
+
+- **`btclib-node` landed what the row excused, so the row turned its
+  success into a failure** (closes #371): `test_every_test_file_is_named
+  _so_pytest_collects_it[btclib-node]` reported `[XPASS(strict)]
+  btclib-org/.github#371` once `btclib-node`'s `cfc43d3d` moved
+  `tests/helpers.py` into `tests/__init__.py` and dropped the
+  `name-tests-test` exclusion. That is the mechanism working — a strict
+  expected failure is what forces an expired exemption to be noticed
+  rather than left to rot — and the answer is to take the row out, not
+  to relax it. `BACKLOG` is now empty, and its docstring says that empty
+  is where it is meant to be rather than a state it has not reached:
+  nothing here is a place a new failure belongs, a red cell being
+  answered in the tree that is red.
+
 ### The fork filter comes back, and section 10's fork half loses its example
 
 - **`names()` asked the API for every unarchived repository, forks

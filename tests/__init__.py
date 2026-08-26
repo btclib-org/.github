@@ -234,19 +234,20 @@ def names() -> list[str]:
     )
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
-    (
-        371,
-        "test_every_test_file_is_named_so_pytest_collects_it",
-        ("btclib-node",),
-    ),
-)
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what
 `conftest.py`'s `cited()` spells it as. A row keyed on a number from a
 tree this suite measures is not caught: those trackers number in the
 same range, so the citation names a real issue about something else.
+
+Empty is where this is meant to be rather than a state it has not
+reached yet: a row is an exemption, and the rows are strict expected
+failures so that a repository catching up is *reported* rather than
+quietly excused. Nothing here is a place a new failure belongs -- a red
+cell is answered in the tree that is red, and a row is what says the
+answer is already written down and waiting.
 """
 
 
