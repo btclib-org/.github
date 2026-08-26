@@ -2391,14 +2391,48 @@ stores for the reason *Dependabot and pre-commit.ci* gives below, and a
 repository that configures Dependabot gets a red review on every pull
 request Dependabot opens while the second is missing.
 
-**Two things a port must adapt**, and both are claims about the receiving
-tree rather than settings. The prompt names `REVIEWING.md`, and it tells
-the reviewer that the gates are running beside it on this sha — so a
-repository without that file, or without those workflows, needs a prompt
-that says something true instead of inheriting a claim about files it
-does not have. Copying the workflow faithfully into a tree that has
+**Two of the three things a port must adapt** are claims about the
+receiving tree rather than settings. The prompt names `REVIEWING.md`, and
+it tells the reviewer that the gates are running beside it on this sha —
+so a repository without that file, or without those workflows, needs a
+prompt that says something true instead of inheriting a claim about files
+it does not have. Copying the workflow faithfully into a tree that has
 neither is the same defect as copying any other shared file that
 describes one tree, committed by the act of spreading it.
+
+**The third is a citation**, and it is not about the receiving tree at
+all. The prompt cites the rules a finding is written against, and this
+repository's copy cites `README.md`, this being the tree that holds them;
+everywhere else that file is section 2's — what the repository is, to
+whoever arrives at it — so a citation carried over verbatim names the
+wrong file. A receiving copy cites this standard instead, in one of
+these shapes:
+
+- `section 11 of the organization's standard`, where the rule cited is in
+  this section and no one subsection of it holds the rule, and wherever
+  the sentence is the one that names the standard;
+- `section 11's *Review*`, or whichever subsection does hold the rule
+  cited;
+- `the organization's standard`, with no section number, where the rule
+  cited is not in this section.
+
+**What chooses the shape is what holds the rule, never where the
+sentence sits.** A copy that shortens to the subsection form after its
+first citation is precise and wrong the moment it cites a rule that
+subsection does not hold: the two secret stores a Dependabot-initiated
+run reads are stated in this section's own prose and in *Dependabot and
+pre-commit.ci*, so a citation of them names no subsection at all, wherever
+in the file it falls. What a copy does owe its own reader is that the
+standard is named in full somewhere in it, since `section 11` alone does
+not say which document it is a section of — that, and not the order,
+is what a copy citing only subsections fails.
+
+The last shape is the one worth stating, since naming section 11 there
+would be precise and wrong. This section is *GitHub settings*, where a
+finding about the prose cites section 9 and a finding about a rule
+stated without the reason that chose it cites *How to use this file*; a
+citation of the wrong place sends a reader further astray for being
+precise than a vague one does.
 
 **Why the job has the shape it has** is in the workflow's own header, in
 every copy of it: why a missing credential had to be made loud, why the
@@ -2926,10 +2960,9 @@ it agrees with this one.
 receiver exactly like every other tree's, which is what
 `tests/verbatim_test.py`'s comparison assumes. `claude-review.yml` has no such
 copy here: this repository is the standard the workflow reviews, so its prompt
-names `REVIEWING.md` and `CONTRIBUTING.md`'s last section directly, where a
-receiving copy names section 11 of the standard instead — the asymmetry section
-11's *The workflow, and what a port of it has to adapt* already states. A
-bullet here would put this repository's own copy in the comparison too, and it
+and a receiving copy's differ by the adaptation section 11's *The workflow, and
+what a port of it has to adapt* states. A bullet here would put this
+repository's own copy in the comparison too, and it
 would fail forever rather than the way `EXPECTED_DRIFT` expects: that table
 records a copy a fix converges, not one that cannot by design.
 
