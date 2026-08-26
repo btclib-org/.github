@@ -197,7 +197,7 @@ def tier(root: Path) -> Tier:
 
 @functools.cache
 def names() -> list[str]:
-    """Ask the API for every repository, rather than listing them here.
+    r"""Ask the API for every repository, rather than listing them here.
 
     A list written down here would be one more place to remember a new
     repository, and the one place nobody would think to look: a tree that
@@ -205,18 +205,22 @@ def names() -> list[str]:
     exists. Archived repositories are out -- what they agree with is the
     standard of the day they were archived.
 
-    Forks are not, though they were: the reason given was that a fork's
-    conventions are upstream's, and that is false for a fork the
-    organization has taken over. `bbt` is one -- its upstream has not
-    been pushed since 2022, every commit since is the organization's, and
-    the forks downstream are of this copy rather than of that one.
-    Excluding it meant the one repository furthest from the standard was
-    the one nothing measured.
+    Forks are out too, a fork's conventions being upstream's. That
+    argument fails for a fork the organization has taken over, whose
+    commits since the takeover are its own and whose downstream forks
+    are of this copy rather than of the original: excluding such a tree
+    silences the suite about the one repository the argument is wrong
+    about.
 
-    The filter is right in general and was wrong for one repository, so
-    it comes back the day that repository is detached from its upstream:
-    btclib-org/bbt#13 carries the request GitHub's support grants, and
-    the last box on it is this line.
+    The organization holds no fork, so the filter selects nothing out
+    and is a guard rather than a description::
+
+        gh api 'orgs/btclib-org/repos?per_page=100' \
+          --jq '[.[] | select(.fork == true)] | length'
+
+    What it asks about is a state, not how a tree reached it: a
+    repository detached from its upstream and one rebuilt from scratch
+    answer it alike.
 
     Cached, because the list is read once at collection to parametrize
     the per-repository tests and once more by the `repositories` fixture,
@@ -226,16 +230,11 @@ def names() -> list[str]:
     """
     return gh(
         f"orgs/{ORG}/repos?per_page=100",
-        ".[] | select(.archived == false) | .name",
+        ".[] | select(.archived == false and .fork == false) | .name",
     )
 
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
-    (
-        177,
-        "test_d_is_selected_with_the_pep257_convention",
-        ("btclib-node",),
-    ),
     (
         371,
         "test_every_test_file_is_named_so_pytest_collects_it",
