@@ -35,6 +35,29 @@ audit has no revision to compare against.
   written some other way leaves; the sweep says it cannot tell those two
   apart and names the reading section 7 asks of `tests/README.md`.
 
+### Section 8 measures a selection against `testpaths`, and reads `--lf` as one
+
+- **A path is a selection only where it leaves a `testpaths` entry out**
+  (issue #424). `pytest tests` names what a bare run already collects,
+  so a hook reading any path as a subset switches the coverage floor off
+  for the run that is the suite; the hooks that read it that way are
+  owed their own fix (issue #430). The paths are
+  `config.option.file_or_dir`, which is `None` and not `[]` under
+  `--help`, so a containment test that iterates it ends `--help` in a
+  traceback.
+- **`--deselect`, `--ignore`, `--ignore-glob` and `--lf` join `-k` and
+  `-m`** (issue #424). Such a run measures the same source with fewer
+  tests, so what its report is short of is the tests it did not run: a
+  shortfall it reports cannot be told apart from one the tree has, and a
+  gate whose red cannot be read teaches whoever runs it to reach for
+  `--no-cov`.
+- **The narrower reading sits beside it** (issue #424): those flags are
+  an iteration's, whose next run is the whole suite, and reading intent
+  off all of them makes the hook a second definition of what a real run
+  is. What the wider set costs is the run that would have cleared 100
+  anyway, a `--lf` with nothing to rerun; an early `-x` is outside the
+  set either way.
+
 ### Section 9 says the union driver is a checkout's, not the forge's
 
 - **`merge=union` is a checkout's driver, and the forge does not apply
