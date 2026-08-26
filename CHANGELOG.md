@@ -7,6 +7,17 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The calendar gains a row for fuzz, the ClusterFuzzLite sentinel
+
+- **`fuzz` takes Monday, 03** (issue #372). `04` and `05` are full on
+  every day; `03` is free on every day but Saturday, where `scorecard`
+  already holds it. Monday is chosen to land on a different day from
+  `scorecard`'s own Saturday.
+- **The row does not make `tests/grid_test.py` green** (issue #372). No
+  tree yet carries a `fuzz` `schedule:` block; `btclib`'s `fuzz.yml`
+  gains one in a follow-up pull request, at this row's instant --
+  minute 04, so `4 3 * * 1`.
+
 ### Section 10 states the interpreter exception and refuses a schedule's timezone
 
 - **An interpreter axis is a gate cell exactly where its extra cell runs
