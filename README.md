@@ -410,15 +410,18 @@ Which property decides which badge:
 - **on pre-commit.ci** — its badge;
 - **builds documentation** — the `docs` workflow, and Read the Docs at
   `app.readthedocs.org`;
+- **registered at bestpractices.dev** — the OpenSSF Best Practices
+  badge, `www.bestpractices.dev/projects/<id>/badge`;
 - **runs a sentinel** — that sentinel's badge.
 
 **The order is fixed**, and it is: the version, the downloads, the
 development status, the licence, the supported Python versions, `wheel`,
 `implementation`, `github/v/release`, `test`, `lint`, `docs`,
 pre-commit.ci, then the sentinels in the order section 10's calendar
-gives them, and last Read the Docs. A tree skips what it does not own
-and keeps the rest in that order, so a reader comparing two `README.md`
-files compares like with like instead of hunting. Taking the sentinels'
+gives them, then Read the Docs, and last the OpenSSF Best Practices
+badge. A tree skips what it does not own and keeps the rest in that
+order, so a reader comparing two `README.md` files compares like with
+like instead of hunting. Taking the sentinels'
 order from the calendar is one order to maintain rather than two, and
 what it costs is that a workflow moved to another day moves its badge in
 every `README.md` that carries it.
@@ -492,12 +495,45 @@ because the second answers `307` and redirects to the first: one spelling
 because two are two things to keep true, and that one because it is where
 the other lands, a redirect being something its owner can retire.
 
+The Best Practices badge is admitted where REUSE's is refused, and the
+line between them is what the render measures. For a registered project
+the badge answers with the questionnaire's live state — in progress with
+its percentage, passing, silver, gold — a state that moves when an
+answer stops being true, and it is the same state the Scorecard's
+`CII-Best-Practices` check scores, so the row and the `scorecard`
+sentinel read one fact from two sides. REUSE's stays refused for the
+reason its own bullet above gives, which this render escapes: the
+questionnaire's state is a measurement, where `reuse unregistered` is
+not. Registration is the
+maintainer's attestation and not a pull request, which is why the
+property is *registered* rather than *compliant*: a tree the maintainer
+has not registered simply lacks the property, and its row is complete
+without the badge.
+
 The downloads badge is pepy's rather than `img.shields.io/pypi/dm`, and
 both of them render: the first answers with the project's whole life and
 the second with the last month, so the second is a figure that falls
 without anything having happened to the tree. What that gives up is the
 reading `pypi/dm` is better at, whether the package is being taken up
 now.
+
+**`CONTRIBUTING.md`'s badge block is inside this rule's reach, and it is
+not the row.** Some trees open *This repository in particular* with a
+block of toolchain badges, and the block's first line is its own
+admission rule: each badge names a choice the sections below explain, or
+a place to go, and the README keeps the ones that can turn red. That
+sentence is the rule, stated where the block is, and it is what makes
+the block a function rather than a curation: a badge belongs there
+because a section of that same file explains the choice it names, so two
+trees' blocks differ exactly where their toolchains do and nowhere else.
+The repository link, refused from the row above as the item that
+measures nothing, is admitted here as the one badge of the *place to go*
+clause — `CONTRIBUTING.md` travels in the sdist and renders where the
+repository is not one click away — so a tree that carries the block
+carries it. The block itself is not owed: a tree without one has nothing
+to explain away, its sections carrying the same choices unbadged. What
+is refused is only a block without its sentence, which is a curated list
+wearing the shape of a rule.
 
 **A publishing repository's `README.md` ends with the line naming who
 supports the work**, under a thematic break:
@@ -1844,9 +1880,29 @@ sight rather than weighed.
   sequence, so `(#N)` does not say which it names — and a squash lands
   with the pull request's own number appended to the commit subject
   already, so the bare form in an entry reads as that number instead.
+- **The qualifier does not stand in for the keyword.** `(owner/repo#N)`
+  with nothing before the number says which object it names and not what
+  the entry did about it, so it fails the falsifiability above exactly
+  as the bare form does while reading as more careful; the
+  cross-repository citations are `(closes owner/repo#N)` and
+  `(issue owner/repo#N)`, keyword and qualifier together. Entries
+  already landed in the keywordless form stay as they are, the bullet
+  below being why.
 - **Nothing already written is rewritten.** Both files are append-only
   in practice and `merge=union` in fact; the rule binds what is written
   next, not the entries that predate it.
+- **A count that expires inside a landed entry stays there.** An entry
+  speaks of its own day — the one its release heading dates, or the day
+  it landed where a changelog releases nothing — so a sentence that
+  counted a moving population — trees yet to take a rule, repositories
+  short of a file — was true when it landed and is not corrected when
+  the population moves; the change that moves the population is what
+  gets the new entry, and the reader is served by that entry rather than
+  by a rewrite the bullet above already refuses. What the no-counts rule
+  of this section forbids is writing the next such sentence: a new entry
+  counts nothing that moves underneath it. A structure the entry itself
+  names — `build` and `check` are two rows, and it lists the two — is a
+  description rather than a count, and the rule does not reach it.
 - **No command in section 15 audits this.** A citation the entry makes
   and an issue merely named in its prose look identical to a pattern
   match — both are a `#N` inside parentheses — and this organization's
@@ -1913,6 +1969,16 @@ rather than the work, so a second image before a review buys a rarer
 answer at the price of every review. Everything else answers weekly and
 before a release instead — a regression sitting on `main` for at most a
 week, against every review paying for it.
+
+**The ceiling's figure has one home per tree, and it is not a workflow
+header.** The number is the plan's, so `REPOSITORY.md`'s *Plan-gated
+settings* is where it lives, beside the command that re-derives it and
+GitHub's own table. Prose that needs the reasoning — a workflow header,
+`CONTRIBUTING.md` — states it as this section does, ceiling unnumbered,
+and points there for the figure. A date beside the number is not the
+cure: the date says when it was true and nothing says it still is,
+where the command answers for the day it is run. This section names no
+number for the same reason.
 
 **An interpreter axis is a gate cell rather than a sentinel row exactly
 where the extra cell runs in parallel with the ones already in the job,
@@ -2028,16 +2094,31 @@ whose result is already known: it upgrades everything the resolver
 touches, runs the suite, the lint gate and the packaging checks, and
 commits nothing.
 
-**A sentinel's row arrives with the workflow.** `tests/grid_test.py`
+**A sentinel's row arrives with the workflow, and one pull request can
+do both only where the first tree is this one.** `tests/grid_test.py`
 reads the calendar against the trees in both directions, so a row naming
 a workflow nothing in the organization schedules fails there exactly as
-a `cron:` no row names does. A sentinel adopted here therefore takes its
-row in the pull request that gives the first tree the workflow, and the
-subsection below is what says which tree that will be. The alternative
-is a row written the day the rule is, which reads as the calendar being
-a plan rather than a description; and that direction of the test is the
-only thing anywhere that catches a row for a workflow nobody wrote, so
-spending it on a rollout leaves it catching nothing.
+a `cron:` no row names does. A sentinel whose first tree is this
+repository takes its row in the pull request that gives it the
+workflow — one repository, one landing, neither test red. A sentinel
+whose first tree is another repository cannot: the row is this tree's
+`README.md` and the schedule is that tree's workflow, always two pull
+requests, and one of them lands first. The order is the row first — the
+adoption is this file's own change, and the receiving tree's workflow
+comment then cites a row that exists from the moment it lands — and the
+red in between is `test_every_row_of_the_calendar_names_something_that_exists`,
+expected, dated by the pull request that opened it and bounded by the
+issue filed against the tree that owes the schedule. The other order
+keeps that test green by turning
+`test_every_cron_is_the_instant_the_calendar_names` red instead, and
+asks a tree to schedule against a calendar that does not yet name it.
+What stays refused is a row written the day the rule is, which reads as
+the calendar being a plan rather than a description: an adoption pull
+request names the tree that owes the workflow and the issue that
+carries the debt, where a plan names nobody — and that direction of the
+test is the only thing anywhere that catches a row for a workflow
+nobody wrote, so spending it on a rollout with no debtor leaves it
+catching nothing.
 
 ### Which trees owe which sentinel
 
@@ -2298,6 +2379,21 @@ description's, not the subject's: a commit that had to close on its own
 subject would repeat the verb for each reference — `(closes #319)
 (closes #388)`, adjacency being the test — and everything here reaches
 `main` through a pull request whose description is what closes.
+
+**The verb is checked against the forge's own parse, not against
+intent.** `closingIssuesReferences` is what GitHub actually read out of
+the description, and *what a pull request closes is read before it is
+merged*, below, has the command — one read answering both questions.
+A title or an entry carrying `closes` for a number missing from that
+answer, or `issue` for one present in it, is wrong on the parser's own
+evidence — landed pull requests have carried the second defect, closing
+their issue while citing it `(issue #N)` in the changelog, the release
+notes and the title at once, and one of them got the title right while
+both prose files beside it stayed wrong, so a correct title is not
+evidence for the citations it travels with. The answer can lag the
+create by a moment; a zero that survives repeated reads spaced apart is
+not lag but a parse that never ran, and an edit that resubmits the body
+is what re-triggers it.
 
 The title is not the closing mechanism. `Closes #N` in the
 *description* is what GitHub acts on, and both are wanted: the
@@ -2786,7 +2882,16 @@ corrected in none of the ones that shipped.
   as work in progress. A fourth component exists only for a release that
   shipped broken and cannot be reuploaded. No release candidates: there
   is no pre-release, only a version not yet tagged, and a check refuses
-  anything that is not digits and dots.
+  anything that is not digits and dots. The one exemption is a wrapper
+  whose version names the upstream it wraps: `btclib-secp256k1` releases
+  `M.N.P` for the libsecp256k1 `vM.N.P` inside it, its own `README.md`
+  stating the scheme, because a wrapper dated by its own calendar makes
+  a caller read a changelog to answer *which upstream is this*. The
+  exemption is this section's rather than an entry on section 14's
+  *decided per repository* list, so a future wrapper re-argues it here
+  instead of inheriting an answer nobody is asked for — and its fourth
+  component means a rewrap of the same upstream, not the broken-release
+  meaning above, the two schemes never sharing a tree.
 - **A rehearsal on TestPyPI** uses `.dev<run number>`, patched in by the
   workflow rather than typed, so it is unique per run and sorts below the
   release it rehearses.
@@ -3219,6 +3324,20 @@ is settled by measuring it, not by copying what a sibling does; the
 convention tests, which each project chooses on section 7's terms; and
 the `[tool.uv.sources]` table, which exists only while a dependency is
 not on the index and goes the day it is.
+
+`.github/scripts/check_vendored_vectors.py` is per repository by
+subject, and deliberately outside the compared list above: each copy
+parses the pin file its own tree keeps, so the bytes differ wherever
+the subjects do, which no comparison by path can read as anything but
+drift. What every copy owes instead is a header sentence naming what it
+parses and where it departs from the sibling of the same name —
+`btclib-node`'s workflow already carries one — so a reader holding two
+copies knows which difference was decided. Its failure mode is why the
+sentence is owed: an entry shape the script does not match is skipped,
+the run is green, and the issue it would have opened never opens — so a
+fix that is not about one tree's entry shape, a `gh` call or a field
+spelling, is carried to every copy in the same campaign, the header
+being what says which parts those are.
 
 ## 15. Auditing a repository against this file
 

@@ -50,6 +50,59 @@ audit has no revision to compare against.
   ungated, so a tree with a local floor points such a run at its
   configuration or makes it say it is ungated, measured per tree.
 
+### The standard answers the campaign's decision issues
+
+- **The qualifier does not stand in for the keyword** (closes #413):
+  section 9 names `(owner/repo#N)` with no `closes`/`issue` before the
+  number as the rejected alternative it is, failing the falsifiability
+  the pair exists for exactly as the bare form does; entries already
+  landed in that form stay, the append-only rule being why.
+- **The verb is checked against the forge's own parse** (closes #421):
+  section 11 carries the `closingIssuesReferences` command and reads a
+  `closes` missing from its answer, or an `issue` present in it, as
+  wrong on the parser's own evidence — a correct title being no
+  evidence for the citations beside it. The stable zero is named there
+  too (closes #451): one that survives spaced reads is a parse that
+  never ran, and an edit resubmitting the body is what re-triggers it.
+- **A count that expires inside a landed entry stays there** (closes
+  #408): the entry speaks of the day its heading dates, the change that
+  moves the population is what gets the new entry, and what the
+  no-counts rule forbids is writing the next such sentence; a structure
+  the entry itself names is a description the rule does not reach.
+- **`CONTRIBUTING.md`'s badge block gets its rule** (closes #445): the
+  block's own first line is the admission rule, membership is a
+  function of the file's own sections rather than a curation, the
+  repository link is the one badge of the *place to go* clause and
+  travels with the block, and a tree without a block owes none.
+- **A cross-repository sentinel takes its row first** (closes #401):
+  section 10 and `tests/grid_test.py`'s docstring say one pull request
+  can land both halves only where the first tree is this one; elsewhere
+  the row lands with the adoption, the expected red in between is the
+  row-existence test, bounded by the issue filed against the tree that
+  owes the schedule.
+- **Section 12 states the wrapper exemption** (closes #352):
+  `btclib-secp256k1` versions by the libsecp256k1 it wraps, the reason
+  written in the rule rather than left in that tree's `README.md`
+  alone, the exemption re-argued here by any future wrapper, and its
+  fourth component told apart from the broken-release one.
+- **The badge row admits the OpenSSF Best Practices badge** (issue
+  #350): a new property, *registered at bestpractices.dev*, last in the
+  fixed order — admitted where REUSE's badge stays refused because its
+  render is the questionnaire's live state, the same fact the
+  Scorecard's `CII-Best-Practices` check scores.
+- **The concurrency ceiling's figure has one home per tree** (issue
+  #412): `REPOSITORY.md`'s *Plan-gated settings*, beside the command
+  that re-derives it; a workflow header or `CONTRIBUTING.md` states the
+  reasoning unnumbered and points there, a date beside the figure being
+  no cure. The statements still standing in the trees are that issue's
+  worklist.
+- **`check_vendored_vectors.py` is owed a scope header, not a
+  comparison** (issue #446): section 14 says each copy parses the pin
+  file its own tree keeps, so the bytes differ by subject, and what
+  every copy owes is the header sentence naming what it parses and
+  where it departs from its siblings — owed still where a copy lacks
+  one, which is why the issue stays open.
+
 ### Section 11 puts the keyword on one line and the subject on one line
 
 - **A subject is one physical line** (closes #403): `%s` joins a
