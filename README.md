@@ -2865,6 +2865,81 @@ cross-repository one is the finding this rule exists for: a tracking
 issue closed on the first of three repositories leaves the other two
 answering to nothing.
 
+**That read describes the pull request, not what a squash will land.**
+`closingIssuesReferences` reads the description as it stands when the
+call runs, and a squash lands a second, separately authored text — the
+commit message composed at merge time, in a field the description never
+populates. `dde42cd` (PR 512) is the gap made concrete: the pull
+request's title read `(issue #468)`, its body's first line said why —
+one of three *Done when* items, the others sibling copies — and
+`closingIssuesReferences` answered empty for #468. Landing it, the
+maintainer typed `(closes #468)` into the squash subject, a text the
+description-based read never sees, and #468 came back CLOSED on it:
+
+```shell
+gh api "repos/<org>/<repo>/issues/468/timeline?per_page=100" \
+  --jq '[.[] | select(.event=="closed" or .event=="reopened") |
+         {event, at: (.created_at | fromdateiso8601)}] | (.[1].at - .[0].at)'
+# 38
+```
+
+— reopened by hand thirty-eight seconds later, the number the command
+above prints rather than one read off the page. Nothing in the pull
+request was wrong, and `closingIssuesReferences` answered correctly for
+the object it reads; the squash subject is a different document,
+written after that read, and no pre-merge check reaches a document that
+does not exist yet.
+
+**So the read is taken twice: `closingIssuesReferences` before the
+merge, as above, and, for every reference the landed commit's own
+message names, the per-issue timeline read given above, after it.** A
+`closed` event naming the just-landed sha for a reference the first read
+did not name is the finding — #468's shape, caught before it costs a
+reopen rather than after.
+
+**The alternative weighed and declined takes the pull request's title as
+the squash subject verbatim, rather than composing one, so there is only
+one text to disagree with itself.** It is cheaper and removes the
+divergence instead of detecting it, but it is a rule about how a person
+presses the button, the weaker kind this file already carries one of —
+the negation paragraph above — and #468 is what that kind looks like
+once broken. Comparing the two reads is a check that runs regardless of
+how the button was pressed, which is why it is the one kept.
+
+**The negation paragraph above is checked directly, against the
+branch's own commit subjects and bodies, because the forge's two reads
+of the same words can disagree.** `f47899a` (PR 491)'s body carried
+`This does not close btclib-org/.github#365`; `closingIssuesReferences`
+answered empty for it while the pull request stood open, and the issue
+still closed once the identical sentence was the landed commit's own
+text. Counting that answer against the number you mean to close,
+above, is what already reaches a different mechanism —
+`btclib-org/portanode#238` quoted another commit's `(closes #188)` in
+its own body, and the same read answered three where two were meant, a
+surplus the count would have shown had it been read rather than only
+printed. Neither reading closes the gap `f47899a` opened, because the
+pull request's own description held the same words the push later
+acted on differently. What reaches that gap is a read that never asks
+the forge at all:
+
+```shell
+git log <base>..<branch> --format='%H%x00%B%x00' | python3 -c '
+import re, sys
+verb = re.compile(r"(?i)\b(close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+"
+                   r"((?:[\w.-]+/[\w.-]+)?#[0-9]+)")
+fields = sys.stdin.read().split("\x00")
+for sha, body in zip(fields[0::2], fields[1::2]):
+    for m in verb.finditer(body):
+        print(sha[:9], m.group(0))
+'
+```
+
+run over the branch before it is opened, against the same expectation:
+every hit outside the title's own `(closes #N)` parentheses is the
+finding, and a number the title carries that the scan does not find is
+a closing keyword the title declares that the branch's own words never
+state.
+
 ### Review
 
 A pull request needs an approving review from somebody other than its

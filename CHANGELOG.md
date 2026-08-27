@@ -7,6 +7,33 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 11 reads what a squash lands too, not only the pull request
+
+- **`closingIssuesReferences` reads the pull request's description, and a
+  squash lands a second, separately authored text** (closes #497):
+  `dde42cd` (PR 512) put #468 into CLOSED on a subject typed at merge
+  time, which the pre-merge read cannot see because that text does not
+  exist yet — the pull request's own title and body both read
+  `(issue #468)` throughout. Section 11's *What a pull request says it
+  is* now asks for the landed commit's own message to be read the same
+  way, from its sha, against the per-issue timeline command the section
+  already gives; CONTRIBUTING.md's *Landing it* points at that second
+  read rather than repeating it.
+- **The alternative weighed and declined lands the pull request's title
+  as the squash subject verbatim, so there is only one text**: cheaper,
+  but a rule about how a person presses the button rather than a check
+  anything runs, where comparing the two reads is a check that runs
+  regardless of how the button was pressed.
+- **A verb in front of a reference that must not close is now a command
+  over the branch's own commit text, run before the merge and before the
+  description exists to disagree with it**: `f47899a` (PR 491)'s body
+  carried `This does not close btclib-org/.github#365`, and
+  `closingIssuesReferences` answered empty for it while that issue
+  closed anyway, once the identical sentence was the landed commit's
+  own text — two reads of the same words, disagreeing. Section 11 gives
+  the scan and the expectation it is read against: every hit outside the
+  title's own `(closes #N)` parentheses is the finding.
+
 ### Section 9 names the rebase hazard `merge=union` hides, and the remedy
 
 - **A rebase across a `merge=union` file can place the rebasing branch's
