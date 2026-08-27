@@ -7,6 +7,33 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The organization's page says how often somebody else's vectors are checked
+
+- **`profile/README.md` called the `vendored-vectors` sweep a monthly
+  job** (closes #482): each tree carrying that workflow restricts the day
+  of the week and leaves the day of the month open, which is a weekly
+  schedule, and section 10 holds the rule behind it — *the week is the
+  whole of the grid's period*, so a `cron:` on any other cadence is one
+  the calendar cannot name.
+
+- **The page states the cadence rather than pointing at section 10 for
+  it**, its reader having arrived at github.com/btclib-org with no
+  section number to follow. What makes that restatement safe is that the
+  period is the grid's and not a row's: a day and an hour move when a row
+  moves, where a change to the period rewrites every row at once.
+  *Monthly* was a word the page could not have held for the same reason.
+
+- **`portanode`'s entry named macOS and Windows where that tree runs on
+  Linux as well.** Its own `README.md` is where the fact lives — *running
+  Bitcoin Core (and Electrum) on macOS, Windows and Linux* — and the page
+  held a shorter copy of it. Section 9's *One fact in one place* is the
+  same diagnosis as the cadence with a different owner.
+
+- **The page names no weekday, no hour and no count of repositories**,
+  enumerating them instead, so the cadence above is the whole of what
+  section 10 owns here and the correction is one word rather than a
+  family of them.
+
 ### The aggregate recipe says what runs the job, and what it may judge
 
 - **Section 10 stated the aggregate step's condition and never the
