@@ -7,6 +7,22 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 9 names the rebase hazard `merge=union` hides, and the remedy
+
+- **A rebase across a `merge=union` file can place the rebasing branch's
+  own section below one that landed while it waited, and no gate reads
+  that order** (closes #486): `git rebase` exits 0, and the fixer that
+  restores the blank line between two joined sections says nothing about
+  which one comes first, so the diff after the rebase — read, not
+  trusted — is what shows the misplacement. The remedy is moving the
+  block back before pushing, since nothing already written there is
+  rewritten once it lands.
+
+- **Where a new entry belongs inside `## Unreleased` is read from the
+  file it lands in** (closes #486), not fixed by section 9 or copied
+  from a sibling repository, since the position is not the same
+  convention in every repository.
+
 ### Section 2 names the scorecard badge and fixes two stale citations
 
 - **`scorecard`'s property asked for "that sentinel's badge" without

@@ -1959,6 +1959,26 @@ sight rather than weighed.
   MD022 and MD032 both refuse. Section 4's autofix rule has
   `markdownlint-cli2` write the line back on the next hook run, rather
   than only reporting it missing.
+- **Where a new entry belongs inside `## Unreleased` is read from the
+  file it lands in, not fixed by this document or copied from a sibling
+  repository.** A block a rebase has misplaced is restored to match its
+  own tree's neighbouring entries, never a convention read off another
+  repository's copy.
+- **The same rebase can also place the rebasing branch's section below
+  one that landed while it waited, and nothing above catches that.**
+  `git rebase` exits 0, there is no conflict marker, and no gate reads
+  the order two `###` sections sit in — only whether the blank line
+  between them survived, which the bullet above covers. The diff after
+  the rebase is what shows it, the section that landed first appearing
+  as unchanged context immediately above the branch's own addition:
+
+  ```shell
+  git diff origin/main..HEAD -- CHANGELOG.md
+  ```
+
+  Move the block back to where it belongs before pushing — *Nothing
+  already written is rewritten* below is what turns leaving it there
+  into a standing misplacement once it lands.
 - **An entry answering an issue that the change closes cites it `(closes
   #N)`.** An entry answering an issue the change does not close — a fix
   that leaves a mechanism unexplained, one half of a bundle — cites it
