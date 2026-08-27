@@ -2046,13 +2046,33 @@ trigger on a calendar workflow is not forbidden. It is `paths`-filtered
 to the workflow's own configuration and to what that configuration
 reads, and what then runs is the whole sweep rather than some cheaper
 check of it: the filter bounds how *often* a pull request pays for the
-sweep, not what the sweep is. That is the clock argument rather than an
-exception to it *where* those paths are ones an ordinary branch does not
-touch, and it is worth counting rather than assuming: a filter naming a
-file every branch edits selects every branch, and preserves no clock at
-all. This repository's own `alignment.yml` is that case — its list names
-`README.md`, which is this tree's product — and btclib-org/.github#467
-is where it is answered rather than here.
+sweep, not what the sweep is. How rare the paths are is that multiplier
+rather than the thing multiplied, so counting the branches a filter
+selects settles nothing on its own: what a narrower list buys back is
+the wait one run adds to the checks a pull request already has, which
+the durations answer and the count does not.
+
+```shell
+gh run list --repo <owner>/<repo> --workflow <name>.yml \
+  --json createdAt,updatedAt,conclusion
+```
+
+Run it for the gate's workflow too, and count only the runs that
+completed: `skipped` and `cancelled` did none of the work, and
+averaging them in reports a fraction of the real cost. A sentinel too
+new to have runs to read is where the pair has no answer yet, and
+`workflow_dispatch` below is what gets it one. What the pair answers is
+how much the sweep *adds* to the wait rather than which check is
+longest — a sweep that outlasts the gate adds nothing to a pull request
+some slower check is still holding. Where the addition is seconds, a
+filter selecting every branch costs a pull request seconds and
+narrowing it recovers seconds; where one run is minutes or hours, the
+same filter preserves no clock and the paths are wrong. This
+repository's own `alignment.yml` is the seconds case — its list names
+`README.md`, which is this tree's product, so nearly every branch here
+selects it, and what a selected branch waits for it is short enough
+that the alternative on offer, waiting for Saturday, is the worse
+trade.
 Where even a filtered sweep is too much to hang off a pull request, as
 an hours-long session is, the calendar is the whole of it. Two triggers
 are outside the question entirely — `workflow_call`, where the release

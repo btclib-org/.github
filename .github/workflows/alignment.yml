@@ -60,7 +60,12 @@ on:
       - uv.lock
       # the two sections the suite reads as data: a row added to the
       # calendar, or a file added to the verbatim list, is checked by
-      # the run on the commit that adds it
+      # the run on the commit that adds it. Naming this tree's product
+      # selects nearly every branch here, which section 10 settles on
+      # the clock rather than on the count: what this sweep adds to the
+      # wait a pull request already has is seconds, so a list narrow
+      # enough to spare a prose branch would buy that branch seconds
+      # and leave the drift it introduces to wait for Saturday
       - README.md
       # section 14's verbatim files themselves, so a pull request that
       # edits one is checked against the copies it would leave behind
