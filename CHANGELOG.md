@@ -7,6 +7,28 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### A sweep's `paths` filter answers to the clock, not to the count
+
+- **Section 10 made a filtered `pull_request` on a calendar workflow
+  conditional on the paths being ones an ordinary branch does not
+  touch, and this repository's own `alignment.yml` fails that
+  condition** (closes #467): its list names `README.md`, which is this
+  tree's product, so it selects nearly every branch here. The condition
+  is now the wait one run adds to the checks a pull request already
+  has, read off the `gh run list --json createdAt,updatedAt,conclusion`
+  pair that stands beside the rule — completed runs only, a `skipped`
+  or a `cancelled` one having done none of the work. How often a filter
+  fires is the multiplier and not the thing multiplied, so a count of
+  the branches it selects decides nothing on its own.
+
+- **Measured that way `alignment.yml` is not the defect the count made
+  it look** (closes #467): the sweep takes longer than the lint gate
+  and still adds seconds to what a pull request here waits, so a list
+  narrow enough to spare a prose branch would buy that branch seconds
+  and leave the drift it introduces to wait for Saturday. The trigger
+  and the list are unchanged; the workflow's own `paths:` comment now
+  says that where a reader counting branches would ask.
+
 ### One order for the badge row and the sentinel calendar
 
 - **Section 2 reads `github/v/release` in a pair with the PyPI version
