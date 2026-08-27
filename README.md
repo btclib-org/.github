@@ -1436,9 +1436,10 @@ A site that needs any of this relaxed — a check, never the annotation
 itself — carries its own `# type: ignore[code]`, never a second global
 exemption.
 
-**Scope is the package, the tests and `.github/scripts`.** What lives
-under `.github/scripts` imports the package and no test collects it, so
-strict mode is the only thing that reads it between workflow dispatches.
+**Scope is the package, the tests and `.github/scripts`.** A test whose
+subject is a script under `.github/scripts` loads it by path, that
+directory being no package, so the type check is what reads a script
+before it runs whether or not one was written for it.
 
 **`docs/source/conf.py` is outside it.** Sphinx is the `docs` group's
 and no shape of section 4's mypy hook installs it, so what that file
@@ -2027,6 +2028,28 @@ sight rather than weighed.
   whose pull request is not open yet has no other way to ask.
 - **`workflow_call`** where the release workflow reuses the gate.
 - Every step is a `uv` command with `--locked`.
+- **A step that waits for something outside the run is a script under
+  `.github/scripts` with a test, not a loop in a `run:` block.** What
+  such a step exists for is the verdict it reaches when the wait runs
+  out, and no trigger produces that verdict: what is waited on is
+  somebody else's work, so neither a release nor a rehearsal can arrange
+  for it to be late. A trigger added to reach the loop reaches its first
+  attempt instead, which is the branch a wait takes when there is
+  nothing to wait for. The lint gate reads the loop and passes it,
+  `actionlint` running `shellcheck` over the `run:` block and neither of
+  them reading it against the job header — so what stays unread until
+  the day the wait is needed is the budget, and a loop able to outlast
+  its own `timeout-minutes` is killed inside itself, the run carrying
+  the runner's message where the step was written to name the page to go
+  and read (btclib-org/btclib#1165). The wait therefore counts against a
+  deadline rather than against attempts, which states the budget once
+  instead of leaving it a product to be multiplied out, and its test
+  substitutes the transport and the clock to drive the loop past that
+  deadline. `btclib`'s `wait_for_hwi_device.py` is a wait in that shape,
+  and `btclib-secp256k1`'s `verify_wheel_contents.py` is tested that way
+  for the reason a wait shares: a run cannot produce the failure on
+  purpose, so what the test gives the script is synthetic, and for a
+  wait that is the clock.
 
 ### The set, and its cadence
 
