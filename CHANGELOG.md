@@ -7,6 +7,43 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### One order for the badge row and the sentinel calendar
+
+- **Section 2 reads `github/v/release` in a pair with the PyPI version
+  badge beside it, and the fixed order stated above that sentence
+  separated the two** (issue #480). The order is now three groups —
+  what the software is, whether it works, and what the OpenSSF makes of
+  it — and the pair opens the first, so the section delivers what it
+  asks for. Inside the second group the gates come first, in the order a
+  commit meets them, no table fixing an order for them; Read the Docs
+  joins them there, answering `passing`, `failing` or `unknown` as the
+  workflow badges do and building what `docs` builds. The Scorecard
+  badge leaves the sentinel run for a line of its own with the OpenSSF
+  Best Practices badge, and reads as the last of the sentinels anyway
+  because `scorecard` is the calendar's last row.
+
+- **Section 10's calendar rows run family by family** (issue #480): the
+  data a tree ships and did not write, the depth its suite is tested to,
+  what it does against software it does not ship, what it depends on and
+  what it publishes, which test is the authority for each arm of its
+  code, the platforms, its own health, and its security. A table whose
+  order is not stated is one a new sentinel is appended to, which would
+  take the last row out from under section 2's OpenSSF line.
+  `deps-latest` keeps Wednesday, which is what leaves section 10's
+  closing sentence about Dependabot's Thursday true and every
+  `dependabot.yml` in the organization untouched.
+
+- **`alignment` and `links` take Saturday, this tree's own half of the
+  move** (issue #480). `alignment.yml`'s `paths:` comment and
+  `tests/verbatim_test.py::test_alignment_triggers_on_every_verbatim_file`
+  each name the cron a pull request editing a verbatim file would
+  otherwise wait for, and each names Saturday now.
+  `tests/grid_test.py::test_every_cron_is_the_instant_the_calendar_names`
+  names every tree still on its old instant until the ports land, and
+  its docstring says so: `BACKLOG` cannot hold a row for it,
+  `conftest.py` refusing one for a test that runs once rather than once
+  per repository.
+
 ### Section 10 states the clock rather than quoting a header
 
 - **The rule *what decides is the clock, not the trigger* rested on a
