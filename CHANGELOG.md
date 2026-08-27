@@ -7,6 +7,28 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 1's group table has a row for `fuzz`
+
+- **`btclib-node` declares `fuzz` and no row described it** (closes
+  #476): `fuzz.yml` there runs its harness with `--group fuzz`, which is
+  section 10's sentinel doing what section 10 asks of it, and
+  `tests/pyproject_test.py::test_every_dependency_group_is_a_row_of_section_1`
+  was red on that tree. The table is what the trees are measured against
+  rather than a record of what they declare, so the standard is the side
+  that moves.
+
+- **What decides whether a tree declares it is where the engine is
+  installed from**: the group, where the workflow runs the fuzzer as a
+  `uv run` command; the fuzzing service's own image, where the targets
+  are compiled inside one. `btclib` hands its targets to ClusterFuzzLite
+  and declares no group, its `.clusterfuzzlite/Dockerfile` naming
+  `base-builder-python` as what has the engine already.
+
+- **The specifier carries the marker naming the platform the engine
+  publishes wheels for.** `uv lock` resolves a specifier without one, so
+  the refusal arrives at a developer's `uv sync` off that platform,
+  over a group that machine never runs.
+
 ### What a repository is, it declares rather than being read off its tier
 
 - **Section 1 read *library* off section 2's tier, and a published
