@@ -7,6 +7,50 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### `REPOSITORY.md` states what it covers, and covers the topics
+
+- **The record said it was the whole of the settings outside the tree**
+  (issue #468): what it covers is stated instead — the settings section
+  16's checklist sets on a new repository, and the ones a section of
+  `README.md` states a rule for. The endpoints the answers come from are
+  listed by a grep over the file's own `gh api` lines rather than by a
+  second list to keep true, and when each was read is the commit that
+  wrote it. A file promising a whole API surface is falsified by that
+  surface moving, with nothing in the repository having changed.
+
+- **The topics are in this record and in no other file** (issue #468):
+  section 3 makes a package's `keywords` its topics, this
+  `pyproject.toml` declares none, and `topics_test.py` compares the two
+  sides only for a tree whose `pyproject.toml` carries a
+  `[build-system]`. What the suite asks of the rest is that a topic
+  exists, so a repository restored from a record without them answers
+  that floor with nothing.
+
+- **Section 16's checklist sets the topics and reads them back**, which
+  is what makes their absence from a copy of `REPOSITORY.md` a defect
+  rather than a matter of taste. The copies that record the setting each
+  reached it their own way, so the checklist is where the one answer
+  belongs.
+
+- **The default branch, GitHub's code-scanning default setup and the
+  absence of a Pages site answer a command**, where they were prose or
+  nothing. That last call answers `404` here and `built` against
+  `btclib-org/btclib`, which is what makes the first an absence rather
+  than a permission.
+
+- **The *Features* block had the sibling repositories turning the wiki
+  and the projects board off**, and `btclib-benchmarks` is the one that
+  does: the loop that answers for the family sits beside the sentence
+  now. This repository's answer is the family's, so it is no divergence
+  of its own — which matters to the scope above, that block being what a
+  call quoted for `has_issues` and `visibility` answers alongside.
+
+- **What the file passes over is named**: fields no call sets, endpoints
+  answering empty for a facility nobody reached for, and fields
+  `README.md` states no rule about. The price is beside them — a change
+  to one of those is found by reading the repository document against
+  this file rather than by running a command.
+
 ### The organization's page says how often somebody else's vectors are checked
 
 - **`profile/README.md` called the `vendored-vectors` sweep a monthly

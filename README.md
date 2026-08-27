@@ -4293,9 +4293,12 @@ independent and the checklist the same for each.
    the required checks bound to the Actions app; the publishing
    environments; the read-only default token; secret scanning, its push
    protection and Dependabot security updates; private vulnerability
-   reporting.
+   reporting. Then the topics, which are the `keywords` of the
+   `pyproject.toml` step above where the tree declares any, and which
+   nothing in the tree holds where it does not.
 1. Read each setting back with the commands `REPOSITORY.md` records, and
-   write the answers into it.
+   write the answers into it — the topics included, that being the one
+   of them a tree without `keywords` records nowhere else.
 
 ### Normalizing an existing repository
 
