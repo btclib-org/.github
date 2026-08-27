@@ -10,8 +10,24 @@ settings down here, and until now this was the repository with nowhere to
 read its own back — the one holding the standard being the one exempt
 from it.
 
-The rules and the settings live *outside* the tree, so this file is the
-whole of them: nothing below is recoverable by reading the repository.
+The rules and the settings live *outside* the tree: nothing below is
+recoverable by reading the repository. What is recorded is the settings
+the standard asks about — the ones [section 16's checklist][s16] sets on
+a new repository, and the ones a section of `README.md` states a rule
+for — together with whatever a call quoted for one of those answers
+alongside it. That is this file's scope, and *What this file passes over*
+at the foot says what falls outside it.
+
+The endpoints these answers come from are the file's own `gh api` lines,
+listed rather than restated in a second place that would have to be kept
+true:
+
+```shell
+grep -o 'repos/btclib-org/\.github[a-z/-]*' REPOSITORY.md | sort -u
+```
+
+When each answer was read is the commit that wrote it: `git blame
+REPOSITORY.md`.
 
 **Where a setting has a reason, the reason is in `README.md` and this
 file links to it.** Two copies of an argument are two things to keep
@@ -89,14 +105,21 @@ reported by anything else.
 
 ## Branch protection and the rulesets
 
-`main` is the only branch, and everything reaches it through a pull
-request. Rules [aggregate rather than replace each other][s11-branch], so
-what holds on `main` is what the call below answers for that target
-**together with** the classic protection two headings up: that one
-requires a review, a linear history, resolved conversations and the
-`Lint` check, and refuses a force push or a deletion — under the
-exemption above, which these rulesets do not carry. Where the two
-overlap, the stricter answer is the one that applies:
+`main` is the repository's default branch and its only one:
+
+```shell
+gh api repos/btclib-org/.github --jq '.default_branch'
+# main
+```
+
+Everything reaches it through a pull request. Rules [aggregate rather
+than replace each other][s11-branch], so what holds on `main` is what the
+call below answers for that target **together with** the classic
+protection two headings up: that one requires a review, a linear history,
+resolved conversations and the `Lint` check, and refuses a force push or
+a deletion — under the exemption above, which these rulesets do not
+carry. Where the two overlap, the stricter answer is the one that
+applies:
 
 ```shell
 gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
@@ -229,10 +252,39 @@ community health files GitHub shows for any public repository of the
 organization that has none of its own, and it does that only while it is
 public and named `.github`.
 
-The wiki and the projects board are on, where the sibling repositories
-turn both off. The standard states no rule about either, so this is a
-divergence rather than a decision, and closing it is a settings change
-with no diff to review.
+The wiki and the projects board are on, and that is not this
+repository's divergence: `btclib-benchmarks` is the sibling that turns
+both off.
+
+```shell
+for r in btclib btclib-node btclib-secp256k1 bbt portanode \
+         bitcoin-core-rpc btclib-benchmarks; do
+  gh api "repos/btclib-org/$r" \
+    --jq '[.name, (.has_wiki | tostring), (.has_projects | tostring)]
+          | @tsv'
+done
+# btclib-benchmarks answers false twice, and every other name true twice
+```
+
+The standard states no rule about either, so no answer to them is a
+decision here, and settling it in one direction is a settings change with
+no diff to review.
+
+## Topics
+
+```shell
+gh api repos/btclib-org/.github --jq '.topics'
+# ["bitcoin","btclib","github-organization","repository-standard"]
+```
+
+[Section 3 makes a package's `keywords` its topics][s3], and this
+`pyproject.toml` declares none — it is not a distribution's, so there is
+no list in the tree for these names to be compared against.
+`topics_test.py` compares the two sides for a repository whose
+`pyproject.toml` carries a `[build-system]`, which this one does not, and
+asks of the rest only that a topic exists at all. So the names live here
+and nowhere else: a repository restored from a record that passed over
+them has no topics, which is the one thing the suite does ask.
 
 ## Token permissions
 
@@ -301,14 +353,19 @@ On, [as the standard asks of every tier][s2-root].
   `pypi` environment, no OIDC trusted publisher and nothing tagged:
   `gh api repos/btclib-org/.github/environments --jq .total_count`
   answers `0`.
-- **No CodeQL.** The reason recorded here was that there is no code, and
-  `tests/` is code. What stands in its place is narrower: that suite is
-  neither installed nor imported by anything, and what it reads is this
-  organization's own API answers. Whether that is enough to leave the
-  analysis off is open rather than settled.
+- **No CodeQL**, and GitHub's default setup off with it:
+  `gh api repos/btclib-org/.github/code-scanning/default-setup --jq .state`
+  answers `not-configured`. The reason recorded here was that there is no
+  code, and `tests/` is code. What stands in its place is narrower: that
+  suite is neither installed nor imported by anything, and what it reads
+  is this organization's own API answers. Whether that is enough to leave
+  the analysis off is open rather than settled.
 - **No Pages and no Read the Docs.** The rendered form of this repository
   is the organization profile GitHub builds from `profile/README.md`,
   which is not a site anything deploys.
+  `gh api repos/btclib-org/.github/pages` answers `404`, and the same
+  call against `btclib-org/btclib` answers `built` — the pair is what
+  makes the first an absence rather than a permission.
 - **A suite, and no coverage.** [Section 8's ratchet][s8] is a claim
   about a package's own code and this tree ships none, so what the number
   would measure is the suite measuring itself. What the suite does
@@ -316,7 +373,36 @@ On, [as the standard asks of every tier][s2-root].
   whose answer is in no single tree — and this file is the rest of that
   audit, pointed at the repository the commands came from.
 
+## What this file passes over
+
+The API answers for more than this repository decides, and what is left
+out is left out by the scope above rather than by oversight.
+
+**What no call sets.** `gh api repos/btclib-org/.github` answers with the
+repository document, most of which is URLs, counts and derived state. The
+fields of it that are settings are the ones the sections above quote.
+
+**A facility nobody reached for.** Actions secrets and variables,
+Dependabot secrets, self-hosted runners, webhooks, deploy keys, autolinks
+and custom property values each answer empty here, and an empty answer
+records no decision. Whichever of them is used one day arrives with the
+section that uses it.
+
+**A field the standard states no rule about, and no call above
+answers alongside one it does.** `allow_forking`, `allow_update_branch`,
+`has_discussions`, `has_downloads` and `web_commit_signoff_required` are
+in the repository document and in none of the `--jq` objects here, and
+`README.md` asks nothing of them: `grep -c allow_update_branch README.md`
+answers `0` where `grep -c 'default branch' README.md` does not, which is
+what makes that zero an absence. Recording a field on no rule grows this
+file with GitHub's API rather than with the standard.
+
+The price is that a change to any of those is invisible here, and finding
+one means reading the repository document against this file rather than
+running a command.
+
 [s2-root]: ./README.md#root-files
+[s3]: ./README.md#3-pyprojecttoml-is-the-configuration
 [s8]: ./README.md#8-coverage-at-100
 [s10-check]: ./README.md#the-aggregate-job-and-the-required-check
 [s11-bots]: ./README.md#dependabot-and-pre-commitci
