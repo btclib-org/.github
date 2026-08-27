@@ -7,6 +7,44 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The alignment sweep refuses the run it has no token for
+
+- **A fallback to `GITHUB_TOKEN` made a missing secret read as a
+  finding** (issue #477): `ALIGNMENT_TOKEN` is set neither on this
+  repository nor on the organization, so every run took the right-hand
+  side of `secrets.ALIGNMENT_TOKEN || secrets.GITHUB_TOKEN` and failed
+  inside the suite, at the fixture that fetches classic protection. The
+  Actions tab shows that red and the red of a run that found drift
+  alike, and this sweep is the running half of section 15's audit.
+
+- **A fallback token is what turns a missing secret into a wrong-scope
+  failure much later.** `GITHUB_TOKEN` is issued for the repository the
+  run is in, and what this sweep asks about is the rest of the
+  organization; the workflow's `permissions:` block declares
+  `contents: read`, and the Actions-permissions endpoint refuses that
+  token in this repository too. No question that needs a credential is
+  one the right-hand side answers, and what it bought was an error
+  arriving as a traceback per repository rather than as the name of the
+  secret. `GH_TOKEN` is `secrets.ALIGNMENT_TOKEN` and nothing else.
+
+- **The refusal is a step of its own, ahead of the checkout**, in the
+  shape `claude-review.yml` already uses over its own credential: an
+  `::error::` annotation naming the secret, and a non-zero exit. It says
+  the run measured nothing, which is what a red sentinel has to say and
+  what a token failure inside the suite does not.
+
+- **The header offered the default token as answering most of these**,
+  and enumerated what it could not: the fields an endpoint omits for a
+  token without push access, and none of the endpoints it refuses
+  outright. What survives of that enumeration is the omissions, which a
+  read-only `ALIGNMENT_TOKEN` does not see either and whose tests skip
+  with the reason.
+
+- **Creating the secret is the maintainer's** — a fine-grained token
+  over the organization's repositories, read-only — so the sweep stays
+  red until it exists, on one line naming what is missing rather than on
+  the questions it could not ask.
+
 ### Section 1's group table has a row for `fuzz`
 
 - **`btclib-node` declares `fuzz` and no row described it** (closes
