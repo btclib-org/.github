@@ -148,9 +148,26 @@ interpreter.
 **What sets the two ends is what the repository is.** A library is
 imported by code its authors never see and an application is run by its
 own users, and the interpreters each of them covers follow from that.
-Which of the two a repository is, section 2's tier measures here: what
-this organization publishes is what other projects import, so tier 1 is
-a library and everything below it an application.
+
+**A library publishes and declares the classifier
+`Topic :: Software Development :: Libraries :: Python Modules`. Every
+other repository is an application.** The two halves are one question
+asked of the two parties to an import: section 2's tier is whether an
+index carries the distribution for somebody else's resolver to reach,
+and the classifier is what the distribution on it says it is.
+Publishing alone is the rejected proxy and `btclib-node` is what it
+reads wrong: a full node is a program its users run, and publishing it
+is how they install it. Rejected with it is a key of this
+organization's own, which would declare a second time what PyPI already
+has a field for and would be read by nothing a user of the package
+sees, and a tier carrying the exception here rather than in the tree it
+is about, which is a list to keep in step with repositories that move
+without it.
+
+The price is that a library declining the classifier takes the
+application window and nothing goes red. No command here refuses that
+and none can, the two being one shape on disk, so the rule above stays a
+reading rather than a test.
 
 A **library covers every interpreter still in support**: the floor is
 the oldest Python that has not reached end of life, `.python-version` is
@@ -166,11 +183,16 @@ the others' is out of step with the cycle rather than with them, and
 section 15's command is what reads it.
 
 An **application takes the newest interpreter its dependencies allow**.
-Nothing imports it, so covering an older one buys compatibility for
-nobody: `.python-version` is the newest version every dependency
-publishes for, and `requires-python` is the oldest the tree itself means
-to run on, which is that same version where it means to run on one
-interpreter alone. Where a dependency holds `.python-version` below the
+It is not there to be imported, so covering an older one buys
+compatibility for nobody: `.python-version` is the newest version every
+dependency publishes for, and `requires-python` is the oldest the tree
+itself means to run on, which is that same version where it means to run on one
+interpreter alone. The newest is also the one worth being on, and the
+release cycle above carries both halves of why: only `main` accepts a
+new feature, so an interpreter's own speed-ups arrive with a release and
+never with a fix to a branch already out, and a branch reaches
+`security` status years before its end of life and takes security fixes
+alone from then on. Where a dependency holds `.python-version` below the
 newest release, that file's comment names the dependency and the
 condition for raising it — a ceiling with no reason beside it is one the
 next reader cannot tell from a preference, and it outlives the
@@ -884,9 +906,10 @@ what it holds.
   maturity level an author claims for the code, which a sweep passing is
   not evidence of, so none is declared on that strength. That last one
   is a convention this section states, so section 7's closing rule makes
-  it a test rather than a hope: a library carries it as
+  it a test rather than a hope: a tree that publishes carries it as
   `interpreters_test.py`, which reads the floor, the classifiers and the
-  matrix and refuses a disagreement. Nothing local
+  matrix and refuses a disagreement, section 15 saying why publishing is
+  what decides that and not section 1's library. Nothing local
   refuses a classifier that is not a classifier at all — `twine check`
   reads the long description and not this list, and a build accepts
   whatever the file says; PyPI's upload endpoint is what rejects one, at
@@ -3537,16 +3560,18 @@ comments, below. A repository answers for itself where it can —
 this file is where the rest is written down.
 
 Section 3 states the convention that the classifiers name the
-interpreters a tree runs, and says a library carries it as
+interpreters a tree runs, and says a tree that publishes carries it as
 `interpreters_test.py`; this file is what carries it for a tree that
-does not: a library's classifiers are what an index shows whoever is
-choosing the package, where an application's declarations are read by
-whoever opens the repository. So the ends of an application's window are
-compared here rather than by a module of its own. The other answer
-weighed was dropping the classifiers a tree that publishes nothing shows
-to no index, and what that costs is the comparison itself — the floor
-and the matrix are declared either way, and nothing would be left to
-read them against. What no command here compares is the classifiers
+does not: a published tree's classifiers are what an index shows whoever
+is choosing the package, where an unpublished tree's declarations are
+read by whoever opens the repository. Publishing and not section 1's
+library is what decides that, an index showing the three declarations
+whatever the distribution on it is. So the ends of an unpublished tree's
+window are compared here rather than by a module of its own. The other
+answer weighed was dropping the classifiers such a tree shows to no
+index, and what that costs is the comparison itself — the floor and the
+matrix are declared either way, and nothing would be left to read them
+against. What no command here compares is the classifiers
 against the interpreters a workflow runs, which stays a reading: a job
 naming one outside the window is correct where the reason is beside it,
 and no command here can read a reason.
@@ -3668,13 +3693,23 @@ for r in <every repository>; do
   classifiers=$(printf '%s' "$content" |
     sed -nE 's/^ +"Programming Language :: Python :: (3\.[0-9]+)",$/\1/p' |
     paste -sd, -)
-  if [ "$ok" = unreadable ]; then floor=unreadable; classifiers=unreadable; fi
+  case $content in
+    *'Topic :: Software Development :: Libraries :: Python Modules'*)
+      declares=library ;;
+    *) declares=application ;;
+  esac
+  if [ "$ok" = unreadable ]; then
+    floor=unreadable; classifiers=unreadable; declares=unreadable
+  fi
   read_or_mark .python-version
   pin=$(printf '%s' "$content" | grep -v '^#')
   [ "$ok" = unreadable ] && pin=unreadable
   list_or_mark
-  if [ "$ok" = unreadable ]; then matrix=unreadable
-  else matrix=$(printf '%s\n' "$names" | while read -r f; do
+  if [ "$ok" = unreadable ]; then matrix=unreadable; publishes=unreadable
+  else
+    printf '%s\n' "$names" | grep -qx release.yml \
+      && publishes=yes || publishes=no
+    matrix=$(printf '%s\n' "$names" | while read -r f; do
       [ -n "$f" ] || continue
       read_or_mark ".github/workflows/$f"
       if [ "$ok" = found ]; then
@@ -3683,17 +3718,27 @@ for r in <every repository>; do
       else echo unreadable; fi
     done | sort -u | paste -sd, -)
   fi
-  printf '%s\tfloor %s\tclassifiers %s\tpin %s\tmatrix %s\n' \
-    "$r" "$floor" "$classifiers" "$pin" "$matrix"
+  case $declares:$publishes in
+    unreadable:*|*:unreadable) kind=unreadable ;;
+    library:yes) kind=library ;;
+    *) kind=application ;;
+  esac
+  printf '%s\t%s\tfloor %s\tclassifiers %s\tpin %s\tmatrix %s\n' \
+    "$r" "$kind" "$floor" "$classifiers" "$pin" "$matrix"
 done
 ```
 
 One line per repository. Where a line carries classifiers, the floor is
 the lowest of them, the pin is the highest, and the matrix runs every
-one. The library lines are the same window as each other, that window
-being python.org's; an application's line is read against the comment in
+one. The `library` lines are the same window as each other, that window
+being python.org's; an `application` line is read against the comment in
 its own `.python-version` instead, which is where section 1 puts the
-dependency that set the ceiling.
+dependency that set the ceiling. Which of the two a line is, section 1
+decides and this reads: `release.yml` among the workflow names, and the
+library classifier anywhere in the file rather than among the
+per-version ones the `classifiers` column keeps. A `kind` of
+`unreadable` is either call not answering, and neither half is guessed
+from the other.
 
 The matrix column is empty where no workflow names a list of them,
 which is a tree whose workflows name no interpreter at all and a tree

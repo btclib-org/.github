@@ -8,12 +8,12 @@ A library covers every interpreter still in support and an application
 takes the newest its dependencies allow, which is section 1's rule and
 the reason the two halves are asked differently here.
 
-Each library holds a module of this name reading its own declarations
-against one another -- `requires-python` against the classifiers,
-the classifiers against the platform sweeps -- which is what section 15
-means by a repository answering for itself. It is a library's, which
-section 3 states where it states the convention and section 15 gives the
-reason for.
+Each tree that publishes holds a module of this name reading its own
+declarations against one another -- `requires-python` against the
+classifiers, the classifiers against the platform sweeps -- which is
+what section 15 means by a repository answering for itself. It is a
+published tree's, which section 3 states where it states the convention
+and section 15 gives the reason for.
 
 Two questions are left here. The one no tree can ask: the window a
 library covers is python.org's release cycle rather than that library's
@@ -22,8 +22,7 @@ the others is out of step with the cycle. And the ends of that window,
 where the tree that would compare them holds no module of its own: they
 are declared in `pyproject.toml` and in `.python-version` whatever the
 tree is, and this reads them against one another. Which tree is a
-library is section 2's tier, for the reason section 1 gives at the
-rule.
+library is `library` below, section 1 giving the rule and the reason.
 
 The calendar itself is asked of nothing here. What decides it is
 python.org's, a date in it is a date this suite would have to be told,
@@ -53,7 +52,34 @@ version this compares.
 """
 
 OWN_MODULE = "tests/interpreters_test.py"
-"""The module a library holds to keep its own declarations in step."""
+"""The module a published tree holds to keep its declarations in step."""
+
+LIBRARY = "Topic :: Software Development :: Libraries :: Python Modules"
+"""The classifier a distribution declares to say it is a library.
+
+Section 1 keys the interpreter window on which of the two a repository
+is, and this is where a repository says so. One string exactly: the
+family it belongs to holds other languages' modules and
+`:: Application Frameworks` besides, so a prefix would read a claim
+nobody made.
+"""
+
+
+def library(parsed: dict[str, Any], repository_tier: Tier) -> bool:
+    """Say whether a tree is a library, as section 1 decides it.
+
+    Both halves are the same question asked of the two parties to an
+    import: the tier is whether an index carries the distribution, and
+    the classifier is what the distribution on it says it is.
+
+    :param parsed: the tree's parsed `pyproject.toml`.
+    :param repository_tier: the repository's tier.
+    :returns: whether it publishes and declares itself a library.
+    """
+    if not Tier.PUBLISHER.binds(repository_tier):
+        return False
+    classifiers: list[str] = parsed.get("project", {}).get("classifiers", [])
+    return LIBRARY in classifiers
 
 
 def versions(parsed: dict[str, Any]) -> tuple[str, tuple[str, ...]]:
@@ -109,34 +135,40 @@ def test_the_libraries_name_one_interpreter_window(
 
     A floor or a classifier list only one of them declares is that tree
     left behind by a cycle that moved, and which of them is wrong is the
-    cycle's answer rather than this suite's.
+    cycle's answer rather than this suite's. A tree that publishes a
+    program rather than a library is out of the comparison instead of
+    wrong in it, its own window being its dependencies'.
 
     :param pyprojects: the parsed files.
     :param tiers: each repository's tier.
     """
     declared: dict[str, list[str]] = {}
     for repository, parsed in sorted(pyprojects.items()):
-        if not Tier.PUBLISHER.binds(tiers[repository]):
+        if not library(parsed, tiers[repository]):
             continue
         floor, classified = versions(parsed)
         listed = ",".join(sorted(classified, key=ordered))
         window = f">={floor}, classifiers {listed or 'none'}"
         declared.setdefault(window, []).append(repository)
-    assert declared, "no repository is tier 1, and this compared nothing"
+    assert declared, (
+        "no repository declares itself a library, and this compared nothing"
+    )
     assert len(declared) == 1, f"section 1's one window, declared as {declared}"
 
 
 @pytest.mark.tier(Tier.PUBLISHER)
-def test_every_library_holds_the_module_that_reads_its_declarations(
+def test_every_publisher_holds_the_module_that_reads_its_declarations(
     repository: str,
     trees: dict[str, Path],
 ) -> None:
     """Section 15: a repository answers for itself where it can.
 
-    That sentence names this module, in each library, as what reads the
-    three declarations of one tree against one another. A library
-    without it declares them in three files and compares them nowhere,
-    and this suite asks only whether they agree across the trees.
+    That sentence names this module, in each tree that publishes, as
+    what reads the three declarations of one tree against one another.
+    A tree without it declares them in three files and compares them
+    nowhere, and this suite asks only whether they agree across the
+    trees. Publishing and not section 1's library is what decides the
+    population, for the reason section 15 gives.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.

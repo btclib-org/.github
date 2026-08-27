@@ -7,6 +7,56 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### What a repository is, it declares rather than being read off its tier
+
+- **Section 1 read *library* off section 2's tier, and a published
+  application is a shape that left no room for** (issue #365):
+  `btclib-node` publishes a full node, so the tier made it a library and
+  handed it a window its own `pyproject.toml` does not declare. A
+  library publishes *and* declares
+  `Topic :: Software Development :: Libraries :: Python Modules`, and
+  every other repository is an application. The two halves are one
+  question asked of the two parties to an import — whether an index
+  carries the distribution for somebody else's resolver to reach, and
+  what the distribution on it says it is. The record of the decision is
+  `btclib-org/btclib-node#507`.
+
+- **The alternatives are beside the rule**: a key of this organization's
+  own, which would declare a second time what PyPI already has a field
+  for and be read by nothing a user of the package sees; and the tier
+  with the exception written in this file rather than in the tree it is
+  about, which is a list to keep in step with repositories that move
+  without it.
+
+- **The price is stated where the rule is**: a library declining the
+  classifier takes the application window and nothing here goes red, an
+  application and a library being one shape on disk, so the rule stays a
+  reading rather than a test.
+
+- **`test_the_libraries_name_one_interpreter_window` compares the
+  population section 1 names** (issue #365): it filtered on the tier, so
+  `btclib-node` was among the libraries it held to one window. It
+  filters on a `library` helper that reads the tier and the classifier
+  together, and no tree's declarations move.
+
+- **What decides which trees hold `interpreters_test.py` is publishing,
+  and sections 3 and 15 say so.** An index shows the three declarations
+  whatever the distribution on it is, so that population is every tree
+  that publishes and the test is named
+  `test_every_publisher_holds_the_module_that_reads_its_declarations`
+  rather than narrowed to the libraries.
+
+- **Section 15's window command prints a `kind` column** — `library`,
+  `application`, or `unreadable` where either call did not answer — so
+  the line a reader holds against python.org's window says which of the
+  two it is instead of leaving it to be read back off the tier.
+
+- **Section 1 says why the newest interpreter is worth being on**, which
+  is the ground the decision was taken on: only `main` accepts a new
+  feature, so an interpreter's own speed-ups arrive with a release and
+  never with a fix to a branch already out, and a branch reaches
+  `security` status years before its end of life.
+
 ### The aggregate reads its own run, not the needs context
 
 - **Section 10 asked for a shell loop that always runs, which settles
