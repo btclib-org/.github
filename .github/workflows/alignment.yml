@@ -23,15 +23,23 @@ name: alignment
 # working tree for `.github` rather than cloning it -- so a pull request
 # that edits the calendar is checked against the calendar it proposes.
 #
-# The default token answers most of these. Topics, the trees and a
-# ruleset's rules are public; two things inside them are not, both
-# omitted rather than refused for a token without push access -- the
-# four merge-method fields on the repository endpoint, and a rule's
-# bypass_actors. GITHUB_TOKEN also reaches only the repository it runs
-# in. The tests that ask those questions skip with the reason rather
-# than passing. Setting ALIGNMENT_TOKEN to a fine-grained token with
-# read access to the organization's repositories turns them on, and
-# nothing here changes.
+# The token is ALIGNMENT_TOKEN, a fine-grained token over the
+# organization's repositories, read-only. The settings half of the
+# questions is what needs it: a repository's classic protection and its
+# Actions permissions are refused to a token that reads the tree alone.
+# What stays unasked even with it is what the endpoint answers by
+# omission -- the merge-method fields, and a ruleset rule's
+# bypass_actors -- both left out for a token without push access, and
+# the tests that ask those skip with the reason rather than passing.
+#
+# There is no fallback to GITHUB_TOKEN, and that absence is the point.
+# GITHUB_TOKEN is this repository's own, so it answers for none of the
+# others, and the permissions block below leaves it reading this tree:
+# the Actions-permissions endpoint refuses that in this repository too. A
+# fallback puts the failure inside the suite, where the Actions tab
+# shows what a run that found real drift shows and the log is what
+# tells the two apart. The step below refuses before the checkout
+# instead, in one message naming the secret.
 
 on:
   schedule:
@@ -105,6 +113,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # a run without the token measures nothing, and the red it leaves
+      # is the one this sweep reports drift with. So the absence is
+      # answered here, before the checkout, in a message naming the
+      # secret, rather than as an error inside the suite on whichever
+      # question reaches the API first
+      - name: Refuse to sweep without the token
+        env:
+          ALIGNMENT_TOKEN: ${{ secrets.ALIGNMENT_TOKEN }}
+        run: |
+          if [ -z "$ALIGNMENT_TOKEN" ]; then
+            echo "::error::ALIGNMENT_TOKEN is empty. It is a fine-grained" \
+                 "token over btclib-org, read-only, and this run measured" \
+                 "nothing without it: the failure is the secret, not a" \
+                 "finding about the organization."
+            exit 1
+          fi
+
       # every action is pinned to a commit SHA, the tag in the comment: a
       # tag, let alone a branch, is a name its owner can move
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -124,7 +149,9 @@ jobs:
       - name: Check what no single repository can
         env:
           BTCLIB_INTEGRATION: "1"
-          # the fine-grained token where one is set, and the default
-          # otherwise: see the header on which question needs which
-          GH_TOKEN: ${{ secrets.ALIGNMENT_TOKEN || secrets.GITHUB_TOKEN }}
+          # ALIGNMENT_TOKEN and nothing else: the step above has
+          # already refused the run this has no token for, and a
+          # fallback is what makes a wrong-scope failure of a missing
+          # secret
+          GH_TOKEN: ${{ secrets.ALIGNMENT_TOKEN }}
         run: uv run --locked --no-default-groups --group test pytest
