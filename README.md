@@ -213,6 +213,7 @@ alone would leave `uv sync` resolving a project without it.
 | `check` | what inspects a distribution before it is published |
 | `docs` | sphinx and `furo` |
 | `mutation` | the mutation runner |
+| `fuzz` | the fuzzing engine |
 | `dev` | every group above, and the default of `uv sync` |
 
 The `harness`/`test` split is what lets a job ask for the suite *without*
@@ -227,6 +228,21 @@ mean different things there: `--only-group build` compiles wheels,
 `--only-group check` reads them without compiling anything. A tree with
 no build step of its own still names its inspection tools `check`, so
 the command means the same thing everywhere.
+
+`fuzz` is `mutation`'s shape: a scheduled workflow's group rather than a
+gate's. A tree declares it where that workflow runs the fuzzer as a
+`uv run` command, and not where the targets are compiled inside the
+fuzzing service's own image, which has the engine installed already —
+`btclib` hands its targets to ClusterFuzzLite and declares no such
+group. Section 10 keys the sentinel on what a tree parses and leaves the
+harness to the tree; the group follows that choice rather than making
+it.
+
+An engine that publishes wheels for the platform it fuzzes on and no
+source archive is specified with the marker naming that platform.
+`uv lock` resolves without one, so what a missing marker costs is a
+developer's `uv sync` off that platform, refused over a group that
+machine never runs.
 
 Where a package is both an extra and a group, the specifier is written
 twice and a test refuses the day the two disagree.
