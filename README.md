@@ -414,24 +414,43 @@ Which property decides which badge:
   badge, `www.bestpractices.dev/projects/<id>/badge`;
 - **runs a sentinel** — that sentinel's badge.
 
-**The order is fixed**, and it is: the version, the downloads, the
-development status, the licence, the supported Python versions, `wheel`,
-`implementation`, `github/v/release`, `test`, `lint`, `docs`,
-pre-commit.ci, then the sentinels in the order section 10's calendar
-gives them, then Read the Docs, and last the OpenSSF Best Practices
-badge. A tree skips what it does not own and keeps the rest in that
-order, so a reader comparing two `README.md` files compares like with
-like instead of hunting. Taking the sentinels'
-order from the calendar is one order to maintain rather than two, and
-what it costs is that a workflow moved to another day moves its badge in
-every `README.md` that carries it.
+**The order is fixed**, and it is three groups: what the software is,
+whether it works, and what the OpenSSF makes of it.
+
+The first opens with the release identity as a pair, the version beside
+`github/v/release`; then what the project is, the development status and
+the licence; then the rest of what the index carries, the downloads, the
+supported Python versions, `implementation` and `wheel`.
+
+The second is the gates and then the sentinels: pre-commit.ci, `lint`,
+`test`, `docs`, Read the Docs, then the sentinels in the order section
+10's calendar gives them. The calendar fixes the sentinels' order and
+nothing fixes the gates', so this list is where the gates' order is
+decided rather than read off something else. Read the Docs is among them
+because it answers `passing`, `failing` or `unknown` as the workflow
+badges around it do and builds what `docs` builds.
+
+The third is the Scorecard badge and then the OpenSSF Best Practices
+badge, on a line of their own. `scorecard` is the calendar's last row,
+so the sentinels end where that line begins and the Scorecard's badge
+reads as the last of them without being among them.
+
+A tree skips what it does not own and keeps the rest in that order, so a
+reader comparing two `README.md` files compares like with like instead
+of hunting. Taking the sentinels' order from the calendar is one order
+to maintain rather than two, and what it costs is that a workflow moved
+to another day moves its badge in every `README.md` that carries it.
+That identity is over the sentinels alone: `lint`, `test` and `docs`
+have no row in section 10's calendar, so a reader who looks there for
+one is reading the wrong table rather than an incomplete one.
 
 `img.shields.io/pypi/wheel` and `img.shields.io/pypi/implementation`
 are read off the files a release uploaded rather than off anything the
 project declares: `iniconfig` names no `Implementation` classifier and
 the second renders `cpython` for it anyway. `github/v/release` is read
-in a **pair** with the PyPI version badge beside it: where the two
-disagree, a release reached the forge and not the index.
+in a **pair** with the PyPI version badge, which the order above puts
+beside it: where the two disagree, a release reached the forge and not
+the index.
 
 **A badge that answers with anything but a measurement is a question
 with two answers**, and which one is the point: either the thing it
@@ -2062,22 +2081,22 @@ owns a day and an hour, the repository owns the minute:
 
 | workflow | day | hour |
 | --- | --- | --- |
-| `fuzz` | Monday | 03 |
-| `links` | Monday | 04 |
-| `vendored-vectors` | Monday | 05 |
-| `codeql` | Tuesday | 04 |
-| `py-arm-authority` | Tuesday | 05 |
+| `vendored-vectors` | Monday | 03 |
+| `bootstrap-dns` | Monday | 04 |
+| `mutation` | Monday | 05 |
+| `fuzz` | Tuesday | 04 |
+| `integration-bitcoind` | Tuesday | 05 |
+| `integration-hwi` | Wednesday | 03 |
 | `deps-latest` | Wednesday | 04 |
 | `pypi-install` | Wednesday | 05 |
-| `alignment` | Thursday | 04 |
-| `bootstrap-dns` | Thursday | 05 |
+| `py-arm-authority` | Thursday | 04 |
+| `os-macos` | Thursday | 05 |
 | `os-ubuntu` | Friday | 04 |
-| `integration-hwi` | Friday | 05 |
-| `scorecard` | Saturday | 03 |
-| `os-macos` | Saturday | 04 |
-| `os-windows` | Saturday | 05 |
-| `mutation` | Sunday | 04 |
-| `integration-bitcoind` | Sunday | 05 |
+| `os-windows` | Friday | 05 |
+| `links` | Saturday | 04 |
+| `alignment` | Saturday | 05 |
+| `codeql` | Sunday | 04 |
+| `scorecard` | Sunday | 05 |
 
 | repository | minute |
 | --- | --- |
@@ -2089,6 +2108,17 @@ owns a day and an hour, the repository owns the minute:
 | `.github` | 24 |
 | `portanode` | 28 |
 | `bbt` | 32 |
+
+**The rows are in the order of what they ask about**, family by family:
+the data a tree ships and did not write, the depth its suite is tested
+to, what it does against software it does not ship, what it depends on
+and what it publishes, which test is the authority for each arm of its
+code, the platforms, its own health, and its security. A new sentinel
+takes the slot its family already holds rather than the end of the
+table, and `scorecard` is why that is a rule rather than a tidiness:
+section 2 puts the Scorecard badge at the head of the OpenSSF line
+because `scorecard` is the last row, so a sentinel appended past it
+takes that reason away.
 
 **The week is the whole of the grid's period**, so every row is a weekly
 run, and a `cron:` repeating on any other cadence is one the calendar has
@@ -2169,6 +2199,14 @@ carries the debt, where a plan names nobody — and that direction of the
 test is the only thing anywhere that catches a row for a workflow
 nobody wrote, so spending it on a rollout with no debtor leaves it
 catching nothing.
+
+**A row that moves is red until the last tree follows it.** The row is
+this file's and each `cron:` is its own tree's, so a slot changed here
+and a schedule changed there are separate landings, and in between
+`test_every_cron_is_the_instant_the_calendar_names` names every tree
+still on the old instant. That list is the port's work rather than a
+defect of the trees on it, and it is bounded by the issue carrying the
+ports, as a new row's red is bounded by the issue carrying the debt.
 
 ### Which trees owe which sentinel
 

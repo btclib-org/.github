@@ -146,7 +146,7 @@ def test_alignment_triggers_on_every_verbatim_file() -> None:
 
     `alignment.yml`'s own `paths:` admits the section of `README.md` that
     lists these files, which is not the same trigger as the files
-    themselves -- a pull request editing one waits for the Thursday cron
+    themselves -- a pull request editing one waits for the Saturday cron
     otherwise.
 
     :raises AssertionError: where a path section 14 names is missing from

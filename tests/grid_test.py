@@ -233,6 +233,14 @@ def test_every_cron_is_the_instant_the_calendar_names(
 ) -> None:
     """Every `cron:` in the organization is its row, to the minute.
 
+    A row that moves is red here for every tree still on the old
+    instant, the row being this file's and each `cron:` its own tree's:
+    section 10's *A row that moves is red until the last tree follows
+    it* is what that red is, and the issue carrying the ports is what
+    bounds it. No `BACKLOG` row can excuse it -- `conftest.py` refuses a
+    row for a test that is not asked per repository, and this one takes
+    `trees`.
+
     :param trees: the checkouts.
     """
     rooms = calendar()

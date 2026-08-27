@@ -38,7 +38,7 @@ on:
     # The time is section 10's grid and not this file's to restate.
     # Only the default branch schedules workflows, so on any other branch
     # this is reachable through the dispatch below alone
-    - cron: "24 4 * * 4"
+    - cron: "24 5 * * 6"
   workflow_dispatch:
   pull_request:
     # ready_for_review, so a pull request marked ready gets the run the
@@ -64,7 +64,7 @@ on:
       - README.md
       # section 14's verbatim files themselves, so a pull request that
       # edits one is checked against the copies it would leave behind
-      # rather than waiting for the Thursday cron --
+      # rather than waiting for the Saturday cron --
       # tests/verbatim_test.py::test_alignment_triggers_on_every_verbatim_file
       # is what keeps this list and section 14's in step
       - .markdownlint.jsonc
