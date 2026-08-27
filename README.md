@@ -2019,20 +2019,19 @@ out from under, three minutes in, nobody having waited for it.
 
 **What decides is the clock, not the trigger** — provided the clock
 stays the thing the expensive work answers to, which is what a filter
-preserves and an unfiltered trigger destroys. `mutation.yml` has
-the discriminator in its own header: "No `pull_request` trigger, unlike
-`links.yml`, which does run itself when its own configuration changes.
-The difference is the clock: a link sweep is a couple of hundred
-requests, a mutation session is hours." So a `pull_request` trigger on a
-calendar workflow is not forbidden. It is `paths`-filtered to the
-workflow's own configuration and to what that configuration reads, and
-what then runs is the whole sweep rather than some cheaper check of it:
-the filter bounds how *often* a pull request pays for the sweep, not
-what the sweep is. That is the clock argument rather than an exception
-to it *where* those paths are ones an ordinary branch does not touch,
-and it is worth counting rather than assuming: a filter naming a file
-every branch edits selects every branch, and preserves no clock at all.
-This repository's own `alignment.yml` is that case — its list names
+preserves and an unfiltered trigger destroys. The clock is how long one
+run takes: `links.yml` makes one pass over the tree's links and carries
+a `pull_request` trigger on its own configuration, where a mutation
+session runs its test command once per mutant. So a `pull_request`
+trigger on a calendar workflow is not forbidden. It is `paths`-filtered
+to the workflow's own configuration and to what that configuration
+reads, and what then runs is the whole sweep rather than some cheaper
+check of it: the filter bounds how *often* a pull request pays for the
+sweep, not what the sweep is. That is the clock argument rather than an
+exception to it *where* those paths are ones an ordinary branch does not
+touch, and it is worth counting rather than assuming: a filter naming a
+file every branch edits selects every branch, and preserves no clock at
+all. This repository's own `alignment.yml` is that case — its list names
 `README.md`, which is this tree's product — and btclib-org/.github#467
 is where it is answered rather than here.
 Where even a filtered sweep is too much to hang off a pull request, as

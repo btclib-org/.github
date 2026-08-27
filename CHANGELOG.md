@@ -7,6 +7,22 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 10 states the clock rather than quoting a header
+
+- **The rule *what decides is the clock, not the trigger* rested on a
+  quotation from `mutation.yml`'s header that named no tree** (closes
+  #469): the copies of that workflow give different reasons for
+  withholding the `pull_request` trigger, so a reader who opened the one
+  in their own tree found an argument other than the clock with nothing
+  to say they held the wrong copy. Section 10 now states the
+  discriminator itself — how long one run takes — and gives `links.yml`,
+  whose `pull_request` trigger is filtered to its own configuration,
+  against a mutation session that runs its test command once per mutant.
+  `mutation.yml` points at section 10 for its schedule and calls the
+  time not its own to restate, so the quotation ran that citation
+  backwards; section 9's *One fact in one place* puts the fact in the
+  standard and the pointer in the workflow.
+
 ### The review job's fork comment loses its example
 
 - **The header's reason for comparing `full_name` rather than `.fork`
