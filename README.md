@@ -472,6 +472,18 @@ record, and the badge and the workflow are one membership rather than
 two. Carrying the badge is why the workflow is there rather than the
 other way round, so a tree drops both together or keeps both.
 
+**That badge is the workflow-run one for every sentinel but
+`scorecard`** —
+`github.com/<org>/<repo>/actions/workflows/<name>.yml/badge.svg`,
+answering whether the run passed. `scorecard` publishes a score rather
+than a pass or fail, and the property asks for that score:
+`api.scorecard.dev/projects/github.com/<org>/<repo>/badge`, which
+section 10's `scorecard` subsection already ties to the same
+`publish_results: true` the published score itself needs. A
+workflow-run badge there would answer whether the sentinel ran and not
+what it found, where what it found is the reason section 10 gives for
+running it at all.
+
 **The order is fixed**, and it is three groups: what the software is,
 whether it works, and what the OpenSSF makes of it.
 
@@ -485,8 +497,8 @@ The second is the gates and then the sentinels: pre-commit.ci, `lint`,
 10's calendar gives them. The calendar fixes the sentinels' order and
 nothing fixes the gates', so this list is where the gates' order is
 decided rather than read off something else. Read the Docs is among them
-because it answers `passing`, `failing` or `unknown` as the workflow
-badges around it do and builds what `docs` builds.
+because it answers with a state of the build as the workflow badges
+around it do and builds what `docs` builds.
 
 The third is the Scorecard badge and then the OpenSSF Best Practices
 badge, on a line of their own. `scorecard` is the calendar's last row,
@@ -593,6 +605,12 @@ the second with the last month, so the second is a figure that falls
 without anything having happened to the tree. What that gives up is the
 reading `pypi/dm` is better at, whether the package is being taken up
 now.
+
+**The badge links to `pepy.tech/projects/<name>`, plural, and not
+`pepy.tech/project/<name>`**: the singular answers `308` and redirects
+to the plural, the same reason the Read the Docs host above is
+`app.readthedocs.org` and not `readthedocs.org` — a redirect being
+something its owner can retire.
 
 **`CONTRIBUTING.md`'s badge block is inside this rule's reach, and it is
 not the row.** Some trees open *This repository in particular* with a
@@ -1182,7 +1200,7 @@ pre-commit.ci does not have — the lint workflow covers it. No
     where they are written.
 
     **A badge nests a link inside a link**, and
-    `bitcoin-core-rpc`'s `[![license: MIT](…)](./LICENSE)` is the
+    `[![license: MIT](…)](./LICENSE)` is the
     shape: the image is the link text, so a link text written `[^]]*`
     stops at the `]` closing the alt text and reads the image `src` in
     place of the badge's own href. Link text is therefore
@@ -4022,9 +4040,9 @@ the file, which section 2's *Root files* owes at every tier. The
 parentheses are what no source has, so neither reads as one.
 
 The badge's **source** and not its alt text, which is prose its author
-chose: `bitcoin-core-rpc` writes `license: MIT` over
-`img.shields.io/badge/license-MIT-blue.svg`, which the rule refuses by
-name, and a loop reading the alt text reports a licence badge and stops.
+chose: a badge can write `license: MIT` over section 2's refused
+`img.shields.io/badge/license-MIT-blue.svg`, and a loop reading the alt
+text reports a licence badge and stops.
 Read the sources against section 2's list and section 10's record, in
 the order they arrive: a badge neither gives the tree, one they give it
 and the row does not carry, and a row out of order are each a finding,
