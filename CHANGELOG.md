@@ -7,6 +7,36 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The aggregate recipe says what runs the job, and what it may judge
+
+- **Section 10 stated the aggregate step's condition and never the
+  job's** (closes #479): a job with `needs` and no `if:` is skipped when
+  one of those needs fails, so a step that always runs sits inside a job
+  the red matrix never reaches and the check a merge waits for reports
+  `skipped` rather than the failure. The rule names `!cancelled()` and
+  why not `always()`, a run its own concurrency group superseded being
+  the case that would reach the job and fail it over a cancellation the
+  newer run already speaks for.
+
+- **The sentence naming the listing now names how it is asked for**
+  (closes #479): `gh api --paginate`, and `per_page=100` on the query. A
+  page is a bound on what comes back and nothing bounds a run's job
+  count under it, so the listing can cross that page with nothing in the
+  answer saying it did, and both the allowlist and the unfinished count
+  are then taken over a subset. `btclib-org/btclib`'s run `33048874272`,
+  a `release.yml` run and so not one this shape reads, is a listing of
+  this organization's already longer than one default page.
+
+- **The aggregate's own row has no conclusion at the moment the step
+  reads it** (closes #479): the allowlist was written over every row of
+  the listing while the same section requires exactly one unfinished job
+  of the run and names the aggregate as it, so the recipe asked for a
+  required check that is red on every run. The allowlist judges each
+  finished row, and the unfinished count is what answers for the rest.
+  `btclib-benchmarks`' run `33090501622` is where its aggregate printed
+  its own row as `unfinished` and `in_progress` before judging the
+  listing.
+
 ### A wait for something outside the run is a script with a test
 
 - **A trigger added to a wait reaches its first attempt and not what the

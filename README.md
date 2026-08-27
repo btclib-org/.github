@@ -2490,13 +2490,34 @@ request, and the rule follows them.
 - **Never name a matrix cell in the branch rule.** The rule lives outside
   the repository, so a context that stops being produced blocks every
   merge with nothing in the tree to explain why.
+- **The job carries an `if:` of its own: a job with `needs` and no `if:`
+  is skipped when one of those needs fails**, which is the outcome the
+  aggregate exists to report. The check then reports `skipped`, which is
+  silence about the failure rather than a report of it, and no step of
+  that job runs however unconditional the step is. The condition is
+  `!cancelled()`, beside the draft and closed conditions *What every
+  workflow does* gives above. `always()` is the wrong widening: a run its
+  own concurrency group superseded reaches the job and fails it, making a
+  red required check of a cancellation the newer run already speaks for.
+  `!cancelled()` skips the job on that run instead, and a job cancelled
+  on its own — the run not being cancelled — still reaches the step.
 - **What the aggregate reads is its own run's job listing, asked of the
   API rather than of `needs`** —
   `repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs`, each
-  row's `conclusion`, in a step that always runs and fails on anything
-  but `success` and `skipped`. The job elevates to `actions: read` above
-  the workflow's `contents: read` and hands `github.token` to the call.
-  What that buys is a source reporting what the needs context does not.
+  finished row's `conclusion`, in a step that fails on anything but
+  `success` and `skipped`. The aggregate's own row is not one of them:
+  its `conclusion` is `null` while the step is reading, and what judges
+  that row is the unfinished count below. The job elevates to
+  `actions: read` above the workflow's `contents: read` and hands
+  `github.token` to the call. What that buys is a source reporting what
+  the needs context does not.
+- **The listing is asked for in full** — `gh api --paginate`, with
+  `per_page=100` on the query so that the pages are few. A page is a
+  bound on what comes back and nothing bounds a run's job count under
+  it, a matrix being what expands that count and the matrix being what
+  an aggregate exists for. Rows past the page are missing from the
+  answer with nothing in the answer saying so, so the allowlist above
+  and the count below are taken over a subset.
 - **A matrix reports one result to `needs` and one row per cell to the
   listing.** btclib-org/btclib#1001 is a run whose cells died in *Set up
   job* downloading a pinned action, codeload answering 429 and the
