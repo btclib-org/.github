@@ -7,6 +7,22 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The review job's fork comment loses its example
+
+- **The header's reason for comparing `full_name` rather than `.fork`
+  offered a branch of `btclib-org/bbt` as the case where `.fork` is
+  true** (issue #456): `gh api repos/btclib-org/bbt --jq .fork` answers
+  `false`. The argument stays and the example goes — what withholds the
+  secret is the head repository not being this one, where `.fork` asks
+  whether the head repository has a parent, so the two part on a
+  repository that is itself a fork, whose own branches are handed the
+  secret and which `.fork` would skip. The header reads this
+  repository's own `.fork` back, which is what says the two decide
+  alike here and that a swap between them would show up in no run. The
+  wording is `btclib-org/bbt`'s, landed there as `btclib-org/bbt#8` and
+  transcribed rather than re-derived; the remaining sibling copies carry
+  the sentence this one had, and each is its own tree's landing.
+
 ### The last backlog row expired
 
 - **`btclib-node` landed what the row excused, so the row turned its
