@@ -420,11 +420,13 @@ that is not answered is the failure they never learn about. It names
 the subject rather than a team, so who answers a report can change
 without the policy changing.
 
-**The badges at a `README.md`'s head are a function of what the tree
-is**, decided by a property of the repository and never curated. A
-curated list has no answer to *should this tree carry that badge*, so
-two trees curate differently and neither of them is wrong, which is how
-one file comes to open a different way in each tree.
+**The badges at a `README.md`'s head are never curated.** A curated
+list has no answer to *should this tree carry that badge*, so two trees
+curate differently and neither of them is wrong, which is how one file
+comes to open a different way in each tree. Where a property of the
+repository decides a badge the answer is read off the tree, and where
+none does the membership is written down — one place either way, and
+neither of them the tree's own taste.
 
 What that gives up is the head as a summary. A badge per sentinel means
 the row grows with section 10's calendar rather than staying the handful
@@ -433,24 +435,42 @@ carries the longest row and this repository, which today opens with no
 badge at all, acquires one. That is the trade and it is deliberate: a
 row long enough to be an audit is worth more here than a row short
 enough to be decoration, because the rule below is what makes it an
-audit. A tree that wants the shorter row drops a sentinel, not its
-badge.
+audit. A tree that wants the shorter row drops a sentinel, its badge
+going with it.
 
-Which property decides which badge:
+Which badge a tree carries, and what decides it:
 
-- **every repository** — the licence, derived from the repository's own
-  `LICENSE` by `img.shields.io/github/license/<org>/<repo>`; and the
-  `lint` workflow;
+- **every repository** — the `lint` workflow;
 - **publishes** — from the index, the version, the downloads, the
   development status, the supported Python versions, `wheel` and
-  `implementation`; and from the forge, `github/v/release`;
+  `implementation`; and from the forge, `github/v/release` and the
+  licence, derived from the repository's own `LICENSE` by
+  `img.shields.io/github/license/<org>/<repo>`;
 - **holds a suite** — the `test` workflow;
 - **on pre-commit.ci** — its badge;
 - **builds documentation** — the `docs` workflow, and Read the Docs at
   `app.readthedocs.org`;
 - **registered at bestpractices.dev** — the OpenSSF Best Practices
   badge, `www.bestpractices.dev/projects/<id>/badge`;
-- **runs a sentinel** — that sentinel's badge.
+- **a sentinel section 10's record names the tree in** — that
+  sentinel's badge.
+
+**The licence badge is tier 1's for the reason `SECURITY.md` is**: the
+archive leaves github.com. A repository page states the licence beside
+the README of its own accord, which
+`gh api repos/<org>/<repo> --jq .license.spdx_id` is the source of, so
+on the page the badge sits on it restates what is already there, and it
+earns its line where the README travels — the long description an index
+renders, and the copy an unpacked sdist carries. What that gives up is
+a tier-2 tree's row saying what the licence is; the sidebar beside it
+says so, and the row is worth more for the questions no sidebar
+answers.
+
+**A sentinel's badge is recorded rather than derived**, because the
+sentinel is: section 10's *Which trees carry which sentinel* is the one
+record, and the badge and the workflow are one membership rather than
+two. Carrying the badge is why the workflow is there rather than the
+other way round, so a tree drops both together or keeps both.
 
 **The order is fixed**, and it is three groups: what the software is,
 whether it works, and what the OpenSSF makes of it.
@@ -2216,11 +2236,13 @@ the one above `05`. **A `timezone:` beside a `cron:` fails
 calendar is compared, so a schedule cannot leave UTC by declaring one.
 
 A day is a slot rather than a census: it says when that workflow runs
-where a repository has it, not that every repository does. Dependabot is
-in neither table and runs Thursday, that being the day `deps-latest`
-reports on the upgrade before the pull request arrives — it states its
-own schedule in `dependabot.yml`, in a different shape, and picks its
-own minute.
+where a repository has it, not that every repository does, and *Which
+trees carry which sentinel* below is which repositories those are.
+
+Dependabot is in neither table and runs Thursday, that being the day
+`deps-latest` reports on the upgrade before the pull request arrives —
+it states its own schedule in `dependabot.yml`, in a different shape,
+and picks its own minute.
 
 `tests/grid_test.py` of this repository reads both tables and every
 `cron:` of every repository, in both directions: a schedule no row names
@@ -2267,14 +2289,58 @@ still on the old instant. That list is the port's work rather than a
 defect of the trees on it, and it is bounded by the issue carrying the
 ports, as a new row's red is bounded by the issue carrying the debt.
 
-### Which trees owe which sentinel
+### Which trees carry which sentinel
 
 Section 14 leaves *which optional workflows exist* to each repository,
 and these are not left there: what a tree owes is decided once and
 ported, a repository deciding for itself whether its own parser is
 fuzzed being a repository deciding what the organization's exposure is.
-Each is keyed on a property of the tree, so the answer for a new
-repository is read off the tree rather than argued.
+
+This is the record: one entry per calendar row, naming the trees that
+carry that sentinel, in the order the two tables above give the rows and
+the repositories. A tree an entry names runs the workflow and shows its
+badge, section 2's row reading its sentinels from here rather than
+stating a rule of its own; a tree an entry does not name is asked
+nothing by that row.
+
+- `vendored-vectors` — `btclib`, `btclib-secp256k1`,
+  `btclib-benchmarks`, `btclib-node`;
+- `bootstrap-dns` — `btclib-node`;
+- `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `btclib-benchmarks`, `btclib-node`;
+- `fuzz` — `btclib`, `btclib-node`;
+- `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`;
+- `integration-hwi` — `btclib`;
+- `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `btclib-benchmarks`, `btclib-node`;
+- `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`;
+- `py-arm-authority` — `btclib`;
+- `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `btclib-benchmarks`, `btclib-node`;
+- `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `btclib-benchmarks`;
+- `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`;
+- `links` — every repository;
+- `alignment` — `.github`;
+- `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `btclib-benchmarks`, `btclib-node`;
+- `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `btclib-node`.
+
+**An entry is what was decided, not what a tree happens to hold**,
+which is what separates it from the tier table of section 2: a tier is
+read off the tree by the two files that section names, where carrying a
+sentinel is a decision somebody took. So a tree short of what its entry
+names is a gap in that tree and not a correction owed here, and a tree
+that carries what no entry gives it is the same finding read from the
+other side — a workflow whose row does not name the tree, and a badge
+with no row behind it.
+
+Where a property of the tree decides membership it is stated below, so
+that the answer for a new repository is read off the tree rather than
+argued; where none does, the entry above is the whole of it. A tree that
+owes a sentinel it does not carry is a debt with an issue behind it, and
+its entry gains the tree when the workflow and the badge land together.
 
 - **`mutation` follows a suite over code the tree ships.** A coverage
   floor at 100 says every line and branch ran and says nothing about
@@ -2293,20 +2359,24 @@ repository is read off the tree rather than argued.
   over anything this tree ships, so a mutant here would land in the
   measuring instrument and the number would be the suite reporting on
   itself.
-- **`scorecard` follows a repository that is public and is not a
-  fork.** Public is what the OpenSSF Scorecard reads at all, and
+- **`scorecard` asks a repository that is public and is not a fork**,
+  and that is the bar rather than the key: clearing it leaves a tree
+  able to run the sentinel, and the entry above is what says whether it
+  does. Public is what the OpenSSF Scorecard reads at all, and
   `ossf/scorecard-action`'s own README says running it on a fork is not
   supported — so `gh api repos/<org>/<repo> --jq .fork` is the second
-  half of the question, and no repository of the organization answers
+  half of the bar, and no repository of the organization answers
   `true` to it: that half is a rule with no instance, kept for the tree
-  that arrives as a fork rather than describing one that is here. `bbt`
-  is inside this rule and owes the sentinel, where the `mutation` rule
-  above leaves it out for a reason of its own. What the sentinel buys
-  is an opinion of the tree's supply-chain posture formed outside the
-  organization: this file is a standard the organization holds itself
-  to and every command in section 15 asks a question somebody here
-  chose, where a score computed by a third party is the one reading
-  that can find what nobody thought to ask for. **A check scoring below
+  that arrives as a fork rather than describing one that is here. A tree
+  the entry leaves out gives up the alerts the run files as well as the
+  score, `security-events: write` below being that half; the badge is
+  what the row is kept for, and a reading nobody displays is not worth
+  the run. What the sentinel buys is an opinion of the tree's
+  supply-chain posture formed outside the organization: this file is a
+  standard the organization holds itself to and every command in section
+  15 asks a question somebody here chose, where a score computed by a
+  third party is the one reading that can find what nobody thought to
+  ask for. **A check scoring below
   its maximum is an issue against what it found**, never a sentence in
   section 14 saying why this organization scores it that way — it
   aligns by adopting the practice rather than by explaining the score,
@@ -3888,8 +3958,9 @@ failing, the same `(HTTP 404)` capture the publishing sweep uses telling
 it apart from a genuine `no SECURITY.md`.
 
 Section 2's badge rule, whose subject is the head of a file no tree can
-read for another. The first loop is membership and order, one line per
-badge and none at all for a `README.md` that carries no badge:
+read for another, and section 10's record beside it. The first loop is
+membership and order, one line per badge and none at all for a
+`README.md` that carries no badge:
 
 ```shell
 for r in <every repository>; do
@@ -3910,10 +3981,10 @@ The badge's **source** and not its alt text, which is prose its author
 chose: `bitcoin-core-rpc` writes `license: MIT` over
 `img.shields.io/badge/license-MIT-blue.svg`, which the rule refuses by
 name, and a loop reading the alt text reports a licence badge and stops.
-Read the sources against that rule's list, in the order they arrive: a
-badge the tree's properties do not ask for, one they ask for and the row
-does not carry, and a row out of order are each a finding, and no
-command tells them apart from each other.
+Read the sources against section 2's list and section 10's record, in
+the order they arrive: a badge neither gives the tree, one they give it
+and the row does not carry, and a row out of order are each a finding,
+and no command tells them apart from each other.
 
 The second asks what each badge renders, which is what a reader of the
 rendered file sees and a reader of its source cannot:
@@ -3979,7 +4050,10 @@ done | sort -k2
 Sorted by workflow, so a file running on a different day from its
 namesake in another tree is one line out of place. A minute shared by two
 repositories at the same day and hour is the other finding, for the
-reason section 10 gives beside the table.
+reason section 10 gives beside the table. A line for a tree that
+workflow's entry in section 10's record does not name is the third, and
+the one no comparison of instants can show: the cron is right and the
+row is not the tree's.
 
 A repository with no schedule prints nothing, so the marker takes a line
 of its own rather than a field, and it sorts under the name of what did
