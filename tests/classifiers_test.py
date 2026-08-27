@@ -19,9 +19,9 @@ Section 3 has the argument for either.
 
 Which interpreter classifiers a package should carry is a different
 question, and one a repository can answer about itself: that is
-`interpreters_test.py`, in each library, reading its own floor and its
-own matrix. What is here is what a tree is not relied on to ask of
-itself, asked of every tree at once.
+`interpreters_test.py`, in each tree that publishes, reading its own
+floor and its own matrix. What is here is what a tree is not relied on
+to ask of itself, asked of every tree at once.
 
 `Typing :: Typed` is asked against `py.typed` rather than against the
 list alone: `surface_test.py` is what locates the package directory a
