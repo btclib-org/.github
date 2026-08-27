@@ -55,8 +55,8 @@ they say that too.
   came out of: slides, spreadsheets illustrating finite fields and
   elliptic curves, notebooks, scripts, and a regtest lab.
 - **[portanode](https://github.com/btclib-org/portanode)** — Bitcoin Core
-  and Electrum on a portable external disk, shared between macOS and
-  Windows.
+  and Electrum on a portable external disk, shared between macOS, Windows
+  and Linux.
 - **[.github](https://github.com/btclib-org/.github)** — this page, and
   the standard the repositories above are built and kept to. Its issue
   tracker is where a repository's drift from that standard is filed,
@@ -69,7 +69,7 @@ it does. These libraries answer to vectors their authors published: the
 BIPs' and the SLIPs' own, Bitcoin Core's script, transaction, sighash and
 key-encoding files, HWI's, Trezor's for BIP39 and SLIP39, and Appendix
 A.2 of RFC 6979. Each vendored file is pinned to the upstream commit it
-was copied from, with a monthly job asking whether the two still agree.
+was copied from, with a weekly job asking whether the two still agree.
 
 Coverage is gated at 100%, so a line no test reaches is a red build
 rather than a number that drifts down. Everything
