@@ -116,6 +116,38 @@ audit has no revision to compare against.
   and leaves the answer to that issue, so a reused gate keeps what it
   has until the mechanism is run rather than argued.
 
+### A sentinel and its badge are one membership, recorded per tree
+
+- **Section 2 gave a sentinel's badge to a tree that runs that
+  sentinel** (closes #490), which is the dependency the wrong way
+  round: carrying the badge is why the workflow is there, so the two
+  are one membership and a tree drops both together or keeps both.
+  Which trees carry which is now section 10's *Which trees carry which
+  sentinel*, one entry per calendar row, and section 2's badge row
+  reads its sentinels from there rather than stating a rule of its own.
+
+- **The licence badge was every repository's and is now what
+  publishing asks for** (closes #490), tier 1's for the reason
+  `SECURITY.md` is: the archive leaves github.com. A repository page
+  states the licence beside the README of its own accord, so on the
+  page the badge sits on it restates what is there, and it earns its
+  line on the index page and in an unpacked sdist, where the README
+  travels without the repository around it.
+
+- **`scorecard` followed a repository that is public and is not a fork,
+  and that is now the bar rather than the key** (closes #490): clearing
+  it leaves a tree able to run the sentinel, and the record is what
+  says whether it does. A tree the record leaves out gives up the code
+  scanning alerts the run files as well as the published score, the
+  badge being the reading the row is kept for.
+
+- **Section 15's badge sweep read a row against the tree's properties**
+  (closes #490) and reads it against section 2's list and section 10's
+  record instead. The calendar sweep beside it gains the reading no
+  comparison of instants can make: a line for a tree that workflow's
+  entry does not name, whose cron is right and whose row is not the
+  tree's.
+
 ### A sweep's `paths` filter answers to the clock, not to the count
 
 - **Section 10 made a filtered `pull_request` on a calendar workflow
