@@ -7,6 +7,43 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### The aggregate reads its own run, not the needs context
+
+- **Section 10 asked for a shell loop that always runs, which settles
+  when the aggregate's step decides and not what it decides from**
+  (closes #464): the needs context reports one result for a whole
+  matrix, and btclib-org/btclib#1001 is a run where that result was not
+  `failure` while cells were red and the check a merge waits for was
+  green. The rule now names the run's own job listing,
+  `repos/{repo}/actions/runs/{run_id}/jobs`, the `actions: read` it
+  costs the job, and what each rejected reading gets wrong — a boolean
+  `if:` that leaves the step skipped, a matrix collapsed to one result,
+  and a `for` loop over a join that can be empty.
+  `btclib-benchmarks`' `602f51d` is where the mechanism was narrowed
+  by experiment rather than by argument: a cell pointed at an action
+  SHA that does not exist propagates `failure`, and a download the
+  runner abandoned does not.
+- **The empty join has no counterpart in the shape now named** (closes
+  #464): `for` splits on words and an empty string contributes none, so
+  an allowlist over `join(needs.*.result, ' ')` compares nothing and
+  exits 0, which is btclib-org/btclib#1454. Reading the listing leaves
+  no join to be empty, and the vacuity that shape can have — a listing
+  that is not this run's — is refused by requiring the run's one
+  unfinished job to be the aggregate itself.
+- **`skipped` passes the listing's filter for the reason it passed the
+  loop's** (closes #464): a `changes` job that decides a diff touches
+  nothing leaves its dependants `skipped`, the API reports that
+  conclusion like any other, and a filter naming only `success` would
+  fail every run a `changes` job empties, on a check a merge waits
+  for.
+- **A gate `release.yml` reuses through `workflow_call` has no run of
+  its own** (issue #474): the caller's jobs and the called workflow's
+  are one listing, every row carrying the caller's `workflow_name`, and
+  the publishing jobs are unfinished exactly because they wait on the
+  aggregate that would be reading it. Section 10 states the constraint
+  and leaves the answer to that issue, so a reused gate keeps what it
+  has until the mechanism is run rather than argued.
+
 ### A sweep's `paths` filter answers to the clock, not to the count
 
 - **Section 10 made a filtered `pull_request` on a calendar workflow
