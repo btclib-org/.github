@@ -7,6 +7,34 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### Section 2 names the scorecard badge and fixes two stale citations
+
+- **`scorecard`'s property asked for "that sentinel's badge" without
+  saying which one** (closes #481): every sentinel but `scorecard`
+  answers with the workflow-run badge,
+  `github.com/<org>/<repo>/actions/workflows/<name>.yml/badge.svg`, and
+  `scorecard` does not — it publishes a score rather than a pass or
+  fail, at `api.scorecard.dev/projects/github.com/<org>/<repo>/badge`,
+  which section 10's `scorecard` subsection already ties to the same
+  `publish_results: true` the badge needs. The Read the Docs clause
+  three lines above it also drops the three literals it borrowed from
+  the workflow badges' own vocabulary, which the paragraph below it is
+  written to keep separate.
+
+- **Sections 4 and 15 cited a hand-written licence badge no tree
+  carries** (closes #495): both illustrated a rule with
+  `bitcoin-core-rpc`'s `[![license: MIT](…)](./LICENSE)`, restored to
+  the derived form while btclib-org/.github#490 was being worked. Both
+  now point at section 2's own refused form,
+  `img.shields.io/badge/license-MIT-blue.svg`, rather than at a tree's
+  markdown.
+
+- **The downloads badge linked to a pepy URL that redirects** (closes
+  #511): `pepy.tech/project/<name>`, singular, answers `308` and
+  redirects to `pepy.tech/projects/<name>`, plural — the same reason
+  the Read the Docs host is `app.readthedocs.org` and not
+  `readthedocs.org` — and section 2 now names the plural.
+
 ### `REPOSITORY.md` states what it covers, and covers the topics
 
 - **The record said it was the whole of the settings outside the tree**
