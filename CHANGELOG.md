@@ -7,6 +7,30 @@ audit has no revision to compare against.
 
 ## Unreleased
 
+### A wait for something outside the run is a script with a test
+
+- **A trigger added to a wait reaches its first attempt and not what the
+  wait is for** (issue #466): the verdict such a step delivers is the
+  one it reaches when the wait runs out, and what is waited on belongs
+  to a third party, so neither a release nor a rehearsal can arrange for
+  it to be late. `documented`'s loop, and the shapes weighed against it
+  — a dispatch input naming a version, the same loop pointed at `latest`
+  on the docs gate — differ in how often the branch that runs when there
+  is nothing to wait for is taken.
+
+- **The lint gate reads the loop and passes it**: `actionlint` runs
+  `shellcheck` over a `run:` block, and neither of them reads it against
+  the job header, which is where a budget able to outlast
+  `timeout-minutes` lives — btclib-org/btclib#1165. Counting against a
+  deadline states that budget once, and a test substituting the
+  transport and the clock is what drives the loop past it.
+
+- **Section 6 said no test collects `.github/scripts`**: a test whose
+  subject is one of those scripts loads it by path, that directory being
+  no package. `btclib-secp256k1` tests its wheel-content check that way
+  because a run cannot produce the failure on purpose, which is the
+  property a wait shares.
+
 ### The alignment sweep refuses the run it has no token for
 
 - **A fallback to `GITHUB_TOKEN` made a missing secret read as a
