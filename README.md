@@ -2358,12 +2358,49 @@ request, and the rule follows them.
 - **Never name a matrix cell in the branch rule.** The rule lives outside
   the repository, so a context that stops being produced blocks every
   merge with nothing in the tree to explain why.
-- The aggregate **fails hard on anything but `success` or `skipped`**,
-  checked by name in a shell loop that always runs — not a boolean
-  expression a skipped step could leave unevaluated.
+- **What the aggregate reads is its own run's job listing, asked of the
+  API rather than of `needs`** —
+  `repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs`, each
+  row's `conclusion`, in a step that always runs and fails on anything
+  but `success` and `skipped`. The job elevates to `actions: read` above
+  the workflow's `contents: read` and hands `github.token` to the call.
+  What that buys is a source reporting what the needs context does not.
+- **A matrix reports one result to `needs` and one row per cell to the
+  listing.** btclib-org/btclib#1001 is a run whose cells died in *Set up
+  job* downloading a pinned action, codeload answering 429 and the
+  runner giving up, where `needs.<job>.result` was not `failure`.
+  `btclib-benchmarks`' `602f51d` narrows the mechanism by experiment
+  rather than by argument: a cell pointed at an action SHA that does not
+  exist propagates `failure` normally, and the abandoned download does
+  not.
+- **A boolean `if:` over `needs` decides nothing when it is false.** The
+  step is skipped, a skipped step leaves its job successful, and the job
+  branch protection names is green over a red matrix — which is what
+  btclib-org/btclib#1001 is a recorded run of.
+- **A shell allowlist over `join(needs.*.result, ' ')` is vacuous on an
+  empty join.** `for` splits on words and an empty string contributes
+  none, so the loop compares nothing and exits 0; it is sharpest where
+  the aggregate has a single `needs`, and it is btclib-org/btclib#1454.
+- **What answers that vacuity here is a count of the run's unfinished
+  jobs, and the count is the aggregate itself alone.** A listing with
+  nothing unfinished is not a listing of the run the step is running in,
+  and one with something else unfinished is a run this job does not
+  `needs` the whole of. The count is what says so rather than a name,
+  a name being what a rename moves. The empty join has no counterpart
+  in this shape, there being no join.
+- **The listing's unit is the run and not the workflow**, so the shape
+  belongs where those are the same thing. A gate `release.yml` reuses
+  through `workflow_call` is not: the caller's jobs and the called
+  workflow's are one run, every row carries the caller's
+  `workflow_name`, and the publishing jobs are unfinished exactly
+  because they wait on this one. btclib-org/.github#474 is where a
+  reused gate is answered, and a workflow inside it does not take this
+  shape until it is.
 - `skipped` is legitimate on purpose: when the run was superseded by its
   concurrency group, and when a `changes` job decided the diff touches
-  nothing those jobs read.
+  nothing those jobs read. The listing reports it as a conclusion like
+  any other, so a filter naming only `success` fails the check a merge
+  waits for on every run a `changes` job empties.
 - **A `changes` job** is the cheapest job in the workflow and decides
   whether the rest runs. It answers `true` on every trigger that has no
   base to diff against, and the files it counts as prose are narrower
