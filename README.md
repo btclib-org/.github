@@ -3360,36 +3360,47 @@ corrected in none of the ones that shipped.
   publisher attaches vouches for bytes, so a release rebuilt from the
   commit its tag names — by running what the release ran — gives those
   bytes back, or the attestation vouches for something no rebuild can
-  check. It is stated as a property because the mechanisms setuptools
-  needed are not what section 3's backends need: `uv_build` ignores
+  check. What the release ran is the repository's to state and this
+  file's to require: `RELEASING.md` names the steps between the tag and
+  the archive with the reason beside each, so replacing one of them is a
+  change to that file and not to this one, where a rule naming the
+  script of the day would date itself the day it is replaced. Section
+  3's backends already differ underneath it — `uv_build` ignores
   `SOURCE_DATE_EPOCH` and writes fixed member metadata into both
   archives, where hatchling reads the variable and writes a constant of
-  its own without it. What "reproduces" still names is the normalization
-  step, and it is not a belt over that: `normalize_sdist.py` rewrites
-  every member of the sdist from the backend's constant to
-  `SOURCE_DATE_EPOCH`, the tagged commit's date, ownership cleared and
-  the gzip header stamped alike, so the digest the attestation signs is
-  the script's output and not the backend's. A publisher with the step
-  and one without are not making one guarantee in two styles: they
-  attest different bytes of the same tree, which is why every publisher
-  carries it rather than each weighing whether its backend has made it
-  redundant. That weighing was the alternative, and it was measured as
-  the wrong question — on `bitcoin-core-rpc` the step moved every
-  member's mtime from `0` to the commit's second and the digest with it,
-  btclib-org/.github#140 having the figures — so the reading under which
-  a migration could drop the step as inert is the one this sentence
-  exists to refuse. `SOURCE_DATE_EPOCH` itself is exported from the
-  tagged commit for what reads it — the normalizer, and the bill of
-  materials below — and under `uv_build` for nothing else, its archives
-  being the same bytes either way. Under hatchling the variable reaches
-  the archives too, so exporting it for the bill of materials moves the
-  digests the attestation vouches for. The compiled case stays outside
-  the property: `btclib-secp256k1`'s wheels are built by cibuildwheel
-  against a compiler and a toolchain nothing pins, so there the property
-  is stated of the sdist and not of the wheels. Nothing yet re-derives
-  it on a released tag — the command that rebuilds one and verifies it
+  its own without it — and what either publisher owes is the same. The
+  released bytes are that pipeline's output rather than the backend's: a
+  normalization step run after the build replaces the member metadata
+  the backend wrote, so the digest the attestation signs is the step's,
+  and not a belt over a backend that fixes that metadata on its own. On
+  `bitcoin-core-rpc` the step moves every member's mtime from `0` to the
+  tagged commit's second and the digest with it, btclib-org/.github#140
+  having the figures, so a publisher that runs such a step and one that
+  does not attest different bytes of the same tree rather than making
+  one guarantee in two styles. Leaving each publisher to weigh whether
+  its backend has made the step redundant is the rejected alternative,
+  that being the reading under which a migration drops it as inert and
+  moves what the attestation vouches for. `SOURCE_DATE_EPOCH` itself is
+  exported from the tagged commit for what reads it — the normalizer,
+  and the bill of materials below — and under `uv_build` for nothing
+  else, its archives being the same bytes either way. Under hatchling
+  the variable reaches the archives too, so exporting it for the bill of
+  materials moves the digests the attestation vouches for. The compiled
+  wheel is outside the property and is named rather than passed over:
+  `btclib-secp256k1`'s wheels are built by cibuildwheel against a
+  compiler and a toolchain nothing pins, while the index attests them
+  beside the sdist, PEP 740 covering every file the publish job uploads,
+  so a verifier who rebuilds one and gets other bytes has nothing to
+  tell them whether that is a defect. Saying nothing about the wheels is
+  the rejected alternative for that reason, an attestation reading as
+  one guarantee over every file it covers. Pinning the image, the
+  compiler and the linker so the wheels reproduce too is the other, and
+  it is declined on cost rather than on the merits: it is a change to
+  the tree that compiles them, and that is
+  btclib-org/btclib-secp256k1#439. Nothing yet re-derives the property
+  on a released tag — the command that rebuilds one and verifies it
   against the attestation is one a person runs — and that half is
-  btclib-org/.github#140's.
+  btclib-org/.github#523's.
 - **A bill of materials is published beside the distribution files**,
   by every publisher, and the attestation signs it with them. One answer
   rather than an answer and its exemptions, for the reason every

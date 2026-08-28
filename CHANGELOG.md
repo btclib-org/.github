@@ -3467,3 +3467,28 @@ audit has no revision to compare against.
 - **Section 3 says a requirement naming the distribution takes the
   canonical spelling too** (closes #335), beside the bullet saying
   `[project].name` does.
+
+### Section 12 states the sdist property, and the mechanism is the tree's
+
+- **The release rule was written as the step a publisher runs: it named
+  the normalization script and required every publisher to carry it**
+  (issue #140): what the standard states is now the property — a
+  published sdist reproduces from the tag it was released from, its
+  released bytes being the output of the pipeline the repository
+  declares — with the steps between the tag and the archive named in
+  that repository's own `RELEASING.md`, the reason beside each, so
+  replacing one of them is a change to that file rather than to the
+  standard.
+- **The compiled wheel was exempted from the property without the reason
+  the exemption needs** (issue #140): the index attests every file the
+  publish job uploads, so `btclib-secp256k1`'s wheels carry an
+  attestation the property is not stated of, and a verifier who rebuilds
+  one and gets other bytes has nothing telling them whether the
+  difference is a defect. Both alternatives are written down as
+  rejected: saying nothing about the wheels, and pinning the image, the
+  compiler and the linker so that they reproduce too, which is declined
+  on cost and filed as btclib-org/btclib-secp256k1#439.
+- **The sentence saying that nothing re-derives the property on a
+  released tag pointed at the issue that states it** (issue #140): it
+  names btclib-org/.github#523, the weekly sentinel split out to carry
+  that half.
