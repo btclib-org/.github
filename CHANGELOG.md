@@ -3647,3 +3647,22 @@ audit has no revision to compare against.
   and none turned red — a fragment check reads the page the plain link
   check already fetched, so it asks no third party a question it was not
   already asking.
+
+### The `bbt` and `bitcoin-core-rpc` entries say what is there
+
+- **`profile/README.md`'s `bbt` entry named slides among what the
+  repository holds; `bbt` carries no slide file at any extension, and
+  its own `README.md` sends a reader to the course page instead**
+  (closes #501): the entry drops the word, the course page staying
+  linked in the `btclib` paragraph above.
+- **The `bitcoin-core-rpc` entry called the package one source file; the
+  client is a package of modules**, its own `CHANGELOG.md` recording the
+  split into a package (btclib-org/bitcoin-core-rpc#292). The entry now
+  says what the tree holds rather than what it held before the split.
+- **The same entry offered vendoring as a supported way to use it, and
+  that stopped being true in the same landing** (closes #544): `grep -in
+  vendor` answers nothing in `bitcoin-core-rpc`'s `README.md`,
+  `CONTRIBUTING.md`, `CLAUDE.md` or `SECURITY.md`, and its changelog says
+  of the split that "vendoring a single file is no longer what the shape
+  is for". What survived is the standard-library-only constraint, which
+  is what the sentence now gives a reader a reason for.
