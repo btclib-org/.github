@@ -3412,3 +3412,26 @@ audit has no revision to compare against.
   commands that tell a session's own branch apart from it —
   `git diff origin/main..HEAD -- tests/` empty, and the same run against
   a `git archive origin/main` snapshot.
+
+### Section 9 puts a new entry at the end of the open section
+
+- **Where a new `CHANGELOG.md` or `RELEASE_NOTES.md` entry belongs
+  inside the section that has not shipped was each tree's own to read
+  off its file** (closes #514): it is now the end of that section, after
+  the entries already there and above the heading of the latest released
+  version. What decides it is the `merge=union` driver rather than how
+  the section reads — it places the side arriving second below the side
+  already there, so appending leaves the entries in the order they
+  landed in, where inserting at the top leaves a rebasing branch's entry
+  under a neighbour it was not written for, its text unchanged and its
+  diff an addition with no deletion counted.
+- **Both alternatives are written down as rejected** (closes #514):
+  newest first reads as a timeline to a person and buys nothing else,
+  the order inside a section that has not shipped carrying no
+  information and the release that closes it giving it a version
+  heading; and section 14's *decided per repository* list takes a reason
+  of a kind that a tree mixed by accident does not have.
+- **The rebase bullet beside it now asks whether the branch's own block
+  is still at the end of the open section** (closes #514), the diff
+  being what says so, since no gate reads the order two `###` sections
+  sit in.
