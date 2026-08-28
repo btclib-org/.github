@@ -3826,3 +3826,29 @@ audit has no revision to compare against.
   `REPOSITORY.md`, a subscription being a setting outside the tree
   rather than a membership the organization decides, and
   `btclib-benchmarks` is where that absence reads as a decision.
+
+### Section 2 drops `--keep-going` and says what `exclude_patterns` names
+
+- **Section 16's checklist no longer asks for `sphinx-build
+  --keep-going`, and section 2 says why it is not passed** (issue #347):
+  in the sphinx `uv.lock` resolves the flag is declared with
+  `help=argparse.SUPPRESS` and the application records it as unused, so
+  it is missing from `--help` while the parser still accepts it. An
+  unrecognized argument is refused where this one builds, so a run that
+  passes it reads exactly like a run that does not.
+- **`-W` on its own reports a warning raised while reading and one
+  raised while writing from the same run, then fails at the end of it**
+  (issue #347), which is what the flag's name asks for. Keeping it with
+  a comment naming what it buys is recorded as the rejected alternative,
+  there being nothing for that comment to say; each tree's own
+  `docs.yml`, `CONTRIBUTING.md` and `.readthedocs.yaml` still pass it,
+  which is the rest of that issue.
+- **`exclude_patterns` is a rule rather than `sphinx-quickstart`
+  residue** (issue #418): it names what the tree writes under
+  `docs/source/` and is empty where nothing does. Sphinx reads a file as
+  a document only where its name ends in one of `source_suffix`'s
+  suffixes with something left over to be the document's name, so
+  `Thumbs.db` and `.DS_Store` are not candidates under the `.md` and
+  `.rst` these trees declare; `_build` is live only for a build
+  directory written inside the source directory, and these trees build
+  beside `docs/source/` rather than under it.
