@@ -187,6 +187,48 @@ repos:
     rev: 0.38.0
     hooks:
       - id: check-dependabot
+  # the four workflows are yaml with expressions, contexts and `run:`
+  # bodies in them, and nothing else here validates any of that: an
+  # unknown key, a typo in a context reference, a job depending on one
+  # that is not there are things a run discovers by failing.
+  # The Python packaging of actionlint rather than the upstream hook,
+  # whose only non-docker id is language: golang, i.e. a go toolchain on
+  # every machine that commits and on pre-commit.ci
+  - repo: https://github.com/Mateusz-Grzelinski/actionlint-py
+    rev: v1.7.12.24
+    hooks:
+      - id: actionlint
+        name: actionlint (github workflows)
+        # actionlint delegates the body of a run: step to shellcheck, and
+        # of a "shell: python" step to pyflakes, if it finds them on the
+        # PATH: without them it validates the yaml around a shell script
+        # and not the script. Declared here rather than installed by
+        # hand, so that every machine and pre-commit.ci check what CI
+        # checks.
+        # Pinned, because nothing bumps an additional dependency:
+        # pre-commit.ci moves rev, dependabot has no pre-commit ecosystem
+        additional_dependencies:
+          - shellcheck-py==0.11.0.1
+          - pyflakes==3.4.0
+  # actionlint asks whether a workflow is correct, zizmor whether it is
+  # safe: a token persisted where a later step can read it, an expression
+  # interpolated into a shell script, a trigger that runs a fork's code
+  # with write access
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.29.0
+    hooks:
+      - id: zizmor
+        # offline is what it does by default, said out loud: it warns
+        # about the implicit choice on every run, and the choice is the
+        # right one. Two audits can query GitHub for the actions a
+        # workflow pins -- impostor-commit and known-vulnerable-actions --
+        # which would make the hook want a token and report differently
+        # on a machine that has none. Those two therefore stay unrun,
+        # here and in CI.
+        # --no-progress is repeated rather than added: args replaces what
+        # the hook declares, and that flag is the whole of what it
+        # declares, so passing --offline alone would drop it
+        args: [--offline, --no-progress]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.3
     hooks:

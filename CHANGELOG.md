@@ -3606,3 +3606,22 @@ audit has no revision to compare against.
 - **Each entry gains `btclib-node` where the repository table orders
   it**, after `btclib-benchmarks`, matching the `os-macos` entry beside
   them that already carries it there.
+
+### The lint gate runs actionlint and zizmor over the workflows
+
+- **`.pre-commit-config.yaml` adds `actionlint-py` and `zizmor-pre-commit`,
+  both at the revisions `btclib` already pins** (closes #503): section
+  4's workflows bullet asks every tree's lint gate for both hooks at zero
+  findings, and this repository's own gate ran neither. `uvx pre-commit
+  run --all-files` passes both hooks against this repository's own
+  workflows, with no finding from either to fix.
+
+### `.github/dependabot.yml`'s header names what it pins without counting it
+
+- **The header states what Dependabot moves and what pre-commit.ci moves
+  instead, and drops the "two of the three" opening** (closes #438): the
+  `typos` hook's `additional_dependencies` pin was a fourth thing the
+  count left out, and section 9's *Measure, don't assert* forbids a
+  stated total that nothing checks. The comment still names every pin
+  and what moves it, with no arithmetic for a future pin to fall outside
+  of.
