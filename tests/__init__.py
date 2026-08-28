@@ -234,7 +234,13 @@ def names() -> list[str]:
     )
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    (
+        524,
+        "test_every_requirement_a_tree_writes_down_spells_the_name_canonically",
+        ("btclib-secp256k1",),
+    ),
+)
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what
@@ -242,12 +248,12 @@ The number is an issue of this repository's own tracker, which is what
 tree this suite measures is not caught: those trackers number in the
 same range, so the citation names a real issue about something else.
 
-Empty is where this is meant to be rather than a state it has not
-reached yet: a row is an exemption, and the rows are strict expected
-failures so that a repository catching up is *reported* rather than
-quietly excused. Nothing here is a place a new failure belongs -- a red
-cell is answered in the tree that is red, and a row is what says the
-answer is already written down and waiting.
+Empty is where this is meant to arrive rather than a state it keeps: a
+row is an exemption, and the rows are strict expected failures so that a
+repository catching up is *reported* rather than quietly excused.
+Nothing here is a place a new failure belongs -- a red cell is answered
+in the tree that is red, and a row is what says the answer is already
+written down and waiting.
 """
 
 
