@@ -3492,3 +3492,29 @@ audit has no revision to compare against.
   released tag pointed at the issue that states it** (issue #140): it
   names btclib-org/.github#523, the weekly sentinel split out to carry
   that half.
+
+### Section 12 has the release pull request open the next cycle's sections
+
+- **Between a release pull request landing and the next cycle opening,
+  `main` carried no work-in-progress section in `CHANGELOG.md` or
+  `RELEASE_NOTES.md`, so a branch open across that window had nowhere
+  correct to put its entry** (closes #522): section 12 now has the
+  release pull request retitle the section of both files to the version
+  being tagged and open an empty work-in-progress section above them,
+  which leaves the topmost `##` heading of either file a
+  work-in-progress heading at every commit of the default branch.
+- **The merge freeze is written down beside it as the rejected
+  alternative**: `bitcoin-core-rpc`, `btclib-node` and
+  `btclib-secp256k1` each write the step "in a pull request of its own
+  and before anything else lands", which is a rule about how a
+  person sequences merges on the day several branches are in flight,
+  where opening the section in the release pull request leaves no window
+  to sequence around. Bringing each publishing tree's `RELEASING.md` to
+  the standard is #528.
+- **The version bump does not travel with the retitle**: the tag is
+  checked to say what `pyproject.toml` declares, so a pull request that
+  released and bumped to the next generic version at once would cut its
+  tag on a tree declaring a version that tag does not name. The
+  objection that the release would then publish the new empty section as
+  its notes does not hold — `awk '$0 ~ "^## " tag "( |$)"'` in each
+  publishing tree's `release.yml` lifts the tag's own section.
