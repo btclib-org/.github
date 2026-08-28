@@ -887,6 +887,18 @@ what it holds.
     `btclib_secp256k1-<version>` either way: the escaping rule above
     already folds both spellings to the one string.
 
+    **A requirement naming the distribution takes that spelling too**,
+    wherever it is written: a table a resolver parses, a command in a
+    document, a block somebody is meant to copy. The normalization above
+    is what hides the other spelling — it resolves and installs the same
+    distribution, and no gate reports it — so what the written form
+    decides is what a reader copies out and types.
+    `tests/names_test.py` asks this of every tree, reading the position
+    rather than the spelling: a name is a requirement where a table
+    declares it as one, or where a version specifier or an extras
+    bracket follows it, and an import package is written in neither
+    place.
+
     **The bullet has no subject where a tree builds no distribution.**
     `bbt` and `.github` both declare `package = false` and a
     `[project].name` of their own — `bbt` after the repository,

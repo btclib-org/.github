@@ -3435,3 +3435,35 @@ audit has no revision to compare against.
   is still at the end of the open section** (closes #514), the diff
   being what says so, since no gate reads the order two `###` sections
   sit in.
+
+### A name of the organization is spelled one way in a requirement
+
+- **Nothing asked whether a requirement naming a distribution of the
+  organization spells it the way that distribution names itself**
+  (closes #335): PEP 503 folds runs of `-`, `_` and `.` before a
+  resolver matches, so either spelling resolves and installs the same
+  distribution, and the tree carrying the odd one passes its own gate.
+  `tests/names_test.py` asks every tree for one spelling, in the
+  requirement tables its `pyproject.toml` declares and in what it writes
+  down elsewhere.
+- **The position is read and never the spelling** (closes #335): the
+  underscore is what the import package is called, and what PEP 427
+  escapes the name to for a wheel or an sdist filename, so a test
+  reading the spelling reports both and carries a list of exceptions
+  instead of a rule. A name is a requirement where a table declares it
+  as one, or where a version specifier or an extras bracket follows it,
+  and an import package is written in neither position. What no
+  position tells apart from prose is a bare name on an installer's
+  command line.
+- **What the second test reads is what a reader or a resolver meets**
+  (closes #335): the files a tree tracks, less `CHANGELOG.md` and
+  `RELEASE_NOTES.md`, which section 9 says nothing already written in is
+  rewritten, and less its Python, where a requirement is a string the
+  program uses rather than one a reader copies out.
+- **A backlog row records the one tree that spells it two ways** (issue
+  #524): `btclib-secp256k1` writes its own name with an underscore in
+  requirements its `README.md` and `RELEASING.md` give a reader, and the
+  row is a strict expected failure until those lines move.
+- **Section 3 says a requirement naming the distribution takes the
+  canonical spelling too** (closes #335), beside the bullet saying
+  `[project].name` does.
