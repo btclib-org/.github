@@ -3625,3 +3625,25 @@ audit has no revision to compare against.
   stated total that nothing checks. The comment still names every pin
   and what moves it, with no arithmetic for a future pin to fall outside
   of.
+
+### `links.yml` checks a link's fragment, so a renamed heading goes red
+
+- **`lychee` checks a fragment only when asked, and the workflow did not
+  ask** (closes #506): a heading rename that changes `README.md`'s anchor
+  left `REPOSITORY.md`'s reference definitions pointing at the old one
+  with nothing red anywhere, GitHub serving the page and dropping the
+  fragment rather than 404ing on it.
+- **The `lychee-action` step now passes `--include-fragments`**: proved
+  first against a copy of the tree with one heading renamed, red only
+  with the flag and green without it on the same input; run again on the
+  tree as it stands, where it found no broken anchor to fix. When it goes
+  red is this workflow's own cadence and unchanged here: weekly, on
+  demand, and on a pull request only when `links.yml` itself moves -- so a
+  rename that lands elsewhere is caught by the next Saturday's run rather
+  than by the pull request that made it.
+- **The flag also reaches a remote URL's fragment, which is not this
+  tree's to keep resolving**: measured online against every `#fragment`
+  this tree currently links to, on `github.com` and `docs.github.com`,
+  and none turned red — a fragment check reads the page the plain link
+  check already fetched, so it asks no third party a question it was not
+  already asking.

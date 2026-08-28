@@ -113,12 +113,22 @@ jobs:
           # age worth setting is expired before the next run reads it,
           # and within one run lychee
           # asks each URL once whatever the flag says
+          # --include-fragments, or a heading rename breaks an anchor
+          # into it with nothing red anywhere: REPOSITORY.md links into
+          # README.md by heading, and lychee checks a fragment only when
+          # asked. It reaches a remote URL's fragment too, which is
+          # somebody else's page to move rather than this tree's -- but
+          # a fragment check reads a page already fetched for the plain
+          # link check above it, so it adds no request and, measured
+          # against every #fragment this tree currently links to
+          # (github.com and docs.github.com), no false red either.
           args: >-
             --no-progress
             --max-retries 3
             --retry-wait-time 10
             --timeout 45
             --accept 100..=103,200..=299,429
+            --include-fragments
             "*.md" "profile/*.md" ".claude/commands/*.md"
           # fail the job rather than only summarizing: a green run that
           # found dead links is the state this workflow exists to end
