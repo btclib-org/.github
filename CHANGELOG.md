@@ -3538,3 +3538,58 @@ audit has no revision to compare against.
   now says *where this returns rather than where it always is*, which is
   the contrast the sentence was reaching for. The tuple emptying is what
   made the sentence worth reading closely.
+
+### A releasing tree's `homepage` is its own documentation site
+
+- **Which trees provide documentation, and whether documenting commits a
+  tree to releasing, were unstated** (issue #533): section 2 now says
+  that a tree releasing a Python package provides documentation and that
+  the converse does not follow. A release carries a URL no later pull
+  request can correct, and building `docs/source/` says nothing about
+  publishing, so a tree that keeps that directory and subscribes no
+  service to it is complete rather than short of a release.
+- **Section 3 sends a releasing tree's two `homepage` surfaces to that
+  site** (issue #533): `[project.urls] homepage`, which an index serves,
+  and the repository's `.homepage`, which is the *About* link on its
+  page. The read for each sits beside the rule, half the pair being a
+  setting no file in the tree holds. A project's home is what documents
+  it and not a project page, a sibling's or its own. The condition is
+  the rule's, not the section's: section 3 binds tier 2 as well, and a
+  tree that releases nothing publishes no URL that outlives a
+  correction, so it is asked nothing here whatever it declares.
+- **The alternative is written down as rejected** (issue #533): where the
+  two surfaces disagree, moving the setting to whatever `pyproject.toml`
+  declares is the cheaper edit, and it settles the disagreement by
+  consecrating it — a tree whose declared home is another project's page
+  keeps it.
+- **`documentation` stays, naming that same URL** (issue #533): an index
+  page then shows two links to one page, which is what it costs, against
+  a field indexes and tools read for documentation specifically.
+- **Section 16's new-repository checklist sets the `homepage` beside the
+  topics** (issue #533), the two settings a `pyproject.toml` field
+  decides.
+
+### Section 11 admits `(issue #N)` in a landed subject
+
+- **A pull request that advances an issue it does not close names it
+  `(issue #N)`, on whichever of the title and the commit subject lands**
+  (closes #529): the token was reserved for a `CHANGELOG.md` entry, and
+  the reason section 11 gives for parentheses at all — the number
+  reaching `git log` and staying reachable from a checkout with no forge
+  in front of it — holds unchanged for a branch answering half an issue,
+  which the reservation left with no number to reach.
+- **One token holds one meaning wherever the standard writes it** (closes
+  #529): *cites an issue the change does not close*, in a changelog entry
+  and in a subject alike, where the reservation made it a meaning in one
+  file and a prohibition in another.
+- **The rejected alternative is beside the rule** (closes #529):
+  reserving the token for `CHANGELOG.md` alone keeps parentheses on a
+  subject always meaning a close, and costs the number that a branch
+  answering half an issue would otherwise leave in `git log`.
+- **What closes is unchanged** (closes #529): the description closes and
+  never the title, `closingIssuesReferences` is the read that says what
+  it closed, and a pull request that neither closes nor advances an issue
+  carries no parentheses.
+- **`CONTRIBUTING.md`'s copy of the two spellings says the same thing**
+  (closes #529), the shared half naming `(issue #N)` as the citation of
+  an issue the change advances rather than as a changelog's alone.

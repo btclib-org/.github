@@ -735,6 +735,17 @@ than it is asked for.
 
 ### The documentation
 
+**A tree that releases a Python package provides documentation; a tree
+that documents need not release.** A release carries a URL no later pull
+request can correct, for the reason section 11's *Pages and Read the
+Docs* gives, so what a published version points a reader at has to
+exist. The converse does not follow: building this directory says
+nothing about publishing, so a tree that keeps it and subscribes no
+service to it is complete rather than short of a release. The badge rule
+above reads *builds documentation* off a tree as a property, and this is
+where a releasing tree owes it — a state recorded rather than work asked
+of anybody, and the next tree kept from arriving without it.
+
 What `docs/source/` holds is a few hand-written pages around a reference
 sphinx generates from the docstrings of a typed public API, one set per
 tree and none of them large.
@@ -999,6 +1010,33 @@ what it holds.
     this suite included.
 - **`[project.urls]`** carries homepage, documentation, download,
   changelog, repository, issues and pull requests.
+
+    **A releasing tree's `homepage` is its own documentation site, in
+    both surfaces that carry the name**: this field, which an index
+    serves with the package, and the repository's `.homepage`, which is
+    the *About* link on its page. A project's home is what documents it
+    and not a project page, a sibling's or its own, and section 2's rule
+    that a releasing tree provides documentation is what says there is
+    one to name. A tree that releases nothing publishes no URL that
+    outlives a correction, so this asks it nothing. The
+    two are read apart, half of the pair being a setting no file in the
+    tree holds:
+
+    ```shell
+    gh api repos/<org>/<repo> --jq '.homepage'
+    sed -n '/^\[project.urls\]/,/^\[/p' pyproject.toml
+    ```
+
+    Where they disagree, the alternative weighed was to move the setting
+    to whatever `pyproject.toml` declares. It is the cheaper edit, and it
+    consecrates the state rather than correcting it: a tree whose
+    declared home is another project's page keeps it, where the rule
+    sends both surfaces to the documentation the tree itself provides.
+
+    **`documentation` names that same URL, and stays.** What it costs is
+    an index page showing two links to one page; what it buys is the
+    field indexes and tools read for documentation specifically, which
+    `homepage` does not stand in for.
 - **No upper bound on a sibling dependency.** Two projects developed
   together coordinate a break at release time, which is what a ceiling
   substitutes for when they cannot; a ceiling would cost a release per
@@ -2743,15 +2781,28 @@ parentheses**: `Say when github-release runs instead of relying on no if
 lands is *Merge method*'s rule, so the parentheses belong on whichever
 one that is — not only on the title. Either way the number reaches
 `git log` and stays reachable from a checkout with no forge in front of
-it. A pull request that closes nothing carries no parentheses, and
-adding some because the shape looks right is how a wrong number gets
-in. `(issue #N)` is reserved for a `CHANGELOG.md` entry naming an issue
-it does not close — section 9's citation, not the title's — one token
-holding one meaning across the standard rather than its opposite
-depending on which file it sits in. Nothing already landed is
-rewritten, a title and a landed commit subject included: section 9's
-*Nothing already written is rewritten* is this same rule, read from the
-title's side of it.
+it.
+
+**A pull request that advances an issue it does not close names it the
+same way, `(issue #N)`**, and for the same reason, which reaches further
+here: without the citation the subject carries no number at all, so from
+a checkout with no forge the connection is not weakened but lost. The
+token holds one meaning wherever the standard writes it — section 9's
+`CHANGELOG.md` citation and this one both name an issue the change does
+not close — and which of the two a change carries is decided by what is
+true of it. Neither is the closing mechanism: the description is, and
+the paragraphs below have the read that says what it closed.
+
+**The rejected alternative reserves `(issue #N)` for `CHANGELOG.md`
+alone**, so that parentheses on a subject always mean a close. What it
+costs is the number: a branch answering half an issue then lands with
+nothing in `git log` pointing at what it answered.
+
+A pull request that neither closes nor advances an issue carries no
+parentheses, and adding some because the shape looks right is how a
+wrong number gets in. Nothing already landed is rewritten, a title and a
+landed commit subject included: section 9's *Nothing already written is
+rewritten* is this same rule, read from the title's side of it.
 
 **A title citing several issues joins them for the reader, and the
 parser binds the verb to the first.** `(closes #319, #388)` is, to the
@@ -4464,7 +4515,9 @@ independent and the checklist the same for each.
    protection and Dependabot security updates; private vulnerability
    reporting. Then the topics, which are the `keywords` of the
    `pyproject.toml` step above where the tree declares any, and which
-   nothing in the tree holds where it does not.
+   nothing in the tree holds where it does not; and, where the tree
+   releases, the `homepage`, the same URL section 3's field of that name
+   carries.
 1. Read each setting back with the commands `REPOSITORY.md` records, and
    write the answers into it — the topics included, that being the one
    of them a tree without `keywords` records nowhere else.
