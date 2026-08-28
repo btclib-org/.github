@@ -3518,3 +3518,23 @@ audit has no revision to compare against.
   objection that the release would then publish the new empty section as
   its notes does not hold — `awk '$0 ~ "^## " tag "( |$)"'` in each
   publishing tree's `release.yml` lifts the tag's own section.
+
+### The one backlog row is gone, its exemption having expired by being fixed
+
+- **`tests/__init__.py`'s `BACKLOG` is empty again** (issue #524):
+  `btclib-secp256k1` spelled its own name with an underscore in three
+  requirements a reader copies, the row excused the cell that measures
+  it, and the row is what forced the expiry to be noticed. That tree
+  hyphenated all three in `d82416c` and the strict expected failure then
+  reported the success as a failure —
+  `XPASS(strict) btclib-org/.github#524` — which is the mechanism
+  working rather than a regression: a cell that starts passing under a
+  strict row turns green into red here until somebody deletes the row.
+- **The docstring's second paragraph said the opposite of the design**
+  (issue #524): *Empty is where this is meant to arrive rather than a
+  state it keeps* predicates both halves of *empty*, so it read as
+  saying that empty is not a state the backlog holds — where the
+  paragraph's whole point is that empty is the state it returns to. It
+  now says *where this returns rather than where it always is*, which is
+  the contrast the sentence was reaching for. The tuple emptying is what
+  made the sentence worth reading closely.
