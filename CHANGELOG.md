@@ -3593,3 +3593,16 @@ audit has no revision to compare against.
 - **`CONTRIBUTING.md`'s copy of the two spellings says the same thing**
   (closes #529), the shared half naming `(issue #N)` as the citation of
   an issue the change advances rather than as a changelog's alone.
+
+### Section 10's `os-ubuntu` and `os-windows` entries name `btclib-node`
+
+- **`btclib-node`'s `origin/main` carries `os-ubuntu.yml` and
+  `os-windows.yml` and both badges, and *Which trees carry which
+  sentinel*'s two entries named neither** (closes #527):
+  btclib-org/btclib-node#599 landed both on the decisions
+  btclib-org/btclib-node#528 and btclib-org/btclib-node#430 recorded,
+  so the tree carried what no entry gave it — the finding section 10
+  names beside the record, read from the same side as #492.
+- **Each entry gains `btclib-node` where the repository table orders
+  it**, after `btclib-benchmarks`, matching the `os-macos` entry beside
+  them that already carries it there.

@@ -2443,8 +2443,9 @@ nothing by that row.
 - `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
 - `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`;
-- `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`;
+  `btclib-benchmarks`, `btclib-node`;
+- `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `btclib-node`;
 - `links` — every repository;
 - `alignment` — `.github`;
 - `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
