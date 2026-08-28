@@ -3356,6 +3356,25 @@ corrected in none of the ones that shipped.
   release it rehearses.
 - **The tag is signed**, is checked to be an ancestor of `main`, and is
   checked to say what `pyproject.toml` says.
+- **The release pull request closes the cycle's sections and opens the
+  next.** It retitles the work-in-progress section of `CHANGELOG.md` and
+  of `RELEASE_NOTES.md` to the version being tagged, and opens an empty
+  work-in-progress section above them in the same pull request, so the
+  topmost `##` heading of either file on the default branch is a
+  work-in-progress heading at every commit and a branch landing across a
+  release day has an open section to append to. Opening the next cycle
+  in a pull request of its own, ahead of anything else landing, is the
+  rejected alternative: the window it leaves is one pull request wide,
+  and the merge freeze that covers it is a rule about how a person
+  sequences merges on the day several branches are in flight, enforced
+  by nothing, where retitling and opening together leaves no window to
+  sequence around. The next generic version does not travel with the
+  retitle: the tag is checked to say what `pyproject.toml` says, above,
+  so a pull request that released and bumped at once would cut its tag
+  on a tree declaring a version that tag does not name, and the version
+  bump stays in the pull request that sets it. The empty section is
+  not what a release publishes: the notes are lifted from the section
+  whose heading is the tag's own, which is the one just retitled.
 - **A published sdist reproduces from its tag.** The attestation every
   publisher attaches vouches for bytes, so a release rebuilt from the
   commit its tag names — by running what the release ran — gives those
