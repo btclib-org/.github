@@ -3723,3 +3723,15 @@ audit has no revision to compare against.
   with this one rejected** (issue #530): the paragraph beside the table
   says which tree serves the site and cites the decision, so a reader
   meets the row as the site's rather than as a name GitHub reserves.
+
+### Three trees have landed the scope port and leave the backlog row
+
+- **`bbt`, `bitcoin-core-rpc` and `btclib-secp256k1` no longer claim
+  their `REPOSITORY.md` is the whole of what is set outside the tree**
+  (issue #551): each landed the port, so
+  `test_the_settings_file_does_not_claim_to_be_the_whole_of_them` passes
+  for all three, and the row being `xfail(strict=True)` turns each pass
+  into a failure until the name comes out. The exemption expires the
+  moment the fix lands, which is the mechanism working rather than the
+  suite complaining — `btclib`, `btclib-node` and `portanode` still owe
+  the port and stay.
