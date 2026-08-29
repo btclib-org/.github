@@ -2673,6 +2673,21 @@ These live outside the tree. `REPOSITORY.md` is where each repository
 writes down its own, with the command that reads it back — nothing here
 is recoverable by reading the code.
 
+**What that file covers is the settings this standard asks about** — the
+ones section 16's checklist sets on a new repository, and the ones a
+section here states a rule for — together with whatever a call quoted
+for one of those answers alongside it. It says what falls outside that
+scope too, so a setting it is silent about reads as a decision rather
+than as an omission.
+
+The claim rejected is `this file is the whole of them`, which no command
+checks: the repository document answers with fields this file states no
+rule about, and telling those apart from the settings a repository
+decides is a reading. What the narrower claim gives up is the promise
+that a reader holding the file holds everything; what it buys is a
+perimeter this file fixes rather than the endpoint, which is what a copy
+can be held to.
+
 ### Signatures
 
 **Every commit reaching a protected branch carries a valid signature**,
