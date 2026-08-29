@@ -36,10 +36,10 @@ they say that too.
   validates its own Python arithmetic against them: consensus code is
   what says the right answer.
 - **[bitcoin-core-rpc](https://github.com/btclib-org/bitcoin-core-rpc)**
-  — a standalone JSON-RPC client for a Bitcoin Core node. One source
-  file, nothing but the standard library behind it, annotated and
-  shipping `py.typed`. Vendoring it is a supported way to use it rather
-  than a fallback.
+  — a standalone JSON-RPC client for a Bitcoin Core node: a package of
+  modules with nothing but the standard library behind it, annotated and
+  shipping `py.typed`. It installs beside anything without bringing a
+  dependency tree with it.
 - **[btclib-benchmarks](https://github.com/btclib-org/btclib-benchmarks)**
   — timings against the packages these are usefully compared with. Its
   own repository on purpose: the comparands are third-party libraries,
@@ -52,8 +52,8 @@ they say that too.
   bitcoin node, consensus and network code in Python, built on btclib.
   Its author reports it downloading and validating the whole chain.
 - **[bbt](https://github.com/btclib-org/bbt)** — the course the library
-  came out of: slides, spreadsheets illustrating finite fields and
-  elliptic curves, notebooks, scripts, and a regtest lab.
+  came out of: spreadsheets illustrating finite fields and elliptic
+  curves, notebooks, scripts, and a regtest lab.
 - **[portanode](https://github.com/btclib-org/portanode)** — Bitcoin Core
   and Electrum on a portable external disk, shared between macOS, Windows
   and Linux.
