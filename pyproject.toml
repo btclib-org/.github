@@ -13,6 +13,12 @@
 [project]
 name = "btclib-alignment"
 version = "0"
+# Section 3 binds this key to every tree that declares a [project]
+# table, so a tree that builds nothing declares it too: the collective
+# the MIT notice names, never a literal of this tree's own. No index
+# ever serves it from here -- what it buys is that the answer for a
+# tree of this shape is read off the standard rather than derived again
+authors = [{ name = "The btclib developers", email = "devs@btclib.org" }]
 # This is not a library covering every interpreter still in support: it
 # is one suite, run by one workflow, on one runner. So the rule for an
 # application applies -- the newest its dependencies allow -- and which

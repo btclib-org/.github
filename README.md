@@ -953,6 +953,39 @@ what it holds.
     is a current entry of that list and not a deprecated one. Whether
     PyPI's upload endpoint refuses the pair is unmeasured, asking it
     meaning publishing a version.
+- **`authors` names what the MIT notice names**, in every file that
+  declares a `[project]` table, whether or not that file builds
+  anything. The collective is already fixed three times over — by
+  `COPYRIGHT`, by `LICENSE`, and by the header ruff's `CPY` holds every
+  source file to — so a per-tree literal here is a fourth statement of
+  one fact, and the one a package index prints as the package's author.
+  `btclib-node` published an sdist whose `LICENSE`, `AUTHORS.md` and
+  every source header named the collective while `Author-email` named an
+  individual: three to one, and the one on the page
+  (btclib-org/btclib-node#598).
+
+    The alternative is the scoping the bullet above uses — `license-files`
+    reaching only a file that declares a build backend — and what it
+    leaves is why it is not taken here. `bbt` and `.github` build
+    nothing, so the harm cannot reach them; but neither can the check,
+    and an unread key is where a tree drifts unobserved until somebody
+    gives it a backend. Declaring it costs each of them one line, and
+    what it buys is that the answer is the same wherever a reader opens
+    the file.
+
+    **The address is fixed by the trees agreeing, not by a literal
+    here.** `COPYRIGHT` carries the name and nothing carries the
+    address, so spelling the address out in this file would put the one
+    copy no command checks in the one document a tree cannot re-derive
+    it from — and the day it moved, every `pyproject.toml` would be
+    updated, the suite would stay green, and this sentence would go
+    stale with nothing reading it. What section 15's suite asks instead
+    is that the name be `COPYRIGHT`'s, transcribed the way `notice-rgx`
+    already is, and that every declaring tree answer the same address as
+    every other, an address none of them declares failing the same as
+    two that disagree. The trees are each other's authority: one changed
+    alone is a drift the suite names, and all of them changed together
+    is a decision rather than an accident.
 - **`keywords` are the GitHub topics**, the same names in the same
   lowercase spelling. The keywords carry an order and the topics do not:
   PyPI shows keywords as given, so they are ordered by relevance, while

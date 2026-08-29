@@ -58,6 +58,23 @@ def transcribed(source: Path) -> str:
     return "^" + r"\n".join(escaped)
 
 
+def collective(source: Path) -> str:
+    """Read the name a `COPYRIGHT` file's first line credits.
+
+    `transcribed` turns the whole file, that line included, into
+    `notice-rgx`; this reads the line alone, for `[project].authors`,
+    which section 3 ties to this file so that the two names cannot drift
+    apart unseen. `pyproject_test.py` asks the question the derivation
+    is for; this stays here, beside `transcribed`, because both derive
+    from `COPYRIGHT` rather than from a literal of their own.
+
+    :param source: the `COPYRIGHT` file to read.
+    :returns: the name after `Copyright (c) `.
+    """
+    first = source.read_text(encoding="utf-8").splitlines()[0]
+    return first.removeprefix("# Copyright (c) ")
+
+
 def declared(parsed: dict[str, Any]) -> str | None:
     """Read the `notice-rgx` a parsed `pyproject.toml` declares.
 
