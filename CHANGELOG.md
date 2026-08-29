@@ -4378,3 +4378,38 @@ audit has no revision to compare against.
   strict expected failure, which turns that success into a failure here.
   The issue is closed by the last of those ports, in
   `btclib-org/portanode`, so this landing cites it without closing it.
+
+### The open section is a list of entries, and a number in one has a place
+
+- **A `###` names one entry, never a theme several entries share**
+  (issue #567). Section 9 asked for an entry "in the group it belongs
+  to" and for the end of the open section, and a section carrying themes
+  has those in two different places; grouping by theme is written down
+  as the rejected alternative, on the ground that nothing in the file
+  says what the themes are and that the append point the placement and
+  rebase bullets are read against becomes the theme's rather than the
+  section's. An open section already carrying theme headings takes its
+  next entry after them, with nothing above it moving. Section 2's row
+  for the file names the entry rather than the group. Bringing the trees
+  to the rule is btclib-org/.github#586, so this cites the issue without
+  closing it.
+- **A citation goes in the bullet making the claim, not on the heading
+  above it** (issue #547). An entry's bullets cite separately, so a
+  citation on the heading answers for the entry while the bullets under
+  it name issues of their own and nothing says how the two sets relate.
+  The heading citation is the rejected alternative, and what it buys is
+  a section whose numbers a reader collects from the headings alone. The
+  tree that cites on the heading is the other half of
+  btclib-org/.github#586, so this cites the issue without closing it.
+- **An issue an entry names without acting on it is written into the
+  sentence, not into the parentheses** (closes #538). The parentheses
+  say what the entry did about an issue and there is nothing to say of
+  one it did nothing about, so a reference put there bare is the shape
+  *The qualifier does not stand in for the keyword* already refuses; in
+  the sentence it sheds the keyword and not the qualifier, and says what
+  the issue is to the entry.
+- **Section 15 audits none of it, and the reason for that is the landed
+  entries rather than the two shapes being indistinguishable**: a
+  pointer inside parentheses with nothing before the number is what
+  *Nothing already written is rewritten* keeps, so a pattern over the
+  file matches one of those as readily as a citation.
