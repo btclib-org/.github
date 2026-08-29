@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 
 from . import ROOT, Tier, by_hand, fenced, name, rows
+from .copyright_test import collective
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -166,6 +167,29 @@ def distribution(
         pytest.skip(f"{repository} names no build backend")
     project: dict[str, Any] = document.get("project", {})
     return project
+
+
+def project_table(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> dict[str, Any] | None:
+    """Return the `[project]` table of a tree that declares one, unscoped.
+
+    Unlike `distribution`, no build backend is required: the `authors`
+    rule reaches every file that declares the table, whether or not it
+    builds anything.
+
+    :param repository: the repository's name.
+    :param pyprojects: the parsed files.
+    :returns: the table, or `None` where the tree has no `pyproject.toml`
+        at all, or one with no `[project]` table -- two different
+        reasons a caller has nothing to ask.
+    """
+    document = pyprojects.get(repository)
+    if document is None:
+        return None
+    project = document.get("project")
+    return project if isinstance(project, dict) else None
 
 
 def ruff_lint(
@@ -373,6 +397,84 @@ def test_the_licence_is_an_expression_with_its_files(
     files = project.get("license-files")
     named = set(files) if isinstance(files, list) else files
     assert named == {"LICENSE", "AUTHORS.md"}, f"license-files is {files!r}; " + command
+
+
+def test_authors_names_the_copyright_s_collective(
+    repository: str,
+    trees: dict[str, Path],
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 3: `authors` names what `COPYRIGHT` names, wherever declared.
+
+    Unscoped by tier and by build backend both -- `project_table` asks
+    for the `[project]` table without `distribution`'s requirement of a
+    build backend, because the rule this asks reaches `bbt` and
+    `.github` too, neither of which builds anything. A tree with no
+    `pyproject.toml` at all (`portanode`) and one with a `pyproject.toml`
+    but no `[project]` table are both skipped: the rule has no subject
+    in either.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    :param pyprojects: the parsed files.
+    """
+    project = project_table(repository, pyprojects)
+    if project is None:
+        reason = (
+            "has no pyproject.toml"
+            if pyprojects.get(repository) is None
+            else "declares no [project] table"
+        )
+        pytest.skip(f"{repository} {reason}")
+    command = by_hand(repository, "grep -n '^authors' pyproject.toml")
+    authors = project.get("authors")
+    assert isinstance(authors, list), f"authors is {authors!r}; " + command
+    assert len(authors) == 1, f"authors is {authors!r}, not a single entry; " + command
+    entry = authors[0]
+    declared = entry.get("name") if isinstance(entry, dict) else None
+    expected = collective(trees[repository] / "COPYRIGHT")
+    assert declared == expected, (
+        f"authors names {declared!r}, not COPYRIGHT's {expected!r}; " + command
+    )
+
+
+def test_every_declared_authors_email_agrees(
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 3: every tree declaring `authors` answers the same address.
+
+    No literal to compare against: `COPYRIGHT` carries the collective's
+    name and nothing carries its address, so the declaring trees are
+    each other's only authority, and one changed alone is what this
+    catches.
+
+    An address a tree does not declare is its own group rather than a
+    tree dropped from the comparison: a suite that skips what it cannot
+    read answers the same green whether the trees agree or none of them
+    says anything, and the second is what this test exists to refuse.
+    An empty comparison fails for the same reason.
+
+    :param pyprojects: the parsed files.
+    """
+    by_address: dict[str | None, list[str]] = {}
+    for repository, document in sorted(pyprojects.items()):
+        project = document.get("project")
+        if not isinstance(project, dict):
+            continue
+        authors = project.get("authors")
+        if authors is None:
+            continue
+        entries = authors if isinstance(authors, list) else []
+        addresses = tuple(
+            entry.get("email") if isinstance(entry, dict) else None for entry in entries
+        ) or (None,)
+        for address in addresses:
+            by_address.setdefault(address, []).append(repository)
+    silent = by_address.pop(None, [])
+    assert not silent, f"authors declares a name and no address: {', '.join(silent)}"
+    assert by_address, "no tree declares an authors address: nothing here is measured"
+    grouped = {email: ", ".join(names) for email, names in by_address.items()}
+    assert len(by_address) == 1, f"authors email is not the same everywhere: {grouped}"
 
 
 @pytest.mark.tier(Tier.PYTHON)

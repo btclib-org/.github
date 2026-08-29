@@ -3684,3 +3684,29 @@ audit has no revision to compare against.
   answers `0` for. A copy still making it is a strict expected failure
   keyed on the issue, so its row is deleted by the branch that narrows
   its wording.
+
+### Section 3 says who `[project].authors` names
+
+- **Nothing said who `authors` names, and `btclib-node`'s own published
+  sdist disagreed with itself over it**: `LICENSE`, `AUTHORS.md` and
+  every source header named the collective while `Author-email` named an
+  individual (btclib-org/btclib-node#598) — three mechanisms the
+  standard already fixes against a field it said nothing about
+  (closes #534).
+- **`authors` now names what the MIT notice names, in every file that
+  declares a `[project]` table, whether or not that file builds
+  anything**: `bbt` and `.github` are declaring trees that build
+  nothing, so the alternative — scoping the rule to a file that names a
+  build backend, the way `license-files` is scoped — was weighed and
+  declined, for the reason section 3 now gives beside the rule.
+- **`tests/pyproject_test.py` asks it of every declaring tree, derived
+  from `COPYRIGHT` and not transcribed**: the name is `COPYRIGHT`'s
+  first line, read by a new helper beside the one
+  `tests/copyright_test.py` already carries for `notice-rgx`, and the
+  address is asked only of the declaring trees agreeing among
+  themselves — no literal names it, `COPYRIGHT` carrying none.
+- **A tree that declares a name and no address fails rather than
+  dropping out of the comparison, and a comparison with nothing in it
+  fails too**: a suite that skips what it cannot read answers the same
+  green whether the trees agree or none of them says anything, and the
+  second is the state the check exists to refuse.
