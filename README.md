@@ -454,12 +454,24 @@ Which badge a tree carries, and what decides it:
   `img.shields.io/github/license/<org>/<repo>`;
 - **holds a suite** — the `test` workflow;
 - **on pre-commit.ci** — its badge;
-- **builds documentation** — the `docs` workflow, and Read the Docs at
+- **builds documentation** — the `docs` workflow;
+- **served by Read the Docs** — the Read the Docs badge at
   `app.readthedocs.org`;
 - **registered at bestpractices.dev** — the OpenSSF Best Practices
   badge, `www.bestpractices.dev/projects/<id>/badge`;
 - **a sentinel section 10's record names the tree in** — that
   sentinel's badge.
+
+**Building documentation and being served by Read the Docs are two
+properties**, the second not implied by the first: a tree that builds
+`docs/` and subscribes no service to it is complete rather than short of
+anything, which is what *The documentation* below says. Under one
+property covering both, that tree's absent Read the Docs badge and a
+badge a tree owes and does not carry read the same, and only the second
+is a finding. What the split gives up is *published documentation* read
+off the `docs` badge alone: the pair answers it instead, and the order
+below keeps the two adjacent, so a tree holding both carries them
+together.
 
 **The licence badge is tier 1's for the reason `SECURITY.md` is**: the
 archive leaves github.com. A repository page states the licence beside
@@ -1019,19 +1031,30 @@ what it holds.
   being a build of one version and not a version of its own — unlike a
   `pypy` prefix, a different implementation with a classifier of its own
   under `Implementation`. PyPI's own `Free Threading` classifiers are a
-  maturity level an author claims for the code, which a sweep passing is
-  not evidence of, so none is declared on that strength. That last one
-  is a convention this section states, so section 7's closing rule makes
-  it a test rather than a hope: a tree that publishes carries it as
-  `interpreters_test.py`, which reads the floor, the classifiers and the
-  matrix and refuses a disagreement, section 15 saying why publishing is
-  what decides that and not section 1's library. Nothing local
-  refuses a classifier that is not a classifier at all — `twine check`
-  reads the long description and not this list, and a build accepts
-  whatever the file says; PyPI's upload endpoint is what rejects one, at
-  the point where a version is already being consumed. `trove-classifiers`
-  is the same list as a package, and comparing against it is the check
-  that can run before then.
+  maturity level an author claims for the code, and one is declared
+  where the merge gate exercises the free-threaded build: a gate refuses
+  the landing that breaks that build, where a sweep runs beside a
+  landing and blocks nothing. The rejected alternative is a green sweep,
+  which says the build passed somewhere and leaves the claim resting on
+  a run nothing waits for. These are conventions this section states, so
+  section 7's closing rule makes them tests rather than hopes: a tree
+  that publishes carries `interpreters_test.py`, which reads the floor,
+  the classifiers and the matrix and refuses a disagreement, section 15
+  saying why publishing is what decides that and not section 1's
+  library. That comparison is over a classifier naming one version, and
+  `Free Threading` names none, so it reaches the free-threading
+  convention no more than it reaches the `Implementation` classifier
+  beside it — which is gated instead by a biconditional, the classifier
+  present exactly where what it claims is run. The free-threading
+  convention takes that same shape, and its second side is the gate's
+  own matrix rather than every file CI holds, a sweep naming an
+  interpreter as readily as the gate does. Nothing local refuses a
+  classifier that is not a classifier at all — `twine check` reads the
+  long description and not this list, and a build accepts whatever the
+  file says; PyPI's upload endpoint is what rejects one, at the point
+  where a version is already being consumed.
+  `trove-classifiers` is the same list as a package, and comparing
+  against it is the check that can run before then.
 
     Both halves of that pairing, and section 2's own `py.typed` bullet
     before it, are a promise about an installed package, and `.github`'s
@@ -2130,6 +2153,32 @@ sight rather than weighed.
   beside the entry's own point rather than its citation. Telling the
   two apart is a reading, the way this file already treats a claim no
   command re-derives.
+- **A value the standard owns is named where the entry decides it and
+  cited where the entry uses it.** The entry giving a sentinel its day
+  and hour states the instant, that being what it decided, and it ages
+  into truth: the decision belongs to that instant whatever the calendar
+  says later. The entry moving a `cron:` onto that instant
+  cites the section and copies nothing out of it, a copy there ageing
+  into a falsehood *Nothing already written is rewritten* above refuses
+  to correct. So what decides how an entry is written is the value's
+  role in it rather than its presence.
+
+    **Ownership tells the two roles apart.** Section 10's calendar is
+    this repository's, so a weekday and an hour beside a citation of
+    that section here is the entry that decided them, and the same pair
+    in another tree's changelog is a copy of what this one says.
+
+    The rejected alternative is a flat refusal to restate any value the
+    standard owns. It is the shorter rule, and it forbids an entry that
+    decides a calendar row from stating the row, which is the whole of
+    what such an entry records.
+
+    **A copy already landed stays**, for the reason *A count that
+    expires inside a landed entry stays there* above gives: the change
+    that moves the value is what gets the next entry, and that entry is
+    what serves the reader. So both files are records rather than
+    references, and a schedule, a floor or a setting is read from the
+    section that owns it.
 
 ## 10. Workflows
 

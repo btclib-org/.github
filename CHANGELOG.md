@@ -3735,3 +3735,38 @@ audit has no revision to compare against.
   moment the fix lands, which is the mechanism working rather than the
   suite complaining — `btclib`, `btclib-node` and `portanode` still owe
   the port and stay.
+
+### A value's role, the free-threading classifier, two documentation properties
+
+- **A value the standard owns is cited where an entry uses it and named
+  where the entry decides it** (closes #485): section 9 draws the rule
+  on the value's role rather than on its presence, so an entry recording
+  a `cron:` moved onto section 10's calendar points at that section,
+  while an entry deciding a calendar row states the instant it chose.
+  Ownership tells the two apart: the calendar is this repository's, so a
+  weekday and an hour beside a citation of section 10 is a decision here
+  and a copy in any other tree. The rejected alternative is a flat
+  refusal to restate an owned value, which would forbid the entries
+  deciding a row from stating the row. A copy already landed stays, the
+  next entry being the remedy append-only leaves.
+- **A `Free Threading` classifier is declared where the merge gate
+  exercises the free-threaded build** (closes #563): a gate refuses the
+  landing that breaks that build, where a sweep runs beside a landing
+  and blocks nothing, so section 3 keys the classifier on the gate
+  rather than refusing it on a sweep's strength. Section 3's claim that
+  section 7's closing rule makes the convention a test rather than a
+  hope holds of the conventions beside it and not of this one:
+  `interpreters_test.py` compares a classifier that names one version
+  against the floor, the classifiers and the matrix, and `Free Threading`
+  names no version, so it sits outside that comparison exactly as the
+  `Implementation` classifier does. Section 3 now says what would
+  enforce it, the biconditional that gates `Implementation`, with the
+  gate's own matrix as its second side.
+- **Building documentation and being served by Read the Docs are two
+  properties** (issue #338): section 2's membership list welded them,
+  and a tree that builds `docs/` and subscribes no service to it is
+  complete by that section's own *The documentation*, so under one
+  property its absent Read the Docs badge reads as a badge it owes. The
+  fixed order is unchanged, Read the Docs staying immediately after
+  `docs`, so no tree's badge row moves. What the split gives up is
+  *published documentation* read off the `docs` badge alone.
