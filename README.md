@@ -2106,8 +2106,27 @@ sight rather than weighed.
   as the bare form does while reading as more careful; the
   cross-repository citations are `(closes owner/repo#N)` and
   `(issue owner/repo#N)`, keyword and qualifier together. Entries
-  already landed in the keywordless form stay as they are, the bullet
-  below being why.
+  already landed in the keywordless form stay as they are, *Nothing
+  already written is rewritten* below being why.
+- **The citation sits in the bullet, beside the claim it answers, and
+  not on the entry's `###` heading.** An entry closes more than one
+  issue often enough that the heading is the wrong place for the
+  number: a reader who arrives from one of them wants the sentence that
+  earned it, and a heading names them all together and maps none of
+  them to what answered it. Where a tree's `###` are topical group
+  headings rather than entry headings, the bullet is the only place
+  there is and the rule asks nothing new of it.
+- **The rejected alternative leaves it on the heading**, which is where
+  it arrives without anybody choosing it: section 11's *What a pull
+  request says it is* requires the landing subject to carry
+  `(closes #N)`, and a heading written from that subject holds the
+  citation already, the pull request's own number appended by the squash
+  being the only part stripped. Leaving it puts one fact in two places,
+  the claim the citation answers being the bullet's, so the heading's
+  copy is the one that goes. A tree that wrote it there keeps what it
+  wrote, *Nothing already written is rewritten* below being why, so its
+  changelog carries the two shapes divided at the day this landed rather
+  than a rewritten history.
 - **Nothing already written is rewritten.** Both files are append-only
   in practice and `merge=union` in fact; the rule binds what is written
   next, not the entries that predate it.

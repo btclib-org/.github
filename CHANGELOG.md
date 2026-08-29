@@ -3723,3 +3723,25 @@ audit has no revision to compare against.
   with this one rejected** (issue #530): the paragraph beside the table
   says which tree serves the site and cites the decision, so a reader
   meets the row as the site's rather than as a name GitHub reserves.
+
+### Section 9 says where an entry's citation goes, not only what it is
+
+- **The section says an entry cites its issue and not where the citation
+  goes, and the trees answer differently** (issue #547): one of them
+  writes the number on the `###` entry heading, ordinarily in the bullet
+  as well, so an entry states the same fact twice and *One fact in one
+  place* is what decides which of the two stays. The rule is the bullet,
+  beside the claim a reader arriving from the issue came for.
+- **The heading inherits the number rather than being chosen for it.**
+  Section 11 requires the landing subject to carry `(closes #N)`, and a
+  heading written from that subject arrives with the citation in it
+  unless the citation is taken out, so what the trees disagree about is
+  a step one of them omits rather than a place either of them picked.
+- **What the silence costs is paid at the point of writing**: this
+  campaign briefed a coder to cite on the heading, and that coder
+  measured its own tree and refused. A rule each tree derives for itself
+  is one the tracker collects an issue per tree for.
+- **The tree that writes it on the heading keeps what it wrote.**
+  *Nothing already written is rewritten* answers the retrofit, so the
+  new bullet points at it rather than restating it, and that tree's
+  changelog carries the two shapes divided at the day this lands.
