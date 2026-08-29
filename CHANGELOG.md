@@ -3666,3 +3666,21 @@ audit has no revision to compare against.
   of the split that "vendoring a single file is no longer what the shape
   is for". What survived is the standard-library-only constraint, which
   is what the sentence now gives a reader a reason for.
+
+### Section 11 says what a `REPOSITORY.md` covers, and the suite asks it
+
+- **The file covers the settings the standard asks about** (issue #551):
+  the ones section 16's checklist sets on a new repository and the ones
+  a section of `README.md` states a rule for, together with whatever a
+  call quoted for one of those answers alongside it, and it says what
+  falls outside that scope. What section 11 rejects is the copy saying
+  `this file is the whole of them`, a claim no command checks: which
+  fields of the repository document are settings rather than URLs,
+  counts and derived state is a reading.
+- **`tests/scope_test.py` asks every repository whether its copy makes
+  the rejected claim**, reading the claim out of section 11 rather than
+  carrying one of its own, and folding the whitespace of both sides: the
+  sentence wraps at the margin in copies a line-based `grep` then
+  answers `0` for. A copy still making it is a strict expected failure
+  keyed on the issue, so its row is deleted by the branch that narrows
+  its wording.
