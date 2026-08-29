@@ -452,15 +452,27 @@ Which badge a tree carries, and what decides it:
   `implementation`; and from the forge, `github/v/release` and the
   licence, derived from the repository's own `LICENSE` by
   `img.shields.io/github/license/<org>/<repo>`;
-- **holds a suite** — the `test` workflow;
+- **holds a `test` workflow** — its badge;
 - **on pre-commit.ci** — its badge;
 - **builds documentation** — the `docs` workflow;
 - **served by Read the Docs** — the Read the Docs badge at
   `app.readthedocs.org`;
-- **registered at bestpractices.dev** — the OpenSSF Best Practices
-  badge, `www.bestpractices.dev/projects/<id>/badge`;
+- **named by section 10's `scorecard` entry** — the OpenSSF Best
+  Practices badge, `www.bestpractices.dev/projects/<id>/badge`;
 - **a sentinel section 10's record names the tree in** — that
   sentinel's badge.
+
+**The suite's badge is the `test` workflow's**, and the property is
+that workflow rather than holding a suite: a tree that runs its suite
+somewhere else carries no `test` badge, and what goes red when the suite
+falls is the badge of the workflow that ran it. This repository is that
+tree, its suite running inside `alignment.yml`. Splitting the property
+as *builds documentation* and *served by Read the Docs* are split is the
+rejected alternative: there the two badges answer for a build and a
+subscription, where a `test` badge pointing at `alignment.yml` and the
+`alignment` badge beside it would be one workflow's status under two
+names, and a reader seeing them differ would be reading two measurements
+where there is one.
 
 **Building documentation and being served by Read the Docs are two
 properties**, the second not implied by the first: a tree that builds
@@ -472,6 +484,15 @@ is a finding. What the split gives up is *published documentation* read
 off the `docs` badge alone: the pair answers it instead, and the order
 below keeps the two adjacent, so a tree holding both carries them
 together.
+
+Which trees the second names is read from each tree's own
+`REPOSITORY.md`. `.readthedocs.yaml` is in every tree that builds
+`docs/`, so the tree cannot be read for the property, and a subscription
+is a setting outside the tree rather than a membership the organization
+decides — which is section 11's file and not a record here.
+`btclib-benchmarks` is where that reads as a decision: it builds
+`docs/`, subscribes no service, and says so under its *What is not
+configured, and why*.
 
 **The licence badge is tier 1's for the reason `SECURITY.md` is**: the
 archive leaves github.com. A repository page states the licence beside
@@ -611,10 +632,10 @@ answer stops being true, and it is the same state the Scorecard's
 sentinel read one fact from two sides. REUSE's stays refused for the
 reason its own bullet above gives, which this render escapes: the
 questionnaire's state is a measurement, where `reuse unregistered` is
-not. Registration is the
-maintainer's attestation and not a pull request, which is why the
-property is *registered* rather than *compliant*: a tree the maintainer
-has not registered simply lacks the property, and its row is complete
+not. Registration is the maintainer's attestation and not a pull
+request. Which trees it reaches is section 10's `scorecard` entry, that
+sentinel's `CII-Best-Practices` check being what reads the
+questionnaire, so a tree the entry does not name has a row complete
 without the badge.
 
 The downloads badge is pepy's rather than `img.shields.io/pypi/dm`, and
@@ -1886,6 +1907,26 @@ that each tree says which.
 
 ## 8. Coverage at 100%
 
+**A tree gates the code it holds against the failure that code has**, and
+the coverage floor below is one such gate rather than the whole rule. A
+package that installs is measured by that floor. Course material is
+measured by whether it still runs on the dependencies pinned today: what
+breaks a demonstration script is a release underneath it renaming what it
+imports, and a floor over code nothing executes measures nothing. A suite
+whose subject is outside its own tree is itself the gate rather than
+something with one — `.github`'s suite runs against the other
+repositories, so a floor here would be the instrument measuring itself.
+
+Which of them applies is read off what the tree installs. A tree that
+installs no package owes no floor, that rule having no subject there,
+which is section 2's sentence for a rule whose subject a tree does not
+hold; what it owes instead is the gate its own material's failure asks
+for, in the workflow a reader already goes to for what runs that
+material. That is a different axis from section 2's rule that the
+package directory, `tests/` and `docs/source/` name a package as their
+subject: that one says which directories a tree owes, this one what
+gates the code it does hold.
+
 ```toml
 [tool.coverage.run]
 source = ["<package>", "tests"]
@@ -2381,6 +2422,7 @@ owns a day and an hour, the repository owns the minute:
 | `integration-hwi` | Wednesday | 03 |
 | `deps-latest` | Wednesday | 04 |
 | `pypi-install` | Wednesday | 05 |
+| `deps-oldest` | Thursday | 03 |
 | `py-arm-authority` | Thursday | 04 |
 | `os-macos` | Thursday | 05 |
 | `os-ubuntu` | Friday | 04 |
@@ -2468,6 +2510,24 @@ whose result is already known: it upgrades everything the resolver
 touches, runs the suite, the lint gate and the packaging checks, and
 commits nothing.
 
+`deps-oldest` is its mirror, and what it verifies is the claim a floor
+makes to whoever installs: `uv lock --resolution lowest-direct` where
+`deps-latest` runs `uv lock --upgrade`, on the oldest interpreter alone.
+`lowest-direct` and not `lowest`, which takes the transitive
+dependencies to their minima as well and resolves environments that do
+not install, a red saying nothing about the tree. One cell, because a
+floor is two claims — `requires-python` and the dependency specifiers —
+and the cell holding both at once is what verifies them together, the
+rest of the matrix being `deps-latest`'s and `test`'s. What it finds is
+an issue against the floor it found, a floor raised because it was wrong
+being the point of the run.
+
+Verifying at release time instead — a `lowest-direct` step in
+`release.yml` — is the rejected alternative. It reaches only the trees
+that publish, where a tree that releases nothing declares floors too,
+and it puts the red at the moment a release is being cut, over a drift
+that happened months earlier and has nothing to do with the release.
+
 **A sentinel's row arrives with the workflow, and one pull request can
 do both only where the first tree is this one.** `tests/grid_test.py`
 reads the calendar against the trees in both directions, so a row naming
@@ -2527,6 +2587,8 @@ nothing by that row.
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
 - `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`;
+- `deps-oldest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `btclib-benchmarks`, `btclib-node`;
 - `py-arm-authority` — `btclib`;
 - `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
@@ -2618,6 +2680,21 @@ its entry gains the tree when the workflow and the badge land together.
     protection, section 16's checklist asking for both, so which of the
     two the score rests on is a question a port answers and this
     sentence does not.
+
+    **The trees this entry names owe a registration at
+    bestpractices.dev**, the questionnaire answered, and section 2's row
+    carries the badge that renders its live state. `CII-Best-Practices`
+    is the check that reads that registration, so the trees the sentinel
+    runs in are the trees to register: registering one that runs no
+    Scorecard is attestation work nothing reads. Registering is an
+    account action rather than a pull request, and
+    btclib-org/.github#350 is where the registrations outstanding are
+    carried. What that costs is a second home, one per tree, for facts
+    this file already states — how a vulnerability is reported, how a
+    release is cut, what gates a change — so a change to any of them
+    owes a pass over the questionnaires, and nothing says so. That is
+    section 9's *One fact in one place* losing deliberately to being
+    legible from outside the organization.
 - **`fuzz` follows a tree that parses whatever a stranger sends.** Not
   merely input the tree does not produce: the property is that nobody
   stands between the parser and an adversary who chooses the bytes.
@@ -2663,6 +2740,16 @@ its entry gains the tree when the workflow and the badge land together.
   fuzzing upstream's work rather than these bindings.
   btclib-org/.github#342 is where that is decided; what is fixed here is
   the name the calendar keys on and which trees owe one.
+- **`deps-oldest` follows a tree that builds a distribution.** Its
+  `requires-python` and its dependency specifiers are a claim made to
+  whoever installs it, and that claim is what the resolution checks; a
+  tree that installs nothing makes none, so `bbt` and this repository
+  are outside the row whatever their `pyproject.toml` declares. It is
+  the same set `deps-latest` names, the two rows asking one question in
+  opposite directions: whether the code survives the newest releases,
+  and whether the oldest ones it declares install at all.
+  btclib-org/.github#323 carries the debt until the first of them
+  schedules the workflow.
 
 ### The aggregate job, and the required check
 
@@ -3415,6 +3502,31 @@ push or a `close`/`reopen`.
 - **Publishing waits for an approval**: `pypi` and `testpypi` are
   environments requiring a review, and `pypi` is restricted to `v*` tags.
   Trusted publishing via OIDC, so no long-lived token exists.
+- **A repository declares `pypi` and `testpypi` where it publishes, and
+  no environment besides.** Each of the two is named by a job of the
+  release workflow and carries the review the bullet above asks for; an
+  environment no workflow names and no protection rule gates does
+  nothing the setting exists for, and the endpoint is where it is
+  found:
+
+    ```shell
+    gh api repos/<org>/<repo>/environments \
+      --jq '.environments[] | "\(.name) \(.protection_rules | length)"'
+    ```
+
+    **`github-pages` is GitHub's**, created by enabling Pages rather
+    than by the repository, and its protection rule is GitHub's too, so
+    it is outside the rule above and outside `REPOSITORY.md`: reading it
+    back would record a value nobody here can set. Serving Pages is what
+    gives a tree the environment, so that answer is read off the
+    repository rather than written down.
+
+    Two alternatives are rejected. **Saying nothing** leaves every other
+    environment outside the perimeter a `REPOSITORY.md` claims, where
+    that file's silence reads as a decision, so each copy would assert
+    that whatever is there is fine. **Recording whatever a repository
+    holds** writes a stray environment down rather than finding it,
+    which is what legitimises it.
 - **Code scanning**: the analysis runs from a workflow, and GitHub's
   default setup is *off* — the two cannot both be on, and while the
   setting is on the workflow runs, the analysis completes, and the upload
