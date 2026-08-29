@@ -323,6 +323,7 @@ own *a rule with no reason beside it* read from the other side.
 | `.github` | 2 |
 | `bbt` | 2 |
 | `portanode` | 3 |
+| `btclib-org.github.io` | 3 |
 
 The table is a claim, and the loop below is what checks it, in either
 direction — a row the loop contradicts is the finding, and so is a
@@ -345,6 +346,11 @@ done
 a `pyproject.toml`, a suite, and no `release.yml`. What it declines of
 tier 2 — there is no coverage here, and section 3 describes a file its
 `pyproject.toml` is not — its `CLAUDE.md` says, with the reason.
+
+`btclib-org.github.io` is the organization site, served by Pages from
+the root of its `main`, and btclib-org/.github#530 is where that vehicle
+was decided and this repository rejected as the alternative. Its row is
+measured like the others too: no `pyproject.toml`, which is tier 3.
 
 **A tier-2 repository carries neither `RELEASING.md` nor `RELEASE_NOTES.md`.**
 What the first would say is that there is no release — which every such tree

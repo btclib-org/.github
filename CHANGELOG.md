@@ -3710,3 +3710,16 @@ audit has no revision to compare against.
   fails too**: a suite that skips what it cannot read answers the same
   green whether the trees agree or none of them says anything, and the
   second is the state the check exists to refuse.
+
+### Section 2 gives the organization site its row
+
+- **`btclib-org.github.io` is a repository of the organization and
+  section 2's table gave it no row** (issue #553): the suite asks the
+  forge which repositories there are rather than reading the table, so
+  `tiers_test.py::test_section_2_gives_every_repository_a_row` failed on
+  the tree the table left out. The row is tier 3, the tree holding no
+  `pyproject.toml`, which is where the measurement of a tier stops.
+- **The vehicle for the organization site is a repository of its own,
+  with this one rejected** (issue #530): the paragraph beside the table
+  says which tree serves the site and cites the decision, so a reader
+  meets the row as the site's rather than as a name GitHub reserves.
