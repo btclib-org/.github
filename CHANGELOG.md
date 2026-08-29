@@ -3852,3 +3852,22 @@ audit has no revision to compare against.
   `.rst` these trees declare; `_build` is live only for a build
   directory written inside the source directory, and these trees build
   beside `docs/source/` rather than under it.
+
+### Section 1's `dev` row says which groups `dev` has to reach
+
+- **The row read `every group above`, and *above* names this table's own
+  rows rather than what a tree declares** (closes #498): two trees read
+  it as the groups a developer runs by hand and each left out one they
+  declare — `btclib-node`'s `fuzz` (btclib-org/btclib-node#646) and
+  `btclib-secp256k1`'s `check` and `mutation`
+  (btclib-org/btclib-secp256k1#451), both since reached from their own
+  `dev`. The row now names the tree's declarations, and the paragraph
+  below the table adds that they are counted transitively, so a
+  `harness` reached through `test` is not read as absent.
+- **The alternative weighed and declined has the row mean every group a
+  developer runs by hand**, which is what the two trees read into it: it
+  saves an install, and it costs a second rule — about which groups
+  count — applied by each tree to itself. The one case that made it
+  attractive is already answered two paragraphs above, where an engine
+  publishing no source archive for the developer's platform carries the
+  marker naming its own.
