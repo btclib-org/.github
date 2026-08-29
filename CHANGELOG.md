@@ -3770,3 +3770,59 @@ audit has no revision to compare against.
   fixed order is unchanged, Read the Docs staying immediately after
   `docs`, so no tree's badge row moves. What the split gives up is
   *published documentation* read off the `docs` badge alone.
+
+### What a tree gates, the environments it declares, and where badges are read
+
+- **A tree gates the code it holds against the failure that code has**
+  (issue #301): section 8 opens with that rule, so the coverage floor is
+  what a package that installs is measured by rather than the whole of
+  what the section says — course material is measured by whether it
+  still runs on the dependencies pinned today, and a suite whose subject
+  is outside its own tree is itself the gate. The title stays
+  `Coverage at 100%`: this tree's own `REPOSITORY.md` reaches the
+  section by that anchor and `links.yml` passes `--include-fragments`,
+  so a retitle is red here.
+- **A repository declares `pypi` and `testpypi` where it publishes and
+  no environment besides** (closes #575): section 11 gives the endpoint
+  that finds anything else, and names `github-pages` as GitHub's own,
+  created by enabling Pages — so it is outside the rule and outside
+  `REPOSITORY.md`, which would otherwise read back a value nobody here
+  can set. The alternatives rejected are saying nothing, which after the
+  scope port has each copy's silence assert that whatever is there is
+  fine, and recording whatever a repository holds, which legitimises a
+  stray environment by writing it down.
+- **`deps-oldest` is `deps-latest`'s mirror, on Thursday at `03`**
+  (issue #323): `uv lock --resolution lowest-direct` on the oldest
+  interpreter alone, which verifies the claim a floor makes to whoever
+  installs — `requires-python` and the dependency specifiers, in the one
+  cell that holds both. The row is owed by the trees that build a
+  distribution, and section 10 has the row land before the workflows do,
+  so `test_every_row_of_the_calendar_names_something_that_exists` is red
+  until the first tree schedules it. Verifying at release time instead
+  is the rejected alternative: it reaches only the trees that publish,
+  and it puts the red at the moment a release is cut.
+- **Which trees owe the OpenSSF Best Practices badge is section 10's
+  `scorecard` entry** (issue #350): `CII-Best-Practices` is the check
+  that reads the questionnaire, so the trees the sentinel runs in are
+  the trees to register, and registering one that runs no Scorecard is
+  attestation work nothing reads. Section 2's badge bullet is keyed on
+  that entry rather than on holding the registration, and section 10
+  names btclib-org/.github#350 as what carries the registrations
+  outstanding. What it costs is a second home per tree for facts this
+  file already states, so a change to any of them owes a pass over the
+  questionnaires.
+- **The `test` badge is keyed on the workflow rather than on holding a
+  suite** (issue #500): a tree that runs its suite inside another
+  workflow carries no `test` badge, and what goes red when the suite
+  falls is the badge of the workflow that ran it — this repository being
+  that tree, its suite running inside `alignment.yml`. Splitting the
+  property as *builds documentation* and *served by Read the Docs* are
+  split is the rejected alternative: there the two badges answer for a
+  build and a subscription, where here they would be one workflow's
+  status under two names.
+- **`.readthedocs.yaml` is in every tree that builds `docs/`, so the
+  tree cannot be read for the *served by Read the Docs* property**:
+  section 2 says the membership is read from each tree's own
+  `REPOSITORY.md`, a subscription being a setting outside the tree
+  rather than a membership the organization decides, and
+  `btclib-benchmarks` is where that absence reads as a decision.
