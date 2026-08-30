@@ -4466,3 +4466,26 @@ audit has no revision to compare against.
   section 2 giving that repository a row, and saying its row is measured
   like the others. Naming the scope leaves the sentence true wherever
   the entry sits.
+
+### Section 7 states how a fuzzer stands to the property layer, once
+
+- **Section 7's *Property tests* carries the statement and section 10's
+  `fuzz` bullet points at it rather than restating it** (closes #594):
+  the two copies claimed different things — section 7's that a fuzzer
+  presupposes the property layer, section 10's that neither substitutes
+  for the other — which is section 9's *One fact in one place* failing
+  rather than being risked. The surviving sentence carries both claims,
+  since keeping only one resolves the duplication by losing half a fact.
+- **Section 7 is the copy that stays, because the distinction is what
+  the property layer is specified against** (closes #594): a reader of
+  the `fuzz` bullet arrives asking whether the tree owes the sentinel,
+  which that bullet's keying property answers, where a reader of section
+  7 arrives deciding whether to write the layer at all. The `fuzz` bullet
+  keeps its own examples — a length prefix larger than the buffer, a
+  truncated multibyte sequence, a varint that overflows, a recursion
+  depth that exhausts the stack — those being about the sentinel rather
+  than about the ordering of the two layers.
+- **The pointer names *Property tests* and speaks for that layer alone**
+  (closes #594): section 10's sentence took in section 7's convention
+  tests beside the property tests, a widening the surviving sentence
+  does not make.

@@ -1923,12 +1923,13 @@ sentinel. The rejected alternative keys the layer on the record instead,
 and what it costs is a tree getting the cheap half only by being given
 the expensive one: a property layer is code in the suite that runs with
 everything else, where a fuzzer is a scheduled runner with a harness and
-a corpus. The two answer different questions: a property test answers
-*does this hold over the domain I described*, a fuzzer answers *what is
-in the domain I did not describe* — and the second presupposes the
-first, a fuzzer extending no described domain having nothing to
-contradict. hypothesis is the named shape, its profiles registered once
-in `tests/conftest.py` rather than repeated on every `@given`:
+a corpus. The two answer different questions and neither substitutes for
+the other: a property test answers *does this hold over the domain I
+described*, a fuzzer answers *what is in the domain I did not describe*
+— and the second presupposes the first, a fuzzer extending no described
+domain having nothing to contradict. hypothesis is the named shape, its
+profiles registered once in `tests/conftest.py` rather than repeated on
+every `@given`:
 
 ```python
 settings.register_profile("default", deadline=None, max_examples=500)
@@ -2880,15 +2881,13 @@ its entry gains the tree when the workflow and the badge land together.
   these bindings — decides what the sentinel would be run for, and
   btclib-org/.github#342 is where that is decided. An entry taken before
   that answer schedules a weekly run against a target nobody has agreed
-  is this project's to write. Section 7's convention tests and the
-  property tests beside them answer *does this hold over the domain I
-  described*; a fuzzer answers *what is in the domain I did not
-  describe* — a length prefix larger than the buffer, a truncated
-  multibyte sequence, a varint that overflows, a recursion depth that
-  exhausts the stack — so neither substitutes for the other and the
-  second is the one that finds the crash before somebody else does.
-  A crash the sentinel finds is an issue against the parser
-  and never a suppression, that being the whole of what it was run for.
+  is this project's to write. Section 7's *Property tests* has how a
+  fuzzer and the property layer stand to each other. What a fuzzer turns
+  up is a length prefix larger than the buffer, a truncated multibyte
+  sequence, a varint that overflows, a recursion depth that exhausts the
+  stack — found by the sentinel rather than by somebody else. A crash
+  the sentinel finds is an issue against the parser and never a
+  suppression, that being the whole of what it was run for.
   The regression that crash becomes is the suite's and not the
   sentinel's: an ordinary test, naming the input and what the parser is
   now expected to do with it — which is usually to refuse it in the
