@@ -4519,3 +4519,21 @@ audit has no revision to compare against.
   file's own parts is narrower and is reachable. `merge=union` is why
   the rule wants a test rather than a reading: the same paragraph edited
   on two branches merges without a conflict.
+
+### Section 7 points at section 10's `fuzz` entry for the keying property
+
+- **Section 7's *Property tests* names the property its layer is keyed
+  on and no longer glosses it** (closes #650): the gloss was a second
+  statement of the criterion, and the two were already apart in their
+  words — section 7's *its parser* against section 10's *the parser* —
+  where section 9's *One fact in one place* asks for one statement and a
+  pointer. Section 10's is the statement that keeps the discrimination,
+  that the property is not merely input the tree does not produce.
+- **What tells a restatement from a pointer's own apposition is whether
+  the clause carries the criterion**: section 1's `fuzz` group and
+  section 14's *Decided per repository* each name what section 10 keys
+  the sentinel on without stating it, so neither can come to disagree
+  with the entry; section 7's gloss carried the criterion itself.
+- **The pointer names the `fuzz` entry rather than the section**, the
+  gloss having been what spared the reader the jump: what is left has to
+  land where the property is stated rather than at a section's head.
