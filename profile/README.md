@@ -2,7 +2,7 @@
 
 Bitcoin cryptography in Python, written to be read.
 
-[btclib](https://btclib.org) is a Python3
+[btclib](https://btclib.readthedocs.io/) is a Python3
 [type annotated](https://docs.python.org/3/library/typing.html) library
 intended for teaching, learning and using bitcoin, focused on elliptic
 curve cryptography and bitcoin's blockchain. It began as a teaching tool
@@ -58,9 +58,13 @@ they say that too.
   and Electrum on a portable external disk, shared between macOS, Windows
   and Linux.
 - **[.github](https://github.com/btclib-org/.github)** — this page, and
-  the standard the repositories above are built and kept to. Its issue
-  tracker is where a repository's drift from that standard is filed,
-  since a divergence between two repositories belongs to neither.
+  the standard every repository of the organization is built and kept
+  to. Its issue tracker is where a repository's drift from that standard
+  is filed, since a divergence between two repositories belongs to
+  neither.
+- **[btclib-org.github.io](https://github.com/btclib-org/btclib-org.github.io)**
+  — the organization site: this page, served at btclib.org from a copy
+  generated out of the repository above.
 
 ## Answering to somebody else's vectors
 
