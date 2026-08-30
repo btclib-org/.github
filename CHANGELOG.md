@@ -3956,3 +3956,30 @@ audit has no revision to compare against.
 - **`[tool.uv] required-version` rises to the ceiling Dependabot's
   bundled uv sets** (issue #448), `0.12.5` by section 15's command at
   the writing; the sibling floors the issue names are their own trees'.
+
+### A reused gate declines to aggregate, on an input its caller passes
+
+- **A gate `release.yml` reuses through `workflow_call` skips its
+  aggregate, on a boolean `workflow_call` input the calling job passes**
+  (issue #474): section 10 named the constraint and left the mechanism
+  open, and the mechanism is an input because nothing else in a called
+  run says it is one — `github.event_name` is the caller's event, which
+  the `changes` job of the workflow `btclib-org/btclib`'s dispatched run
+  `32458459305` called printed as `workflow_dispatch`, and
+  `github.workflow` is the caller's name. What gates the release in that
+  run is the caller's own `needs:` on the calling job, which the
+  publishing jobs already name: `bitcoin-core-rpc`'s run `33236701141`
+  is a release whose called platform workflows had failing cells and
+  whose every publishing job reports `skipped`.
+- **Running the aggregate anyway is the alternative refused first**
+  (issue #474): the listing it would read is the caller's, and the
+  caller's publishing jobs are unfinished exactly because they wait on
+  the aggregate, so the one unfinished row the shape requires can never
+  be the aggregate itself. Reading `needs.*.result` where the listing is
+  not the workflow's own is refused for the reason section 10 already
+  gives, btclib-org/btclib#1001.
+- **What runs the mechanism is the first port and not this entry**
+  (issue #474): the tree that proves it is one whose `release.yml` calls
+  a `test.yml` carrying an aggregate, `bitcoin-core-rpc`, and the two
+  observations are `test: every job passed` reported on that tree's own
+  pull request and skipped in a release run.
