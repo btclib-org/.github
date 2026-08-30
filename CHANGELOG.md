@@ -4310,3 +4310,20 @@ audit has no revision to compare against.
 - **`EXPECTED_DRIFT` no longer names `CONTRIBUTING.md`** (closes #281):
   every tree carries the shared half as this one has it, and
   `tests/verbatim_test.py`'s own cut of it hashes the same in each.
+
+### The suite reads section 10's sentinel record in both directions
+
+- **Section 10's *Which trees carry which sentinel* is read as data and
+  asked of every tree** (closes #494): `tests/grid_test.py` reads each
+  entry's trees off the record — `subjects` in `tests/__init__.py`
+  reading a bullet whole where it wraps, which the entries do — and
+  compares them with the workflows a checkout holds, one cell per
+  repository, short and unnamed alike; a second test holds the record to
+  one entry per calendar row, in the order section 10 says. What a tree
+  is short of is that tree's, as section 10 says beside the record, so
+  the red cells are `BACKLOG` rows keyed on the issues carrying them:
+  `deps-oldest` (issue #323), `sdist-rebuild` (issue #523), the site's
+  `links` (issue #597), and `os-windows` in `btclib-node` (issue #618),
+  where the tree dropped the sentinel for a gate cell and the record has
+  not said whether it follows. The badge half stays a reader's catch:
+  the badge is section 2's, and no fixture holds a tree's `README.md`.

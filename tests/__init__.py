@@ -54,7 +54,9 @@ shared is these parts:
   are the same table rather than two copies of it: the file is the
   source, `rows` is how the suite reads it. A row added there is
   checked from the moment it is added, and a row nobody maintains
-  fails against the trees instead of going quietly stale.
+  fails against the trees instead of going quietly stale. A list of
+  that file is read the same way, `subjects` being how: section 10's
+  record of which trees carry which sentinel and section 14's paths.
 """
 
 from __future__ import annotations
@@ -262,6 +264,41 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "portanode",
         ),
     ),
+    # deps-oldest: every tree its entry names is short of the workflow
+    (
+        323,
+        "test_a_tree_carries_the_sentinels_its_entries_give_it",
+        (
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-benchmarks",
+            "btclib-node",
+            "btclib-secp256k1",
+        ),
+    ),
+    # sdist-rebuild: the row landed ahead of the trees it names
+    (
+        523,
+        "test_a_tree_carries_the_sentinels_its_entries_give_it",
+        (
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-secp256k1",
+        ),
+    ),
+    # links: the site has no links.yml, and the entry names every tree
+    (
+        597,
+        "test_a_tree_carries_the_sentinels_its_entries_give_it",
+        ("btclib-org.github.io",),
+    ),
+    # os-windows: the tree dropped the sentinel for a gate cell, and
+    # whether the entry follows it is section 10's decision
+    (
+        618,
+        "test_a_tree_carries_the_sentinels_its_entries_give_it",
+        ("btclib-node",),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
@@ -332,8 +369,7 @@ SUBJECT = re.compile(r"^- `([^`]+)` — (.+)")
 
 The backticks and the spaced em dash are the shape, and a bullet written
 any other way is one this cannot answer for. What follows the dash is
-the rest of that line, for a caller reading the clause the bullet opens
-with.
+the rest of the bullet, for a caller reading the clause it opens with.
 """
 
 
@@ -418,8 +454,8 @@ def subjects(document: Path, opening: str, closing: str) -> dict[str, str]:
     :param document: the markdown file to read.
     :param opening: a substring of the line the list follows.
     :param closing: a substring of the line the list stops at.
-    :returns: each subject against the rest of its bullet's first line,
-        in the order the list gives them.
+    :returns: each subject against the rest of its bullet, the lines it
+        wraps over joined by a space, in the order the list gives them.
     :raises LookupError: where either end is not found exactly once, the
         closing line comes first, a bullet between them has no backticked
         subject, or two bullets carry the same one.
@@ -430,16 +466,22 @@ def subjects(document: Path, opening: str, closing: str) -> dict[str, str]:
     if end < start:
         msg = f"{document.name} holds {closing!r} before {opening!r}"
         raise LookupError(msg)
+    # a bullet is its own line and every indented line after it, which
+    # is how a bullet wraps at the margin
+    bullets: list[str] = []
+    for line in lines[start + 1 : end]:
+        if line.startswith("- "):
+            bullets.append(line)
+        elif line.startswith("  ") and bullets:
+            bullets[-1] += " " + line.strip()
     read: list[tuple[str, str]] = []
     unread: list[str] = []
-    for line in lines[start + 1 : end]:
-        if not line.startswith("- "):
-            continue
-        found = SUBJECT.match(line)
+    for bullet in bullets:
+        found = SUBJECT.match(bullet)
         if found:
             read.append((found.group(1), found.group(2)))
         else:
-            unread.append(line)
+            unread.append(bullet)
     out = dict(read)
     if unread or not out or len(out) != len(read):
         msg = (
