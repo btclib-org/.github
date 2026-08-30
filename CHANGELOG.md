@@ -4327,3 +4327,10 @@ audit has no revision to compare against.
   where the tree dropped the sentinel for a gate cell and the record has
   not said whether it follows. The badge half stays a reader's catch:
   the badge is section 2's, and no fixture holds a tree's `README.md`.
+
+### This tree's badge row carries the qualifier section 2 asks of it
+
+- **Every workflow-status badge at the head of `README.md` carries
+  `?branch=main`** (issue #579): `lint`, `links` and `alignment` answer
+  for `main` or answer `no status`, where the unqualified badge falls
+  back to another branch's run when `main` has none.

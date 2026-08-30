@@ -15,9 +15,9 @@ publishing or on a documentation build, this tree doing neither. One
 badge per line keeps a change to one line and every line inside MD013,
 whose 80 columns bind only where a space follows them. -->
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/btclib-org/.github/main.svg)](https://results.pre-commit.ci/latest/github/btclib-org/.github/main)
-[![lint workflow status](https://github.com/btclib-org/.github/actions/workflows/lint.yml/badge.svg)](https://github.com/btclib-org/.github/actions/workflows/lint.yml)
-[![links workflow status](https://github.com/btclib-org/.github/actions/workflows/links.yml/badge.svg)](https://github.com/btclib-org/.github/actions/workflows/links.yml)
-[![alignment workflow status](https://github.com/btclib-org/.github/actions/workflows/alignment.yml/badge.svg)](https://github.com/btclib-org/.github/actions/workflows/alignment.yml)
+[![lint workflow status](https://github.com/btclib-org/.github/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/btclib-org/.github/actions/workflows/lint.yml)
+[![links workflow status](https://github.com/btclib-org/.github/actions/workflows/links.yml/badge.svg?branch=main)](https://github.com/btclib-org/.github/actions/workflows/links.yml)
+[![alignment workflow status](https://github.com/btclib-org/.github/actions/workflows/alignment.yml/badge.svg?branch=main)](https://github.com/btclib-org/.github/actions/workflows/alignment.yml)
 
 **This repository keeps the standards the btclib-org projects have in
 common: it states them, and it is where they are kept true.** The
