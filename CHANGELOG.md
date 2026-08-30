@@ -4156,3 +4156,32 @@ audit has no revision to compare against.
   another lacks is that disagreement. Which URL it is — the tree's own
   site rather than a sibling's, or on which host — is not asked,
   section 3 naming no host and no shape for the site.
+
+### Section 7 keys the property layer, and section 10 loses an example
+
+- **A tree owes section 7's property layer because bytes an adversary
+  chose reach its parser, not because section 10's record gives it the
+  fuzzer** (issue #426): the two cost differently — a property layer is
+  code in the suite that runs with everything else, where a fuzzer is a
+  scheduled runner with a harness and a corpus — so keying the cheap one
+  on membership in the expensive one lets a tree obtain the first only
+  by being given the second. Keying it on the record is the rejected
+  alternative.
+- **`btclib-secp256k1` has the property and no entry, and the reason
+  stands beside the absence** (issue #342): whether a target there may
+  reach the vendored C library at all — which would be fuzzing
+  upstream's work rather than these bindings — decides what the sentinel
+  would be run for, and that is undecided, so an entry taken now
+  schedules a weekly run against a target nobody has agreed is this
+  project's to write. The membership record is untouched: giving `fuzz`
+  a fourth tree is a decision to take on its own evidence rather than
+  one to arrive at by making two sentences agree.
+- **Section 10 states what a sentinel's own work costs a pull request
+  rather than instancing it** (closes #471): what a pull request charges
+  is the wait, and a sentinel's length is what makes its work worth
+  anything, so a trigger firing `fuzz` on a pull request charges the
+  whole of a sentinel's run for a verdict no merge waits on. The
+  rejected alternative is a replacement example: `fuzz.yml` runs on the
+  calendar and on a dispatch in both trees the record names, so an
+  example of a sentinel charging a pull request for its own work would
+  come out of history, which section 9 keeps in two files of its own.
