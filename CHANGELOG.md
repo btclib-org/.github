@@ -4310,3 +4310,33 @@ audit has no revision to compare against.
 - **`EXPECTED_DRIFT` no longer names `CONTRIBUTING.md`** (closes #281):
   every tree carries the shared half as this one has it, and
   `tests/verbatim_test.py`'s own cut of it hashes the same in each.
+
+### Two trees have landed the scope port and leave the row behind
+
+- **`BACKLOG`'s 551 row excused `btclib` and `btclib-node` from a test
+  they now pass** (issue #551): each landed the `REPOSITORY.md` scope
+  port, so `test_the_settings_file_does_not_claim_to_be_the_whole_of_them`
+  succeeds there, and the row's `xfail(strict=True)` turns that success
+  into a failure here with nothing in this tree having changed. That is
+  the mechanism working — an exemption that outlives its cause is meant
+  to be noticed rather than left to rot — and the row is what expires,
+  not the test.
+- **The row is reduced rather than deleted**, `portanode` being the one
+  copy still opening with the claim the standard rejects.
+  Measured on each tree's `main`, flattening with `tr` first so that a copy
+  wrapping the sentence would answer too, and counting with
+  `grep -o | wc -l` because `grep -c` counts lines and answers `1` for two
+  occurrences on a flattened file:
+
+  ```shell
+  gh api "repos/btclib-org/<repo>/contents/REPOSITORY.md?ref=main" \
+    -H "Accept: application/vnd.github.raw" | tr '\n' ' ' \
+    | grep -o 'this file is the whole of them' | wc -l
+  ```
+
+  `portanode` answers 1 and every other tree 0. The probe is the claim
+  section 11 names verbatim, which is what `scope_test.py` reads off
+  that line and asserts; the looser substring `whole of them` answers 1
+  for `btclib` and for `bitcoin-core-rpc`, `## Security settings` opening
+  with a bounded claim of its own — `this list is the whole of them` —
+  that they keep on purpose.

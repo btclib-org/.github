@@ -238,11 +238,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         551,
         "test_the_settings_file_does_not_claim_to_be_the_whole_of_them",
-        (
-            "btclib",
-            "btclib-node",
-            "portanode",
-        ),
+        ("portanode",),
     ),
     (
         565,
