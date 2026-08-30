@@ -76,6 +76,14 @@ version = "0"
 source = { virtual = "." }
 
 [package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "pyyaml" },
+    { name = "trove-classifiers" },
+    { name = "types-pyyaml" },
+]
 lint = [
     { name = "mypy" },
     { name = "pre-commit" },
@@ -90,6 +98,14 @@ test = [
 [package.metadata]
 
 [package.metadata.requires-dev]
+dev = [
+    { name = "mypy" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "pyyaml" },
+    { name = "trove-classifiers" },
+    { name = "types-pyyaml" },
+]
 lint = [
     { name = "mypy" },
     { name = "pre-commit" },

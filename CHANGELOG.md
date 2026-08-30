@@ -3934,3 +3934,25 @@ audit has no revision to compare against.
 - **The header sentence a `check_vendored_vectors.py` copy owes names
   the siblings of that name** (issue #446), the singular it carried
   having presumed exactly one other copy.
+
+### `dev` reaches every group here, and the uv floor sits at the ceiling
+
+- **`pyproject.toml` declared `test` and `lint` and no `dev`** (closes
+  #552): section 1's row makes `dev` every group the tree declares and
+  the default of `uv sync`, and section 2 measures this tree's own row
+  the way it measures the others. `dev` now includes both groups, so
+  one sync installs what any command here runs.
+- **The `--no-default-groups` call sites keep the flag**, `alignment.yml`'s
+  pytest step and the mypy hook: each installs the groups it names,
+  unmoved by what `dev` includes, and the hook's command is the one
+  section 4 spells out. The alternative weighed and declined drops the
+  flag now that `dev` covers the same groups: it saves a word, and makes
+  each environment follow `dev` wherever it goes next.
+- **`CLAUDE.md` said a bare `uv run pytest` exits 0 with everything
+  skipped, and in a worktree with no `.venv` it failed to spawn pytest**
+  (closes #545): nothing installed the `test` group. With `dev` as uv's
+  default the run syncs, collects and skips, and the bullet now says so,
+  `BTCLIB_INTEGRATION=1` being what a measuring run still needs.
+- **`[tool.uv] required-version` rises to the ceiling Dependabot's
+  bundled uv sets** (issue #448), `0.12.5` by section 15's command at
+  the writing; the sibling floors the issue names are their own trees'.
