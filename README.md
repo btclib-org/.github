@@ -2288,6 +2288,17 @@ sight rather than weighed.
   lands in the pull request's own concurrency group and cancels the run
   still holding it. Draft and closed pull requests decline the work in an
   `if`.
+- **A workflow whose concurrency group sets `cancel-in-progress: false`
+  omits `closed`, and says beside its trigger that it does.** The type
+  is there for the cancellation, so where nothing is cancelled a closed
+  event supersedes no run and starts one: the `if` above then declines
+  that run in every job, which is a workflow scheduled in order to do
+  nothing. Such a workflow's `if` guards the draft alone, the event it
+  would otherwise decline being one it no longer receives. The rejected
+  alternative keeps the list flat and leaves the `if` to absorb the
+  event, which reads the same in every tree and costs a run per close,
+  with the reason the type is inert stated nowhere the trigger block
+  shows.
 - **`paths-ignore` only on `push`.** The same list on `pull_request`
   would produce no run at all for a prose-only diff, and a required check
   that produces no run blocks the merge instead of passing it.
@@ -2563,6 +2574,19 @@ Verifying at release time instead — a `lowest-direct` step in
 that publish, where a tree that releases nothing declares floors too,
 and it puts the red at the moment a release is being cut, over a drift
 that happened months earlier and has nothing to do with the release.
+
+`links` runs lychee with `--include-fragments`, so a link into a
+heading is checked as an anchor and not only as a page. A tree cites
+another tree's headings by anchor — this file's sections most of all,
+which the `CONTRIBUTING.md` of every repository links into — and the
+forge serves a page whose fragment resolves to nothing rather than
+answering 404, so a heading renamed here breaks those links with
+nothing red in the tree that renamed it. The run that would notice is
+therefore the linking tree's, which is why the flag belongs in every
+`links.yml` and not in this repository's alone; `tests/links_test.py`
+asks each tree's lychee step for it. The rejected alternative has a
+tree check only the anchors of its own headings, which measures the
+file a rename lands in and never the links pointing at it.
 
 **A sentinel's row arrives with the workflow, and one pull request can
 do both only where the first tree is this one.** `tests/grid_test.py`
