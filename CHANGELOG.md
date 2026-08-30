@@ -4413,3 +4413,28 @@ audit has no revision to compare against.
   pointer inside parentheses with nothing before the number is what
   *Nothing already written is rewritten* keeps, so a pattern over the
   file matches one of those as readily as a citation.
+
+### The .gitattributes comment names the driver's sides and one anchor
+
+- **`union` keeps `ours` first and then `theirs`, and the base's own
+  lines stay where they are** (issue #520): the comment said the added
+  lines were kept "in the order base-then-ours", which names no order
+  between the two sides — the fact the position of an entry turns on. A
+  scratch repository with `CHANGELOG.md merge=union` and two branches
+  each writing an entry answers with the `ours` line above the `theirs`
+  line, in a merge and in a rebase alike and wherever the base's own
+  line sits. Which side is which is the operation's: the branch checked
+  out when merging, the upstream when rebasing.
+- **The premise is an entry arriving at one anchor, not a bullet
+  appended to one of a few groups** (issue #643): a `###` names one
+  entry, so the open section is the list of its entries and there are no
+  groups to append to, and what the driver resolves is two branches
+  writing an entry at the one place section 9 sends it.
+- **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` names `.gitattributes`
+  against btclib-org/.github#646** (issue #520, issue #643): a comment
+  section 14 owes verbatim makes this tree's edit a drift the comparison
+  reports, and an entry there excuses that path while every other
+  verbatim file stays compared — where a `BACKLOG` row would excuse the
+  whole test. Carrying the comment to the repositories that lag is what
+  closes both issues, which is why this landing cites them without
+  closing either.
