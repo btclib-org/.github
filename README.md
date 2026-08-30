@@ -3271,19 +3271,58 @@ still — where a commit whose own pull request closes the issue through
 its body records `referenced` whether the keyword bound or not, and
 proves neither. In both, a newline separates the verb from the number —
 and that a newline alone breaks the binding, in a keyword meant to fire,
-is btclib-org/.github#420's subject. The measurement is there rather
-than here: the pull request it was taken on was corrected before it
-merged, so the forge no longer answers what it answered then.
+is btclib-org/.github#420's subject.
 
-**The keyword and its reference share a physical line, and a block of
-several is written one keyword per line.** This section asks each issue
-for its own verb and section 9 wraps prose at eighty columns; a body
-that follows both as one long line loses precisely the keywords the
-wrap splits, every one of them individually well-formed, the text
-reading correctly to a person and only the API answering short. One
-keyword per line is the shape a wrapper cannot split, and no formatter
-is let reflow the block. What catches a loss is counting the
-registrations against the number intended:
+**Two parsers read a closing keyword, and a newline is where they part.**
+One answers `closingIssuesReferences` and reads the pull request's
+description; the other closes on a push and reads the message that
+landed. A physical line is what the first requires, and #420's
+measurement is of that one. It is not reproducible, the pull request it
+was taken on having been corrected before it merged, and what stands in
+its place is a pair of negations, read on 2026-08-30:
+`btclib-org/.github#510` says `does not close #466` on one line, its
+only mention of that issue, and `closingIssuesReferences` names it;
+`btclib-org/bitcoin-core-rpc#182` says the same negation at the end of
+a line with `btclib-org/btclib#1157` beginning the next, and the same
+read answers empty. The two differ in the reference form as well as in
+the newline, and the sweep below is what controls for that: its
+adjacent hits carry the bare and the qualified form alike and are
+parsed alike, so the newline is what is left between the pair. The most
+recent pull requests of every repository in the organization are asked
+the same question:
+
+```shell
+gh pr list --repo <org>/<repo> --state all --limit 200 \
+  --json number,body,closingIssuesReferences
+```
+
+— the verbs reaching a reference on one line being the positive control,
+without which the absence of the others measures nothing.
+
+**The second parser crosses the newline, and a `closed` event's commit
+id is what says so.** That field carries a sha where the push closed the
+issue and null where the description did:
+`btclib-org/btclib-secp256k1#366` names `btclib-org/.github#81` with no
+verb anywhere in its description and `closingIssuesReferences` empty,
+and the close of #81 carries `592f1bc`; `btclib-org/.github#504`'s
+squash message carries no keyword at all, its description closes #477,
+and that close carries no sha. So `btclib-org/btclib`'s `825c74e2` is
+the measurement of the second parser on a newline: it writes `closes` at
+the end of a line and `btclib-org/.github#402`, its only occurrence, at
+the start of the next, and the close of #402 names that sha. Where both
+parsers could fire, the event records whichever did, so a null there
+says nothing against it.
+
+**So the keyword and its reference share a physical line, and a block of
+several is written one keyword per line.** That is the description
+parser's requirement stated where a wrapper can break it rather than a
+second rule: this section asks each issue for its own verb and section 9
+wraps prose at eighty columns, and a body that follows both as one long
+line loses precisely the keywords the wrap splits, every one of them
+individually well-formed, the text reading correctly to a person and
+only the API answering short. One keyword per line is the shape a wrapper cannot
+split, and no formatter is let reflow the block. What catches a loss is
+counting the registrations against the number intended:
 
 ```shell
 gh pr view <n> --json closingIssuesReferences \
@@ -3418,7 +3457,10 @@ run over the branch before it is opened, against the same expectation:
 every hit outside the title's own `(closes #N)` parentheses is the
 finding, and a number the title carries that the scan does not find is
 a closing keyword the title declares that the branch's own words never
-state.
+state. Its separator is `\s`, which crosses a newline, because the
+parser this text will meet is the one that reads a landed message: a
+space or a tab would miss the shape `825c74e2` closed an issue with,
+which is the shape this scan exists to catch.
 
 ### Review
 
@@ -3585,9 +3627,43 @@ summary says so in those words, that it was not run: a hand trace is
 the author's reading performed a second time, and it can carry a
 finding but not an ack.
 
-**A correction is a commit of its own, never an amend.** A force-push
-replaces the commits the review is attached to. The one force-push that
-stays right is a rebase carrying no new work.
+**What a force-push costs is the review attached to the sha it
+replaces**, a bot's included, and whether there is one is read before the
+push rather than remembered:
+
+```shell
+gh pr list --repo <org>/<repo> --state open --head <branch> --json number
+gh api repos/<org>/<repo>/pulls/<n>/reviews \
+  --jq '.[] | "\(.user.login) \(.state) \(.commit_id[0:8])"'
+```
+
+`reviews` is the endpoint that answers, and `pulls/<n>/comments` is the
+one that reads as an absence: it counts inline review comments, so a
+review carrying none answers zero there and one here. The first command
+finding no pull request is the rule's own limit — a reading taken before
+one exists is attached to nothing, and no push can orphan it.
+
+**A pull request that exists leaves no window.** `sourcery-ai[bot]`
+submits against the head within seconds of one opening — `created_at` on
+the pull request against `submitted_at` on the review, read on
+2026-08-30 — so a push following the open has no interval in which
+nothing is attached yet. That is not the same as every pull request
+carrying one, which is why what decides is the read and not the timing.
+What carries the correction does not reach this either: an amend and a
+commit of its own both move the head, and a review describes the sha it
+names rather than the branch. What the read buys is that a review left
+pinned to the replaced sha is known to be stale rather than taken for a
+reading of the head, and *A green check is an ack of the head* above is
+what shows it. The one force-push that stays right is a rebase carrying
+no new work.
+
+**The rejected alternative is an ordering rule**: open the pull request
+only once a reading has cleared the sha, so that no push ever follows a
+review. It needs no read at all, and what it costs is being a rule about
+what a session remembers per branch — the weaker kind, for the reason
+*What a pull request says it is* gives above — where a session holding
+several branches at once has nothing telling it which of them is already
+open. The commands above are that same rule as a check that runs.
 
 #### The workflow, and what a port of it has to adapt
 
