@@ -4264,3 +4264,27 @@ audit has no revision to compare against.
   sibling reads the claim. `portanode`'s copy has no such section and is
   a strict expected failure keyed on the issue, its row expiring with
   the port that gives the copy the section.
+
+### This tree's head carries the row section 2 owes it, and its suite declares itself
+
+- **`README.md` opens with the badge row section 2 reads off this tree**
+  (closes #357): pre-commit.ci and `lint`, then `links` and `alignment`
+  in section 10's calendar order, in the form every other repository's
+  head takes. No `test` badge, the suite running inside `alignment.yml`
+  and section 2 giving a suite's badge to the workflow that runs it; no
+  licence badge, that being tier 1's; no Scorecard badge, the record not
+  naming this tree. Whether a workflow badge carries `?branch=main` is
+  #579's question, and it reaches this row as it reaches every other.
+- **`tests/README.md` declares which of section 7's conventions this
+  suite tests, and what of that section has no subject here** (closes
+  #357): none of the bullets, this tree shipping no package for one to
+  walk, and one sentence beside each rule of the section the suite takes
+  or declines, with the reason.
+- **`pytest-randomly` joins the `test` group** (issue #428), section 7's
+  default taken rather than declined: what it guards here is the session
+  fixtures every test reads after one fetch, where a test that mutated
+  what it read would pass or fail by order and nothing else in the suite
+  would notice. The rejected alternative declares the decline in
+  `tests/README.md` on the ground that the fetched answers are read once
+  and never changed -- which nothing enforces, and which the shuffle is
+  what would notice the day it stops being true.
