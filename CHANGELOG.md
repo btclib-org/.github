@@ -4368,3 +4368,13 @@ audit has no revision to compare against.
   does not name is asked nothing by that row, so the analysis is off by
   a decision taken once for the organization — in place of a reason that
   narrated the file and a question left open with nothing behind it.
+
+### The backlog row for the fragment flag is gone
+
+- **`tests/__init__.py`'s `BACKLOG` row for
+  `test_lychee_checks_a_link_into_a_heading` is deleted rather than
+  narrowed** (issue #583): every tree the row named passes
+  `--include-fragments` to lychee, so each cell passes without the
+  strict expected failure, which turns that success into a failure here.
+  The issue is closed by the last of those ports, in
+  `btclib-org/portanode`, so this landing cites it without closing it.
