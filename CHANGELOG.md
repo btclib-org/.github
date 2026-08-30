@@ -4489,3 +4489,33 @@ audit has no revision to compare against.
   (closes #594): section 10's sentence took in section 7's convention
   tests beside the property tests, a widening the surviving sentence
   does not make.
+
+### The suite asserts its own convention declaration, and tests the changelog
+
+- **`tests/README.md`'s declaration of which of section 7's conventions
+  this repository tests is asserted by a test in the same suite**
+  (closes #615): `conventions_test.py` asks that the declaration's table
+  and its *Not tested here* line account for each of section 7's
+  conventions once, that a module named there is a file, and that the
+  file holds a test.
+- **Section 7's conventions are read off `README.md` rather than
+  transcribed into the suite** (closes #615): a sibling suite holds a
+  copy because its standard is in another repository, and here the
+  standard and the declaration are the same commit, so a copy would be
+  the one that goes stale — a bullet added to section 7 would land with
+  nothing to notice that neither half of the declaration accounts for
+  it.
+- **`subjects` takes the pattern by which a list names its subjects**
+  (closes #615): section 7 emphasises its bullet leads where the lists
+  this suite already reads quote theirs as code, so the shape is the
+  caller's to pass and there is one reader of a bulleted list rather
+  than two.
+- **`CHANGELOG.md` states no count of itself, and a test says so**
+  (closes #616): `changelog_test.py` reads a history file for a count of
+  its own entries or bullets, and tells that from a count of something
+  else by whether a possessive in front of the count gives what it
+  counts an owner. Section 11 says a count is not reachable by a
+  pattern, which is a rule about counts of anything; a count of the
+  file's own parts is narrower and is reachable. `merge=union` is why
+  the rule wants a test rather than a reading: the same paragraph edited
+  on two branches merges without a conflict.
