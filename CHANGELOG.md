@@ -4557,3 +4557,27 @@ audit has no revision to compare against.
   subject is this tree waits on nothing outside its own process, and
   what carries the conclusion is that a test asking about another
   repository waits on the fetching, which is where the wall clock goes.
+
+### A paste of section 15's metadata block reaches nothing that writes
+
+- **The block's lines chain with `&&`** (closes #619): the first holds
+  bare placeholders, which the shell reads as redirections and refuses
+  — a redirection error and not a parse error, so unchained the lines
+  below it run, and the last of them runs `uv build --sdist`, which
+  writes into a `dist/` of the directory it runs in. Chained, a paste
+  made before the placeholders are filled runs no command at all, in
+  `zsh`, `bash` and `sh` alike. What the block asks is unchanged: the
+  repository's topics against `pyproject.toml`'s `keywords`, and
+  `twine check` on the sdist's metadata.
+- **Section 9 carries the rule** (closes #619), governing every document
+  here rather than section 15 alone, and it turns on what follows a
+  placeholder on its own line. A word after it leaves `>` a target, so
+  the line fails at run time and a trailing `&&` short-circuits the rest
+  — a guard resting on the reader's directory rather than on the line,
+  since a file of the placeholder's own name sitting there lets the `<`
+  succeed and the line run. A placeholder ending the line leaves `>`
+  nothing to open, and an interactive shell discards that line together
+  with its `&&` and reads the next as a fresh command, so the chain
+  never forms and a write below it runs. The chain guards the first
+  case, and the second is left the fence of its own for the writing line
+  that the first rejects.

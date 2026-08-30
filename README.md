@@ -2169,6 +2169,26 @@ sight rather than weighed.
   and never state how many of anything a file holds: a stated total is a
   line every open branch has to edit, and two branches moving it to the
   same wrong number merge without a conflict.
+- **A block whose placeholders sit above a line that writes is guarded
+  by what follows the placeholder on its own line.** `<` and `>` are the
+  shell's redirection operators, so a paste made before a placeholder is
+  filled in fails on the line holding it, and which of two failures it
+  is decides what guards the lines below. Where a word follows the
+  placeholder, `>` has a target and the line fails at run time on the
+  `<` — `no such file or directory: org` — so a trailing `&&`
+  short-circuits the rest and nothing runs. That guard rests on the
+  reader's directory rather than on the line: where a file of the
+  placeholder's own name sits there the `<` succeeds, the line runs, and
+  the `>` writes one named for the word that follows. Where the
+  placeholder ends the line, `>` has no target and the line is a parse
+  error, which an interactive shell answers by discarding it together
+  with its trailing `&&` and reading the next line as a fresh command:
+  the chain never forms, and a write below it runs. So the chain guards
+  the first case, and the second is left what the first rejects — a
+  fence of its own for the line that writes, which the reader pastes
+  deliberately. What tells the cases apart is a paste into a pty: the
+  same block fed to a shell as a script aborts on the parse error an
+  interactive shell discards, which answers a different question.
 - **One fact in one place.** Two files stating the same thing become two
   files disagreeing about it; the second points at the first.
 - **A package upstream of another does not name the one downstream.**
@@ -4669,11 +4689,12 @@ cat tests/README.md
 ```
 
 The metadata an index shows, which no command in the tree can compare
-because half of it is a repository setting:
+because half of it is a repository setting. The lines chain because the
+last of them writes, which is section 9's rule:
 
 ```shell
-gh api repos/<org>/<repo> --jq '.topics | join(", ")'
-sed -n '/^keywords = \[/,/^\]/p' pyproject.toml
+gh api repos/<org>/<repo> --jq '.topics | join(", ")' &&
+sed -n '/^keywords = \[/,/^\]/p' pyproject.toml &&
 uv build --sdist && uvx twine check dist/*.tar.gz
 ```
 
