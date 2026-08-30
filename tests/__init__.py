@@ -251,19 +251,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_the_settings_file_says_what_it_passes_over",
         ("portanode",),
     ),
-    (
-        583,
-        "test_lychee_checks_a_link_into_a_heading",
-        (
-            "bbt",
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-benchmarks",
-            "btclib-node",
-            "btclib-secp256k1",
-            "portanode",
-        ),
-    ),
     # deps-oldest: every tree its entry names is short of the workflow
     (
         323,
