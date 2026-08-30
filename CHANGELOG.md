@@ -4057,3 +4057,28 @@ audit has no revision to compare against.
   own — the community health files it supplies are shown while it is
   public — the sentinel section 10's bar is about not being one it
   carries.
+
+### Section 11's Read the Docs connection is the App, not a webhook
+
+- **What connects a repository to Read the Docs is the organization-wide
+  `read-the-docs-community` GitHub App at `repository_selection: all`**
+  (issue #564): `gh api orgs/btclib-org/installations` names it, and
+  `gh api repos/btclib-org/<repo>/hooks --jq length` answers `0` in
+  every repository of the organization, so what a `REPOSITORY.md`
+  records is the installation and an empty hook list rather than a
+  webhook. A hook found on a repository is stale and is deleted rather
+  than repaired; btclib-org/bitcoin-core-rpc#291 records one that was.
+- **The per-repository webhook is the rejected alternative, and the
+  secret is why**: Read the Docs issues it on the project's own
+  integration page and GitHub returns it masked, so nothing read back
+  from the repository says whether a hook still carries the right one.
+  The status code the section named for a hand-added hook goes with the
+  rule it belonged to, rather than becoming the ground a rule stands on:
+  no command here re-derives it.
+- **`latest`, `stable` and the tag automation rule are read back from
+  the project's public API** (issue #564), which answers without a
+  token: `latest` comes back as a branch and `stable` as a tag whose
+  `ref` is the highest release tag, beside the tags the rule has
+  activated. The rule itself the API does not expose —
+  `automation-rules/` answers 404 where an endpoint needing a token
+  answers 401 — so the rule is recorded through its result.
