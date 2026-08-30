@@ -4082,3 +4082,32 @@ audit has no revision to compare against.
   activated. The rule itself the API does not expose —
   `automation-rules/` answers 404 where an endpoint needing a token
   answers 401 — so the rule is recorded through its result.
+
+### Section 10 calendars the rebuild and homepage sentinels
+
+- **A tree that publishes an attestation has a row that re-derives it**
+  (issue #523): `sdist-rebuild` takes Sunday 03, at the head of the
+  security rows the calendar ends with, and its entry names `btclib`,
+  `btclib-secp256k1` and `bitcoin-core-rpc`. What it compares against is
+  the digests the published attestation carries rather than the ones the
+  index serves, and the compiled wheel stays outside the property
+  section 12 states. Section 10 has the row land here first, so
+  `test_every_row_of_the_calendar_names_something_that_exists` names it
+  until the first of the three schedules the workflow.
+- **The page github.com/btclib-org serves is generated from a file in
+  this tree, and the sentinel that watches for drift between them has a
+  row and a minute** (issue #558) (issue #553): `homepage` takes
+  Saturday 03, and `btclib-org.github.io` the minute after `bbt`'s,
+  which is `links`'s minute in that tree too — a sentinel its entry
+  gives it and it does not carry, btclib-org/btclib-org.github.io#1.
+  The `repository_dispatch` that would send the exact signal wants a
+  credential with write access to that tree, which nothing here holds,
+  and asking the question from this suite instead answers red on `main`
+  here for a drift another repository owns. Until the site schedules the
+  workflow, `test_every_row_of_the_calendar_names_something_that_exists`
+  names `homepage` beside `sdist-rebuild`.
+- **`pypi-install`'s entry names `btclib-node`** (issue #85): that tree
+  schedules the workflow on the row's day and hour and on its own
+  minute, which section 10 reads as the entry's gap and not the tree's.
+  What that issue stays open for is `os-windows`, whose entry names
+  `btclib-node` where that tree carries no windows workflow.
