@@ -358,8 +358,8 @@ done
 
 `.github` is this repository, and its row is measured like the others:
 a `pyproject.toml`, a suite, and no `release.yml`. What it declines of
-tier 2 — there is no coverage here, and section 3 describes a file its
-`pyproject.toml` is not — its `CLAUDE.md` says, with the reason.
+tier 2 — there is no coverage here, and of section 3 the metadata only
+an index reads — its `CLAUDE.md` says, with the reason.
 
 `btclib-org.github.io` is the organization site, served by Pages from
 the root of its `main`, and btclib-org/.github#530 is where that vehicle
@@ -986,6 +986,26 @@ what it holds.
     bracket follows it, and an import package is written in neither
     place.
 
+    **Every other place a person writes the name for somebody to copy
+    out takes it too**: a flag's value, an install target, a deployment
+    environment's `url:`, the message on a release tag. The reason is
+    the one above and it does not turn on the position — what the
+    written form decides is what a reader copies and types — so the rule
+    reaches wherever the thing named is the distribution rather than the
+    import package. Position is all `tests/names_test.py` can read, and
+    these sites have none, so this half is a reader's catch.
+
+    **A PyPI page is linked as `https://pypi.org/project/<name>/`**, the
+    form `https://pypi.org/p/<name>` redirects to, and it spells the
+    name canonically like any other written form: the site serves
+    `/project/btclib_secp256k1/` and `/project/btclib-secp256k1/` alike
+    and redirects neither, so which spelling a reader is shown is the
+    writer's. The rejected alternative is the short form, which saves
+    the characters and costs everybody who follows it the redirect. A
+    URL that settles its own spelling is outside the rule rather than an
+    exception to it: `/simple/` redirects to the hyphen PEP 503 folds
+    the name to, and asks nothing of whoever writes the link.
+
     **The bullet has no subject where a tree builds no distribution.**
     `bbt` and `.github` both declare `package = false` and a
     `[project].name` of their own — `bbt` after the repository,
@@ -1070,11 +1090,22 @@ what it holds.
   twenty are full — past twenty the topics are the first twenty
   keywords, which is the one place the two may differ at all.
 
-    Both name what the tree holds. A keyword no module answers to is a
-    claim an index makes on a reader's behalf; a module no keyword names
-    is why somebody did not find the package. Neither is visible from
-    inside the file, so both are read against the tree rather than
-    against the list they were copied from.
+    Both name what the tree holds. A keyword nothing in the tree answers
+    to is a claim made to whoever searched and not kept; something the
+    tree holds that no keyword names is why somebody did not find it.
+    Neither is visible from inside the file, so both are read against
+    the tree rather than against the list they were copied from.
+
+    **The rule turns on the `[project]` table and not on the index.** A
+    tree that uploads nothing declares the list all the same, so that
+    the topics github.com shows have something in the tree to be read
+    against. The rejected alternative keys the rule on publishing, the
+    bullets around this one each being about metadata an index serves,
+    and what it costs is that reading: such a tree's topics then answer
+    to no list, and drift from what it holds with nothing red. A
+    repository with no `pyproject.toml` has no table and so no key to
+    write, and section 16's checklist is where its topics are recorded
+    instead.
 - **`classifiers` are present**, and each is a claim about this tree
   rather than a line taken from a sibling's: `Typing :: Typed` and
   `py.typed` ship together or neither ships, the marker being PEP 561's
@@ -5054,13 +5085,13 @@ independent and the checklist the same for each.
    publishing environments; the read-only default token; secret scanning,
    its push protection and Dependabot security updates; private
    vulnerability reporting. Then the topics, which are the `keywords` of the
-   `pyproject.toml` step above where the tree declares any, and which
-   nothing in the tree holds where it does not; and, where the tree
+   `pyproject.toml` step above, and which nothing in the tree holds where
+   there is no such file to declare them in; and, where the tree
    releases, the `homepage`, the same URL section 3's field of that name
    carries.
 1. Read each setting back with the commands `REPOSITORY.md` records, and
    write the answers into it — the topics included, that being the one
-   of them a tree without `keywords` records nowhere else.
+   of them a tree with no `pyproject.toml` records nowhere else.
 
 ### Normalizing an existing repository
 

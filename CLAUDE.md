@@ -127,12 +127,13 @@ Do not use Fable unless explicitly instructed.
 ## Non-obvious facts that will otherwise waste a session
 
 - **`pyproject.toml` is not a distribution's.** `package = false`, no
-  build backend and no wheel, so section 3 describes a file this one is
-  not. Section 14 names the files kept by the gate's tools that do not
-  look in `pyproject.toml` for their configuration. A word this file's
-  own prose needs — `CPY`, ruff's copyright rule — is a typo to the
-  spell checker until `[tool.typos]` names it, with the reason beside
-  it.
+  build backend and no wheel, so of section 3 it declines the metadata
+  only an index reads and declares what binds the `[project]` table —
+  `authors` and `keywords` — with the reason at the key. Section 14
+  names the files kept by the gate's tools that do not look in
+  `pyproject.toml` for their configuration. A word this file's own
+  prose needs — `CPY`, ruff's copyright rule — is a typo to the spell
+  checker until `[tool.typos]` names it, with the reason beside it.
 - **The suite's subject is the other repositories, and there is no
   coverage**: what it would measure is a tree that ships nothing, so the
   number would be the suite measuring itself. What it cannot reach — a
