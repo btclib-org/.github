@@ -3032,6 +3032,14 @@ that a reader holding the file holds everything; what it buys is a
 perimeter this file fixes rather than the endpoint, which is what a copy
 can be held to.
 
+**The section headed `## What this file passes over` is where a copy
+says what falls outside that scope.** Whether the section is there is
+what a command asks; whether it is honest about the perimeter is a
+reading, as the wider claim above is. The rejected alternative leaves
+the second obligation to a reader's check with nothing to run, and what
+it costs is a copy that deletes the rejected claim and says nothing of
+what it leaves out reading as converged.
+
 **A copy does not claim that nothing it records has another form in the
 tree.** The topics are section 3's `keywords`, a releasing tree's
 `.homepage` is the `[project.urls]` field of that name, and a Pages

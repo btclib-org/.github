@@ -12,15 +12,21 @@ in its own text, where whether its coverage reaches the perimeter is a
 reading, which fields of the repository document are settings rather
 than URLs, counts and derived state being what nothing answers.
 
-The claim is read out of section 11 rather than written down here, for
-the reason `fenced` in `tests/__init__.py` gives: a transcription is the
-copy that goes stale, and the sentence a copy may not carry belongs
-where the rule that refuses it is.
+The section says what falls outside that scope too, under the heading
+section 11 names, and that heading is the half of it a command decides:
+a copy carries the section or does not, where what the section says
+about the perimeter is the same reading.
 
-What this does not reach is the same promise in words of its own. A
-string finds the sentence and not the claim, so a copy promising
-completeness some other way is a reading, as a claim of this standard
-that no command re-derives is anywhere else.
+The claim and the heading are read out of section 11 rather than
+written down here, for the reason `fenced` in `tests/__init__.py`
+gives: a transcription is the copy that goes stale, and the sentence a
+copy may not carry belongs where the rule that refuses it is.
+
+What this does not reach is the same promise in words of its own, or a
+section that names the heading and passes nothing over. A string finds
+the sentence and not the claim, so a copy promising completeness some
+other way is a reading, as a claim of this standard that no command
+re-derives is anywhere else.
 """
 
 from __future__ import annotations
@@ -47,8 +53,14 @@ The quotation is read off that one line, so a section wrapping the claim
 away from this phrase raises rather than answering with nothing.
 """
 
+HEADED = "The section headed"
+"""How section 11 opens the sentence that names the heading a copy carries.
+
+The heading is read off that one line, as the claim is off its own.
+"""
+
 QUOTED = re.compile(r"`([^`]+)`")
-"""How that sentence carries the claim."""
+"""How each of those sentences carries what it quotes."""
 
 WRAPPED = re.compile(r"\s+")
 """What a claim wrapped at eighty columns has between its words.
@@ -58,19 +70,36 @@ the sentence rather than for the line breaks its own margin gave it.
 """
 
 
-def rejected() -> str:
-    """Read the claim section 11 refuses, out of the standard.
+def quoted(opening: str) -> str:
+    """Read what the one line of section 11 holding a phrase quotes.
 
-    :returns: the claim, as that section quotes it.
-    :raises LookupError: where the sentence quotes none, or several.
+    :param opening: the phrase naming the line.
+    :returns: the one backticked text on that line.
+    :raises LookupError: where the line quotes none, or several.
     """
     document = ROOT / "README.md"
     lines = document.read_text(encoding="utf-8").splitlines()
-    found = QUOTED.findall(lines[sole(document, lines, REJECTED)])
+    found: list[str] = QUOTED.findall(lines[sole(document, lines, opening)])
     if len(found) != 1:
-        msg = f"{document.name} quotes {len(found)} claims after {REJECTED!r}"
+        msg = f"{document.name} quotes {len(found)} texts after {opening!r}"
         raise LookupError(msg)
-    return WRAPPED.sub(" ", found[0])
+    return found[0]
+
+
+def rejected() -> str:
+    """Read the claim section 11 refuses, out of the standard.
+
+    :returns: the claim, as that section quotes it, folded.
+    """
+    return WRAPPED.sub(" ", quoted(REJECTED))
+
+
+def heading() -> str:
+    """Read the heading section 11 asks a copy for, out of the standard.
+
+    :returns: the heading line, as that section quotes it.
+    """
+    return quoted(HEADED)
 
 
 def test_the_settings_file_does_not_claim_to_be_the_whole_of_them(
@@ -95,4 +124,28 @@ def test_the_settings_file_does_not_claim_to_be_the_whole_of_them(
     assert claim not in text, (
         f"{SETTINGS} says {claim!r}, which section 11 rejects; "
         + by_hand(repository, f"tr '\\n' ' ' < {SETTINGS} | grep -c '{claim}'")
+    )
+
+
+def test_the_settings_file_says_what_it_passes_over(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 11: a `REPOSITORY.md` says what falls outside its scope.
+
+    The section is asked for by its heading, a line of the copy, so
+    that a copy narrowing its claim and stopping there is not reported
+    as converged; what the section says under it is a reading.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    path = trees[repository] / SETTINGS
+    if not path.is_file():
+        pytest.skip(f"{repository} has no {SETTINGS}")
+    wanted = heading()
+    lines = path.read_text(encoding="utf-8").splitlines()
+    assert wanted in lines, (
+        f"{SETTINGS} has no {wanted!r} section, which section 11 asks for; "
+        + by_hand(repository, f"grep -cx '{wanted}' {SETTINGS}")
     )

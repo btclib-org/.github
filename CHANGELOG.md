@@ -4251,3 +4251,16 @@ audit has no revision to compare against.
   no read at all, and what it costs is being a rule about what a session
   remembers per branch — where a bot submits against the head within
   seconds of a pull request opening, leaving no window to work inside.
+
+### The suite asks a `REPOSITORY.md` for the section on what it passes over
+
+- **A copy says what falls outside its scope under
+  `## What this file passes over`, and `tests/scope_test.py` asks every
+  repository for that heading** (issue #565): whether the section is
+  there is what a string finds, where what it says about the perimeter
+  stays a reading. Section 11 names the heading as the form the second
+  obligation takes, with the reader's check as the rejected alternative
+  beside it, and the test reads the heading off that sentence as its
+  sibling reads the claim. `portanode`'s copy has no such section and is
+  a strict expected failure keyed on the issue, its row expiring with
+  the port that gives the copy the section.
