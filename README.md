@@ -1916,9 +1916,8 @@ port into a marker or a naming convention, the same fact kept where a
 
 ### Property tests
 
-A tree that has the property section 10 keys its fuzzer on — nobody
-standing between its parser and an adversary who chooses the bytes —
-owes a property layer, whether or not that section's record gives it the
+A tree that has the property section 10's `fuzz` entry keys on owes a
+property layer, whether or not that section's record gives it the
 sentinel. The rejected alternative keys the layer on the record instead,
 and what it costs is a tree getting the cheap half only by being given
 the expensive one: a property layer is code in the suite that runs with
