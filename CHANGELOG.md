@@ -4215,3 +4215,39 @@ audit has no revision to compare against.
   section 3 describes a file this `pyproject.toml` is not, which read as
   the whole of it while `authors` and now `keywords` bind the tree; each
   now names the half declined.
+
+### Section 11 separates the two closing parsers, and what a force-push costs
+
+- **Two parsers read a closing keyword, and a newline is where they
+  part** (closes #519): the one answering `closingIssuesReferences`
+  reads the pull request's description and requires a physical line, and
+  the one that closes on a push reads the message that landed and
+  crosses the newline. Section 11 states them apart, each with the
+  measurement it rests on and the day it was read.
+- **A `closed` event's commit id says which of the two closed the
+  issue** (closes #519): it carries a sha where the push did and null
+  where the description did, so `825c74e2` closing an issue its message
+  reaches only across a newline is the measurement of the second parser,
+  and a null beside it is uninformative rather than contrary. The pair
+  of controls is a description with no keyword whose issue closed on its
+  commit, and a commit with no keyword whose issue closed on its
+  description.
+- **The keyword scan over a branch's own commit text keeps `\s`**
+  (closes #519): the parser that text will meet is the one that reads a
+  landed message, so a separator narrowed to a space or a tab would miss
+  the shape the scan exists to catch. The rule to write one keyword per
+  line stays, being what the description parser requires and what a wrap
+  at eighty columns silently breaks.
+- **What a force-push costs is the review attached to the sha it
+  replaces, and section 11 gives the read that answers whether there is
+  one** (closes #570): `pulls/<n>/reviews` is the endpoint that answers,
+  and `pulls/<n>/comments` is the one that reads as an absence, counting
+  inline comments alone. An amend and a correction as its own commit
+  both move the head, so what the rule reaches is the push rather than
+  what carries the correction; a reading taken before a pull request
+  exists is attached to nothing and cannot be orphaned.
+- **The rejected alternative opens the pull request only once a reading
+  has cleared the sha**, so that no push ever follows a review. It needs
+  no read at all, and what it costs is being a rule about what a session
+  remembers per branch — where a bot submits against the head within
+  seconds of a pull request opening, leaving no window to work inside.
