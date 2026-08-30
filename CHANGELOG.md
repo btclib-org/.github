@@ -4140,3 +4140,19 @@ audit has no revision to compare against.
   alternative: the release's own call runs after its upload and waits
   for the version its tag names, so what has nothing to read is the
   schedule.
+
+### The suite asks whether a releasing tree's homepage is its documentation
+
+- **A releasing tree's `.homepage`, its `[project.urls] homepage` and its
+  `[project.urls] documentation` are read against each other** (closes
+  #535): section 3 sends both surfaces that carry the name to the
+  documentation the tree provides and has `documentation` name that
+  same URL, and no gate in the tree the rule binds compares them.
+  `tests/homepage_test.py` asks each tier-1 tree that the three are one
+  string, the way `topics_test.py` asks `keywords` and `.topics`, and
+  `CLAUDE.md`'s list of the files that ask the API names it.
+  Compared as written rather than with the trailing slash normalized:
+  the rule is that the surfaces agree, and a slash one carries and
+  another lacks is that disagreement. Which URL it is — the tree's own
+  site rather than a sibling's, or on which host — is not asked,
+  section 3 naming no host and no shape for the site.
