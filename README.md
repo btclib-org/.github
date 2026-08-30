@@ -839,6 +839,29 @@ itself. That is the same trade section 5 makes over `ignore` and section
 8 over `exclude_also`, and it is why the first run of `-n` is triage
 rather than a pass.
 
+**`--keep-going` is not passed.** In the sphinx `uv.lock` resolves, the
+flag is declared with `help=argparse.SUPPRESS` and the application
+records it as unused, so it is missing from `--help` and accepted by the
+parser at once: an unrecognized argument is refused, and this one
+builds. `-W` on its own reports every warning a build raises and fails
+at the end of it — a warning raised while reading and one raised while
+writing arrive from the same run — so what the flag's name asks for is
+what the build does without it. Keeping it with a comment naming what it
+buys is the alternative, and there is nothing for that comment to say.
+
+**`exclude_patterns` names what the tree writes under `docs/source/`,
+and is empty where nothing does.** `sphinx-quickstart` seeds it with
+`_build`, `Thumbs.db` and `.DS_Store`. Sphinx reads a file as a document
+only where its name ends in one of `source_suffix`'s suffixes and
+something is left over to be the document's name, so under the `.md` and
+`.rst` these trees declare neither of the last two is a candidate to
+exclude at all. `_build` is a live entry only for a build directory
+written inside the source directory, a page under one being read and
+then failing `-W` for belonging to no toctree; a tree whose build goes
+beside `docs/source/` has nothing there to name. Carrying the stock list
+anyway is the alternative, rejected because it reads as a statement
+about the tree's layout while naming paths that layout does not produce.
+
 ## 3. `pyproject.toml` is the configuration
 
 One file holds the project metadata and every tool that can be
@@ -4706,9 +4729,8 @@ independent and the checklist the same for each.
    selective-run coverage hook, the first convention tests, and the
    `tests/README.md` that declares which of section 7's bullets they are
    — with the test that asserts the declaration.
-1. `docs/source` and `.readthedocs.yaml`, built with `-W -n
-   --keep-going`, and `sphinx.ext.intersphinx` in `extensions` before
-   `-n` is turned on.
+1. `docs/source` and `.readthedocs.yaml`, built with `-W -n`, and
+   `sphinx.ext.intersphinx` in `extensions` before `-n` is turned on.
 1. Section 12's package-content floor: `[tool.check-wheel-contents]`
    naming the package where the wheel is one package tree, and the page,
    the script and the test where it is not; `check-sdist` wherever an
