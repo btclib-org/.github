@@ -4298,3 +4298,15 @@ audit has no revision to compare against.
   badge its first reading. The rejected alternatives, a qualifier keyed
   on whether the workflow has run on `main` and the unqualified badge,
   are beside the rule; the badge rows are ported behind it.
+
+### The ported verbatim files agree everywhere, so their drift entries go
+
+- **`EXPECTED_DRIFT` no longer names `.gitattributes`** (closes #423):
+  every tree's header states the union price as section 9 does, the
+  forge not applying the driver, and the copies agree byte for byte.
+- **`EXPECTED_DRIFT` no longer names `.markdownlint.jsonc`** (closes
+  #316): every tree's header points at section 14 for who carries the
+  file, in place of naming trees, and the copies agree byte for byte.
+- **`EXPECTED_DRIFT` no longer names `CONTRIBUTING.md`** (closes #281):
+  every tree carries the shared half as this one has it, and
+  `tests/verbatim_test.py`'s own cut of it hashes the same in each.
