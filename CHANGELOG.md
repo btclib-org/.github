@@ -4288,3 +4288,13 @@ audit has no revision to compare against.
   `tests/README.md` on the ground that the fetched answers are read once
   and never changed -- which nothing enforces, and which the shuffle is
   what would notice the day it stops being true.
+
+### Section 2 puts `?branch=main` on every workflow-status badge
+
+- **A workflow-status badge answers for `main` or answers `no status`**
+  (issue #579): unqualified, it falls back to another branch's run where
+  `main` has none, so section 2 qualifies every one of them and names
+  the `workflow_dispatch` run from `main` that gives a new sentinel's
+  badge its first reading. The rejected alternatives, a qualifier keyed
+  on whether the workflow has run on `main` and the unqualified badge,
+  are beside the rule; the badge rows are ported behind it.

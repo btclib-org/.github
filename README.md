@@ -556,6 +556,27 @@ workflow-run badge there would answer whether the sentinel ran and not
 what it found, where what it found is the reason section 10 gives for
 running it at all.
 
+**Every workflow-status badge carries `?branch=main`** on that URL, the
+gates' and the sentinels' alike. The row is an audit of `main`, and an
+unqualified badge is not always `main`'s: where the workflow has no run
+on `main` it renders another branch's, a deleted branch's included, and
+nothing in the render says so — the fallback is
+[GitHub's own](https://docs.github.com/en/actions/how-tos/monitoring-and-troubleshooting-workflows/monitoring-workflows/adding-a-workflow-status-badge).
+The qualified badge answers for `main` or answers `no status`, which
+*A badge that answers with anything but a measurement* below reads as
+a question: datable while the first `main` run is still ahead, a defect
+once its day has passed. Section 10's *`workflow_dispatch` on
+everything* is what gets a workflow its first `main` run before its
+day, so a tree that lands the badge dispatches the workflow from `main`
+rather than leaving it at `no status` until the schedule comes round.
+The rejected alternatives are the unqualified badge, whose fallback
+reports what the row does not audit, and a qualifier omitted where the
+workflow has no `main` run yet, which is a row re-derived per workflow
+and out of date the day the first run lands. The pre-commit.ci badge,
+`results.pre-commit.ci/badge/github/<org>/<repo>/main.svg`, is outside
+the rule, being the service's own and not a workflow-status badge: its
+branch is in its path.
+
 **The order is fixed**, and it is three groups: what the software is,
 whether it works, and what the OpenSSF makes of it.
 
