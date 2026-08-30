@@ -2753,7 +2753,9 @@ sentinel is a decision somebody took. So a tree short of what its entry
 names is a gap in that tree and not a correction owed here, and a tree
 that carries what no entry gives it is the same finding read from the
 other side — a workflow whose row does not name the tree, and a badge
-with no row behind it.
+with no row behind it. `tests/grid_test.py` reads the workflow half of
+both against every tree, a red cell there bounded by the issue a
+`BACKLOG` row of `tests/__init__.py` names.
 
 Where a property of the tree decides membership it is stated below, so
 that the answer for a new repository is read off the tree rather than
