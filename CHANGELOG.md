@@ -4334,3 +4334,37 @@ audit has no revision to compare against.
   `?branch=main`** (issue #579): `lint`, `links` and `alignment` answer
   for `main` or answer `no status`, where the unqualified badge falls
   back to another branch's run when `main` has none.
+
+### The record answers for the ceiling, the credential and CodeQL
+
+- **`REPOSITORY.md` has a *Plan-gated settings* section, which is where
+  section 10 puts the ceiling's figure** (issue #569, issue #412):
+  `gh api orgs/btclib-org --jq .plan.name` and GitHub's limits table sit
+  beside the number, `CONTRIBUTING.md`'s *The landing queue* already
+  points at that heading by name, and the plan-gated secret-scanning
+  pair is pointed at the section that reads it back rather than
+  restated. The plan and the credential are the file's first
+  organization-scoped calls, so the command at the head that enumerates
+  its endpoints matches `orgs/btclib-org` as well as this repository's
+  own paths, and prints them all.
+- **The credential `claude-review.yml` spends leaves *A facility nobody
+  reached for*** (closes #572): the empty Actions and Dependabot
+  repository stores record section 11's decision that the token is an
+  organization secret at `visibility=all`, so they take a bullet of
+  their own with the organization's two stores read back beside them,
+  and the facilities nobody has reached for keep the general one.
+  `bbt`'s copy, the other the issue names, already reads that way.
+- **The *Topics* section reads the tree's own `keywords` back against
+  the setting** (closes #593, issue #571): section 3 turns the rule on
+  the `[project]` table rather than on whether anything is published,
+  `topics_test.py`'s `keyworded` selects on that table, and this
+  `pyproject.toml` declares the names — so the section carries the
+  `diff` that holds the two lists together, the head of the file says
+  the topics have a second form in the tree as the ported copies do, and
+  what the record is still the only home of is that the names are set on
+  the repository at all.
+- **The CodeQL bullet states what section 10's record decides** (closes
+  #590): the `codeql` entry does not name this tree, and a tree an entry
+  does not name is asked nothing by that row, so the analysis is off by
+  a decision taken once for the organization — in place of a reason that
+  narrated the file and a question left open with nothing behind it.
