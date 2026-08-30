@@ -422,7 +422,7 @@ having nothing to lock:
 | `REVIEWING.md` | the standard a review is written against | 1, 2, 3 |
 | `REPOSITORY.md` | the settings that live outside the tree | 1, 2, 3 |
 | `RELEASING.md` | how a release is cut, and how one is recovered | 1 |
-| `CHANGELOG.md` | every user-visible change, by group | 1, 2, 3 |
+| `CHANGELOG.md` | every user-visible change, one entry each | 1, 2, 3 |
 | `RELEASE_NOTES.md` | what a user has to *act* on, on top of it | 1 |
 | `CLAUDE.md` | what a session needs and no human document holds | 1, 2, 3 |
 | `pyproject.toml` | the project and every tool's configuration | 1, 2 |
@@ -2190,18 +2190,18 @@ sight rather than weighed.
 
 ### `CHANGELOG.md` and `RELEASE_NOTES.md`
 
-- The changelog gets an entry for anything a user would notice, in the
-  group it belongs to. The release notes are what a user has to *act* on.
+- The changelog gets an entry for anything a user would notice. The
+  release notes are what a user has to *act* on.
 - **One fact each**: the breaking-changes list lives in the release
   notes and the detail behind it in the changelog, so neither restates
   the other.
-- **Both are `merge=union` in `.gitattributes`.** Two branches appending
-  a bullet to the same group conflict on the insertion point, which is a
-  conflict with nothing to decide; union keeps both sides' added lines,
-  on rebases included. Its price is that on a checkout the two files
-  never conflict at all, so the *same* entry edited on two branches
-  merges in silence — which is the second reason neither file states a
-  count.
+- **Both are `merge=union` in `.gitattributes`.** Two branches each
+  appending an entry at the same anchor conflict on the insertion point,
+  which is a conflict with nothing to decide; union keeps both sides'
+  added lines, on rebases included. Its price is that on a checkout the
+  two files never conflict at all, so the *same* entry edited on two
+  branches merges in silence — which is the second reason neither file
+  states a count.
 - **The driver is a checkout's, and the forge does not apply it**, so
   the price has a second half no local command predicts. A pull request
   whose `CHANGELOG.md` or `RELEASE_NOTES.md` overlaps its base is
@@ -2224,6 +2224,15 @@ sight rather than weighed.
   MD022 and MD032 both refuse. Section 4's autofix rule has
   `markdownlint-cli2` write the line back on the next hook run, rather
   than only reporting it missing.
+- **A `###` names one entry, never a theme several entries share.** So
+  the open section is the list of its entries, and the end of it is one
+  place. Grouping by theme is the rejected alternative: nothing here
+  says what the themes are, so each tree names its own set and an entry
+  belonging to two of them has to pick one, and the append point becomes
+  the theme's rather than the section's — which is the anchor the two
+  bullets below are read against. Where an open section already carries
+  theme headings, the next entry goes after them, at the end of the
+  section, and nothing above it moves.
 - **A new entry goes at the end of the open section**, after the entries
   already there and immediately above the heading of the latest released
   version — at the end of the file where the tree has released nothing.
@@ -2265,6 +2274,13 @@ sight rather than weighed.
   inside the same parentheses, the qualifier rule above reaching a
   changelog citation exactly as it reaches any other cross-repository
   reference.
+- **The citation sits in the bullet making the claim, not on the heading
+  above it.** An entry's bullets are separate facts and cite separately,
+  so a citation gathered onto the heading answers for the entry as a
+  whole while the bullets under it name issues of their own, and nothing
+  says how the two sets relate. The rejected alternative is the heading
+  citation, and what it buys is a section whose issue numbers a reader
+  collects by scanning the headings alone.
 - **The reason the pair has two spellings rather than one** is that it
   is then checkable against the landing commit's own subject, written at
   a different moment and the half that gets re-read before merging. One
@@ -2284,6 +2300,15 @@ sight rather than weighed.
   `(issue owner/repo#N)`, keyword and qualifier together. Entries
   already landed in the keywordless form stay as they are, the bullet
   below being why.
+- **An issue the entry names without acting on it is written into the
+  sentence, not into the parentheses.** The parentheses say what the
+  entry did about an issue, and there is nothing to say of one it did
+  nothing about, so a reference put there bare is the shape the bullet
+  above refuses and reads as a citation with its keyword dropped. What
+  the move sheds is the keyword and the parentheses, never the qualifier
+  *A reference to another repository is qualified* above requires, and
+  the sentence says what the issue is to the entry — where a decision
+  lives, which issue covers the other half.
 - **Nothing already written is rewritten.** Both files are append-only
   in practice and `merge=union` in fact; the rule binds what is written
   next, not the entries that predate it.
@@ -2299,13 +2324,12 @@ sight rather than weighed.
   counts nothing that moves underneath it. A structure the entry itself
   names — `build` and `check` are two rows, and it lists the two — is a
   description rather than a count, and the rule does not reach it.
-- **No command in section 15 audits this.** A citation the entry makes
-  and an issue merely named in its prose look identical to a pattern
-  match — both are a `#N` inside parentheses — and this organization's
-  own entries already use the second shape, a cross-repository pointer
-  beside the entry's own point rather than its citation. Telling the
-  two apart is a reading, the way this file already treats a claim no
-  command re-derives.
+- **No command in section 15 audits this.** Entries already landed put a
+  pointer inside parentheses with nothing before the number, and
+  *Nothing already written is rewritten* above keeps them there, so a
+  pattern over the file matches one of those as readily as a citation.
+  Telling the two apart is a reading, the way this file already treats a
+  claim no command re-derives.
 - **A value the standard owns is named where the entry decides it and
   cited where the entry uses it.** The entry giving a sentinel its day
   and hour states the instant, that being what it decided, and it ages
