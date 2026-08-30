@@ -2925,15 +2925,22 @@ request, and the rule follows them.
 ## 11. GitHub settings
 
 These live outside the tree. `REPOSITORY.md` is where each repository
-writes down its own, with the command that reads it back — nothing here
-is recoverable by reading the code.
+writes down its own, with the command that reads it back.
 
 **What that file covers is the settings this standard asks about** — the
-ones section 16's checklist sets on a new repository, and the ones a
-section here states a rule for — together with whatever a call quoted
-for one of those answers alongside it. It says what falls outside that
-scope too, so a setting it is silent about reads as a decision rather
-than as an omission.
+ones section 16's checklist sets on a new repository, the ones a section
+of the standard states a rule for, and the ones a behaviour it describes
+rests on — together with whatever a call quoted for one of those answers
+alongside it. It says what falls outside that scope too, so a setting it
+is silent about reads as a decision rather than as an omission.
+
+**A copy carries all three limbs in the standard's own words** rather
+than wording them for itself. Two spellings are what that forecloses:
+`README.md` written into the second limb names a sibling's own file, and
+a bare `it` there reaches for section 16's checklist, where the third
+limb's `it` is this standard. The rejected alternative leaves the wording
+to each copy, and what it costs is a reading per tree of a claim they are
+all making once.
 
 The claim rejected is `this file is the whole of them`, which no command
 checks: the repository document answers with fields this file states no
@@ -2942,6 +2949,40 @@ decides is a reading. What the narrower claim gives up is the promise
 that a reader holding the file holds everything; what it buys is a
 perimeter this file fixes rather than the endpoint, which is what a copy
 can be held to.
+
+**A copy does not claim that nothing it records has another form in the
+tree.** The topics are section 3's `keywords`, a releasing tree's
+`.homepage` is the `[project.urls]` field of that name, and a Pages
+custom domain has the root `CNAME` carrying the same value — so where a
+tree holds one of those, the record is a second copy read back for
+comparison rather than the only place the answer lives, which is what
+that copy's own section on it says. The rejected alternative is the
+blanket clause `nothing here is recoverable by reading the code`, one
+sentence shorter and refuted in such a tree's own file two sections
+further down.
+
+**`has_wiki` and `has_projects` are outside the perimeter**: this
+standard states no rule about either, and a copy neither reads them back
+nor explains an answer to them. The rejected alternative records each
+with a sentence saying no rule is stated, so that a reader sees the
+answer and is told it is nobody's divergence; what it costs is a file
+growing with GitHub's API rather than with this standard, in a wording
+each copy invents for itself.
+
+**`has_issues` is not with them.** `CONTRIBUTING.md` sends an issue about
+one repository alone to that repository's own tracker, and section 16's
+checklist gives every repository an `ISSUE_TEMPLATE/`, so a behaviour
+this standard describes rests on the setting and a copy records it.
+
+**Section 10's `scorecard` bar splits on that same test.** Public is what the
+sentinel reads at all, so a behaviour this standard describes rests on
+`.visibility` and a copy reads it back, which puts a flip to private one
+command from being seen. Nothing sets `.fork`: a repository arrives as a fork
+or it does not, so no limb reaches it and section 10 states that half of the
+bar once. The rejected alternative keeps both halves out of every copy, on the
+ground that the bar is section 10's to state; what it costs is the flip, after
+which the sentinel's row and its badge stand while the run stops producing a
+score, and the file a reader restores the repository from says nothing.
 
 ### Signatures
 
@@ -3021,6 +3062,15 @@ review and the checks are in. One change is one commit on `main`. A merge
 commit is refused by linear history already; rebase-and-merge is the one
 deliberately removed, since it replays a branch's review steps onto
 `main`.
+
+**`allow_auto_merge` is on**, and a copy reads it back with the other
+merge settings: the sentence above rests on the setting rather than
+describing it. Off, auto-merge is not offered, every landing waits on
+somebody pressing *Squash and merge* at the moment the last check goes
+green, and nothing turns red. The rejected alternative leaves it to each
+repository as a convenience rather than a setting of this standard's,
+and what that costs is a section describing a landing path the tree no
+longer offers, with no command anywhere to catch it.
 
 One method is also one entry in a dropdown that GitHub preselects from
 whatever was used last — and the dialog that switches auto-merge on
@@ -4831,12 +4881,12 @@ independent and the checklist the same for each.
    `CHANGELOG.md`, `CLAUDE.md`; and `SECURITY.md`, `RELEASING.md` and
    `RELEASE_NOTES.md` where the repository publishes, the rows section
    2's table marks for tier 1 alone.
-1. GitHub, in this order: default branch `main`; squash-only;
-   `delete_branch_on_merge`; the three rulesets; classic protection with
-   the required checks bound to the Actions app; the publishing
-   environments; the read-only default token; secret scanning, its push
-   protection and Dependabot security updates; private vulnerability
-   reporting. Then the topics, which are the `keywords` of the
+1. GitHub, in this order: default branch `main`; squash-only, with
+   auto-merge; `delete_branch_on_merge`; the three rulesets; classic
+   protection with the required checks bound to the Actions app; the
+   publishing environments; the read-only default token; secret scanning,
+   its push protection and Dependabot security updates; private
+   vulnerability reporting. Then the topics, which are the `keywords` of the
    `pyproject.toml` step above where the tree declares any, and which
    nothing in the tree holds where it does not; and, where the tree
    releases, the `homepage`, the same URL section 3's field of that name
