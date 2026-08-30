@@ -242,7 +242,9 @@ repos:
   # trove-classifiers, all three already resolved in uv.lock, where the
   # mirror would need each named again in additional_dependencies and
   # kept equal to the lock by nothing. Section 4 has the trade in full;
-  # the price taken here is the `skip:` above
+  # the price taken here is the `skip:` above. --no-default-groups with
+  # the two groups named is section 4's own spelling of the command:
+  # the hook's environment is what it names, whatever `dev` includes
   - repo: local
     hooks:
       - id: mypy

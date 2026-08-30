@@ -41,13 +41,18 @@ test = [
     "trove-classifiers",
 ]
 lint = ["mypy", "pre-commit", "types-PyYAML"]
+# section 1's `dev` row: every group this file declares, so that one
+# sync installs what any command here runs. uv makes it the default of
+# `uv sync` and `uv run`, `[tool.uv]` below naming no `default-groups`;
+# CLAUDE.md says what a bare `uv run pytest` then measures
+dev = [{ include-group = "test" }, { include-group = "lint" }]
 
 [tool.uv]
 # nothing is built here, so nothing installs this directory either
 package = false
 # the oldest uv that may read uv.lock -- section 1 has the argument and
 # section 15 the command that measures the ceiling
-required-version = ">=0.12.1"
+required-version = ">=0.12.5"
 
 [tool.ruff]
 # target-version is inferred from project.requires-python
