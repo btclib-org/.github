@@ -245,6 +245,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ),
     ),
     (
+        565,
+        "test_the_settings_file_says_what_it_passes_over",
+        ("portanode",),
+    ),
+    (
         583,
         "test_lychee_checks_a_link_into_a_heading",
         (
