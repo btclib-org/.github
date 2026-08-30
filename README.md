@@ -214,7 +214,7 @@ alone would leave `uv sync` resolving a project without it.
 | `docs` | sphinx and `furo` |
 | `mutation` | the mutation runner |
 | `fuzz` | the fuzzing engine |
-| `dev` | every group above, and the default of `uv sync` |
+| `dev` | every group the tree declares, and the default of `uv sync` |
 
 The `harness`/`test` split is what lets a job ask for the suite *without*
 the optional native dependency, since uv's `--no-group` suppresses a
@@ -243,6 +243,20 @@ source archive is specified with the marker naming that platform.
 `uv lock` resolves without one, so what a missing marker costs is a
 developer's `uv sync` off that platform, refused over a group that
 machine never runs.
+
+`dev` reaches every group *the tree itself declares*, transitively
+through `include-group`, rather than every row of this table: the table
+names the groups, and each tree declares the subset it has. What the
+rule buys is that one sync is enough to run anything the tree runs, so
+a group left out of `dev` is found by a gate failing on a machine that
+had already synced.
+
+A group no developer runs by hand — a scheduled workflow's `mutation`,
+say — is not an exception to it. What such an exception saves is an
+install; what it costs is a second rule, about which groups count,
+applied by each tree to itself. And the hazard it would be reached for,
+a sync refused over a group that machine never runs, is the marker
+paragraph's above, and answered there.
 
 Where a package is both an extra and a group, the specifier is written
 twice and a test refuses the day the two disagree.
