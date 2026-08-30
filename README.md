@@ -4117,12 +4117,22 @@ convention tests, which each project chooses on section 7's terms; and
 the `[tool.uv.sources]` table, which exists only while a dependency is
 not on the index and goes the day it is.
 
+`.gitignore` is decided per repository and so outside the compared list
+above: what a tree ignores is what its own build and tools write. A
+package that compiles an extension ignores the object files and the
+shared library it links; a tree whose `dist` job writes a bill of
+materials ignores the directory it lands in; a tree that installs
+nothing has no build output to name at all. The rejected alternative is
+one file copied into every tree, holding the union of what any of them
+writes: it grows with every repository added, and a reader of one tree
+cannot tell from it which entries that tree needs.
+
 `.github/scripts/check_vendored_vectors.py` is per repository by
 subject, and deliberately outside the compared list above: each copy
 parses the pin file its own tree keeps, so the bytes differ wherever
 the subjects do, which no comparison by path can read as anything but
 drift. What every copy owes instead is a header sentence naming what it
-parses and where it departs from the sibling of the same name —
+parses and where it departs from the siblings of the same name —
 `btclib-node`'s workflow already carries one — so a reader holding two
 copies knows which difference was decided. Its failure mode is why the
 sentence is owed: an entry shape the script does not match is skipped,
@@ -4744,8 +4754,11 @@ independent and the checklist the same for each.
    licence, keywords matching the topics, urls, dependency groups, and
    the tool tables of sections 5, 6, 7 and 8.
 1. Copy the files section 14 names for the tools whose configuration is
-   not in `pyproject.toml`, `.gitattributes` (with the two
-   `merge=union` entries), `.python-version`, `.gitignore`.
+   not in `pyproject.toml`, and `.gitattributes` (with the two
+   `merge=union` entries). `.python-version` and `.gitignore` are
+   written rather than copied, section 14 deciding both per repository:
+   the interpreter this repository pins, and what its own build and
+   tools write.
 1. `.pre-commit-config.yaml`, including the mypy hook section 4's
    criterion chooses and the `pinned-rev` guard; `uv run pre-commit run
    --all-files` until clean; generate `.secrets.baseline`.
