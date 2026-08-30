@@ -4438,3 +4438,31 @@ audit has no revision to compare against.
   whole test. Carrying the comment to the repositories that lag is what
   closes both issues, which is why this landing cites them without
   closing either.
+
+### The organization page names the site tree and links btclib's documentation
+
+- **The word *btclib* opening `profile/README.md` links the library's
+  published documentation** (closes #637): `btclib.org` is served by
+  `btclib-org.github.io`, whose `index.md` is that file's bytes under
+  front matter, so on that surface the word linked the page carrying it.
+  The library's repository was the other candidate, and the file already
+  links it under *The libraries*; the documentation is what a reader
+  following that word in that sentence is after, and it is right
+  whichever repository holds the domain.
+- **`btclib-org.github.io` is an entry in the same file's *Around them*,
+  with the domain written and not linked** (closes #559): against naming
+  it, a reader of the organization's page is looking for what to use and
+  a repository whose whole content is that page is not it — but the list
+  carries `.github` on those same terms, so what decides an entry there
+  is not whether a reader would use the repository. What the entry says
+  is where the page is served, which nothing else on the page says once
+  the link above is the library's documentation; linking the domain
+  would put back on the served copy the self-reference the bullet above
+  removes.
+- **The `.github` entry writes the standard's scope instead of pointing
+  at it** (closes #559): it said the standard is what *the repositories
+  above* are built and kept to, which enumerated the list while that
+  entry was last and stopped doing so the moment one sat below it —
+  section 2 giving that repository a row, and saying its row is measured
+  like the others. Naming the scope leaves the sentence true wherever
+  the entry sits.
