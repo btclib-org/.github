@@ -1845,14 +1845,19 @@ port into a marker or a naming convention, the same fact kept where a
 
 ### Property tests
 
-A tree that owes section 10's fuzzer owes a property layer first, keyed
-on the same property — parsing what a stranger sends. The two answer
-different questions: a property test answers *does this hold over the
-domain I described*, a fuzzer answers *what is in the domain I did not
-describe* — and the second presupposes the first, a fuzzer extending no
-described domain having nothing to contradict. hypothesis is the named
-shape, its profiles registered once in `tests/conftest.py` rather than
-repeated on every `@given`:
+A tree that has the property section 10 keys its fuzzer on — nobody
+standing between its parser and an adversary who chooses the bytes —
+owes a property layer, whether or not that section's record gives it the
+sentinel. The rejected alternative keys the layer on the record instead,
+and what it costs is a tree getting the cheap half only by being given
+the expensive one: a property layer is code in the suite that runs with
+everything else, where a fuzzer is a scheduled runner with a harness and
+a corpus. The two answer different questions: a property test answers
+*does this hold over the domain I described*, a fuzzer answers *what is
+in the domain I did not describe* — and the second presupposes the
+first, a fuzzer extending no described domain having nothing to
+contradict. hypothesis is the named shape, its profiles registered once
+in `tests/conftest.py` rather than repeated on every `@given`:
 
 ```python
 settings.register_profile("default", deadline=None, max_examples=500)
@@ -2391,10 +2396,11 @@ naming the floor where the finding is the platform's.
 though the cost were the gate's, so a job that runs on a pull request
 while gating nothing looks to have escaped it: it has not, because what
 a pull request charges is the wait, and a reader waits on the list
-rather than on the subset of it that gates. `btclib`'s `fuzz` is the
-case — a ten-minute exploration on every push to every branch, which no
-rule required, and which the pull request that cut a release was merged
-out from under, three minutes in, nobody having waited for it.
+rather than on the subset of it that gates. `fuzz` is where the trade is
+starkest: the exploration is the whole of the work and its length is
+what makes it worth anything, so a trigger firing it on a pull request
+charges that pull request the wait of a sentinel's full run for a
+verdict no merge waits on.
 
 **What decides is the clock, not the trigger** — provided the clock
 stays the thing the expensive work answers to, which is what a filter
@@ -2770,9 +2776,16 @@ its entry gains the tree when the workflow and the badge land together.
   stranger. `bitcoin-core-rpc` reads a Bitcoin Core instance its own
   operator runs, so the party on the other side is chosen rather than
   arbitrary and the property does not reach it; that is a weaker threat
-  model and it is the reason, not an omission. Section 7's convention tests and
-  the property tests beside them answer *does this hold over the domain
-  I described*; a fuzzer answers *what is in the domain I did not
+  model and it is the reason, not an omission. `btclib-secp256k1` has
+  the property and no entry, and the property does not settle this one
+  on its own: whether a target there is allowed to reach the vendored C
+  library at all — which would be fuzzing upstream's work rather than
+  these bindings — decides what the sentinel would be run for, and
+  btclib-org/.github#342 is where that is decided. An entry taken before
+  that answer schedules a weekly run against a target nobody has agreed
+  is this project's to write. Section 7's convention tests and the
+  property tests beside them answer *does this hold over the domain I
+  described*; a fuzzer answers *what is in the domain I did not
   describe* — a length prefix larger than the buffer, a truncated
   multibyte sequence, a varint that overflows, a recursion depth that
   exhausts the stack — so neither substitutes for the other and the
@@ -2801,11 +2814,8 @@ its entry gains the tree when the workflow and the badge land together.
   suite is the ordinary test above rather than this gate.
   What fills the workflow is the tree's — which entry points are targets
   and which harness runs them, `atheris` under ClusterFuzzLite in
-  Actions or under OSS-Fuzz, and for `btclib-secp256k1` whether a target
-  is allowed to reach the vendored C library at all, which would be
-  fuzzing upstream's work rather than these bindings.
-  btclib-org/.github#342 is where that is decided; what is fixed here is
-  the name the calendar keys on and which trees owe one.
+  Actions or under OSS-Fuzz. What is fixed here is the name the calendar
+  keys on and which trees owe one.
 - **`deps-oldest` follows a tree that builds a distribution.** Its
   `requires-python` and its dependency specifiers are a claim made to
   whoever installs it, and that claim is what the resolution checks; a
