@@ -122,7 +122,8 @@ on concurrent jobs, so rebasing every waiting pull request after each
 landing spends that capacity on runs the next landing invalidates
 anyway, and delays the one pull request that is actually next: work
 spent on a pull request that is not next is work that delays the one
-that is.
+that is. The ceiling's figure is `REPOSITORY.md`'s, under *Plan-gated
+settings*, beside the command that re-derives it.
 
 Order is cheapest and least contended first, most invasive last, so that
 a large change does not sit at the head blocking everything behind it.

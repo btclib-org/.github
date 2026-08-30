@@ -3893,3 +3893,24 @@ audit has no revision to compare against.
   names the collective by reference; the alternative makes `README.md` a
   source `tests/` reads, and the `authors` bullet beside it has why the
   trees, and not this file, are the authority.
+
+### Two verbatim files say what the standard says, and the queue points home
+
+- **`.gitattributes` states the union price as section 9 does** (issue
+  #423): the driver is a checkout's and the forge does not apply it, so
+  a pull request whose changelog or release notes overlap its base is
+  reported `CONFLICTING` however cleanly the pair merges locally, and a
+  rebase on a checkout is what clears it. Every other tree is owed the
+  same file, so `tests/verbatim_test.py`'s `EXPECTED_DRIFT` names the
+  path against that issue until the copies agree.
+- **`.markdownlint.jsonc` points at section 14 for who carries it**
+  (issue #316), in place of naming the trees: an enumeration is a count,
+  and the one it replaces named a part of the trees carrying the file.
+  `EXPECTED_DRIFT` names the path against that issue on the same
+  ground.
+- **`CONTRIBUTING.md`'s *The landing queue* points at `REPOSITORY.md`'s
+  *Plan-gated settings* for the ceiling's figure** (issue #412), which
+  section 10 names as its one home per tree; the sentence stays
+  unnumbered. The path's `EXPECTED_DRIFT` entry already names
+  btclib-org/.github#281, one entry excusing the whole of a path's
+  drift, so the port carries this with the rest.
