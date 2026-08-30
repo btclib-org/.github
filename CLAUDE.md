@@ -155,9 +155,12 @@ Do not use Fable unless explicitly instructed.
   working — it is what forces an expired exemption to be noticed rather
   than left to rot — and the question it raises, *is this mine*, is
   answered by two commands: `git diff origin/main..HEAD -- tests/`
-  empty says the branch did not cause it, and the same run against a
-  `git archive origin/main` snapshot says it was already red before the
-  branch existed.
+  empty says the branch did not cause it, and the same run in a second
+  worktree at `origin/main` says it was already red before the branch
+  existed. A `git archive` snapshot cannot stand in for that worktree:
+  it has no `.git`, and `tests/__init__.py`'s `tracked` runs
+  `git ls-files` in the tree under test, so the cells that read a tree
+  through it are red there for the method's reason and not the tree's.
 - **`profile/README.md` is public in a way no other file here is**: it
   is what github.com/btclib-org renders. Treat a change to it as a change
   to the organization's front page, because it is one.

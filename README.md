@@ -1006,15 +1006,14 @@ what it holds.
     **`license-files` names `LICENSE` and `AUTHORS.md`, and nothing
     else**, in a file that declares a build backend: where nothing is
     built the key would name files into an archive that does not exist.
-    The MIT notice names *The btclib developers*, and `AUTHORS.md` is
-    where the archive says the members of that collective are listed —
-    section 14 has what the file is, the vendored attribution it carries
-    included, and why `COPYRIGHT` is not named beside it. The
-    alternative is `LICENSE` alone: what it saves is shipping a file
-    whose text is a pointer to github.com, which a reader who has the
-    archive and not the site cannot follow, and what it costs is an
-    archive that names the collective and never says where its members
-    are listed.
+    The MIT notice names a collective, and `AUTHORS.md` is where the
+    archive says its members are listed — section 14 has what the file
+    is, the vendored attribution it carries included, and why
+    `COPYRIGHT` is not named beside it. The alternative is `LICENSE`
+    alone: what it saves is shipping a file whose text is a pointer to
+    github.com, which a reader who has the archive and not the site
+    cannot follow, and what it costs is an archive that names the
+    collective and never says where its members are listed.
 
     **Nothing local refuses the classifier beside the expression**,
     which is why this is a rule rather than something a build catches.
@@ -4359,9 +4358,14 @@ no workflow.
 Section 1's uv floor, and the ceiling it may not exceed:
 
 ```shell
-gh api repos/dependabot/dependabot-core/contents/uv/Dockerfile \
-  -H 'Accept: application/vnd.github.raw' \
-  | grep -oE 'ghcr\.io/astral-sh/uv:[0-9.]+'
+if d=$(gh api repos/dependabot/dependabot-core/contents/uv/Dockerfile \
+    -H 'Accept: application/vnd.github.raw' 2>/dev/null)
+then ceiling=$(printf '%s' "$d" | grep -oE 'ghcr\.io/astral-sh/uv:[0-9.]+')
+elif gh api repos/dependabot/dependabot-core/contents/uv/Dockerfile \
+    2>&1 1>/dev/null | grep -q '(HTTP 404)'; then ceiling=absent
+else ceiling=unreadable
+fi
+printf 'ceiling=%s\n' "$ceiling"
 for r in <every repository>; do
   read_or_mark pyproject.toml
   req=$(printf '%s' "$content" \
@@ -4374,8 +4378,18 @@ for r in <every repository>; do
 done
 ```
 
-The first line is the ceiling: the uv Dependabot's own bundled updater
-ships, above which it refuses to re-lock rather than upgrading itself.
+`ceiling=` is the uv Dependabot's own bundled updater ships, above
+which it refuses to re-lock rather than upgrading itself. It is read
+outside the organization, where `read_or_mark` builds no path, so the
+reading is spelled out with the helper's markers: `absent` is the
+`Dockerfile` gone from that path and an empty value is its image line
+no longer matching the pattern — either is `dependabot-core` moving
+what this block rests on, and is acted on the day it prints — where
+`unreadable` is the call not answering, and is asked again. The
+alternative gives `read_or_mark` a second argument naming another
+repository; what it costs is every call inside the organization
+carrying a default for the one outside it.
+
 `lock=yes` names a tree that owes the floor; `floor=` empty beside it is
 the finding, a tree committing a lock with nothing capping the uv that
 reads it. `lock=no` owes no floor, so an empty `floor=` beside it is
