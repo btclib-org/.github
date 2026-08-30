@@ -244,6 +244,19 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "portanode",
         ),
     ),
+    (
+        583,
+        "test_lychee_checks_a_link_into_a_heading",
+        (
+            "bbt",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-benchmarks",
+            "btclib-node",
+            "btclib-secp256k1",
+            "portanode",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 

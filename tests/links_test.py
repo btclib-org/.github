@@ -7,8 +7,10 @@
 `links.yml` gates nothing, so its whole value is that a red run means a
 destination has moved: a flag that makes a live host read as dead, or
 that promises a cache no step keeps, costs an investigation and buys
-nothing. Both are read from the action's `args:` rather than grepped,
-the arguments being one folded string the grep would have to reassemble.
+nothing, and a question the arguments never ask leaves a move
+unreported. The flags are read from the action's `args:` rather than
+grepped, the arguments being one folded string the grep would have to
+reassemble.
 """
 
 from __future__ import annotations
@@ -144,6 +146,33 @@ def test_lychee_accepts_every_success_code(
     assert not lost, (
         f"success codes --accept turns into errors: {ranges(lost)}; "
         + by_hand(repository, "grep -o -- '--accept [^ ]*' .github/workflows/links.yml")
+    )
+
+
+def test_lychee_checks_a_link_into_a_heading(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """`--include-fragments` is passed, so an anchor is a link too.
+
+    A fragment is checked only when asked for, and the forge serves the
+    page whether or not the fragment names a heading on it -- so a
+    heading renamed in one tree breaks the links into it with nothing
+    red in that tree. The run that would notice is the one over the
+    file holding the link, which is why every tree passes the flag and
+    not only the tree whose headings are cited most.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    step, _ = lychee(repository, trees)
+    assert "--include-fragments" in arguments(step), (
+        "lychee checks a fragment only when asked, and a link into "
+        "another tree's heading is checked by this tree's run alone; "
+        + by_hand(
+            repository,
+            "grep -c include-fragments .github/workflows/links.yml",
+        )
     )
 
 

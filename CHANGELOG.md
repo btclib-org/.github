@@ -3983,3 +3983,24 @@ audit has no revision to compare against.
   a `test.yml` carrying an aggregate, `bitcoin-core-rpc`, and the two
   observations are `test: every job passed` reported on that tree's own
   pull request and skipped in a release run.
+
+### A workflow that cancels nothing omits `closed`, and lychee checks anchors
+
+- **The `closed` type is there for the cancellation, and a workflow
+  whose group sets `cancel-in-progress: false` cancels nothing**
+  (closes #513): section 10 now says such a workflow omits the type and
+  says beside its trigger that it does, which is how
+  `bitcoin-core-rpc`'s and `btclib-node`'s `pypi-install.yml` read it.
+  The alternative weighed and declined keeps the list flat and leaves
+  the job's `github.event.action != 'closed'` to absorb the event: a run
+  scheduled for every close in order to decline its own work, with the
+  reason the type is inert stated nowhere the trigger block shows.
+- **`--include-fragments` is every `links.yml`'s and not this
+  repository's alone** (issue #583): the anchors a renamed heading here
+  breaks are cited in the trees that link to it, so the run that would
+  notice is theirs, and `tests/links_test.py` now asks each tree's
+  lychee step for the flag. The alternative weighed and declined has a
+  tree check the anchors of its own headings only, which cannot see who
+  links into them. A tree that does not pass the flag yet carries a
+  backlog row against the issue, so its cell is a strict expected
+  failure until the port lands.
