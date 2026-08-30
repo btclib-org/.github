@@ -1,5 +1,24 @@
 # The btclib-org repository standard
 
+<!-- The badges are what the reader decides with, one property of the
+tree per badge, in the groups section 2 below fixes and in its order:
+the gates first -- pre-commit.ci, then the lint workflow -- and the
+sentinels after them in the order section 10's calendar schedules them,
+the day and the hour each one owns being that section's and not
+restated here. Which sentinels this tree carries is section 10's
+record: `links` is every repository's and `alignment` is this tree's,
+and the record gives it no other, so there is no Scorecard badge and
+no `scorecard.yml` behind it. There is no `test` badge either, this
+tree's suite running inside `alignment.yml` and section 2 giving a
+suite's badge to the workflow that runs it; and nothing keyed on
+publishing or on a documentation build, this tree doing neither. One
+badge per line keeps a change to one line and every line inside MD013,
+whose 80 columns bind only where a space follows them. -->
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/btclib-org/.github/main.svg)](https://results.pre-commit.ci/latest/github/btclib-org/.github/main)
+[![lint workflow status](https://github.com/btclib-org/.github/actions/workflows/lint.yml/badge.svg)](https://github.com/btclib-org/.github/actions/workflows/lint.yml)
+[![links workflow status](https://github.com/btclib-org/.github/actions/workflows/links.yml/badge.svg)](https://github.com/btclib-org/.github/actions/workflows/links.yml)
+[![alignment workflow status](https://github.com/btclib-org/.github/actions/workflows/alignment.yml/badge.svg)](https://github.com/btclib-org/.github/actions/workflows/alignment.yml)
+
 **This repository keeps the standards the btclib-org projects have in
 common: it states them, and it is where they are kept true.** The
 statement is this file. Keeping it true is the issue tracker beside it,
@@ -451,8 +470,8 @@ neither of them the tree's own taste.
 What that gives up is the head as a summary. A badge per sentinel means
 the row grows with section 10's calendar rather than staying the handful
 a reader takes in at once, so the tree running the most sentinels
-carries the longest row and this repository, which today opens with no
-badge at all, acquires one. That is the trade and it is deliberate: a
+carries the longest row and the tree running the fewest carries a row
+all the same. That is the trade and it is deliberate: a
 row long enough to be an audit is worth more here than a row short
 enough to be decoration, because the rule below is what makes it an
 audit. A tree that wants the shorter row drops a sentinel, its badge

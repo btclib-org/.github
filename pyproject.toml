@@ -50,6 +50,10 @@ keywords = [
 # says so for a developer running this by hand.
 test = [
     "pytest",
+    # section 7's default, taken rather than declined: tests/README.md
+    # says what the shuffle guards in this suite and what argued against
+    # it, and `-p no:randomly` is how a failure is reproduced in order
+    "pytest-randomly",
     # a workflow file is read with a parser and not with a regex: what
     # this suite asks of one is where its `cron:` entries are, which is
     # a question about the document's shape rather than about a line
