@@ -3871,3 +3871,25 @@ audit has no revision to compare against.
   attractive is already answered two paragraphs above, where an engine
   publishing no source archive for the developer's platform carries the
   marker naming its own.
+
+### Three lines of prose agree with their mechanism
+
+- **Section 15's uv ceiling is read with the markers `read_or_mark`
+  gives** (closes #440): the line piped `gh api` into a `grep -oE`, so a
+  call that failed and a `Dockerfile` whose image line stopped matching
+  both left stdout blank and both exited 1. The read prints `ceiling=`
+  with the value, `absent` or `unreadable`, and the prose beside it says
+  which is asked again and which is `dependabot-core` moving what the
+  block rests on. The alternative, a second argument to `read_or_mark`
+  naming another repository, is declined beside it.
+- **`CLAUDE.md` names a worktree at `origin/main` as the baseline for a
+  red that may not be the branch's** (closes #442): a `git archive`
+  snapshot has no `.git`, and `tests/__init__.py`'s `tracked` runs
+  `git ls-files` in the tree under test, so the snapshot is red where
+  `origin/main` is not.
+- **Section 3's `license-files` bullet no longer spells the collective's
+  name** (closes #557): the literal was a copy no command compared, where
+  `COPYRIGHT` is the file the suite derives the name from. The sentence
+  names the collective by reference; the alternative makes `README.md` a
+  source `tests/` reads, and the `authors` bullet beside it has why the
+  trees, and not this file, are the authority.
