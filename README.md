@@ -2474,8 +2474,10 @@ owns a day and an hour, the repository owns the minute:
 | `os-macos` | Thursday | 05 |
 | `os-ubuntu` | Friday | 04 |
 | `os-windows` | Friday | 05 |
+| `homepage` | Saturday | 03 |
 | `links` | Saturday | 04 |
 | `alignment` | Saturday | 05 |
+| `sdist-rebuild` | Sunday | 03 |
 | `codeql` | Sunday | 04 |
 | `scorecard` | Sunday | 05 |
 
@@ -2489,6 +2491,7 @@ owns a day and an hour, the repository owns the minute:
 | `.github` | 24 |
 | `portanode` | 28 |
 | `bbt` | 32 |
+| `btclib-org.github.io` | 36 |
 
 **The rows are in the order of what they ask about**, family by family:
 the data a tree ships and did not write, the depth its suite is tested
@@ -2646,7 +2649,8 @@ nothing by that row.
 - `integration-hwi` — `btclib`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
-- `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`;
+- `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `btclib-node`;
 - `deps-oldest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
 - `py-arm-authority` — `btclib`;
@@ -2656,8 +2660,10 @@ nothing by that row.
   `btclib-benchmarks`, `btclib-node`;
 - `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-node`;
+- `homepage` — `btclib-org.github.io`;
 - `links` — every repository;
 - `alignment` — `.github`;
+- `sdist-rebuild` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`;
 - `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
 - `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
@@ -2810,6 +2816,41 @@ its entry gains the tree when the workflow and the badge land together.
   and whether the oldest ones it declares install at all.
   btclib-org/.github#323 carries the debt until the first of them
   schedules the workflow.
+- **`sdist-rebuild` follows a tree that publishes an attestation.** The
+  attestation vouches for bytes, so a released tag either rebuilds to
+  the sdist that was signed or it vouches for something no rebuild
+  answers for: section 12 states that property, and each tree's
+  `RELEASING.md` names the steps a rebuild replays. What the sentinel
+  compares against is the digests the attestation carries,
+  `gh attestation verify` over the rebuilt file passing only where the
+  two agree; reading the index's own digests for the release instead is
+  the rejected alternative, those saying what PyPI holds rather than
+  what was signed. Cutting the comparison into the release is the
+  other, and there it is a build against itself in the same job on the
+  same image: what moves between a release and the day somebody
+  verifies is a backend, a runner image or a toolchain, which is the
+  interval a weekly run covers and a release-time step has not reached.
+  The compiled wheel is outside the property for the reason section 12
+  gives, so the row is the sdist's rather than every file a rebuild
+  produces with one tree's exemption written into it. A rebuild that
+  disagrees is an issue against the tree it ran in.
+  btclib-org/.github#523 carries the debt until the first of the three
+  schedules the workflow.
+- **`homepage` follows a tree serving a page generated from another
+  tree's file.** `btclib-org.github.io`'s `index.md` is derived from
+  `profile/README.md` here, and what the sentinel asks is whether the
+  served copy still says what that file says. The drift it watches for
+  arrives from a landing in this tree rather than from anything the
+  serving tree does, so no pull request there is the occasion to ask.
+  Sending a `repository_dispatch` from here when `profile/README.md`
+  lands is the rejected alternative: it is the exact signal rather than
+  a poll, and it wants a credential with write access to that tree,
+  which nothing here holds. Asking it from this suite is the other, and
+  what it costs is a red on `main` here for a drift another repository
+  owns. The minute this row gives that tree is `links`'s there too,
+  which it does not carry yet: btclib-org/btclib-org.github.io#1.
+  btclib-org/.github#558 carries the debt until that tree schedules the
+  workflow.
 
 ### The aggregate job, and the required check
 
