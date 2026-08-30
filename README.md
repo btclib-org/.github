@@ -2855,14 +2855,34 @@ request, and the rule follows them.
   `needs` the whole of. The count is what says so rather than a name,
   a name being what a rename moves. The empty join has no counterpart
   in this shape, there being no join.
-- **The listing's unit is the run and not the workflow**, so the shape
-  belongs where those are the same thing. A gate `release.yml` reuses
-  through `workflow_call` is not: the caller's jobs and the called
-  workflow's are one run, every row carries the caller's
-  `workflow_name`, and the publishing jobs are unfinished exactly
-  because they wait on this one. btclib-org/.github#474 is where a
-  reused gate is answered, and a workflow inside it does not take this
-  shape until it is.
+- **The listing's unit is the run and not the workflow.** A gate
+  `release.yml` reuses through `workflow_call` has no listing of its
+  own: the caller's jobs and the called workflow's are one run, every
+  row of it carries the caller's `workflow_name`, and the publishing
+  jobs are unfinished exactly because they wait on this one, so the
+  count above can never be the aggregate alone.
+- **The aggregate declines the reused run, on an input the caller
+  passes.** The reusable workflow declares a `workflow_call` input
+  `reused`, `type: boolean` with `default: false`; the calling job in
+  `release.yml` passes it `true` in its `with:` block; and the aggregate
+  carries `!inputs.reused` in the `if:` beside the conditions above. A
+  run that is not a call leaves the input unset, so the aggregate runs
+  wherever the listing is the workflow's own — which is where branch
+  protection reads it, a release being a tag push or a dispatch that no
+  rule waits on. What gates the release instead is the caller's own
+  `needs:` on the calling job: `bitcoin-core-rpc`'s `release.yml` run
+  `33236701141` had failing cells in the platform workflows it called,
+  and every publishing job of it reports `skipped`.
+- **The input carries the signal because nothing else in a called run
+  states it.** `github.event_name` is the caller's event —
+  `btclib-org/btclib`'s run `32458459305` was dispatched, and the
+  `changes` job of the workflow it called printed `workflow_dispatch` —
+  as `github.workflow` is the caller's name, which is why *What every
+  workflow does* above names a concurrency group literally; and no field
+  of a job row names the file that wrote it. Detecting reuse without the
+  input is therefore an inference over the caller's own values. The
+  other rejected alternative reads `needs.*.result` where the listing is
+  not the workflow's own, which reinstates btclib-org/btclib#1001.
 - `skipped` is legitimate on purpose: when the run was superseded by its
   concurrency group, and when a `changes` job decided the diff touches
   nothing those jobs read. The listing reports it as a conclusion like
