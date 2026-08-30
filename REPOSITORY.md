@@ -6,15 +6,14 @@ is one nobody can check; recorded this way, a drift is one command away
 from being seen.
 
 [Section 11 of the standard][s11] says every repository writes its
-settings down here, and until now this was the repository with nowhere to
-read its own back — the one holding the standard being the one exempt
-from it.
+settings down here, this one included: the repository that holds the
+standard is not exempt from it.
 
-The rules and the settings live *outside* the tree: nothing below is
-recoverable by reading the repository. What is recorded is the settings
-the standard asks about — the ones [section 16's checklist][s16] sets on
-a new repository, and the ones a section of `README.md` states a rule
-for — together with whatever a call quoted for one of those answers
+The rules and the settings live *outside* the tree. What is recorded is
+the settings the standard asks about — the ones [section 16's
+checklist][s16] sets on a new repository, the ones a section of the
+standard states a rule for, and the ones a behaviour it describes rests
+on — together with whatever a call quoted for one of those answers
 alongside it. That is this file's scope, and *What this file passes over*
 at the foot says what falls outside it.
 
@@ -229,6 +228,9 @@ which is a settings change and a landing rather than a call.
 [Merge method][s11-merge] asks for, and which of the two titles lands is
 that subsection's rule.
 
+Auto-merge is on, and [the landing that subsection describes rests on
+it][s11-merge].
+
 `delete_branch_on_merge` fires on its own, every landing here being a
 merged pull request, so a branch still standing is one that was closed
 rather than merged.
@@ -237,9 +239,8 @@ rather than merged.
 
 ```shell
 gh api repos/btclib-org/.github \
-  --jq '{wiki: .has_wiki, projects: .has_projects, issues: .has_issues,
-         visibility: .visibility}'
-# {"issues":true,"projects":true,"visibility":"public","wiki":true}
+  --jq '{issues: .has_issues, visibility: .visibility}'
+# {"issues":true,"visibility":"public"}
 ```
 
 Issues are where this organization's cross-repository findings live, and
@@ -251,24 +252,6 @@ Public matters more here than elsewhere. This repository supplies the
 community health files GitHub shows for any public repository of the
 organization that has none of its own, and it does that only while it is
 public and named `.github`.
-
-The wiki and the projects board are on, and that is not this
-repository's divergence: `btclib-benchmarks` is the sibling that turns
-both off.
-
-```shell
-for r in btclib btclib-node btclib-secp256k1 bbt portanode \
-         bitcoin-core-rpc btclib-benchmarks; do
-  gh api "repos/btclib-org/$r" \
-    --jq '[.name, (.has_wiki | tostring), (.has_projects | tostring)]
-          | @tsv'
-done
-# btclib-benchmarks answers false twice, and every other name true twice
-```
-
-The standard states no rule about either, so no answer to them is a
-decision here, and settling it in one direction is a settings change with
-no diff to review.
 
 ## Topics
 

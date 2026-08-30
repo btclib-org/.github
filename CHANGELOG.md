@@ -4004,3 +4004,56 @@ audit has no revision to compare against.
   links into them. A tree that does not pass the flag yet carries a
   backlog row against the issue, so its cell is a strict expected
   failure until the port lands.
+
+### Section 11 draws the perimeter a `REPOSITORY.md` records
+
+- **A copy records a setting a behaviour of the standard rests on, not
+  only one a section states a rule for** (issue #566): `allow_auto_merge`
+  is inside by that limb, *Merge method*'s landing being auto-merge
+  pressing the only enabled button, and section 16's checklist turns it
+  on with the squash-only setting it already names. The rejected
+  alternative leaves the setting to each repository as a convenience, and
+  what it costs is a section describing a landing path the tree no longer
+  offers with no command anywhere to catch it.
+- **`has_wiki` and `has_projects` are outside it, and a copy neither
+  reads them back nor explains an answer to them** (issue #550): the
+  standard states no rule about either and says so beside the perimeter,
+  which is the one place a copy has to read to know. The rejected
+  alternative records each with a sentence saying no rule is stated, so
+  that a reader sees the answer and is told it is nobody's divergence;
+  what it costs is a file growing with GitHub's API rather than with the
+  standard, in a wording each copy invents for itself.
+- **`has_issues` is inside** (issue #550): `CONTRIBUTING.md` sends an
+  issue about one repository alone to that repository's own tracker and
+  section 16's checklist gives every repository an `ISSUE_TEMPLATE/`, so
+  a behaviour the standard describes rests on the setting.
+- **A copy reads `.visibility` back, and records nothing for `.fork`**
+  (issue #584): the sentinel's run rests on the repository being public,
+  which is the limb above, where nothing sets `.fork` — a repository
+  arrives as one or it does not. The rejected alternative keeps both
+  halves of section 10's bar out of every copy on the ground that the bar
+  is section 10's to state, and what it costs is the flip: the sentinel's
+  row and its badge stand while the run stops producing a score, and the
+  file a reader restores the repository from says nothing.
+- **A copy does not claim that nothing it records has another form in the
+  tree** (issue #571): the topics are section 3's `keywords`, a releasing
+  tree's `.homepage` is the `[project.urls]` field of that name, and a
+  Pages custom domain has the root `CNAME` carrying the same value, so in
+  a tree holding one of those the record is a second copy read back for
+  comparison. The rejected alternative is the blanket clause,
+  one sentence shorter and refuted in such a tree's own file two sections
+  further down.
+- **A copy carries all three limbs of the scope sentence in the
+  standard's own words** (issue #582): `README.md` written into the
+  second names a sibling's own file, and a bare `it` there reaches for
+  section 16's checklist. The rejected alternative leaves the wording to
+  each copy, and what it costs is a reading per tree of a claim they are
+  all making once.
+- **This repository's own `REPOSITORY.md` takes the same answers**: it
+  already reads `allow_auto_merge` and `.visibility` back and now states
+  the first, drops the wiki and the projects board along with the
+  comparison against the siblings, and takes the scope sentence's
+  wording. The reason recorded beside `.visibility` is this repository's
+  own — the community health files it supplies are shown while it is
+  public — the sentinel section 10's bar is about not being one it
+  carries.
