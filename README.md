@@ -4061,6 +4061,48 @@ corrected in none of the ones that shipped.
     invocation is written to take a second reference pair rather than to
     be replaced by one.
 
+- **A job named in `needs:` that is not a gate takes `always()` in the
+  dependent's own guard**, beside an explicit `needs.<job>.result ==
+  'success'` for each listed job that is one. The public-surface check
+  above is such a job: it exits non-zero on any break, which is what a
+  cycle before 1.0 is expected to produce, and `needs:` alone refuses to
+  start a job whose listed dependency failed or was skipped. Listing it
+  orders the reading before the upload, and the guard is what says the
+  reading's result decides nothing. `always()` here and not the
+  `!cancelled()` section 10 gives an aggregate: what that section weighs
+  `always()` against is a superseded run turning a required check red,
+  and a release workflow, triggered by a tag push and a dispatch,
+  produces no required check.
+- **The widening does not propagate, so each dependent states it for
+  itself.** A bare `needs:` reads back through the listed job's own
+  `needs:` chain, so a job two hops from the non-gating one is skipped
+  although the dependency it names succeeded — which is how a
+  post-publish check comes to be skipped by a job it does not name.
+  Putting `always()` on the non-gating job itself is the rejected
+  alternative and moves nothing: what a dependent reads is that job's
+  result, and a job that ran and failed stops it exactly as a skipped one
+  does. Dropping it from `needs:` is the other, and it costs the
+  ordering: the surface is then read beside the upload rather than before
+  it, which is a reading arriving too late to bear on the release it was
+  written for.
+- **A release run is audited job by job for `skipped`, not for red.** A
+  failed job is loud; a skipped one carries no step, starts and completes
+  in the same second, and gives a reader looking for a failure nothing to
+  look at, so a release whose post-publish check never ran reads as a
+  release that finished. What answers is the run's own job listing — the
+  endpoint section 10's aggregate reads from inside its run, asked here
+  of a run that has ended:
+
+    ```shell
+    gh api --paginate \
+      "repos/{owner}/{repo}/actions/runs/<id>/jobs?per_page=100" \
+      --jq '.jobs[] | [.conclusion, (.steps|length), .name] | @tsv'
+    ```
+
+    read against the jobs the release was expected to hold. Auditing for
+    red alone is the rejected alternative, and it is what a reader does
+    unprompted: it finds whatever went wrong and says nothing about what
+    the failure took with it.
 - **The smoke test runs again in the release job, without constraints**,
   after the upload rather than before: installing a dependency executes
   its code, and a compromised one must not reach a `dist/` still to be
@@ -4069,6 +4111,42 @@ corrected in none of the ones that shipped.
   published artifact *works*, not whether it installs — an import runs
   `__init__.py` alone, where a data file missing from the wheel is opened
   only at the first call that needs it.
+- **That workflow is where the post-publish check lives, called by the
+  release as a job of its own, and never a step appended to a publish
+  job.** A publish job downloads the distribution files and hands them to
+  `pypa/gh-action-pypi-publish`, so nothing in it provisions a toolchain:
+  what the runner carries is whatever its image ships and nothing the
+  tree chose — no `uv`, and an interpreter at the image's version rather
+  than at the one `requires-python` asks for. A step appended there
+  provisions its own or fails in one of two ways: on the command's name
+  where what it calls is `uv`, `127` being the shell's answer to a
+  command that is not there, and on the interpreter's version where it
+  is not — or, where `requires-python` admits the image's version, it
+  passes on an interpreter the tree did not choose, which says nothing.
+  Neither failure names the runner as its cause. The reusable workflow
+  provisions its own toolchain, so nobody placing the check there has
+  to know either.
+- **Placement also decides whether the failure is legible.** Both
+  placements run after the upload, so either can only report an act
+  already irreversible — a filename on the index is not retractable. A
+  job that fails is a row of its own in the listing above, red beside a
+  publish job that stayed green; a step that fails turns the publish job
+  itself red, and every job guarded on that job's `success` skips with
+  it — the attestation and the GitHub release among them — leaving a
+  release published, unattested and unannounced behind one red job that
+  names none of it.
+- **The check reads the index for the version the tag names**, so a first
+  release is no different from any other: the call passes the tag, the
+  wait holds until the index serves that version, and it fails on its
+  deadline rather than let the matrix install the version the tag
+  replaces. Inlining the check because the index has nothing to read
+  before a first release is the rejected alternative, and what it answers
+  is a different run: the release's own call runs after its upload, and
+  what has nothing to read is the schedule, which passes no version,
+  waits for nothing and installs whatever the index serves at the time. A
+  rehearsal has no such job either — the check reads the release index,
+  and what a rehearsal exercises is the publish step rather than what an
+  index then serves.
 
 Worked answers, each named for the property of its distribution that
 decides it rather than as a shape to copy, and each re-derived by section

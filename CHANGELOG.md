@@ -4111,3 +4111,32 @@ audit has no revision to compare against.
   minute, which section 10 reads as the entry's gap and not the tree's.
   What that issue stays open for is `os-windows`, whose entry names
   `btclib-node` where that tree carries no windows workflow.
+
+### Section 12 says what a release run's `needs:` and its post-publish check are
+
+- **A job named in `needs:` that is not a gate is opted back in by the
+  dependent's own `always()`, and the widening does not propagate**
+  (issue #484): each dependent states it for itself, with the explicit
+  `needs.<job>.result == 'success'` beside it, because a bare `needs:`
+  reads back through the listed job's own chain. The audit lands beside
+  it: a release run is read job by job for `skipped` rather than for
+  red, a skipped job carrying no step and leaving a release that never
+  finished reading as one that did. `always()` on the non-gating job
+  itself and dropping it from `needs:` are the rejected alternatives,
+  the first changing nothing a dependent reads and the second costing
+  the ordering the listing buys. The publishers whose guards do not
+  carry the shape yet are that issue's other half.
+- **The post-publish check is a job of the release run calling the
+  reusable install workflow, and never a step appended to a publish
+  job** (closes #488): a publish job's runner carries what its image
+  ships and nothing the tree chose, so an appended step provisions its
+  own toolchain or fails on the missing `uv` at `127` or on an
+  interpreter `requires-python` does not admit, and placement decides
+  whether the failure is legible — a failing job is red beside a publish
+  job that stayed green, where a failing step turns the publish job
+  itself red and takes the attestation and the GitHub release down as
+  skips with it. Inlining the check because the
+  index has nothing to read before a first release is the rejected
+  alternative: the release's own call runs after its upload and waits
+  for the version its tag names, so what has nothing to read is the
+  schedule.
