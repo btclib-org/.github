@@ -3914,3 +3914,23 @@ audit has no revision to compare against.
   unnumbered. The path's `EXPECTED_DRIFT` entry already names
   btclib-org/.github#281, one entry excusing the whole of a path's
   drift, so the port carries this with the rest.
+
+### Section 14 decides `.gitignore` per repository
+
+- **What a tree ignores is what its own build and tools write**
+  (issue #39): a package that compiles an extension ignores the object
+  files and the shared library it links, a tree whose `dist` job writes
+  a bill of materials ignores the directory it lands in, and a tree that
+  installs nothing has no build output to name. Section 14 classified
+  the file neither way while section 16's first checklist had a new
+  repository copy it; that checklist now has `.python-version` and
+  `.gitignore` written for the tree rather than copied, both being
+  decided per repository.
+- **The rejected alternative is a verbatim `.gitignore` owed by every
+  repository**, holding the union of what any tree writes: it would be a
+  bullet `tests/verbatim_test.py` compares, and it would grow with every
+  repository added while telling a reader of one tree nothing about
+  which of its entries that tree needs.
+- **The header sentence a `check_vendored_vectors.py` copy owes names
+  the siblings of that name** (issue #446), the singular it carried
+  having presumed exactly one other copy.
