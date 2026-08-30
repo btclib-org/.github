@@ -228,9 +228,9 @@ def repositories() -> list[str]:
 def settings(repositories: list[str]) -> dict[str, dict[str, Any]]:
     """Ask the API for the repository document of every repository.
 
-    One document answers two of this suite's questions -- the topics are
-    in it and so is the merge method -- so it is fetched here rather than
-    once per module.
+    One document answers more than one of this suite's questions -- the
+    topics are in it, the merge method and the homepage -- so it is
+    fetched here rather than once per module.
 
     :param repositories: the names to ask about.
     :returns: each name against its repository document.
