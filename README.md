@@ -3714,10 +3714,48 @@ Where a repository serves a site from its own root, the source, the
 build type and the CNAME are settings rather than files, and a workflow
 builds the same site so that a failure is a red check rather than a page
 served broken. Read the Docs' `latest` follows the default branch,
-`stable` is the highest release tag, an automation rule activates each
-new tag, and the webhook has to carry the secret the project's own
-integration page issued — one added by hand is refused with a 400 that
-GitHub records nowhere else.
+`stable` is the highest release tag, and an automation rule activates
+each new tag. The project's public API answers for each of those
+without a token:
+
+```shell
+p=https://app.readthedocs.org/api/v3/projects/<slug>
+curl -s "$p/"                        # repository.url, default_branch
+curl -s "$p/versions/?active=true"   # latest, stable, the active tags
+```
+
+`repository.url` in the first says which repository the slug serves. The
+second comes back with `latest` as a branch and `stable` as a tag whose
+`ref` is the highest release tag, beside the tags the rule has
+activated — the rule's result rather than the rule itself, which that
+API does not expose: `automation-rules/` answers 404 where an endpoint
+needing a token answers 401.
+
+**What connects a repository to Read the Docs is the organization-wide
+`read-the-docs-community` GitHub App, not a per-repository webhook**, so
+what a repository records on the GitHub side is the installation and an
+empty hook list:
+
+```shell
+gh api orgs/<org>/installations \
+  --jq '.installations[] | select(.app_slug == "read-the-docs-community")
+        | [.app_slug, .repository_selection]'
+gh api repos/<org>/<repo>/hooks --jq length
+```
+
+`repository_selection: all` is what makes one installation the
+connection for every repository at once rather than a setting each tree
+carries its own copy of. A hook the second command finds is stale and is
+deleted rather than repaired, the App already doing the whole of what it
+was for; btclib-org/bitcoin-core-rpc#291 records one that was found and
+removed.
+
+The per-repository webhook is the rejected alternative, and the secret
+is why: Read the Docs issues it on the project's own integration page
+and GitHub returns it masked, so nothing read back from the repository
+says whether a hook still carries the right one, and one that has
+stopped delivering sits `active: true` while the App carries the build
+regardless.
 
 The **slug** is what serves the site, and it is not the project's name:
 renaming the project leaves the slug where it was, so a repository
