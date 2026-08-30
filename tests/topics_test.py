@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""A repository's topics and its package's keywords name the same things.
+"""A repository's topics and its `keywords` name the same things.
 
 Both are what somebody searching finds the project by, and they live in
 two places that cannot see each other: one is a repository setting, the
@@ -43,27 +43,26 @@ def topics(settings: dict[str, dict[str, Any]]) -> dict[str, set[str]]:
 
 
 def keyworded(pyprojects: dict[str, dict[str, Any]]) -> dict[str, list[str]]:
-    """Return the keywords of every package, whether it declares any or not.
+    """Return the keywords of every tree, whether it declares any or not.
 
-    A package with no `keywords` line answers `[]` here rather than
-    dropping out, because the two ways of having none are the same fact
-    and neither excuses the repository from having no topic either.
-    Dropping out is what a package would do to be exempt from the
-    comparison below, and deleting a line is not how a rule is opted out
-    of.
+    A tree with no `keywords` line answers `[]` here rather than dropping
+    out, because the two ways of having none are the same fact and
+    neither excuses the repository from having no topic either. Dropping
+    out is what a tree would do to be exempt from the comparison below,
+    and deleting a line is not how a rule is opted out of.
 
-    Which trees are packages is what `[build-system]` says: a
-    `pyproject.toml` that builds nothing describes a suite or a tool, has
-    nothing on an index for anybody to search, and section 3's rule about
-    keywords is not about it.
+    Which trees owe the key is what the `[project]` table says, section
+    3 turning the rule on that table and not on the index: a tree that
+    builds nothing is asked the same question, its topics being what
+    github.com shows a reader either way.
 
     :param pyprojects: the parsed files.
-    :returns: each package against its keywords, in file order.
+    :returns: each tree against its keywords, in file order.
     """
     return {
-        repository: parsed.get("project", {}).get("keywords", [])
+        repository: parsed["project"].get("keywords", [])
         for repository, parsed in pyprojects.items()
-        if "build-system" in parsed
+        if "project" in parsed
     }
 
 
@@ -71,12 +70,12 @@ def test_the_topics_are_the_keywords(
     pyprojects: dict[str, dict[str, Any]],
     topics: dict[str, set[str]],
 ) -> None:
-    """Every package's topics are its keywords, capped and as a set.
+    """Every declaring tree's topics are its keywords, capped and as a set.
 
-    Both directions at once: a keyword no topic answers to is the index
+    Both directions at once: a keyword no topic answers to is the file
     knowing what GitHub does not, and a topic no keyword answers to is
-    the other way round. A package with neither is aligned, and a package
-    with one and not the other is the finding whichever side is empty.
+    the other way round. A tree with neither is aligned, and a tree with
+    one and not the other is the finding whichever side is empty.
 
     :param pyprojects: the parsed files.
     :param topics: the topics of each repository.
@@ -96,11 +95,10 @@ def test_the_topics_are_the_keywords(
 def test_a_repository_has_topics(repository: str, topics: dict[str, set[str]]) -> None:
     """A reader arriving from a search arrives at every repository.
 
-    The rule above derives the topics from `keywords` and so reaches a
-    package alone; a repository with no `keywords` to derive them from
-    is the one with none set, and btclib-org/.github#105 is where what
-    such a repository owes is being decided. What is asked meanwhile is
-    the floor either answer shares: that there is at least one.
+    The rule above derives the topics from `keywords`, so a repository
+    with no `pyproject.toml` to declare them in is outside it. What is
+    asked here is the floor that holds either way: that there is at
+    least one.
 
     :param repository: the repository asked about.
     :param topics: the topics of each repository.

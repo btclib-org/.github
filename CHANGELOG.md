@@ -4185,3 +4185,33 @@ audit has no revision to compare against.
   calendar and on a dispatch in both trees the record names, so an
   example of a sentinel charging a pull request for its own work would
   come out of history, which section 9 keeps in two files of its own.
+
+### Section 3 reaches a tree that ships nothing, and every written name
+
+- **`keywords` turns on the `[project]` table and not on the index**
+  (closes #465): a tree that uploads nothing declares the list all the
+  same, so that the topics github.com shows have something in the tree
+  to be read against, and `tests/topics_test.py` selects on that table
+  where it selected on `[build-system]`. The rejected alternative keys
+  the rule on publishing, which is how the topics of a tree with no
+  upload came to answer to no list at all. This `pyproject.toml`
+  declares its own topics as keywords, and section 16's checklist keys
+  the absence it already described on there being no `pyproject.toml`
+  rather than on a file that declares no `keywords`.
+- **A distribution name written for somebody to copy out is spelled
+  canonically wherever it is written** (issue #581), not only in a
+  requirement: a flag's value, an install target, a deployment
+  environment's `url:`, the message on a release tag. Position is all
+  `tests/names_test.py` can read and these sites have none, so the rule
+  is stated and named a reader's catch rather than left to be answered a
+  line at a time per tree.
+- **A PyPI page is linked as `https://pypi.org/project/<name>/`**, the
+  form `https://pypi.org/p/<name>` redirects to: the site serves either
+  spelling of the name and redirects neither, so the spelling shown is
+  the writer's and the rule above reaches it. The short form is the
+  rejected alternative, saving the characters and costing the redirect.
+- **This tree declines of section 3 the metadata only an index reads,
+  and no more** (closes #602): its `CLAUDE.md` and section 2's row said
+  section 3 describes a file this `pyproject.toml` is not, which read as
+  the whole of it while `authors` and now `keywords` bind the tree; each
+  now names the half declined.
