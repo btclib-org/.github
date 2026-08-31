@@ -215,7 +215,7 @@ repos:
   # interpolated into a shell script, a trigger that runs a fork's code
   # with write access
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.29.0
+    rev: v1.30.0
     hooks:
       - id: zizmor
         # offline is what it does by default, said out loud: it warns
@@ -230,7 +230,7 @@ repos:
         # declares, so passing --offline alone would drop it
         args: [--offline, --no-progress]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.3
+    rev: v0.16.5
     hooks:
       - id: ruff-check
         name: ruff check (in place fixes)
@@ -257,7 +257,7 @@ repos:
         pass_filenames: false
         require_serial: true
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.5
+    rev: 0.12.7
     hooks:
       # keep uv.lock in sync with pyproject.toml
       - id: uv-lock
