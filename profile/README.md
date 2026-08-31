@@ -1,14 +1,14 @@
-# btclib-org
+# btclib.org
 
 Bitcoin cryptography in Python, written to be read.
 
-[btclib](https://btclib.org) is a Python3
+[btclib](https://btclib.readthedocs.io/) is a Python
 [type annotated](https://docs.python.org/3/library/typing.html) library
 intended for teaching, learning and using bitcoin, focused on elliptic
 curve cryptography and bitcoin's blockchain. It began as a teaching tool
 for Ferdinando Ametrano's *[Bitcoin and Blockchain
 Technology](https://www.ametrano.net/bbt/)* course — taught at the
-University of Milano-Bicocca, Politecnico di Milano, the University of
+Università di Milano-Bicocca, Politecnico di Milano, Università Statale di
 Milano, and ESSEC (Paris) — and is used in production today. It is still
 marked beta, because it is still refactored whenever that makes it
 clearer.
@@ -58,11 +58,15 @@ they say that too.
   and Electrum on a portable external disk, shared between macOS, Windows
   and Linux.
 - **[.github](https://github.com/btclib-org/.github)** — this page, and
-  the standard the repositories above are built and kept to. Its issue
-  tracker is where a repository's drift from that standard is filed,
-  since a divergence between two repositories belongs to neither.
+  the standard every repository of the organization is built and kept
+  to. Its issue tracker is where a repository's drift from that standard
+  is filed, since a divergence between two repositories belongs to
+  neither.
+- **[btclib-org.github.io](https://github.com/btclib-org/btclib-org.github.io)**
+  — the organization site: this page, served at btclib.org from a copy
+  generated out of the repository above.
 
-## Answering to somebody else's vectors
+## Answering to somebody else's test vectors
 
 A test suite that only agrees with itself proves that the code does what
 it does. These libraries answer to vectors their authors published: the
@@ -89,6 +93,8 @@ What every one of them asks for is the same, and none of it waits for
 CI to say so: the lint gate clean, the suite passing with its coverage,
 a signed commit, and a changelog entry wherever a user would notice the
 difference.
+
+## License
 
 Everything here is MIT licensed.
 

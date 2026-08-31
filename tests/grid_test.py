@@ -10,16 +10,24 @@ repository owns the minute. Between them they name an instant for every
 drifts from the trees, or a tree that drifts from the rows, fails here
 rather than being noticed the week a notification arrives on the wrong
 day.
+
+The record beside the calendar, section 10's *Which trees carry which
+sentinel*, is read here too, against each tree's `.github/workflows/`:
+an entry names the trees carrying a sentinel, and a tree short of one
+its entry names, or carrying one no entry gives it, is the pair of
+findings section 10 states beside the record, reported per tree.
 """
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Any
 
 import pytest
 import yaml
 
-from . import ROOT, name, rows
+from . import ROOT, by_hand, name, rows, subjects
+from .workflows_test import workflows
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -63,6 +71,51 @@ def minutes() -> dict[str, str]:
     }
 
 
+RECORD = (
+    "This is the record: one entry per calendar row",
+    "**An entry is what was decided, not what a tree happens to hold**",
+)
+"""The prose either side of section 10's record, as `subjects` wants it."""
+
+EVERY = "every repository"
+"""How an entry names the whole organization rather than listing it."""
+
+TREE = re.compile(r"`[^`]+`")
+"""How an entry spells one tree: its name, quoted as code."""
+
+
+def record() -> dict[str, list[str]]:
+    """Read section 10's record of which trees carry which sentinel.
+
+    An entry's clause is its trees, each quoted as code and separated by
+    a comma, or `EVERY`; the list's own punctuation, a semicolon between
+    entries and a full stop after the last, is stripped and nothing
+    else is. `EVERY` is the minute table's repositories, in its order:
+    a tree with no minute can schedule nothing on the calendar, so that
+    table is what the organization is here. A clause written any other
+    way is refused, for the reason `subjects` refuses a bullet it cannot
+    read -- an entry read as naming no tree is a sentinel asked of
+    nobody, and a run that reports that as agreement.
+
+    :returns: each sentinel against the trees carrying it, in the order
+        the record gives both.
+    :raises LookupError: where a clause is neither `EVERY` nor names
+        quoted as code and separated by commas.
+    """
+    out: dict[str, list[str]] = {}
+    for sentinel, clause in subjects(ROOT / "README.md", *RECORD).items():
+        trees = clause.rstrip(";.")
+        if trees == EVERY:
+            out[sentinel] = list(minutes())
+            continue
+        cells = trees.split(", ")
+        if not all(TREE.fullmatch(cell) for cell in cells):
+            msg = f"section 10's entry for {sentinel} names its trees as {clause!r}"
+            raise LookupError(msg)
+        out[sentinel] = [name(cell) for cell in cells]
+    return out
+
+
 def triggers(workflow: Path) -> dict[str, Any]:
     """Read the `on:` block of a workflow file.
 
@@ -94,10 +147,8 @@ def schedules(root: Path) -> dict[str, list[str]]:
     :returns: each workflow's file stem against the crons it declares.
     :raises AssertionError: where a schedule entry carries a `timezone:`.
     """
-    here = root / ".github" / "workflows"
-    files = sorted(path for suffix in ("*.yml", "*.yaml") for path in here.glob(suffix))
     out: dict[str, list[str]] = {}
-    for workflow in files:
+    for workflow in workflows(root):
         entries = triggers(workflow).get("schedule") or []
         for entry in entries:
             assert "timezone" not in entry, (
@@ -261,3 +312,72 @@ def test_every_cron_is_the_instant_the_calendar_names(
                 if instant(cron) != want:
                     wrong[where] = f"{cron!r}, where the calendar says {wanted!r}"
     assert not wrong, f"crons that are not on the calendar: {wrong}"
+
+
+def test_the_record_has_an_entry_per_row_of_the_calendar() -> None:
+    """The record's entries are the calendar's rows, in the calendar's order.
+
+    The per-repository test below reads a tree's workflows against the
+    record's entries, so a calendar row with no entry would be a
+    sentinel asked of nobody, carried or not; this is what says every
+    row has one. The order is the record's own claim, "in the order the
+    two tables above give the rows and the repositories", and a tree an
+    entry names has to be one the minute table gives a minute: a name
+    spelt some other way would excuse nothing and fail nothing.
+    """
+    entries = record()
+    assert list(entries) == list(calendar()), (
+        f"section 10's record names {list(entries)} where its calendar"
+        f" names {list(calendar())}"
+    )
+    order = list(minutes())
+    unknown = {
+        sentinel: [tree for tree in trees if tree not in order]
+        for sentinel, trees in entries.items()
+        if any(tree not in order for tree in trees)
+    }
+    assert not unknown, f"section 10 entries naming trees with no minute: {unknown}"
+    disordered = {
+        sentinel: trees
+        for sentinel, trees in entries.items()
+        if trees != sorted(trees, key=order.index)
+    }
+    assert not disordered, (
+        f"section 10 entries out of the minute table's order: {disordered}"
+    )
+
+
+def test_a_tree_carries_the_sentinels_its_entries_give_it(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10's record, read against one tree in both directions.
+
+    A tree short of a sentinel its entry names and a tree carrying one
+    no entry gives it are the pair of findings section 10 states beside
+    the record, and one cell reports both. The workflow and the badge
+    are one membership there, and the workflow is the half a checkout
+    holds; the badge half is a reader's catch, no fixture here holding
+    a tree's `README.md`. A workflow the record has no entry for --
+    `test`, `lint`, the release path -- is no sentinel and is not asked.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    entries = record()
+    carried = {
+        workflow.stem
+        for workflow in workflows(trees[repository])
+        if workflow.stem in entries
+    }
+    given = {sentinel for sentinel, members in entries.items() if repository in members}
+    findings = {
+        "sentinels the record gives it and the tree does not carry": sorted(
+            given - carried
+        ),
+        "sentinels the tree carries and no entry gives it": sorted(carried - given),
+    }
+    findings = {finding: names for finding, names in findings.items() if names}
+    assert not findings, f"{repository}: {findings}; " + by_hand(
+        repository, "ls .github/workflows/  # against section 10's sentinel record"
+    )

@@ -1,5 +1,24 @@
 # The btclib-org repository standard
 
+<!-- The badges are what the reader decides with, one property of the
+tree per badge, in the groups section 2 below fixes and in its order:
+the gates first -- pre-commit.ci, then the lint workflow -- and the
+sentinels after them in the order section 10's calendar schedules them,
+the day and the hour each one owns being that section's and not
+restated here. Which sentinels this tree carries is section 10's
+record: `links` is every repository's and `alignment` is this tree's,
+and the record gives it no other, so there is no Scorecard badge and
+no `scorecard.yml` behind it. There is no `test` badge either, this
+tree's suite running inside `alignment.yml` and section 2 giving a
+suite's badge to the workflow that runs it; and nothing keyed on
+publishing or on a documentation build, this tree doing neither. One
+badge per line keeps a change to one line and every line inside MD013,
+whose 80 columns bind only where a space follows them. -->
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/btclib-org/.github/main.svg)](https://results.pre-commit.ci/latest/github/btclib-org/.github/main)
+[![lint workflow status](https://github.com/btclib-org/.github/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/btclib-org/.github/actions/workflows/lint.yml)
+[![links workflow status](https://github.com/btclib-org/.github/actions/workflows/links.yml/badge.svg?branch=main)](https://github.com/btclib-org/.github/actions/workflows/links.yml)
+[![alignment workflow status](https://github.com/btclib-org/.github/actions/workflows/alignment.yml/badge.svg?branch=main)](https://github.com/btclib-org/.github/actions/workflows/alignment.yml)
+
 **This repository keeps the standards the btclib-org projects have in
 common: it states them, and it is where they are kept true.** The
 statement is this file. Keeping it true is the issue tracker beside it,
@@ -358,8 +377,8 @@ done
 
 `.github` is this repository, and its row is measured like the others:
 a `pyproject.toml`, a suite, and no `release.yml`. What it declines of
-tier 2 — there is no coverage here, and section 3 describes a file its
-`pyproject.toml` is not — its `CLAUDE.md` says, with the reason.
+tier 2 — there is no coverage here, and of section 3 the metadata only
+an index reads — its `CLAUDE.md` says, with the reason.
 
 `btclib-org.github.io` is the organization site, served by Pages from
 the root of its `main`, and btclib-org/.github#530 is where that vehicle
@@ -403,7 +422,7 @@ having nothing to lock:
 | `REVIEWING.md` | the standard a review is written against | 1, 2, 3 |
 | `REPOSITORY.md` | the settings that live outside the tree | 1, 2, 3 |
 | `RELEASING.md` | how a release is cut, and how one is recovered | 1 |
-| `CHANGELOG.md` | every user-visible change, by group | 1, 2, 3 |
+| `CHANGELOG.md` | every user-visible change, one entry each | 1, 2, 3 |
 | `RELEASE_NOTES.md` | what a user has to *act* on, on top of it | 1 |
 | `CLAUDE.md` | what a session needs and no human document holds | 1, 2, 3 |
 | `pyproject.toml` | the project and every tool's configuration | 1, 2 |
@@ -451,8 +470,8 @@ neither of them the tree's own taste.
 What that gives up is the head as a summary. A badge per sentinel means
 the row grows with section 10's calendar rather than staying the handful
 a reader takes in at once, so the tree running the most sentinels
-carries the longest row and this repository, which today opens with no
-badge at all, acquires one. That is the trade and it is deliberate: a
+carries the longest row and the tree running the fewest carries a row
+all the same. That is the trade and it is deliberate: a
 row long enough to be an audit is worth more here than a row short
 enough to be decoration, because the rule below is what makes it an
 audit. A tree that wants the shorter row drops a sentinel, its badge
@@ -536,6 +555,27 @@ section 10's `scorecard` subsection already ties to the same
 workflow-run badge there would answer whether the sentinel ran and not
 what it found, where what it found is the reason section 10 gives for
 running it at all.
+
+**Every workflow-status badge carries `?branch=main`** on that URL, the
+gates' and the sentinels' alike. The row is an audit of `main`, and an
+unqualified badge is not always `main`'s: where the workflow has no run
+on `main` it renders another branch's, a deleted branch's included, and
+nothing in the render says so — the fallback is
+[GitHub's own](https://docs.github.com/en/actions/how-tos/monitoring-and-troubleshooting-workflows/monitoring-workflows/adding-a-workflow-status-badge).
+The qualified badge answers for `main` or answers `no status`, which
+*A badge that answers with anything but a measurement* below reads as
+a question: datable while the first `main` run is still ahead, a defect
+once its day has passed. Section 10's *`workflow_dispatch` on
+everything* is what gets a workflow its first `main` run before its
+day, so a tree that lands the badge dispatches the workflow from `main`
+rather than leaving it at `no status` until the schedule comes round.
+The rejected alternatives are the unqualified badge, whose fallback
+reports what the row does not audit, and a qualifier omitted where the
+workflow has no `main` run yet, which is a row re-derived per workflow
+and out of date the day the first run lands. The pre-commit.ci badge,
+`results.pre-commit.ci/badge/github/<org>/<repo>/main.svg`, is outside
+the rule, being the service's own and not a workflow-status badge: its
+branch is in its path.
 
 **The order is fixed**, and it is three groups: what the software is,
 whether it works, and what the OpenSSF makes of it.
@@ -986,6 +1026,26 @@ what it holds.
     bracket follows it, and an import package is written in neither
     place.
 
+    **Every other place a person writes the name for somebody to copy
+    out takes it too**: a flag's value, an install target, a deployment
+    environment's `url:`, the message on a release tag. The reason is
+    the one above and it does not turn on the position — what the
+    written form decides is what a reader copies and types — so the rule
+    reaches wherever the thing named is the distribution rather than the
+    import package. Position is all `tests/names_test.py` can read, and
+    these sites have none, so this half is a reader's catch.
+
+    **A PyPI page is linked as `https://pypi.org/project/<name>/`**, the
+    form `https://pypi.org/p/<name>` redirects to, and it spells the
+    name canonically like any other written form: the site serves
+    `/project/btclib_secp256k1/` and `/project/btclib-secp256k1/` alike
+    and redirects neither, so which spelling a reader is shown is the
+    writer's. The rejected alternative is the short form, which saves
+    the characters and costs everybody who follows it the redirect. A
+    URL that settles its own spelling is outside the rule rather than an
+    exception to it: `/simple/` redirects to the hyphen PEP 503 folds
+    the name to, and asks nothing of whoever writes the link.
+
     **The bullet has no subject where a tree builds no distribution.**
     `bbt` and `.github` both declare `package = false` and a
     `[project].name` of their own — `bbt` after the repository,
@@ -1070,11 +1130,22 @@ what it holds.
   twenty are full — past twenty the topics are the first twenty
   keywords, which is the one place the two may differ at all.
 
-    Both name what the tree holds. A keyword no module answers to is a
-    claim an index makes on a reader's behalf; a module no keyword names
-    is why somebody did not find the package. Neither is visible from
-    inside the file, so both are read against the tree rather than
-    against the list they were copied from.
+    Both name what the tree holds. A keyword nothing in the tree answers
+    to is a claim made to whoever searched and not kept; something the
+    tree holds that no keyword names is why somebody did not find it.
+    Neither is visible from inside the file, so both are read against
+    the tree rather than against the list they were copied from.
+
+    **The rule turns on the `[project]` table and not on the index.** A
+    tree that uploads nothing declares the list all the same, so that
+    the topics github.com shows have something in the tree to be read
+    against. The rejected alternative keys the rule on publishing, the
+    bullets around this one each being about metadata an index serves,
+    and what it costs is that reading: such a tree's topics then answer
+    to no list, and drift from what it holds with nothing red. A
+    repository with no `pyproject.toml` has no table and so no key to
+    write, and section 16's checklist is where its topics are recorded
+    instead.
 - **`classifiers` are present**, and each is a claim about this tree
   rather than a line taken from a sibling's: `Typing :: Typed` and
   `py.typed` ship together or neither ships, the marker being PEP 561's
@@ -1845,14 +1916,19 @@ port into a marker or a naming convention, the same fact kept where a
 
 ### Property tests
 
-A tree that owes section 10's fuzzer owes a property layer first, keyed
-on the same property — parsing what a stranger sends. The two answer
-different questions: a property test answers *does this hold over the
-domain I described*, a fuzzer answers *what is in the domain I did not
-describe* — and the second presupposes the first, a fuzzer extending no
-described domain having nothing to contradict. hypothesis is the named
-shape, its profiles registered once in `tests/conftest.py` rather than
-repeated on every `@given`:
+A tree that has the property section 10's `fuzz` entry keys on owes a
+property layer, whether or not that section's record gives it the
+sentinel. The rejected alternative keys the layer on the record instead,
+and what it costs is a tree getting the cheap half only by being given
+the expensive one: a property layer is code in the suite that runs with
+everything else, where a fuzzer is a scheduled runner with a harness and
+a corpus. The two answer different questions and neither substitutes for
+the other: a property test answers *does this hold over the domain I
+described*, a fuzzer answers *what is in the domain I did not describe*
+— and the second presupposes the first, a fuzzer extending no described
+domain having nothing to contradict. hypothesis is the named shape, its
+profiles registered once in `tests/conftest.py` rather than repeated on
+every `@given`:
 
 ```python
 settings.register_profile("default", deadline=None, max_examples=500)
@@ -2114,18 +2190,18 @@ sight rather than weighed.
 
 ### `CHANGELOG.md` and `RELEASE_NOTES.md`
 
-- The changelog gets an entry for anything a user would notice, in the
-  group it belongs to. The release notes are what a user has to *act* on.
+- The changelog gets an entry for anything a user would notice. The
+  release notes are what a user has to *act* on.
 - **One fact each**: the breaking-changes list lives in the release
   notes and the detail behind it in the changelog, so neither restates
   the other.
-- **Both are `merge=union` in `.gitattributes`.** Two branches appending
-  a bullet to the same group conflict on the insertion point, which is a
-  conflict with nothing to decide; union keeps both sides' added lines,
-  on rebases included. Its price is that on a checkout the two files
-  never conflict at all, so the *same* entry edited on two branches
-  merges in silence — which is the second reason neither file states a
-  count.
+- **Both are `merge=union` in `.gitattributes`.** Two branches each
+  appending an entry at the same anchor conflict on the insertion point,
+  which is a conflict with nothing to decide; union keeps both sides'
+  added lines, on rebases included. Its price is that on a checkout the
+  two files never conflict at all, so the *same* entry edited on two
+  branches merges in silence — which is the second reason neither file
+  states a count.
 - **The driver is a checkout's, and the forge does not apply it**, so
   the price has a second half no local command predicts. A pull request
   whose `CHANGELOG.md` or `RELEASE_NOTES.md` overlaps its base is
@@ -2148,6 +2224,15 @@ sight rather than weighed.
   MD022 and MD032 both refuse. Section 4's autofix rule has
   `markdownlint-cli2` write the line back on the next hook run, rather
   than only reporting it missing.
+- **A `###` names one entry, never a theme several entries share.** So
+  the open section is the list of its entries, and the end of it is one
+  place. Grouping by theme is the rejected alternative: nothing here
+  says what the themes are, so each tree names its own set and an entry
+  belonging to two of them has to pick one, and the append point becomes
+  the theme's rather than the section's — which is the anchor the two
+  bullets below are read against. Where an open section already carries
+  theme headings, the next entry goes after them, at the end of the
+  section, and nothing above it moves.
 - **A new entry goes at the end of the open section**, after the entries
   already there and immediately above the heading of the latest released
   version — at the end of the file where the tree has released nothing.
@@ -2189,6 +2274,13 @@ sight rather than weighed.
   inside the same parentheses, the qualifier rule above reaching a
   changelog citation exactly as it reaches any other cross-repository
   reference.
+- **The citation sits in the bullet making the claim, not on the heading
+  above it.** An entry's bullets are separate facts and cite separately,
+  so a citation gathered onto the heading answers for the entry as a
+  whole while the bullets under it name issues of their own, and nothing
+  says how the two sets relate. The rejected alternative is the heading
+  citation, and what it buys is a section whose issue numbers a reader
+  collects by scanning the headings alone.
 - **The reason the pair has two spellings rather than one** is that it
   is then checkable against the landing commit's own subject, written at
   a different moment and the half that gets re-read before merging. One
@@ -2208,6 +2300,15 @@ sight rather than weighed.
   `(issue owner/repo#N)`, keyword and qualifier together. Entries
   already landed in the keywordless form stay as they are, the bullet
   below being why.
+- **An issue the entry names without acting on it is written into the
+  sentence, not into the parentheses.** The parentheses say what the
+  entry did about an issue, and there is nothing to say of one it did
+  nothing about, so a reference put there bare is the shape the bullet
+  above refuses and reads as a citation with its keyword dropped. What
+  the move sheds is the keyword and the parentheses, never the qualifier
+  *A reference to another repository is qualified* above requires, and
+  the sentence says what the issue is to the entry — where a decision
+  lives, which issue covers the other half.
 - **Nothing already written is rewritten.** Both files are append-only
   in practice and `merge=union` in fact; the rule binds what is written
   next, not the entries that predate it.
@@ -2223,13 +2324,12 @@ sight rather than weighed.
   counts nothing that moves underneath it. A structure the entry itself
   names — `build` and `check` are two rows, and it lists the two — is a
   description rather than a count, and the rule does not reach it.
-- **No command in section 15 audits this.** A citation the entry makes
-  and an issue merely named in its prose look identical to a pattern
-  match — both are a `#N` inside parentheses — and this organization's
-  own entries already use the second shape, a cross-repository pointer
-  beside the entry's own point rather than its citation. Telling the
-  two apart is a reading, the way this file already treats a claim no
-  command re-derives.
+- **No command in section 15 audits this.** Entries already landed put a
+  pointer inside parentheses with nothing before the number, and
+  *Nothing already written is rewritten* above keeps them there, so a
+  pattern over the file matches one of those as readily as a citation.
+  Telling the two apart is a reading, the way this file already treats a
+  claim no command re-derives.
 - **A value the standard owns is named where the entry decides it and
   cited where the entry uses it.** The entry giving a sentinel its day
   and hour states the instant, that being what it decided, and it ages
@@ -2391,10 +2491,11 @@ naming the floor where the finding is the platform's.
 though the cost were the gate's, so a job that runs on a pull request
 while gating nothing looks to have escaped it: it has not, because what
 a pull request charges is the wait, and a reader waits on the list
-rather than on the subset of it that gates. `btclib`'s `fuzz` is the
-case — a ten-minute exploration on every push to every branch, which no
-rule required, and which the pull request that cut a release was merged
-out from under, three minutes in, nobody having waited for it.
+rather than on the subset of it that gates. `fuzz` is where the trade is
+starkest: the exploration is the whole of the work and its length is
+what makes it worth anything, so a trigger firing it on a pull request
+charges that pull request the wait of a sentinel's full run for a
+verdict no merge waits on.
 
 **What decides is the clock, not the trigger** — provided the clock
 stays the thing the expensive work answers to, which is what a filter
@@ -2474,8 +2575,10 @@ owns a day and an hour, the repository owns the minute:
 | `os-macos` | Thursday | 05 |
 | `os-ubuntu` | Friday | 04 |
 | `os-windows` | Friday | 05 |
+| `homepage` | Saturday | 03 |
 | `links` | Saturday | 04 |
 | `alignment` | Saturday | 05 |
+| `sdist-rebuild` | Sunday | 03 |
 | `codeql` | Sunday | 04 |
 | `scorecard` | Sunday | 05 |
 
@@ -2489,6 +2592,7 @@ owns a day and an hour, the repository owns the minute:
 | `.github` | 24 |
 | `portanode` | 28 |
 | `bbt` | 32 |
+| `btclib-org.github.io` | 36 |
 
 **The rows are in the order of what they ask about**, family by family:
 the data a tree ships and did not write, the depth its suite is tested
@@ -2646,7 +2750,8 @@ nothing by that row.
 - `integration-hwi` — `btclib`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
-- `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`;
+- `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `btclib-node`;
 - `deps-oldest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
 - `py-arm-authority` — `btclib`;
@@ -2656,8 +2761,10 @@ nothing by that row.
   `btclib-benchmarks`, `btclib-node`;
 - `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-node`;
+- `homepage` — `btclib-org.github.io`;
 - `links` — every repository;
 - `alignment` — `.github`;
+- `sdist-rebuild` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`;
 - `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
 - `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
@@ -2670,7 +2777,9 @@ sentinel is a decision somebody took. So a tree short of what its entry
 names is a gap in that tree and not a correction owed here, and a tree
 that carries what no entry gives it is the same finding read from the
 other side — a workflow whose row does not name the tree, and a badge
-with no row behind it.
+with no row behind it. `tests/grid_test.py` reads the workflow half of
+both against every tree, a red cell there bounded by the issue a
+`BACKLOG` row of `tests/__init__.py` names.
 
 Where a property of the tree decides membership it is stated below, so
 that the answer for a new repository is read off the tree rather than
@@ -2764,15 +2873,20 @@ its entry gains the tree when the workflow and the badge land together.
   stranger. `bitcoin-core-rpc` reads a Bitcoin Core instance its own
   operator runs, so the party on the other side is chosen rather than
   arbitrary and the property does not reach it; that is a weaker threat
-  model and it is the reason, not an omission. Section 7's convention tests and
-  the property tests beside them answer *does this hold over the domain
-  I described*; a fuzzer answers *what is in the domain I did not
-  describe* — a length prefix larger than the buffer, a truncated
-  multibyte sequence, a varint that overflows, a recursion depth that
-  exhausts the stack — so neither substitutes for the other and the
-  second is the one that finds the crash before somebody else does.
-  A crash the sentinel finds is an issue against the parser
-  and never a suppression, that being the whole of what it was run for.
+  model and it is the reason, not an omission. `btclib-secp256k1` has
+  the property and no entry, and the property does not settle this one
+  on its own: whether a target there is allowed to reach the vendored C
+  library at all — which would be fuzzing upstream's work rather than
+  these bindings — decides what the sentinel would be run for, and
+  btclib-org/.github#342 is where that is decided. An entry taken before
+  that answer schedules a weekly run against a target nobody has agreed
+  is this project's to write. Section 7's *Property tests* has how a
+  fuzzer and the property layer stand to each other. What a fuzzer turns
+  up is a length prefix larger than the buffer, a truncated multibyte
+  sequence, a varint that overflows, a recursion depth that exhausts the
+  stack — found by the sentinel rather than by somebody else. A crash
+  the sentinel finds is an issue against the parser and never a
+  suppression, that being the whole of what it was run for.
   The regression that crash becomes is the suite's and not the
   sentinel's: an ordinary test, naming the input and what the parser is
   now expected to do with it — which is usually to refuse it in the
@@ -2795,11 +2909,8 @@ its entry gains the tree when the workflow and the badge land together.
   suite is the ordinary test above rather than this gate.
   What fills the workflow is the tree's — which entry points are targets
   and which harness runs them, `atheris` under ClusterFuzzLite in
-  Actions or under OSS-Fuzz, and for `btclib-secp256k1` whether a target
-  is allowed to reach the vendored C library at all, which would be
-  fuzzing upstream's work rather than these bindings.
-  btclib-org/.github#342 is where that is decided; what is fixed here is
-  the name the calendar keys on and which trees owe one.
+  Actions or under OSS-Fuzz. What is fixed here is the name the calendar
+  keys on and which trees owe one.
 - **`deps-oldest` follows a tree that builds a distribution.** Its
   `requires-python` and its dependency specifiers are a claim made to
   whoever installs it, and that claim is what the resolution checks; a
@@ -2810,6 +2921,41 @@ its entry gains the tree when the workflow and the badge land together.
   and whether the oldest ones it declares install at all.
   btclib-org/.github#323 carries the debt until the first of them
   schedules the workflow.
+- **`sdist-rebuild` follows a tree that publishes an attestation.** The
+  attestation vouches for bytes, so a released tag either rebuilds to
+  the sdist that was signed or it vouches for something no rebuild
+  answers for: section 12 states that property, and each tree's
+  `RELEASING.md` names the steps a rebuild replays. What the sentinel
+  compares against is the digests the attestation carries,
+  `gh attestation verify` over the rebuilt file passing only where the
+  two agree; reading the index's own digests for the release instead is
+  the rejected alternative, those saying what PyPI holds rather than
+  what was signed. Cutting the comparison into the release is the
+  other, and there it is a build against itself in the same job on the
+  same image: what moves between a release and the day somebody
+  verifies is a backend, a runner image or a toolchain, which is the
+  interval a weekly run covers and a release-time step has not reached.
+  The compiled wheel is outside the property for the reason section 12
+  gives, so the row is the sdist's rather than every file a rebuild
+  produces with one tree's exemption written into it. A rebuild that
+  disagrees is an issue against the tree it ran in.
+  btclib-org/.github#523 carries the debt until the first of the three
+  schedules the workflow.
+- **`homepage` follows a tree serving a page generated from another
+  tree's file.** `btclib-org.github.io`'s `index.md` is derived from
+  `profile/README.md` here, and what the sentinel asks is whether the
+  served copy still says what that file says. The drift it watches for
+  arrives from a landing in this tree rather than from anything the
+  serving tree does, so no pull request there is the occasion to ask.
+  Sending a `repository_dispatch` from here when `profile/README.md`
+  lands is the rejected alternative: it is the exact signal rather than
+  a poll, and it wants a credential with write access to that tree,
+  which nothing here holds. Asking it from this suite is the other, and
+  what it costs is a red on `main` here for a drift another repository
+  owns. The minute this row gives that tree is `links`'s there too,
+  which it does not carry yet: btclib-org/btclib-org.github.io#1.
+  btclib-org/.github#558 carries the debt until that tree schedules the
+  workflow.
 
 ### The aggregate job, and the required check
 
@@ -2925,15 +3071,22 @@ request, and the rule follows them.
 ## 11. GitHub settings
 
 These live outside the tree. `REPOSITORY.md` is where each repository
-writes down its own, with the command that reads it back — nothing here
-is recoverable by reading the code.
+writes down its own, with the command that reads it back.
 
 **What that file covers is the settings this standard asks about** — the
-ones section 16's checklist sets on a new repository, and the ones a
-section here states a rule for — together with whatever a call quoted
-for one of those answers alongside it. It says what falls outside that
-scope too, so a setting it is silent about reads as a decision rather
-than as an omission.
+ones section 16's checklist sets on a new repository, the ones a section
+of the standard states a rule for, and the ones a behaviour it describes
+rests on — together with whatever a call quoted for one of those answers
+alongside it. It says what falls outside that scope too, so a setting it
+is silent about reads as a decision rather than as an omission.
+
+**A copy carries all three limbs in the standard's own words** rather
+than wording them for itself. Two spellings are what that forecloses:
+`README.md` written into the second limb names a sibling's own file, and
+a bare `it` there reaches for section 16's checklist, where the third
+limb's `it` is this standard. The rejected alternative leaves the wording
+to each copy, and what it costs is a reading per tree of a claim they are
+all making once.
 
 The claim rejected is `this file is the whole of them`, which no command
 checks: the repository document answers with fields this file states no
@@ -2942,6 +3095,48 @@ decides is a reading. What the narrower claim gives up is the promise
 that a reader holding the file holds everything; what it buys is a
 perimeter this file fixes rather than the endpoint, which is what a copy
 can be held to.
+
+**The section headed `## What this file passes over` is where a copy
+says what falls outside that scope.** Whether the section is there is
+what a command asks; whether it is honest about the perimeter is a
+reading, as the wider claim above is. The rejected alternative leaves
+the second obligation to a reader's check with nothing to run, and what
+it costs is a copy that deletes the rejected claim and says nothing of
+what it leaves out reading as converged.
+
+**A copy does not claim that nothing it records has another form in the
+tree.** The topics are section 3's `keywords`, a releasing tree's
+`.homepage` is the `[project.urls]` field of that name, and a Pages
+custom domain has the root `CNAME` carrying the same value — so where a
+tree holds one of those, the record is a second copy read back for
+comparison rather than the only place the answer lives, which is what
+that copy's own section on it says. The rejected alternative is the
+blanket clause `nothing here is recoverable by reading the code`, one
+sentence shorter and refuted in such a tree's own file two sections
+further down.
+
+**`has_wiki` and `has_projects` are outside the perimeter**: this
+standard states no rule about either, and a copy neither reads them back
+nor explains an answer to them. The rejected alternative records each
+with a sentence saying no rule is stated, so that a reader sees the
+answer and is told it is nobody's divergence; what it costs is a file
+growing with GitHub's API rather than with this standard, in a wording
+each copy invents for itself.
+
+**`has_issues` is not with them.** `CONTRIBUTING.md` sends an issue about
+one repository alone to that repository's own tracker, and section 16's
+checklist gives every repository an `ISSUE_TEMPLATE/`, so a behaviour
+this standard describes rests on the setting and a copy records it.
+
+**Section 10's `scorecard` bar splits on that same test.** Public is what the
+sentinel reads at all, so a behaviour this standard describes rests on
+`.visibility` and a copy reads it back, which puts a flip to private one
+command from being seen. Nothing sets `.fork`: a repository arrives as a fork
+or it does not, so no limb reaches it and section 10 states that half of the
+bar once. The rejected alternative keeps both halves out of every copy, on the
+ground that the bar is section 10's to state; what it costs is the flip, after
+which the sentinel's row and its badge stand while the run stops producing a
+score, and the file a reader restores the repository from says nothing.
 
 ### Signatures
 
@@ -3021,6 +3216,15 @@ review and the checks are in. One change is one commit on `main`. A merge
 commit is refused by linear history already; rebase-and-merge is the one
 deliberately removed, since it replays a branch's review steps onto
 `main`.
+
+**`allow_auto_merge` is on**, and a copy reads it back with the other
+merge settings: the sentence above rests on the setting rather than
+describing it. Off, auto-merge is not offered, every landing waits on
+somebody pressing *Squash and merge* at the moment the last check goes
+green, and nothing turns red. The rejected alternative leaves it to each
+repository as a convenience rather than a setting of this standard's,
+and what that costs is a section describing a landing path the tree no
+longer offers, with no command anywhere to catch it.
 
 One method is also one entry in a dropdown that GitHub preselects from
 whatever was used last — and the dialog that switches auto-merge on
@@ -3139,19 +3343,58 @@ still — where a commit whose own pull request closes the issue through
 its body records `referenced` whether the keyword bound or not, and
 proves neither. In both, a newline separates the verb from the number —
 and that a newline alone breaks the binding, in a keyword meant to fire,
-is btclib-org/.github#420's subject. The measurement is there rather
-than here: the pull request it was taken on was corrected before it
-merged, so the forge no longer answers what it answered then.
+is btclib-org/.github#420's subject.
 
-**The keyword and its reference share a physical line, and a block of
-several is written one keyword per line.** This section asks each issue
-for its own verb and section 9 wraps prose at eighty columns; a body
-that follows both as one long line loses precisely the keywords the
-wrap splits, every one of them individually well-formed, the text
-reading correctly to a person and only the API answering short. One
-keyword per line is the shape a wrapper cannot split, and no formatter
-is let reflow the block. What catches a loss is counting the
-registrations against the number intended:
+**Two parsers read a closing keyword, and a newline is where they part.**
+One answers `closingIssuesReferences` and reads the pull request's
+description; the other closes on a push and reads the message that
+landed. A physical line is what the first requires, and #420's
+measurement is of that one. It is not reproducible, the pull request it
+was taken on having been corrected before it merged, and what stands in
+its place is a pair of negations, read on 2026-08-30:
+`btclib-org/.github#510` says `does not close #466` on one line, its
+only mention of that issue, and `closingIssuesReferences` names it;
+`btclib-org/bitcoin-core-rpc#182` says the same negation at the end of
+a line with `btclib-org/btclib#1157` beginning the next, and the same
+read answers empty. The two differ in the reference form as well as in
+the newline, and the sweep below is what controls for that: its
+adjacent hits carry the bare and the qualified form alike and are
+parsed alike, so the newline is what is left between the pair. The most
+recent pull requests of every repository in the organization are asked
+the same question:
+
+```shell
+gh pr list --repo <org>/<repo> --state all --limit 200 \
+  --json number,body,closingIssuesReferences
+```
+
+— the verbs reaching a reference on one line being the positive control,
+without which the absence of the others measures nothing.
+
+**The second parser crosses the newline, and a `closed` event's commit
+id is what says so.** That field carries a sha where the push closed the
+issue and null where the description did:
+`btclib-org/btclib-secp256k1#366` names `btclib-org/.github#81` with no
+verb anywhere in its description and `closingIssuesReferences` empty,
+and the close of #81 carries `592f1bc`; `btclib-org/.github#504`'s
+squash message carries no keyword at all, its description closes #477,
+and that close carries no sha. So `btclib-org/btclib`'s `825c74e2` is
+the measurement of the second parser on a newline: it writes `closes` at
+the end of a line and `btclib-org/.github#402`, its only occurrence, at
+the start of the next, and the close of #402 names that sha. Where both
+parsers could fire, the event records whichever did, so a null there
+says nothing against it.
+
+**So the keyword and its reference share a physical line, and a block of
+several is written one keyword per line.** That is the description
+parser's requirement stated where a wrapper can break it rather than a
+second rule: this section asks each issue for its own verb and section 9
+wraps prose at eighty columns, and a body that follows both as one long
+line loses precisely the keywords the wrap splits, every one of them
+individually well-formed, the text reading correctly to a person and
+only the API answering short. One keyword per line is the shape a wrapper cannot
+split, and no formatter is let reflow the block. What catches a loss is
+counting the registrations against the number intended:
 
 ```shell
 gh pr view <n> --json closingIssuesReferences \
@@ -3286,7 +3529,10 @@ run over the branch before it is opened, against the same expectation:
 every hit outside the title's own `(closes #N)` parentheses is the
 finding, and a number the title carries that the scan does not find is
 a closing keyword the title declares that the branch's own words never
-state.
+state. Its separator is `\s`, which crosses a newline, because the
+parser this text will meet is the one that reads a landed message: a
+space or a tab would miss the shape `825c74e2` closed an issue with,
+which is the shape this scan exists to catch.
 
 ### Review
 
@@ -3453,9 +3699,43 @@ summary says so in those words, that it was not run: a hand trace is
 the author's reading performed a second time, and it can carry a
 finding but not an ack.
 
-**A correction is a commit of its own, never an amend.** A force-push
-replaces the commits the review is attached to. The one force-push that
-stays right is a rebase carrying no new work.
+**What a force-push costs is the review attached to the sha it
+replaces**, a bot's included, and whether there is one is read before the
+push rather than remembered:
+
+```shell
+gh pr list --repo <org>/<repo> --state open --head <branch> --json number
+gh api repos/<org>/<repo>/pulls/<n>/reviews \
+  --jq '.[] | "\(.user.login) \(.state) \(.commit_id[0:8])"'
+```
+
+`reviews` is the endpoint that answers, and `pulls/<n>/comments` is the
+one that reads as an absence: it counts inline review comments, so a
+review carrying none answers zero there and one here. The first command
+finding no pull request is the rule's own limit — a reading taken before
+one exists is attached to nothing, and no push can orphan it.
+
+**A pull request that exists leaves no window.** `sourcery-ai[bot]`
+submits against the head within seconds of one opening — `created_at` on
+the pull request against `submitted_at` on the review, read on
+2026-08-30 — so a push following the open has no interval in which
+nothing is attached yet. That is not the same as every pull request
+carrying one, which is why what decides is the read and not the timing.
+What carries the correction does not reach this either: an amend and a
+commit of its own both move the head, and a review describes the sha it
+names rather than the branch. What the read buys is that a review left
+pinned to the replaced sha is known to be stale rather than taken for a
+reading of the head, and *A green check is an ack of the head* above is
+what shows it. The one force-push that stays right is a rebase carrying
+no new work.
+
+**The rejected alternative is an ordering rule**: open the pull request
+only once a reading has cleared the sha, so that no push ever follows a
+review. It needs no read at all, and what it costs is being a rule about
+what a session remembers per branch — the weaker kind, for the reason
+*What a pull request says it is* gives above — where a session holding
+several branches at once has nothing telling it which of them is already
+open. The commands above are that same rule as a check that runs.
 
 #### The workflow, and what a port of it has to adapt
 
@@ -3664,10 +3944,48 @@ Where a repository serves a site from its own root, the source, the
 build type and the CNAME are settings rather than files, and a workflow
 builds the same site so that a failure is a red check rather than a page
 served broken. Read the Docs' `latest` follows the default branch,
-`stable` is the highest release tag, an automation rule activates each
-new tag, and the webhook has to carry the secret the project's own
-integration page issued — one added by hand is refused with a 400 that
-GitHub records nowhere else.
+`stable` is the highest release tag, and an automation rule activates
+each new tag. The project's public API answers for each of those
+without a token:
+
+```shell
+p=https://app.readthedocs.org/api/v3/projects/<slug>
+curl -s "$p/"                        # repository.url, default_branch
+curl -s "$p/versions/?active=true"   # latest, stable, the active tags
+```
+
+`repository.url` in the first says which repository the slug serves. The
+second comes back with `latest` as a branch and `stable` as a tag whose
+`ref` is the highest release tag, beside the tags the rule has
+activated — the rule's result rather than the rule itself, which that
+API does not expose: `automation-rules/` answers 404 where an endpoint
+needing a token answers 401.
+
+**What connects a repository to Read the Docs is the organization-wide
+`read-the-docs-community` GitHub App, not a per-repository webhook**, so
+what a repository records on the GitHub side is the installation and an
+empty hook list:
+
+```shell
+gh api orgs/<org>/installations \
+  --jq '.installations[] | select(.app_slug == "read-the-docs-community")
+        | [.app_slug, .repository_selection]'
+gh api repos/<org>/<repo>/hooks --jq length
+```
+
+`repository_selection: all` is what makes one installation the
+connection for every repository at once rather than a setting each tree
+carries its own copy of. A hook the second command finds is stale and is
+deleted rather than repaired, the App already doing the whole of what it
+was for; btclib-org/bitcoin-core-rpc#291 records one that was found and
+removed.
+
+The per-repository webhook is the rejected alternative, and the secret
+is why: Read the Docs issues it on the project's own integration page
+and GitHub returns it masked, so nothing read back from the repository
+says whether a hook still carries the right one, and one that has
+stopped delivering sits `active: true` while the App carries the build
+regardless.
 
 The **slug** is what serves the site, and it is not the project's name:
 renaming the project leaves the slug where it was, so a repository
@@ -3932,6 +4250,48 @@ corrected in none of the ones that shipped.
     invocation is written to take a second reference pair rather than to
     be replaced by one.
 
+- **A job named in `needs:` that is not a gate takes `always()` in the
+  dependent's own guard**, beside an explicit `needs.<job>.result ==
+  'success'` for each listed job that is one. The public-surface check
+  above is such a job: it exits non-zero on any break, which is what a
+  cycle before 1.0 is expected to produce, and `needs:` alone refuses to
+  start a job whose listed dependency failed or was skipped. Listing it
+  orders the reading before the upload, and the guard is what says the
+  reading's result decides nothing. `always()` here and not the
+  `!cancelled()` section 10 gives an aggregate: what that section weighs
+  `always()` against is a superseded run turning a required check red,
+  and a release workflow, triggered by a tag push and a dispatch,
+  produces no required check.
+- **The widening does not propagate, so each dependent states it for
+  itself.** A bare `needs:` reads back through the listed job's own
+  `needs:` chain, so a job two hops from the non-gating one is skipped
+  although the dependency it names succeeded — which is how a
+  post-publish check comes to be skipped by a job it does not name.
+  Putting `always()` on the non-gating job itself is the rejected
+  alternative and moves nothing: what a dependent reads is that job's
+  result, and a job that ran and failed stops it exactly as a skipped one
+  does. Dropping it from `needs:` is the other, and it costs the
+  ordering: the surface is then read beside the upload rather than before
+  it, which is a reading arriving too late to bear on the release it was
+  written for.
+- **A release run is audited job by job for `skipped`, not for red.** A
+  failed job is loud; a skipped one carries no step, starts and completes
+  in the same second, and gives a reader looking for a failure nothing to
+  look at, so a release whose post-publish check never ran reads as a
+  release that finished. What answers is the run's own job listing — the
+  endpoint section 10's aggregate reads from inside its run, asked here
+  of a run that has ended:
+
+    ```shell
+    gh api --paginate \
+      "repos/{owner}/{repo}/actions/runs/<id>/jobs?per_page=100" \
+      --jq '.jobs[] | [.conclusion, (.steps|length), .name] | @tsv'
+    ```
+
+    read against the jobs the release was expected to hold. Auditing for
+    red alone is the rejected alternative, and it is what a reader does
+    unprompted: it finds whatever went wrong and says nothing about what
+    the failure took with it.
 - **The smoke test runs again in the release job, without constraints**,
   after the upload rather than before: installing a dependency executes
   its code, and a compromised one must not reach a `dist/` still to be
@@ -3940,6 +4300,42 @@ corrected in none of the ones that shipped.
   published artifact *works*, not whether it installs — an import runs
   `__init__.py` alone, where a data file missing from the wheel is opened
   only at the first call that needs it.
+- **That workflow is where the post-publish check lives, called by the
+  release as a job of its own, and never a step appended to a publish
+  job.** A publish job downloads the distribution files and hands them to
+  `pypa/gh-action-pypi-publish`, so nothing in it provisions a toolchain:
+  what the runner carries is whatever its image ships and nothing the
+  tree chose — no `uv`, and an interpreter at the image's version rather
+  than at the one `requires-python` asks for. A step appended there
+  provisions its own or fails in one of two ways: on the command's name
+  where what it calls is `uv`, `127` being the shell's answer to a
+  command that is not there, and on the interpreter's version where it
+  is not — or, where `requires-python` admits the image's version, it
+  passes on an interpreter the tree did not choose, which says nothing.
+  Neither failure names the runner as its cause. The reusable workflow
+  provisions its own toolchain, so nobody placing the check there has
+  to know either.
+- **Placement also decides whether the failure is legible.** Both
+  placements run after the upload, so either can only report an act
+  already irreversible — a filename on the index is not retractable. A
+  job that fails is a row of its own in the listing above, red beside a
+  publish job that stayed green; a step that fails turns the publish job
+  itself red, and every job guarded on that job's `success` skips with
+  it — the attestation and the GitHub release among them — leaving a
+  release published, unattested and unannounced behind one red job that
+  names none of it.
+- **The check reads the index for the version the tag names**, so a first
+  release is no different from any other: the call passes the tag, the
+  wait holds until the index serves that version, and it fails on its
+  deadline rather than let the matrix install the version the tag
+  replaces. Inlining the check because the index has nothing to read
+  before a first release is the rejected alternative, and what it answers
+  is a different run: the release's own call runs after its upload, and
+  what has nothing to read is the schedule, which passes no version,
+  waits for nothing and installs whatever the index serves at the time. A
+  rehearsal has no such job either — the check reads the release index,
+  and what a rehearsal exercises is the publish step rather than what an
+  index then serves.
 
 Worked answers, each named for the property of its distribution that
 decides it rather than as a shape to copy, and each re-derived by section
@@ -4831,19 +5227,19 @@ independent and the checklist the same for each.
    `CHANGELOG.md`, `CLAUDE.md`; and `SECURITY.md`, `RELEASING.md` and
    `RELEASE_NOTES.md` where the repository publishes, the rows section
    2's table marks for tier 1 alone.
-1. GitHub, in this order: default branch `main`; squash-only;
-   `delete_branch_on_merge`; the three rulesets; classic protection with
-   the required checks bound to the Actions app; the publishing
-   environments; the read-only default token; secret scanning, its push
-   protection and Dependabot security updates; private vulnerability
-   reporting. Then the topics, which are the `keywords` of the
-   `pyproject.toml` step above where the tree declares any, and which
-   nothing in the tree holds where it does not; and, where the tree
+1. GitHub, in this order: default branch `main`; squash-only, with
+   auto-merge; `delete_branch_on_merge`; the three rulesets; classic
+   protection with the required checks bound to the Actions app; the
+   publishing environments; the read-only default token; secret scanning,
+   its push protection and Dependabot security updates; private
+   vulnerability reporting. Then the topics, which are the `keywords` of the
+   `pyproject.toml` step above, and which nothing in the tree holds where
+   there is no such file to declare them in; and, where the tree
    releases, the `homepage`, the same URL section 3's field of that name
    carries.
 1. Read each setting back with the commands `REPOSITORY.md` records, and
    write the answers into it — the topics included, that being the one
-   of them a tree without `keywords` records nowhere else.
+   of them a tree with no `pyproject.toml` records nowhere else.
 
 ### Normalizing an existing repository
 

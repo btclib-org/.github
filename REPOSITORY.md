@@ -6,24 +6,30 @@ is one nobody can check; recorded this way, a drift is one command away
 from being seen.
 
 [Section 11 of the standard][s11] says every repository writes its
-settings down here, and until now this was the repository with nowhere to
-read its own back — the one holding the standard being the one exempt
-from it.
+settings down here, this one included: the repository that holds the
+standard is not exempt from it.
 
-The rules and the settings live *outside* the tree: nothing below is
-recoverable by reading the repository. What is recorded is the settings
-the standard asks about — the ones [section 16's checklist][s16] sets on
-a new repository, and the ones a section of `README.md` states a rule
-for — together with whatever a call quoted for one of those answers
+The rules and the settings live *outside* the tree. What is recorded is
+the settings the standard asks about — the ones [section 16's
+checklist][s16] sets on a new repository, the ones a section of the
+standard states a rule for, and the ones a behaviour it describes rests
+on — together with whatever a call quoted for one of those answers
 alongside it. That is this file's scope, and *What this file passes over*
 at the foot says what falls outside it.
 
+The topics have a second form in the tree, `pyproject.toml`'s
+`keywords`, so they are read back here for comparison rather than as the
+only place the answer lives, which is what *Topics* says of them.
+Nothing else here is recoverable by reading the tree.
+
 The endpoints these answers come from are the file's own `gh api` lines,
 listed rather than restated in a second place that would have to be kept
-true:
+true. The pattern reaches both scopes: a setting the organization decides
+once is read back here too, where a section below rests on it.
 
 ```shell
-grep -o 'repos/btclib-org/\.github[a-z/-]*' REPOSITORY.md | sort -u
+grep -oE '(repos/btclib-org/\.github|orgs/btclib-org)[a-z/-]*' \
+  REPOSITORY.md | sort -u
 ```
 
 When each answer was read is the commit that wrote it: `git blame
@@ -229,6 +235,9 @@ which is a settings change and a landing rather than a call.
 [Merge method][s11-merge] asks for, and which of the two titles lands is
 that subsection's rule.
 
+Auto-merge is on, and [the landing that subsection describes rests on
+it][s11-merge].
+
 `delete_branch_on_merge` fires on its own, every landing here being a
 merged pull request, so a branch still standing is one that was closed
 rather than merged.
@@ -237,9 +246,8 @@ rather than merged.
 
 ```shell
 gh api repos/btclib-org/.github \
-  --jq '{wiki: .has_wiki, projects: .has_projects, issues: .has_issues,
-         visibility: .visibility}'
-# {"issues":true,"projects":true,"visibility":"public","wiki":true}
+  --jq '{issues: .has_issues, visibility: .visibility}'
+# {"issues":true,"visibility":"public"}
 ```
 
 Issues are where this organization's cross-repository findings live, and
@@ -252,24 +260,6 @@ community health files GitHub shows for any public repository of the
 organization that has none of its own, and it does that only while it is
 public and named `.github`.
 
-The wiki and the projects board are on, and that is not this
-repository's divergence: `btclib-benchmarks` is the sibling that turns
-both off.
-
-```shell
-for r in btclib btclib-node btclib-secp256k1 bbt portanode \
-         bitcoin-core-rpc btclib-benchmarks; do
-  gh api "repos/btclib-org/$r" \
-    --jq '[.name, (.has_wiki | tostring), (.has_projects | tostring)]
-          | @tsv'
-done
-# btclib-benchmarks answers false twice, and every other name true twice
-```
-
-The standard states no rule about either, so no answer to them is a
-decision here, and settling it in one direction is a settings change with
-no diff to review.
-
 ## Topics
 
 ```shell
@@ -277,14 +267,28 @@ gh api repos/btclib-org/.github --jq '.topics'
 # ["bitcoin","btclib","github-organization","repository-standard"]
 ```
 
-[Section 3 makes a package's `keywords` its topics][s3], and this
-`pyproject.toml` declares none — it is not a distribution's, so there is
-no list in the tree for these names to be compared against.
-`topics_test.py` compares the two sides for a repository whose
-`pyproject.toml` carries a `[build-system]`, which this one does not, and
-asks of the rest only that a topic exists at all. So the names live here
-and nowhere else: a repository restored from a record that passed over
-them has no topics, which is the one thing the suite does ask.
+[Section 3 makes a package's `keywords` its topics][s3], and the rule
+turns on what the `[project]` table declares rather than on whether
+anything is published. `pyproject.toml` here declares the same names, so
+the two lists are one list spelled twice, and this is the command that
+holds them together: it prints the difference and exits nonzero on one.
+
+```shell
+diff <(gh api repos/btclib-org/.github --jq '.topics[]' | sort) \
+     <(sed -n '/^keywords = \[/,/^]/s/^ *"\(.*\)",$/\1/p' pyproject.toml \
+       | sort)
+```
+
+Both sides are sorted because [the order is maintained on one side and
+compared on neither][s3]: `pyproject.toml` declares the names in the
+order that section keeps, and the call answers in an order of GitHub's
+own. `topics_test.py`'s `keyworded` selects the trees this comparison is
+asked of on the `[project]` table's presence, so this one is among them.
+
+What the record is still the only home of is that the names are set on
+the repository at all: nothing in the tree pushes them there, so a
+repository restored from `pyproject.toml` alone has the keywords and no
+topics until somebody sets them.
 
 ## Token permissions
 
@@ -346,6 +350,29 @@ gh api repos/btclib-org/.github/private-vulnerability-reporting
 
 On, [as the standard asks of every tier][s2-root].
 
+## Plan-gated settings
+
+The ceiling on concurrent jobs is a number the plan decides rather than
+anything this repository configures, and [section 10 of the standard
+makes this section its one home in the tree][s10-set], beside the command
+that re-derives it:
+
+```shell
+gh api orgs/btclib-org --jq .plan.name    # free
+```
+
+[GitHub's own table](https://docs.github.com/en/actions/reference/limits)
+turns that answer into a number, twenty concurrent jobs on the free plan,
+shared across every repository of the organization. `lint.yml` and
+`claude-review.yml` are what a pull request here starts, with
+`alignment.yml` and `links.yml` added where the paths their triggers name
+are touched. `CONTRIBUTING.md`'s *The landing queue* is what points here
+for the figure.
+
+The two secret-scanning settings that answer `disabled` under *Secret
+scanning and Dependabot* above are the other plan-gated pair, and that
+section is where they are read back.
+
 ## What is not configured, and why
 
 - **No publishing, and no release workflow.** `CONTRIBUTING.md`'s *A
@@ -355,11 +382,12 @@ On, [as the standard asks of every tier][s2-root].
   answers `0`.
 - **No CodeQL**, and GitHub's default setup off with it:
   `gh api repos/btclib-org/.github/code-scanning/default-setup --jq .state`
-  answers `not-configured`. The reason recorded here was that there is no
-  code, and `tests/` is code. What stands in its place is narrower: that
-  suite is neither installed nor imported by anything, and what it reads
-  is this organization's own API answers. Whether that is enough to leave
-  the analysis off is open rather than settled.
+  answers `not-configured`. [Section 10's `codeql` entry does not name
+  this tree][s10-carries], and a tree an entry does not name is asked
+  nothing by that row, so what is off here is off by a decision taken
+  once for the organization rather than by one this repository reached
+  on its own. What would turn the analysis on is that entry, and this
+  bullet is the setting that follows from it.
 - **No Pages and no Read the Docs.** The rendered form of this repository
   is the organization profile GitHub builds from `profile/README.md`,
   which is not a site anything deploys.
@@ -382,11 +410,30 @@ out is left out by the scope above rather than by oversight.
 repository document, most of which is URLs, counts and derived state. The
 fields of it that are settings are the ones the sections above quote.
 
-**A facility nobody reached for.** Actions secrets and variables,
-Dependabot secrets, self-hosted runners, webhooks, deploy keys, autolinks
-and custom property values each answer empty here, and an empty answer
-records no decision. Whichever of them is used one day arrives with the
-section that uses it.
+**A credential this repository spends and does not hold.**
+`claude-review.yml` reads `secrets.CLAUDE_CODE_OAUTH_TOKEN`, and both
+secret stores here answer empty for it:
+
+```shell
+gh api repos/btclib-org/.github/actions/secrets --jq .total_count
+gh api repos/btclib-org/.github/dependabot/secrets --jq .total_count
+# 0, both
+gh api orgs/btclib-org/actions/secrets \
+  --jq '.secrets[] | [.name, .visibility]'
+gh api orgs/btclib-org/dependabot/secrets \
+  --jq '.secrets[] | [.name, .visibility]'
+# ["CLAUDE_CODE_OAUTH_TOKEN","all"], both
+```
+
+Those two zeros record a decision, and it is [the standard's][s11-review]:
+the token is an organization secret at `visibility=all`, in both stores,
+so a repository adopting the workflow configures nothing for it, and a
+copy of it in a store here would be that decision undone.
+
+**A facility nobody reached for.** Actions variables, self-hosted
+runners, webhooks, deploy keys, autolinks and custom property values each
+answer empty here, and an empty answer records no decision. Whichever of
+them is used one day arrives with the section that uses it.
 
 **A field the standard states no rule about, and no call above
 answers alongside one it does.** `allow_forking`, `allow_update_branch`,
@@ -405,6 +452,8 @@ running a command.
 [s3]: ./README.md#3-pyprojecttoml-is-the-configuration
 [s8]: ./README.md#8-coverage-at-100
 [s10-check]: ./README.md#the-aggregate-job-and-the-required-check
+[s10-carries]: ./README.md#which-trees-carry-which-sentinel
+[s10-set]: ./README.md#the-set-and-its-cadence
 [s11-bots]: ./README.md#dependabot-and-pre-commitci
 [s11-branch]: ./README.md#branch-protection-and-rulesets
 [s11-merge]: ./README.md#merge-method

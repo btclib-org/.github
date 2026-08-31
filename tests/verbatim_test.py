@@ -62,10 +62,8 @@ CONDITIONAL = "owed where "
 """How a bullet of section 14 opens where a copy is owed on a condition."""
 
 EXPECTED_DRIFT: dict[str, str] = {
-    ".gitattributes": "btclib-org/.github#423",
-    ".markdownlint.jsonc": "btclib-org/.github#316",
-    "CONTRIBUTING.md": "btclib-org/.github#281",
     "REVIEWING.md": "btclib-org/.github#353",
+    ".gitattributes": "btclib-org/.github#646",
 }
 """A path section 14 names whose copies are known not to agree yet.
 

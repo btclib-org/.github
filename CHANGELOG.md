@@ -4004,3 +4004,536 @@ audit has no revision to compare against.
   links into them. A tree that does not pass the flag yet carries a
   backlog row against the issue, so its cell is a strict expected
   failure until the port lands.
+
+### Section 11 draws the perimeter a `REPOSITORY.md` records
+
+- **A copy records a setting a behaviour of the standard rests on, not
+  only one a section states a rule for** (issue #566): `allow_auto_merge`
+  is inside by that limb, *Merge method*'s landing being auto-merge
+  pressing the only enabled button, and section 16's checklist turns it
+  on with the squash-only setting it already names. The rejected
+  alternative leaves the setting to each repository as a convenience, and
+  what it costs is a section describing a landing path the tree no longer
+  offers with no command anywhere to catch it.
+- **`has_wiki` and `has_projects` are outside it, and a copy neither
+  reads them back nor explains an answer to them** (issue #550): the
+  standard states no rule about either and says so beside the perimeter,
+  which is the one place a copy has to read to know. The rejected
+  alternative records each with a sentence saying no rule is stated, so
+  that a reader sees the answer and is told it is nobody's divergence;
+  what it costs is a file growing with GitHub's API rather than with the
+  standard, in a wording each copy invents for itself.
+- **`has_issues` is inside** (issue #550): `CONTRIBUTING.md` sends an
+  issue about one repository alone to that repository's own tracker and
+  section 16's checklist gives every repository an `ISSUE_TEMPLATE/`, so
+  a behaviour the standard describes rests on the setting.
+- **A copy reads `.visibility` back, and records nothing for `.fork`**
+  (issue #584): the sentinel's run rests on the repository being public,
+  which is the limb above, where nothing sets `.fork` — a repository
+  arrives as one or it does not. The rejected alternative keeps both
+  halves of section 10's bar out of every copy on the ground that the bar
+  is section 10's to state, and what it costs is the flip: the sentinel's
+  row and its badge stand while the run stops producing a score, and the
+  file a reader restores the repository from says nothing.
+- **A copy does not claim that nothing it records has another form in the
+  tree** (issue #571): the topics are section 3's `keywords`, a releasing
+  tree's `.homepage` is the `[project.urls]` field of that name, and a
+  Pages custom domain has the root `CNAME` carrying the same value, so in
+  a tree holding one of those the record is a second copy read back for
+  comparison. The rejected alternative is the blanket clause,
+  one sentence shorter and refuted in such a tree's own file two sections
+  further down.
+- **A copy carries all three limbs of the scope sentence in the
+  standard's own words** (issue #582): `README.md` written into the
+  second names a sibling's own file, and a bare `it` there reaches for
+  section 16's checklist. The rejected alternative leaves the wording to
+  each copy, and what it costs is a reading per tree of a claim they are
+  all making once.
+- **This repository's own `REPOSITORY.md` takes the same answers**: it
+  already reads `allow_auto_merge` and `.visibility` back and now states
+  the first, drops the wiki and the projects board along with the
+  comparison against the siblings, and takes the scope sentence's
+  wording. The reason recorded beside `.visibility` is this repository's
+  own — the community health files it supplies are shown while it is
+  public — the sentinel section 10's bar is about not being one it
+  carries.
+
+### Section 11's Read the Docs connection is the App, not a webhook
+
+- **What connects a repository to Read the Docs is the organization-wide
+  `read-the-docs-community` GitHub App at `repository_selection: all`**
+  (issue #564): `gh api orgs/btclib-org/installations` names it, and
+  `gh api repos/btclib-org/<repo>/hooks --jq length` answers `0` in
+  every repository of the organization, so what a `REPOSITORY.md`
+  records is the installation and an empty hook list rather than a
+  webhook. A hook found on a repository is stale and is deleted rather
+  than repaired; btclib-org/bitcoin-core-rpc#291 records one that was.
+- **The per-repository webhook is the rejected alternative, and the
+  secret is why**: Read the Docs issues it on the project's own
+  integration page and GitHub returns it masked, so nothing read back
+  from the repository says whether a hook still carries the right one.
+  The status code the section named for a hand-added hook goes with the
+  rule it belonged to, rather than becoming the ground a rule stands on:
+  no command here re-derives it.
+- **`latest`, `stable` and the tag automation rule are read back from
+  the project's public API** (issue #564), which answers without a
+  token: `latest` comes back as a branch and `stable` as a tag whose
+  `ref` is the highest release tag, beside the tags the rule has
+  activated. The rule itself the API does not expose —
+  `automation-rules/` answers 404 where an endpoint needing a token
+  answers 401 — so the rule is recorded through its result.
+
+### Section 10 calendars the rebuild and homepage sentinels
+
+- **A tree that publishes an attestation has a row that re-derives it**
+  (issue #523): `sdist-rebuild` takes Sunday 03, at the head of the
+  security rows the calendar ends with, and its entry names `btclib`,
+  `btclib-secp256k1` and `bitcoin-core-rpc`. What it compares against is
+  the digests the published attestation carries rather than the ones the
+  index serves, and the compiled wheel stays outside the property
+  section 12 states. Section 10 has the row land here first, so
+  `test_every_row_of_the_calendar_names_something_that_exists` names it
+  until the first of the three schedules the workflow.
+- **The page github.com/btclib-org serves is generated from a file in
+  this tree, and the sentinel that watches for drift between them has a
+  row and a minute** (issue #558) (issue #553): `homepage` takes
+  Saturday 03, and `btclib-org.github.io` the minute after `bbt`'s,
+  which is `links`'s minute in that tree too — a sentinel its entry
+  gives it and it does not carry, btclib-org/btclib-org.github.io#1.
+  The `repository_dispatch` that would send the exact signal wants a
+  credential with write access to that tree, which nothing here holds,
+  and asking the question from this suite instead answers red on `main`
+  here for a drift another repository owns. Until the site schedules the
+  workflow, `test_every_row_of_the_calendar_names_something_that_exists`
+  names `homepage` beside `sdist-rebuild`.
+- **`pypi-install`'s entry names `btclib-node`** (issue #85): that tree
+  schedules the workflow on the row's day and hour and on its own
+  minute, which section 10 reads as the entry's gap and not the tree's.
+  What that issue stays open for is `os-windows`, whose entry names
+  `btclib-node` where that tree carries no windows workflow.
+
+### Section 12 says what a release run's `needs:` and its post-publish check are
+
+- **A job named in `needs:` that is not a gate is opted back in by the
+  dependent's own `always()`, and the widening does not propagate**
+  (issue #484): each dependent states it for itself, with the explicit
+  `needs.<job>.result == 'success'` beside it, because a bare `needs:`
+  reads back through the listed job's own chain. The audit lands beside
+  it: a release run is read job by job for `skipped` rather than for
+  red, a skipped job carrying no step and leaving a release that never
+  finished reading as one that did. `always()` on the non-gating job
+  itself and dropping it from `needs:` are the rejected alternatives,
+  the first changing nothing a dependent reads and the second costing
+  the ordering the listing buys. The publishers whose guards do not
+  carry the shape yet are that issue's other half.
+- **The post-publish check is a job of the release run calling the
+  reusable install workflow, and never a step appended to a publish
+  job** (closes #488): a publish job's runner carries what its image
+  ships and nothing the tree chose, so an appended step provisions its
+  own toolchain or fails on the missing `uv` at `127` or on an
+  interpreter `requires-python` does not admit, and placement decides
+  whether the failure is legible — a failing job is red beside a publish
+  job that stayed green, where a failing step turns the publish job
+  itself red and takes the attestation and the GitHub release down as
+  skips with it. Inlining the check because the
+  index has nothing to read before a first release is the rejected
+  alternative: the release's own call runs after its upload and waits
+  for the version its tag names, so what has nothing to read is the
+  schedule.
+
+### The suite asks whether a releasing tree's homepage is its documentation
+
+- **A releasing tree's `.homepage`, its `[project.urls] homepage` and its
+  `[project.urls] documentation` are read against each other** (closes
+  #535): section 3 sends both surfaces that carry the name to the
+  documentation the tree provides and has `documentation` name that
+  same URL, and no gate in the tree the rule binds compares them.
+  `tests/homepage_test.py` asks each tier-1 tree that the three are one
+  string, the way `topics_test.py` asks `keywords` and `.topics`, and
+  `CLAUDE.md`'s list of the files that ask the API names it.
+  Compared as written rather than with the trailing slash normalized:
+  the rule is that the surfaces agree, and a slash one carries and
+  another lacks is that disagreement. Which URL it is — the tree's own
+  site rather than a sibling's, or on which host — is not asked,
+  section 3 naming no host and no shape for the site.
+
+### Section 7 keys the property layer, and section 10 loses an example
+
+- **A tree owes section 7's property layer because bytes an adversary
+  chose reach its parser, not because section 10's record gives it the
+  fuzzer** (issue #426): the two cost differently — a property layer is
+  code in the suite that runs with everything else, where a fuzzer is a
+  scheduled runner with a harness and a corpus — so keying the cheap one
+  on membership in the expensive one lets a tree obtain the first only
+  by being given the second. Keying it on the record is the rejected
+  alternative.
+- **`btclib-secp256k1` has the property and no entry, and the reason
+  stands beside the absence** (issue #342): whether a target there may
+  reach the vendored C library at all — which would be fuzzing
+  upstream's work rather than these bindings — decides what the sentinel
+  would be run for, and that is undecided, so an entry taken now
+  schedules a weekly run against a target nobody has agreed is this
+  project's to write. The membership record is untouched: giving `fuzz`
+  a fourth tree is a decision to take on its own evidence rather than
+  one to arrive at by making two sentences agree.
+- **Section 10 states what a sentinel's own work costs a pull request
+  rather than instancing it** (closes #471): what a pull request charges
+  is the wait, and a sentinel's length is what makes its work worth
+  anything, so a trigger firing `fuzz` on a pull request charges the
+  whole of a sentinel's run for a verdict no merge waits on. The
+  rejected alternative is a replacement example: `fuzz.yml` runs on the
+  calendar and on a dispatch in both trees the record names, so an
+  example of a sentinel charging a pull request for its own work would
+  come out of history, which section 9 keeps in two files of its own.
+
+### Section 3 reaches a tree that ships nothing, and every written name
+
+- **`keywords` turns on the `[project]` table and not on the index**
+  (closes #465): a tree that uploads nothing declares the list all the
+  same, so that the topics github.com shows have something in the tree
+  to be read against, and `tests/topics_test.py` selects on that table
+  where it selected on `[build-system]`. The rejected alternative keys
+  the rule on publishing, which is how the topics of a tree with no
+  upload came to answer to no list at all. This `pyproject.toml`
+  declares its own topics as keywords, and section 16's checklist keys
+  the absence it already described on there being no `pyproject.toml`
+  rather than on a file that declares no `keywords`.
+- **A distribution name written for somebody to copy out is spelled
+  canonically wherever it is written** (issue #581), not only in a
+  requirement: a flag's value, an install target, a deployment
+  environment's `url:`, the message on a release tag. Position is all
+  `tests/names_test.py` can read and these sites have none, so the rule
+  is stated and named a reader's catch rather than left to be answered a
+  line at a time per tree.
+- **A PyPI page is linked as `https://pypi.org/project/<name>/`**, the
+  form `https://pypi.org/p/<name>` redirects to: the site serves either
+  spelling of the name and redirects neither, so the spelling shown is
+  the writer's and the rule above reaches it. The short form is the
+  rejected alternative, saving the characters and costing the redirect.
+- **This tree declines of section 3 the metadata only an index reads,
+  and no more** (closes #602): its `CLAUDE.md` and section 2's row said
+  section 3 describes a file this `pyproject.toml` is not, which read as
+  the whole of it while `authors` and now `keywords` bind the tree; each
+  now names the half declined.
+
+### Section 11 separates the two closing parsers, and what a force-push costs
+
+- **Two parsers read a closing keyword, and a newline is where they
+  part** (closes #519): the one answering `closingIssuesReferences`
+  reads the pull request's description and requires a physical line, and
+  the one that closes on a push reads the message that landed and
+  crosses the newline. Section 11 states them apart, each with the
+  measurement it rests on and the day it was read.
+- **A `closed` event's commit id says which of the two closed the
+  issue** (closes #519): it carries a sha where the push did and null
+  where the description did, so `825c74e2` closing an issue its message
+  reaches only across a newline is the measurement of the second parser,
+  and a null beside it is uninformative rather than contrary. The pair
+  of controls is a description with no keyword whose issue closed on its
+  commit, and a commit with no keyword whose issue closed on its
+  description.
+- **The keyword scan over a branch's own commit text keeps `\s`**
+  (closes #519): the parser that text will meet is the one that reads a
+  landed message, so a separator narrowed to a space or a tab would miss
+  the shape the scan exists to catch. The rule to write one keyword per
+  line stays, being what the description parser requires and what a wrap
+  at eighty columns silently breaks.
+- **What a force-push costs is the review attached to the sha it
+  replaces, and section 11 gives the read that answers whether there is
+  one** (closes #570): `pulls/<n>/reviews` is the endpoint that answers,
+  and `pulls/<n>/comments` is the one that reads as an absence, counting
+  inline comments alone. An amend and a correction as its own commit
+  both move the head, so what the rule reaches is the push rather than
+  what carries the correction; a reading taken before a pull request
+  exists is attached to nothing and cannot be orphaned.
+- **The rejected alternative opens the pull request only once a reading
+  has cleared the sha**, so that no push ever follows a review. It needs
+  no read at all, and what it costs is being a rule about what a session
+  remembers per branch — where a bot submits against the head within
+  seconds of a pull request opening, leaving no window to work inside.
+
+### The suite asks a `REPOSITORY.md` for the section on what it passes over
+
+- **A copy says what falls outside its scope under
+  `## What this file passes over`, and `tests/scope_test.py` asks every
+  repository for that heading** (issue #565): whether the section is
+  there is what a string finds, where what it says about the perimeter
+  stays a reading. Section 11 names the heading as the form the second
+  obligation takes, with the reader's check as the rejected alternative
+  beside it, and the test reads the heading off that sentence as its
+  sibling reads the claim. `portanode`'s copy has no such section and is
+  a strict expected failure keyed on the issue, its row expiring with
+  the port that gives the copy the section.
+
+### This tree's head carries the row section 2 owes it, and its suite declares itself
+
+- **`README.md` opens with the badge row section 2 reads off this tree**
+  (closes #357): pre-commit.ci and `lint`, then `links` and `alignment`
+  in section 10's calendar order, in the form every other repository's
+  head takes. No `test` badge, the suite running inside `alignment.yml`
+  and section 2 giving a suite's badge to the workflow that runs it; no
+  licence badge, that being tier 1's; no Scorecard badge, the record not
+  naming this tree. Whether a workflow badge carries `?branch=main` is
+  #579's question, and it reaches this row as it reaches every other.
+- **`tests/README.md` declares which of section 7's conventions this
+  suite tests, and what of that section has no subject here** (closes
+  #357): none of the bullets, this tree shipping no package for one to
+  walk, and one sentence beside each rule of the section the suite takes
+  or declines, with the reason.
+- **`pytest-randomly` joins the `test` group** (issue #428), section 7's
+  default taken rather than declined: what it guards here is the session
+  fixtures every test reads after one fetch, where a test that mutated
+  what it read would pass or fail by order and nothing else in the suite
+  would notice. The rejected alternative declares the decline in
+  `tests/README.md` on the ground that the fetched answers are read once
+  and never changed -- which nothing enforces, and which the shuffle is
+  what would notice the day it stops being true.
+
+### Section 2 puts `?branch=main` on every workflow-status badge
+
+- **A workflow-status badge answers for `main` or answers `no status`**
+  (issue #579): unqualified, it falls back to another branch's run where
+  `main` has none, so section 2 qualifies every one of them and names
+  the `workflow_dispatch` run from `main` that gives a new sentinel's
+  badge its first reading. The rejected alternatives, a qualifier keyed
+  on whether the workflow has run on `main` and the unqualified badge,
+  are beside the rule; the badge rows are ported behind it.
+
+### The ported verbatim files agree everywhere, so their drift entries go
+
+- **`EXPECTED_DRIFT` no longer names `.gitattributes`** (closes #423):
+  every tree's header states the union price as section 9 does, the
+  forge not applying the driver, and the copies agree byte for byte.
+- **`EXPECTED_DRIFT` no longer names `.markdownlint.jsonc`** (closes
+  #316): every tree's header points at section 14 for who carries the
+  file, in place of naming trees, and the copies agree byte for byte.
+- **`EXPECTED_DRIFT` no longer names `CONTRIBUTING.md`** (closes #281):
+  every tree carries the shared half as this one has it, and
+  `tests/verbatim_test.py`'s own cut of it hashes the same in each.
+
+### The suite reads section 10's sentinel record in both directions
+
+- **Section 10's *Which trees carry which sentinel* is read as data and
+  asked of every tree** (closes #494): `tests/grid_test.py` reads each
+  entry's trees off the record — `subjects` in `tests/__init__.py`
+  reading a bullet whole where it wraps, which the entries do — and
+  compares them with the workflows a checkout holds, one cell per
+  repository, short and unnamed alike; a second test holds the record to
+  one entry per calendar row, in the order section 10 says. What a tree
+  is short of is that tree's, as section 10 says beside the record, so
+  the red cells are `BACKLOG` rows keyed on the issues carrying them:
+  `deps-oldest` (issue #323), `sdist-rebuild` (issue #523), the site's
+  `links` (issue #597), and `os-windows` in `btclib-node` (issue #618),
+  where the tree dropped the sentinel for a gate cell and the record has
+  not said whether it follows. The badge half stays a reader's catch:
+  the badge is section 2's, and no fixture holds a tree's `README.md`.
+
+### This tree's badge row carries the qualifier section 2 asks of it
+
+- **Every workflow-status badge at the head of `README.md` carries
+  `?branch=main`** (issue #579): `lint`, `links` and `alignment` answer
+  for `main` or answer `no status`, where the unqualified badge falls
+  back to another branch's run when `main` has none.
+
+### The record answers for the ceiling, the credential and CodeQL
+
+- **`REPOSITORY.md` has a *Plan-gated settings* section, which is where
+  section 10 puts the ceiling's figure** (issue #569, issue #412):
+  `gh api orgs/btclib-org --jq .plan.name` and GitHub's limits table sit
+  beside the number, `CONTRIBUTING.md`'s *The landing queue* already
+  points at that heading by name, and the plan-gated secret-scanning
+  pair is pointed at the section that reads it back rather than
+  restated. The plan and the credential are the file's first
+  organization-scoped calls, so the command at the head that enumerates
+  its endpoints matches `orgs/btclib-org` as well as this repository's
+  own paths, and prints them all.
+- **The credential `claude-review.yml` spends leaves *A facility nobody
+  reached for*** (closes #572): the empty Actions and Dependabot
+  repository stores record section 11's decision that the token is an
+  organization secret at `visibility=all`, so they take a bullet of
+  their own with the organization's two stores read back beside them,
+  and the facilities nobody has reached for keep the general one.
+  `bbt`'s copy, the other the issue names, already reads that way.
+- **The *Topics* section reads the tree's own `keywords` back against
+  the setting** (closes #593, issue #571): section 3 turns the rule on
+  the `[project]` table rather than on whether anything is published,
+  `topics_test.py`'s `keyworded` selects on that table, and this
+  `pyproject.toml` declares the names — so the section carries the
+  `diff` that holds the two lists together, the head of the file says
+  the topics have a second form in the tree as the ported copies do, and
+  what the record is still the only home of is that the names are set on
+  the repository at all.
+- **The CodeQL bullet states what section 10's record decides** (closes
+  #590): the `codeql` entry does not name this tree, and a tree an entry
+  does not name is asked nothing by that row, so the analysis is off by
+  a decision taken once for the organization — in place of a reason that
+  narrated the file and a question left open with nothing behind it.
+
+### The backlog row for the fragment flag is gone
+
+- **`tests/__init__.py`'s `BACKLOG` row for
+  `test_lychee_checks_a_link_into_a_heading` is deleted rather than
+  narrowed** (issue #583): every tree the row named passes
+  `--include-fragments` to lychee, so each cell passes without the
+  strict expected failure, which turns that success into a failure here.
+  The issue is closed by the last of those ports, in
+  `btclib-org/portanode`, so this landing cites it without closing it.
+
+### The open section is a list of entries, and a number in one has a place
+
+- **A `###` names one entry, never a theme several entries share**
+  (issue #567). Section 9 asked for an entry "in the group it belongs
+  to" and for the end of the open section, and a section carrying themes
+  has those in two different places; grouping by theme is written down
+  as the rejected alternative, on the ground that nothing in the file
+  says what the themes are and that the append point the placement and
+  rebase bullets are read against becomes the theme's rather than the
+  section's. An open section already carrying theme headings takes its
+  next entry after them, with nothing above it moving. Section 2's row
+  for the file names the entry rather than the group. Bringing the trees
+  to the rule is btclib-org/.github#586, so this cites the issue without
+  closing it.
+- **A citation goes in the bullet making the claim, not on the heading
+  above it** (issue #547). An entry's bullets cite separately, so a
+  citation on the heading answers for the entry while the bullets under
+  it name issues of their own and nothing says how the two sets relate.
+  The heading citation is the rejected alternative, and what it buys is
+  a section whose numbers a reader collects from the headings alone. The
+  tree that cites on the heading is the other half of
+  btclib-org/.github#586, so this cites the issue without closing it.
+- **An issue an entry names without acting on it is written into the
+  sentence, not into the parentheses** (closes #538). The parentheses
+  say what the entry did about an issue and there is nothing to say of
+  one it did nothing about, so a reference put there bare is the shape
+  *The qualifier does not stand in for the keyword* already refuses; in
+  the sentence it sheds the keyword and not the qualifier, and says what
+  the issue is to the entry.
+- **Section 15 audits none of it, and the reason for that is the landed
+  entries rather than the two shapes being indistinguishable**: a
+  pointer inside parentheses with nothing before the number is what
+  *Nothing already written is rewritten* keeps, so a pattern over the
+  file matches one of those as readily as a citation.
+
+### The .gitattributes comment names the driver's sides and one anchor
+
+- **`union` keeps `ours` first and then `theirs`, and the base's own
+  lines stay where they are** (issue #520): the comment said the added
+  lines were kept "in the order base-then-ours", which names no order
+  between the two sides — the fact the position of an entry turns on. A
+  scratch repository with `CHANGELOG.md merge=union` and two branches
+  each writing an entry answers with the `ours` line above the `theirs`
+  line, in a merge and in a rebase alike and wherever the base's own
+  line sits. Which side is which is the operation's: the branch checked
+  out when merging, the upstream when rebasing.
+- **The premise is an entry arriving at one anchor, not a bullet
+  appended to one of a few groups** (issue #643): a `###` names one
+  entry, so the open section is the list of its entries and there are no
+  groups to append to, and what the driver resolves is two branches
+  writing an entry at the one place section 9 sends it.
+- **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` names `.gitattributes`
+  against btclib-org/.github#646** (issue #520, issue #643): a comment
+  section 14 owes verbatim makes this tree's edit a drift the comparison
+  reports, and an entry there excuses that path while every other
+  verbatim file stays compared — where a `BACKLOG` row would excuse the
+  whole test. Carrying the comment to the repositories that lag is what
+  closes both issues, which is why this landing cites them without
+  closing either.
+
+### The organization page names the site tree and links btclib's documentation
+
+- **The word *btclib* opening `profile/README.md` links the library's
+  published documentation** (closes #637): `btclib.org` is served by
+  `btclib-org.github.io`, whose `index.md` is that file's bytes under
+  front matter, so on that surface the word linked the page carrying it.
+  The library's repository was the other candidate, and the file already
+  links it under *The libraries*; the documentation is what a reader
+  following that word in that sentence is after, and it is right
+  whichever repository holds the domain.
+- **`btclib-org.github.io` is an entry in the same file's *Around them*,
+  with the domain written and not linked** (closes #559): against naming
+  it, a reader of the organization's page is looking for what to use and
+  a repository whose whole content is that page is not it — but the list
+  carries `.github` on those same terms, so what decides an entry there
+  is not whether a reader would use the repository. What the entry says
+  is where the page is served, which nothing else on the page says once
+  the link above is the library's documentation; linking the domain
+  would put back on the served copy the self-reference the bullet above
+  removes.
+- **The `.github` entry writes the standard's scope instead of pointing
+  at it** (closes #559): it said the standard is what *the repositories
+  above* are built and kept to, which enumerated the list while that
+  entry was last and stopped doing so the moment one sat below it —
+  section 2 giving that repository a row, and saying its row is measured
+  like the others. Naming the scope leaves the sentence true wherever
+  the entry sits.
+
+### Section 7 states how a fuzzer stands to the property layer, once
+
+- **Section 7's *Property tests* carries the statement and section 10's
+  `fuzz` bullet points at it rather than restating it** (closes #594):
+  the two copies claimed different things — section 7's that a fuzzer
+  presupposes the property layer, section 10's that neither substitutes
+  for the other — which is section 9's *One fact in one place* failing
+  rather than being risked. The surviving sentence carries both claims,
+  since keeping only one resolves the duplication by losing half a fact.
+- **Section 7 is the copy that stays, because the distinction is what
+  the property layer is specified against** (closes #594): a reader of
+  the `fuzz` bullet arrives asking whether the tree owes the sentinel,
+  which that bullet's keying property answers, where a reader of section
+  7 arrives deciding whether to write the layer at all. The `fuzz` bullet
+  keeps its own examples — a length prefix larger than the buffer, a
+  truncated multibyte sequence, a varint that overflows, a recursion
+  depth that exhausts the stack — those being about the sentinel rather
+  than about the ordering of the two layers.
+- **The pointer names *Property tests* and speaks for that layer alone**
+  (closes #594): section 10's sentence took in section 7's convention
+  tests beside the property tests, a widening the surviving sentence
+  does not make.
+
+### The suite asserts its own convention declaration, and tests the changelog
+
+- **`tests/README.md`'s declaration of which of section 7's conventions
+  this repository tests is asserted by a test in the same suite**
+  (closes #615): `conventions_test.py` asks that the declaration's table
+  and its *Not tested here* line account for each of section 7's
+  conventions once, that a module named there is a file, and that the
+  file holds a test.
+- **Section 7's conventions are read off `README.md` rather than
+  transcribed into the suite** (closes #615): a sibling suite holds a
+  copy because its standard is in another repository, and here the
+  standard and the declaration are the same commit, so a copy would be
+  the one that goes stale — a bullet added to section 7 would land with
+  nothing to notice that neither half of the declaration accounts for
+  it.
+- **`subjects` takes the pattern by which a list names its subjects**
+  (closes #615): section 7 emphasises its bullet leads where the lists
+  this suite already reads quote theirs as code, so the shape is the
+  caller's to pass and there is one reader of a bulleted list rather
+  than two.
+- **`CHANGELOG.md` states no count of itself, and a test says so**
+  (closes #616): `changelog_test.py` reads a history file for a count of
+  its own entries or bullets, and tells that from a count of something
+  else by whether a possessive in front of the count gives what it
+  counts an owner. Section 11 says a count is not reachable by a
+  pattern, which is a rule about counts of anything; a count of the
+  file's own parts is narrower and is reachable. `merge=union` is why
+  the rule wants a test rather than a reading: the same paragraph edited
+  on two branches merges without a conflict.
+
+### Section 7 points at section 10's `fuzz` entry for the keying property
+
+- **Section 7's *Property tests* names the property its layer is keyed
+  on and no longer glosses it** (closes #650): the gloss was a second
+  statement of the criterion, and the two were already apart in their
+  words — section 7's *its parser* against section 10's *the parser* —
+  where section 9's *One fact in one place* asks for one statement and a
+  pointer. Section 10's is the statement that keeps the discrimination,
+  that the property is not merely input the tree does not produce.
+- **What tells a restatement from a pointer's own apposition is whether
+  the clause carries the criterion**: section 1's `fuzz` group and
+  section 14's *Decided per repository* each name what section 10 keys
+  the sentinel on without stating it, so neither can come to disagree
+  with the entry; section 7's gloss carried the criterion itself.
+- **The pointer names the `fuzz` entry rather than the section**, the
+  gloss having been what spared the reader the jump: what is left has to
+  land where the property is stated rather than at a section's head.

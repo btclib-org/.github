@@ -5,13 +5,14 @@
 """The alignment suite: whether the repositories still agree with README.md.
 
 Section 7 of README.md says a test never reaches the network, and every
-test here does. That is the whole reason this suite is in this
-repository rather than spread across the others: what it measures is
-agreement with the standard, and the standard is here. A test in a
-repository's own tree answers for that repository's reading of a rule
-on the day it was written; a test here reads the rule as the file
-states it now, and asks it of every repository at once. Section 15 of
-that file is the audit this is the running half of.
+test here that asks about another repository does. That is the whole
+reason this suite is in this repository rather than spread across the
+others: what it measures is agreement with the standard, and the
+standard is here. A test in a repository's own tree answers for that
+repository's reading of a rule on the day it was written; a test here
+reads the rule as the file states it now, and asks it of every
+repository at once. Section 15 of that file is the audit this is the
+running half of.
 
 A test that takes a `repository` argument is asked once per repository,
 `conftest.py` parametrizing it at collection, and this module says
@@ -21,10 +22,11 @@ asks what no single tree can answer -- the calendar, the verbatim
 copies -- and runs once.
 
 Each test that reaches GitHub is marked `integration`, which is how a
-run selects or deselects them by name -- `backlog_test.py` asks
-`conftest.py` itself and is not; what skips the suite without
-`BTCLIB_INTEGRATION` in the environment is `conftest.py` at collection,
-a marker being a label rather than a condition::
+run selects or deselects them by name -- a module whose subject is this
+tree rather than the organization asks nothing of GitHub and carries
+none; what skips the suite without `BTCLIB_INTEGRATION` in the
+environment is `conftest.py` at collection, a marker being a label
+rather than a condition::
 
     BTCLIB_INTEGRATION=1 uv run --locked --group test pytest
 
@@ -54,7 +56,10 @@ shared is these parts:
   are the same table rather than two copies of it: the file is the
   source, `rows` is how the suite reads it. A row added there is
   checked from the moment it is added, and a row nobody maintains
-  fails against the trees instead of going quietly stale.
+  fails against the trees instead of going quietly stale. A list of
+  that file is read the same way, `subjects` being how: section 10's
+  record of which trees carry which sentinel, section 14's paths, and
+  section 7's conventions.
 """
 
 from __future__ import annotations
@@ -245,17 +250,44 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ),
     ),
     (
-        583,
-        "test_lychee_checks_a_link_into_a_heading",
+        565,
+        "test_the_settings_file_says_what_it_passes_over",
+        ("portanode",),
+    ),
+    # deps-oldest: every tree its entry names is short of the workflow
+    (
+        323,
+        "test_a_tree_carries_the_sentinels_its_entries_give_it",
         (
-            "bbt",
             "bitcoin-core-rpc",
             "btclib",
             "btclib-benchmarks",
             "btclib-node",
             "btclib-secp256k1",
-            "portanode",
         ),
+    ),
+    # sdist-rebuild: the row landed ahead of the trees it names
+    (
+        523,
+        "test_a_tree_carries_the_sentinels_its_entries_give_it",
+        (
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-secp256k1",
+        ),
+    ),
+    # links: the site has no links.yml, and the entry names every tree
+    (
+        597,
+        "test_a_tree_carries_the_sentinels_its_entries_give_it",
+        ("btclib-org.github.io",),
+    ),
+    # os-windows: the tree dropped the sentinel for a gate cell, and
+    # whether the entry follows it is section 10's decision
+    (
+        618,
+        "test_a_tree_carries_the_sentinels_its_entries_give_it",
+        ("btclib-node",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
@@ -327,8 +359,16 @@ SUBJECT = re.compile(r"^- `([^`]+)` — (.+)")
 
 The backticks and the spaced em dash are the shape, and a bullet written
 any other way is one this cannot answer for. What follows the dash is
-the rest of that line, for a caller reading the clause the bullet opens
-with.
+the rest of the bullet, for a caller reading the clause it opens with.
+"""
+
+EMPHASISED = re.compile(r"^- \*\*([^*]+)\*\* — (.+)")
+"""The same shape where the subject is prose rather than a name.
+
+A list whose subjects are paths quotes them as code, and section 7's
+conventions are phrases of English -- *the public surface*, *the
+changelog* -- which the file emphasises instead. Which of the two a
+list uses is the document's to choose, so it is the caller's to pass.
 """
 
 
@@ -390,8 +430,10 @@ def fenced(document: Path, opening: str, language: str) -> str:
     return "\n".join(blocks[0]) + "\n"
 
 
-def subjects(document: Path, opening: str, closing: str) -> dict[str, str]:
-    """Read every bullet between two lines, by its backticked subject.
+def subjects(
+    document: Path, opening: str, closing: str, pattern: re.Pattern[str] = SUBJECT
+) -> dict[str, str]:
+    """Read every bullet between two lines, by the subject it opens with.
 
     A bullet's subject is what it is about, and a list whose subjects are
     paths is a list a test can act on; what the bullet then says about it
@@ -413,11 +455,12 @@ def subjects(document: Path, opening: str, closing: str) -> dict[str, str]:
     :param document: the markdown file to read.
     :param opening: a substring of the line the list follows.
     :param closing: a substring of the line the list stops at.
-    :returns: each subject against the rest of its bullet's first line,
-        in the order the list gives them.
+    :param pattern: how a bullet of this list names its subject.
+    :returns: each subject against the rest of its bullet, the lines it
+        wraps over joined by a space, in the order the list gives them.
     :raises LookupError: where either end is not found exactly once, the
-        closing line comes first, a bullet between them has no backticked
-        subject, or two bullets carry the same one.
+        closing line comes first, a bullet between them names no subject
+        the pattern reads, or two bullets carry the same one.
     """
     lines = document.read_text(encoding="utf-8").splitlines()
     start = sole(document, lines, opening)
@@ -425,16 +468,22 @@ def subjects(document: Path, opening: str, closing: str) -> dict[str, str]:
     if end < start:
         msg = f"{document.name} holds {closing!r} before {opening!r}"
         raise LookupError(msg)
+    # a bullet is its own line and every indented line after it, which
+    # is how a bullet wraps at the margin
+    bullets: list[str] = []
+    for line in lines[start + 1 : end]:
+        if line.startswith("- "):
+            bullets.append(line)
+        elif line.startswith("  ") and bullets:
+            bullets[-1] += " " + line.strip()
     read: list[tuple[str, str]] = []
     unread: list[str] = []
-    for line in lines[start + 1 : end]:
-        if not line.startswith("- "):
-            continue
-        found = SUBJECT.match(line)
+    for bullet in bullets:
+        found = pattern.match(bullet)
         if found:
             read.append((found.group(1), found.group(2)))
         else:
-            unread.append(line)
+            unread.append(bullet)
     out = dict(read)
     if unread or not out or len(out) != len(read):
         msg = (

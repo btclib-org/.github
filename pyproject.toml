@@ -3,12 +3,16 @@
 # gives the commands a human runs to audit one repository; this is the
 # subset a machine can run against all of them, weekly, unattended.
 #
-# It is not a distribution. Section 3 describes the `pyproject.toml` of a
-# package that ships -- name, version, classifiers, keywords, urls, a
-# build backend, a wheel -- and none of that applies to a tree whose only
-# Python is a test suite. `package = false` below is what says so to uv,
+# It is not a distribution. Section 3's metadata that only an index reads
+# is therefore not here -- no classifiers, no urls, no license
+# expression, no build backend and no wheel -- there being no upload for
+# any of them to describe. `package = false` below is what says so to uv,
 # and what keeps `uv run` from trying to build this directory before
 # running anything in it.
+#
+# What section 3 binds to the `[project]` table rather than to an index
+# is here all the same, `authors` and `keywords` both, each with the
+# reason at the key.
 
 [project]
 name = "btclib-alignment"
@@ -24,6 +28,21 @@ authors = [{ name = "The btclib developers", email = "devs@btclib.org" }]
 # application applies -- the newest its dependencies allow -- and which
 # interpreter that is, `.python-version` says rather than this comment.
 requires-python = ">=3.14"
+# the GitHub topics, the same names in the same lowercase spelling.
+# Section 3 turns this key on the [project] table and not on the index,
+# so a tree that uploads nothing writes the list all the same: the
+# topics are how a reader of github.com/btclib-org finds the standard
+# the other repositories are kept to, and this is what they are read
+# against. The order is this file's alone -- `gh api
+# repos/btclib-org/.github --jq '.topics'` sorts what it is given -- and
+# it runs from what the tree is to what it is about. Each name is read
+# against the tree rather than taken from a sibling's list
+keywords = [
+    "repository-standard",
+    "github-organization",
+    "btclib",
+    "bitcoin",
+]
 
 [dependency-groups]
 # `gh` and `git` are the other two dependencies and neither is a wheel:
@@ -31,6 +50,10 @@ requires-python = ">=3.14"
 # says so for a developer running this by hand.
 test = [
     "pytest",
+    # section 7's default, taken rather than declined: tests/README.md
+    # says what the shuffle guards in this suite and what argued against
+    # it, and `-p no:randomly` is how a failure is reproduced in order
+    "pytest-randomly",
     # a workflow file is read with a parser and not with a regex: what
     # this suite asks of one is where its `cron:` entries are, which is
     # a question about the document's shape rather than about a line

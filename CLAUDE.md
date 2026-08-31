@@ -127,12 +127,13 @@ Do not use Fable unless explicitly instructed.
 ## Non-obvious facts that will otherwise waste a session
 
 - **`pyproject.toml` is not a distribution's.** `package = false`, no
-  build backend and no wheel, so section 3 describes a file this one is
-  not. Section 14 names the files kept by the gate's tools that do not
-  look in `pyproject.toml` for their configuration. A word this file's
-  own prose needs — `CPY`, ruff's copyright rule — is a typo to the
-  spell checker until `[tool.typos]` names it, with the reason beside
-  it.
+  build backend and no wheel, so of section 3 it declines the metadata
+  only an index reads and declares what binds the `[project]` table —
+  `authors` and `keywords` — with the reason at the key. Section 14
+  names the files kept by the gate's tools that do not look in
+  `pyproject.toml` for their configuration. A word this file's own
+  prose needs — `CPY`, ruff's copyright rule — is a typo to the spell
+  checker until `[tool.typos]` names it, with the reason beside it.
 - **The suite's subject is the other repositories, and there is no
   coverage**: what it would measure is a tree that ships nothing, so the
   number would be the suite measuring itself. What it cannot reach — a
@@ -194,9 +195,10 @@ Do not use Fable unless explicitly instructed.
   tip, so it removes no network dependency, and its object store is borrowed
   from a checkout that a `git gc` there can break — for a saving the issue's
   own numbers call not worth the hazard. `git grep -lE 'gh_json|settings:
-  dict' tests/*_test.py` names `protection_test.py`, `security_test.py`,
-  `settings_test.py`, `tags_test.py` and `topics_test.py` — what asks the API
-  for state with no on-disk representation. `tiers` is not one of them:
+  dict' tests/*_test.py` names `homepage_test.py`, `protection_test.py`,
+  `security_test.py`, `settings_test.py`, `tags_test.py` and `topics_test.py`
+  — what asks the API for state with no on-disk representation. `tiers` is
+  not one of them:
   `tests/__init__.py`'s `tier()` reads `pyproject.toml` and `release.yml` off
   the checkout, which `tiers_test.py` asks through the `tiers` fixture —
   `conftest.py`'s one-liner over `trees` — rather than through `gh_json`.
