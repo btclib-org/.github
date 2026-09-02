@@ -363,8 +363,7 @@ direction — a row the loop contradicts is the finding, and so is a
 repository the loop names and the table does not. A new repository is a
 row here in the pull request that creates it, section 16's first step.
 
-`<org>` sits last so that a paste made before it is filled in writes no
-file.
+`<org>` sits last for the reason section 9 gives.
 
 ```shell
 for r in $(gh repo list --json name --jq '.[].name' <org>); do
@@ -972,9 +971,9 @@ what it holds.
     which is the number to lower first if a resolver ever wants it
     lower. The boundary is measured by calling the backend's own hook at
     each version. `--with` puts `<version>` ahead of the command it
-    measures, so it cannot sit last the way section 2's tier loop puts
-    `<org>`; the assignment stands in a block of its own, for the reason
-    `CLAUDE.md`'s `docs/` read gives:
+    measures, so it cannot sit last as section 9 asks; the assignment
+    stands in a block of its own, for the reason section 9's bullet
+    gives:
 
     ```shell
     version=<version>
@@ -1323,8 +1322,8 @@ pre-commit.ci does not have — the lint workflow covers it. No
     holds at one — a full-history fetch of the same ref is equally
     tagless and puts the whole history's count there instead. What
     follows the `g` is the commit the `rev:` resolved to, abbreviated,
-    and this names it in full, `<rev>` last for the reason section 2's
-    tier loop gives:
+    and this names it in full, `<rev>` last for the reason section 9
+    gives:
 
     ```shell
     gh api --jq .sha repos/codespell-project/codespell/commits/<rev>
@@ -2185,32 +2184,49 @@ sight rather than weighed.
   reaching the tool. Quoting is what an argument holding spaces
   otherwise asks for, and it makes `<` and `>` ordinary text: the
   command runs, and the tool takes the placeholder as the value. What a
-  bare one fails with, and what that failure guards, is the bullet
-  below. A placeholder *inside* a larger string is not this:
-  `"repos/<org>/$r/contents/$1"` is quoted for the variable beside it,
-  and unquoting it would be wrong shell rather than a guard. Nor is a
-  quote another language needs — a `python -c` program's string, a TOML
-  value.
-- **A block whose placeholders sit above a line that writes is guarded
-  by what follows the placeholder on its own line.** `<` and `>` are the
-  shell's redirection operators, so a paste made before a placeholder is
-  filled in fails on the line holding it, and which of two failures it
-  is decides what guards the lines below. Where a word follows the
-  placeholder, `>` has a target and the line fails at run time on the
-  `<` — `no such file or directory: org` — so a trailing `&&`
-  short-circuits the rest and nothing runs. That guard rests on the
-  reader's directory rather than on the line: where a file of the
-  placeholder's own name sits there the `<` succeeds, the line runs, and
-  the `>` writes one named for the word that follows. Where the
-  placeholder ends the line, `>` has no target and the line is a parse
-  error, which an interactive shell answers by discarding it together
-  with its trailing `&&` and reading the next line as a fresh command:
-  the chain never forms, and a write below it runs. So the chain guards
-  the first case, and the second is left what the first rejects — a
-  fence of its own for the line that writes, which the reader pastes
-  deliberately. What tells the cases apart is a paste into a pty: the
-  same block fed to a shell as a script aborts on the parse error an
-  interactive shell discards, which answers a different question.
+  bare one fails with is the bullet below, and what that failure leaves
+  unguarded is the one after that. A placeholder *inside* a larger
+  string is not this: `"repos/<org>/$r/contents/$1"` is quoted for the
+  variable beside it, and unquoting it would be wrong shell rather than
+  a guard. Nor is a quote another language needs — a `python -c`
+  program's string, a TOML value.
+- **A bare placeholder goes at the end of its command**, where the `>`
+  closing it has no target and the line is a parse error before it is a
+  command. `<` and `>` are the shell's redirection operators, so a paste
+  made before the placeholder is filled in is a pair of redirections
+  wherever the placeholder sits; what the position decides is whether
+  the line can run at all. Where a word follows the placeholder, `>`
+  takes the word as its target and the line fails at run time on the `<`
+  — `no such file or directory: org` — except in a reader's directory
+  holding a file of the placeholder's own name, where the `<` succeeds,
+  the line runs, and the `>` writes one named for the word that follows.
+  At the end of the line there is nothing for `>` to open, so the line
+  writes nothing whatever the directory holds. Where the command's own
+  shape refuses the position — `--with <version>` precedes what it
+  measures — the placeholder's line is a block of its own, with nothing
+  under it for a paste that stops at the fence to reach; what that
+  stopping rests on is the bullet below.
+- **A line that writes goes in a fence of its own**, the parse error
+  guarding only the line it sits on: an interactive shell answers it by
+  discarding that line together with its trailing `&&` and reading the
+  next as a fresh command, so the chain never forms and a write below it
+  runs. The run-time failure is the one a trailing `&&` short-circuits,
+  and that guard rests on the reader's directory rather than on the
+  line. The fence rests on something of the reader's too — on their
+  taking the one fence, which github.com affords by giving each its own
+  copy button. A drag across the rendered passage is one paste instead,
+  and what a shell makes of one paste is the bullet below.
+- **What any of that is measured with is a paste into a terminal, and
+  the shell decides how much of one paste is a command.** `zsh` takes a
+  bracketed paste — what a terminal emulator wraps one in — as a single
+  buffer and abandons all of it on the parse error, where `bash` and
+  `sh` submit it a line at a time and reach the write with the markers
+  present or absent. Feeding the block to a shell as a script measures
+  something else, and not the same something for every shell: `zsh`
+  reading it from stdin discards the parse error and carries on as an
+  interactive shell does, where `-c` and a file abort. So a harness
+  built on `cat block | zsh` reads as the aborting case and is the
+  other one.
 - **One fact in one place.** Two files stating the same thing become two
   files disagreeing about it; the second points at the first.
 - **A package upstream of another does not name the one downstream.**
@@ -3489,7 +3505,7 @@ individually well-formed, the text reading correctly to a person and
 only the API answering short. One keyword per line is the shape a wrapper cannot
 split, and no formatter is let reflow the block. What catches a loss is
 counting the registrations against the number intended. `<n>` sits last
-for the reason section 2's tier loop gives:
+for the reason section 9 gives:
 
 ```shell
 gh pr view --json closingIssuesReferences \
@@ -3536,7 +3552,7 @@ had #178 landed first.
 
 So **what a pull request closes is read before it is merged**, from the
 one place that answers. The variables follow the query, which puts `<n>`
-last for the reason section 2's tier loop gives:
+last for the reason section 9 gives:
 
 ```shell
 gh api graphql -f query='
