@@ -1517,6 +1517,49 @@ pre-commit.ci does not have — the lint workflow covers it. No
     '*.md'` once `btclib-secp256k1`'s three were fixed, so the rule
     costs nothing today and exists to keep the next one from being
     written.
+- **`unquoted-placeholder`** — pygrep refusing a placeholder that stands
+  as a whole argument and carries quotes. Section 9 is the rule and what
+  the quoting costs: quotes make the angle brackets ordinary text, so a
+  paste made before the placeholder is filled in reaches the tool with
+  the placeholder as its value rather than failing at the shell. In
+  every repository of the organization, this one included: the rule is
+  section 9's and binds them alike, and the paste it guards against is
+  made by a reader of whichever tree they have open.
+
+    **What separates an exempt quote from a refused one is a property of
+    the line, not of the fence around it.** Section 9 exempts a quote
+    another language needs, which a reader tells apart by the fence a
+    line sits in. A pattern cannot: Python's `re` takes a look-behind
+    only at a fixed width, so a pygrep matching across lines has to
+    consume the file from its start, and it then names the first line
+    and prints everything up to the match — a verdict carrying no
+    location. Both exemptions are read off the line instead. No shell
+    puts a space around an assignment's `=`, `x = y` being the command
+    `x` run with two arguments, so a spaced one belongs to another
+    language and its value is that language's to quote; and a quote
+    nested inside a quote of the other kind is a nested program's.
+
+    **What it cannot see** is three things, each of them the price of
+    reading one line at a time, and two of them over-reports rather than
+    misses. An array written one element to a line: no element line
+    carries the assignment that exempts a value, so the elements are
+    reported and the rule does not reach them. A program in another
+    language written across two lines: the quote that makes the
+    placeholder that language's sits on the line above, so what section
+    9 exempts by name is reported. And a placeholder that shares its
+    line with an earlier quote of its own kind, an apostrophe in the
+    prose or a second argument alike: the pattern crosses a quoted run
+    of the *other* kind to reach a placeholder and stops at one of the
+    same, so that line goes unreported.
+
+    Widening for either of the first two wants a match that spans lines,
+    which costs what is measured above: pygrep matching at once names the
+    file's first line and prints everything up to the match.
+
+    Measured before it was proposed: this tree is clean under the hook
+    and no other repository of the organization is, so unlike the two
+    hooks above it costs each tree a pass over its own prose before that
+    tree can carry it.
 
 ## 5. ruff
 

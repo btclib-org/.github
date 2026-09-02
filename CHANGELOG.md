@@ -5022,3 +5022,35 @@ audit has no revision to compare against.
   to fail on and creates a file at that path. The same line stands in
   the organization's other repositories, which is what leaves the issue
   open.
+
+### A gate reads section 9's unquoted-placeholder rule
+
+- **`unquoted-placeholder` refuses a placeholder that stands as a whole
+  argument and carries quotes** (issue #706): section 4 has the hook,
+  beside the two markdown ones it joins, and section 9 keeps the rule.
+  What the quoting costs is a paste that reaches the tool with the
+  placeholder as its value, where a bare one fails at the shell first.
+- **Both exemptions section 9 grants are read off the line rather than
+  off the fence around it** (issue #706): no shell puts a space around
+  an assignment's `=`, so a spaced one belongs to another language and
+  its value is that language's to quote, and a quote nested inside a
+  quote of the other kind is a nested program's.
+- **The fence-aware pattern is the alternative declined** (issue #706):
+  Python's `re` takes a look-behind only at a fixed width, so such a
+  pattern has to consume the file from its start, and pygrep then names
+  the first line and prints everything up to the match — a verdict
+  carrying no location, where the hooks beside it name the line.
+- **Anchoring at a fence opener instead is declined for reaching less
+  than the rule does** (issue #706): the shape section 9 refuses is
+  written in a code span in prose as readily as in a block, and a
+  pattern with a fence to anchor on passes the prose over — where the
+  reader the rule is addressed to pastes from either.
+- **Reading one line at a time costs three blind spots, and section 4
+  names them at the hook** (issue #706): an array written one element to
+  a line and a program in another language written across two are both
+  reported without the rule reaching them, the exempting assignment and
+  the quote that makes the string another language's each sitting on a
+  line the pattern is not looking at; and a placeholder sharing its line
+  with an earlier quote of its own kind goes unreported, the pattern
+  crossing a quoted run of the other kind only. Widening for either of
+  the first two wants the match that spans lines declined above.
