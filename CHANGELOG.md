@@ -4993,3 +4993,16 @@ audit has no revision to compare against.
   #688): `markdownlint-cli2` carries neither `files:` nor `exclude:` in
   `.pre-commit-config.yaml`, and that file declares no top-level
   `exclude:`, so the hook id is all that narrows the run.
+
+### `scope_test.py`'s heading command asks the assertion's question
+
+- **The heading reaches `grep` as a fixed string** (closes #718): the
+  assertion asks a copy for a line equal to the heading, and section 11
+  is what words that heading, so a `*` or a `[` in it is an expression
+  to a `grep` reading a pattern. `-F` asks for the string the assertion
+  compares.
+- **The sibling test's `grep -oF | wc -l` is the shape declined**
+  (closes #718): that assertion is a substring test over a copy folded
+  to one line, where this one is a whole-line equality against the
+  copy's lines, so `-x` makes the comparison and a matching line is an
+  occurrence.
