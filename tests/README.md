@@ -83,11 +83,11 @@ table and the *Not tested here* line account for each of them once.
   gives: what it measures is agreement with the standard, and the
   standard is here. So there is no `tests/_data/`, no pins file and no
   `vendored-vectors` workflow.
-- **No per-test timeout**, where section 7 asks one of a suite that
-  waits on anything outside its own process: every test here that asks
-  about another repository waits on GitHub, and `alignment.yml`'s
-  `timeout-minutes` bounds the job rather than the test.
-  btclib-org/.github#617 is that gap.
+- **A per-test timeout**, section 7's for a suite that waits on
+  anything outside its own process: a test here that asks about another
+  repository waits on GitHub, where `alignment.yml`'s `timeout-minutes`
+  bounds the job and names no test. `pyproject.toml`'s comment at
+  `timeout` is the measurement the number was taken from.
 - **No `slow` marker.** The markers registered are `integration`, `tier`
   and `backlog`, each with its reason at the key in `pyproject.toml`.
 - **No `--cov` and no `-n auto`**, the comment at `addopts` in
