@@ -2782,8 +2782,7 @@ nothing by that row.
   `btclib-benchmarks`, `btclib-node`;
 - `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
-- `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-node`;
+- `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`;
 - `homepage` — `btclib-org.github.io`;
 - `links` — every repository;
 - `alignment` — `.github`;
@@ -2979,6 +2978,19 @@ its entry gains the tree when the workflow and the badge land together.
   which it does not carry yet: btclib-org/btclib-org.github.io#1.
   btclib-org/.github#558 carries the debt until that tree schedules the
   workflow.
+- **A platform row leaves a tree's entry where a gate cell asks the
+  whole of what that tree's sentinel asked.** *What runs weekly does not
+  also gate* above denies its own converse over a hole in a matrix, and
+  a sentinel the gate covers whole leaves none. That cell gates on the
+  suite passing and not on the coverage floor, for the reason the same
+  paragraph gives a sentinel cell its `--no-cov`, and its place before a
+  review is the trade *An interpreter axis is a gate cell rather than a
+  sentinel row* above names. Where that trade does not hold, or where
+  the cell is narrower than the sentinel's matrix — one of its images,
+  one of its interpreters — the sentinel keeps its whole matrix on the
+  calendar and the entry keeps the tree. `btclib-node` is out of the
+  `os-windows` entry on this ground, its `test.yml` gating a
+  `windows-latest` cell at the interpreter `.python-version` pins.
 
 ### The aggregate job, and the required check
 

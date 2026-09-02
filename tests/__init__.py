@@ -254,7 +254,8 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_the_settings_file_says_what_it_passes_over",
         ("portanode",),
     ),
-    # deps-oldest: every tree its entry names is short of the workflow
+    # deps-oldest: these trees are short of the workflow; btclib-node
+    # schedules it (btclib-org/btclib-node#739)
     (
         323,
         "test_a_tree_carries_the_sentinels_its_entries_give_it",
@@ -262,7 +263,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "bitcoin-core-rpc",
             "btclib",
             "btclib-benchmarks",
-            "btclib-node",
             "btclib-secp256k1",
         ),
     ),
@@ -275,19 +275,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib",
             "btclib-secp256k1",
         ),
-    ),
-    # links: the site has no links.yml, and the entry names every tree
-    (
-        597,
-        "test_a_tree_carries_the_sentinels_its_entries_give_it",
-        ("btclib-org.github.io",),
-    ),
-    # os-windows: the tree dropped the sentinel for a gate cell, and
-    # whether the entry follows it is section 10's decision
-    (
-        618,
-        "test_a_tree_carries_the_sentinels_its_entries_give_it",
-        ("btclib-node",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
