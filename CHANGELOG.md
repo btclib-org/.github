@@ -4581,3 +4581,19 @@ audit has no revision to compare against.
   never forms and a write below it runs. The chain guards the first
   case, and the second is left the fence of its own for the writing line
   that the first rejects.
+
+### `REPOSITORY.md`'s Topics section states the `[project]`-table trigger once
+
+- **`## Topics` states the `[project]`-table trigger once, in the
+  sentence naming `topics_test.py`'s `keyworded` and this repository's
+  own inclusion** (closes #671): the section stated the same fact
+  twice — that the rule turns on the `[project]` table and not on
+  whether anything is published — section 9's *One fact in one place*
+  failing rather than being risked.
+- **The surviving sentence is the one tying the trigger to the test
+  that enforces it on this repository, not the one paraphrasing
+  section 3 on its own** (closes #671): the sibling copies are written
+  from this section rather than the other way round, so what is kept
+  here is what they carry, and the sentence kept already pairs the test
+  with this repository, where the other restated section 3's own wording
+  with nothing tying it to either.
