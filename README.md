@@ -363,8 +363,11 @@ direction — a row the loop contradicts is the finding, and so is a
 repository the loop names and the table does not. A new repository is a
 row here in the pull request that creates it, section 16's first step.
 
+`<org>` sits last so that a paste made before it is filled in writes no
+file.
+
 ```shell
-for r in $(gh repo list <org> --json name --jq '.[].name'); do
+for r in $(gh repo list --json name --jq '.[].name' <org>); do
   t=3
   gh api "repos/<org>/$r/contents/pyproject.toml" --silent \
     2>/dev/null && t=2
@@ -3414,11 +3417,12 @@ line loses precisely the keywords the wrap splits, every one of them
 individually well-formed, the text reading correctly to a person and
 only the API answering short. One keyword per line is the shape a wrapper cannot
 split, and no formatter is let reflow the block. What catches a loss is
-counting the registrations against the number intended:
+counting the registrations against the number intended. `<n>` sits last
+for the reason section 2's tier loop gives:
 
 ```shell
-gh pr view <n> --json closingIssuesReferences \
-  --jq '.closingIssuesReferences | length'
+gh pr view --json closingIssuesReferences \
+  --jq '.closingIssuesReferences | length' <n>
 ```
 
 The failure is stable, so asking twice answers only the indexing lag —
@@ -3460,15 +3464,17 @@ in time, not the mechanism — the link would have closed #1160 on merge
 had #178 landed first.
 
 So **what a pull request closes is read before it is merged**, from the
-one place that answers:
+one place that answers. The variables follow the query, which puts `<n>`
+last for the reason section 2's tier loop gives:
 
 ```shell
-gh api graphql -F owner=<org> -F name=<repo> -F num=<n> -f query='
+gh api graphql -f query='
 query($owner:String!,$name:String!,$num:Int!){
   repository(owner:$owner,name:$name){
     pullRequest(number:$num){
       closingIssuesReferences(first:10){
-        nodes{number repository{nameWithOwner}}}}}}'
+        nodes{number repository{nameWithOwner}}}}}}' \
+  -F owner=<org> -F name=<repo> -F num=<n>
 ```
 
 An issue there that the description does not name is the finding, and a
