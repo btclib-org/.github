@@ -363,8 +363,11 @@ direction — a row the loop contradicts is the finding, and so is a
 repository the loop names and the table does not. A new repository is a
 row here in the pull request that creates it, section 16's first step.
 
+`<org>` sits last so that a paste made before it is filled in writes no
+file.
+
 ```shell
-for r in $(gh repo list <org> --json name --jq '.[].name'); do
+for r in $(gh repo list --json name --jq '.[].name' <org>); do
   t=3
   gh api "repos/<org>/$r/contents/pyproject.toml" --silent \
     2>/dev/null && t=2
@@ -2169,6 +2172,26 @@ sight rather than weighed.
   and never state how many of anything a file holds: a stated total is a
   line every open branch has to edit, and two branches moving it to the
   same wrong number merge without a conflict.
+- **A block whose placeholders sit above a line that writes is guarded
+  by what follows the placeholder on its own line.** `<` and `>` are the
+  shell's redirection operators, so a paste made before a placeholder is
+  filled in fails on the line holding it, and which of two failures it
+  is decides what guards the lines below. Where a word follows the
+  placeholder, `>` has a target and the line fails at run time on the
+  `<` — `no such file or directory: org` — so a trailing `&&`
+  short-circuits the rest and nothing runs. That guard rests on the
+  reader's directory rather than on the line: where a file of the
+  placeholder's own name sits there the `<` succeeds, the line runs, and
+  the `>` writes one named for the word that follows. Where the
+  placeholder ends the line, `>` has no target and the line is a parse
+  error, which an interactive shell answers by discarding it together
+  with its trailing `&&` and reading the next line as a fresh command:
+  the chain never forms, and a write below it runs. So the chain guards
+  the first case, and the second is left what the first rejects — a
+  fence of its own for the line that writes, which the reader pastes
+  deliberately. What tells the cases apart is a paste into a pty: the
+  same block fed to a shell as a script aborts on the parse error an
+  interactive shell discards, which answers a different question.
 - **One fact in one place.** Two files stating the same thing become two
   files disagreeing about it; the second points at the first.
 - **A package upstream of another does not name the one downstream.**
@@ -3394,11 +3417,12 @@ line loses precisely the keywords the wrap splits, every one of them
 individually well-formed, the text reading correctly to a person and
 only the API answering short. One keyword per line is the shape a wrapper cannot
 split, and no formatter is let reflow the block. What catches a loss is
-counting the registrations against the number intended:
+counting the registrations against the number intended. `<n>` sits last
+for the reason section 2's tier loop gives:
 
 ```shell
-gh pr view <n> --json closingIssuesReferences \
-  --jq '.closingIssuesReferences | length'
+gh pr view --json closingIssuesReferences \
+  --jq '.closingIssuesReferences | length' <n>
 ```
 
 The failure is stable, so asking twice answers only the indexing lag —
@@ -3440,15 +3464,17 @@ in time, not the mechanism — the link would have closed #1160 on merge
 had #178 landed first.
 
 So **what a pull request closes is read before it is merged**, from the
-one place that answers:
+one place that answers. The variables follow the query, which puts `<n>`
+last for the reason section 2's tier loop gives:
 
 ```shell
-gh api graphql -F owner=<org> -F name=<repo> -F num=<n> -f query='
+gh api graphql -f query='
 query($owner:String!,$name:String!,$num:Int!){
   repository(owner:$owner,name:$name){
     pullRequest(number:$num){
       closingIssuesReferences(first:10){
-        nodes{number repository{nameWithOwner}}}}}}'
+        nodes{number repository{nameWithOwner}}}}}}' \
+  -F owner=<org> -F name=<repo> -F num=<n>
 ```
 
 An issue there that the description does not name is the finding, and a
@@ -4669,11 +4695,12 @@ cat tests/README.md
 ```
 
 The metadata an index shows, which no command in the tree can compare
-because half of it is a repository setting:
+because half of it is a repository setting. The lines chain because the
+last of them writes, which is section 9's rule:
 
 ```shell
-gh api repos/<org>/<repo> --jq '.topics | join(", ")'
-sed -n '/^keywords = \[/,/^\]/p' pyproject.toml
+gh api repos/<org>/<repo> --jq '.topics | join(", ")' &&
+sed -n '/^keywords = \[/,/^\]/p' pyproject.toml &&
 uv build --sdist && uvx twine check dist/*.tar.gz
 ```
 

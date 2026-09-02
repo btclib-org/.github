@@ -4537,3 +4537,94 @@ audit has no revision to compare against.
 - **The pointer names the `fuzz` entry rather than the section**, the
   gloss having been what spared the reader the jump: what is left has to
   land where the property is stated rather than at a section's head.
+
+### The alignment suite bounds a hung test, and `addopts` says what it waits on
+
+- **The suite carries section 7's per-test timeout** (closes #617): a
+  hang is the one failure a suite cannot report on itself, and without a
+  bound what a reader gets is `alignment.yml` cancelled at its
+  `timeout-minutes`, naming the job and no test. `pyproject.toml`'s
+  comment at `timeout` is the measurement the number was taken from, and
+  `tests/README.md` declares the bullet as taken rather than as the gap.
+- **The bound covers a test's setup as well as its body**: the clone of
+  every repository and the repository document of each are session
+  fixtures', which pytest-timeout charges to whichever test triggered
+  them, so `timeout_func_only` would time the bodies alone and leave a
+  stalled clone unbounded. `session_timeout` is no answer either, being
+  read between tests rather than able to interrupt one.
+- **`addopts`' reason for declining `-n auto` no longer rests on every
+  test here waiting on the network** (closes #652): a module whose
+  subject is this tree waits on nothing outside its own process, and
+  what carries the conclusion is that a test asking about another
+  repository waits on the fetching, which is where the wall clock goes.
+
+### A paste of section 15's metadata block reaches nothing that writes
+
+- **The block's lines chain with `&&`** (closes #619): the first holds
+  bare placeholders, which the shell reads as redirections and refuses
+  — a redirection error and not a parse error, so unchained the lines
+  below it run, and the last of them runs `uv build --sdist`, which
+  writes into a `dist/` of the directory it runs in. Chained, a paste
+  made before the placeholders are filled runs no command at all, in
+  `zsh`, `bash` and `sh` alike. What the block asks is unchanged: the
+  repository's topics against `pyproject.toml`'s `keywords`, and
+  `twine check` on the sdist's metadata.
+- **Section 9 carries the rule** (closes #619), governing every document
+  here rather than section 15 alone, and it turns on what follows a
+  placeholder on its own line. A word after it leaves `>` a target, so
+  the line fails at run time and a trailing `&&` short-circuits the rest
+  — a guard resting on the reader's directory rather than on the line,
+  since a file of the placeholder's own name sitting there lets the `<`
+  succeed and the line run. A placeholder ending the line leaves `>`
+  nothing to open, and an interactive shell discards that line together
+  with its `&&` and reads the next as a fresh command, so the chain
+  never forms and a write below it runs. The chain guards the first
+  case, and the second is left the fence of its own for the writing line
+  that the first rejects.
+
+### `REPOSITORY.md`'s Topics section states the `[project]`-table trigger once
+
+- **`## Topics` states the `[project]`-table trigger once, in the
+  sentence naming `topics_test.py`'s `keyworded` and this repository's
+  own inclusion** (closes #671): the section stated the same fact
+  twice — that the rule turns on the `[project]` table and not on
+  whether anything is published — section 9's *One fact in one place*
+  failing rather than being risked.
+- **The surviving sentence is the one tying the trigger to the test
+  that enforces it on this repository, not the one paraphrasing
+  section 3 on its own** (closes #671): the sibling copies are written
+  from this section rather than the other way round, so what is kept
+  here is what they carry, and the sentence kept already pairs the test
+  with this repository, where the other restated section 3's own wording
+  with nothing tying it to either.
+
+### A paste of the blocks named here reaches nothing that writes
+
+- **The placeholder ends the command in section 2's tier loop and in
+  section 11's blocks that read `closingIssuesReferences`** (closes #621):
+  a word after it leaves the `>` closing the placeholder a target, so a
+  paste made from a directory holding a file of the placeholder's own
+  name creates one named for that word. Ending the line, the placeholder
+  leaves `>` nothing to open and the command does not parse, in `zsh`,
+  `bash` and `sh` alike; what `zsh` then reads as fresh commands is the
+  tier loop's body, which only reads. `gh` takes the positional after
+  its flags and the GraphQL variables after the query, so what the
+  blocks ask is unchanged. What a paste of another block still writes
+  here is measured the same way and left where it is filed (issue #675).
+- **`git worktree remove --force "$WT"` stands in a block of its own**
+  (closes #664): the line above it ends in a placeholder, and a shell
+  that discards that line as a parse error reads the next as a fresh
+  command, so a paste of one block removes whatever `$WT` a session that
+  has already been through it still holds. Its own block is the one
+  CLAUDE.md's reader pastes deliberately.
+
+### `.gitattributes`'s copies agree, so `EXPECTED_DRIFT` no longer names it
+
+- **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` no longer names
+  `.gitattributes`** (closes #646, closes #520, closes #643): every
+  repository section 14 owes the file to now carries
+  `btclib-org/.github`'s comment verbatim, naming the union driver's
+  `ours`-then-`theirs` order and the anchor rather than the order the
+  driver does not produce or the changelog groups section 9 no longer
+  has. The table itself stays, `REVIEWING.md`'s entry standing against
+  issue #353.

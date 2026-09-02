@@ -267,11 +267,10 @@ gh api repos/btclib-org/.github --jq '.topics'
 # ["bitcoin","btclib","github-organization","repository-standard"]
 ```
 
-[Section 3 makes a package's `keywords` its topics][s3], and the rule
-turns on what the `[project]` table declares rather than on whether
-anything is published. `pyproject.toml` here declares the same names, so
-the two lists are one list spelled twice, and this is the command that
-holds them together: it prints the difference and exits nonzero on one.
+[Section 3 makes a package's `keywords` its topics][s3].
+`pyproject.toml` here declares the same names, so the two lists are one
+list spelled twice, and this is the command that holds them together: it
+prints the difference and exits nonzero on one.
 
 ```shell
 diff <(gh api repos/btclib-org/.github --jq '.topics[]' | sort) \
