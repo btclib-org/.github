@@ -1,0 +1,30 @@
+---
+name: Feature request
+description: Add something, or change how something works
+labels: [enhancement]
+
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What is missing
+      description: What it would let somebody do, and how it would read.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it belongs here
+      description: >
+        What cannot be done today with what is already there.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: >
+        Other spellings of the same thing, and what somebody relying on
+        the behaviour as it stands would have to change.

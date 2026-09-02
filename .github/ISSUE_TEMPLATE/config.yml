@@ -1,0 +1,38 @@
+---
+# GitHub serves an organization's `.github` templates to every public
+# repository of it that keeps none of its own, so this directory is two
+# things at once: this tracker's forms, and the new-issue page of a
+# repository that has not written its own. There is no third file to put
+# a default in -- the one directory answers both -- which is why the
+# forms beside this one ask what is answerable in a tree whose subject
+# they do not know.
+#
+# Blank issues are off: discussions are not enabled here, so a question
+# has a form of its own, and with that written there is nothing a blank
+# box is the only home for.
+#
+# A `contact_links` url is absolute -- the schema for this file admits
+# only `^https?://` -- so it names one repository and cannot resolve
+# against the tree rendering it. That is what decides the security entry
+# below: a repository that keeps its own config names its own advisory
+# form, which is the sharper route and is open to it because its file is
+# read from one tracker, where a file read from several would send every
+# reporter to one repository's Security tab. SECURITY.md asks for the
+# tab of the repository the defect is in, so naming the policy is the
+# route that stays right wherever this renders.
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/btclib-org/.github/blob/main/SECURITY.md
+    about: >
+      Never a public issue, which is public from the moment it is filed.
+      The policy names *Report a vulnerability* on the Security tab of
+      the repository the defect is in, and an email address for anyone
+      who would rather not use it.
+  - name: An issue the standard owns, or that spans repositories
+    url: https://github.com/btclib-org/.github/issues
+    about: >
+      Where an issue is filed is CONTRIBUTING.md's *The issue tracker*,
+      the same file in every repository of the organization: what the
+      standard decides, or what no single tree can answer, is filed
+      there rather than where it was noticed.
