@@ -217,10 +217,19 @@ Do not use Fable unless explicitly instructed.
   documentation build — `btclib`, `btclib-secp256k1`, `btclib-node`,
   `btclib-benchmarks` and `bitcoin-core-rpc` — `docs/source/changelog_link.md`
   pulls `../../CHANGELOG.md` through a MyST `include` and the
-  toctree lists it, under `-W`:
+  toctree lists it, under `-W`. `-C` puts `<checkout>` ahead of the read
+  it names, so it cannot sit last the way section 2's tier loop puts
+  `<org>`; the assignment stands in a block of its own, its own
+  placeholder ending the line being the parse error a shell discards,
+  reading the read below as a fresh command against whatever `$checkout`
+  a paste has already set:
 
   ```shell
-  git -C <checkout> grep -l 'include} \.\./\.\./CHANGELOG\.md' origin/main -- docs/
+  checkout=<checkout>
+  ```
+
+  ```shell
+  git -C "$checkout" grep -l 'include} \.\./\.\./CHANGELOG\.md' origin/main -- docs/
   ```
 
   answers in each of the five and nothing in `.github`, `bbt` or

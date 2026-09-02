@@ -971,10 +971,17 @@ what it holds.
     `uv-pre-commit`, and with the sibling the number was copied from —
     which is the number to lower first if a resolver ever wants it
     lower. The boundary is measured by calling the backend's own hook at
-    each version,
+    each version. `--with` puts `<version>` ahead of the command it
+    measures, so it cannot sit last the way section 2's tier loop puts
+    `<org>`; the assignment stands in a block of its own, for the reason
+    `CLAUDE.md`'s `docs/` read gives:
 
     ```shell
-    uv run --no-project --with uv_build==<version> python -c \
+    version=<version>
+    ```
+
+    ```shell
+    uv run --no-project --with uv_build=="$version" python -c \
       "import uv_build; print(uv_build.build_sdist('<outdir>'))"
     ```
 
@@ -1316,10 +1323,11 @@ pre-commit.ci does not have — the lint workflow covers it. No
     holds at one — a full-history fetch of the same ref is equally
     tagless and puts the whole history's count there instead. What
     follows the `g` is the commit the `rev:` resolved to, abbreviated,
-    and this names it in full:
+    and this names it in full, `<rev>` last for the reason section 2's
+    tier loop gives:
 
     ```shell
-    gh api repos/codespell-project/codespell/commits/<rev> --jq .sha
+    gh api --jq .sha repos/codespell-project/codespell/commits/<rev>
     ```
 
     The commits endpoint and not `git/ref/tags`, so that the command

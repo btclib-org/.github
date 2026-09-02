@@ -4697,3 +4697,21 @@ audit has no revision to compare against.
   repository*** (closes #674): no two copies are byte-equal and that
   comparison is by path, so the bullet would report the copies as drift
   on the day it landed and could not reach `btclib-node`'s at all.
+
+### The `docs/` read and `README.md`'s boundary and commit blocks write nothing
+
+- **`CLAUDE.md`'s `docs/` read and `README.md`'s `uv_build` boundary
+  check each move their placeholder into an assignment of its own**
+  (issue #675): `-C` and `--with` put it ahead of the command that
+  takes it, so it cannot sit last inside that command the way section
+  2's tier loop puts `<org>`; the assignment stands in its own block
+  instead, what section 9 already leaves for a placeholder that ends
+  its line, and the read or the boundary check below it runs against
+  whatever the assignment has already set.
+- **`README.md`'s pinned-commit block moves `--jq` ahead of the
+  endpoint it reads** (issue #675): `<rev>` then sits last the way
+  section 2's tier loop already puts `<org>`.
+- The fourth block the same sweep still finds sits inside the
+  `merge=union` bullet, which #629 is open against and #661 owes a
+  consolidation afterward; it is left there rather than edited by a
+  second branch at once.
