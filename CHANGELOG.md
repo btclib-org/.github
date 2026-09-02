@@ -4930,3 +4930,34 @@ audit has no revision to compare against.
   on them already classes with the rest: a session editing a form has to
   meet the sentence saying what it is changing for a reader of every
   repository that inherits it.
+
+### Section 9 says where a placeholder goes, and what each guard rests on
+
+- **A bare placeholder goes at the end of its command** (closes #673):
+  there the `>` closing it has no target and the line is a parse error,
+  so it writes nothing whatever the reader's directory holds, where a
+  word after the placeholder gives `>` that word as a target and a
+  directory holding a file of the placeholder's own name turns the line
+  into a write. That instruction was written at the blocks obeying it,
+  which is a convention a later editor undoes by tidying one block's
+  arguments; the blocks now point at section 9 for the reason instead of
+  at section 2's tier loop.
+- **The fence of its own for a writing line rests on the reader taking
+  the one fence** (closes #678): github.com gives each fence its own
+  copy button, and a drag across the rendered passage is one paste that
+  the fences do not interrupt. Section 9 states that condition beside
+  the remedy, as it already stated the reader's directory beside the
+  `&&` chain's.
+- **What discriminates is the feed and the paste, not a script against a
+  pty** (closes #672): `zsh` reading a block from stdin discards the
+  parse error and carries on to the write at `rc=0`, where `-c` and a
+  file abort, so a harness built on `cat block | zsh` reads as the
+  aborting case and is the other one; and `zsh` takes a bracketed paste
+  as a single buffer and abandons all of it, where `bash` and `sh`
+  submit it a line at a time and reach the write with the markers
+  present or absent.
+- **The rejected shape keeps the bullet those three are against and adds
+  one apiece**: that bullet carried where a placeholder goes and what
+  the guards below it rest on at once, which is why the layout came to
+  be written at the blocks, so it is split by subject rather than
+  extended.
