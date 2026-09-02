@@ -4961,3 +4961,21 @@ audit has no revision to compare against.
   the guards below it rest on at once, which is why the layout came to
   be written at the blocks, so it is split by subject rather than
   extended.
+
+### `scope_test.py`'s by-hand command quotes what it reads out of section 11
+
+- **The claim and the heading go through `shlex.quote`** (closes #711):
+  each is whatever section 11 backticks on its own line, so what it may
+  hold is that section's to decide and not this module's, and an
+  apostrophe written bare into a shell word ends the word where it
+  stands. `shlex.quote` leaves a value of words and spaces inside plain
+  single quotes, so the command a failure names still reads as the
+  string it looks for.
+- **Escaping inside `by_hand` is the alternative declined**
+  (closes #711): it is handed a command already assembled and cannot
+  tell a value from the shell around it, so the two would have to
+  arrive apart and every caller would write its command as a template.
+- **The rest of `by_hand`'s callers are left as they are**
+  (closes #711): `git grep -n 'by_hand(' -- tests/` names them, and what
+  each interpolates is a name the tree spells for itself rather than a
+  sentence the standard may reword.
