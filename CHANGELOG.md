@@ -4597,3 +4597,23 @@ audit has no revision to compare against.
   here is what they carry, and the sentence kept already pairs the test
   with this repository, where the other restated section 3's own wording
   with nothing tying it to either.
+
+### A paste of the blocks named here reaches nothing that writes
+
+- **The placeholder ends the command in section 2's tier loop and in
+  section 11's blocks that read `closingIssuesReferences`** (closes #621):
+  a word after it leaves the `>` closing the placeholder a target, so a
+  paste made from a directory holding a file of the placeholder's own
+  name creates one named for that word. Ending the line, the placeholder
+  leaves `>` nothing to open and the command does not parse, in `zsh`,
+  `bash` and `sh` alike; what `zsh` then reads as fresh commands is the
+  tier loop's body, which only reads. `gh` takes the positional after
+  its flags and the GraphQL variables after the query, so what the
+  blocks ask is unchanged. What a paste of another block still writes
+  here is measured the same way and left where it is filed (issue #675).
+- **`git worktree remove --force "$WT"` stands in a block of its own**
+  (closes #664): the line above it ends in a placeholder, and a shell
+  that discards that line as a parse error reads the next as a fresh
+  command, so a paste of one block removes whatever `$WT` a session that
+  has already been through it still holds. Its own block is the one
+  CLAUDE.md's reader pastes deliberately.
