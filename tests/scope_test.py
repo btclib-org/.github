@@ -67,6 +67,12 @@ WRAPPED = re.compile(r"\s+")
 
 Both sides of the comparison are folded on it, so a copy is asked for
 the sentence rather than for the line breaks its own margin gave it.
+
+The failure names a command that folds the same way: `tr -s` squeezes
+the run an indented continuation leaves, where translating the newline
+alone leaves the indent's own spaces beside the one it writes. It asks
+for the claim as a string and counts occurrences rather than lines, a
+folded file being one line.
 """
 
 
@@ -123,7 +129,10 @@ def test_the_settings_file_does_not_claim_to_be_the_whole_of_them(
     text = WRAPPED.sub(" ", path.read_text(encoding="utf-8"))
     assert claim not in text, (
         f"{SETTINGS} says {claim!r}, which section 11 rejects; "
-        + by_hand(repository, f"tr '\\n' ' ' < {SETTINGS} | grep -c '{claim}'")
+        + by_hand(
+            repository,
+            f"tr -s '[:space:]' ' ' < {SETTINGS} | grep -oF '{claim}' | wc -l",
+        )
     )
 
 

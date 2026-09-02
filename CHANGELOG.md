@@ -4844,3 +4844,21 @@ audit has no revision to compare against.
   the opening sentence states the ground and its self-terminating condition.
   `btclib-node`'s `free-threaded` job, already out of `test-passed`'s own
   `needs:` on exactly this ground, is the instance the paragraph cites.
+
+### `scope_test.py`'s by-hand command asks the assertion's question
+
+- **A claim wrapping onto an indented line is found by the assertion and
+  missed by the command the failure names** (closes #620): the test folds
+  every run of whitespace to one space, where translating newlines alone
+  leaves the indent beside the space it writes, so a reader taking the
+  command to the checkout reads that the finding is not there. `tr -s
+  '[:space:]' ' '` squeezes the run instead, which is the fold the test
+  makes.
+- **The command counts occurrences rather than lines** (closes #620): a
+  folded file is one line, so a count of lines answers the same for a
+  copy carrying the claim twice as for one carrying it once. `grep -oF`
+  asks for the claim as a string, which is what the assertion asks.
+- **Restating the test's own regex in a `python3 -c` is the alternative
+  declined** (closes #620): it is provably the same fold, and it is no
+  longer a shell command a reader can eyeball, where two filters are
+  checkable against the fold by running both against a copy that wraps.
