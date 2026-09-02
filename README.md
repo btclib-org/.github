@@ -3305,6 +3305,15 @@ does not conceal the wrap is the first line of `%B`:
 git show -s --format=%B <sha> | head -1
 ```
 
+`79fb1df` is where that happened here. `git show -s --format=%s 190d5bd`
+reads the whole subject the branch carried, `(closes #686) (closes #692)`
+and all; the first line of the same commit's `%B` is the fragment the
+squash landed. The rest of the subject is on `main` as the body's own
+first line, `what they mean (closes #686) (closes #692)` sitting where a
+paragraph belongs, in a message nothing rewrites. The issues closed
+anyway, GitHub having parsed them from the pull request title, so
+nothing went red and the only signal was the sentence stopping mid-clause.
+
 `delete_branch_on_merge` is on.
 
 ### What a pull request says it is
@@ -3313,9 +3322,10 @@ git show -s --format=%B <sha> | head -1
 parentheses**: `Say when github-release runs instead of relying on no if
 (closes #1142)`. Which of the title and the branch's own commit subject
 lands is *Merge method*'s rule, so the parentheses belong on whichever
-one that is — not only on the title. Either way the number reaches
-`git log` and stays reachable from a checkout with no forge in front of
-it.
+one that is — not only on the title; whether they survive the landing at
+all is that same rule, a subject that wraps taking its citation off the
+subject with it. Either way the number reaches `git log` and stays
+reachable from a checkout with no forge in front of it.
 
 **A pull request that advances an issue it does not close names it the
 same way, `(issue #N)`**, and for the same reason, which reaches further

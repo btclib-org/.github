@@ -4780,3 +4780,29 @@ audit has no revision to compare against.
   statement standing between the two is the difference. A line that
   parses as no directive is red wherever it sits. Neither outcome is one
   to aim for, so there is no boundary the rule has to name.
+
+### *Merge method*'s rule gains the instance that got past it
+
+- **A wrapped commit subject lands truncated by the squash, and the
+  usual read cannot see it** (closes #701): `git show -s --format=%s`
+  joins a multi-line subject paragraph into one, so the read a coder
+  and a reviewer both run shows the sentence they intended while the
+  squash lands only the first physical line. *Merge method* already
+  stated the rule and the `%B`-based read that sees it, and states it
+  once still: what it gains is the worked instance it had none of,
+  this repository's own `79fb1df`, whose remainder is on `main` as the
+  body's first line with both closing citations in it.
+- **The rule is not restated where a reader went looking for it**
+  (closes #701). *What a pull request says it is* already pointed at
+  *Merge method* for which of the title and the subject lands; the
+  same sentence now says that rule also decides whether the citation
+  survives the landing. A second statement of the mechanism was
+  written first and dropped in review: section 9 has the second place
+  point at the first, not repeat it.
+- **Prose alone did not catch it: the rule is an ancestor of the
+  instance it is cited against, not a reaction to it** (closes #701):
+  `fc2412a` added *Merge method*'s paragraph, and `79fb1df` landed on a
+  tree that already carried it, so a documented, correct, manual read
+  is not what stopped the truncation from recurring. Whether an
+  automated check belongs in this repository is left to a separate
+  issue rather than decided here.
