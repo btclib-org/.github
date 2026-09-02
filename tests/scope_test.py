@@ -109,6 +109,12 @@ def rejected() -> str:
 def heading() -> str:
     """Read the heading section 11 asks a copy for, out of the standard.
 
+    The failure names a command asking for the heading as a fixed
+    string on a whole line, which is the equality the assertion makes.
+    Its wording is section 11's, and a `*` or a `[` -- markdown's
+    emphasis and its link -- is an expression to a `grep` reading a
+    pattern rather than the character the assertion compares.
+
     :returns: the heading line, as that section quotes it.
     """
     return quoted(HEADED)
@@ -163,5 +169,5 @@ def test_the_settings_file_says_what_it_passes_over(
     lines = path.read_text(encoding="utf-8").splitlines()
     assert wanted in lines, (
         f"{SETTINGS} has no {wanted!r} section, which section 11 asks for; "
-        + by_hand(repository, f"grep -cx {shlex.quote(wanted)} {SETTINGS}")
+        + by_hand(repository, f"grep -cxF {shlex.quote(wanted)} {SETTINGS}")
     )
