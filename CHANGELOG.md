@@ -4979,3 +4979,17 @@ audit has no revision to compare against.
   (closes #711): `git grep -n 'by_hand(' -- tests/` names them, and what
   each interpolates is a name the tree spells for itself rather than a
   sentence the standard may reword.
+
+### The single-hook gate line lints from a clean tree
+
+- **`uvx pre-commit run markdownlint-cli2` reads the staged files, so
+  from a clean tree it reports `(no files to check)Skipped` and exits 0**
+  (issue #688): the line carries `--all-files` now, as the one above it
+  does, and `# one hook` beside it names hook scope, which is the whole
+  of what separates the two. What that removes is the failure *Check
+  exit codes, not filtered output* names in the same section — a gate
+  report giving a hook and an exit code over a set of no files.
+- **`--all-files` reaches every markdown file the tree tracks** (issue
+  #688): `markdownlint-cli2` carries neither `files:` nor `exclude:` in
+  `.pre-commit-config.yaml`, and that file declares no top-level
+  `exclude:`, so the hook id is all that narrows the run.

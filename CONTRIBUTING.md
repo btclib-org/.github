@@ -245,16 +245,19 @@ both are on every GitHub-hosted runner already, and the suite shells out
 to them rather than importing a client.
 
 ```shell
-uvx pre-commit run --all-files          # the whole gate
-uvx pre-commit run markdownlint-cli2    # one hook
+uvx pre-commit run --all-files                    # the whole gate
+uvx pre-commit run --all-files markdownlint-cli2  # one hook
 uvx pre-commit validate-config .pre-commit-config.yaml
 ```
 
 `uvx` and not the `uv run` a sibling's lint job uses, and `lint.yml` runs
-this same command for the reason its own header gives. The last one is
-worth running before pushing a change to the hook config: it catches what
-a wrong `types_or` tag or a malformed entry would otherwise turn into a
-red lint job.
+this same command for the reason its own header gives. Without
+`--all-files` a `pre-commit run` reads the staged files, and from a clean
+tree it reports `(no files to check)Skipped` and exits 0. So the
+single-hook line carries the flag as well, and hook scope is the whole of
+what separates it from the first. The last one is worth running before
+pushing a change to the hook config: it catches what a wrong `types_or`
+tag or a malformed entry would otherwise turn into a red lint job.
 
 **Check exit codes, not filtered output.** `pre-commit run ... | grep -v
 Passed` hides a failure, and `grep` finding nothing exits 1, which is not
