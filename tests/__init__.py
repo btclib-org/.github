@@ -38,7 +38,8 @@ a test spelled some other way, or shared code in the wrong file. What is
 shared is these parts:
 
 - **the organization, and how this suite asks GitHub about it** --
-  `ORG`, `SELF`, `ROOT`, the two `gh` callers, `by_hand` and `tracked`;
+  `ORG`, `SELF`, `ROOT`, `output` and the bound it holds a call to, the
+  two `gh` callers, `by_hand` and `tracked`;
 - **which repositories the standard applies to, how far, and what is
   owed** -- kept together, so that a change to any of them is made in
   one place: *which repositories
@@ -68,9 +69,10 @@ import enum
 import functools
 import json
 import re
+import shlex
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, override
 
 ORG = "btclib-org"
 
@@ -85,6 +87,76 @@ name to `ROOT` instead.
 
 ROOT = Path(__file__).parents[1]
 
+TIMEOUT = 60
+"""The seconds a call may take before it is a hang rather than a wait.
+
+A run's first fetch is made at collection, `conftest.py` parametrizing
+the per-repository tests over the names the API answers with, and
+`pytest-timeout`'s per-test bound does not reach there: it is installed
+in `pytest_runtest_protocol`, which runs once an item exists. Unbounded,
+a call that never returns ends the run with `alignment.yml` cancelled at
+its `timeout-minutes`, naming the job and no test, so what covers
+collection is a bound on the call.
+
+Under `pyproject.toml`'s `timeout`, so that a call hanging inside a test
+is reported as the command that hung rather than as whichever test was
+being asked when it did; and far over what a call here takes, which
+
+    time gh api 'orgs/btclib-org/repos?per_page=100' --paginate
+
+measures, so that a slow answer is not turned into a finding about the
+organization.
+"""
+
+
+class Refused(subprocess.CalledProcessError):
+    """A `gh` or `git` call that came back non-zero, saying what it said.
+
+    The reason a call failed is on standard error, and
+    `CalledProcessError` carries the exit status alone into pytest's
+    report: a 404, a revoked token and a secondary rate limit read
+    alike there. This says what the tool said, and names the command
+    the way `by_hand` does, as a line the reader can take to a
+    terminal.
+
+    A `CalledProcessError` still, so that a caller telling one refusal
+    from another reads `stderr` off it as before.
+    """
+
+    @override
+    def __str__(self) -> str:
+        return f"{shlex.join(self.cmd)} exited {self.returncode}: {self.stderr.strip()}"
+
+
+def output(*command: str) -> str:
+    """Run a command that has to answer, and return what it wrote.
+
+    What a failure raises is `Refused` and not an assertion: the
+    backlog's rows are strict expected failures keyed on
+    `AssertionError`, so an assertion here would be excused as the
+    finding a row records -- reported as an expected failure, in a green
+    run, whether it was raised in a test's body or in a fixture that
+    test asked for. A refused API call is neither the finding nor
+    expected.
+
+    A wait past `TIMEOUT` raises `subprocess.TimeoutExpired`, whose own
+    message names the command and the bound it passed.
+
+    :param command: the argument list, run without a shell.
+    :returns: what the command wrote to standard output.
+    :raises Refused: where the command comes back non-zero.
+    """
+    completed = subprocess.run(
+        command,
+        capture_output=True,
+        check=False,
+        encoding="utf-8",
+        timeout=TIMEOUT,
+    )
+    if completed.returncode:
+        raise Refused(completed.returncode, command, completed.stdout, completed.stderr)
+    return completed.stdout
+
 
 def gh(endpoint: str, jq: str) -> list[str]:
     """Ask the GitHub API and return one line of its answer per element.
@@ -93,12 +165,7 @@ def gh(endpoint: str, jq: str) -> list[str]:
     :param jq: the `--jq` filter, whose output is split on newlines.
     :returns: the non-empty lines, in the order the API answered.
     """
-    out = subprocess.run(
-        ["gh", "api", endpoint, "--paginate", "--jq", jq],
-        capture_output=True,
-        check=True,
-        encoding="utf-8",
-    ).stdout
+    out = output("gh", "api", endpoint, "--paginate", "--jq", jq)
     return [line for line in out.splitlines() if line]
 
 
@@ -111,13 +178,7 @@ def gh_json(endpoint: str) -> Any:  # noqa: ANN401
     :param endpoint: the path after `gh api`.
     :returns: whatever the endpoint answers, parsed.
     """
-    out = subprocess.run(
-        ["gh", "api", endpoint],
-        capture_output=True,
-        check=True,
-        encoding="utf-8",
-    ).stdout
-    return json.loads(out)
+    return json.loads(output("gh", "api", endpoint))
 
 
 def by_hand(repository: str, command: str) -> str:
@@ -146,13 +207,7 @@ def tracked(root: Path, *patterns: str) -> list[str]:
     :param patterns: git pathspecs, `*.toml` and the like.
     :returns: the paths, relative to the root, in git's order.
     """
-    out = subprocess.run(
-        ["git", "-C", str(root), "ls-files", "--", *patterns],
-        capture_output=True,
-        check=True,
-        encoding="utf-8",
-    ).stdout
-    return out.splitlines()
+    return output("git", "-C", str(root), "ls-files", "--", *patterns).splitlines()
 
 
 class Tier(enum.IntEnum):
