@@ -2279,8 +2279,8 @@ sight rather than weighed.
   driver:
 
   ```shell
-  git merge-tree --write-tree origin/main <branch>   # exits 0
-  gh pr view <n> --json mergeable --jq .mergeable    # CONFLICTING
+  git merge-tree --write-tree origin/main <branch>
+  gh pr view --json mergeable --jq .mergeable <n>
   ```
 
   `UNKNOWN` from the second is the forge computing the merge rather than

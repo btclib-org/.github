@@ -5006,3 +5006,19 @@ audit has no revision to compare against.
   to one line, where this one is a whole-line equality against the
   copy's lines, so `-x` makes the comparison and a matching line is an
   occurrence.
+
+### The `CONFLICTING` pair and the worktree line end in their placeholders
+
+- **Section 9's own pair of commands writes nothing when pasted before
+  `<branch>` and `<n>` are filled in** (closes #675): the `>` closing a
+  placeholder takes the next word as its target, which a trailing
+  comment supplies wherever `interactive_comments` is off and a flag
+  supplies whatever the shell makes of that comment, so neither line
+  carries a comment and `gh pr view` takes its number last.
+- **`git worktree add` takes `-b <branch>` after the path and the
+  commit-ish** (issue #687): the procedure ends by removing the
+  worktree, so the state a second paste starts from is `WT` set with no
+  directory at it, and there the `>` closing the placeholder has nothing
+  to fail on and creates a file at that path. The same line stands in
+  the organization's other repositories, which is what leaves the issue
+  open.
