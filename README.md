@@ -2491,10 +2491,10 @@ where the command answers for the day it is run. This section names no
 number for the same reason.
 
 **An interpreter axis is a gate cell rather than a sentinel row exactly
-where the extra cell runs in parallel with the ones already in the job,
-so the ceiling absorbs it without lengthening the wait, and where what
-it claims is the same pinned interpreter run a second time rather than a
-version the package newly claims to support.** `btclib-node`'s
+where the extra cell runs in parallel with the cells already gating the
+review, so the ceiling absorbs it without lengthening the wait, and
+where what it claims is the same pinned interpreter run a second time
+rather than a version the package newly claims to support.** `btclib-node`'s
 `test.yml` carries `3.14t` on this ground, in a `free-threaded` job of
 its own beside the `coverage` job at `3.14`: the two run as parallel
 jobs rather than in sequence, and `3.14t` is `.python-version`'s own
@@ -2973,7 +2973,7 @@ its entry gains the tree when the workflow and the badge land together.
   gives, so the row is the sdist's rather than every file a rebuild
   produces with one tree's exemption written into it. A rebuild that
   disagrees is an issue against the tree it ran in.
-  btclib-org/.github#523 carries the debt until the first of the three
+  btclib-org/.github#523 carries the debt until the first of them
   schedules the workflow.
 - **`homepage` follows a tree serving a page generated from another
   tree's file.** `btclib-org.github.io`'s `index.md` is derived from
