@@ -22,6 +22,11 @@ written down here, for the reason `fenced` in `tests/__init__.py`
 gives: a transcription is the copy that goes stale, and the sentence a
 copy may not carry belongs where the rule that refuses it is.
 
+The command a failure names quotes both with `shlex.quote` rather than
+writing a shell word around them. Their content is section 11's, and an
+apostrophe -- ordinary in an English sentence -- ends a single-quoted
+word early.
+
 What this does not reach is the same promise in words of its own, or a
 section that names the heading and passes nothing over. A string finds
 the sentence and not the claim, so a copy promising completeness some
@@ -32,6 +37,7 @@ re-derives is anywhere else.
 from __future__ import annotations
 
 import re
+import shlex
 from typing import TYPE_CHECKING
 
 import pytest
@@ -131,7 +137,8 @@ def test_the_settings_file_does_not_claim_to_be_the_whole_of_them(
         f"{SETTINGS} says {claim!r}, which section 11 rejects; "
         + by_hand(
             repository,
-            f"tr -s '[:space:]' ' ' < {SETTINGS} | grep -oF '{claim}' | wc -l",
+            f"tr -s '[:space:]' ' ' < {SETTINGS}"
+            f" | grep -oF {shlex.quote(claim)} | wc -l",
         )
     )
 
@@ -156,5 +163,5 @@ def test_the_settings_file_says_what_it_passes_over(
     lines = path.read_text(encoding="utf-8").splitlines()
     assert wanted in lines, (
         f"{SETTINGS} has no {wanted!r} section, which section 11 asks for; "
-        + by_hand(repository, f"grep -cx '{wanted}' {SETTINGS}")
+        + by_hand(repository, f"grep -cx {shlex.quote(wanted)} {SETTINGS}")
     )
