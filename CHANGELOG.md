@@ -4617,3 +4617,14 @@ audit has no revision to compare against.
   command, so a paste of one block removes whatever `$WT` a session that
   has already been through it still holds. Its own block is the one
   CLAUDE.md's reader pastes deliberately.
+
+### `.gitattributes`'s copies agree, so `EXPECTED_DRIFT` no longer names it
+
+- **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` no longer names
+  `.gitattributes`** (closes #646, closes #520, closes #643): every
+  repository section 14 owes the file to now carries
+  `btclib-org/.github`'s comment verbatim, naming the union driver's
+  `ours`-then-`theirs` order and the anchor rather than the order the
+  driver does not produce or the changelog groups section 9 no longer
+  has. The table itself stays, `REVIEWING.md`'s entry standing against
+  issue #353.
