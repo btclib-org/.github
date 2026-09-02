@@ -4537,3 +4537,23 @@ audit has no revision to compare against.
 - **The pointer names the `fuzz` entry rather than the section**, the
   gloss having been what spared the reader the jump: what is left has to
   land where the property is stated rather than at a section's head.
+
+### The alignment suite bounds a hung test, and `addopts` says what it waits on
+
+- **The suite carries section 7's per-test timeout** (closes #617): a
+  hang is the one failure a suite cannot report on itself, and without a
+  bound what a reader gets is `alignment.yml` cancelled at its
+  `timeout-minutes`, naming the job and no test. `pyproject.toml`'s
+  comment at `timeout` is the measurement the number was taken from, and
+  `tests/README.md` declares the bullet as taken rather than as the gap.
+- **The bound covers a test's setup as well as its body**: the clone of
+  every repository and the repository document of each are session
+  fixtures', which pytest-timeout charges to whichever test triggered
+  them, so `timeout_func_only` would time the bodies alone and leave a
+  stalled clone unbounded. `session_timeout` is no answer either, being
+  read between tests rather than able to interrupt one.
+- **`addopts`' reason for declining `-n auto` no longer rests on every
+  test here waiting on the network** (closes #652): a module whose
+  subject is this tree waits on nothing outside its own process, and
+  what carries the conclusion is that a test asking about another
+  repository waits on the fetching, which is where the wall clock goes.

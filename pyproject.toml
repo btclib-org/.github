@@ -54,6 +54,10 @@ test = [
     # says what the shuffle guards in this suite and what argued against
     # it, and `-p no:randomly` is how a failure is reproduced in order
     "pytest-randomly",
+    # section 7's per-test bound, which is what names a wedged test
+    # where `alignment.yml`'s `timeout-minutes` names only a wedged
+    # runner. The limit is in [tool.pytest.ini_options] below
+    "pytest-timeout",
     # a workflow file is read with a parser and not with a regex: what
     # this suite asks of one is where its `cron:` entries are, which is
     # a question about the document's shape rather than about a line
@@ -229,13 +233,49 @@ testpaths = ["tests"]
 # question this suite does not have. No --cov: coverage at 100% is a
 # claim about a package's own code, and this tree ships none -- what
 # would be measured is the suite measuring itself. No -n auto either:
-# every test here waits on the network, so the wall clock is the fetch
-# and not the CPU, and the fetching is done once in a session fixture
+# what a test asking about another repository waits on is the fetching,
+# so the wall clock is that and not the CPU, and the longest waits are
+# the session fixtures', taken once for the run
 # -p pytester: tests/backlog_test.py runs a suite of its own in a
 # temporary directory to ask what conftest.py does with a backlog row on
 # a cell the run skips, and pytester is the fixture that runs one
 addopts = "-ra --durations=8 --strict-config --strict-markers -p pytester"
 xfail_strict = true
+# Section 7's per-test bound, for a suite that waits on something
+# outside its own process. Without it a hang is the one failure this
+# suite cannot report: the run stops rather than fails, and what a
+# reader gets is `alignment.yml` cancelled at its `timeout-minutes`,
+# naming the job and no test. pytest-timeout's `signal` method, which
+# it picks wherever SIGALRM exists and so on the runner, raises inside
+# the item and fails it, leaving the rest of the matrix to be asked.
+# `timeout_method` is unset for that reason: the other method ends the
+# process with `os._exit`, which loses the report this line is for.
+#
+# One item's whole protocol is bounded rather than its body alone.
+# `timeout_func_only` would time the bodies, and the waiting here is
+# mostly the session fixtures' -- a clone of every repository, a
+# repository document for each -- which pytest-timeout charges to
+# whichever item triggered them; timing bodies alone leaves a stalled
+# clone unbounded, and that is the hang there is to catch.
+# `session_timeout` is read between items and cannot interrupt one.
+#
+# So the number is the worst item a shuffle can build -- every session
+# fixture set up for one test, plus the slowest body -- rather than the
+# worst seen, `pytest-randomly` putting a different test in that place
+# each run. Measured on a ten-core machine sharing its cores with other
+# work, its load average reaching 14, over whole runs of
+#
+#   BTCLIB_INTEGRATION=1 uv run --locked --no-default-groups \
+#     --group test pytest --durations=0 --durations-min=0
+#
+# the setup phases summed to 75.28s beside a slowest body of 5.65s,
+# and on the run where the API began refusing, to 114.60s beside
+# 6.20s. This doubles the second of those, and sits far enough under
+# `alignment.yml`'s fifteen minutes that a run losing an item to it
+# still finishes and reports the rest, the slowest whole run here
+# taking 155.97s. Nothing measured on the runner stands behind it,
+# btclib-org/.github#628 being what has to close for there to be one
+timeout = 240
 # --strict-markers is on, so a marker is declared here or it is a typo.
 # Every test that reaches GitHub carries `integration`: section 7's rule
 # that a test never reaches the network is what makes this suite an
