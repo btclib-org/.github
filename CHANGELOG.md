@@ -4728,3 +4728,13 @@ audit has no revision to compare against.
   `strategy:`, so "the cells already gating the review" replaces "the
   ones already in the job", matching the wording the criterion's own
   failure clause already uses.
+
+### The BACKLOG row keyed on ISS 551 narrows to its lagging tree
+
+- **`tests/__init__.py`'s row for
+  `test_the_settings_file_does_not_claim_to_be_the_whole_of_them` names
+  `portanode` alone** (closes #693): neither `btclib`'s nor
+  `btclib-node`'s `REPOSITORY.md` carries `this file is the whole of
+  them` any longer, so the row's strict `xfail` was turning each tree's
+  own passing cell into `XPASS(strict)`. `portanode` is still the one
+  copy the claim is found in.
