@@ -4757,3 +4757,26 @@ audit has no revision to compare against.
   is the class that block enumerates; a field of that class it does not
   name is silent in both places at once, and reads as one nobody looked
   at rather than as one weighed and left out.
+
+### Section 9 holds a wrap to what `shellcheck` reads a comment line as
+
+- **A sentence wrapped so that `shellcheck` is the first word of a
+  comment line writes a directive rather than prose** (issue #689): the
+  same sentence with the word pulled up onto the line above is green, so
+  what fails is the wrapping and not the prose. Where the rest of the
+  line does not parse as a directive, the file is `SC1072` and the gate
+  is red; where it does — `# shellcheck disable=SC2086` arriving whole
+  on its own line — the run exits 0 and an unquoted `echo $x` beside it
+  goes unreported, which the same script with the word pulled up
+  reports. Both outcomes reproduce through `actionlint` over a
+  workflow's `run:` block, which is how the lint gate here reads a
+  comment.
+- **The rule is about the wrapping alone, because both outcomes are
+  defects**: what the rest of the line parses as decides which of the two
+  a wrapped sentence produces, and where it parses as a directive
+  `shellcheck`'s ordinary scope decides whether the finding beside it
+  goes quiet — file-wide where the line precedes every command, and
+  otherwise over the command or compound it immediately precedes, so a
+  statement standing between the two is the difference. A line that
+  parses as no directive is red wherever it sits. Neither outcome is one
+  to aim for, so there is no boundary the rule has to name.

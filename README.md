@@ -2218,6 +2218,18 @@ sight rather than weighed.
   included; Python comments and docstrings by ruff. Code is 88, the
   formatter's; yaml is 100, because an action pinned to a commit SHA with
   its tag in a trailing comment is past 80 before anything else is said.
+- **A comment whose first word is `shellcheck` is a directive, so where a
+  sentence wraps decides whether one gets written.** A wrap that puts the
+  word there does so by accident, and what follows it on that line
+  decides which failure it is: what the tool cannot parse as a directive
+  is a parse error — `SC1072`, and a red gate — while a line that does
+  read as a valid directive can be honoured, the run exiting 0 with a
+  real finding suppressed by a sentence that was never about it. The
+  second is the one the rule is for: a gate that passes having measured
+  less than it appears to leaves nothing to notice. Any comment
+  `shellcheck` reads is in scope, including the `run:` block section 10
+  has `actionlint` hand it. Wrap so the word does not begin a line — the
+  same sentence with it pulled up onto the line above is prose again.
 
 ### `CHANGELOG.md` and `RELEASE_NOTES.md`
 
