@@ -4862,3 +4862,36 @@ audit has no revision to compare against.
   declined** (closes #620): it is provably the same fold, and it is no
   longer a shell command a reader can eyeball, where two filters are
   checkable against the fold by running both against a copy that wraps.
+
+### A failing `gh` call says what `gh` said, and the first fetch is bounded
+
+- **A `gh api` that comes back non-zero names what the tool wrote to
+  standard error** (closes #663): `CalledProcessError` carries the exit
+  status alone into pytest's report, so a 404, a revoked token and a
+  secondary rate limit arrive there as one sentence. `tests/__init__.py`
+  raises `Refused` instead — a `CalledProcessError` still, so that
+  `protection_test.py` goes on telling one refusal from another by
+  `stderr` — whose message names the command as a line the reader can
+  take to a terminal, the way `by_hand` names one.
+- **The alternative declined is an assertion carrying `stderr`**
+  (closes #663): the backlog's rows are strict expected failures keyed
+  on `AssertionError`, so a refused call raised that way is reported as
+  the finding the row already records, in a run that exits 0, whether
+  the assertion came from a test's body or from a fixture that test
+  asked for. Any other exception is the failure or the error it is.
+- **The run's first fetch carries a bound of its own**
+  (closes #667): `conftest.py` parametrizes the per-repository tests
+  over the names the API answers with, before an item exists, and
+  pytest-timeout installs its bound in `pytest_runtest_protocol` — so
+  `pyproject.toml`'s `timeout` reaches every wait but that one, and an
+  unbounded first fetch ends the run with `alignment.yml` cancelled at
+  its `timeout-minutes`, naming the job and no test. `TIMEOUT` sits
+  under the per-test bound, so a hang inside a test is reported as the
+  command that hung and not as the test that was being asked, and far
+  over what a call here takes, so that a slow answer is not turned into
+  a finding about the organization.
+- **One helper runs every command whose output this suite reads**:
+  `git grep -n 'subprocess.run' tests/` answers with `output` and with
+  `conftest.py`'s clone, which is not one of them — it captures
+  nothing, so git's own stderr reaches the report already, and it runs
+  inside an item, where the per-test bound covers it.

@@ -87,7 +87,9 @@ table and the *Not tested here* line account for each of them once.
   anything outside its own process: a test here that asks about another
   repository waits on GitHub, where `alignment.yml`'s `timeout-minutes`
   bounds the job and names no test. `pyproject.toml`'s comment at
-  `timeout` is the measurement the number was taken from.
+  `timeout` is the measurement the number was taken from. The wait it
+  cannot reach is the one at collection, and `__init__.py`'s `TIMEOUT`
+  is what bounds that.
 - **No `slow` marker.** The markers registered are `integration`, `tier`
   and `backlog`, each with its reason at the key in `pyproject.toml`.
 - **No `--cov` and no `-n auto`**, the comment at `addopts` in

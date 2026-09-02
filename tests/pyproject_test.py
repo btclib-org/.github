@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import ROOT, Tier, by_hand, fenced, name, rows
+from . import ROOT, Tier, by_hand, fenced, name, output, rows
 from .copyright_test import collective
 
 if TYPE_CHECKING:
@@ -96,12 +96,9 @@ def dockerfile() -> str | None:
         nor a reason to read the fetch as having found nothing.
     """
     try:
-        return subprocess.run(
-            ["gh", "api", "-H", "Accept: application/vnd.github.raw", UV_DOCKERFILE],
-            capture_output=True,
-            check=True,
-            encoding="utf-8",
-        ).stdout
+        return output(
+            "gh", "api", "-H", "Accept: application/vnd.github.raw", UV_DOCKERFILE
+        )
     except subprocess.CalledProcessError as error:
         if UNREADABLE in error.stderr:
             return None
