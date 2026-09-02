@@ -4662,3 +4662,21 @@ audit has no revision to compare against.
   and leaving it would have turned a passing cell red. The `links` row
   was already red on `main` on its own account and is fixed here
   because it was in front of us.
+
+### Section 10's worked examples follow the trees they name
+
+- **The interpreter-axis example reads `btclib-node`'s `test.yml` as it
+  stands** (closes #666): `3.14t` runs in a `free-threaded` job of its
+  own beside the `coverage` job at `3.14` rather than as a second cell
+  of the `coverage` job, and `test-passed` does not name that job, so
+  the paragraph no longer states that both cells are required by one
+  aggregate. btclib-org/btclib-node#746 is what it points at for why
+  the job reports rather than gates.
+- **The criterion the example illustrates is untouched** (closes #666):
+  what it weighs is the slot a cell occupies before a review, which the
+  cell costs whether or not a merge waits for it, so whether the cell
+  reports or gates does not move the axis onto the weekly calendar.
+- **The `deps-oldest` bullet says what btclib-org/.github#323 still
+  carries** (closes #683): the trees of the entry still short of the
+  workflow, `btclib-node` carrying `deps-oldest.yml` with a `schedule:`
+  and no longer being one of them.

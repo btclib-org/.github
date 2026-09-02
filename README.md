@@ -2487,14 +2487,18 @@ where the extra cell runs in parallel with the ones already in the job,
 so the ceiling absorbs it without lengthening the wait, and where what
 it claims is the same pinned interpreter run a second time rather than a
 version the package newly claims to support.** `btclib-node`'s
-`test.yml` carries `3.14` and `3.14t` in its `coverage` job on this
-ground: both cells are required by the job's own aggregate, run as
-parallel jobs rather than in sequence, and `3.14t` is `.python-version`'s
-own interpreter with the GIL off rather than a second interpreter the
-package claims to support. Where either condition fails — the cells run
-in sequence, or the second cell is a version the package does not
-already claim — the row belongs in the weekly calendar instead, on the
-same trade that keeps a platform row there.
+`test.yml` carries `3.14t` on this ground, in a `free-threaded` job of
+its own beside the `coverage` job at `3.14`: the two run as parallel
+jobs rather than in sequence, and `3.14t` is `.python-version`'s own
+interpreter with the GIL off rather than a second interpreter the
+package claims to support. That job reports rather than gates,
+`test-passed` there leaving it out of `needs:` for the reason
+btclib-org/btclib-node#746 records; what the criterion weighs is the
+slot a cell occupies before a review, which it costs either way. Where
+either condition fails — the cells run in sequence, or the second cell
+is a version the package does not already claim — the row belongs in
+the weekly calendar instead, on the same trade that keeps a platform
+row there.
 
 **What runs weekly does not also gate**, so nothing is asked twice at
 the price a gate charges. The converse does not hold: a sentinel runs
@@ -2941,8 +2945,8 @@ its entry gains the tree when the workflow and the badge land together.
   the same set `deps-latest` names, the two rows asking one question in
   opposite directions: whether the code survives the newest releases,
   and whether the oldest ones it declares install at all.
-  btclib-org/.github#323 carries the debt until the first of them
-  schedules the workflow.
+  btclib-org/.github#323 carries the debt for the trees of the entry
+  still short of the workflow.
 - **`sdist-rebuild` follows a tree that publishes an attestation.** The
   attestation vouches for bytes, so a released tag either rebuilds to
   the sdist that was signed or it vouches for something no rebuild
