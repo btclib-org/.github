@@ -4628,3 +4628,37 @@ audit has no revision to compare against.
   driver does not produce or the changelog groups section 9 no longer
   has. The table itself stays, `REVIEWING.md`'s entry standing against
   issue #353.
+
+### Section 10 says when a platform row leaves a tree's entry
+
+- **The `os-windows` entry no longer names `btclib-node`** (closes #618,
+  closes btclib-org/btclib-node#735): that tree gates a `windows-latest`
+  cell on the suite passing instead of carrying the sentinel beside it,
+  so the record follows the tree and the tree owes no workflow back.
+- **The ground is a gate cell asking the whole of what that tree's
+  sentinel asked** (closes #618): the converse *What runs weekly does
+  not also gate* denies is a hole in a matrix, and a sentinel covered
+  whole leaves none. The cell earns its place before a review on the
+  parallel-job trade section 10 already states for an interpreter axis,
+  and gates on the suite passing rather than on the coverage floor.
+  Where that trade does not hold, or where the cell is narrower than
+  the sentinel's matrix, the sentinel keeps its whole matrix on the
+  calendar and the entry keeps the tree -- a hole is what the paragraph
+  above refuses, so a partial cell buys nothing.
+- **`tests/__init__.py`'s `BACKLOG` row keyed on the issue goes**
+  (closes #618): a row says the answer is written down and waiting, and
+  this entry is the answer.
+- **Two more rows go with it, both excusing a cell that now passes.**
+  A row is a strict expected failure precisely so that a tree catching
+  up is reported rather than quietly excused, so a row outliving its
+  cell turns the suite red from the other side. `btclib-node` leaves
+  the `deps-oldest` row, having become the first tree to schedule that
+  sentinel, which is btclib-org/btclib-node#739's own landing; the
+  `links` row goes whole, the site carrying `links.yml` now
+  (closes #656). Only the first of those two is forced by the entry
+  above it: with the `os-windows` row gone, the `deps-oldest` row was
+  the last thing excusing
+  `test_a_tree_carries_the_sentinels_its_entries_give_it[btclib-node]`,
+  and leaving it would have turned a passing cell red. The `links` row
+  was already red on `main` on its own account and is fixed here
+  because it was in front of us.
