@@ -4715,3 +4715,16 @@ audit has no revision to compare against.
   `merge=union` bullet, which #629 is open against and #661 owes a
   consolidation afterward; it is left there rather than edited by a
   second branch at once.
+
+### Section 10 says what its own prose means
+
+- **The `sdist-rebuild` bullet no longer counts the trees of its own
+  entry** (closes #686): "the first of the three" stated a total,
+  which section 9's *Measure, don't assert* forbids; "the first of
+  them" bounds the same debt without one.
+- **The interpreter-axis criterion's lead sentence names a second job
+  as readily as a second matrix cell** (closes #692): no gate workflow
+  in the organization runs its interpreter axis inside one job's own
+  `strategy:`, so "the cells already gating the review" replaces "the
+  ones already in the job", matching the wording the criterion's own
+  failure clause already uses.
