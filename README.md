@@ -3029,10 +3029,24 @@ its entry gains the tree when the workflow and the badge land together.
 
 ### The aggregate job, and the required check
 
-A workflow whose answer gates a pull request ends in a job that `needs`
-every other job in it and is named with its workflow — `test: every job
-passed` — because a check context is keyed by name alone and two
-workflows with a job of the same name produce one ambiguous check.
+A workflow whose answer gates a pull request ends in a job that `needs` every
+other job in it whose own result is a claim about the pull request, and is
+named with its workflow — `test: every job passed` — because a check context is
+keyed by name alone and two workflows with a job of the same name produce one
+ambiguous check.
+
+**A job engineered to conclude successfully whatever it finds makes no such
+claim, and stays out of `needs` for exactly as long as that holds.** A step
+tolerated with `continue-on-error: true`, reported by a step of its own
+rather than left to redden the run, is what gives such a job that shape:
+its green then says nothing about what the job is named for, so folding it
+into `needs` would make the aggregate cite a job whose passing is not
+evidence of anything. The exception is not a standing shape — it holds only
+while the job cannot make the claim it is named for, and it ends the day it
+can. `btclib-node`'s `free-threaded` job is out of `test-passed`'s own
+`needs:` on exactly this ground: its sync step is tolerated because the
+wheel it depends on does not publish, and it rejoins `needs` the day that
+changes (btclib-org/btclib-node#746).
 
 **A matrix is not what asks for one.** A branch rule can name only a
 context a pull request produces, so a workflow triggered by `push` and

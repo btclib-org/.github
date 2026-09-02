@@ -4834,3 +4834,13 @@ audit has no revision to compare against.
   would make a violation of every one of them in the tree that states
   it. What that leaves is a command a paste still runs, and the rule
   claims no protection for it.
+
+### Section 10 says which job an aggregate's `needs` may leave out
+
+- **The opening sentence names what `needs` collects: every job whose own result
+  is a claim about the pull request** (closes #685): a job built to conclude
+  successfully whatever it finds -- a `continue-on-error` step reported rather
+  than left to redden the run -- makes no such claim, and a paragraph beside
+  the opening sentence states the ground and its self-terminating condition.
+  `btclib-node`'s `free-threaded` job, already out of `test-passed`'s own
+  `needs:` on exactly this ground, is the instance the paragraph cites.
