@@ -4680,3 +4680,20 @@ audit has no revision to compare against.
   carries** (closes #683): the trees of the entry still short of the
   workflow, `btclib-node` carrying `deps-oldest.yml` with a `schedule:`
   and no longer being one of them.
+
+### Section 14 places `tests/conventions_test.py`
+
+- **The module is per repository by subject, and outside the compared
+  list** (closes #674): each copy reads the declaration its own tree
+  keeps, its rows and the `tests/` root it resolves a declared module
+  against are that tree's, and `btclib-node` keeps its copy at
+  `tests/unit/conventions_test.py`. What the copies hold in common is a
+  job — read the declaration section 7 asks for and assert every
+  convention it names has a module holding a test for it — so each owes
+  a header sentence about this module: what it reads, and which of its
+  departures are decided. A defect in the parsing that job needs
+  otherwise sits in every copy with nothing red anywhere.
+- **The rejected alternative is a bullet in *The same file in every
+  repository*** (closes #674): no two copies are byte-equal and that
+  comparison is by path, so the bullet would report the copies as drift
+  on the day it landed and could not reach `btclib-node`'s at all.
