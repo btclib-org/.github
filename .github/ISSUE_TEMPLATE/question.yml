@@ -1,0 +1,32 @@
+---
+name: Question
+description: Ask how something works, or why it works that way
+labels: [question]
+
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Discussions are not enabled here, so a question is an issue: this
+        form is what keeps one from having to be filed as a bug. The
+        repository's own `README.md` comes first.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: The question
+      description: >
+        What you are trying to do, and what you have already read or
+        tried. What a call or a command returned, and what you expected
+        instead, is a sharper question than a description of either.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit, where it matters
+      description: >
+        The release, where the repository cuts one; otherwise the commit,
+        `git rev-parse --short HEAD`.
+      placeholder: "2026.8, or 83e339a"

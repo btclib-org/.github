@@ -4895,3 +4895,38 @@ audit has no revision to compare against.
   `conftest.py`'s clone, which is not one of them — it captures
   nothing, so git's own stderr reaches the report already, and it runs
   inside an item, where the per-test bound covers it.
+
+### The organization's default new-issue page is this tree's own
+
+- **`.github/ISSUE_TEMPLATE/` holds `bug_report.yml`,
+  `feature_request.yml`, `question.yml` and `config.yml`** (issue #632):
+  section 2 gives `.github/` to every tier, section 16's checklist names
+  the directory in it, and section 11 cites that checklist as why
+  `has_issues` is a setting a copy records. GitHub serves an
+  organization's `.github` templates to every public repository of it
+  that keeps none of its own, so one directory is both this tracker's
+  forms and the new-issue page of a repository that has not written its
+  own.
+- **The forms ask what is answerable in a tree whose subject they do not
+  know** (issue #632): what happens, how to reproduce it, and against
+  which release or commit. A question only one subject answers — which
+  chain, which BIP, which script — is what a repository asks in a form it
+  keeps itself, and is what a default served to several cannot ask.
+- **Where an issue belongs is a link and not a second statement of the
+  rule** (issue #632): `CONTRIBUTING.md`'s *The issue tracker* already
+  says that what the standard decides, or what no single tree can answer,
+  is filed in `btclib-org/.github`, and that file is the same in every
+  repository these forms reach.
+- **The security entry names the policy rather than an advisory form**
+  (issue #632): a `contact_links` url is absolute, the schema admitting
+  only `^https?://`, so an advisory form written here sends every
+  reporter to one repository's Security tab, where `SECURITY.md` asks
+  for the tab of the repository the defect is in.
+- **Blank issues are off** (issue #632): discussions are not enabled
+  here, so a question has a form of its own, and with that written there
+  is nothing a blank box is the only home for.
+- **`CLAUDE.md`'s list of the community health files inherited from here
+  carries the directory** (issue #632), which `README.md`'s own bullet
+  on them already classes with the rest: a session editing a form has to
+  meet the sentence saying what it is changing for a reader of every
+  repository that inherits it.
