@@ -4806,3 +4806,31 @@ audit has no revision to compare against.
   is not what stopped the truncation from recurring. Whether an
   automated check belongs in this repository is left to a separate
   issue rather than decided here.
+
+### A placeholder standing as a whole argument is unquoted
+
+- **`REVIEWING.md`'s blocks for filing collateral quoted their
+  placeholders, so a paste of them reached `gh` rather than failing**
+  (closes #587): the quotes make `<` and `>` ordinary text, leaving a
+  valid `gh issue create` whose title and body are the placeholders
+  themselves and a `gh issue list` whose search term is one. Unquoted,
+  the placeholder ends the line, `>` has no target, and the shell
+  refuses the block and writes nothing — `zsh`, `bash` and `sh` alike.
+- **Section 9 carries the rule** (closes #587), governing every document
+  here rather than `REVIEWING.md` alone, and it says what tempts the
+  quotes back: quoting is what an argument holding spaces otherwise asks
+  for, so the absence wants a sentence beside it. Section 15's
+  `git log -S <phrase>` comes under the rule.
+- **The condition the shell's `<` succeeds under is stated once, in the
+  bullet whose claim rests on it** (closes #661): a file of the
+  placeholder's own name sitting in the reader's directory is what
+  leaves a block's guard resting on the reader rather than on the line,
+  and the rule above points at that bullet for what a bare placeholder
+  fails with rather than stating the condition beside its own claim.
+- **The rule stops at a placeholder standing as a whole argument**
+  (closes #587): a placeholder inside a larger string is quoted for what
+  sits beside it — `"repos/<org>/$r/contents/$1"` for the variable — and
+  a quote another language needs is that language's, so a wider rule
+  would make a violation of every one of them in the tree that states
+  it. What that leaves is a command a paste still runs, and the rule
+  claims no protection for it.

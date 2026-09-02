@@ -2180,6 +2180,17 @@ sight rather than weighed.
   and never state how many of anything a file holds: a stated total is a
   line every open branch has to edit, and two branches moving it to the
   same wrong number merge without a conflict.
+- **A placeholder standing as a whole argument is unquoted**, so that a
+  paste made before it is filled in fails at the shell rather than
+  reaching the tool. Quoting is what an argument holding spaces
+  otherwise asks for, and it makes `<` and `>` ordinary text: the
+  command runs, and the tool takes the placeholder as the value. What a
+  bare one fails with, and what that failure guards, is the bullet
+  below. A placeholder *inside* a larger string is not this:
+  `"repos/<org>/$r/contents/$1"` is quoted for the variable beside it,
+  and unquoting it would be wrong shell rather than a guard. Nor is a
+  quote another language needs — a `python -c` program's string, a TOML
+  value.
 - **A block whose placeholders sit above a line that writes is guarded
   by what follows the placeholder on its own line.** `<` and `>` are the
   shell's redirection operators, so a paste made before a placeholder is
@@ -5256,7 +5267,7 @@ authoritative precisely because it sits next to the thing it describes.
    endpoint asked without `--paginate` answers for its newest page alone,
    so "nothing here has ever been X" survives every X older than that
    page.
-1. **`git log -S "<phrase>"` on every mismatch**, to separate *was true,
+1. **`git log -S <phrase>` on every mismatch**, to separate *was true,
    drifted* from *never matched*. That axis decides whether the fix is
    the comment or the code, and a comment describing a safer design that
    was never built is a finding against the code.
