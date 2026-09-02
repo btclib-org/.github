@@ -4623,6 +4623,28 @@ fix that is not about one tree's entry shape, a `gh` call or a field
 spelling, is carried to every copy in the same campaign, the header
 being what says which parts those are.
 
+`tests/conventions_test.py` is per repository by subject too, and outside
+the compared list for the same reason: each copy reads the declaration
+its own tree keeps, so its rows are that tree's, and so is the `tests/`
+root it resolves a declared module against — `btclib-node` keeps its copy
+at `tests/unit/conventions_test.py`, a different path and not only
+different bytes. What the copies hold in common is a job rather than a
+text: read the declaration section 7 asks for and assert that every
+convention it names has a module holding a test for it. The header
+sentence a copy owes is about this module and not about how its tree
+names convention tests: what it reads, and which of its departures are
+decided rather than accidental. This repository's copy reads section 7's
+list of conventions off `README.md` rather than transcribing it — which a
+sibling cannot, the standard being in another repository — and says so.
+The failure mode is why the sentence is owed: a defect in the parsing
+that shared job needs sits in every copy carrying it and turns nothing
+red anywhere, so a fix that is not about one tree's rows or its root is
+carried to every copy in the same campaign, which is what
+`btclib-org/.github#651` records. A bullet in the compared list above is
+the rejected alternative: no two copies are byte-equal and that
+comparison is by path, so the bullet would report the copies as drift on
+the day it landed and could not reach `btclib-node`'s at all.
+
 ## 15. Auditing a repository against this file
 
 Alignment is measured, not remembered. Each command below answers for
