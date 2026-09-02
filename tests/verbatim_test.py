@@ -63,7 +63,6 @@ CONDITIONAL = "owed where "
 
 EXPECTED_DRIFT: dict[str, str] = {
     "REVIEWING.md": "btclib-org/.github#353",
-    ".gitattributes": "btclib-org/.github#646",
 }
 """A path section 14 names whose copies are known not to agree yet.
 
