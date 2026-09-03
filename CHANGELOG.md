@@ -5157,3 +5157,19 @@ audit has no revision to compare against.
   `tests/__init__.py`'s `bulleted` is what returns a list's bullets, one
   string per bullet whatever column the file wrapped at, and `subjects`
   keys those by the subject each opens with.
+
+### A decision that removes an artifact owes a sweep of what asserts it
+
+- **A decision taken in this tracker that removes an artifact owes a
+  sweep of every tree for what asserts it** (closes #596): *What this
+  repository is* puts the obligation on the deciding issue, the tree
+  holding the sentence having changed nothing to make it false and so
+  having no diff of its own to be the occasion for re-reading it. The
+  sweep goes in the deciding diff where what asserts the artifact is in a
+  tree that diff already touches, and in an issue filed with the deciding
+  one where it is not.
+- **The rejected alternative leaves it to section 15's read-backs**: they
+  are run against the tree that did not change, by hand or by the suite
+  on its schedule, so they answer when that next comes round rather than
+  at the landing, and each answers for a section of the standard rather
+  than for a sentence a decision elsewhere falsified.
