@@ -87,11 +87,15 @@ already exists — or worse, a second worker reads the first one's tree.
 worktree at once, which the ordinary sequence avoids by each removing
 its own.
 
+An issue of this tracker worked in `btclib` by a coder names its
+worktree `wt-github-255-btclib-coder`. No `uv sync` follows the `cd`,
+the gate doing that itself, and the editing, the gates and the commits
+all happen in the worktree before the push.
+
 ```shell
-WT=<scratchpad>/wt-<tracker>-<issue>-<repo>-<role>  # wt-github-255-btclib-coder
+WT=<scratchpad>/wt-<tracker>-<issue>-<repo>-<role>
 git worktree add "$WT" origin/main -b <branch>
-cd "$WT"                              # no uv sync: the gate does it
-# edit, gate and commit here, then
+cd "$WT"
 git push origin HEAD:refs/heads/<branch>
 ```
 
