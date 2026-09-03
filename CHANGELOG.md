@@ -5522,3 +5522,17 @@ audit has no revision to compare against.
 - **`BACKLOG` gains a row keyed on #781**: `bbt`, `btclib-benchmarks`,
   `btclib-org.github.io` and `portanode` track no template of their own,
   and that issue is where each of them lands one.
+
+### Section 9 gains a clause for a literal `<...>`, and reaches the whole-line comment
+
+- **A `<...>` that is a literal takes the unquoting bullet's own
+  larger-string exemption, not its repair** (closes #788): section 15's
+  own badge-render loop and `btclib-node`'s `CLAUDE.md` both write
+  `grep -oE '<title>[^<]*</title>'`; `grep '<title>'` alone stands in
+  the bullet's own shape, and unquoting it is a parse error.
+- **A whole-line `#` comment carrying an apostrophe kills a `zsh` paste
+  of the fence beneath it, the way a trailing one does, and one
+  carrying a backtick runs it** (issue #789): the trailing-comment
+  bullet's mechanism reaches it too, and `btclib-secp256k1`'s
+  `detect-secrets` fence carries the shape this issue's second box
+  fixes.
