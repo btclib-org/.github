@@ -2695,6 +2695,7 @@ owns a day and an hour, the repository owns the minute:
 | `homepage` | Saturday | 03 |
 | `links` | Saturday | 04 |
 | `alignment` | Saturday | 05 |
+| `wheel-reproducibility` | Sunday | 02 |
 | `sdist-rebuild` | Sunday | 03 |
 | `codeql` | Sunday | 04 |
 | `scorecard` | Sunday | 05 |
@@ -2720,7 +2721,11 @@ takes the slot its family already holds rather than the end of the
 table, and `scorecard` is why that is a rule rather than a tidiness:
 section 2 puts the Scorecard badge at the head of the OpenSSF line
 because `scorecard` is the last row, so a sentinel appended past it
-takes that reason away.
+takes that reason away. The table's order is that order too: the day
+and the hour place the row among the families as well as fixing when
+it runs. So a slot standing free between two rows of another family
+does not seat a row beside its own, and where the band offers none
+that does, it grows downward.
 
 **The week is the whole of the grid's period**, so every row is a weekly
 run, and a `cron:` repeating on any other cadence is one the calendar has
@@ -2749,12 +2754,12 @@ the working day, where the ceiling above is not being spent on a pull
 request somebody is waiting for and a failure is waiting to be read
 rather than arriving in the middle of one.
 
-**The hour is UTC, and the band grows downward: the next hour the grid
-takes is `03`.** A `cron:` here names no `timezone:`, which is what
-leaves it UTC, and a fixed UTC hour falls later in the morning here for
-as long as the clocks are forward. The band's late end is what reaches
-the working day first, so the grid takes the hour below `04` rather than
-the one above `05`. **A `timezone:` beside a `cron:` fails
+**The hour is UTC, and the band grows downward.** A `cron:` here names
+no `timezone:`, which is what leaves it UTC, and a fixed UTC hour falls
+later in the morning here for as long as the clocks are forward. The
+band's late end is what reaches the working day first, so the hour the
+band gains is the one below its earliest rather than the one above its
+latest. **A `timezone:` beside a `cron:` fails
 `tests/grid_test.py` outright**, rather than being converted before the
 calendar is compared, so a schedule cannot leave UTC by declaring one.
 
@@ -2880,6 +2885,7 @@ nothing by that row.
 - `homepage` — `btclib-org.github.io`;
 - `links` — every repository;
 - `alignment` — `.github`;
+- `wheel-reproducibility` — `btclib-secp256k1`;
 - `sdist-rebuild` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`;
 - `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
@@ -3057,6 +3063,23 @@ its entry gains the tree when the workflow and the badge land together.
   disagrees is an issue against the tree it ran in.
   btclib-org/.github#523 carries the debt until the first of them
   schedules the workflow.
+- **`wheel-reproducibility` follows a tree that ships a compiled
+  wheel.** Section 12 puts the compiled wheel outside the property
+  `sdist-rebuild` re-derives, cibuildwheel building it against a
+  compiler and a toolchain nothing pins, and this row is what asks how
+  far that stands. A wheel with nothing compiled in it is the
+  checkout's own files under the member metadata the backend fixes,
+  which is the ground `sdist-rebuild` already stands on. The sentinel
+  builds the wheel twice on one image and diffs the two archives
+  member by member, then diffs the wheels two images of one platform
+  built, the second image being chosen to differ in the toolchain it
+  carries. btclib-org/btclib-secp256k1#439 is where the property is
+  being reached for, and the workflow this row schedules asks two
+  builds in one directory and two environments alike: a platform
+  whose wheels disagree is an issue against what the run names rather
+  than a line here.
+  btclib-org/btclib-secp256k1#538 carries the port until that tree's
+  `cron:` is the instant above and its badge is in the row.
 - **`homepage` follows a tree serving a page generated from another
   tree's file.** `btclib-org.github.io`'s `index.md` is derived from
   `profile/README.md` here, and what the sentinel asks is whether the
