@@ -5173,3 +5173,22 @@ audit has no revision to compare against.
   on its schedule, so they answer when that next comes round rather than
   at the landing, and each answers for a section of the standard rather
   than for a sentence a decision elsewhere falsified.
+
+### Section 2's example of a floor is a file, not a release
+
+- **`portanode` illustrates a floor by carrying the `RELEASING.md` its
+  tier does not ask for** (closes #554): the root-files table gives that
+  file to tier 1 and the tiers table gives `portanode` tier 3, so the
+  example is read back from section 2's own two tables and from the
+  file the forge shows. The clause it replaces said the repository cuts
+  a signed tag and a GitHub release by hand, which
+  `gh api repos/btclib-org/portanode/releases` and the same read of
+  `tags` answer empty for, with `btclib` as the control that the two
+  endpoints answer where a repository has them.
+- **The rejected alternative names a different repository, one whose
+  practice measures as that clause claimed**: section 2's own tier loop,
+  run beside those two endpoints across the organization, finds a tag or
+  a release only where a `release.yml` has already made the tree tier 1
+  and its tier therefore asks for the release. An example has to be
+  concrete, so the weaker fix — dropping to "carries more than its tier
+  asks" with nothing named — is declined with it.
