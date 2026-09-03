@@ -5192,3 +5192,35 @@ audit has no revision to compare against.
   and its tier therefore asks for the release. An example has to be
   concrete, so the weaker fix — dropping to "carries more than its tier
   asks" with nothing named — is declined with it.
+
+### The uv floor test asks the whole of section 1's sentence
+
+- **`test_the_uv_floor_is_what_dependabot_bundles` asks that the floor
+  *be* the ceiling, where it asked only that the floor not sit above it**
+  (closes #598): section 1 sets `[tool.uv] required-version` at the
+  newest uv `dependabot-core`'s own updater reads, and the direction the
+  assertion passed over — a floor below that pin — is the one #448 is
+  filed against. Each direction now carries its own message, the two
+  failing for different causes: above the pin, the tree's uv-driven
+  Dependabot updates are not running and nothing anywhere errors; below
+  it, the floor still admits a uv older than the one those updates write
+  the lock with.
+- **Section 15's read-back of the same key put the ceiling as a bound
+  the floor may not exceed, and called a floor below it safe**: the
+  loop's output is unchanged, `floor=` and `ceiling=` being what it
+  already prints, and the block's prose reads section 1's sentence back
+  instead — a `floor=` that is not `ceiling=` is a finding on either
+  side of it, with a different fix each way. The two instruments
+  measuring one key would otherwise disagree, the reader's half calling
+  safe the cell the suite goes red on.
+- **The alternative declined keeps the assertion at `<=` and leaves the
+  low side to a reader**, which is the half of section 15's audit no
+  command runs and is how #448 was found. What strict equality costs is a
+  pull request per tree with a lock every time `dependabot-core` bumps
+  its bundled uv; that pull request is owed the morning the pin moves
+  either way, so the red states a fact about those trees on the day it
+  becomes true rather than whenever somebody next reads the key.
+- **The trees below the ceiling are excused by a `BACKLOG` row keyed on
+  #448**, which expires as each bumps its own floor: the strict expected
+  failure turns a tree catching up into a red cell here, so the exemption
+  is read again rather than left standing.
