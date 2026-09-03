@@ -5298,3 +5298,17 @@ audit has no revision to compare against.
   `ISSUE_TEMPLATE/`, so that rule would be written here rather than
   found, and what the trees happen to track answers what they do rather
   than what they owe.
+
+### Section 2 filters a workflow badge's link to `main` as it filters the image
+
+- **A workflow-status badge's link carries `?query=branch%3Amain`**
+  (closes #741): the two halves of a badge line are one claim, so a
+  reader clicking a green badge lands on the runs the image answers for
+  rather than on every branch's. The spelling differs from the image's
+  because the runs page ignores `?branch=main`.
+- **The rejected alternative is the unqualified link**, which is how a
+  reader reaches the pull request run that broke something: a different
+  question from the one the row answers, and the filtered page's *Clear
+  filters* control leaves the whole history one click away.
+- **This tree's own badge rows carry the query** (closes #741), the rule
+  binding the head of this `README.md` as it binds a sibling's.
