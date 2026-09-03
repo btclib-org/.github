@@ -339,6 +339,18 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-secp256k1",
         ),
     ),
+    # the pull request template: these trees carry none, and the issue
+    # is where each of them lands one
+    (
+        781,
+        "test_a_repository_carries_a_pull_request_template",
+        (
+            "bbt",
+            "btclib-benchmarks",
+            "btclib-org.github.io",
+            "portanode",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 

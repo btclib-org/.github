@@ -5491,3 +5491,34 @@ audit has no revision to compare against.
   take it**: its `<org>` is one value shared across that section's
   blocks, which is not a shape the standard has, so what a guard looks
   like there is a decision of its own. #773 carries it.
+
+### The pull request template is `.github/`'s, and the suite asks for it
+
+- **Section 2 says where `PULL_REQUEST_TEMPLATE.md` goes** (closes
+  #729): its directories bullet names the file under `.github/` and its
+  root-files table gives it no row, which left open whether the bullet
+  was the placement or one of the places GitHub reads a template from.
+  The paragraph under that bullet now fixes `.github/`, the placement
+  the forge takes ahead of the root and of `docs/`, and gives the
+  reason: the file is the forge's input rather than a document a reader
+  opens.
+- **The rejected alternative is the file wherever GitHub reads one**,
+  which leaves two trees of one organization differing in shape for
+  nothing and cannot be read back off the forge —
+  `repos/<org>/<repo>/community/profile` answers
+  `files.pull_request_template.url` with this repository's copy for a
+  tree that has none of its own.
+- **This repository's own copy moves with the rule**, from the root to
+  `.github/PULL_REQUEST_TEMPLATE.md`. The precedence above holds in this
+  repository too, so the file every tree with none of its own is shown
+  is the one it was.
+- **`tests/pull_request_template_test.py` asks each tree for that path**,
+  through `git ls-files` in the checkout: a template a reader is shown
+  from here is in no tree of the repository being asked about, which is
+  the reading `tests/issue_template_test.py` takes of the sibling member
+  of the same bullet. What the file says is not compared — the copy here
+  names the commands of one tree's gates, and says in itself that a
+  repository whose commands differ writes its own.
+- **`BACKLOG` gains a row keyed on #781**: `bbt`, `btclib-benchmarks`,
+  `btclib-org.github.io` and `portanode` track no template of their own,
+  and that issue is where each of them lands one.
