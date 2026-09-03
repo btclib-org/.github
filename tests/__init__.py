@@ -306,6 +306,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_the_settings_file_says_what_it_passes_over",
         ("portanode",),
     ),
+    (
+        553,
+        "test_main_requires_a_check_and_the_rest_of_classic_protection",
+        ("btclib-org.github.io",),
+    ),
     # deps-oldest: these trees are short of the workflow; btclib-node
     # schedules it (btclib-org/btclib-node#739)
     (

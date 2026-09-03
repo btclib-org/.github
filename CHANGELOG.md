@@ -5312,3 +5312,23 @@ audit has no revision to compare against.
   filters* control leaves the whole history one click away.
 - **This tree's own badge rows carry the query** (closes #741), the rule
   binding the head of this `README.md` as it binds a sibling's.
+
+### The organization site's unprotected `main` is a backlog row
+
+- **`btclib-org.github.io` carries no classic protection on `main`, and
+  the cell reading section 11's list is a strict expected failure keyed
+  on #553** (closes #743): that issue's *What is red* table is where the
+  gap is written down, which is what a `BACKLOG` row says. The row names
+  one repository and one test, so a sibling acquiring the same gap is
+  red here.
+- **What a row excuses is an assertion, and the list is one**:
+  `conftest.py` marks a backlog cell `raises=AssertionError`, and a
+  `main` with no classic protection reaches that assertion with every
+  field of the list off rather than erring or skipping ahead of it.
+- **The alternative declined protects the branch now**: that is a change
+  to a repository's settings, and #553 asks for it nowhere in its *Done
+  when*, so that issue closing on its own terms leaves this row excusing
+  a gap. This issue is about what the suite asserts meanwhile. The row
+  is a strict expected failure, so the branch being protected turns the
+  cell red here and the exemption is read again rather than left
+  standing.
