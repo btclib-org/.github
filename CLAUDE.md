@@ -210,10 +210,12 @@ Do not use Fable unless explicitly instructed.
   tip, so it removes no network dependency, and its object store is borrowed
   from a checkout that a `git gc` there can break — for a saving the issue's
   own numbers call not worth the hazard. `git grep -lE 'gh_json|settings:
-  dict' tests/*_test.py` names `homepage_test.py`, `protection_test.py`,
-  `security_test.py`, `settings_test.py`, `tags_test.py` and `topics_test.py`
-  — what asks the API for state with no on-disk representation. `tiers` is
-  not one of them:
+  dict' tests/*_test.py` names `grid_test.py`, `homepage_test.py`,
+  `protection_test.py`, `security_test.py`, `settings_test.py`,
+  `tags_test.py` and `topics_test.py` — what asks the API for state with
+  no on-disk representation. `grid_test.py` asks it for one document and
+  only where a calendar row is idle: the state of the issue section 10
+  says carries that row's debt. `tiers` is not one of them:
   `tests/__init__.py`'s `tier()` reads `pyproject.toml` and `release.yml` off
   the checkout, which `tiers_test.py` asks through the `tiers` fixture —
   `conftest.py`'s one-liner over `trees` — rather than through `gh_json`.

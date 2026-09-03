@@ -2825,11 +2825,13 @@ whose first tree is another repository cannot: the row is this tree's
 `README.md` and the schedule is that tree's workflow, always two pull
 requests, and one of them lands first. The order is the row first — the
 adoption is this file's own change, and the receiving tree's workflow
-comment then cites a row that exists from the moment it lands — and the
-red in between is `test_every_row_of_the_calendar_names_something_that_exists`,
-expected, dated by the pull request that opened it and bounded by the
-issue filed against the tree that owes the schedule. The other order
-keeps that test green by turning
+comment then cites a row that exists from the moment it lands — and what
+carries the row in between is the debt issue its paragraph of *Which
+trees carry which sentinel* below names. That reference is what
+`test_every_row_of_the_calendar_names_something_that_exists` reads,
+asking GitHub whether the issue is open, so the exemption expires when
+the issue closes rather than when a reader thinks to look.
+The other order keeps that test green by turning
 `test_every_cron_is_the_instant_the_calendar_names` red instead, and
 asks a tree to schedule against a calendar that does not yet name it.
 What stays refused is a row written the day the rule is, which reads as
@@ -2846,7 +2848,8 @@ and a schedule changed there are separate landings, and in between
 `test_every_cron_is_the_instant_the_calendar_names` names every tree
 still on the old instant. That list is the port's work rather than a
 defect of the trees on it, and it is bounded by the issue carrying the
-ports, as a new row's red is bounded by the issue carrying the debt.
+ports — a reader's check, where the debt issue an adoption names is one
+the run reads.
 
 ### Which trees carry which sentinel
 
