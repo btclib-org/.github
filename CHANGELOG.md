@@ -5074,3 +5074,26 @@ audit has no revision to compare against.
   take, so the shas a review is attached to survive it — hangs on the
   same replaced rule, and offers the surviving sha as something that
   shape buys.
+
+### The suite asks every repository for `.github/ISSUE_TEMPLATE/`
+
+- **Section 2's directories bullet names the directory beside
+  `dependabot.yml`, and the suite asked about the second alone** (closes
+  #709): `tests/issue_template_test.py` asks each tree what it tracks
+  under `.github/ISSUE_TEMPLATE`, so a repository without the directory
+  is a red cell rather than a reader's catch.
+- **What is asserted is the directory and no form under it**: the
+  standard names none, so a test asking for `bug_report.yml` would be
+  where a convention this file does not carry got written down.
+- **A default served from elsewhere is not a directory a tree has**: the
+  question is what `git ls-files` answers in the repository asked about,
+  and what GitHub renders for a repository that carries no directory of
+  its own is beside it.
+- **`BACKLOG` excuses the trees short of the directory, a row per
+  issue**: `bbt` and `btclib-benchmarks` under #632, and
+  `btclib-org.github.io` under #713, the issue filed for the tree #632's
+  measurement does not reach.
+- **A module of its own rather than a question added to
+  `root_files_test.py`**: that module reads section 2's root-files table
+  and its tier column, where this is a directory the same section gives
+  every tier in prose.
