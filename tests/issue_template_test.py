@@ -31,7 +31,7 @@ pytestmark = pytest.mark.integration
 
 DIRECTORY = ".github/ISSUE_TEMPLATE"
 
-FORMS = f"git ls-files -- {DIRECTORY}"
+LISTING = f"git ls-files -- {DIRECTORY}"
 """How a reader asks a checkout what the directory holds."""
 
 
@@ -39,11 +39,11 @@ def test_a_repository_carries_an_issue_template_directory(
     repository: str,
     trees: dict[str, Path],
 ) -> None:
-    """The directory is in the tree, with a form in it.
+    """The directory is tracked.
 
-    One question rather than two: git tracks no empty directory, so a
-    tree that answers with a path has both, and a tree that answers with
-    nothing is short of the directory or of everything under it.
+    git tracks no empty directory, so listing what is under the
+    directory is how a checkout is asked whether the directory is there
+    at all, and a tree answering with nothing has none.
 
     A default rendered from another repository is not a directory this
     one has, so what a reader is shown does not answer it.
@@ -51,8 +51,8 @@ def test_a_repository_carries_an_issue_template_directory(
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    forms = tracked(trees[repository], DIRECTORY)
-    assert forms, (
+    paths = tracked(trees[repository], DIRECTORY)
+    assert paths, (
         f"section 2 gives every tree {DIRECTORY}/ and this one tracks nothing"
-        " under it; " + by_hand(repository, FORMS)
+        " under it; " + by_hand(repository, LISTING)
     )

@@ -5283,3 +5283,18 @@ audit has no revision to compare against.
   section 3's `uv_build` boundary read, and CLAUDE.md's worktree removal
   and documentation-build read, each write the value their first fence
   sets as `${name:?}`.
+
+### `issue_template_test.py`'s summary line is what its assertion asks
+
+- **The question is the directory, not a form under it** (closes #732):
+  the assertion passes on any path `git ls-files` answers with under
+  `.github/ISSUE_TEMPLATE`, and `config.yml` — GitHub's chooser
+  configuration rather than a form — is such a path. The module's own
+  docstring gives the reason the question stops there: nothing in the
+  standard names a file under the directory.
+- **The alternative declined tightens the assertion to ask for a form**,
+  which needs a rule saying which files count as one. Neither section
+  2's directories bullet nor section 16's checklist names any file under
+  `ISSUE_TEMPLATE/`, so that rule would be written here rather than
+  found, and what the trees happen to track answers what they do rather
+  than what they owe.
