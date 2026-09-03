@@ -107,6 +107,26 @@ a repository's share of a cross-repository finding, it links to the
 issue here rather than restating it, and closes when that repository's
 pull request lands.
 
+**A decision taken here that removes an artifact owes a sweep of every
+tree for what asserts it.** A tag, a release page, a setting: what a
+tree says about the thing is false from the moment the decision lands,
+and that tree did not change to make it so, so no diff there is the
+occasion to re-read the sentence. The landing that removes the artifact
+is the one place where somebody has the fact in view as it stops being
+true, which is what makes the sweep the deciding issue's rather than the
+stale tree's.
+
+The sweep goes in the deciding diff where what asserts the artifact is
+in a tree that diff already touches, and otherwise in an issue filed
+with the deciding one, in the shape above. The rejected alternative
+leaves it to section 15's read-backs, which are run against the tree
+that did not change — by hand in an audit, or by the suite on its
+schedule — so they answer whenever that next comes round rather than at
+the landing. Each of them answers for a section of this file too, so a
+sentence about the artifact is compared with nothing unless a section
+names it. No command checks that a decision did this, which puts it
+among section 15's readings rather than its comparisons.
+
 Branch rules, rulesets and repository settings are *not* inherited from
 here either. On an organization plan without organization-wide rulesets
 they are applied per repository, which section 15 is how to verify.
