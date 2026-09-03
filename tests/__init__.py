@@ -58,9 +58,10 @@ shared is these parts:
   source, `rows` is how the suite reads it. A row added there is
   checked from the moment it is added, and a row nobody maintains
   fails against the trees instead of going quietly stale. A list of
-  that file is read the same way, `subjects` being how: section 10's
-  record of which trees carry which sentinel, section 14's paths, and
-  section 7's conventions.
+  that file is read the same way: `bulleted` returns its bullets, and
+  `subjects` keys them by the subject each opens with, which is how
+  section 10's record of which trees carry which sentinel, section 14's
+  paths and section 7's conventions are read.
 """
 
 from __future__ import annotations
@@ -468,6 +469,38 @@ def fenced(document: Path, opening: str, language: str) -> str:
     return "\n".join(blocks[0]) + "\n"
 
 
+def bulleted(document: Path, opening: str, closing: str) -> list[str]:
+    """Read the list between two lines, one string per bullet.
+
+    A bullet is its own line and every indented line after it, which is
+    how a bullet wraps at the margin, so a caller matching a pattern
+    against what comes back is asking about the bullet rather than about
+    where the file broke the line. `opening` and `closing` are the prose
+    either side of the list, so moving it within its section does not
+    need the caller changed.
+
+    :param document: the markdown file to read.
+    :param opening: a substring of the line the list follows.
+    :param closing: a substring of the line the list stops at.
+    :returns: the bullets, in the order the list gives them.
+    :raises LookupError: where either end is not found exactly once, or
+        the closing line comes before the opening one.
+    """
+    lines = document.read_text(encoding="utf-8").splitlines()
+    start = sole(document, lines, opening)
+    end = sole(document, lines, closing)
+    if end < start:
+        msg = f"{document.name} holds {closing!r} before {opening!r}"
+        raise LookupError(msg)
+    bullets: list[str] = []
+    for line in lines[start + 1 : end]:
+        if line.startswith("- "):
+            bullets.append(line)
+        elif line.startswith("  ") and bullets:
+            bullets[-1] += " " + line.strip()
+    return bullets
+
+
 def subjects(
     document: Path, opening: str, closing: str, pattern: re.Pattern[str] = SUBJECT
 ) -> dict[str, str]:
@@ -475,9 +508,7 @@ def subjects(
 
     A bullet's subject is what it is about, and a list whose subjects are
     paths is a list a test can act on; what the bullet then says about it
-    is the caller's to read. `opening` and `closing` are the prose either
-    side of it, so moving the list within its section does not need this
-    call changed.
+    is the caller's to read, `bulleted` being what reads the list itself.
 
     Every way of reading nothing here is an error rather than an empty
     answer, for the reason `rows` refuses a header it finds twice: a
@@ -500,23 +531,9 @@ def subjects(
         closing line comes first, a bullet between them names no subject
         the pattern reads, or two bullets carry the same one.
     """
-    lines = document.read_text(encoding="utf-8").splitlines()
-    start = sole(document, lines, opening)
-    end = sole(document, lines, closing)
-    if end < start:
-        msg = f"{document.name} holds {closing!r} before {opening!r}"
-        raise LookupError(msg)
-    # a bullet is its own line and every indented line after it, which
-    # is how a bullet wraps at the margin
-    bullets: list[str] = []
-    for line in lines[start + 1 : end]:
-        if line.startswith("- "):
-            bullets.append(line)
-        elif line.startswith("  ") and bullets:
-            bullets[-1] += " " + line.strip()
     read: list[tuple[str, str]] = []
     unread: list[str] = []
-    for bullet in bullets:
+    for bullet in bulleted(document, opening, closing):
         found = pattern.match(bullet)
         if found:
             read.append((found.group(1), found.group(2)))

@@ -5134,3 +5134,26 @@ audit has no revision to compare against.
   is a red cell here until the row goes.
 - **The rows cited #632 and #713, and both are closed**: an exemption
   outliving its issue points a reader at a question already answered.
+
+### A calendar row waiting on its adoption is carried by its debt issue
+
+- **A row the calendar names and no tree schedules passes for as long as
+  the issue carrying its debt is open** (closes #647): section 10 already
+  asks an adoption pull request to name that issue, and
+  `test_every_row_of_the_calendar_names_something_that_exists` reads the
+  reference out of the row's paragraph in *Which trees carry which
+  sentinel* and asks GitHub for its state. The exemption expires with the
+  issue rather than with a reader, and a row with no issue behind it
+  fails, which is the finding that direction of the test is kept for.
+- **The alternative declined leaves the red standing and a reader to
+  check the debt issue**, which is the half of section 15's audit no
+  command runs. What that costs is not one reading: the red stands for as
+  long as the rollout takes, every branch cut from `main` inherits it,
+  and each coder pays a second worktree and a second suite run to
+  establish that a red gate is not theirs.
+- **Reading an issue's state puts `tests/grid_test.py` among the modules
+  whose subject no checkout holds**: it asks for one document, and only
+  where a row is idle, so a calendar every tree answers to costs no call.
+  `tests/__init__.py`'s `bulleted` is what returns a list's bullets, one
+  string per bullet whatever column the file wrapped at, and `subjects`
+  keys those by the subject each opens with.

@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 import yaml
 
-from . import ROOT, by_hand, name, rows, subjects
+from . import ROOT, bulleted, by_hand, gh_json, name, rows, subjects
 from .workflows_test import workflows
 
 if TYPE_CHECKING:
@@ -114,6 +114,65 @@ def record() -> dict[str, list[str]]:
             raise LookupError(msg)
         out[sentinel] = [name(cell) for cell in cells]
     return out
+
+
+OWED = (
+    "Where a property of the tree decides membership it is stated below",
+    "### The aggregate job, and the required check",
+)
+"""The prose either side of section 10's paragraphs on the entries."""
+
+ROW = re.compile(r"^- \*\*`([^`]+)`")
+"""How one of those paragraphs names the calendar row it is about."""
+
+DEBT = re.compile(r"([\w.-]+/[\w.-]+#\d+) carries the debt")
+"""How it names the issue an adoption of that row waits on.
+
+Section 10 asks an adoption pull request to name the tree that owes the
+workflow and the issue that carries the debt, and this is the second of
+those two read back off the file, spelled as every cross-repository
+reference here is.
+"""
+
+
+def debts() -> dict[str, str]:
+    """Read the debt issue section 10 gives a row it schedules nowhere yet.
+
+    A paragraph naming a debt and no row is refused rather than dropped,
+    and so is a row given one twice, for the reason `subjects` refuses a
+    bullet it cannot read: a debt this fails to find is a row whose
+    exemption stops holding with nothing saying so.
+
+    :returns: each row against the issue its paragraph names, rows whose
+        paragraph names none left out.
+    :raises LookupError: where a paragraph names a debt issue and no
+        row, or two of them name the same row.
+    """
+    out: dict[str, str] = {}
+    for paragraph in bulleted(ROOT / "README.md", *OWED):
+        owed = DEBT.search(paragraph)
+        if not owed:
+            continue
+        row = ROW.match(paragraph)
+        if not row:
+            msg = f"section 10 gives {owed.group(1)} to no row of the calendar"
+            raise LookupError(msg)
+        if row.group(1) in out:
+            msg = f"section 10 gives {row.group(1)} a debt issue twice"
+            raise LookupError(msg)
+        out[row.group(1)] = owed.group(1)
+    return out
+
+
+def still_open(issue: str) -> bool:
+    """Ask GitHub whether an issue carrying a debt is still open.
+
+    :param issue: the reference, as section 10 spells it.
+    :returns: whether the API reports it open.
+    """
+    repository, number = issue.split("#")
+    state: str = gh_json(f"repos/{repository}/issues/{number}")["state"]
+    return state == "open"
 
 
 def triggers(workflow: Path) -> dict[str, Any]:
@@ -223,18 +282,30 @@ def test_every_row_of_the_calendar_names_something_that_exists(
     it the workflow, so for those nothing excuses a row added ahead of
     that landing. A sentinel whose first tree is another repository
     cannot land both halves in one pull request -- section 10 says the
-    row lands first -- so this test is the one expected red in between,
-    bounded by the issue filed against the tree that owes the schedule;
-    a red with no such issue behind it is a row for a workflow nobody
-    wrote, which is what this direction exists to catch, and this suite
-    gates nothing either way.
+    row lands first -- and what carries the row until the schedule
+    follows is the open issue its paragraph in *Which trees carry which
+    sentinel* names, which is the issue that section says an adoption
+    names. So the exemption is read here rather than left to a reader,
+    and it expires the day the issue closes: a row nothing schedules,
+    with no issue behind it or with a closed one, is the row for a
+    workflow nobody wrote that this direction exists to catch.
 
     :param trees: the checkouts.
     """
     scheduled = {workflow for root in trees.values() for workflow in schedules(root)}
     idle = sorted(workflow for workflow in calendar() if workflow not in scheduled)
     unknown = sorted(repository for repository in minutes() if repository not in trees)
-    assert not idle, f"section 10 rows no repository schedules: {idle}"
+    owed = debts()
+    unbounded = [workflow for workflow in idle if workflow not in owed]
+    assert not unbounded, (
+        f"section 10 rows no repository schedules, with no debt issue: {unbounded}"
+    )
+    settled = {
+        workflow: owed[workflow] for workflow in idle if not still_open(owed[workflow])
+    }
+    assert not settled, (
+        f"section 10 rows no repository schedules, their debt closed: {settled}"
+    )
     assert not unknown, f"section 10 minutes for no repository: {unknown}"
 
 
