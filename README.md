@@ -1572,6 +1572,26 @@ pre-commit.ci does not have — the lint workflow covers it. No
   section 9's and binds them alike, and the paste it guards against is
   made by a reader of whichever tree they have open.
 
+    **`CHANGELOG.md` and `RELEASE_NOTES.md` are outside it**, by
+    `exclude: ^(CHANGELOG|RELEASE_NOTES)\.md$`. Section 9 makes both
+    append-only, so the refused shape in an entry that has landed has no
+    repair and the tree carrying the hook over it no green state to
+    reach — what is left to such a tree is a `SKIP=` on every run, or no
+    hook at all. What the exclusion gives up is a file a reader pastes
+    from like any other prose, so what holds the rule there is somebody
+    reading the entry before it lands.
+
+    The narrower exclusion, keyed on the entries written before the
+    rule, is the alternative declined for being unavailable rather than
+    unwanted: `exclude:` selects files and pygrep reads whole ones.
+    Leaving the scope to each tree is the other, and what it costs is
+    what this bullet opens by asking for — the same entry in every
+    repository, rather than each deciding which of its own files the
+    rule reaches. `RELEASE_NOTES.md` is named in a tree that carries
+    none because `check-useless-excludes` asks an exclusion to match
+    some file the hook selects rather than each name in it, and section
+    2's table gives `CHANGELOG.md` to every tier.
+
     **What separates an exempt quote from a refused one is a property of
     the line, not of the fence around it.** Section 9 exempts a quote
     another language needs, which a reader tells apart by the fence a
@@ -1601,6 +1621,17 @@ pre-commit.ci does not have — the lint workflow covers it. No
     Widening for either of the first two wants a match that spans lines,
     which costs what is measured above: pygrep matching at once names the
     file's first line and prints everything up to the match.
+
+    **What a reader meeting the second of those does** — the report
+    being right about the line and wrong about the rule — is rewrite the
+    line rather than waive the hook. The value the reader supplies goes
+    into an assignment block above the fence and the program carries
+    `${name:?}`, which is what section 9's *The fence a split leaves
+    below is live* already asks of the lower fence and the shape
+    section 3's `uv_build` read is written in. Reflowing the program
+    onto one line is the other answer available and it is declined:
+    what decides whether it fits is 80 columns rather than the reading,
+    and a program too long for one line has nowhere left to go.
 
     Measured before it was proposed: this tree is clean under the hook
     and no other repository of the organization is, so unlike the two
