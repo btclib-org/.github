@@ -993,14 +993,15 @@ what it holds.
     each version. `--with` puts `<version>` ahead of the command it
     measures, so it cannot sit last as section 9 asks; the assignment
     stands in a block of its own, for the reason section 9's bullet
-    gives:
+    gives, and the block below it writes `${version:?}`, unset being
+    what an unfilled paste of that block alone supplies:
 
     ```shell
     version=<version>
     ```
 
     ```shell
-    uv run --no-project --with uv_build=="$version" python -c \
+    uv run --no-project --with uv_build=="${version:?}" python -c \
       "import uv_build; print(uv_build.build_sdist('<outdir>'))"
     ```
 
@@ -2263,12 +2264,15 @@ sight rather than weighed.
   — `no such file or directory: org` — except in a reader's directory
   holding a file of the placeholder's own name, where the `<` succeeds,
   the line runs, and the `>` writes one named for the word that follows.
-  At the end of the line there is nothing for `>` to open, so the line
-  writes nothing whatever the directory holds. Where the command's own
-  shape refuses the position — `--with <version>` precedes what it
-  measures — the placeholder's line is a block of its own, with nothing
-  under it for a paste that stops at the fence to reach; what that
-  stopping rests on is the bullet below.
+  A redirection that fails is the one command's rather than the line's,
+  so the other side of a pipeline runs whatever it did:
+  `git show v<version>:pyproject.toml | grep '^version'` reaches the
+  `grep`. At the end of the line there is nothing for `>` to open, so
+  the line writes nothing whatever the directory holds. Where the
+  command's own shape refuses the position — `--with <version>` precedes
+  what it measures — the placeholder's line is a block of its own, with
+  nothing under it for a paste that stops at the fence to reach; what
+  that stopping rests on is the bullet below.
 - **A line that writes goes in a fence of its own**, the parse error
   guarding only the line it sits on: an interactive shell answers it by
   discarding that line together with its trailing `&&` and reading the
@@ -2290,6 +2294,29 @@ sight rather than weighed.
   interactive shell does, where `-c` and a file abort. So a harness
   built on `cat block | zsh` reads as the aborting case and is the
   other one.
+- **The fence a split leaves below is live.** Nothing in it fails at the
+  parse, so a paste of it alone is a command and it runs with every
+  value the reader was to set empty. A placeholder in it settles
+  nothing: section 3's `uv_build` read carries `<outdir>` inside a
+  `python -c` program's string, which the unquoting bullet above
+  exempts, so what stops that line is its `${version:?}` rather than
+  the placeholder. It writes each of those values as `${name:?}` and
+  joins its lines with `&&`, and reads one of them at or above its
+  first line that writes, a guard below that line arriving too late.
+  Neither is the guard by itself: an interactive shell's `${name:?}`
+  abandons the one command it stands in, so a line under it that reads
+  nothing of the reader's runs anyway, and a chain with nothing failing
+  in it runs to its end. Chained, a `${name:?}` failure is the run-time
+  one the fence bullet above says a trailing `&&` short-circuits. Prose
+  beside the fence says what `:?` is doing there, since a reader who is
+  not told deletes it.
+- **A trailing `#` comment ends a chained line.** `zsh` leaves
+  `INTERACTIVE_COMMENTS` unset, so an interactive one takes `#` as an
+  ordinary word and what follows it as arguments. A chain whose `&&` is
+  followed by a comment has its right-hand side on that same line, so it
+  is complete where the file shows it continuing, and the lines under it
+  start a chain of their own. A chained fence carries its explanation in
+  the prose above it.
 - **One fact in one place.** Two files stating the same thing become two
   files disagreeing about it; the second points at the first.
 - **A package upstream of another does not name the one downstream.**

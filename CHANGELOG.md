@@ -5249,3 +5249,37 @@ audit has no revision to compare against.
   section 10's words for the sentence an adoption is asked for, and a
   paragraph citing an issue for something else -- the port of a row a
   tree already schedules -- names no debt.
+
+### Section 9 says what the fence it prescribes leaves below it
+
+- **Splitting a block leaves a fence that runs** (closes #754): nothing
+  in it fails at the parse, so a paste of that fence alone is a command
+  and it runs with every value the reader was to set empty. A
+  placeholder in it settles nothing, section 3's `uv_build` read
+  carrying one inside a `python -c` program's string that the section
+  exempts from unquoting. The section asks such a fence to write each of
+  those values `${name:?}`, to join its lines with `&&` and to read one
+  of them at or above its first line that writes, and gives which
+  failure each guard answers — the expansion's is a run-time one, which
+  the chain carries, where the placeholder's is the parse error the
+  section already describes taking its own `&&` away with the discarded
+  line.
+- **The rejected alternative is either guard on its own**: an
+  interactive shell's `${name:?}` abandons the one command it stands in,
+  so a line under it that reads nothing of the reader's runs regardless,
+  and a chain with nothing failing in it runs to its end on empty
+  values.
+- **A trailing `#` comment is an ordinary word to an interactive `zsh`**
+  (issue #749), so a chain whose `&&` is followed by one is complete on
+  that line and the lines under it start a chain of their own. A chained
+  fence now carries its explanation in the prose above it, which is what
+  CLAUDE.md's fast-forward of the primary checkout does.
+- **A redirection that fails is the one command's rather than the
+  line's**, so the other side of a pipeline runs whatever it did. That
+  is what a placeholder glued into a larger unquoted word leaves
+  reachable, and #751 is filed against the tagging block whose second
+  line has that shape.
+- **This tree's own second fences take the guard** (closes #754):
+  section 3's `uv_build` boundary read, and CLAUDE.md's worktree removal
+  and documentation-build read, each write the value their first fence
+  sets as `${name:?}`.

@@ -51,7 +51,7 @@ Where the checkout has to be current rather than merely readable, a
 fast-forward of a clean `main` brings it up:
 
 ```shell
-git fetch origin && git merge --ff-only origin/main   # clean main only
+git fetch origin && git merge --ff-only origin/main
 ```
 
 That writes no commit, switches no branch and runs no hook, so it is on
@@ -105,9 +105,11 @@ Removing the worktree is part of finishing, and it stands in a block of
 its own: the block above ends in a placeholder, and a shell that
 discards that line as a parse error reads the next as a fresh command —
 which, in one block, is this line against whatever `$WT` already held.
+Standing alone it is a second fence, so `${WT:?}` is what it writes:
+with no `$WT` set the expansion fails and the removal does not run.
 
 ```shell
-git worktree remove --force "$WT"
+git worktree remove --force "${WT:?}"
 ```
 
 **Never `git stash` in a worktree either: `refs/stash` is shared.** A
@@ -230,14 +232,16 @@ Do not use Fable unless explicitly instructed.
   it names, so it cannot sit last as section 9 asks; the assignment
   stands in a block of its own, its own placeholder ending the line
   being the parse error a shell discards, reading the read below as a
-  fresh command against whatever `$checkout` a paste has already set:
+  fresh command against whatever `$checkout` a paste has already set,
+  which `${checkout:?}` refuses where a paste has set nothing:
 
   ```shell
   checkout=<checkout>
   ```
 
   ```shell
-  git -C "$checkout" grep -l 'include} \.\./\.\./CHANGELOG\.md' origin/main -- docs/
+  git -C "${checkout:?}" grep -l 'include} \.\./\.\./CHANGELOG\.md' \
+    origin/main -- docs/
   ```
 
   answers in each of the five and nothing in `.github`, `bbt` or
