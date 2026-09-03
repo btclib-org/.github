@@ -2320,15 +2320,24 @@ sight rather than weighed.
   — `no such file or directory: org` — except in a reader's directory
   holding a file of the placeholder's own name, where the `<` succeeds,
   the line runs, and the `>` writes one named for the word that follows.
+  A placeholder inside a path puts that word at the root of the
+  filesystem: `orgs/<org>/installations` gives the `>` the target
+  `/installations`, so what a paste creates is not in the directory the
+  reader is standing in and a sweep that lists that directory reports
+  the block as clean. `/` alone is not that case — the open fails as a
+  directory wherever it runs, and one command's redirections are
+  performed in order, so the `>` after it in `repos/<org>/<repo>` is
+  never reached and that command writes nothing.
   A redirection that fails is the one command's rather than the line's,
   so the other side of a pipeline runs whatever it did:
   `git show v<version>:pyproject.toml | grep '^version'` reaches the
   `grep`. At the end of the line there is nothing for `>` to open, so
   the line writes nothing whatever the directory holds. Where the
   command's own shape refuses the position — `--with <version>` precedes
-  what it measures — the placeholder's line is a block of its own, with
-  nothing under it for a paste that stops at the fence to reach; what
-  that stopping rests on is the bullet below.
+  what it measures, and an endpoint's path continues past `<org>` — the
+  placeholder's line is a block of its own, with nothing under it for a
+  paste that stops at the fence to reach; what that stopping rests on is
+  the bullet below.
 - **A line that writes goes in a fence of its own**, the parse error
   guarding only the line it sits on: an interactive shell answers it by
   discarding that line together with its trailing `&&` and reading the
@@ -4257,13 +4266,20 @@ answers 401.
 **What connects a repository to Read the Docs is the organization-wide
 `read-the-docs-community` GitHub App, not a per-repository webhook**, so
 what a repository records on the GitHub side is the installation and an
-empty hook list:
+empty hook list. Both names stand in a block of their own, the
+endpoints' paths continuing past them being the position section 9
+refuses:
 
 ```shell
-gh api orgs/<org>/installations \
+org=<org>
+repo=<repo>
+```
+
+```shell
+gh api "orgs/${org:?}/installations" \
   --jq '.installations[] | select(.app_slug == "read-the-docs-community")
         | [.app_slug, .repository_selection]'
-gh api repos/<org>/<repo>/hooks --jq length
+gh api "repos/${org:?}/${repo:?}/hooks" --jq length
 ```
 
 `repository_selection: all` is what makes one installation the
@@ -5200,7 +5216,17 @@ for r in <every repository>; do
          || w=unreadable; }
   printf '%s\trelease=%s\n' "$r" "$w"
 done
-curl -s https://pypi.org/pypi/<name>/json | python3 -c 'import json, sys
+```
+
+The index's path continues past the name, which is the position section
+9 refuses, so it stands in a block of its own:
+
+```shell
+name=<name>
+```
+
+```shell
+curl -s "https://pypi.org/pypi/${name:?}/json" | python3 -c 'import json, sys
 d = json.load(sys.stdin).get("info")
 if d is None:
     print("absent from the index")

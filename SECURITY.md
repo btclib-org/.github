@@ -17,10 +17,19 @@ only the maintainers can see, the discussion stays private until an
 advisory is published, and it is a thread you are in — what is asked and
 what is fixed reaches you without anybody having to remember to write.
 Whether that route is open on a given repository is a setting rather
-than a file:
+than a file. The repository's name ends the first block, which is what
+section 9 of
+[the standard](https://github.com/btclib-org/.github#9-prose-comments-and-docstrings)
+asks where a command's own path continues past a placeholder, and
+`${repo:?}` stops the second block, pasted on its own, from asking about
+a repository nobody named.
 
 ```shell
-gh api repos/btclib-org/<repo>/private-vulnerability-reporting
+repo=<repo>
+```
+
+```shell
+gh api "repos/btclib-org/${repo:?}/private-vulnerability-reporting"
 ```
 
 If it answers `{"enabled":false}`, or you have no GitHub account, or you

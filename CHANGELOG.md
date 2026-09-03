@@ -5434,3 +5434,32 @@ audit has no revision to compare against.
   reader does — the value into an assignment block above the fence and
   `${name:?}` in the program — and declines reflowing onto one line,
   which 80 columns decides rather than the reading.
+
+### A placeholder inside a path sends the paste's write to the root
+
+- **Section 9's position rule names the word after the placeholder that
+  begins with `/`** (closes #725): `orgs/<org>/installations` gives the
+  `>` closing `<org>` the target `/installations`, so a paste made
+  before the placeholder is filled in reaches for a file at the root of
+  the filesystem rather than in the directory the reader is standing in.
+  A sweep answering with the files a fresh run directory gained reports
+  such a block as clean, which is the direction that turns a sweep into
+  a clean bill of health.
+- **`repos/<org>/<repo>` is not that case, and section 9 says so beside
+  the sentence that names it**: the `>` closing `<org>` takes `/`, whose
+  open fails as a directory wherever it runs, and one command's
+  redirections are performed in order, so the `>` after it is never
+  reached. What decides is whether the word is a path something can be
+  created at.
+- **`SECURITY.md`'s private-reporting read, section 11's Read the Docs
+  installations block and section 15's index read move their placeholder
+  into an assignment of its own**: an endpoint's path continues past the
+  placeholder, so it cannot sit last inside that command, and the
+  assignment standing in its own block is what section 9 already leaves
+  for that. `${repo:?}`, `${org:?}` and `${name:?}` below it stop a
+  paste of the second block alone rather than let it read an endpoint
+  with the value empty.
+- **The sweep that measures this class reads the shells' stderr beside
+  the run directory**: macOS mounts `/` read-only, so an absolute target
+  is a message on stderr and never a file the run directory could
+  report. That is the detector the three lines above were invisible to.
