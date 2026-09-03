@@ -5397,3 +5397,14 @@ audit has no revision to compare against.
   `CONTRIBUTING.md`'s gate and its releases read, and `REPOSITORY.md`'s
   plan read, which states its answer on a line of its own as the rest of
   that file does.
+
+### Two `BACKLOG` rows expire on `portanode`'s converged copy
+
+- **`portanode`'s `REPOSITORY.md` carries `## What this file passes
+  over` and not the claim section 11 rejects** (closes #768): the cells
+  `tests/scope_test.py` asks of it pass, and a strict `xfail` makes a
+  passing cell a failing one, so the rows keyed on #551 and #565 come
+  out — an exemption expiring as it is meant to rather than a defect in
+  `BACKLOG`.
+- **Neither issue closes with its row**: a row excuses one cell of one
+  test rather than standing for the issue it is keyed on.
