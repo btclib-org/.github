@@ -357,14 +357,14 @@ rule with no subject here and a rule with a subject that is declined,
 which is the difference an alignment finding has to state.
 
 **A tier is a floor, not a ceiling.** Above it, a repository carries
-what its own practice needs: `portanode` cuts a signed tag and a GitHub
-release by hand, and carries the `RELEASING.md` that says how, which its
-tier does not ask for. Below it, a repository short of what its tier
-binds is a gap, filed here. A gap with the reason beside it, where a
-reader meets the repository — its `CLAUDE.md` or its `REPOSITORY.md` —
-is a decision rather than a gap; a sentence that declines a rule and
-gives no reason is a gap with a sentence in front of it, this file's
-own *a rule with no reason beside it* read from the other side.
+what its own practice needs: `portanode` carries the `RELEASING.md`
+that says how a release is cut by hand, which its tier does not ask
+for. Below it, a repository short of what its tier binds is a gap,
+filed here. A gap with the reason beside it, where a reader meets the
+repository — its `CLAUDE.md` or its `REPOSITORY.md` — is a decision
+rather than a gap; a sentence that declines a rule and gives no reason
+is a gap with a sentence in front of it, this file's own *a rule with
+no reason beside it* read from the other side.
 
 | repository | tier |
 | --- | --- |
