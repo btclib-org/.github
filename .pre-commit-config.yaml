@@ -132,6 +132,24 @@ repos:
         language: pygrep
         entry: "[A-Za-z0-9]-$"
         types: [markdown]
+      # a placeholder that is a whole argument, in quotes. Section 9 of
+      # README.md is the rule and what the quoting costs a paste;
+      # section 4 is where this hook is, which quotes it exempts, and
+      # the three things this pattern cannot see. The discrimination is
+      # read off the line and not off the fence around it, because a
+      # fence-aware pattern has to consume everything before the match
+      # and pygrep then reports the file's first line and prints the
+      # whole prefix. A shell assignment takes no space around its `=`,
+      # so a line carrying one is another language's value; and a quote
+      # inside a quote of the other kind is a nested program's -- both
+      # read off one line, which is also where the three blind spots
+      # come from. Same `\x20` as above, and the same reason
+      - id: unquoted-placeholder
+        name: a placeholder standing as a whole argument is unquoted
+        language: pygrep
+        entry: |-
+          ^(?![\x20\t]*[A-Za-z_][A-Za-z0-9_.-]*[\x20\t]+=[\x20\t])(?:(?:[^"'\n]|'[^'\n]*')*"<[^<>"'`\n]*>"|(?:[^"'\n]|"[^"\n]*")*'<[^<>"'`\n]*>')
+        types: [markdown]
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: v3.9.6
     hooks:
