@@ -5097,3 +5097,30 @@ audit has no revision to compare against.
   `root_files_test.py`**: that module reads section 2's root-files table
   and its tier column, where this is a directory the same section gives
   every tier in prose.
+
+### Section 10 calendars the `wheel-reproducibility` sentinel
+
+- **A tree that ships a compiled wheel has a row asking whether its
+  build is deterministic** (issue #698): `wheel-reproducibility` takes
+  Sunday 02, at the head of the security rows the calendar ends with,
+  and its entry names `btclib-secp256k1`. The condition is the compiled
+  wheel and not the tree: section 12 puts that file outside the property
+  `sdist-rebuild` re-derives, and a wheel with nothing compiled in it is
+  the checkout's own files under the member metadata the backend fixes.
+- **The slot is one that seats the row beside its own family rather than
+  one standing free inside another's**: Tuesday 03 sits between two
+  rows about the depth of a suite and Friday 03 between two platform
+  rows, so the band grows downward and the row takes the instant that
+  falls against the security block. The table's order is the record's
+  order and the badge row's too, and section 10 says which instant a
+  new row may take.
+- **The band's paragraph states the direction and names no hour**: the
+  hours it gave as the band's ends and as the next one to take are
+  hours the table holds, where what decides is the hour below the
+  band's earliest.
+- **`btclib-secp256k1` schedules the workflow on Tuesday 05, which is
+  `integration-bitcoind`'s slot**: that instant was picked against the
+  tree's own file rather than against this calendar, so
+  `test_every_cron_is_the_instant_the_calendar_names` names it until the
+  port lands. btclib-org/btclib-secp256k1#538 carries that port, and the
+  badge this row's position places with it.
