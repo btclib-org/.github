@@ -206,12 +206,9 @@ is what to use when a review leaves more than one.
 The author may apply one directly through the interface, which is why a
 suggestion is offered where a description would do.
 
-Two properties make this the right shape here and not merely a
-convenience: the commit GitHub writes is signed with its web-flow key,
-and `main` requires a valid signature rather than one particular
-signer; and it lands as a commit of its own on top of the branch,
-which is the shape section 11 of the standard asks a correction to take,
-so the shas the review is attached to survive it.
+What makes this the right shape here and not merely a convenience is the
+signature: the commit GitHub writes carries its web-flow key, and `main`
+requires a valid signature rather than one particular signer.
 
 Two properties decide when not to:
 
@@ -434,10 +431,10 @@ before its child, and otherwise the oldest.
 
 ## Re-review
 
-The delta is `git diff <old-sha>..<new-sha>`, and there is one to read
-because section 11 of the standard has corrections added as commits
-rather than amended in: the shas the review was attached to are still
-there.
+The delta is `git diff <old-sha>..<new-sha>`, and the old sha is the one
+the previous round's verdict named. An amend and a rebase each leave it
+off the branch, so it is read from that verdict rather than from the
+branch's history.
 
 - **Resolve every thread the author addressed, and only those.** A
   thread they declined stays open only if it is still blocking; where

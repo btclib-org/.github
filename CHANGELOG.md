@@ -5054,3 +5054,23 @@ audit has no revision to compare against.
   with an earlier quote of its own kind goes unreported, the pattern
   crossing a quoted run of the other kind only. Widening for either of
   the first two wants the match that spans lines declined above.
+
+### A re-review's delta starts at the sha the verdict named
+
+- **The starting point is read from the previous round's verdict and not
+  from the branch** (closes #592): an amend and a rebase each leave that
+  sha off the branch, so a re-review that looks for it in the branch's
+  history looks where it is not. What *Re-review* opened with instead
+  was section 11 of the standard having a correction added as a commit
+  rather than amended in, so that the shas a review was attached to were
+  still there; section 11's *Review* states the opposite — an amend and
+  a commit of its own both move the head, and a review describes the sha
+  it names rather than the branch.
+- **A `suggestion` block is the right shape here for the signature on
+  the commit GitHub writes** (closes #592): that key is a valid one and
+  `main` asks for a valid signature rather than for one particular
+  signer. The property named beside it — that the block lands as a
+  commit of its own, which is the shape section 11 asks a correction to
+  take, so the shas a review is attached to survive it — hangs on the
+  same replaced rule, and offers the surviving sha as something that
+  shape buys.
