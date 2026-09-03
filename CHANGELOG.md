@@ -5408,3 +5408,29 @@ audit has no revision to compare against.
   `BACKLOG`.
 - **Neither issue closes with its row**: a row excuses one cell of one
   test rather than standing for the issue it is keyed on.
+
+### Section 4 gives the unquoted-placeholder hook a scope and a remedy
+
+- **`CHANGELOG.md` and `RELEASE_NOTES.md` are outside the hook**
+  (closes #721): section 9 makes both append-only, so the refused shape
+  in an entry that has landed has no repair and the tree carrying the
+  hook over it no green state to reach. Section 4 states the exclusion
+  and what it gives up — a file a reader pastes from like any other
+  prose, held to the rule by somebody reading a new entry rather than by
+  a run.
+- **The narrower exclusion, keyed on the entries written before the
+  rule, is declined for being unavailable**: `exclude:` selects files
+  and pygrep reads whole ones, so there is nothing to write it in.
+  Leaving the scope to each tree is the other alternative declined, one
+  entry every repository carries being what section 4 puts in its place.
+- **`RELEASE_NOTES.md` is named in a tree that carries none**:
+  `check-useless-excludes` asks an exclusion to match some file the hook
+  selects rather than each name in it, and section 2's table gives
+  `CHANGELOG.md` to every tier.
+- **A nested program written across lines is rewritten rather than
+  waived** (closes #723): the report on its continuation line is right
+  about the line and wrong about the rule, the quote that makes the
+  string another language's sitting above it. Section 4 says what the
+  reader does — the value into an assignment block above the fence and
+  `${name:?}` in the program — and declines reflowing onto one line,
+  which 80 columns decides rather than the reading.
