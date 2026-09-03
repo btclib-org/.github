@@ -5124,3 +5124,13 @@ audit has no revision to compare against.
   `test_every_cron_is_the_instant_the_calendar_names` names it until the
   port lands. btclib-org/btclib-secp256k1#538 carries that port, and the
   badge this row's position places with it.
+
+### `BACKLOG` excuses no tree from the issue-template question
+
+- **`bbt`, `btclib-benchmarks` and `btclib-org.github.io` each track
+  `.github/ISSUE_TEMPLATE/`, and no row excuses them from
+  `test_a_repository_carries_an_issue_template_directory`** (closes
+  #731): a row is a strict expected failure, so a tree that catches up
+  is a red cell here until the row goes.
+- **The rows cited #632 and #713, and both are closed**: an exemption
+  outliving its issue points a reader at a question already answered.

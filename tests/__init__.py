@@ -327,21 +327,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-secp256k1",
         ),
     ),
-    # ISSUE_TEMPLATE/: two issues rather than one, 713 being the tree
-    # 632's measurement did not reach
-    (
-        632,
-        "test_a_repository_carries_an_issue_template_directory",
-        (
-            "bbt",
-            "btclib-benchmarks",
-        ),
-    ),
-    (
-        713,
-        "test_a_repository_carries_an_issue_template_directory",
-        ("btclib-org.github.io",),
-    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
