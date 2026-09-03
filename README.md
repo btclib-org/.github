@@ -1375,10 +1375,17 @@ pre-commit.ci does not have — the lint workflow covers it. No
     upstream clone in the loop for a tag to be missing from.
 - **prose and markup** — `markdownlint-cli2`, `prettier` (yaml and
   jsonc), `taplo-format`, `yamllint`.
-- **schemas** — `check-dependabot` and `check-readthedocs`, because a
-  typo in either file is not an error to the service that reads it: it
-  silently does nothing, and the evidence is a pull request that never
-  arrives.
+- **schemas** — `check-dependabot`, `check-readthedocs`,
+  `check-github-issue-config` and `check-github-issue-forms`, because a
+  typo in any of those files is not an error to the service that reads
+  it: it silently does nothing. `dependabot.yml`'s evidence is a pull
+  request that never arrives; an issue form's is the *New issue* page,
+  where the reader is a person and not a run. The issue pair selects
+  narrowly, both hooks carrying `types: [yaml]`: `config.yml` under that
+  spelling for the first, the directory's yaml that is neither
+  `config.yml` nor `config.yaml` for the second, a markdown template for
+  neither. `check-hooks-apply` above fails a hook that matches no file,
+  so each goes where `ISSUE_TEMPLATE/` holds what it selects.
 - **workflows** — `actionlint` and `zizmor`, both at zero findings, both
   required to stay there. actionlint via its Python packaging, the
   upstream hook's only non-docker id needing a go toolchain everywhere.
