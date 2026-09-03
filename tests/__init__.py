@@ -297,16 +297,6 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
-        551,
-        "test_the_settings_file_does_not_claim_to_be_the_whole_of_them",
-        ("portanode",),
-    ),
-    (
-        565,
-        "test_the_settings_file_says_what_it_passes_over",
-        ("portanode",),
-    ),
-    (
         553,
         "test_main_requires_a_check_and_the_rest_of_classic_protection",
         ("btclib-org.github.io",),
