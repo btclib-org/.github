@@ -188,14 +188,14 @@ Do not use Fable unless explicitly instructed.
   is what github.com/btclib-org renders. Treat a change to it as a change
   to the organization's front page, because it is one.
 - **The community health files are inherited, not copied.**
-  `CODE_OF_CONDUCT.md`, `SECURITY.md`, `PULL_REQUEST_TEMPLATE.md` and
-  `.github/ISSUE_TEMPLATE/` here are what GitHub shows for a *public*
-  repository of the organization that has none of its own, and section 2
-  of `README.md` is what says which repositories have one. The
-  inheritance is display only: nothing is written into those
-  repositories and no hook reads it, so a repository that wants the file
-  gated keeps its own. A change here is a change to what a reader of
-  every repository inheriting it sees.
+  `CODE_OF_CONDUCT.md`, `SECURITY.md`,
+  `.github/PULL_REQUEST_TEMPLATE.md` and `.github/ISSUE_TEMPLATE/` here
+  are what GitHub shows for a *public* repository of the organization
+  that has none of its own, and section 2 of `README.md` is what says
+  which repositories have one. The inheritance is display only: nothing
+  is written into those repositories and no hook reads it, so a
+  repository that wants the file gated keeps its own. A change here is a
+  change to what a reader of every repository inheriting it sees.
 - **A branch touching the shared half of `CONTRIBUTING.md` or `REVIEWING.md` —
   the text above `## This repository in particular` — owes
   `tests/verbatim_test.py`'s `EXPECTED_DRIFT` an entry and the issue it names,

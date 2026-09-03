@@ -833,6 +833,26 @@ or a build backend given no module to build. Where there is no package a
 bullet has no subject: a floor is over the rules whose subject a tree
 holds, and does not supply one.
 
+**`PULL_REQUEST_TEMPLATE.md` sits under `.github/`.** GitHub reads the
+file from `.github/`, from the root or from `docs/`, in that order — in
+a repository's own tree, and in this one for a repository that carries
+none of its own — so where it goes is this file's to say and not the
+forge's, and a copy under `.github/` is the one served whatever else a
+tree holds. It goes there because it is the forge's input rather than a
+document a reader opens, which is what `dependabot.yml` and
+`ISSUE_TEMPLATE/` beside it in the bullet above are as well. What that
+costs is the reader who would have met the template in the repository
+listing, the same trade this section makes for the package directory
+under `src/`.
+
+The rejected alternative is the file wherever GitHub reads one, which
+leaves two trees of one organization differing in shape for nothing and
+cannot be read back off the forge:
+`repos/<org>/<repo>/community/profile` answers
+`files.pull_request_template.url` with this repository's copy for a tree
+that has none of its own, so that endpoint cannot tell a repository
+carrying no template from one carrying its own.
+
 **The package directory sits under `src/`.** A package at the
 repository root is on `sys.path` whenever anything runs from that
 root, so an import can resolve to the checkout instead of to the
