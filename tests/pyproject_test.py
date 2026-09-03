@@ -247,18 +247,22 @@ def test_every_dependency_group_is_a_row_of_section_1(
 
 
 @pytest.mark.tier(Tier.PYTHON)
-def test_the_uv_floor_is_not_above_what_dependabot_bundles(
+def test_the_uv_floor_is_what_dependabot_bundles(
     repository: str,
     trees: dict[str, Path],
     pyprojects: dict[str, dict[str, Any]],
 ) -> None:
-    """Section 1: every tree with a lock names a floor, capped at the ceiling.
+    """Section 1: every tree with a lock names a floor, and it is the ceiling.
 
     A floor above the pin in `dependabot-core`'s `uv/Dockerfile` makes
     every lock update the `uv` ecosystem attempts a silent no-op --
     `tool_version_not_supported`, with no pull request and nothing red
     -- so a repository past this line is one whose Dependabot uv updates
-    are not running, and finds out from no error anywhere. A tree with
+    are not running, and finds out from no error anywhere. A floor below
+    that pin admits a uv older than the one the updater writes the lock
+    with, which is the rewrite section 1 sets the key against; a tree
+    at the pin goes red the day the pin moves, and the floor bump that
+    answers the red is what the move already owed it. A tree with
     no floor at all is not exempt from that failure, only unmeasured
     against it: section 1 owes the key to every tree that commits
     `uv.lock`, so a repository holding one and naming none fails here
@@ -294,13 +298,20 @@ def test_the_uv_floor_is_not_above_what_dependabot_bundles(
     )
     floor = tuple(int(part) for part in match["version"].split("."))
     ceiling = tuple(int(part) for part in bundled.split("."))
+    reading = (
+        by_hand(repository, "grep -n required-version pyproject.toml")
+        + "; dependabot-core's own pin: gh api -H"
+        " 'Accept: application/vnd.github.raw' " + UV_DOCKERFILE
+    )
     assert floor <= ceiling, (
         f"required-version is {declared!r}, above the uv dependabot-core"
         f" bundles ({bundled}), so {repository}'s uv-driven Dependabot"
-        " updates are not running; "
-        + by_hand(repository, "grep -n required-version pyproject.toml")
-        + "; dependabot-core's own pin: gh api -H"
-        " 'Accept: application/vnd.github.raw' " + UV_DOCKERFILE
+        " updates are not running; " + reading
+    )
+    assert floor >= ceiling, (
+        f"required-version is {declared!r}, below the uv dependabot-core"
+        f" bundles ({bundled}), so {repository} still admits a uv older"
+        " than the one its lock updates are written with; " + reading
     )
 
 

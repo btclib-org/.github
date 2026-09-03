@@ -5030,7 +5030,7 @@ match. Reading the matrix against the classifiers is this command's
 work: what the suite compares them with is the floor and the pin, and
 no workflow.
 
-Section 1's uv floor, and the ceiling it may not exceed:
+Section 1's uv floor, and the ceiling it is set at:
 
 ```shell
 if d=$(gh api repos/dependabot/dependabot-core/contents/uv/Dockerfile \
@@ -5068,9 +5068,12 @@ carrying a default for the one outside it.
 `lock=yes` names a tree that owes the floor; `floor=` empty beside it is
 the finding, a tree committing a lock with nothing capping the uv that
 reads it. `lock=no` owes no floor, so an empty `floor=` beside it is
-silent rather than a finding, whatever the ceiling is that day. A floor
-below the ceiling is safe by section 1's own argument, and only one above
-it is the other finding this loop can print. `lock=unreadable` is
+silent rather than a finding, whatever the ceiling is that day. A `floor=`
+that is not `ceiling=` is a finding on either side of it, section 1's
+sentence being that the floor is set at the ceiling rather than below
+it. Below the ceiling, the tree still admits a uv older than the one
+its lock updates are written with. Above it, the refusal `ceiling=`
+names has already stopped that tree's uv updates. `lock=unreadable` is
 neither: the call itself failed, told apart from a genuine `no` by the
 `(HTTP 404)` `--silent` would otherwise swallow, and `floor=` beside it
 answers nothing until the sweep is run again. `floor=unreadable` says it
