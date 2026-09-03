@@ -5536,3 +5536,22 @@ audit has no revision to compare against.
   bullet's mechanism reaches it too, and `btclib-secp256k1`'s
   `detect-secrets` fence carries the shape this issue's second box
   fixes.
+
+### `scope_test.py` asks a copy for section 11's three limbs too
+
+- **A new test asks a `REPOSITORY.md` for the clause naming section 16's
+  checklist, a section stating a rule, and a behaviour one rests on, in
+  the standard's own words** (closes #782): the two tests already there
+  read the claim a copy rejects and the heading a copy passes under,
+  neither reaching the sentence between them that names what the file's
+  scope is drawn from. `limbs` in `tests/scope_test.py` reads that
+  sentence's em-dashed clause off `README.md` the way `rejected` and
+  `heading` read their own strings, anchored on the paragraph's bold
+  opening since it carries no backtick, and folds and compares it as one
+  string, so a copy naming the same three things in another order or
+  with its own connective fails as section 11 says it must.
+- **A copy may link a limb to the section it names without failing
+  this**: `unlinked` strips the brackets a `[text](url)` or `[text][ref]`
+  puts around a limb's words before the comparison, since those words
+  are what section 11 asks a copy to carry and the link around them is
+  decoration rather than a rewording.
