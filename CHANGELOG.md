@@ -5224,3 +5224,28 @@ audit has no revision to compare against.
   #448**, which expires as each bumps its own floor: the strict expected
   failure turns a tree catching up into a red cell here, so the exemption
   is read again rather than left standing.
+
+### A row's debt issue is read qualified or bare
+
+- **`tests/grid_test.py` reads a debt sentence in either spelling, and
+  resolves a bare reference against this tracker** (closes #738): section
+  9 asks the qualifier of a reference to another repository, so a debt
+  issue of this tree's own is correct prose written `#N`. Reading the
+  qualified spelling alone dropped such a row out of the exemption, and
+  `test_every_row_of_the_calendar_names_something_that_exists` reported
+  it as naming no debt issue for a paragraph that names one.
+- **That cell's message names the pattern it searched section 10's
+  paragraphs for**, which is what separates a debt sentence that is
+  missing from one spelled a way the pattern does not read. The
+  exemption still fails closed, which is what section 10 asks of it: a
+  sentence this cannot read excuses no row.
+- **The alternative declined has section 10 require the qualifier for
+  this tracker too, so that the pattern keeps working**: what section 9
+  gives as the reason to qualify is that a bare `#123` resolves inside
+  the repository it is written in, which is where a reference to this
+  tracker wants to resolve. Narrowing what the standard permits to what
+  one regex reads puts the implementation ahead of the product.
+- **`carries the debt` stays the whole of the phrase read**: those are
+  section 10's words for the sentence an adoption is asked for, and a
+  paragraph citing an issue for something else -- the port of a row a
+  tree already schedules -- names no debt.

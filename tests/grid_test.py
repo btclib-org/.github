@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 import yaml
 
-from . import ROOT, bulleted, by_hand, gh_json, name, rows, subjects
+from . import ORG, ROOT, SELF, bulleted, by_hand, gh_json, name, rows, subjects
 from .workflows_test import workflows
 
 if TYPE_CHECKING:
@@ -125,14 +125,30 @@ OWED = (
 ROW = re.compile(r"^- \*\*`([^`]+)`")
 """How one of those paragraphs names the calendar row it is about."""
 
-DEBT = re.compile(r"([\w.-]+/[\w.-]+#\d+) carries the debt")
+DEBT = re.compile(r"([\w.-]+/[\w.-]+)?#(\d+) carries the debt")
 """How it names the issue an adoption of that row waits on.
 
 Section 10 asks an adoption pull request to name the tree that owes the
 workflow and the issue that carries the debt, and this is the second of
-those two read back off the file, spelled as every cross-repository
-reference here is.
+those two read back off the file. The qualifier is optional because
+section 9 makes it so: it requires one of a reference to another
+repository, and a debt issue of this tree's own tracker resolves
+without one. `carries the debt` is section 10's own phrase, and is
+what keeps out the other issues a paragraph cites: an issue carrying a
+row's *port* is named where a tree already schedules that row, and is
+no reason to excuse an idle one.
 """
+
+
+def reference(owed: re.Match[str]) -> str:
+    """Qualify what `DEBT` read, so that one shape reaches the API.
+
+    :param owed: the match.
+    :returns: the reference, this repository filled in where section 10
+        wrote it bare.
+    """
+    repository = owed.group(1) or f"{ORG}/{SELF}"
+    return f"{repository}#{owed.group(2)}"
 
 
 def debts() -> dict[str, str]:
@@ -143,8 +159,8 @@ def debts() -> dict[str, str]:
     bullet it cannot read: a debt this fails to find is a row whose
     exemption stops holding with nothing saying so.
 
-    :returns: each row against the issue its paragraph names, rows whose
-        paragraph names none left out.
+    :returns: each row against the issue its paragraph names, qualified,
+        rows whose paragraph names none left out.
     :raises LookupError: where a paragraph names a debt issue and no
         row, or two of them name the same row.
     """
@@ -155,19 +171,19 @@ def debts() -> dict[str, str]:
             continue
         row = ROW.match(paragraph)
         if not row:
-            msg = f"section 10 gives {owed.group(1)} to no row of the calendar"
+            msg = f"section 10 gives {reference(owed)} to no row of the calendar"
             raise LookupError(msg)
         if row.group(1) in out:
             msg = f"section 10 gives {row.group(1)} a debt issue twice"
             raise LookupError(msg)
-        out[row.group(1)] = owed.group(1)
+        out[row.group(1)] = reference(owed)
     return out
 
 
 def still_open(issue: str) -> bool:
     """Ask GitHub whether an issue carrying a debt is still open.
 
-    :param issue: the reference, as section 10 spells it.
+    :param issue: the reference, qualified, as `debts` returns it.
     :returns: whether the API reports it open.
     """
     repository, number = issue.split("#")
@@ -269,6 +285,39 @@ def test_every_repository_that_schedules_anything_has_a_minute(
     assert not without, f"scheduling repositories with no minute: {without}"
 
 
+def test_a_debt_sentence_is_read_qualified_or_bare() -> None:
+    """Either spelling of a debt sentence, and what is not one at all.
+
+    Section 9 asks the qualifier of a reference to another repository,
+    so a debt issue of this tree's own is correct prose written bare: a
+    bare reference resolves to this repository, and a qualified one
+    keeps the repository it names. A sentence citing an issue for
+    anything but the debt, and one naming the debt with no issue, are
+    read as naming none, which is what leaves the exemption failing
+    closed.
+    """
+    read = {
+        "btclib-org/.github#558 carries the debt until that tree schedules": (
+            "btclib-org/.github#558"
+        ),
+        "btclib-org/btclib-node#42 carries the debt until it schedules": (
+            "btclib-org/btclib-node#42"
+        ),
+        "#558 carries the debt until that tree schedules": f"{ORG}/{SELF}#558",
+    }
+    for sentence, issue in read.items():
+        found = DEBT.search(sentence)
+        assert found, f"no debt read in {sentence!r}"
+        assert reference(found) == issue, f"{sentence!r} names {reference(found)}"
+    unread = [
+        "btclib-org/btclib-secp256k1#538 carries the port until that tree's",
+        "btclib-org/.github#558 is the issue behind this row",
+        "an open issue carries the debt until that tree schedules",
+    ]
+    misread = [sentence for sentence in unread if DEBT.search(sentence)]
+    assert not misread, f"read as naming a debt: {misread}"
+
+
 def test_every_row_of_the_calendar_names_something_that_exists(
     trees: dict[str, Path],
 ) -> None:
@@ -298,7 +347,8 @@ def test_every_row_of_the_calendar_names_something_that_exists(
     owed = debts()
     unbounded = [workflow for workflow in idle if workflow not in owed]
     assert not unbounded, (
-        f"section 10 rows no repository schedules, with no debt issue: {unbounded}"
+        "section 10 rows no repository schedules, with no paragraph matching"
+        f" `{DEBT.pattern}`: {unbounded}"
     )
     settled = {
         workflow: owed[workflow] for workflow in idle if not still_open(owed[workflow])
