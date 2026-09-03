@@ -5347,3 +5347,25 @@ audit has no revision to compare against.
   matches no file, and the standard names no file under
   `ISSUE_TEMPLATE/`. This repository's `.pre-commit-config.yaml` carries
   the pair.
+
+### Section 12 names the wheels its exemption covers, and where the pin stands
+
+- **Two builders make the wheels the exemption covers** (closes #747):
+  `btclib-secp256k1` publishes the `py3-none-*` wheels `python -m build`
+  writes on the runner beside the `cp3XX` and `pp3XX` ones cibuildwheel
+  writes, and `release.yml` uploads both families under one artifact
+  pattern. Section 12 names each builder, cibuildwheel run against a
+  `py3-none-*` wheel producing a file of another name rather than other
+  bytes, and says what is measured: `wheel-reproducibility.yml` builds
+  one interpreter's wheel twice in one image, and whether a wheel of
+  another ABI tag reproduces is measured on no trigger, the published
+  `py3-none-*` ones being btclib-org/btclib-secp256k1#540. Section 10's
+  `wheel-reproducibility` row leaves the builders to section 12 and says
+  its own question is narrower than the exemption.
+- **Sections 10 and 12 cite the pin where it is live** (closes #748):
+  btclib-org/btclib-secp256k1#439 is a closed umbrella, so section 12
+  cites btclib-org/btclib-secp256k1#524 for the digest that would pin
+  the container the Linux build compiles inside and
+  btclib-org/btclib-secp256k1#554 for macOS and Windows, where the same
+  pin is declined rather than pending; section 10's sentinel row cites
+  the first of those.

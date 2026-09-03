@@ -3137,20 +3137,20 @@ its entry gains the tree when the workflow and the badge land together.
   btclib-org/.github#523 carries the debt until the first of them
   schedules the workflow.
 - **`wheel-reproducibility` follows a tree that ships a compiled
-  wheel.** Section 12 puts the compiled wheel outside the property
-  `sdist-rebuild` re-derives, cibuildwheel building it against a
-  compiler and a toolchain nothing pins, and this row is what asks how
-  far that stands. A wheel with nothing compiled in it is the
-  checkout's own files under the member metadata the backend fixes,
-  which is the ground `sdist-rebuild` already stands on. The sentinel
-  builds the wheel twice on one image and diffs the two archives
+  wheel.** Section 12 puts the compiled wheels outside the property
+  `sdist-rebuild` re-derives, and this row is what asks how far that
+  stands. A wheel with nothing compiled in it is the checkout's own
+  files under the member metadata the backend fixes, which is the
+  ground `sdist-rebuild` already stands on. The sentinel builds one
+  interpreter's wheel twice on one image and diffs the two archives
   member by member, then diffs the wheels two images of one platform
   built, the second image being chosen to differ in the toolchain it
-  carries. btclib-org/btclib-secp256k1#439 is where the property is
-  being reached for, and the workflow this row schedules asks two
-  builds in one directory and two environments alike: a platform
-  whose wheels disagree is an issue against what the run names rather
-  than a line here.
+  carries. What it answers for is narrower than what section 12
+  exempts. btclib-org/btclib-secp256k1#524 is where the property is
+  being reached for, on the platform section 12 names a pin for, and the
+  workflow this row schedules asks two builds in one directory and two
+  environments alike: a platform whose wheels disagree is an issue
+  against what the run names rather than a line here.
   btclib-org/btclib-secp256k1#538 carries the port until that tree's
   `cron:` is the instant above and its badge is in the row.
 - **`homepage` follows a tree serving a page generated from another
@@ -4322,18 +4322,33 @@ corrected in none of the ones that shipped.
   else, its archives being the same bytes either way. Under hatchling
   the variable reaches the archives too, so exporting it for the bill of
   materials moves the digests the attestation vouches for. The compiled
-  wheel is outside the property and is named rather than passed over:
-  `btclib-secp256k1`'s wheels are built by cibuildwheel against a
-  compiler and a toolchain nothing pins, while the index attests them
-  beside the sdist, PEP 740 covering every file the publish job uploads,
-  so a verifier who rebuilds one and gets other bytes has nothing to
-  tell them whether that is a defect. Saying nothing about the wheels is
-  the rejected alternative for that reason, an attestation reading as
-  one guarantee over every file it covers. Pinning the image, the
-  compiler and the linker so the wheels reproduce too is the other, and
-  it is declined on cost rather than on the merits: it is a change to
-  the tree that compiles them, and that is
-  btclib-org/btclib-secp256k1#439. Nothing yet re-derives the property
+  wheels are outside the property and are named rather than passed over.
+  `btclib-secp256k1` publishes two builders' wheels and `release.yml`
+  downloads them under one artifact pattern, so the index attests every
+  one beside the sdist, PEP 740 covering every file the publish job
+  uploads, and a verifier who rebuilds one and gets other bytes has
+  nothing to tell them whether that is a defect. One tool does not
+  rebuild both: cibuildwheel builds the `cp3XX` and `pp3XX` wheels
+  against a compiler and a toolchain nothing pins, where the
+  `py3-none-*` wheels are cffi ABI-mode builds `python -m build` writes
+  on the runner, and cibuildwheel run against one of those produces a
+  file of another name rather than other bytes. What is measured is
+  narrower than what either builder writes: `wheel-reproducibility.yml`
+  builds one interpreter's wheel twice in one image and diffs the
+  archives, and whether a wheel of another ABI tag reproduces is
+  measured on no trigger — the published `py3-none-*` ones being
+  btclib-org/btclib-secp256k1#540. Saying nothing about the wheels is
+  the rejected alternative for that reason, an attestation
+  reading as one guarantee over every file it covers. Pinning the
+  environment so they reproduce across two of them is the other, and in
+  the tree that compiles them it is one measurement across the platforms
+  rather than one decision: a digest on the container the Linux build
+  compiles inside states that environment to anybody who can pull it,
+  which is btclib-org/btclib-secp256k1#524, where Xcode and the MSVC
+  toolset are chosen from what a runner image already carries, so the
+  same pin on macOS and Windows states nothing to a verifier who was
+  never on the machine and is declined rather than pending —
+  btclib-org/btclib-secp256k1#554. Nothing yet re-derives the property
   on a released tag — the command that rebuilds one and verifies it
   against the attestation is one a person runs — and that half is
   btclib-org/.github#523's.
