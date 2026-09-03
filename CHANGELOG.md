@@ -5463,3 +5463,31 @@ audit has no revision to compare against.
   the run directory**: macOS mounts `/` read-only, so an absolute target
   is a message on stderr and never a file the run directory could
   report. That is the detector the three lines above were invisible to.
+
+### Section 9 asks the guard of any fence that runs, not of a second one
+
+- **The bullet's subject is a fence with nothing in it that fails at the
+  parse, whether a split left it below another or nothing split it at
+  all** (closes #759): *The fence a split leaves below is live* said
+  what such a fence owes of the second fence alone, so a reader holding
+  a standalone one was left with the unquoting bullet's exemption, which
+  settles nothing about whether the line runs. That narrower sentence no
+  longer stands.
+- **A placeholder the unquoting bullet exempts is text the line sends to
+  the tool rather than a stop, so where no split has left such a fence
+  the guard is what splits it**: the value takes an assignment block of
+  its own, where the bare placeholder ends the line, and the fence reads
+  it as `${name:?}`.
+- **Leaving such a line alone because the endpoint it names only reads
+  is the rejected alternative**: what a call does at the far end is not
+  on the page, so that test is a ruling per line, where the parse is
+  something the fence shows.
+- **Section 12's job listing and section 11's timeline read take the
+  rule**: the first puts its run id in a block of its own, quoting being
+  what the query string beside it asks for; the second names the
+  repository it measured, the issue number in the same string having
+  named it already.
+- **Section 15's helper fence answers to the same sentence and does not
+  take it**: its `<org>` is one value shared across that section's
+  blocks, which is not a shape the standard has, so what a guard looks
+  like there is a decision of its own. #773 carries it.

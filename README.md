@@ -2359,22 +2359,31 @@ sight rather than weighed.
   interactive shell does, where `-c` and a file abort. So a harness
   built on `cat block | zsh` reads as the aborting case and is the
   other one.
-- **The fence a split leaves below is live.** Nothing in it fails at the
-  parse, so a paste of it alone is a command and it runs with every
-  value the reader was to set empty. A placeholder in it settles
-  nothing: section 3's `uv_build` read carries `<outdir>` inside a
-  `python -c` program's string, which the unquoting bullet above
-  exempts, so what stops that line is its `${version:?}` rather than
-  the placeholder. It writes each of those values as `${name:?}` and
-  joins its lines with `&&`, and reads one of them at or above its
-  first line that writes, a guard below that line arriving too late.
-  Neither is the guard by itself: an interactive shell's `${name:?}`
-  abandons the one command it stands in, so a line under it that reads
-  nothing of the reader's runs anyway, and a chain with nothing failing
-  in it runs to its end. Chained, a `${name:?}` failure is the run-time
-  one the fence bullet above says a trailing `&&` short-circuits. Prose
-  beside the fence says what `:?` is doing there, since a reader who is
-  not told deletes it.
+- **A fence with nothing in it that fails at the parse is live**,
+  whether a split left it below another or nothing split it at all. A
+  paste of it alone is a command and it runs with every value the reader
+  was to set empty. A placeholder in it settles nothing: section 3's
+  `uv_build` read carries `<outdir>` inside a `python -c` program's
+  string, which the unquoting bullet above exempts, so what stops that
+  line is its `${version:?}` rather than the placeholder. Where no split
+  has left such a fence, the guard is what splits it: a placeholder that
+  bullet exempts is text the line sends to the tool rather than a stop,
+  so section 12's job listing, whose run id is quoted for the query
+  string beside it, puts that id in an assignment block of its own above
+  the fence and reads it from there. The fence writes each of those
+  values as `${name:?}` and joins its lines with `&&`, and reads one of
+  them at or above its first line that writes, a guard below that line
+  arriving too late. Neither is the guard by itself: an interactive
+  shell's `${name:?}` abandons the one command it stands in, so a line
+  under it that reads nothing of the reader's runs anyway, and a chain
+  with nothing failing in it runs to its end. Chained, a `${name:?}`
+  failure is the run-time one the fence bullet above says a trailing
+  `&&` short-circuits. Prose beside the fence says what `:?` is doing
+  there, since a reader who is not told deletes it. Leaving such a line
+  alone because the endpoint it names only reads is the rejected
+  alternative: what a call does at the far end is not on the page, so
+  that test is a ruling per line where the parse is something the fence
+  shows.
 - **A trailing `#` comment goes above the fence, as prose.** `zsh`
   leaves `INTERACTIVE_COMMENTS` unset, so an interactive one takes `#`
   as an ordinary word and what follows it as arguments to the command on
@@ -3769,7 +3778,7 @@ maintainer typed `(closes #468)` into the squash subject, a text the
 description-based read never sees, and #468 came back CLOSED on it:
 
 ```shell
-gh api "repos/<org>/<repo>/issues/468/timeline?per_page=100" \
+gh api "repos/btclib-org/.github/issues/468/timeline?per_page=100" \
   --jq '[.[] | select(.event=="closed" or .event=="reopened") |
          {event, at: (.created_at | fromdateiso8601)}] | (.[1].at - .[0].at)'
 # 38
@@ -4604,11 +4613,19 @@ corrected in none of the ones that shipped.
   look at, so a release whose post-publish check never ran reads as a
   release that finished. What answers is the run's own job listing — the
   endpoint section 10's aggregate reads from inside its run, asked here
-  of a run that has ended:
+  of a run that has ended. The run id is quoted for the query string
+  beside it, so the assignment stands in a block of its own, for the
+  reason section 9's bullet gives, and the block below it writes
+  `${run:?}`, unset being what an unfilled paste of that block alone
+  supplies:
+
+    ```shell
+    run=<id>
+    ```
 
     ```shell
     gh api --paginate \
-      "repos/{owner}/{repo}/actions/runs/<id>/jobs?per_page=100" \
+      "repos/{owner}/{repo}/actions/runs/${run:?}/jobs?per_page=100" \
       --jq '.jobs[] | [.conclusion, (.steps|length), .name] | @tsv'
     ```
 
