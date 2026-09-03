@@ -5332,3 +5332,18 @@ audit has no revision to compare against.
   is a strict expected failure, so the branch being protected turns the
   cell red here and the exemption is read again rather than left
   standing.
+
+### Section 4's schemas bullet reads an issue form as one
+
+- **`check-github-issue-config` and `check-github-issue-forms` stand
+  beside `check-dependabot` there** (closes #708): check-jsonschema
+  ships both with their own `files:`, so the argument the bullet already
+  makes reaches `.github/ISSUE_TEMPLATE/` with nothing written for it. A
+  form whose `type:` is misspelt is still yaml, which is all
+  `check-yaml` asks, and the reader who meets it is a person on the *New
+  issue* page.
+- **The bullet says what each hook selects rather than asking every
+  repository for both files**: `check-hooks-apply` fails a hook that
+  matches no file, and the standard names no file under
+  `ISSUE_TEMPLATE/`. This repository's `.pre-commit-config.yaml` carries
+  the pair.
