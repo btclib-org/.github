@@ -2329,7 +2329,22 @@ sight rather than weighed.
   string is not this: `"repos/<org>/$r/contents/$1"` is quoted for the
   variable beside it, and unquoting it would be wrong shell rather than
   a guard. Nor is a quote another language needs — a `python -c`
-  program's string, a TOML value.
+  program's string, a TOML value. Nor is a `<...>` whose spelling is not
+  a placeholder at all — an element name the command is looking for,
+  `<title>` in a badge SVG being the instance. Such a token is a
+  literal, and the unquoting repair is not available to it: what it
+  takes instead is the exemption above, on purpose — inside a larger
+  string carrying the neighbouring literal text the match needs,
+  `grep -oE '<title>[^<]*</title>'` rather than `grep '<title>'` alone,
+  the form section 15's own badge-render loop already writes. What
+  decides is the token's neighbourhood, not its spelling: the same
+  token is a genuine placeholder standing alone as a flag's whole
+  argument elsewhere, where unquoting is exactly the right repair. The
+  rejected alternative is a list of literals the rule exempts by name;
+  what it costs is a ruling per line, on a page where nothing
+  distinguishes a literal from a value — the larger-string form is
+  visible in the fence itself, and it is the same test a reader already
+  applies to `"repos/<org>/$r/contents/$1"`.
 - **A bare placeholder goes at the end of its command**, where the `>`
   closing it has no target and the line is a parse error before it is a
   command. `<` and `>` are the shell's redirection operators, so a paste
@@ -2417,7 +2432,26 @@ sight rather than weighed.
   neither that command nor the lines below it run. That stop is not a
   guard: nothing puts the apostrophe there for it, and the next
   rewording of the comment takes it away. The prose above the fence has
-  the room a line beside a command does not.
+  the room a line beside a command does not. The same mechanism reaches
+  a whole-line comment too: `#` is an ordinary word to an interactive
+  `zsh` wherever it opens the line, not only where it follows `&&`, so
+  an apostrophe among that line's own words opens the same unterminated
+  quote and kills the fence beneath it. A backtick in such a comment is
+  a command substitution to the same shell, and a paste attempts to run
+  it. A whole-line `#` comment inside a fence carries neither an
+  apostrophe nor a backtick, and one that needs either goes above the
+  fence as prose beside the rest. What decides is not the first
+  character being `#` — a word the shell fails to find and moves past —
+  but what the rest of the line hands it, and that stop is no more a
+  guard than the trailing case's: nothing puts the plain words there for
+  it, and the next rewording can add the apostrophe. The rejected
+  alternative moves every whole-line comment above the fence, as the
+  trailing one goes; what it costs is every fence in the organization
+  that carries one, for a shape that is harmless while it keeps to plain
+  words, and a comment on a line of its own is where a reader finds why
+  a flag is there. No gate reads this — a heading and a comment both
+  begin with `#`, so a line-based hook cannot tell them apart — and that
+  absence is a fence-aware runner's, not this bullet's.
 - **One fact in one place.** Two files stating the same thing become two
   files disagreeing about it; the second points at the first.
 - **A package upstream of another does not name the one downstream.**
