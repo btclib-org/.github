@@ -5369,3 +5369,31 @@ audit has no revision to compare against.
   btclib-org/btclib-secp256k1#554 for macOS and Windows, where the same
   pin is declined rather than pending; section 10's sentinel row cites
   the first of those.
+
+### A trailing `#` comment goes above the `shell` fence
+
+- **Section 9 asks it of any command carrying one, not only of a chained
+  one** (closes #749): `zsh` leaves `INTERACTIVE_COMMENTS` unset, so an
+  interactive one takes `#` as an ordinary word and hands the comment's
+  words to the command on that line as arguments. The chain stays in the
+  bullet as the sharper case, its right-hand side sitting on the
+  comment's line where the file shows it continuing.
+- **An apostrophe in such a comment opens a quote, and a second
+  apostrophe below decides which failure the reader gets**: with one,
+  the command runs and takes the lines between the two as a single
+  argument; with none, the buffer ends unterminated and neither that
+  command nor the lines below it run. The bullet refuses to call the
+  second failure a guard: nothing puts the apostrophe there for it, and
+  the next rewording of the comment takes it away. #745 says as much of
+  an apostrophe inside a placeholder — remove it and the guard goes with
+  it.
+- **The reason is `zsh`'s and the rule is not narrowed to it**: a fence
+  that is safe in one shell and not in another is what the section's
+  fence rules exist to prevent, so what the shell decides is written as
+  the reason rather than as a condition.
+- **This tree's own fences take the rule**: section 1's toolchain
+  commands, section 11's Read the Docs reads, section 15's
+  `read_or_mark` and `list_or_mark`, `CLAUDE.md`'s worktree block,
+  `CONTRIBUTING.md`'s gate and its releases read, and `REPOSITORY.md`'s
+  plan read, which states its answer on a line of its own as the rest of
+  that file does.

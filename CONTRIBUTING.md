@@ -245,8 +245,8 @@ both are on every GitHub-hosted runner already, and the suite shells out
 to them rather than importing a client.
 
 ```shell
-uvx pre-commit run --all-files                    # the whole gate
-uvx pre-commit run --all-files markdownlint-cli2  # one hook
+uvx pre-commit run --all-files
+uvx pre-commit run --all-files markdownlint-cli2
 uvx pre-commit validate-config .pre-commit-config.yaml
 ```
 
@@ -298,9 +298,9 @@ placeholder version — there is no artifact for a version to name. So
 this tree carries no `RELEASING.md` and no `RELEASE_NOTES.md` — section
 2 of `README.md` has why a tier-2 repository carries neither — and a
 file whose content is its own absence is this section instead. Measured
-rather than asserted, and re-derivable:
+rather than asserted, and re-derivable, each answering `0`:
 
 ```shell
-gh api repos/btclib-org/.github/releases --jq 'length'   # 0
-gh api repos/btclib-org/.github/tags --jq 'length'       # 0
+gh api repos/btclib-org/.github/releases --jq 'length'
+gh api repos/btclib-org/.github/tags --jq 'length'
 ```

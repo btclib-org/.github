@@ -149,12 +149,14 @@ they are applied per repository, which section 15 is how to verify.
 ### uv is the only prerequisite
 
 `uv` fetches interpreters, linters and packaging tools itself, so a
-contributor installs one thing and CI installs nothing:
+contributor installs one thing and CI installs nothing. The commands are
+the environment with all groups, the suite gated at 100%, and the whole
+lint gate:
 
 ```shell
-uv sync                      # the environment, all groups
-uv run pytest                # the suite, gated at 100%
-uv run pre-commit run --all-files    # the whole lint gate
+uv sync
+uv run pytest
+uv run pre-commit run --all-files
 ```
 
 Every documented command is a `uv run` command, and every workflow step
@@ -2333,13 +2335,20 @@ sight rather than weighed.
   one the fence bullet above says a trailing `&&` short-circuits. Prose
   beside the fence says what `:?` is doing there, since a reader who is
   not told deletes it.
-- **A trailing `#` comment ends a chained line.** `zsh` leaves
-  `INTERACTIVE_COMMENTS` unset, so an interactive one takes `#` as an
-  ordinary word and what follows it as arguments. A chain whose `&&` is
-  followed by a comment has its right-hand side on that same line, so it
-  is complete where the file shows it continuing, and the lines under it
-  start a chain of their own. A chained fence carries its explanation in
-  the prose above it.
+- **A trailing `#` comment goes above the fence, as prose.** `zsh`
+  leaves `INTERACTIVE_COMMENTS` unset, so an interactive one takes `#`
+  as an ordinary word and what follows it as arguments to the command on
+  that line. A chain whose `&&` is followed by a comment has its
+  right-hand side on that same line, so it is complete where the file
+  shows it continuing, and the lines under it start a chain of their
+  own. An apostrophe in the comment opens a quote instead. A later
+  apostrophe closes it, and the command runs with the lines between the
+  two as a single argument, the lines past the second running as they
+  were written. With none to close it the buffer ends unterminated, and
+  neither that command nor the lines below it run. That stop is not a
+  guard: nothing puts the apostrophe there for it, and the next
+  rewording of the comment takes it away. The prose above the fence has
+  the room a line beside a command does not.
 - **One fact in one place.** Two files stating the same thing become two
   files disagreeing about it; the second points at the first.
 - **A package upstream of another does not name the one downstream.**
@@ -4202,16 +4211,17 @@ without a token:
 
 ```shell
 p=https://app.readthedocs.org/api/v3/projects/<slug>
-curl -s "$p/"                        # repository.url, default_branch
-curl -s "$p/versions/?active=true"   # latest, stable, the active tags
+curl -s "$p/"
+curl -s "$p/versions/?active=true"
 ```
 
-`repository.url` in the first says which repository the slug serves. The
-second comes back with `latest` as a branch and `stable` as a tag whose
-`ref` is the highest release tag, beside the tags the rule has
-activated — the rule's result rather than the rule itself, which that
-API does not expose: `automation-rules/` answers 404 where an endpoint
-needing a token answers 401.
+The first answers with `default_branch` and with `repository.url`, which
+says which repository the slug serves. The second comes back with
+`latest` as a branch and `stable` as a tag whose `ref` is the highest
+release tag, beside the tags the rule has activated — the rule's result
+rather than the rule itself, which that API does not expose:
+`automation-rules/` answers 404 where an endpoint needing a token
+answers 401.
 
 **What connects a repository to Read the Docs is the organization-wide
 `read-the-docs-community` GitHub App, not a per-repository webhook**, so
@@ -4993,10 +5003,12 @@ failure, which is what the settings block above does. Where a `sed`
 reads the fetch instead, or a capture parses it as content, both signals
 are lost and a call that failed is one blank with a repository that owes
 nothing — a sweep's row and a single repository's answer alike. The
-reading is written once:
+reading is written once. `read_or_mark` takes the path in `$r`'s tree as
+`$1` and sets `$content` and `$ok`; `list_or_mark` names `$r`'s
+workflows and sets `$names` and `$ok`:
 
 ```shell
-read_or_mark() {  # $1 the path in $r's tree; sets $content and $ok
+read_or_mark() {
   if e=$(gh api "repos/<org>/$r/contents/$1" --jq .content 2>/dev/null)
   then content=$(printf '%s' "$e" | base64 -d); ok=found
   elif gh api "repos/<org>/$r/contents/$1" --jq .content 2>&1 1>/dev/null \
@@ -5004,7 +5016,7 @@ read_or_mark() {  # $1 the path in $r's tree; sets $content and $ok
   else content=; ok=unreadable
   fi
 }
-list_or_mark() {  # names $r's workflows; sets $names and $ok
+list_or_mark() {
   if names=$(gh api "repos/<org>/$r/contents/.github/workflows" \
       --jq '.[].name' 2>/dev/null); then ok=found
   elif gh api "repos/<org>/$r/contents/.github/workflows" 2>&1 1>/dev/null \
