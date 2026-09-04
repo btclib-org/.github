@@ -5555,3 +5555,25 @@ audit has no revision to compare against.
   puts around a limb's words before the comparison, since those words
   are what section 11 asks a copy to carry and the link around them is
   decoration rather than a rewording.
+
+### The pull request template's Checks name this tree's own commands
+
+- **The lint checkbox gives `uvx pre-commit run --all-files`**
+  (closes #785): CONTRIBUTING.md's gate block gives that command, and
+  `lint.yml`, whose job is the whole of what a merge here is gated on,
+  runs it with `--show-diff-on-failure`.
+- **The suite checkbox names `BTCLIB_INTEGRATION` and leaves the command
+  to `alignment.yml`**: a bare `uv run pytest` skips every test for want
+  of the switch and exits 0, so the box was one a contributor could tick
+  on a run that measured nothing. The coverage gate the line claimed is
+  not this tree's either, `[tool.pytest.ini_options]` declaring no
+  `--cov` for a tree that installs no package.
+- **The escape clause above the list stays**: it says this copy is what
+  GitHub shows a public repository of the organization that carries none
+  of its own, which is what this copy is.
+- **The comment above the list is left as it stands**, #796 being where
+  its claim that CI runs every item on the list is decided.
+- **`BACKLOG` loses the row keyed on #781**: `bbt`, `btclib-benchmarks`,
+  `btclib-org.github.io` and `portanode` each track a template of their
+  own, and the rows are strict expected failures, so those cells passing
+  is a failure here until the row goes.
