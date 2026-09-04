@@ -5577,3 +5577,14 @@ audit has no revision to compare against.
   `btclib-org.github.io` and `portanode` each track a template of their
   own, and the rows are strict expected failures, so those cells passing
   is a failure here until the row goes.
+
+### The uv floor is the ceiling `dependabot-core` bundles
+
+- **`[tool.uv] required-version` reads `>=0.12.7`** (closes #448), which
+  is what `dependabot-core`'s `uv/Dockerfile` pins: section 1 puts the
+  floor at that ceiling, and a floor below it admits a uv older than the
+  one Dependabot's uv-ecosystem updater writes `uv.lock` with.
+- **`BACKLOG` loses the row keyed on #448**: the rows are strict
+  expected failures, so a repository reaching the ceiling turns its own
+  cell of `test_the_uv_floor_is_what_dependabot_bundles` into a failure
+  here until the row goes.
