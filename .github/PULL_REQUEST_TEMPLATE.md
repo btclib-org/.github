@@ -17,8 +17,10 @@
      A repository whose commands differ from these carries a template of
      its own; this one is what GitHub shows where there is none. -->
 
-- [ ] the lint gate is clean: `uv run pre-commit run --all-files`
-- [ ] the suite passes, with its coverage gate: `uv run pytest`
+- [ ] the lint gate is clean: `uvx pre-commit run --all-files`
+- [ ] the suite passes, with `BTCLIB_INTEGRATION` set — without it
+      every test skips and the run exits 0; `alignment.yml` carries
+      the command
 - [ ] `CHANGELOG.md` has an entry, if a user would notice the change;
       `RELEASE_NOTES.md` too, if it is one a user has to act on
 - [ ] every commit carries a verified signature
