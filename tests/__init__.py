@@ -323,22 +323,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-secp256k1",
         ),
     ),
-    # the uv floor: each of these sits below the ceiling
-    # dependabot-core's uv/Dockerfile pins, and the row goes with the
-    # bump
-    (
-        448,
-        "test_the_uv_floor_is_what_dependabot_bundles",
-        (
-            ".github",
-            "bbt",
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-benchmarks",
-            "btclib-node",
-            "btclib-secp256k1",
-        ),
-    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
