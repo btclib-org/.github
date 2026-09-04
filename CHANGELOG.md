@@ -5588,3 +5588,35 @@ audit has no revision to compare against.
   expected failures, so a repository reaching the ceiling turns its own
   cell of `test_the_uv_floor_is_what_dependabot_bundles` into a failure
   here until the row goes.
+
+### The pull request template's Checks say which of them a run reads
+
+- **The comment names the one required check instead of promising CI
+  runs the list** (closes #795): `Lint` is the whole of what `main`'s
+  protection requires, and the signature box is a `main-integrity` rule
+  over `refs/heads/main` rather than a run. Squash being the only merge
+  method here, what is written to `main` is the commit GitHub composes
+  at the button, which REPOSITORY.md's *Signed commits* names as the
+  signature the endpoint answers for — so the rule never reaches a
+  branch's own commits.
+- **The suite is on the list and nothing gates it** (issue #796):
+  `alignment.yml`'s header calls it a sentinel and not a gate, and its
+  `pull_request` trigger carries a `paths:` filter, so a pull request
+  touching none of them does not run it at all. The comment carries the
+  draft carve-out beside that: `lint.yml`'s job declines a draft pull
+  request, so the one required check reports nothing until the pull
+  request is ready.
+- **Nothing reads `CHANGELOG.md` for whether a change needed an entry**
+  (issue #796): `git grep -in changelog origin/main --
+  .github/workflows` answers nothing where `git grep -c runs-on` over
+  the same pathspec names every workflow, and
+  `.pre-commit-config.yaml`'s two mentions are an exclusion of the file
+  and the comment giving its reason.
+- **The `RELEASE_NOTES.md` clause goes rather than being made
+  conditional** (closes #798): section 2 gives that file to tier 1, this
+  tree is tier 2, and a box naming a file the tree may not hold can be
+  neither ticked nor struck. Making it conditional was the alternative,
+  and what decided against it is that nothing is reading this copy for
+  the instruction — the contents endpoint answers for every repository
+  of the organization asked for a template of its own, where a made-up
+  path under the same directory answers 404.
