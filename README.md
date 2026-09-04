@@ -2562,6 +2562,14 @@ sight rather than weighed.
   was the other alternative, and it is declined.** A tree whose entries
   land in both places has no reason of the kind that list takes, so an
   entry for it would record an accident as a decision.
+- **An entry making several claims has a list for a body, and one making
+  a single claim may have a paragraph.** What a list does is keep claims
+  apart, and an entry making one has nothing to keep it apart from, so
+  the marker is available to it rather than owed. The rejected
+  alternative is a list whatever the entry holds: what it buys is one
+  shape for every body, so that a reader looking for an entry's citation
+  looks in the same place each time, and what it costs is a list of one
+  standing for a separation the entry does not make.
 - **An entry answering an issue that the change closes cites it `(closes
   #N)`.** An entry answering an issue the change does not close — a fix
   that leaves a mechanism unexplained, one half of a bundle — cites it
@@ -2569,13 +2577,18 @@ sight rather than weighed.
   inside the same parentheses, the qualifier rule above reaching a
   changelog citation exactly as it reaches any other cross-repository
   reference.
-- **The citation sits in the bullet making the claim, not on the heading
+- **The citation sits in the text making the claim — the bullet of a
+  list body, the paragraph of a paragraph body — and not on the heading
   above it.** An entry's bullets are separate facts and cite separately,
   so a citation gathered onto the heading answers for the entry as a
   whole while the bullets under it name issues of their own, and nothing
-  says how the two sets relate. The rejected alternative is the heading
-  citation, and what it buys is a section whose issue numbers a reader
-  collects by scanning the headings alone.
+  says how the two sets relate. A paragraph body makes one claim and
+  raises no such pairing; what keeps its citation off the heading is
+  what a heading is, *A `###` names one entry* above making it the
+  entry's name where a citation says what the entry did about an issue.
+  The rejected alternative is the heading citation, and what it buys is
+  a section whose issue numbers a reader collects by scanning the
+  headings alone.
 - **The reason the pair has two spellings rather than one** is that it
   is then checkable against the landing commit's own subject, written at
   a different moment and the half that gets re-read before merging. One

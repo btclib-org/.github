@@ -5620,3 +5620,18 @@ audit has no revision to compare against.
   the instruction — the contents endpoint answers for every repository
   of the organization asked for a template of its own, where a made-up
   path under the same directory answers 404.
+
+### Section 9 says an entry's body may be a paragraph, and where that cites
+
+- **An entry making several claims has a list for a body, and one making
+  a single claim may have a paragraph** (closes #802): a list keeps
+  claims apart, and an entry making one claim has nothing to keep it
+  apart from, so a list of one stands for a separation the entry does
+  not make. Requiring the list of every body is the rejected
+  alternative, and what it buys is one place a reader looks for a
+  citation.
+- **The citation sits in the text making the claim — the bullet of a
+  list body, the paragraph of a paragraph body** (closes #802): the rule
+  named the bullet, so a paragraph-bodied entry had no subject for its
+  affirmative half while the heading stayed refused, and `btclib`'s
+  changelog carries entries of that shape citing in prose.
