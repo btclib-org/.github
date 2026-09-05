@@ -22,11 +22,9 @@ asks what no single tree can answer -- the calendar, the verbatim
 copies -- and runs once.
 
 Each test that reaches GitHub is marked `integration`, which is how a
-run selects or deselects them by name -- a module whose subject is this
-tree rather than the organization asks nothing of GitHub and carries
-none; what skips the suite without `BTCLIB_INTEGRATION` in the
-environment is `conftest.py` at collection, a marker being a label
-rather than a condition::
+run selects or deselects them by name; what skips the suite without
+`BTCLIB_INTEGRATION` in the environment is `conftest.py` at collection,
+a marker being a label rather than a condition::
 
     BTCLIB_INTEGRATION=1 uv run --locked --group test pytest
 
@@ -39,7 +37,7 @@ shared is these parts:
 
 - **the organization, and how this suite asks GitHub about it** --
   `ORG`, `SELF`, `ROOT`, `output` and the bound it holds a call to, the
-  two `gh` callers, `by_hand` and `tracked`;
+  two `gh` callers, `still_open`, `by_hand` and `tracked`;
 - **which repositories the standard applies to, how far, and what is
   owed** -- kept together, so that a change to any of them is made in
   one place: *which repositories
@@ -180,6 +178,22 @@ def gh_json(endpoint: str) -> Any:  # noqa: ANN401
     :returns: whatever the endpoint answers, parsed.
     """
     return json.loads(output("gh", "api", endpoint))
+
+
+def still_open(issue: str) -> bool:
+    """Ask GitHub whether an issue is still open.
+
+    A citation is read for its state rather than taken at its word:
+    section 10's calendar excuses an idle row while the issue carrying
+    its debt is open, and the backlog excuses a cell while the issue its
+    row names is, and each exemption expires the day the issue closes.
+
+    :param issue: the reference, qualified -- `owner/repo#123`.
+    :returns: whether the API reports it open.
+    """
+    repository, number = issue.split("#")
+    state: str = gh_json(f"repos/{repository}/issues/{number}")["state"]
+    return state == "open"
 
 
 def by_hand(repository: str, command: str) -> str:

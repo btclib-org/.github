@@ -63,14 +63,14 @@ table and the *Not tested here* line account for each of them once.
   shuffle is what notices the day it stops being true. `-p no:randomly`
   puts the collection order back to reproduce a failure against it, and
   the seed a run prints reproduces the shuffle.
-- **The suite is integration but for the modules whose subject is this
-  tree**, and it sits in `tests/` rather than under `tests/integration/`
-  because there is nothing beside it to keep apart. Every test that
-  reaches GitHub carries the `integration` marker; `BTCLIB_INTEGRATION`
-  is the switch, and `conftest.py` skips the run without it at
-  collection, naming the switch in the skip. `alignment.yml` sets it,
-  and refuses the run before the checkout where the token it needs is
-  absent rather than letting the suite skip.
+- **The suite is integration but for the tests that reach nothing
+  outside this tree**, and it sits in `tests/` rather than under
+  `tests/integration/` because there is nothing beside it to keep apart.
+  Every test that reaches GitHub carries the `integration` marker;
+  `BTCLIB_INTEGRATION` is the switch, and `conftest.py` skips the run
+  without it at collection, naming the switch in the skip.
+  `alignment.yml` sets it, and refuses the run before the checkout where
+  the token it needs is absent rather than letting the suite skip.
 - **No functional layer**: `tests/functional/` is for a suite that
   starts what the repository ships, and this tree ships nothing to start.
 - **No property layer**: section 7 keys it on a parser between the tree

@@ -5753,3 +5753,31 @@ audit has no revision to compare against.
 - **Keeping the `cd` and explaining it below the fence is the rejected
   alternative** (closes #823): the block would then tell a reader to run
   a line the paragraph under it says binds only the shell that runs it.
+
+### A backlog row keyed on a closed issue fails the suite
+
+- **`tests/backlog_test.py` reads the state of every issue `BACKLOG`
+  cites** (closes #758): a row excuses a cell for as long as the tracker
+  records the gap, and a citation that has closed leaves the exemption
+  standing with nothing behind it — the cell fails, the row excuses it,
+  and the reason printed beside the expected failure sends a reader to
+  an issue that no longer says the answer is waiting. `conftest.py`'s
+  check at collection reads a row's names and never a state.
+- **The check is a test rather than a second refusal at collection**
+  (closes #758): a row naming a test or a repository that does not exist
+  excuses nothing, so the run is not worth starting, where a closed
+  citation costs the record and leaves every cell of the matrix asked as
+  before. Refusing the collection is the rejected alternative, and it
+  takes the whole run down over a citation — on whatever the API
+  answered that minute, `gh_json` raising rather than asserting.
+- **A control asks the same function for an issue that is closed**
+  (closes #758): the check over the rows is an absence, so it is green
+  where every row cites an open issue and green where no state was read
+  at all, and only the control tells the two apart.
+- **`still_open` moves to `tests/__init__.py`** (closes #758): section
+  10's calendar reads the issue carrying an idle row's debt and the
+  backlog reads the issue a row cites, and shared code is what that file
+  holds. `CLAUDE.md`'s census of what asks the API for state moves with
+  it: the move takes `gh_json` out of `grid_test.py`, so the command that
+  file prints stopped naming a tree its own next sentence describes, and
+  the pattern gains `still_open` rather than losing the name.

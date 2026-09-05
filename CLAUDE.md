@@ -232,13 +232,19 @@ Do not use Fable unless explicitly instructed.
   btclib-org/.github#272.** The shrunk clone still contacts the forge for the
   tip, so it removes no network dependency, and its object store is borrowed
   from a checkout that a `git gc` there can break — for a saving the issue's
-  own numbers call not worth the hazard. `git grep -lE 'gh_json|settings:
-  dict' tests/*_test.py` names `grid_test.py`, `homepage_test.py`,
+  own numbers call not worth the hazard. `git grep -lE
+  'gh_json|still_open|settings: dict' tests/*_test.py` names
+  `backlog_test.py`, `grid_test.py`, `homepage_test.py`,
   `protection_test.py`, `security_test.py`, `settings_test.py`,
   `tags_test.py` and `topics_test.py` — what asks the API for state with
-  no on-disk representation. `grid_test.py` asks it for one document and
-  only where a calendar row is idle: the state of the issue section 10
-  says carries that row's debt. `tiers` is not one of them:
+  no on-disk representation. `still_open` is in the pattern because it is
+  the read rather than a caller of one: it lives in `tests/__init__.py`,
+  so a file reaching the API through it names neither `gh_json` nor a
+  settings dict, and a pattern without it answers a confident zero for
+  two of the eight. `grid_test.py` asks for one document and only where a
+  calendar row is idle — the state of the issue section 10 says carries
+  that row's debt — and `backlog_test.py` asks for one per distinct issue
+  its rows cite. `tiers` is not one of them:
   `tests/__init__.py`'s `tier()` reads `pyproject.toml` and `release.yml` off
   the checkout, which `tiers_test.py` asks through the `tiers` fixture —
   `conftest.py`'s one-liner over `trees` — rather than through `gh_json`.
