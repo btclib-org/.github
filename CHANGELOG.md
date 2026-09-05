@@ -5709,3 +5709,31 @@ audit has no revision to compare against.
 - **Explaining that clean sweep by a file created at the root is the
   rejected alternative** (closes #819): what it costs is a reader
   hunting at `/` for a file this platform does not write.
+
+### The worktree fence names what the guard misses and what the create needs
+
+- **`${WT:?}` catches an unset or empty `WT` and nothing else** (closes
+  #797): a `$WT` an earlier session or command left holding a path
+  expands, and the removal runs against whatever worktree that path
+  names — the accident the paragraph's own reasoning is about.
+- **The clause the limit rests on names the empty value beside the
+  unset one** (closes #797): `${WT:?}` fails on both, `/bin/bash` and
+  `/bin/sh` saying so in the diagnostic they print — `parameter null or
+  not set` — so a sentence ending at the unset case cannot carry "and
+  nothing else".
+- **Stopping at the unset case is the rejected alternative** (closes
+  #797): it leaves the guard standing beside the reasoning for the
+  accident it does not reach, and a reader takes `${WT:?}` for a fence
+  against a stale `WT`.
+- **The `>` closing `<branch>` is reached only where the reader's own
+  directory already holds that name** (closes #821): redirections are
+  performed left to right, so ordinarily the `<` fails first — `no such
+  file or directory: branch` — and the line ends before the `>` opens
+  anything.
+- **The condition is the name and not a file of it** (closes #821):
+  section 9's placeholder exception turns on the open's direction, a
+  `<` succeeding on a directory as readily as on a file, so a narrower
+  condition here disagrees with the section this paragraph cites.
+- **Stating the create unconditionally is the rejected alternative**
+  (closes #821): a reader who pastes the block and finds nothing at
+  `$WT` reads the rule as one their own shell does not obey.

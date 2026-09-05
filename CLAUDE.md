@@ -101,16 +101,23 @@ git push origin HEAD:refs/heads/<branch>
 
 `-b <branch>` sits after the path and the commit-ish so that the
 placeholder ends the command, which is section 9 of `README.md`'s rule.
-With the placeholder ahead of `"$WT"` the `>` closing it takes that path
-as its target, and a path with no directory at it is a file the paste
-creates.
+With the placeholder ahead of `"$WT"`, its `<` and its `>` are
+redirections performed left to right, so the `>` is reached only where
+the reader's own directory already holds the name `branch`: there the
+`<` succeeds, the line runs, and the `>` takes `"$WT"` as its target —
+a path with no directory at it is the file it creates. Ordinarily
+nothing holds that name, so the `<` fails first (`no such file or
+directory: branch`) and the line ends before the `>` opens anything.
 
 Removing the worktree is part of finishing, and it stands in a block of
 its own: the block above ends in a placeholder, and a shell that
 discards that line as a parse error reads the next as a fresh command —
 which, in one block, is this line against whatever `$WT` already held.
 Standing alone it is a second fence, so `${WT:?}` is what it writes:
-with no `$WT` set the expansion fails and the removal does not run.
+with `$WT` unset or empty the expansion fails and the removal does not
+run. Those are the only cases it catches — a `$WT` an earlier session or
+command left holding a path expands, and the removal runs against
+whatever worktree that path names.
 
 ```shell
 git worktree remove --force "${WT:?}"
