@@ -5737,3 +5737,19 @@ audit has no revision to compare against.
 - **Stating the create unconditionally is the rejected alternative**
   (closes #821): a reader who pastes the block and finds nothing at
   `$WT` reads the rule as one their own shell does not obey.
+
+### The worktree fence's push names the tree it acts on
+
+- **The push is `git -C "$WT" push`, and the `cd` above it is gone**
+  (closes #823): a `cd` binds the shell that runs it, so a session that
+  runs each line as its own command starts the next one in the directory
+  it began in — the primary checkout — and a push after a `cd` offers
+  that checkout's `HEAD` instead of the worktree's.
+- **The flag is not itself the guard** (closes #823): a session that
+  loses the `cd` loses `WT` with it, and `git -C ""` leaves the working
+  directory unchanged, so that push lands the same way, exit 0 and no
+  diagnostic. What the `-C` buys is a path that can be written out in
+  full.
+- **Keeping the `cd` and explaining it below the fence is the rejected
+  alternative** (closes #823): the block would then tell a reader to run
+  a line the paragraph under it says binds only the shell that runs it.
