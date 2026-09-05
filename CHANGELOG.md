@@ -5680,3 +5680,21 @@ audit has no revision to compare against.
   statement and a pointer, and a copy of the reason in this file is kept
   equal to the header by nothing while being what a session reads before
   running the gate.
+
+### The `>` on `/` fails on the name rather than on the directory
+
+- **Section 9's `/` sentence gives a reason true of `/`** (closes #815):
+  a `>` asks to create as well as to write, and at `/` the errno names
+  the create — `EEXIST`, which the platform's own `open(2)` gives only
+  for `O_CREAT` with `O_EXCL`, and a `>` sets `O_CREAT` alone. `/.`
+  names the same directory and answers `EISDIR`, so the answer belongs
+  to the spelling and not to the directory it names.
+- **The clause asserting every platform is gone** (closes #815): one was
+  measured, and what reaches the others is the documented rule the
+  sentence now names rather than a generality beside it.
+- **Keeping the general reason a directory gets is the rejected
+  alternative** (closes #815): the bullet ten lines above supplies
+  `EISDIR` as the term for exactly that, so a reader carries it down
+  onto the one target the sentence is about. The conclusion holds under
+  either errno — the open fails, the `>` after it is never reached, and
+  that command writes nothing.

@@ -2368,10 +2368,20 @@ sight rather than weighed.
   filesystem: `orgs/<org>/installations` gives the `>` the target
   `/installations`, so what a paste creates is not in the directory the
   reader is standing in and a sweep that lists that directory reports
-  the block as clean. `/` alone is not that case — the open fails as a
-  directory wherever it runs, and one command's redirections are
-  performed in order, so the `>` after it in `repos/<org>/<repo>` is
-  never reached and that command writes nothing.
+  the block as clean. `/` alone is not that case — the open fails, and
+  one command's redirections are performed in order, so the `>` after it
+  in `repos/<org>/<repo>` is never reached and that command writes
+  nothing. What the open fails with on macOS is not the `EISDIR` above:
+  a `>` asks to create as well as to write, and at `/` the errno names
+  the create rather than the direction. macOS answers `EEXIST`, which
+  its own `open(2)` gives only for `O_CREAT` with `O_EXCL`; a `>` sets
+  `O_CREAT` alone, so the platform departs from its own page. `/.`
+  names the same directory and answers `EISDIR`, so the answer belongs
+  to the spelling and not to the directory it names. Neither errno
+  decides anything here, the open failing under both. The rejected
+  alternative leaves the general reason a directory gets; what it costs
+  is a reader carrying the `EISDIR` above down onto the one target this
+  sentence is about.
   A redirection that fails is the one command's rather than the line's,
   so the other side of a pipeline runs whatever it did:
   `git show v<version>:pyproject.toml | grep '^version'` reaches the
