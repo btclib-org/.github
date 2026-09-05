@@ -5663,3 +5663,20 @@ audit has no revision to compare against.
   fails on exactly what the `<` accepts, so widening the exception to a
   file or a directory is the rejected alternative — it reads as taken
   back where the bullet reaches `/`.
+
+### The `uvx` gate is stated in `CONTRIBUTING.md` and reasoned in `lint.yml`
+
+- **The reason the file gave in its own words is gone** (closes #601): it
+  said there is no project environment for pre-commit to be a dependency
+  group of and that `--locked` would have nothing to check against, where
+  `pyproject.toml`'s `lint` group holds `pre-commit` and
+  `.pre-commit-config.yaml`'s mypy hook runs `uv run --locked` in that
+  environment.
+- **The rule stands, and the sentence below the gate block carries it**
+  (closes #601): `uvx` against the `uv run` section 1 describes, with
+  `lint.yml`'s header pointed at for what chose it.
+- **Restating that header's reason here is the rejected alternative**
+  (closes #601): section 9's *One fact in one place* asks for one
+  statement and a pointer, and a copy of the reason in this file is kept
+  equal to the header by nothing while being what a session reads before
+  running the gate.
