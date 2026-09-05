@@ -2319,6 +2319,25 @@ sight rather than weighed.
   and never state how many of anything a file holds: a stated total is a
   line every open branch has to edit, and two branches moving it to the
   same wrong number merge without a conflict.
+- **A measurement's quantifier is not the sentence's.** The bullet above
+  is satisfied by a command that ran and a number that is right, and a
+  sentence saying *every*, *the only*, *none* or *always* where the
+  command asked about one instance claims more than the command beside
+  it answers. So the reading is two questions in order: what the
+  measurement covers, and what the sentence it licensed claims. Where
+  the second is the wider, either the measurement widens or the sentence
+  narrows, a universal owing a hunted counterexample.
+  `btclib-org/btclib`'s `40e75d87` is the narrow form: its entry holds a
+  chaininfo reply, a block hash and a header each `to the size their
+  endpoint answers rather than to something wider`, and the same bullet
+  says what makes the narrower claim measurable — `A reply one octet
+  over the limit is refused with that limit in the message, and the
+  recorded answer inside it is accepted`, a check on each side of the
+  bound. The reader-side form is the one with a
+  shape on the page: a sentence about a mechanism names the command that
+  would falsify it. A quantifier too wide is invisible in prose and a
+  missing command name is not, so the second is how a reader finds the
+  first.
 - **A placeholder standing as a whole argument is unquoted**, so that a
   paste made before it is filled in fails at the shell rather than
   reaching the tool. Quoting is what an argument holding spaces
@@ -2645,7 +2664,9 @@ sight rather than weighed.
   lives, which issue covers the other half.
 - **Nothing already written is rewritten.** Both files are append-only
   in practice and `merge=union` in fact; the rule binds what is written
-  next, not the entries that predate it.
+  next, not the entries that predate it. What the next entry owes one
+  still sitting in the open section is *An entry in the open section is
+  a live claim* below.
 - **A count that expires inside a landed entry stays there.** An entry
   speaks of its own day — the one its release heading dates, or the day
   it landed where a changelog releases nothing — so a sentence that
@@ -2657,7 +2678,54 @@ sight rather than weighed.
   of this section forbids is writing the next such sentence: a new entry
   counts nothing that moves underneath it. A structure the entry itself
   names — `build` and `check` are two rows, and it lists the two — is a
-  description rather than a count, and the rule does not reach it.
+  description rather than a count, and the rule does not reach it. That
+  day is what a reader dates the count against, and a release heading is
+  what announces it: an entry the open section still holds has the day
+  and not the heading, so it is met as current rather than as a record.
+  *An entry in the open section is a live claim* below is that case.
+- **An entry in the open section is a live claim.** *Nothing already
+  written is rewritten* and *A count that expires inside a landed entry
+  stays there* above are about an entry a reader meets as a record: the
+  release heading over it says which day the entries beneath it speak
+  of. The open section carries no such heading, so its entries are met
+  as what the tree holds now, and the release that closes the section
+  ships them whole — and where a tree releases nothing, as this one
+  does, that section is the whole file and no heading ever arrives. So a
+  later entry in that same section bearing on an earlier one leaves the
+  file making two claims at once, with nothing saying which the tree
+  holds. What is owed is a sentence in the new entry saying what it does
+  to the earlier one, and the append stays an append.
+  `btclib-org/btclib`'s `babf6fd8` puts a bullet under one the open
+  section already held and says `It leaves the entry above where it
+  was`, giving the reason that entry's rule survives — while the same
+  commit rewrites the prompt that entry's own last paragraph calls
+  unchanged, which is what makes it a claim borne on rather than a
+  neighbour — and `git show --numstat` reports no deletion on
+  `CHANGELOG.md`. So this is not an exception to either bullet above; it
+  is what they cost.
+- **The form of an entry moves; what an entry claims does not.** That is
+  the boundary, and `btclib-org/btclib`'s `49176251` is where it sits:
+  it edits the open section — 105 insertions against 84 deletions on
+  `CHANGELOG.md`, and no other file — turning paragraphs sitting bare
+  under a `###` into bullets split at a bold lead-in, of which the
+  citation moving into the bullet that makes the claim is one
+  consequence. No sentence changes its truth value across those
+  deletions, and that is established rather than asserted: normalizing
+  both sides — every citation removed wherever it sat, emphasis and
+  list markers stripped, sentence punctuation dropped — and comparing
+  the word sequences of the whole file leaves one clause reordered in
+  the `btclib.minikey` entry, carrying the same facts, and the commit's
+  own new entry. A session that finds that commit and stops there reads
+  the open section as editable, and one that finds *Nothing already
+  written is rewritten* above and stops there reads it as frozen. The
+  deletions are what `git show --numstat` reports: `grep -c '^-[^-]'`
+  over the same diff answers 76, being blind to a deleted blank line,
+  which is a `-` with no second character; to a deleted markdown bullet,
+  which gives `-- **`; and to a wrapped line opening on the house `--`,
+  which gives `---`. Every one of those shapes undercounts, and a diff
+  holding nothing else answers 0 and reads as the pure append it is not,
+  which is why a boundary is argued from `--numstat` and not from a
+  pattern.
 - **No command in section 15 audits this.** Entries already landed put a
   pointer inside parentheses with nothing before the number, and
   *Nothing already written is rewritten* above keeps them there, so a

@@ -5781,3 +5781,34 @@ audit has no revision to compare against.
   it: the move takes `gh_json` out of `grid_test.py`, so the command that
   file prints stopped naming a tree its own next sentence describes, and
   the pattern gains `still_open` rather than losing the name.
+
+### A measured sentence's quantifier, and a live entry in the open section
+
+- **Section 9 asks what a measurement covers and what the sentence it
+  licensed claims** (closes #827): *Measure, don't assert* is satisfied
+  by a command that ran and a number that is right, so a sentence saying
+  *every*, *the only*, *none* or *always* over a measurement of one
+  instance adds a claim with no shape on the page. Where the sentence is
+  the wider, either the measurement widens or the sentence narrows. The
+  reader-side form is the one that does have a shape — a sentence about
+  a mechanism names the command that would falsify it — and
+  `btclib-org/btclib`'s `40e75d87` is the narrow form the bullet cites.
+- **An entry the open section still holds is a live claim** (closes
+  #827): *Nothing already written is rewritten* and *A count that
+  expires inside a landed entry stays there* are about an entry a reader
+  meets as a record, the release heading over it saying which day the
+  entries beneath it speak of. The open section carries no such heading,
+  and where a tree releases nothing it never gains one. A later entry
+  bearing on one says in its own text what it does to it, and the append
+  stays an append. The older bullets
+  point at the new one, so a reader arriving at any of the three reaches
+  the others.
+- **`btclib-org/btclib`'s `49176251` is named as the boundary** (closes
+  #827): it edits the open section, and what it moves is the form of an
+  entry and of its citations rather than a claim an entry makes — read
+  without that, the commit says the open section is editable where
+  *Nothing already written is rewritten* says it is not. The bullet
+  states the deletions as `git show --numstat` reports them, and says
+  what `grep -c '^-[^-]'` over the same diff is blind to: that pattern
+  answers short of them, and answers 0 on a diff whose deletions are all
+  of those shapes.
