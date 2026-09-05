@@ -5635,3 +5635,16 @@ audit has no revision to compare against.
   named the bullet, so a paragraph-bodied entry had no subject for its
   affirmative half while the heading stayed refused, and `btclib`'s
   changelog carries entries of that shape citing in prose.
+
+### `REPOSITORY.md` says which ref `required_signatures` holds over
+
+- **The rule is named as `main-integrity`'s, conditioned on
+  `refs/heads/main`** (closes #804): the section listing the rulesets
+  already records that condition, and nothing in it reaches a branch
+  other than `main`, so a topic branch's own commits are pushed under no
+  rule at all.
+- **What no rule covers is every commit but the squash, pushed or not**
+  (closes #804): the boundary was drawn at the push, which reads as
+  reaching anything a contributor pushes, where what is written to
+  `main` is the commit GitHub composes at the button and a branch's own
+  are never read.
