@@ -235,10 +235,7 @@ this heading.
 
 uv is the only thing that has to be installed; it fetches interpreters
 and tools itself. There is a project here, and nothing installs it:
-`package = false`, its only Python being one test suite. So the gate
-below is a `uvx` and not the `uv run` section 1 describes: there is no
-project environment for pre-commit to be a dependency group of, and
-`--locked` would have nothing to check against.
+`package = false`, its only Python being one test suite.
 
 `gh` and `git` are the other two prerequisites and neither is a wheel:
 both are on every GitHub-hosted runner already, and the suite shells out
@@ -250,14 +247,18 @@ uvx pre-commit run --all-files markdownlint-cli2
 uvx pre-commit validate-config .pre-commit-config.yaml
 ```
 
-`uvx` and not the `uv run` a sibling's lint job uses, and `lint.yml` runs
-this same command for the reason its own header gives. Without
-`--all-files` a `pre-commit run` reads the staged files, and from a clean
-tree it reports `(no files to check)Skipped` and exits 0. So the
-single-hook line carries the flag as well, and hook scope is the whole of
-what separates it from the first. The last one is worth running before
-pushing a change to the hook config: it catches what a wrong `types_or`
-tag or a malformed entry would otherwise turn into a red lint job.
+`uvx`, and not the `uv run` section 1 describes and a sibling's lint job
+runs; `lint.yml` runs this same command for the reason its own header
+gives. Restating that reason here is the rejected alternative, and what
+it costs is section 9's *One fact in one place*: nothing keeps a copy in
+this file equal to the header, and this file is what a session reads
+before running the gate. Without `--all-files` a `pre-commit run` reads
+the staged files, and from a clean tree it reports
+`(no files to check)Skipped` and exits 0. So the single-hook line carries
+the flag as well, and hook scope is the whole of what separates it from
+the first. The last one is worth running before pushing a change to the
+hook config: it catches what a wrong `types_or` tag or a malformed entry
+would otherwise turn into a red lint job.
 
 **Check exit codes, not filtered output.** `pre-commit run ... | grep -v
 Passed` hides a failure, and `grep` finding nothing exits 1, which is not
