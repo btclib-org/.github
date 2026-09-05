@@ -88,15 +88,14 @@ worktree at once, which the ordinary sequence avoids by each removing
 its own.
 
 An issue of this tracker worked in `btclib` by a coder names its
-worktree `wt-github-255-btclib-coder`. No `uv sync` follows the `cd`,
-the gate doing that itself, and the editing, the gates and the commits
-all happen in the worktree before the push.
+worktree `wt-github-255-btclib-coder`. No `uv sync` follows
+`git worktree add`, the gate doing that itself, and the editing, the
+gates and the commits all happen in the worktree before the push.
 
 ```shell
 WT=<scratchpad>/wt-<tracker>-<issue>-<repo>-<role>
 git worktree add "$WT" origin/main -b <branch>
-cd "$WT"
-git push origin HEAD:refs/heads/<branch>
+git -C "$WT" push origin HEAD:refs/heads/<branch>
 ```
 
 `-b <branch>` sits after the path and the commit-ish so that the
@@ -108,6 +107,17 @@ the reader's own directory already holds the name `branch`: there the
 a path with no directory at it is the file it creates. Ordinarily
 nothing holds that name, so the `<` fails first (`no such file or
 directory: branch`) and the line ends before the `>` opens anything.
+
+The push names the worktree with `git -C "$WT"` because a `cd` binds the
+shell that runs it: a session that runs each line as its own command
+starts the next one in the directory it began in, the primary checkout,
+so a push after a `cd` offers that checkout's `HEAD` instead of the
+worktree's. `env -C <dir>` is the same binding for a command that takes
+no `-C` of its own. Neither binding rescues the assignment above it: a
+session that loses the `cd` loses `WT` with it, and `git -C ""` is
+documented to leave the working directory unchanged, so that push lands
+the same way, exit 0 and no diagnostic. What the `-C` buys is a path
+that can be written out in full; write it out.
 
 Removing the worktree is part of finishing, and it stands in a block of
 its own: the block above ends in a placeholder, and a shell that
