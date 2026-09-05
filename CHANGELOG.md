@@ -5698,3 +5698,14 @@ audit has no revision to compare against.
   onto the one target the sentence is about. The conclusion holds under
   either errno — the open fails, the `>` after it is never reached, and
   that command writes nothing.
+
+### A placeholder inside a path creates nothing on a read-only `/`
+
+- **Section 9's sweep sentence rests on the paste writing nothing rather
+  than on a file landing elsewhere** (closes #819):
+  `orgs/<org>/installations` gives the `>` the target `/installations`,
+  and on macOS `/` is read-only, so the open fails `EROFS` and nothing
+  is created at the root either.
+- **Explaining that clean sweep by a file created at the root is the
+  rejected alternative** (closes #819): what it costs is a reader
+  hunting at `/` for a file this platform does not write.

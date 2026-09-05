@@ -2364,24 +2364,31 @@ sight rather than weighed.
   where a directory is what the open fails on, so the pair would read as
   taken back where the bullet reaches `/` rather than following from what
   is said here.
-  A placeholder inside a path puts that word at the root of the
-  filesystem: `orgs/<org>/installations` gives the `>` the target
-  `/installations`, so what a paste creates is not in the directory the
-  reader is standing in and a sweep that lists that directory reports
-  the block as clean. `/` alone is not that case — the open fails, and
-  one command's redirections are performed in order, so the `>` after it
-  in `repos/<org>/<repo>` is never reached and that command writes
-  nothing. What the open fails with on macOS is not the `EISDIR` above:
-  a `>` asks to create as well as to write, and at `/` the errno names
-  the create rather than the direction. macOS answers `EEXIST`, which
-  its own `open(2)` gives only for `O_CREAT` with `O_EXCL`; a `>` sets
-  `O_CREAT` alone, so the platform departs from its own page. `/.`
-  names the same directory and answers `EISDIR`, so the answer belongs
-  to the spelling and not to the directory it names. Neither errno
-  decides anything here, the open failing under both. The rejected
-  alternative leaves the general reason a directory gets; what it costs
-  is a reader carrying the `EISDIR` above down onto the one target this
-  sentence is about.
+  A placeholder inside a path puts that word at the root of the filesystem:
+  `orgs/<org>/installations` gives the `>` the target `/installations`, so
+  the paste writes nothing in the directory the reader is standing in and a
+  sweep that lists that directory reports the block as clean. A sweep of
+  `/` reports the same on macOS, where `/` is read-only: the open of a name
+  not already there answers `EROFS`, and the `>` creates nothing. That
+  errno is the platform's answer measured rather than its page's: macOS's
+  own `open(2)` gives `EROFS` for a file that resides on a read-only file
+  system and is to be modified, and a name that is not there resides
+  nowhere. The rejected alternative explains the reader's clean directory
+  by the write having landed at the root; what it costs is a reader hunting
+  at `/` for a file this platform does not write. `/` alone is not that
+  case — the open fails, and one command's redirections are performed in
+  order, so the `>` after it in `repos/<org>/<repo>` is never reached and
+  that command writes nothing. What the open fails with on macOS is not the
+  `EISDIR` above: a `>` asks to create as well as to write, and at `/` the
+  errno names the create rather than the direction. macOS answers `EEXIST`,
+  which its own `open(2)` gives only for `O_CREAT` with `O_EXCL`; a `>`
+  sets `O_CREAT` alone, so the platform departs from its own page. `/.`
+  names the same directory and answers `EISDIR`, so the answer belongs to
+  the spelling and not to the directory it names. Neither errno decides
+  anything here, the open failing under both. The rejected alternative
+  leaves the general reason a directory gets; what it costs is a reader
+  carrying the `EISDIR` above down onto the one target this sentence is
+  about.
   A redirection that fails is the one command's rather than the line's,
   so the other side of a pipeline runs whatever it did:
   `git show v<version>:pyproject.toml | grep '^version'` reaches the
