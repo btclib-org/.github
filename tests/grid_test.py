@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 import yaml
 
-from . import ORG, ROOT, SELF, bulleted, by_hand, gh_json, name, rows, subjects
+from . import ORG, ROOT, SELF, bulleted, by_hand, name, rows, still_open, subjects
 from .workflows_test import workflows
 
 if TYPE_CHECKING:
@@ -178,17 +178,6 @@ def debts() -> dict[str, str]:
             raise LookupError(msg)
         out[row.group(1)] = reference(owed)
     return out
-
-
-def still_open(issue: str) -> bool:
-    """Ask GitHub whether an issue carrying a debt is still open.
-
-    :param issue: the reference, qualified, as `debts` returns it.
-    :returns: whether the API reports it open.
-    """
-    repository, number = issue.split("#")
-    state: str = gh_json(f"repos/{repository}/issues/{number}")["state"]
-    return state == "open"
 
 
 def triggers(workflow: Path) -> dict[str, Any]:
