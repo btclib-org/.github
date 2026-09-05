@@ -2353,8 +2353,17 @@ sight rather than weighed.
   the line can run at all. Where a word follows the placeholder, `>`
   takes the word as its target and the line fails at run time on the `<`
   — `no such file or directory: org` — except in a reader's directory
-  holding a file of the placeholder's own name, where the `<` succeeds,
-  the line runs, and the `>` writes one named for the word that follows.
+  holding the placeholder's own name, where the `<` succeeds, the line
+  runs, and the `>` writes one named for the word that follows. What
+  decides is the direction of the open and not what the name holds: POSIX
+  gives `open(2)` an `EISDIR` only where the flags ask to write or to
+  execute, so the `<` opens for reading and succeeds on a directory as
+  readily as on a file, and the `read(2)` that would fail is one the shell
+  never performs. The rejected alternative names the two objects — a file
+  or a directory — in place of the rule; what it costs is the `>` side,
+  where a directory is what the open fails on, so the pair would read as
+  taken back where the bullet reaches `/` rather than following from what
+  is said here.
   A placeholder inside a path puts that word at the root of the
   filesystem: `orgs/<org>/installations` gives the `>` the target
   `/installations`, so what a paste creates is not in the directory the

@@ -5648,3 +5648,18 @@ audit has no revision to compare against.
   reaching anything a contributor pushes, where what is written to
   `main` is the commit GitHub composes at the button and a branch's own
   are never read.
+
+### Section 9's placeholder exception turns on the open's direction
+
+- **A directory of the placeholder's own name makes the `<` succeed, as
+  a file of that name does** (closes #800): the exception named a file
+  alone, where the open a `<` performs is for reading and succeeds on a
+  directory as readily — the `read(2)` that would fail is one the shell
+  never performs. That sentence is what a reader checks their own
+  directory against before pasting, so the narrowing tells them a paste
+  cannot write where it does.
+- **The exception is stated as the direction of the open rather than as
+  a pair of objects** (closes #800): the `>` half of the same bullet
+  fails on exactly what the `<` accepts, so widening the exception to a
+  file or a directory is the rejected alternative — it reads as taken
+  back where the bullet reaches `/`.
