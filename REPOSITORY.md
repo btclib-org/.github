@@ -192,16 +192,23 @@ gh api repos/btclib-org/.github/commits/main \
 # {"reason":"valid","verified":true}
 ```
 
-`required_signatures` refuses an unsigned commit at the push rather than
-noticing it afterwards, and with an empty bypass list it refuses one from
-everybody. What the call answers is the signature on the squash GitHub
-composed at the merge button, made with its own web-flow key rather than
-the maintainer's, and that satisfies the rule: [it asks for a valid
-signature and not for a particular signer][s11-sigs].
+`required_signatures` is a rule of `main-integrity`, so what it refuses
+is a push writing an unsigned commit to `refs/heads/main`, at the push
+rather than in a check reported afterwards, and with no bypass actor it
+refuses one from everybody. Nothing above reaches a branch other than
+that one.
 
-What no rule covers is a commit before it is pushed:
-`git log -1 --format='%G? %GS'`, an `N` being a defect to fix rather than
-to explain.
+What the call answers is the signature on the squash GitHub composed at
+the merge button, made with its own web-flow key rather than the
+maintainer's, and that satisfies the rule: [it asks for a valid signature
+and not for a particular signer][s11-sigs]. The section below reads back
+squash as the only merge method, so that commit is also the only one the
+rule ever sees: a branch's own are never written to `main`.
+
+So what no rule covers is every commit but that one, pushed or not, and a
+verified `main` is not evidence that any of them is signed.
+`git log --format='%G? %GS' origin/main..` is what answers for a branch's
+own, an `N` being a defect to fix rather than to explain.
 
 ## Merge methods
 
