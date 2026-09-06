@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from . import ROOT, subjects
+from . import ROOT, still_open, subjects
 from .grid_test import triggers
 
 if TYPE_CHECKING:
@@ -68,14 +68,29 @@ EXPECTED_DRIFT: dict[str, str] = {
 """A path section 14 names whose copies are known not to agree yet.
 
 The value is the issue that decides it, and the commit the drift came
-from where one commit made it. An entry here is a strict expected
-failure rather than a red row: the suite stays green on a drift that is
-already filed, and the day the copies agree the test passes
-unexpectedly, which strict turns red -- the signal to delete the entry.
-That red says the copies agree and not how they came to, so the commit
-is what tells whoever deletes the entry which way the drift was
+from where one commit made it -- a reference, then a comma, then that
+clause where one exists. `drift_reference` reads only the first field,
+so the clause behind it is free to say anything. An entry here is a
+strict expected failure rather than a red row: the suite stays green on
+a drift that is already filed, and the day the copies agree the test
+passes unexpectedly, which strict turns red -- the signal to delete the
+entry. That red says the copies agree and not how they came to, so the
+commit is what tells whoever deletes the entry which way the drift was
 resolved.
 """
+
+
+def drift_reference(value: str) -> str:
+    """Read the issue reference out of an `EXPECTED_DRIFT` value.
+
+    A value may carry more than the reference -- `.gitattributes`' also
+    names the commit the drift came from -- so this reads the field
+    before the first comma, never the value whole.
+
+    :param value: an `EXPECTED_DRIFT` entry's value.
+    :returns: the reference alone, qualified the way `still_open` reads it.
+    """
+    return value.split(",", maxsplit=1)[0]
 
 
 def verbatim() -> dict[str, str]:
@@ -246,3 +261,55 @@ def test_a_recorded_drift_is_still_one(trees: dict[str, Path], path: str) -> Non
         raise LookupError(msg)
     found = copies(trees, path)
     assert len(found) == 1, f"{path} is {len(found)} distinct files"
+
+
+def test_drift_reference_reads_only_the_field_before_the_first_comma() -> None:
+    """A value naming a commit besides the issue still yields it alone."""
+    value = "btclib-org/.github#830, from portanode@309a098"
+    assert drift_reference(value) == "btclib-org/.github#830"
+
+
+PRECEDENT = "btclib-org/.github#367"
+"""A closed issue of this tracker, read as the control on the check below.
+
+`backlog_test.py`'s own `PRECEDENT` is the same issue for the same
+reason: a reader that told no state from another -- open for a 404, or
+for a renamed field -- would pass an all-open check on nothing measured,
+and 367 is what tells that reader from a working one.
+"""
+
+
+def test_every_expected_drift_entry_cites_an_open_issue() -> None:
+    """An entry goes when its issue closes, the way a `BACKLOG` row does.
+
+    `test_a_recorded_drift_is_still_one` re-derives that the copies still
+    differ; it never asks whether the issue in the value is still open,
+    which is what leaves a stale citation excusing a live drift with a
+    green run and nothing pointing at it. `backlog_test.py` asks the
+    equivalent question of `BACKLOG`, and btclib-org/.github#844 is the
+    issue that named the gap between the two tables.
+    """
+    stale = [
+        path
+        for path, value in EXPECTED_DRIFT.items()
+        if not still_open(drift_reference(value))
+    ]
+    assert not stale, (
+        f"EXPECTED_DRIFT cites issues that have closed: {stale}. An entry"
+        " goes once the copies converge; where they still differ, it"
+        " cites the issue recording it now"
+    )
+
+
+def test_a_reader_that_answered_open_for_every_drift_would_be_caught() -> None:
+    """The check above passes on an empty answer, however it came to be one.
+
+    It is green where every entry cites an open issue and green where no
+    state was read at all. Asking the same function for an issue that is
+    closed is what tells the two apart.
+    """
+    assert not still_open(PRECEDENT), (
+        f"{PRECEDENT} did not come back closed: either it was reopened, and"
+        " the control needs an issue that is not, or a state is no longer"
+        " being read"
+    )

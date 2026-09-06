@@ -213,29 +213,30 @@ Do not use Fable unless explicitly instructed.
   is written into those repositories and no hook reads it, so a
   repository that wants the file gated keeps its own. A change here is a
   change to what a reader of every repository inheriting it sees.
-- **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` takes an entry where the
-  copies converge by a landing the branch cannot make.** A branch
-  touching the shared half of a file section 14 compares up to
-  `## This repository in particular` owes that entry and the issue it
-  names, in the same diff. What the table takes is section 14's own
-  sentence — a copy a fix converges, not one that cannot by design — so
-  a port going out tree by tree qualifies, and so does a decision for
-  the family whose outcomes all converge: `d000842` filed one against a
-  port decision not yet taken, the paragraph ported into the other trees
-  and the paragraph moved below the heading leaving the compared halves
-  equal either way. Where the convergence is one edit of the branch's
-  own instead — tree-local text written above the heading rather than
-  below it — that edit is the answer, and an entry there registers a
-  mistake as a migration. An entry switches the comparison off
-  meanwhile: the path leaves
-  `test_every_copy_of_a_verbatim_file_is_the_same_copy` for as long as
-  the entry stands. Not `tests/__init__.py`'s `BACKLOG`, which excuses a
-  whole test rather than one path, and not a second statement of what
-  deletes an entry, which `EXPECTED_DRIFT`'s own docstring carries. The
-  precedent is `.gitattributes`, and it is the precedent for an entry's
-  whole life: `90faad8` added one and `6bf5e5c` deleted it once the
-  eighth tree converged, its message giving the reason — "a drift filed
-  later still wants an entry here and not a row there".
+- **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` takes an entry where the copies
+  converge by a landing the branch cannot make.** A branch touching the shared
+  half of a file section 14 compares — the whole file, or everything above
+  `## This repository in particular` where a copy carries that heading — owes
+  that entry and the issue it names, in the same diff. Dropping the heading
+  clause would lose the useful half of the old sentence, which said which part
+  of `CONTRIBUTING.md` is at stake; keeping it costs one clause and reaches
+  every path all the same, `shared()`'s own two returns being exactly this pair.
+  What the table takes is section 14's own sentence — a copy a fix converges,
+  not one that cannot by design — so a port going out tree by tree qualifies,
+  and so does a decision for the family whose outcomes all converge: `d000842`
+  filed one against a port decision not yet taken, the paragraph ported into the
+  other trees and the paragraph moved below the heading leaving the compared
+  halves equal either way. Where the convergence is one edit of the branch's own
+  instead — tree-local text written above the heading rather than below it —
+  that edit is the answer, and an entry there registers a mistake as a
+  migration. An entry switches the comparison off meanwhile: the path leaves
+  `test_every_copy_of_a_verbatim_file_is_the_same_copy` for as long as the entry
+  stands. Not `tests/__init__.py`'s `BACKLOG`, which excuses a whole test rather
+  than one path, and not a second statement of what deletes an entry, which
+  `EXPECTED_DRIFT`'s own docstring carries. The precedent is `.gitattributes`,
+  and it is the precedent for an entry's whole life: `90faad8` added one and
+  `6bf5e5c` deleted it once the eighth tree converged, its message giving the
+  reason — "a drift filed later still wants an entry here and not a row there".
 - **A claim about "every tier-2 repository" has to hold of this tree too**,
   section 2 saying its own row is measured the same way as the others. `grep
   -c '^### A version, and no release' CONTRIBUTING.md`, run against every
