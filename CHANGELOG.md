@@ -5835,3 +5835,19 @@ audit has no revision to compare against.
   excluded rather than of the tree holding it. `btclib-node`'s
   `[tool.coverage.report]` comment is where the family already wrote
   this, and it is the shape section 8 now takes.
+
+### `changelog_test.py` names no command for counting entries
+
+- **The guard's failure message tells a contributor to take a stated
+  count out and offers no command for deriving one instead** (issue
+  #829): it named `grep -c '^- '`, which counts the separate claims an
+  entry's list body makes rather than the entries, and section 9 lets an
+  entry making a single claim carry no bullet at all. Naming a corrected
+  pattern is the rejected alternative: one message serves each history
+  file the guard reads, `RELEASE_NOTES.md` joining the moment this tree
+  writes one, so a command written there is a claim about a shape the
+  message cannot check, where what the guard asks is that a number be
+  absent rather than that it be derivable. What the message keeps is the
+  reason the count is removed rather than corrected, under `merge=union`
+  such a paragraph coming back in silence, and an answer to *but a
+  reader wants the number*: the reader counts the entries.
