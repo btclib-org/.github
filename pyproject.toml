@@ -164,12 +164,20 @@ ignore = [
 max-complexity = 10
 
 [tool.ruff.lint.pycodestyle]
-# section 5's second width, and the one the formatter cannot reach:
-# ruff-format reflows code to 88 columns and rewrites neither a comment
-# nor a docstring, so this is the other half of a file, held to the
-# width MD013 already holds the markdown here to. W505 is in the "W"
-# family selected above and is inert without this key, ruff having no
-# default doc length
+# section 5's second width, held to the width MD013 already holds the
+# markdown here to: max-doc-length reaches a docstring and a
+# whole-line comment -- prose ruff-format never reflows -- and stops
+# there, a comment ending in a URL excepted, so a comment following
+# code on its line is outside the key. This tree does not ignore
+# line-too-long, so such a comment is unmeasured between 81 and 88
+# columns and reported above 88 by that rule instead -- except where a
+# URL or a pragma that rule recognises is what carries the line past
+# 88, which it passes over. The exemption is that condition and not the
+# shape: code already over 88 before the comment starts is reported
+# whatever follows it. `# pragma: no cover` is not one of the pragmas
+# it recognises, so section 8's inline half is measured here like any
+# other trailing comment. W505 is in the "W" family selected above and
+# is inert without this key, ruff having no default doc length
 max-doc-length = 80
 
 [tool.ruff.lint.pydocstyle]
