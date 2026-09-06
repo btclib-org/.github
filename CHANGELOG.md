@@ -6049,3 +6049,31 @@ audit has no revision to compare against.
   above**: that entry called `.gitattributes` the entry `EXPECTED_DRIFT` holds,
   true when it landed and not any longer — what it said about the bullet's own
   subject and the census behind it stands untouched.
+
+### `.github`'s own `pyproject.toml` comment says what `max-doc-length` reaches
+
+- **The `[tool.ruff.lint.pycodestyle]` comment no longer calls the key
+  "the half the formatter cannot reach"** (closes #850): a comment
+  following code on its line is part of that half too, and the key does
+  not hold it to any width -- section 9's own ruling, landed by #841.
+  The comment keeps the `section 5's second width` anchor, the reason
+  the 80 matches the width MD013 already holds the markdown here to,
+  the URL exemption section 5 states beside the key, and the
+  W505-is-inert-without-the-key sentence. This narrows **Section 5's
+  statement of the same width narrows with it** above by one tree, the
+  rest of that entry standing.
+- **It also says what a trailing comment meets here instead**: this
+  tree does not ignore `line-too-long`, so such a comment is unmeasured
+  between 81 and 88 columns and reported above 88 by that rule -- with
+  that rule's own exemptions named, and named as the condition they
+  are: it passes over a line only where a URL or a pragma it recognises
+  is what carries it past 88, and reports code already over before the
+  comment starts. `# pragma: no cover` is not one of those pragmas, so
+  section 8's inline half is measured here like any other trailing
+  comment -- which is the only part of that rule's own list this tree
+  needs, the list itself being ruff's and a thing no file here can keep
+  true. Neither the fact nor the exemptions were in the comment before.
+- **This is the shape the trees ISS 841's box 2 names are asked to
+  copy, not a match to one already chosen**: those branches, one per
+  tree, do not exist yet, so this branch sets the wording rather than
+  following it.
