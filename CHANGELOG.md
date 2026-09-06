@@ -5950,3 +5950,25 @@ audit has no revision to compare against.
   principle for one path, and it is left where it was — this bullet is
   where the principle becomes what a session applies before writing an
   entry. #830's port decision is untouched.
+
+### Section 7 asks for a guard where the platform may refuse the call
+
+- **The call sits in a `try` and the refusal becomes a `pytest.skip`
+  naming it** (closes #812): creating a symlink is the case the family
+  carries, an account on Windows without
+  `SeCreateSymbolicLinkPrivilege` getting an `OSError` from `os.symlink`
+  rather than a link, which CPython records in `Lib/tarfile.py` above
+  the exception tuple its own call is guarded by. What the guard is for
+  is a contributor's own machine rather than a runner, so a green matrix
+  cell answers for the gate rather than for that machine.
+- **The `except` carries section 8's `pragma: no cover`, and the fuller
+  reason stays in the docstring at the site** (closes #812): what the
+  standard states once is the ruling, not the sentence each case gives
+  for its own line — deleting those sentences is what section 8's *What
+  it costs is paid at the site* refuses.
+- **A docstring in whichever tree carries the form is the rejected
+  home** (closes #812): a porting tree reads it only where it copies
+  from that tree, and `btclib`, the tree #806 sends the case to, carries
+  no symlink-creating test to copy from. A comment at the guard citing
+  an issue is the other rejected home: a citation is not a reason, it
+  would be written twice, and it points at a tracker entry that closes.
