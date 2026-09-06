@@ -2036,6 +2036,25 @@ licence travels with what it covers: where upstream ships one beside the
 file, the copy takes it too, under a name that cannot be read as
 licensing the directory around it.
 
+### A capability the platform may refuse is asked for inside a guard
+
+The call that asks for it sits in a `try`, and the refusal becomes a
+`pytest.skip` naming what refused, which this section's `-ra` reports.
+Creating a symlink is the case the family carries: on Windows an account
+without `SeCreateSymbolicLinkPrivilege` gets an `OSError` from
+`os.symlink` rather than a link, which CPython records in
+`Lib/tarfile.py` where it names the exceptions that call may raise. What
+the guard is for is a contributor's own machine and not a runner — a
+runner holding the privilege runs the case either way, so its green cell
+answers for the gate rather than for that machine. The `except` runs
+only where the refusal happened, which is not the machine the floor is
+measured on, so it carries section 8's `pragma: no cover` with the
+inline half that section asks for, and the fuller reason is the
+docstring the case already opens with. Leaving the call bare is the
+rejected alternative, on the ground that no runner has refused it; what
+it costs is a red suite on the one machine that cannot run the case at
+all, naming a privilege where the case is about something else.
+
 ### Integration tests
 
 `tests/integration/` is whatever needs something the repository does not
