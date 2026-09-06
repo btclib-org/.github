@@ -5991,3 +5991,32 @@ audit has no revision to compare against.
   does not reach, so the two sections would otherwise disagree about one
   rule. What is left is the configuration comment of each Python tree,
   which reads this sentence rather than deriving it.
+
+### Section 3's `uv_build` floor is the boundary, not an alignment
+
+- **The floor is the boundary of the property it keeps** (closes #835):
+  the alignment the section asked for — with the `uv` the gate pins
+  through `uv-pre-commit`, and with the sibling the number was copied
+  from — named versions that differ and that nothing kept, pre-commit.ci
+  moving a rev on each repository's own weekly schedule with nothing
+  moving a floor. A floor above the boundary is the rejected alternative
+  now, and what chose against it is written beside it: it excludes
+  backends that keep the property, and nothing checks the number, the
+  archive `check-sdist` compares against git being packed by a backend
+  `additional_dependencies` resolves from `[build-system]`'s own range.
+  The section's PEP 639 bullet says the same floor is set by what its
+  sdist carries, and the two halves of the section now agree.
+- **A floor at the boundary cannot contradict section 1** (closes #834):
+  `[tool.uv] required-version` names the oldest uv a tree admits, and on
+  a uv it admits but a higher floor excludes, `uv build` looks past the
+  copy bundled in it for a `uv_build` meeting the floor — section 12's
+  read, whose run is issue #242's. `0.12.0` is below what that key
+  names, so the floor and the key cannot disagree while the floor stays
+  at the boundary.
+- **This bears on *Section 3 separates a floor from the boundary it
+  keeps*** above (closes #835): the half of that entry saying the
+  section states the two as separate facts, a floor above the boundary
+  being alignment with the `uv` the gate pins, is what this replaces —
+  there is one number now and one reason. What that entry says about the
+  boundary itself, and about the measurement that locates one, is
+  untouched, and it stays where it was.

@@ -1019,16 +1019,32 @@ what it holds.
     project in between. Each bound carries the reason that chose it, and
     PEP 639 below is one such reason.
 
-    A floor and the boundary of the property it keeps are two facts, and
-    the comment states both rather than giving the second's number the
-    first's reason. Under `uv_build` the sdist's own `pyproject.toml`
-    became a normalized copy of the file with the verbatim one kept
-    beside it as `pyproject.toml.orig` in `0.12.0`, and a floor above
-    that is alignment — with the `uv` the gate pins through
-    `uv-pre-commit`, and with the sibling the number was copied from —
-    which is the number to lower first if a resolver ever wants it
-    lower. The boundary is measured by calling the backend's own hook at
-    each version. `--with` puts `<version>` ahead of the command it
+    The floor is the boundary of the property it keeps, and the comment
+    gives the measurement that found it. Under `uv_build` the sdist's
+    own `pyproject.toml` is a normalized copy of the file with the
+    verbatim one kept beside it as `pyproject.toml.orig` from `0.12.0`;
+    below that the sdist carries the verbatim file and no `.orig`.
+
+    The rejected alternative is a floor above that boundary, aligned
+    with the `uv` the gate pins through `uv-pre-commit` or with the
+    sibling the number was copied from, as an equality or as a bound the
+    floor stays under. It excludes backends that keep the property, and
+    nothing checks the number it lands on: under section 12's
+    `--installer=pip` the archive `check-sdist` compares against git is
+    packed by a backend `additional_dependencies` resolves from
+    `[build-system]`'s own range, which satisfies the floor by
+    construction. What does read the floor is `uv build`, and section 1
+    is where that costs: `[tool.uv] required-version` names the oldest
+    uv a tree admits, pre-commit.ci moves a hook rev on each
+    repository's own weekly schedule with nothing moving that key, and
+    on a uv the key admits but the floor excludes, uv looks past the
+    copy bundled in it for a `uv_build` meeting the floor instead, which
+    section 12 has too. `0.12.0` is below what `required-version`
+    names — section 15's sweep prints that key per tree — so a floor at
+    the boundary cannot contradict section 1.
+
+    The boundary is measured by calling the backend's own hook at each
+    version. `--with` puts `<version>` ahead of the command it
     measures, so it cannot sit last as section 9 asks; the assignment
     stands in a block of its own, for the reason section 9's bullet
     gives, and the block below it writes `${version:?}`, unset being
