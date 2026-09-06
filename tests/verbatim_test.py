@@ -63,7 +63,6 @@ CONDITIONAL = "owed where "
 
 EXPECTED_DRIFT: dict[str, str] = {
     "REVIEWING.md": "btclib-org/.github#353",
-    ".gitattributes": "btclib-org/.github#830, from portanode@309a098",
 }
 """A path section 14 names whose copies are known not to agree yet.
 
@@ -83,8 +82,8 @@ resolved.
 def drift_reference(value: str) -> str:
     """Read the issue reference out of an `EXPECTED_DRIFT` value.
 
-    A value may carry more than the reference -- `.gitattributes`' also
-    names the commit the drift came from -- so this reads the field
+    A value may carry more than the reference -- the commit a drift
+    came from, comma-separated behind it -- so this reads the field
     before the first comma, never the value whole.
 
     :param value: an `EXPECTED_DRIFT` entry's value.
