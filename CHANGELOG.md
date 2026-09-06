@@ -6034,3 +6034,18 @@ audit has no revision to compare against.
   closed issue no longer explains. `tests/verbatim_test.py` now asks the same
   question `backlog_test.py` asks of `BACKLOG`, reading the reference out of a
   value that may carry more than one.
+
+### `.gitattributes` converges again, and `EXPECTED_DRIFT` drops the entry
+
+- **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` no longer names
+  `.gitattributes`** (closes #830): every tree's shared half now hashes the
+  same, `portanode`'s own `bacb2b8` having moved the union-driver paragraph
+  below `## This repository in particular` rather than porting it into the rest
+  of the family — the port decision this issue's second box asked for, recorded
+  there and not ported. `test_a_recorded_drift_is_still_one`'s row for the path
+  goes with the entry, and `test_every_copy_of_a_verbatim_file_is_the_same_copy`
+  compares it again instead of skipping it.
+- **This falsifies part of *The bullet's subject was the marker group...*
+  above**: that entry called `.gitattributes` the entry `EXPECTED_DRIFT` holds,
+  true when it landed and not any longer — what it said about the bullet's own
+  subject and the census behind it stands untouched.
