@@ -5812,3 +5812,26 @@ audit has no revision to compare against.
   what `grep -c '^-[^-]'` over the same diff is blind to: that pattern
   answers short of them, and answers 0 on a diff whose deletions are all
   of those shapes.
+
+### Where a pragma's reason goes, and what a grep for it answers
+
+- **The reason goes on the pragma's own line, after ` -- `** (closes
+  #828): *beside it* was as true of the line above as of the same line.
+  The position is what makes `git grep -nE 'pragma: no cover$'` mean
+  something: a reason written off the line leaves a site carrying none
+  reading exactly like one carrying a paragraph. ` - ` is named as the
+  rejected alternative, a check written for one spelling answering a
+  confident zero for a tree that writes the other, and the check that
+  finds that spelling is named beside the rule.
+- **A reason too long for the line goes above it as well, the inline
+  half naming the case** (closes #828): the fuller reason is the comment
+  over the line, or the docstring the file or the function already opens
+  with where one reason covers every pragma under it. Because the inline
+  half stays, the grep is a gate and not a census: a tree keeping the
+  rule answers it empty. Letting the fuller reason replace the inline
+  half is the rejected alternative, and what it costs is that gate;
+  section 14's *decided per repository* list is the other one, declined
+  because how much a reason has to say is a property of the line being
+  excluded rather than of the tree holding it. `btclib-node`'s
+  `[tool.coverage.report]` comment is where the family already wrote
+  this, and it is the shape section 8 now takes.

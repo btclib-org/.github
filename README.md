@@ -2215,8 +2215,9 @@ fail_under = 100.0
   that cannot fail — is excluded once, by pattern, rather than carrying
   a `pragma: no cover` at every site. What is left is a number only
   untested code can lower. A pattern that would also exclude something a
-  test can reach is not one of these: for a one-off, the pragma with its
-  reason beside it is still the answer.
+  test can reach is not one of these: for a one-off, the pragma is still
+  the answer, in the shape *What it costs is paid at the site* below
+  gives it.
 - **`source` is named, never left to `--cov` alone.** Unnamed, it measures
   every file the run imports, which reaches a script a test imports by
   path — uncovered, because nothing runs its `main()` but a subprocess.
@@ -2229,8 +2230,47 @@ fail_under = 100.0
   print `FAIL` and exit zero.
 - **What it costs is paid at the site**: a line no ordinary run reaches is
   covered by patching what stands in the way, or carries a
-  `pragma: no cover` with the reason beside it. Neither is a build left
-  red.
+  `pragma: no cover` with its reason. Neither is a build left red.
+
+  **The reason goes on the pragma's own line, after ` -- `** — the dash
+  a comment writes, an em dash being this file's own. What the position
+  buys is that
+
+  ```shell
+  git grep -nE 'pragma: no cover$' -- '*.py'
+  ```
+
+  answers empty in a tree that keeps the rule, so every line it names is
+  a site short of the inline half — a defect under this rule whether or
+  not a reason for it is written somewhere else. ` - ` is the rejected
+  alternative, and what it costs is a hyphen where a dash was meant, and
+  a check written for one spelling answering a confident zero for a tree
+  that writes the other, which is what
+
+  ```shell
+  git grep -nE 'pragma: no cover - [^-]' -- '*.py'
+  ```
+
+  is for.
+
+  **A reason too long for the line goes above it as well, the inline
+  half naming the case.** `btclib-node`'s `[tool.coverage.report]`
+  comment is where the family already writes this, and it is what keeps
+  the grep above a gate rather than a census. The fuller reason is the
+  comment over the line, or the docstring the file or the function
+  already opens with where one reason covers every pragma under it —
+  written once there rather than copied per line, while each line goes
+  on carrying the case it is.
+
+  Letting the fuller reason **replace** the inline half is the rejected
+  alternative, and what it costs is the gate: a conforming tree would
+  then answer the grep non-empty, so the command would name its
+  conforming sites and its reasonless ones together and telling them
+  apart would be a reading. Section 14's *decided per repository* list
+  was the other alternative, and it is declined: that list takes a
+  reason true of the repository, and how much a reason has to say is a
+  property of the line being excluded rather than of the tree holding
+  it.
 - **Measured on one interpreter**, the one `.python-version` pins, which
   is enough at 100 only because no source branches on the version — a
   percentage below 100 could not promise that, the statement count moving
