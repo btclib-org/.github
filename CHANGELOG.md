@@ -6077,3 +6077,47 @@ audit has no revision to compare against.
   copy, not a match to one already chosen**: those branches, one per
   tree, do not exist yet, so this branch sets the wording rather than
   following it.
+
+### Section 9 tells the 88 the formatter produces from the rule that reports it
+
+- **The width bullet gave the 88 to the formatter alone** (closes
+  #851): `ruff format` counts a trailing comment in the line's width
+  and splits the code to fit it where a split fits, so what it cannot
+  bring back is the line where no split fits — the statement admitting
+  no split, or the comment leaving nothing to split into. That line is
+  a `line-too-long` finding with no fix ruff can apply, wherever a tree
+  keeps that rule — measured against this tree's own configuration,
+  where the rule is live at the width `line-length` gives when
+  `max-line-length` is unset. The first wording of this entry and of
+  the bullet said the formatter leaves the comment where it is, and the
+  review of this branch refuted it; the shapes it was refuted with are
+  in this commit's message, where a reader can find them. The bullet names the
+  rule beside the formatter now, and a paragraph under it says what a
+  tree keeping the rule reports and at which width, and that a tree
+  naming the rule in section 5's `ignore` measures such a line nowhere.
+- **The amnesty that rule offers is written as the condition it is**
+  (closes #851): a line ending in a URL, or in a pragma of the rule's
+  own membership, is passed over only where that URL or pragma begins
+  before the width, so code already over before the comment starts is
+  outside it. The membership is ruff's and moves with ruff, so the
+  standard refers to it rather than listing it, and answers the one
+  case section 8 makes universal: `pragma: no cover` is outside that
+  membership, and an inline half is measured like any other trailing
+  comment. This corrects **It also says what a trailing comment meets
+  here instead** above, whose closing clause — that the rule "reports
+  code already over before the comment starts" — is false where a
+  `noqa` follows: `noqa` suppresses the diagnostic rather than
+  exempting the line, which is #869. Outside the amnesty is what that
+  clause should have said, and is what this entry says.
+- **Which of the two a tree is stays the tree's** (closes #851): fixing
+  the choice for the family is written in as the rejected alternative,
+  section 5's `ignore` being where a rule declined on its own merits is
+  already argued. This is the standard's half of the comment #850
+  landed in this tree's `pyproject.toml`, which the branches #841's
+  second box asks for can point at rather than each deriving a wording.
+- **Section 5's width bullet stops counting the widths** (closes #851):
+  a tree keeping `line-too-long` names that rule's width in the same
+  `[tool.ruff.lint.pycodestyle]` table, which is a third width the
+  bullet's *Two widths* did not admit. It points at section 9 for that
+  rule rather than restating it, as it already does for a comment
+  following code on its line.
