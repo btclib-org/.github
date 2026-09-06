@@ -161,8 +161,9 @@ def test_the_file_states_no_count_of_itself(path: Path) -> None:
     stated = counts(path.read_text(encoding="utf-8"))
     assert not stated, (
         f"{path.name} states a count of itself: {stated}."
-        " Take it out -- `grep -c '^- ' <file>` answers on demand, and"
-        " under `merge=union` such a paragraph comes back in silence."
+        " Take it out rather than correcting it -- a reader who wants"
+        " the number counts the entries, and under `merge=union` such a"
+        " paragraph comes back in silence."
     )
 
 
