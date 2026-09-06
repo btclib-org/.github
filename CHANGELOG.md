@@ -5878,3 +5878,38 @@ audit has no revision to compare against.
   the session that owns `portanode`. Either way the copies converge,
   which is what section 14 asks of a path in this table: it records a
   copy a fix converges, not one that cannot by design.
+
+### Section 9 names the measurement whose apparatus silences its control
+
+- **A control is chosen so that the fault under suspicion could not have
+  produced its answer** (closes #779): the class is a measurement whose
+  apparatus fails symmetrically, the check and the control going quiet
+  together so that the pair agrees and the agreement is what convinces.
+  Naming a control by the perturbation it applies rather than by the
+  property it is hoped to prove is what makes it one, and the revision
+  or the file it asks has to be one the answer already in hand is
+  impossible at. Zero is not the tell: `git show` handed a mangled
+  revision complains on stderr, so a count of its stdout is the zero a
+  real absence gives and a count of the streams merged is a small
+  plausible number.
+- **Each repository's `CLAUDE.md` is the rejected home, written into the
+  bullet with its cost** (closes #779): a copy per repository of one
+  fact, reaching whoever works in a tree rather than whoever writes the
+  sentence a measurement is for. What decides against it is where the
+  standard already asks how a fact is established — *Measure, don't
+  assert* and *A measurement's quantifier is not the sentence's* are
+  what this material follows, and splitting that chain across two
+  documents is what *One fact in one place* refuses.
+- **The guard goes into the instrument rather than the reader's
+  recognition** (closes #779): a control runs unchained, `grep -c`
+  exiting 1 on a count of zero so that `check && control` never reaches
+  the control; a parameter expansion a `:` follows is braced, `zsh`
+  consuming the colon together with a modifier character after it where
+  that character is literal text; a status is read from the command,
+  `$?` after a pipeline being the last stage's. The list of which
+  characters bite is the rejected alternative, and what it costs is a
+  lookup at every use site.
+- **A reconstruction is evidence while its inputs are independent of the
+  subject** (closes #779): one built out of the tip it is meant to check
+  carries whatever damaged that tip, so the comparison exits 0 and reads
+  exactly as a clean one does.
