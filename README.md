@@ -1757,12 +1757,13 @@ preview rule then runs only where `extend-select` names it exactly.
   `[tool.ruff.lint.pycodestyle] max-doc-length = 80` holds the
   docstrings and whole-line comments — prose the formatter never
   reflows — to the width markdown is already held to. A comment ending
-  in a URL is exempt, and one following code on its line is outside the
-  key, which section 9 states with the reason — as it states what a
-  tree keeping `line-too-long` reports such a comment at, the same
-  table naming that width. `W505` is the rule that reads the key and is
-  inert without it, ruff having no default doc length: a tree naming no
-  `max-doc-length` states a width and enforces none, `select` aside.
+  in a URL is exempt on a condition, and one following code on its line
+  is outside the key: section 9 states both, with the reason — as it
+  states what a tree keeping `line-too-long` reports such a comment at,
+  the same table naming that width. `W505` is the rule that reads the
+  key and is inert without it, ruff having no default doc length: a
+  tree naming no `max-doc-length` states a width and enforces none,
+  `select` aside.
 - **`max-complexity = 10`**, ruff's default, with a `# noqa` and a reason
   at each site over it rather than a global bound at the tree's worst.
   `RUF100` then fails the noqa as unused the moment a refactor brings the
@@ -2672,15 +2673,15 @@ sight rather than weighed.
     to spare differs with the code on it, and section 5's `ignore` is
     already where a rule declined on its own merits is argued.
 
-    For such a comment that rule's amnesty is a condition on where the
-    exempting text begins rather than on its shape: a line ending in a
-    URL, or in a pragma of the rule's own membership, is passed over
-    only where that URL or pragma begins before the width, so code
-    already over before the comment starts is outside the amnesty
-    whatever follows. The membership is ruff's and moves with ruff, so
-    nothing here restates it; what section 8 needs of it is that
-    `pragma: no cover` is outside it, an inline half being measured
-    like any other trailing comment.
+    `line-too-long` does not report every over-long line. A line whose
+    last word contains `://` is passed over where everything ahead of
+    that word fits the width. A pragma ruff recognises need not end the
+    line: from it the rest goes unmeasured, so the width a finding
+    names is the one ahead of it. The membership is ruff's and moves
+    with ruff, so nothing here restates it; what section 8 needs of it
+    is that `pragma: no cover` is outside it, an inline half being
+    measured like any other trailing comment. Both hold under
+    `max-doc-length` too, at its own width.
 - **A comment whose first word is `shellcheck` is a directive, so where a
   sentence wraps decides whether one gets written.** A wrap that puts the
   word there does so by accident, and what follows it on that line

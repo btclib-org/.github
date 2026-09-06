@@ -6148,3 +6148,42 @@ audit has no revision to compare against.
   are section 9's, and the W505 sentence is a pointer at section 5. The
   shape #841's box 2 asks the other trees to copy is this one rather
   than the one that entry's last bullet names.
+
+### Section 9 states the URL and the pragma amnesties separately
+
+- **A line whose last word contains `://` is passed over where
+  everything ahead of that word fits the width** (closes #874): the key
+  is the separator and not a scheme ruff knows, `zzzzz://` being passed
+  over where `https_//` at the same width is reported. A sham that only
+  corrupts the scheme name is passed over too, so it proves nothing.
+  The word has to be the line's last, words after the URL bringing the
+  line back.
+- **A pragma ruff recognises need not end the line, and what an
+  over-long line is reported at is the width ahead of it** (closes
+  #874): the sentence this replaces gave the two one condition, in the
+  form `ruff rule E501` states it — the pragma starting before the
+  threshold — which does not hold where the code ahead sits at the
+  width and the pragma opens past it, the line being silent anyway. A
+  sham pragma fires on both sides of that step.
+- **Stating one condition that covers both is the rejected
+  alternative**: the two compare different things, everything ahead of
+  the URL's own word against the width ahead of the pragma with the
+  whitespace between them dropped, so an exempting text opening at the
+  same column is passed over as a pragma and reported as a URL. What
+  each reports differs too, the width ahead for the pragma and the
+  whole line for the URL. Naming neither and leaving the exemptions to
+  ruff was the other alternative, and it costs a tree keeping the rule
+  what it can read here now.
+- **Both hold under `max-doc-length`, at its own width** (issue #866):
+  section 5 called a comment ending in a URL exempt without the
+  condition that the URL is what carries the line past the width, and
+  now says there is a condition and leaves it to section 9 rather than
+  wording it a second time. `btclib` and `bitcoin-core-rpc` still carry
+  the unconditional sentence in their own `pyproject.toml`, which is
+  that issue's second box.
+- **This supersedes "The amnesty that rule offers is written as the
+  condition it is" above**: its *only where that URL or pragma begins
+  before the width* holds for the URL half and not for the pragma half.
+  What that entry corrected in its own turn, that code already over is
+  outside the amnesty, follows from either sentence, so section 9 no
+  longer writes it out.
