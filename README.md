@@ -2378,6 +2378,49 @@ sight rather than weighed.
   would falsify it. A quantifier too wide is invisible in prose and a
   missing command name is not, so the second is how a reader finds the
   first.
+- **A control the same fault silences is not a control.** *Measure,
+  don't assert* and the bullet above ask that a number come from a
+  command and that the sentence claim no more than the command answered;
+  neither asks whether the command measured anything. An apparatus fails
+  symmetrically where whatever silences the check silences the control
+  with it — a pattern that matches nothing, a revision the shell
+  mangled, a status read off the wrong process — and a control that
+  differs from the check only in what it looks for is the one that fails
+  that way, so the two agree and the agreement is what convinces. Name a
+  control by the perturbation it applies rather than by the property it
+  is hoped to prove, and put it where the answer already in hand is
+  impossible: a revision that cannot hold the file, a file that cannot
+  hold the string. Zero is not the tell. `git show` handed a mangled
+  revision writes its complaint to stderr, so a count of its stdout is
+  the zero a real absence gives and a count of the streams merged is a
+  small plausible number. The rejected alternative writes this into each
+  repository's `CLAUDE.md`, among the failure modes a session meets
+  there; what it costs is a copy per repository of one fact, and the
+  reader it reaches is whoever works in a tree rather than whoever
+  writes the sentence a measurement is for.
+- **The guard goes into the instrument, not into the reader's
+  recognition.** A rule applied where it is recognised is not applied at
+  the site nobody looked at, so what survives is the form written
+  unconditionally. A control runs unchained, `grep -c` exiting 1 on a
+  count of zero so that `check && control` prints one number where two
+  were due and never reaches the second. A parameter expansion a `:`
+  follows is braced: `zsh` takes the character after an unbraced
+  `$name:` as a modifier where it is one and consumes the pair, so
+  `"$sha:AUTHORS.md"` asks `git` for a revision that does not exist
+  where `"${sha}:AUTHORS.md"` asks for the file, and `:a`, `:A` and `:P`
+  resolve what is left against the working directory. The trigger is
+  literal text, which makes a path arriving in a variable immune by
+  mechanism rather than by care. A status is read from the command
+  rather than from a pipeline, `$?` after `cmd | head` being `head`'s.
+  The rejected alternative writes down which characters bite; what it
+  costs is a lookup at every use site, and the site that gets no lookup
+  is the one the rule was for.
+- **A reference derived from what it tests is not a reference.** A
+  reconstruction is evidence while its inputs are independent of the
+  subject, and one built out of the tip it is meant to check carries
+  whatever damaged that tip, so the comparison exits 0 and reads exactly
+  as a clean one does. The block comes from the blob before the
+  operation, or the two sides come from different commits.
 - **A placeholder standing as a whole argument is unquoted**, so that a
   paste made before it is filled in fails at the shell rather than
   reaching the tool. Quoting is what an argument holding spaces
