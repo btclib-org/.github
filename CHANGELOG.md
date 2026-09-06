@@ -5851,3 +5851,30 @@ audit has no revision to compare against.
   reason the count is removed rather than corrected, under `merge=union`
   such a paragraph coming back in silence, and an answer to *but a
   reader wants the number*: the reader counts the entries.
+
+### `EXPECTED_DRIFT` names `.gitattributes` while the port decision is open
+
+- **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` names `.gitattributes`**
+  (issue #830): `portanode`'s copy carries a paragraph above
+  `## This repository in particular` that no other tree's carries, and
+  with no entry for the path
+  `test_every_copy_of_a_verbatim_file_is_the_same_copy` reported it as
+  an unfiled drift on every run, a pull request touching what
+  `alignment.yml`'s `paths:` admits included. The entry excuses that one
+  path where a `BACKLOG` row would excuse the whole test, and the strict
+  expected failure it arms turns the copies agreeing back into a signal.
+- **The entry's value names `portanode@309a098` beside the issue that
+  decides the path** (issue #830): the value is the `reason` of that
+  strict expected failure, so it is what a run prints on the day the
+  copies agree, and they agree either by the paragraph being ported into
+  the trees section 14 owes the file to or by its moving below
+  `portanode`'s own heading. The commit is what tells the reader of that
+  red which of the two happened. A comment beside the entry is the
+  rejected alternative: it is read by whoever is already in the file,
+  where the value is read by whoever the red sent there.
+- **The port decision is not taken here, and the entry stays until it
+  is** (issue #830): which way the family goes is a section 14 decision
+  about the standard rather than about this tree, and it is raised with
+  the session that owns `portanode`. Either way the copies converge,
+  which is what section 14 asks of a path in this table: it records a
+  copy a fix converges, not one that cannot by design.

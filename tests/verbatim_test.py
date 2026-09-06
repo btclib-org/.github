@@ -63,14 +63,18 @@ CONDITIONAL = "owed where "
 
 EXPECTED_DRIFT: dict[str, str] = {
     "REVIEWING.md": "btclib-org/.github#353",
+    ".gitattributes": "btclib-org/.github#830, from portanode@309a098",
 }
 """A path section 14 names whose copies are known not to agree yet.
 
-The value is the issue that decides it. An entry here is a strict
-expected failure rather than a red row: the suite stays green on a
-drift that is already filed, and the day the copies agree the test
-passes unexpectedly, which strict turns red -- the signal to delete the
-entry.
+The value is the issue that decides it, and the commit the drift came
+from where one commit made it. An entry here is a strict expected
+failure rather than a red row: the suite stays green on a drift that is
+already filed, and the day the copies agree the test passes
+unexpectedly, which strict turns red -- the signal to delete the entry.
+That red says the copies agree and not how they came to, so the commit
+is what tells whoever deletes the entry which way the drift was
+resolved.
 """
 
 
