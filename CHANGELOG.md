@@ -6121,3 +6121,30 @@ audit has no revision to compare against.
   bullet's *Two widths* did not admit. It points at section 9 for that
   rule rather than restating it, as it already does for a comment
   following code on its line.
+
+### The `pycodestyle` comment points at section 9 instead of restating it
+
+- **The clause claiming a line already over 88 is reported whatever
+  follows it is gone** (closes #869): where what follows is a `# noqa`,
+  the rule fires and the directive discards the diagnostic, so nothing
+  is reported. `--ignore-noqa` tells that from a line the exemption
+  reaches — under it the `noqa` line reports and the exempt line stays
+  silent.
+- **The exemption clause beside it was wrong in its own way** (closes
+  #869): it made the exemption a condition on whether a URL or a
+  recognised pragma is what carries the line past 88, and a pragma
+  beginning before the width exempts a line with text still following
+  it. #870 carries the measurement that refutes it, and one removal
+  answers both clauses.
+- **What is left is this tree's own half** (closes #869): section 9
+  states what the key reaches, what it leaves to `line-too-long`, and
+  when that rule passes a line over, so restating any of it here is
+  what *One fact in one place* refuses. `ignore` does not name
+  `line-too-long`, so a comment following code on its line meets that
+  rule here rather than nothing, which is the choice section 9 leaves
+  a tree.
+- **This narrows "It also says what a trailing comment meets here
+  instead" above**: the exemptions that entry has the comment naming
+  are section 9's, and the W505 sentence is a pointer at section 5. The
+  shape #841's box 2 asks the other trees to copy is this one rather
+  than the one that entry's last bullet names.
