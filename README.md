@@ -1738,11 +1738,13 @@ preview rule then runs only where `extend-select` names it exactly.
   appears only where nothing has settled it.
 - **Two widths, and both are enforced**: `ruff-format` reflows code to
   88, and `[tool.ruff.lint.pycodestyle] max-doc-length = 80` holds the
-  comments and docstrings — the half of a file the formatter never
-  touches — to the width markdown is already held to. A comment ending
-  in a URL is exempt. `W505` is the rule that reads the key and is inert
-  without it, ruff having no default doc length: a tree naming no
-  `max-doc-length` states a width and enforces none, `select` aside.
+  docstrings and whole-line comments — prose the formatter never
+  reflows — to the width markdown is already held to. A comment ending
+  in a URL is exempt, and one following code on its line is outside the
+  key, which section 9 states with the reason. `W505` is the rule that
+  reads the key and is inert without it, ruff having no default doc
+  length: a tree naming no `max-doc-length` states a width and enforces
+  none, `select` aside.
 - **`max-complexity = 10`**, ruff's default, with a `# noqa` and a reason
   at each site over it rather than a global bound at the tree's worst.
   `RUF100` then fails the noqa as unused the moment a refactor brings the
@@ -2614,9 +2616,27 @@ sight rather than weighed.
 - **No history in the prose.** Comments say why the code is as it is, in
   the present tense. History has two files of its own.
 - **80 columns everywhere prose lives** — markdown by MD013, tables
-  included; Python comments and docstrings by ruff. Code is 88, the
+  included; a Python docstring and a whole-line comment by ruff's
+  `max-doc-length`; a toml comment by a pygrep hook. Code is 88, the
   formatter's; yaml is 100, because an action pinned to a commit SHA with
   its tag in a trailing comment is past 80 before anything else is said.
+
+    **A Python comment following code on its line is outside the
+    number**, and nothing holds it to that width: `max-doc-length`
+    reaches a docstring and a whole-line comment and stops there, and
+    `ruff format` does not rewrap one. What such a comment may use is
+    whatever the code leaves, and a reason that will not fit goes into
+    the comment above the line — for a `pragma: no cover`, above the
+    inline half section 8 keeps rather than replaces.
+
+    A gate is the rejected alternative rather than a missing one, and
+    what it would buy is the number holding without anybody reading for
+    it. What overflows is typically a `type: ignore`, a `noqa` or a
+    pragma's inline half: the first two are a tool's own spelling and
+    the third names which case the line is, so the only thing left to
+    shorten is the code the comment sits after. And a line-oriented
+    pattern reads a `#` inside a string as a comment, which no spelling
+    of such a pattern fixes.
 - **A comment whose first word is `shellcheck` is a directive, so where a
   sentence wraps decides whether one gets written.** A wrap that puts the
   word there does so by accident, and what follows it on that line

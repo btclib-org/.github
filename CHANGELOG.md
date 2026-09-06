@@ -5972,3 +5972,22 @@ audit has no revision to compare against.
   no symlink-creating test to copy from. A comment at the guard citing
   an issue is the other rejected home: a citation is not a reason, it
   would be written twice, and it points at a tracker entry that closes.
+
+### Section 9 says a comment following code on its line is outside the 80
+
+- **A trailing Python comment is outside the number, and nothing holds
+  it to that width** (issue #841): `max-doc-length` reaches a docstring
+  and a whole-line comment and stops there, and `ruff format` does not
+  rewrap one — measured in one run, what it reports being the control
+  for what it passes over. The bullet gains what does hold the rest, ruff's key
+  by name and the pygrep hook that holds a toml comment. A gate is
+  written in as the rejected alternative: what overflows is a tool's own
+  token or a reason section 8 asks to name the case rather than to fit,
+  so the width comes off the code and not the prose, and a
+  line-oriented pattern reads a `#` inside a string as a comment.
+- **Section 5's statement of the same width narrows with it** (issue
+  #841): that bullet gave `max-doc-length` the half of a file the
+  formatter never touches, which a trailing comment is and which the key
+  does not reach, so the two sections would otherwise disagree about one
+  rule. What is left is the configuration comment of each Python tree,
+  which reads this sentence rather than deriving it.
