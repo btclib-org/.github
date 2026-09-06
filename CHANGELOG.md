@@ -6020,3 +6020,17 @@ audit has no revision to compare against.
   there is one number now and one reason. What that entry says about the
   boundary itself, and about the measurement that locates one, is
   untouched, and it stays where it was.
+
+### `EXPECTED_DRIFT`'s bullet widens, and its citation is now checked
+
+- **The bullet's subject was the marker group, and most of the paths section 14
+  compares carry no marker** (closes #848): its sentence now reaches every path
+  — the whole file, or everything above `## This repository in particular` where
+  a copy carries that heading — and is true of this tree's own `.gitattributes`,
+  which carries no marker and is the entry `EXPECTED_DRIFT` holds.
+- **`EXPECTED_DRIFT` excused a path on an issue's say-so and nothing read
+  whether that issue was still open** (closes #844): a citation could go stale
+  exactly as a `BACKLOG` row's does, with the suite staying green on a drift a
+  closed issue no longer explains. `tests/verbatim_test.py` now asks the same
+  question `backlog_test.py` asks of `BACKLOG`, reading the reference out of a
+  value that may carry more than one.
