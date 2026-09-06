@@ -5913,3 +5913,40 @@ audit has no revision to compare against.
   subject** (closes #779): one built out of the tip it is meant to check
   carries whatever damaged that tip, so the comparison exits 0 and reads
   exactly as a clean one does.
+
+### An `EXPECTED_DRIFT` entry where the copies converge, a repair otherwise
+
+- **`CLAUDE.md`'s bullet conditions the entry on a convergence the branch
+  cannot make itself** (closes #833): a port going out tree by tree is
+  one, and so is a decision for the family whose outcomes all converge.
+  Section 14 is where the condition is stated — the table records a copy
+  a fix converges, not one that cannot by design — so the bullet cites
+  that sentence rather than restating it.
+- **Where the shared half was edited in the wrong place, the text moves
+  below `## This repository in particular` and no entry is filed**
+  (closes #833): the move converges the compared halves outright, which
+  `portanode`'s `.gitattributes` shows — its shared half with the block
+  removed hashes to what the other trees carry, against a control on the
+  unrepaired half that does not. An entry there registers a mistake as a
+  migration and switches the comparison off meanwhile.
+- **The bullet states what an entry costs, which the site that writes one
+  could not see** (closes #833): the path leaves
+  `test_every_copy_of_a_verbatim_file_is_the_same_copy` for as long as
+  the entry stands.
+- **The obligation names the class of files section 14 compares up to
+  that heading, rather than two of them** (closes #833): `.gitattributes`
+  is such a file and is where the bullet's own precedent comes from, so
+  naming `CONTRIBUTING.md` and `REVIEWING.md` alone left the obligation
+  short of it.
+- **`tests/verbatim_test.py` carries none of this, decided rather than
+  defaulted** (closes #833): `EXPECTED_DRIFT`'s docstring states the life
+  cycle and what deletes an entry, and the bullet points at it, section
+  9's *One fact in one place* being the reason. No check comes with it
+  either: whether a drift has a port behind it is what the issue the
+  entry names is about, and no run reads that.
+- **The `.gitattributes` entry stands and the entry recording it stays as
+  written** (closes #833): the open section's *`EXPECTED_DRIFT` names
+  `.gitattributes` while the port decision is open* states this
+  principle for one path, and it is left where it was — this bullet is
+  where the principle becomes what a session applies before writing an
+  entry. #830's port decision is untouched.
