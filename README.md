@@ -1752,15 +1752,17 @@ preview rule then runs only where `extend-select` names it exactly.
   the half it disables: beside a declared convention that entry changes no
   diagnostic and silences no warning. The warning ruff prints over such a pair
   appears only where nothing has settled it.
-- **Two widths, and both are enforced**: `ruff-format` reflows code to
-  88, and `[tool.ruff.lint.pycodestyle] max-doc-length = 80` holds the
+- **Code and prose have separate widths, and both are enforced**:
+  `ruff-format` reflows code to 88, and
+  `[tool.ruff.lint.pycodestyle] max-doc-length = 80` holds the
   docstrings and whole-line comments — prose the formatter never
   reflows — to the width markdown is already held to. A comment ending
   in a URL is exempt, and one following code on its line is outside the
-  key, which section 9 states with the reason. `W505` is the rule that
-  reads the key and is inert without it, ruff having no default doc
-  length: a tree naming no `max-doc-length` states a width and enforces
-  none, `select` aside.
+  key, which section 9 states with the reason — as it states what a
+  tree keeping `line-too-long` reports such a comment at, the same
+  table naming that width. `W505` is the rule that reads the key and is
+  inert without it, ruff having no default doc length: a tree naming no
+  `max-doc-length` states a width and enforces none, `select` aside.
 - **`max-complexity = 10`**, ruff's default, with a `# noqa` and a reason
   at each site over it rather than a global bound at the tree's worst.
   `RUF100` then fails the noqa as unused the moment a refactor brings the
@@ -2634,8 +2636,10 @@ sight rather than weighed.
 - **80 columns everywhere prose lives** — markdown by MD013, tables
   included; a Python docstring and a whole-line comment by ruff's
   `max-doc-length`; a toml comment by a pygrep hook. Code is 88, the
-  formatter's; yaml is 100, because an action pinned to a commit SHA with
-  its tag in a trailing comment is past 80 before anything else is said.
+  width `ruff format` produces, and what reports a line past it is
+  `line-too-long`, a rule each tree keeps or ignores; yaml is 100,
+  because an action pinned to a commit SHA with its tag in a trailing
+  comment is past 80 before anything else is said.
 
     **A Python comment following code on its line is outside the
     number**, and nothing holds it to that width: `max-doc-length`
@@ -2653,6 +2657,30 @@ sight rather than weighed.
     shorten is the code the comment sits after. And a line-oriented
     pattern reads a `#` inside a string as a comment, which no spelling
     of such a pattern fixes.
+
+    **What holds a Python line to 88 is not the formatter alone.**
+    `ruff format` counts a trailing comment in the line's width and
+    splits the code to fit it where a split fits; where none does —
+    the statement admitting no split, or the comment leaving nothing
+    to split into — the line stays past 88, and that is the line left
+    over. A tree keeping `line-too-long` reports it at the width
+    `max-line-length` names, falling back to `line-length` — 88, the
+    width this section already fixes — where that key is unset, and
+    with no fix ruff can apply; a tree naming the rule in section 5's
+    `ignore` measures it nowhere. Fixing the
+    choice for every tree is the rejected alternative: what a line has
+    to spare differs with the code on it, and section 5's `ignore` is
+    already where a rule declined on its own merits is argued.
+
+    For such a comment that rule's amnesty is a condition on where the
+    exempting text begins rather than on its shape: a line ending in a
+    URL, or in a pragma of the rule's own membership, is passed over
+    only where that URL or pragma begins before the width, so code
+    already over before the comment starts is outside the amnesty
+    whatever follows. The membership is ruff's and moves with ruff, so
+    nothing here restates it; what section 8 needs of it is that
+    `pragma: no cover` is outside it, an inline half being measured
+    like any other trailing comment.
 - **A comment whose first word is `shellcheck` is a directive, so where a
   sentence wraps decides whether one gets written.** A wrap that puts the
   word there does so by accident, and what follows it on that line
