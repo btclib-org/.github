@@ -2673,15 +2673,21 @@ sight rather than weighed.
     to spare differs with the code on it, and section 5's `ignore` is
     already where a rule declined on its own merits is argued.
 
-    `line-too-long` does not report every over-long line. A line whose
-    last word contains `://` is passed over where everything ahead of
-    that word fits the width. A pragma ruff recognises need not end the
+    `line-too-long` does not report every over-long line. Which lines it
+    passes over and which pragmas it recognises are ruff's and move with
+    ruff, so neither list is here; what is stated is what this
+    standard's own decisions rest on. A line whose last word contains
+    `://` is passed over where everything ahead of that word fits the
+    width, which is the condition section 5 leaves here rather than
+    wording it a second time. A pragma ruff recognises need not end the
     line: from it the rest goes unmeasured, so the width a finding
-    names is the one ahead of it. The membership is ruff's and moves
-    with ruff, so nothing here restates it; what section 8 needs of it
-    is that `pragma: no cover` is outside it, an inline half being
-    measured like any other trailing comment. Both hold under
-    `max-doc-length` too, at its own width.
+    names is the one ahead of it. That much is `preview`'s, which
+    section 5 sets: without it the whole line is reported. A comment
+    opening with such a pragma is passed over whichever way `preview`
+    is set, by an exemption that is not this one. Each of these holds
+    under `max-doc-length` too, at its own width. What section 8 needs
+    is that `pragma: no cover` is outside the set ruff recognises, an
+    inline half being measured like any other trailing comment.
 - **A comment whose first word is `shellcheck` is a directive, so where a
   sentence wraps decides whether one gets written.** A wrap that puts the
   word there does so by accident, and what follows it on that line
