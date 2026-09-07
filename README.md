@@ -976,6 +976,26 @@ beside `docs/source/` has nothing there to name. Carrying the stock list
 anyway is the alternative, rejected because it reads as a statement
 about the tree's layout while naming paths that layout does not produce.
 
+**`templates_path` names the directory under `docs/source/` where the
+tree keeps its own templates, and a tree keeping none does not carry the
+key.** `sphinx-quickstart` seeds it with `_templates` and creates that
+directory empty; git carries no empty directory, so the key arrives in a
+repository without the directory it names. Each entry is prepended to
+the jinja loader chain and none is checked for existence, where
+`html_static_path` warns on a directory that is not there, so a key
+naming nothing builds green while reading as a theme override the tree
+does not make. Where the directory is there the key is what finds the
+template, an override the loader chain does not reach being silent in
+the same way. It also keeps that directory out of the document set: a
+template whose name ends in one of `source_suffix`'s suffixes —
+`sphinx.ext.autosummary`'s stock templates are `.rst` — is otherwise
+read as a document and fails `-W` for belonging to no toctree, which is
+`_build` above under another name. Writing the key empty, as
+`exclude_patterns` above is written, is the rejected alternative: that
+key says which of the things under a directory the tree has are not
+documents, where an empty `templates_path` describes a directory the
+tree does not have.
+
 ## 3. `pyproject.toml` is the configuration
 
 One file holds the project metadata and every tool that can be
