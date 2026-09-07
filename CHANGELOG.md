@@ -6386,3 +6386,29 @@ audit has no revision to compare against.
   and `btclib-org/btclib#1160` in full and then each again bare, where
   the first of those resolves in this tracker to an unrelated closed
   issue. Both carry the qualifier at every occurrence.
+
+### Section 2 says `templates_path` names a directory the tree holds
+
+- **The key names the directory under `docs/source/` where a tree keeps
+  its own templates, and a tree keeping none does not carry it**
+  (issue #901): `sphinx-quickstart` seeds it with `_templates` and
+  creates that directory empty, and git carries no empty directory, so
+  what a repository inherits is the key without the directory it names.
+- **Neither direction of the mismatch is an error** (issue #901): sphinx
+  prepends each entry to the jinja loader chain and checks none of them
+  for existence, where `html_static_path` warns on a directory that is
+  not there, and a template the loader chain does not reach is not
+  applied, so a key naming nothing and an override named nowhere both
+  build green.
+- **Where the directory is there the key also keeps it out of the
+  document set** (issue #901): a template whose name ends in one of
+  `source_suffix`'s suffixes is otherwise read as a document and fails
+  `-W` for belonging to no toctree, which is the `_build` case of the
+  `exclude_patterns` rule beside it.
+- **Writing the key empty, as `exclude_patterns` is written, is the
+  rejected alternative** (issue #901): that key says which of the things
+  under a directory the tree has are not documents, where an empty
+  `templates_path` describes a directory the tree does not have.
+- **No `docs/source/conf.py` moves with this** (issue #901): the trees
+  carrying the key take it out under their own entries, so the standard
+  is what this settles and the issue stays open until they have.
