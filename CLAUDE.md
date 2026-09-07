@@ -116,8 +116,12 @@ worktree's. `env -C <dir>` is the same binding for a command that takes
 no `-C` of its own. Neither binding rescues the assignment above it: a
 session that loses the `cd` loses `WT` with it, and `git -C ""` is
 documented to leave the working directory unchanged, so that push lands
-the same way, exit 0 and no diagnostic. What the `-C` buys is a path
-that can be written out in full; write it out.
+the same way, exit 0 and no diagnostic. That silence is `git`'s rather
+than the binding's: the BSD `env` macOS ships documents no case for an
+empty `-C` and refuses one — `cannot change directory to ''`, exit 125 —
+so a line bound with `env -C` stops there instead of running against the
+wrong tree. What the `-C` buys is a path that can be written out in
+full; write it out.
 
 Removing the worktree is part of finishing, and it stands in a block of
 its own: the block above ends in a placeholder, and a shell that

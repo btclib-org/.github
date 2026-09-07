@@ -6248,3 +6248,38 @@ audit has no revision to compare against.
   amnesty the `name:` states against the positional rule the `entry:`
   implements is #843's other half, one decision for every tree carrying
   the hook rather than this tree's to take alone.
+
+### The worktree fence says which binding fails silently and which refuses
+
+- **The paragraph attributes *exit 0 and no diagnostic* to `git -C ""`
+  rather than to a `-C` in general** (closes #855): `git(1)` documents
+  the empty path as leaving the working directory unchanged, and
+  `git -C "" rev-parse --show-toplevel` run inside a worktree answers
+  that worktree at exit 0, where `env -C "" pwd` answers `env: cannot
+  change directory to '': No such file or directory` and exits 125.
+  `env -C /tmp pwd` printing `/private/tmp` at exit 0 is the control
+  saying the 125 refuses the empty value rather than the option.
+- **The `env` measured is the BSD `/usr/bin/env` macOS ships**
+  (closes #855): its page describes `-C altwd` and names 126 and 127
+  among its exit statuses, and says nothing of an empty argument or of
+  125, so what the paragraph states for `env` is measured behaviour
+  attributed to that implementation. Whether a GNU `env` answers the
+  same way is not established here, and the sentence does not rest on
+  it.
+- **What the paragraph keeps is *Neither binding rescues the assignment
+  above it*** (closes #855): a lost `WT` breaks the line under either
+  binding, and the instruction the paragraph closes on — write the path
+  out in full — holds under both. What changes is the substantiation
+  after the colon, which reached `git` alone.
+- **This narrows *The flag is not itself the guard* above and leaves it
+  where it is** (closes #855): that bullet's sentence names `git -C ""`
+  and stays true of it, and what its lead-in says of a `-C` in general
+  holds for the binding measured there rather than for both.
+- **Narrowing the sentence to `git -C ""` and saying nothing of `env` is
+  the rejected alternative**: it removes the false half and leaves the
+  inference available, so a session whose fence binds a line with
+  `env -C` goes on reading the silence as the binding's.
+- **The copies of this paragraph in the other repositories of the
+  organization are not in this branch** (closes #855): they carry the
+  sentence this corrects until a port converges them, and that port is a
+  landing of its own.
