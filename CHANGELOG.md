@@ -6358,3 +6358,31 @@ audit has no revision to compare against.
   it says the rules above leave the `#` form nowhere to be right inside
   a `STRING` token, which holds only where a docstring naming the pragma
   is reached as well as one quoting the rule.
+
+### Section 9 says what a command decides of the qualifier rule
+
+- **The half naming a repository is a substitution and the bare half is
+  not** (closes #642): `repo#N` against `owner/repo#N` needs no reading,
+  and a guard on the character before the name keeps an
+  already-qualified reference's tail out of the answer, where a bare
+  number carries no tracker and another tree's issue, the tree's own and
+  a number naming no issue are one string. Section 9 says that beside
+  the rule, and says a reading is what tells a finding from a correct
+  reference.
+- **A tree's own highest issue-or-pull number decides a part of the bare
+  form and no more** (closes #642): a bare number above it names nothing
+  in that tracker, which is arithmetic rather than a reading; the bound
+  only rises, so what it decides today it stops deciding, and an
+  in-range reference to another tree's issue is outside it either way.
+- **A suite test standing in for that reading is the rejected
+  alternative** (closes #642): what the pattern hands back holds a
+  standards name, a version in front of a URL fragment and a hyphenated
+  word in front of a tree's own number, so a green run costs an
+  exemption list that grows with whatever a tree writes next — and the
+  bare form, which is where the rule fails silently, is outside such a
+  run altogether.
+- **Section 11's manual-link paragraph carried the shape the rule
+  refuses** (closes #642): it names `btclib-org/bitcoin-core-rpc#178`
+  and `btclib-org/btclib#1160` in full and then each again bare, where
+  the first of those resolves in this tracker to an unrelated closed
+  issue. Both carry the qualifier at every occurrence.
