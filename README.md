@@ -2282,11 +2282,12 @@ fail_under = 100.0
   ```
 
   answers empty in a tree that keeps the rule, so every line it names is
-  a site short of the inline half — a defect under this rule whether or
-  not a reason for it is written somewhere else. ` - ` is the rejected
-  alternative, and what it costs is a hyphen where a dash was meant, and
-  a check written for one spelling answering a confident zero for a tree
-  that writes the other, which is what
+  a defect under this rule: a site short of the inline half — whether or
+  not a reason for it is written somewhere else — or a pragma inside a
+  string, which the paragraph below says is not a site at all. ` - ` is
+  the rejected alternative, and what it costs is a hyphen where a dash
+  was meant, and a check written for one spelling answering a confident
+  zero for a tree that writes the other, which is what
 
   ```shell
   git grep -nE 'pragma: no cover - [^-]' -- '*.py'
@@ -2312,6 +2313,30 @@ fail_under = 100.0
   reason true of the repository, and how much a reason has to say is a
   property of the line being excluded rather than of the tree holding
   it.
+
+  **A pragma is a comment, and one inside a string is not a site.**
+  coverage matches its exclusion patterns against the raw source a line
+  at a time rather than tokenizing it first, so what leaves `statements`
+  is the statement the matched line belongs to, and the suite under it
+  where that statement is a clause header. Where the string is a value —
+  a right-hand side, an argument, the subject of an `if` or a `with` —
+  that is the statement holding it, which a string spanning several
+  lines puts above the match rather than on it, so what the exclusion
+  takes out is a statement nobody wrote the pragma for, and no
+  percentage reports the loss: what has left is out of the set the
+  percentage is of. Where the string is a module, class or function
+  docstring, nothing leaves `statements` at all, a docstring being no
+  statement coverage measures — the match is recorded and excludes
+  nothing. So prose quoting this rule writes the pragma in backticks and
+  without its `#`, which is what keeps it out of that pattern and out of
+  both commands above.
+
+  Which of the two a line named by the commands above is, is a reading,
+  the output showing a string-borne pragma exactly as it shows a site.
+  What would answer it without a reading is a parser rather than a
+  pattern: `tokenize` tells a `COMMENT` token from a `STRING` one, and
+  the rules above leave the `#` form nowhere to be right inside the
+  second. No command here runs one, so the reading is what a tree has.
 - **Measured on one interpreter**, the one `.python-version` pins, which
   is enough at 100 only because no source branches on the version — a
   percentage below 100 could not promise that, the statement count moving
