@@ -6187,3 +6187,37 @@ audit has no revision to compare against.
   What that entry corrected in its own turn, that code already over is
   outside the amnesty, follows from either sentence, so section 9 no
   longer writes it out.
+
+### Section 9 names what `preview` decides and declines the pass-over list
+
+- **Which lines `line-too-long` passes over is ruff's, and the section
+  is no longer written as the list of them** (closes #878): an
+  over-long comment whose text is one unbroken run is silent under that
+  rule and under `max-doc-length` alike, where the same line with a
+  space in it is reported, and neither clause the section named reaches
+  it. What stays named is named as what this standard's own decisions
+  rest on, section 5 leaving the URL condition here and section 8
+  needing `pragma: no cover` outside the set ruff recognises.
+- **The section says the pragma amnesty it describes is `preview`'s and
+  leaves the setting to section 5** (closes #877): measuring up to a
+  pragma nested inside a longer comment is what that setting buys, and
+  without it the whole line is reported at its full width. A comment
+  that opens with a pragma ruff recognises is passed over whichever way
+  `preview` is set, so the section draws that line rather than calling
+  the pragma amnesty gated: the sentence would be true of one shape and
+  false of the other. The URL pass-over answers the same under either
+  setting.
+- **Section 5's `preview` entry gaining the consequence instead is the
+  rejected alternative**: what depends on the setting is what one rule
+  reports, and the readers who need it arrive at section 9 -- this
+  tree's `[tool.ruff.lint.pycodestyle]` comment and `btclib`'s both
+  send them there. Section 5 keeps the setting and section 9 the
+  dependence, so each is written once.
+- **This narrows *Section 9 states the URL and the pragma amnesties
+  separately* above**: what that entry gives as the width an over-long
+  line is reported at, the one ahead of the pragma, holds where
+  `preview` is set. What it says about the URL half stands as it is.
+- **Whether a tree keeps `line-too-long` at all is still that tree's**:
+  section 5's `ignore` is where a rule declined on its own merits is
+  argued, and what a tree would inherit by keeping the rule is its own
+  to weigh.
