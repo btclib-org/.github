@@ -2668,6 +2668,21 @@ sight rather than weighed.
   reference is `owner/repo#123` or it points somewhere else in silence.
   The one exemption is mechanical: a pull request's closing keyword is
   read by the forge, so it takes the forge's own form.
+- **What a command decides of that is the half naming a repository, and
+  it decides that half as candidates.** `repo#N` against `owner/repo#N`
+  is a substitution with nothing to read, so a pattern reaches it
+  whatever organization the repository belongs to, and a guard on the
+  character before the name is what keeps the tail of an
+  already-qualified reference out of the answer. The same pattern
+  matches a name that is no repository's — a standards name, a version
+  in front of a URL fragment — so what comes back is read before it is
+  a finding. The bare form is not reachable at all: the number carries
+  no tracker, so another tree's issue, the tree's own and a number that
+  names no issue are one string. A tree's own highest issue-or-pull
+  number bounds part of that form, a bare number above it naming
+  nothing there, and that bound only rises, so what it decides today it
+  stops deciding. Section 15 audits none of this, and a reading is what
+  tells a finding from a correct reference.
 - **No history in the prose.** Comments say why the code is as it is, in
   the present tense. History has two files of its own.
 - **80 columns everywhere prose lives** — markdown by MD013, tables
@@ -4110,12 +4125,14 @@ description, so every surface a reviewer reads can say the opposite of
 what merging will do. `btclib-org/bitcoin-core-rpc#178` carried exactly
 such a link to `btclib-org/btclib#1160`, confirmed by
 `closingIssuesReferences`, while its own body said in as many words
-that it did not close that issue. Merging #178 did not close #1160
-either: the issue had already been closed by hand, deliberately, once a
-maintainer found the same undisclosed link on two more pull requests
-racing it. What kept the sentence from being false is a person noticing
-in time, not the mechanism — the link would have closed #1160 on merge
-had #178 landed first.
+that it did not close that issue. Merging
+`btclib-org/bitcoin-core-rpc#178` did not close
+`btclib-org/btclib#1160` either: the issue had already been closed by
+hand, deliberately, once a maintainer found the same undisclosed link
+on two more pull requests racing it. What kept the sentence from being
+false is a person noticing in time, not the mechanism — the link would
+have closed `btclib-org/btclib#1160` on merge had
+`btclib-org/bitcoin-core-rpc#178` landed first.
 
 So **what a pull request closes is read before it is merged**, from the
 one place that answers. The variables follow the query, which puts `<n>`
