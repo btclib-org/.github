@@ -6283,3 +6283,47 @@ audit has no revision to compare against.
   organization are not in this branch** (closes #855): they carry the
   sentence this corrects until a port converges them, and that port is a
   landing of its own.
+
+### Section 8 says a pragma inside a string is not a site
+
+- **The paragraph states the mechanism and what each kind of string
+  costs** (issue #842): coverage matches its exclusion patterns against
+  the raw source a line at a time rather than tokenizing it first, so
+  what leaves `statements` is the statement the matched line belongs to,
+  and the suite under it where that statement is a clause header.
+  Measured with `coverage.parser.PythonParser` under coverage's
+  `DEFAULT_EXCLUDE`, each source parsed a second time with the pragma
+  text neutralised: a value string in an assignment costs the assignment
+  above the match, an `if`, a `with`, a `for`, a `while` and a decorator
+  each cost their header and the suite it introduces, and a module,
+  class or function docstring costs nothing. `raw_excluded` names the
+  matched line in every one of them, which is what says the parser was
+  given a pattern to exclude with — the same parser called with no
+  `exclude` argument answers `raw_excluded` empty for an ordinary
+  comment site too.
+- **Prose quoting the pragma writes it in backticks and without its
+  `#`** (issue #842): so spelled it is outside coverage's pattern and
+  outside both acceptance commands. Planted in a docstring both ways,
+  `git grep -nE 'pragma: no cover$'` and
+  `git grep -nE 'pragma: no cover - [^-]'` each name the bare spelling
+  and neither names the backticked one, while a reasonless site and a
+  hyphen-form site beside them are what each command is for.
+- **The sentence above the first command loses its universal**
+  (issue #842): it read that every line the command names is a site
+  short of the inline half, and a pragma inside a string is named the
+  same way and is not a site. What it says now is that every line named
+  is a defect under this rule, of one kind or the other, so the command
+  stays a gate.
+- **The section says the distinction is a reading and that no command
+  here makes it** (issue #842): `tokenize` tells a `COMMENT` token from
+  a `STRING` one, and the rules above leave the `#` form nowhere to be
+  right inside the second, so such a command is available and this
+  branch writes none. Where it goes, and what it asks of a docstring
+  already written with the `#` inside backticks, is what the issue stays
+  open for.
+- **This narrows *Where a pragma's reason goes, and what a grep for it
+  answers* above and leaves it where it is** (issue #842): that entry's
+  claim is that a tree keeping the rule answers the grep empty, which
+  stands. What is added is on the other side of the command, that a line
+  it does name is a site or a string, and telling the two apart is a
+  reading.
