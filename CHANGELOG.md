@@ -6327,3 +6327,34 @@ audit has no revision to compare against.
   stands. What is added is on the other side of the command, that a line
   it does name is a site or a string, and telling the two apart is a
   reading.
+
+### Section 8 scopes the pragma's prose spelling to Python files
+
+- **The rule names the files it governs rather than leaving the scope to
+  its reason** (closes #892): coverage matches its exclusion pattern
+  against Python source and both acceptance commands are restricted to
+  `*.py`, so the `#` form in a `.toml` comment, in a workflow's, or in a
+  `CHANGELOG.md` entry is outside the rule rather than short of it.
+  Prose of that kind is landed across the organization, read at each
+  repository's own `origin/main`.
+- **The file decides, not what the prose is doing** (closes #892):
+  `coverage.parser.PythonParser.lines_matching` searches the pattern
+  inside each line — `re.finditer`, and its docstring says the entire
+  line needn't match — so a line naming the pragma is matched exactly as
+  one quoting the rule, where the sentence corrected here turned on
+  whether the prose was a quotation.
+- **Holding all prose to the spelling is the rejected alternative**
+  (closes #892): what it costs is a rule reaching where neither
+  mechanism does, so what it would condemn is what no command here can
+  name, and in an append-only file what section 9's *Nothing already
+  written is rewritten* leaves standing.
+- **This scopes *Section 8 says a pragma inside a string is not a site*
+  above and leaves it where it is** (closes #892): its bullet asking
+  prose quoting the pragma to write it in backticks and without the `#`
+  holds of prose in a Python file, and the measurement under it — the
+  backticked spelling being outside both acceptance commands — stands,
+  those commands naming `*.py` alone.
+- **The paragraph below already reads the rule this way** (closes #892):
+  it says the rules above leave the `#` form nowhere to be right inside
+  a `STRING` token, which holds only where a docstring naming the pragma
+  is reached as well as one quoting the rule.

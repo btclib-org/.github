@@ -2327,9 +2327,19 @@ fail_under = 100.0
   percentage is of. Where the string is a module, class or function
   docstring, nothing leaves `statements` at all, a docstring being no
   statement coverage measures — the match is recorded and excludes
-  nothing. So prose quoting this rule writes the pragma in backticks and
+  nothing. So prose in a Python file writes the pragma in backticks and
   without its `#`, which is what keeps it out of that pattern and out of
-  both commands above.
+  both commands above. What the prose is doing does not narrow it: the
+  pattern matches characters and not what they are for, so a line naming
+  the pragma is matched exactly as one quoting this rule. The file is
+  what decides instead — coverage matches that pattern against Python
+  source alone, and both commands above are restricted to `*.py` — so
+  the `#` in a `.toml` comment, in a workflow's, or in a `CHANGELOG.md`
+  entry is outside the rule rather than short of it. Holding all prose
+  to that spelling is the rejected alternative, and what it costs is a
+  rule reaching where neither mechanism does: what it condemns is what
+  no command here can name, and in an append-only file what section 9's
+  *Nothing already written is rewritten* leaves standing.
 
   Which of the two a line named by the commands above is, is a reading,
   the output showing a string-borne pragma exactly as it shows a site.
