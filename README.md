@@ -1501,8 +1501,9 @@ pre-commit.ci does not have — the lint workflow covers it. No
     resolves, and each `additional_dependencies` pin against the same
     package there. The second declaration is the price named above; that
     it is unchecked is the part worth knowing before choosing it.
-- **`toml-comment-width`** — pygrep, 80 columns on a toml comment, a
-  trailing unbreakable link exempt.
+- **`toml-comment-width`** — pygrep, 80 columns on a toml comment.
+  `.{80}\S*[ \t]` reports a line only when whitespace is left past
+  column 80: a comment whose overflow is one unbroken token is exempt.
 - **`decoded-subprocess-encoding`** — pygrep refusing `text=True` and
   `universal_newlines=True`: a decoded child process takes the locale's
   encoding, which is the same defect ruff's `unspecified-encoding`

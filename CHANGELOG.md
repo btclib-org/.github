@@ -6221,3 +6221,30 @@ audit has no revision to compare against.
   section 5's `ignore` is where a rule declined on its own merits is
   argued, and what a tree would inherit by keeping the rule is its own
   to weigh.
+
+### `toml-comment-width` is described by its pattern in both places
+
+- **The comment above the hook no longer exempts a trailing unbreakable
+  link** (issue #843): `^(?=[ \t]*#).{80}\S*[ \t]` has no notion of a
+  link, and one 64-character link is passed over where it opens at
+  column 63 and reported where it opens at column 93, the two lines
+  differing in nothing else — one space inserted just after column 80
+  in the passed-over one makes it report too, which is the control
+  saying that silence is an absence. What replaces the sentence states
+  the pattern's own predicate, that a line is reported only where
+  whitespace is left past column 80, and names no other tool, which is
+  the wording #843 settled for the trees carrying this hook.
+- **Section 4's bullet for the hook carried the same sentence and states
+  the predicate too** (issue #843): the hook list in `README.md` is
+  where a reader who does not open `.pre-commit-config.yaml` meets the
+  rule, and `README.md` is the standard every repository of the
+  organization is built to, so the link-shaped wording stood in two
+  places in this tree and stands in neither.
+- **A sentence about another tool's amnesty is the rejected
+  alternative**: what a comment says about the regex beside it is
+  checkable against that regex, where what it says about a second tool
+  is checked by nothing in this tree.
+- **The hook's `name:` and `entry:` are left alone**: the lexical
+  amnesty the `name:` states against the positional rule the `entry:`
+  implements is #843's other half, one decision for every tree carrying
+  the hook rather than this tree's to take alone.
