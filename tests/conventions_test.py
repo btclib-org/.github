@@ -86,9 +86,16 @@ def test_every_convention_named_is_one_of_section_sevens(
     :param convention: the row's first cell.
     :param module: the row's second cell, for the message.
     """
+    # repr on the list as well as on the name: `rows` strips the row's
+    # cells and section 7's bullets reach `CONVENTIONS` unstripped, so a
+    # bullet differing from the row in whitespace alone reads, bare, as
+    # the name this message says is missing. The `unknown` assertion
+    # below quotes the names the declaration wrote, which the split can
+    # leave a space on, and leaves its own list bare:
+    # btclib-org/.github#934 is where that half is being decided
     assert convention in CONVENTIONS, (
         f"{module} is declared against {convention!r}, which is not one of"
-        f" section 7's: {', '.join(CONVENTIONS)}"
+        f" section 7's: {', '.join(map(repr, CONVENTIONS))}"
     )
 
 

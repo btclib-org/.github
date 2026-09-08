@@ -6530,3 +6530,15 @@ audit has no revision to compare against.
   sibling copies widens** (issue #923): section 14 places this module
   outside the compared list, so this one takes in its own words the
   decisions the #911 ports carry.
+
+### `conventions_test.py` quotes the list it says a row is not in
+
+- **The membership message quotes section 7's names as well as the row's
+  own** (closes #929): a row's name arrives through `rows` stripped and
+  a bullet reaches `CONVENTIONS` unstripped, so a bullet differing from
+  the row in whitespace alone was rendered bare in the sentence
+  reporting that row's name as missing.
+- **The `unknown` message is left as it stands** (issue #929): the names
+  it quotes are the ones the declaration wrote, which the split can
+  leave a space on, and whether its own bare list operand owes the same
+  treatment is #934.
