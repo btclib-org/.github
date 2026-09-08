@@ -68,7 +68,15 @@ compared: a line break falls wherever eighty columns put it.
 """
 
 CONVENTIONS = tuple(subjects(ROOT / "README.md", OPENING, CLOSING, EMPHASISED))
-"""Section 7's conventions, in its order and its words."""
+"""Section 7's conventions, in its order and its words.
+
+Its words include its whitespace: `subjects` hands over the text
+`EMPHASISED` captured and takes nothing out of it, where `rows` strips a
+cell's ends and the *Not tested here* names go through a `split` that
+takes every run inside one too. So a name here can differ from a name
+the declaration wrote in whitespace alone, and joined bare into a
+message the two read alike.
+"""
 
 ROWS = tuple(
     (row["convention"], name(row["module"]))
@@ -86,13 +94,9 @@ def test_every_convention_named_is_one_of_section_sevens(
     :param convention: the row's first cell.
     :param module: the row's second cell, for the message.
     """
-    # repr on the list as well as on the name: `rows` strips the row's
-    # cells and section 7's bullets reach `CONVENTIONS` unstripped, so a
-    # bullet differing from the row in whitespace alone reads, bare, as
-    # the name this message says is missing. The `unknown` assertion
-    # below quotes the names the declaration wrote, which the split can
-    # leave a space on, and leaves its own list bare:
-    # btclib-org/.github#934 is where that half is being decided
+    # repr on the list as well as on the name: either operand can be
+    # the odd one, a cell keeping a run inside it where a bullet keeps
+    # whatever it wrote, and bare the odd one reads as the other
     assert convention in CONVENTIONS, (
         f"{module} is declared against {convention!r}, which is not one of"
         f" section 7's: {', '.join(map(repr, CONVENTIONS))}"
@@ -175,16 +179,12 @@ def test_the_two_halves_account_for_every_convention() -> None:
     )
 
     unknown = [convention for convention in absent if convention not in CONVENTIONS]
-    # repr because these names come out of the declaration and keep
-    # whatever the split above did not take: one differing from a
-    # convention in whitespace alone is invisible bare, and reads as a
-    # name this same message goes on to list as known. `CONVENTIONS`
-    # stays bare because it is what the name is measured against
-    # rather than what is reported, and quoting both would mark
-    # neither
+    # repr on the list as well as on the names: a stray space in
+    # section 7's bullet lands in a member of the list, and bare that
+    # member reads as the name this same sentence quotes as missing
     assert not unknown, (
         f"{', '.join(map(repr, unknown))} is listed as not tested and is"
-        f" not one of section 7's: {', '.join(CONVENTIONS)}"
+        f" not one of section 7's: {', '.join(map(repr, CONVENTIONS))}"
     )
 
     unaccounted = [
@@ -192,8 +192,11 @@ def test_the_two_halves_account_for_every_convention() -> None:
         for convention in CONVENTIONS
         if convention not in tested and convention not in absent
     ]
+    # repr because what this reports is section 7's own name: a bullet
+    # differing in whitespace alone from what the two halves wrote is
+    # accounted for by neither, and bare it reads as the name they wrote
     assert not unaccounted, (
-        f"{', '.join(unaccounted)} is neither declared tested nor listed as"
-        " not tested; section 7's conventions are what the two halves"
-        " must cover"
+        f"{', '.join(map(repr, unaccounted))} is neither declared tested nor"
+        " listed as not tested; section 7's conventions are what the two"
+        " halves must cover"
     )
