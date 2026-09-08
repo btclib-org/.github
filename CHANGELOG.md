@@ -6542,3 +6542,38 @@ audit has no revision to compare against.
   it quotes are the ones the declaration wrote, which the split can
   leave a space on, and whether its own bare list operand owes the same
   treatment is #934.
+
+### `conventions_test.py` quotes the operand a bullet's stray space lands in
+
+- **The `unaccounted` message quotes the names it reports** (closes
+  #933): what it reports is section 7's own names, which arrive as the
+  bullets wrote them, where each half it finds them missing from has
+  some of its own taken out — so a bullet differing in whitespace alone
+  was printed bare, reading as the name the declaration accounts for in
+  both halves.
+- **The `unknown` message quotes its list as well as the names it
+  reports** (closes #934): a stray space inside section 7's emphasis
+  lands in a member of that list, and bare that member read as the name
+  the same sentence quotes as not being one of section 7's.
+- **It leaves the entries above where they are, and this is what it does
+  to them**: `conventions_test.py gives the separator a reason and
+  quotes the name` states that `CONVENTIONS` stays bare, being what the
+  name is measured against rather than what is reported, and that
+  asymmetry does not hold — the list is where a bullet's stray space
+  lands, so it carries at that message too. `conventions_test.py quotes
+  the list it says a row is not in` left whether the bare list operand
+  owes the same treatment to #934, which this answers.
+- **The property is stated at `CONVENTIONS`, and each message says
+  which of its own operands the whitespace reaches**: what a name read
+  off section 7 can carry, and what each half of the declaration takes
+  out of its own, belongs to the object that has the property. The
+  rejected alternative states it again at each assertion, which is the
+  second statement section 9 refuses; what differs per message is which
+  operand carries the space, and that is what each of them says.
+- **The `overlap` message stays bare**: its operands are the
+  declaration's halves, and each normalizer erases a difference the
+  other would have kept — a cell's ends are stripped where the `split`
+  collapses the runs inside a name — so the intersection holds only
+  names canonical in both, and no whitespace difference reaches this
+  message. Whether the `', '` join can make one name read as two is
+  #938.
