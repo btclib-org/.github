@@ -1595,14 +1595,41 @@ pre-commit.ci does not have — the lint workflow covers it. No
     see a fenced block, so an example of the refused shape inside one
     fails the hook; the code span is the way round it, and this file is
     written accordingly.
-- **`no-hyphen-at-end-of-line`** — pygrep refusing a markdown line that
-  ends inside a word, at that word's own hyphen. Markdown joins two
-  source lines with a space, so a word wrapped there renders with the
-  hyphen *and then a space* inside it. The source looks correct, which
-  is why reading a diff does not find one; the instance that produced
-  this rule was found by scanning rendered `<code>` spans in built html
-  across the organization, which is the only gate here that reads output
-  rather than source, and there is no such gate.
+- **`no-hyphen-at-end-of-line`** — pygrep refusing a line that ends
+  inside a word, at that word's own hyphen, in the file types whose
+  prose a build renders: markdown, reStructuredText and Python. Markdown
+  joins two source lines with a space, so a word wrapped there renders
+  with the hyphen *and then a space* inside it. The source looks
+  correct, which is why reading a diff does not find one; the instance
+  that produced this rule was found by scanning rendered `<code>` spans
+  in built html across the organization, which is the only gate here
+  that reads output rather than source, and there is no such gate.
+
+    **A docstring reaches that rendering by another route**, which is
+    what puts Python in the list: docutils leaves the source break
+    inside the paragraph it builds and html collapses it to a space, so
+    the page reads the hyphen and a space as the markdown one does.
+    Section 9's width holds a docstring to 80 columns through ruff's
+    `max-doc-length` and has no opinion on where a line ends, so the
+    break this hook refuses is one that width asks for.
+
+    **Over Python it refuses more than a build renders** — a `#`
+    comment, a test's docstring — and that is what a location costs.
+    pygrep reads a line at a time, where a pattern telling a docstring
+    from a comment has to consume the file from its start: it then
+    names the file's first line, prints everything up to the match, and
+    answers once per file however many the file holds. The repair is
+    the same reflow wherever the refused line sits, and in a formatted
+    tree there is nothing but prose to refuse: `ruff format` puts a
+    binary operator at the start of the next line rather than at the
+    end of this one.
+
+    Leaving the hook to markdown is the alternative declined: what
+    reaches a docstring then is a scan of built html, which is the gate
+    the paragraph above says there is none of. Scoping the Python half
+    by path — a tree's tests, its `docs/source/conf.py` — is the other,
+    and it costs section 14's default of one answer for every tree, the
+    paths being each tree's own.
 
     Nothing else covers it. markdownlint has no rule for it, the width
     rules read a line rather than what two lines become, and
@@ -1612,14 +1639,20 @@ pre-commit.ci does not have — the lint workflow covers it. No
 
     **What it cannot see**, stated so the rule is not mistaken for the
     class: a code span whose content breaks at a `/` or a `.` renders
-    with the same intruding space and has no hyphen to match. Reading
-    the built html is what catches that, and this hook is not it.
+    with the same intruding space and has no hyphen to match, and a file
+    type the list does not name — a stub, a notebook holding markdown
+    cells — is not selected at all. Reading the built html is what
+    catches those, and this hook is not it.
 
     Measured before it was proposed: every repository of the
     organization was clean under `git grep -n -E '[A-Za-z0-9]-$' --
-    '*.md'` once `btclib-secp256k1`'s three were fixed, so the rule
-    costs nothing today and exists to keep the next one from being
-    written.
+    '*.md'` once `btclib-secp256k1`'s three were fixed, so the markdown
+    half costs nothing today and exists to keep the next one from being
+    written. The same expression over `'*.py'` is what a tree reads
+    before the rest of the hook is green there, each hit being a line to
+    reflow — so this half costs a pass over a tree's own docstrings and
+    comments, which is `unquoted-placeholder`'s shape below rather than
+    the two hooks above.
 - **`unquoted-placeholder`** — pygrep refusing a placeholder that stands
   as a whole argument and carries quotes. Section 9 is the rule and what
   the quoting costs: quotes make the angle brackets ordinary text, so a
