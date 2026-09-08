@@ -4577,12 +4577,11 @@ push or a `close`/`reopen`.
 ### Tokens, publishing, scanning
 
 - **The default `GITHUB_TOKEN` is read-only repository-wide**; a job
-  needing more declares it, and a caller's `permissions:` block replaces
-  the callee's default outright rather than adding to it. This is a
-  *setting* and not a property of the workflows, and it is inherited
-  from an organization default that ships as `write` — so a new
-  repository is writable until somebody says otherwise, and the
-  workflow-level `permissions:` block is the braces and not the belt:
+  needing more declares it. This is a *setting* and not a property of
+  the workflows, and it is inherited from an organization default that
+  ships as `write` — so a new repository is writable until somebody says
+  otherwise, and the workflow-level `permissions:` block is the braces
+  and not the belt:
 
     ```shell
     gh api -X PUT orgs/<org>/actions/permissions/workflow \
@@ -4605,6 +4604,39 @@ push or a `close`/`reopen`.
     known good. So a repository that pins its own is recorded in its
     `REPOSITORY.md`, that file being the one place the fact can live,
     and whoever moves the organization default moves those with it.
+- **A caller's `permissions:` block bounds the workflow it calls rather
+  than standing in for what that workflow declares.** A job of the
+  called workflow with no block of its own is granted what that workflow
+  declares at its own top level, and not what the caller grants beyond
+  it. What says so is the `GITHUB_TOKEN Permissions` group each job's
+  log opens with, read one job at a time:
+
+    ```shell
+    gh api --allow-escape-sequences repos/<org>/<repo>/actions/jobs/<id>/logs
+    ```
+
+    `bitcoin-core-rpc`'s release run 33753542084 grants `contents: read`
+    and `pull-requests: read` at the call, over a `test.yml` declaring
+    `contents: read` at its own top level: every job of it carrying no
+    block of its own logs `Contents: read` and no `PullRequests`, where
+    `changes`, reached through the same `uses:` in the same run, declares
+    `pull-requests: read` and logs it. That is the control that could
+    have failed, so those absences are absences.
+
+    **The bound refuses rather than trims.** A scope a called *job*
+    declares and the caller's list leaves off fails the run before a job
+    of it starts, the caller's own included: `btclib-secp256k1`'s
+    `v0.8.0.3` at `79ed35c6`, whose caller grants `contents: read` alone
+    over a `changes` declaring `pull-requests: read`, is a
+    `startup_failure` with no job scheduled (run 32392845488), and the
+    same tag succeeds at `eadcc131`, which adds that scope to the
+    caller's list and the comment beside it (run 32404708595). So a
+    caller's list names the scopes the jobs of the workflow it calls
+    declare. What a run does where the *callee's* top-level declaration
+    falls outside the caller's list is not measured, and the refusal
+    above is not evidence for it (btclib-org/.github#912) — naming that
+    workflow's top-level scopes in the caller's list too is what keeps
+    the question out of a release.
 - **Secret scanning, its push protection and Dependabot security updates
   are on.** All three are free on a public repository and off by
   default; push protection is the one that refuses the push rather than

@@ -6457,3 +6457,33 @@ audit has no revision to compare against.
   moves with it** (issue #908): each carries the types and the pass over
   its own Python under its own entry, which #921 is for, so the standard
   is what this settles.
+
+### Section 11 says a caller's grant bounds the workflow it calls
+
+- **A job of a called workflow with no block of its own is granted what
+  that workflow declares at its own top level** (closes #920):
+  `bitcoin-core-rpc`'s release run 33753542084 grants
+  `pull-requests: read` at the call over a `test.yml` declaring
+  `contents: read` at its own top level, and every job of it carrying no
+  block of its own logs `Contents: read` and no `PullRequests`, where
+  `changes`, reached through the same `uses:`, declares
+  `pull-requests: read` and logs it. Substitution is the rejected
+  reading: under it each of those jobs would hold the caller's list too.
+- **The bound refuses rather than trims** (closes #920):
+  `btclib-secp256k1`'s `v0.8.0.3` at `79ed35c6`, whose caller grants
+  `contents: read` alone over a `changes` declaring
+  `pull-requests: read`, is a `startup_failure` with no job scheduled,
+  and the same tag succeeds at `eadcc131`, which adds that scope to the
+  caller's list and the comment beside it.
+- **The wording claims only what those runs cover** (closes #920): what
+  a run does where the callee's *top-level* declaration falls outside
+  the caller's list is not measured, the refusal above is not evidence
+  for it, and naming that workflow's top-level scopes in the caller's
+  list too is what keeps the question out of a release.
+- **The mechanism takes a bullet of its own** (closes #920): it is a
+  property of the workflows, where the bullet it shared is about a
+  repository-wide setting and says so in its next sentence.
+- **`release.yml`'s comment in `btclib` and `btclib-secp256k1`, and
+  `btclib`'s `REPOSITORY.md`, state the mechanism as a substitution**,
+  and those sites take the wording from here under #912 and #917, the
+  standard being where it is decided.
