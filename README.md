@@ -3250,6 +3250,7 @@ owns a day and an hour, the repository owns the minute:
 | `mutation` | Monday | 05 |
 | `fuzz` | Tuesday | 04 |
 | `integration-bitcoind` | Tuesday | 05 |
+| `zkp-oracle` | Wednesday | 02 |
 | `integration-hwi` | Wednesday | 03 |
 | `deps-latest` | Wednesday | 04 |
 | `pypi-install` | Wednesday | 05 |
@@ -3438,6 +3439,7 @@ nothing by that row.
   `btclib-benchmarks`, `btclib-node`;
 - `fuzz` — `btclib`, `btclib-node`;
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`;
+- `zkp-oracle` — `btclib`;
 - `integration-hwi` — `btclib`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
@@ -3664,6 +3666,11 @@ its entry gains the tree when the workflow and the badge land together.
   which it does not carry yet: btclib-org/btclib-org.github.io#1.
   btclib-org/.github#558 carries the debt until that tree schedules the
   workflow.
+- **`zkp-oracle` follows a tree with an implementation of its own to
+  compare.** The sentinel compares two implementations of one primitive,
+  so the tree it asks is the one holding the side written in Python;
+  `btclib-secp256k1` is the comparison's other side, which the run
+  builds from its sdist, rather than a tree the row reaches.
 - **A platform row leaves a tree's entry where a gate cell asks the
   whole of what that tree's sentinel asked.** *What runs weekly does not
   also gate* above denies its own converse over a hole in a matrix, and
