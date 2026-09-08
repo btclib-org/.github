@@ -267,7 +267,7 @@ repos:
         # declares, so passing --offline alone would drop it
         args: [--offline, --no-progress]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.5
+    rev: v0.16.6
     hooks:
       - id: ruff-check
         name: ruff check (in place fixes)
@@ -294,7 +294,7 @@ repos:
         pass_filenames: false
         require_serial: true
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.7
+    rev: 0.12.10
     hooks:
       # keep uv.lock in sync with pyproject.toml
       - id: uv-lock
