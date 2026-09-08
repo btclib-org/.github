@@ -6435,3 +6435,25 @@ audit has no revision to compare against.
 - **The sibling trees carry the wording this replaces**, and they take
   the paragraph from the standard under #919, the wording being decided
   here first.
+
+### Section 4's hyphen hook reads a docstring too, not markdown alone
+
+- **A word wrapped at its own hyphen renders with a space inside it
+  wherever a build reads the prose, and a docstring is such a place**
+  (issue #908): docutils leaves the source break inside the paragraph it
+  builds and html collapses it to a space, so the page reads the hyphen
+  and a space as a markdown one does. Section 4 gives the hook's types
+  as markdown, reStructuredText and Python.
+- **Over Python it refuses more than a build renders** (issue #908): a
+  `#` comment and a test's docstring are refused with the rendered ones,
+  pygrep reading a line at a time and a pattern telling a docstring from
+  a comment having to consume the file from its start, which leaves the
+  report with no location and one answer per file. The repair is the
+  same reflow wherever the refused line sits.
+- **Scoping the Python half by path is the rejected alternative** (issue
+  #908): the paths that render nothing are each tree's own, where
+  section 14 asks one answer of every tree.
+- **This repository's gate takes the widened list, and no other gate
+  moves with it** (issue #908): each carries the types and the pass over
+  its own Python under its own entry, which #921 is for, so the standard
+  is what this settles.
