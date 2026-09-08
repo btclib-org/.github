@@ -142,9 +142,13 @@ worktree isolates files, not refs, so `git stash push` pushes onto the
 same stack every other session pops from. Commit to your own branch
 instead.
 
-**Do not rewrite `refs/heads/main`, or advance it with work that is not
-yours.** Your own branch is what you push, and the pull request is what
-moves `main`.
+**Do not rewrite `refs/heads/main`, and move it only onto
+`origin/main`.** That name is the local branch's, and no ruleset reaches
+it: a ruleset binds the forge's copy. The fast-forward above moves it
+onto `origin/main` and is inside that, where a merge, a commit on `main`
+or an `update-ref` to a branch tip leaves the ref somewhere
+`origin/main` is not. Your own branch is what you push, and the pull
+request is what moves `origin/main`.
 
 ## Model
 
