@@ -6412,3 +6412,26 @@ audit has no revision to compare against.
 - **No `docs/source/conf.py` moves with this** (issue #901): the trees
   carrying the key take it out under their own entries, so the standard
   is what this settles and the issue stays open until they have.
+
+### CLAUDE.md's `refs/heads/main` clause names the local ref
+
+- **The clause is about the branch in the session's own clone, and the
+  ref may be moved onto `origin/main` and nowhere else** (closes #887):
+  the fast-forward the same section prescribes for bringing the primary
+  checkout forward is inside that, where a merge, a commit on `main` or
+  an `update-ref` to a branch tip is not. `advance it with work that is
+  not yours` reached that fast-forward, and it also left the ref free to
+  be advanced with work that *is* yours, which the section's opening
+  refuses.
+- **Reading the clause as the forge's copy of the ref is the rejected
+  alternative** (closes #887): `main-integrity` and `main-self-merge`
+  are conditioned on `refs/heads/main` there, so that reading makes the
+  sentence a restatement of what a ruleset already holds, and leaves the
+  ref in a clone, which no ruleset reaches, bound by nothing.
+- **The carve-out is left naming one rule** (closes #887): a clause the
+  fast-forward is outside gives it nothing further to be excepted from,
+  so the relation between the two paragraphs is stated once, at the
+  clause, which is where a reader holds the command up against it.
+- **The sibling trees carry the wording this replaces**, and they take
+  the paragraph from the standard under #919, the wording being decided
+  here first.
