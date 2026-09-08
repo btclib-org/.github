@@ -62,9 +62,9 @@ NOT_TESTED = re.compile(r"^Not tested here: (.+?)\.$", re.MULTILINE | re.DOTALL)
 DOTALL as well as MULTILINE because eighty columns wrap the list of
 names across lines, and the non-greedy match then stops at the first
 full stop ending one -- which is why no name in it may carry a full stop
-of its own. The names are separated by semicolons, a comma appearing
-inside one, and the wrap is taken out of a name before it is compared:
-a line break falls wherever eighty columns put it.
+of its own. The names are separated by a semicolon and a space, a comma
+appearing inside one, and the wrap is taken out of a name before it is
+compared: a line break falls wherever eighty columns put it.
 """
 
 CONVENTIONS = tuple(subjects(ROOT / "README.md", OPENING, CLOSING, EMPHASISED))
@@ -154,6 +154,11 @@ def test_the_two_halves_account_for_every_convention() -> None:
         " lines; the declaration is half of one"
     )
     listed = " ".join(found[0].split())
+    # the space goes with the semicolon, which is the separator
+    # `NOT_TESTED` describes: the semicolon alone would take one
+    # written without the space for a separator too, where this
+    # leaves it inside the name and the assertion below reports that
+    # name as a convention section 7 does not have
     absent = () if listed == "none" else tuple(listed.split("; "))
     tested = {convention for convention, _ in ROWS}
 
@@ -163,9 +168,16 @@ def test_the_two_halves_account_for_every_convention() -> None:
     )
 
     unknown = [convention for convention in absent if convention not in CONVENTIONS]
+    # repr because these names come out of the declaration and keep
+    # whatever the split above did not take: one differing from a
+    # convention in whitespace alone is invisible bare, and reads as a
+    # name this same message goes on to list as known. `CONVENTIONS`
+    # stays bare because it is what the name is measured against
+    # rather than what is reported, and quoting both would mark
+    # neither
     assert not unknown, (
-        f"{', '.join(unknown)} is listed as not tested and is not one of"
-        f" section 7's: {', '.join(CONVENTIONS)}"
+        f"{', '.join(map(repr, unknown))} is listed as not tested and is"
+        f" not one of section 7's: {', '.join(CONVENTIONS)}"
     )
 
     unaccounted = [
