@@ -6487,3 +6487,27 @@ audit has no revision to compare against.
   `btclib`'s `REPOSITORY.md`, state the mechanism as a substitution**,
   and those sites take the wording from here under #912 and #917, the
   standard being where it is decided.
+
+### Section 10 calendars the `zkp-oracle` sentinel
+
+- **A tree with an implementation of its own to compare against the
+  bindings has a row for it** (issue #926): `zkp-oracle` takes Wednesday
+  02, between `integration-bitcoind` and `integration-hwi`, and its
+  entry names `btclib`. What the sentinel asks — what a tree does
+  against software it does not ship — is what those two rows ask, so the
+  instant seats it inside its own family's band rather than beside
+  another's.
+- **The slots standing free at hour 03 seat it nowhere**: Tuesday 03
+  stands between rows about the depth of a suite and Friday 03 between
+  platform rows, and a row taking either would read as belonging to a
+  family that does not ask its question. Hour 02 is what the band
+  reached for `wheel-reproducibility` on that same ground.
+- **The entry names one tree, and the paragraph beside it says which
+  property decides that**: the sentinel compares two implementations of
+  one primitive, so the tree it asks is the one holding the side written
+  in Python, `btclib-secp256k1` being the comparison's other side rather
+  than a tree the row reaches.
+- **The instant is this file's and the `cron:` is `btclib`'s, so they
+  land separately** (issue #926):
+  `test_every_cron_is_the_instant_the_calendar_names` names `btclib`
+  until its own pull request follows the row here.
