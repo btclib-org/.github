@@ -6511,3 +6511,22 @@ audit has no revision to compare against.
   land separately** (issue #926):
   `test_every_cron_is_the_instant_the_calendar_names` names `btclib`
   until its own pull request follows the row here.
+
+### `conventions_test.py` gives the separator a reason and quotes the name
+
+- **The docstring's account of the separator and what the split takes
+  now say the same thing** (closes #923): `NOT_TESTED` said the names
+  are separated by semicolons where the split takes a semicolon and a
+  space, and the comment at the split carries the reason — the semicolon
+  alone would take one written without the space for a separator too,
+  where this leaves it inside the name for the assertion below to
+  report.
+- **The `unknown` message quotes the names it read out of the
+  declaration** (closes #928): a name differing from a convention in
+  whitespace alone was invisible in a sentence that goes on to list that
+  convention as known. `CONVENTIONS` stays bare, being what the name is
+  measured against rather than what is reported.
+- **No `EXPECTED_DRIFT` entry is owed and the divergence from the
+  sibling copies widens** (issue #923): section 14 places this module
+  outside the compared list, so this one takes in its own words the
+  decisions the #911 ports carry.
