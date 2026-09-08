@@ -72,8 +72,9 @@ def gated(repository: str, trees: dict[str, Path]) -> list[Path]:
     """List the workflows of one repository, or skip where it has none.
 
     A tree with no `.github/workflows/` has nothing section 10 can be
-    asked about, and btclib-org/.github#107 is where whether it owes one
-    is being decided; skipped with the reason so the cell says so.
+    asked about, and whether it owes one follows from its tier in
+    section 2 rather than from anything here; btclib-org/.github#107 is
+    where that was settled. Skipped with the reason so the cell says so.
 
     :param repository: the repository's name.
     :param trees: the checkouts.

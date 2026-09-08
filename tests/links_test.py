@@ -45,10 +45,11 @@ RANGE = re.compile(r"^(\d+)(?:\.\.=(\d+))?$")
 def lychee(repository: str, trees: dict[str, Path]) -> tuple[dict[str, Any], Path]:
     """Find the lychee step of a repository's `links.yml`, with the file.
 
-    Skipped where there is no `links.yml`, that being
-    btclib-org/.github#107's question rather than this module's; an
-    error where the file exists and no step calls the action, since the
-    file is then not what its name says.
+    Skipped where there is no `links.yml`: section 10's record gives the
+    workflow to every repository, so a tree without one is a gap in that
+    tree, reported by `grid_test.py` against the record rather than asked
+    here. An error where the file exists and no step calls the action,
+    since the file is then not what its name says.
 
     :param repository: the repository's name.
     :param trees: the checkouts.

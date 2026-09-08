@@ -9,8 +9,8 @@ asks whether the ruleset enforces it; this asks whether the tag a
 repository holds is one the rule can describe. A lightweight tag is a
 ref to a commit with no object of its own, so there is nothing on it to
 sign, and a ruleset requiring a signature on `refs/tags/v*` says nothing
-about it. btclib-org/.github#105 is where what a release tag is, for a
-repository that publishes nothing, is being decided.
+about it. What a release tag is does not turn on whether the repository
+publishes: btclib-org/.github#105 is where that was settled.
 """
 
 from __future__ import annotations

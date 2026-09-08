@@ -6593,3 +6593,39 @@ audit has no revision to compare against.
   reaches this message — and what quotes the names here is the join's
   own separator against a comma both halves admit inside one, which is
   the question that bullet left to #938.
+
+### A docstring cites an issue for what it records, and nothing reads its state
+
+- **Three docstrings said a question was being decided at an issue no
+  longer open** (closes #935): `tags_test.py` on what a release tag is
+  where a repository publishes nothing, `workflows_test.py` on whether a
+  tree with no `.github/workflows/` owes one, and `pyproject_test.py` on
+  the spelling of section 3's `[project.urls]`. Each says what was
+  decided instead and keeps the reference, which is why the skips and
+  the loose comparison are shaped as they are.
+- **`links_test.py`'s skip names what decides whether a tree owes a
+  `links.yml`**: it gave that question to btclib-org/.github#107, where
+  section 10's record gives the workflow to every repository and a tree
+  without one is a gap `grid_test.py` reports against that record.
+- **Nothing asks a prose pointer the question `still_open` asks a
+  table's, and `still_open`'s docstring carries the reason**: every
+  entry of `BACKLOG` and of `EXPECTED_DRIFT` is an exemption by
+  construction, so there the state is the whole question, where a
+  sentence's truth turns on the claim it makes — section 2 cites an
+  open issue for what it decided and section 10 cites one for a question
+  still open, and both are true. So what keeps a citation from expiring
+  is its form, and section 9 rules the same way for the qualifier a
+  reference carries.
+- **The rejected alternative fixes a phrase for a pending citation and
+  reads the carriers of it**, the way section 10 fixes `carries the
+  debt`: what that check has and this one cannot is an enumeration of
+  its subjects taken from somewhere other than the prose — the calendar
+  rows no tree schedules — which is what lets it fail on an idle row
+  whose paragraph names no debt at all. Keyed on the phrase alone it
+  reaches whoever reached for the phrase, and a green run then says
+  nothing about the file.
+- **The reading such a check would need first is the one it was meant to
+  replace**: the issue-shaped strings in this tree include the form
+  `still_open`'s own parameter names, a fixture number planted in the
+  suite `backlog_test.py` runs through `pytester`, and a section anchor
+  in `REPOSITORY.md` whose number reads as an issue.

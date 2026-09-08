@@ -41,12 +41,12 @@ URLS = {
     "issues",
     "pull_requests",
 }
-"""Section 3's `[project.urls]` list, in the spelling two publishers use.
+"""Section 3's `[project.urls]` list, spelled as the publishers declare it.
 
 The section names the seven in prose and not as keys, and
-btclib-org/.github#133 is where the spelling is being decided; the set
-is compared case-insensitively with spaces read as underscores, so the
-one spelling the comparison refuses is a different name for the link.
+btclib-org/.github#133 is where that spelling was settled; the set is
+compared case-insensitively with spaces read as underscores, so the one
+spelling the comparison refuses is a different name for the link.
 """
 
 DOC_WIDTH = 80
