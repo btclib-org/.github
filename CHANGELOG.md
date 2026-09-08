@@ -6577,3 +6577,19 @@ audit has no revision to compare against.
   names canonical in both, and no whitespace difference reaches this
   message. Whether the `', '` join can make one name read as two is
   #938.
+
+### `conventions_test.py` tells one overlapping name from two
+
+- **The `overlap` message quotes the names it reports** (closes #938): a
+  convention name may hold a comma, so joined bare on a comma and a
+  space one such name printed as two — one declaration mistake reported
+  as two, and one of the names the reader is sent after is no convention
+  either half of the declaration holds.
+- **It leaves the entry above where it is, and this is what it does to
+  it**: `conventions_test.py quotes the operand a bullet's stray space
+  lands in` says the `overlap` message stays bare, and it no longer
+  does. What that bullet gives as the reason stands — the intersection
+  holds only names canonical in both halves, so no whitespace difference
+  reaches this message — and what quotes the names here is the join's
+  own separator against a comma both halves admit inside one, which is
+  the question that bullet left to #938.
