@@ -6793,3 +6793,19 @@ audit has no revision to compare against.
   state is superseded when a reader finds it false, and not because the
   section stays open. #946 covers the other half, the entries in the
   sibling trees whose sentences name an issue's state.
+
+### `conventions_test.py`'s messages name `tests/README.md`
+
+- **A message naming the declaration writes it `tests/README.md`**
+  (closes #947): `DECLARATION.name` renders `README.md`, and the
+  standard this module reads section 7's conventions off is `README.md`
+  too, so a message opening on that name left the reader to open the
+  module to find out which file it meant. Section 7 writes the
+  declaration `tests/README.md`, and the module derives that path from
+  `DECLARATION` rather than writing it at each message.
+- **The absolute path is the rejected alternative**: it is unambiguous
+  as well, and it is a different string on every checkout, so what it
+  gives a reader is where the file sat on the machine that ran.
+- **A message whose subject is a row's module does not name the
+  declaration**: it reports the module the row declares, and no spelling
+  of the declaration is in it.
