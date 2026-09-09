@@ -143,6 +143,13 @@ they are applied per repository, which section 15 is how to verify.
 - **A rule with no reason beside it is not this file's rule.** Every
   setting below was decided against an alternative, and the alternative
   is what stops the next reader from undoing it.
+- **A numbered section's rule enters this file together with what reads
+  it — a hook of section 4 or a test of `tests/` — or it does not
+  enter**, the way btclib-org/.github#976 records a rule only a reader
+  enforces turning every landing into a finding. This preamble binds
+  those rules rather than stating one of their kind, and what reads it
+  is the review every change here gets, REVIEWING.md's *This repository
+  in particular* asking whether the standard keeps the rule it states.
 
 ## 1. Toolchain and environment
 

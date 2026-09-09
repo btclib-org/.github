@@ -319,11 +319,6 @@ def names() -> list[str]:
 
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
-    (
-        553,
-        "test_main_requires_a_check_and_the_rest_of_classic_protection",
-        ("btclib-org.github.io",),
-    ),
     # deps-oldest: these trees are short of the workflow; btclib-node
     # schedules it (btclib-org/btclib-node#739)
     (

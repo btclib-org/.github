@@ -120,8 +120,8 @@ comment about one of them is either wrong or a bug in the hook.
 
 A review notices more than its subject: a defect the diff did not cause,
 a document that has gone stale, a rule the tree quietly stopped
-following. **None of it is a review comment, and every one of it is an
-issue.** File it, and go back to the diff.
+following. **Most of it does not belong as a review comment: file it as
+an issue**, and go back to the diff.
 
 The reason is the author's round trip. A finding they cannot address
 without leaving the subject is a round of review spent on something the
@@ -129,6 +129,17 @@ pull request was not for, and asking for it anyway is how a branch stops
 converging. Filing costs the reviewer one command and loses nothing: the
 defect is recorded, with its evidence, where the next person to touch
 that code will find it.
+
+**Not every finding is filed.** A finding about the *wording* of prose no
+user reads — `CLAUDE.md`, a test's docstring or message, a comment in a
+workflow, a yaml or a toml, a `CHANGELOG.md` entry, a pull request body —
+is named at the foot of the review instead and left there: the diff's
+author fixes it where the diff already touches that file, and otherwise
+the note is the record of it. What is filed stays as above: a defect a
+test or a hook can measure, a decision the standard has to take, or a
+functional defect. btclib-org/.github#976 is where a tracker of prose
+findings about prose was found not to converge, and is the authority for
+this line.
 
 What is *not* collateral, and stays in the review, is what this diff
 introduces or breaks, and what was already wrong and this diff makes
