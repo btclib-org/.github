@@ -6629,3 +6629,23 @@ audit has no revision to compare against.
   `still_open`'s own parameter names, a fixture number planted in the
   suite `backlog_test.py` runs through `pytester`, and a section anchor
   in `REPOSITORY.md` whose number reads as an issue.
+
+### `conventions_test.py`'s list messages read for one name or several
+
+- **Each message reporting a list of conventions takes the declaration
+  as its subject and the names as its object** (closes #940): a list
+  that can hold more than one name was the subject of a singular verb,
+  so a message stating a real declaration defect disagreed with what it
+  had just printed. A verb agreeing with the declaration is right
+  whether the list holds one name or several.
+- **The rejected alternative chooses the verb by the length of the
+  list**: that puts a conditional in the message, which no green run
+  executes — so a mistake in it surfaces the day somebody is already
+  debugging the declaration. Where the names are an object there is no
+  agreement to get wrong, which is the shape `pyproject_test.py`'s
+  `authors` message reports its own set of names in.
+- **The `unknown` message keeps its colon for section 7's own list**:
+  that operand arrives the way the membership message introduces it, so
+  this message's own names are the object of `lists` and `none of which
+  is` is what says they are not section 7's, where the others follow the
+  colon.

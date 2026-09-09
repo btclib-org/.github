@@ -182,8 +182,8 @@ def test_the_two_halves_account_for_every_convention() -> None:
     # reporting only names both halves hold: it stands on the separators
     # those halves have, where repr delimits a name whatever it holds.
     assert not overlap, (
-        f"{', '.join(map(repr, sorted(overlap)))} is both declared tested"
-        " and listed as not tested"
+        f"{DECLARATION.name} both declares tested and lists as not tested:"
+        f" {', '.join(map(repr, sorted(overlap)))}"
     )
 
     unknown = [convention for convention in absent if convention not in CONVENTIONS]
@@ -191,8 +191,9 @@ def test_the_two_halves_account_for_every_convention() -> None:
     # section 7's bullet lands in a member of the list, and bare that
     # member reads as the name this same sentence quotes as missing
     assert not unknown, (
-        f"{', '.join(map(repr, unknown))} is listed as not tested and is"
-        f" not one of section 7's: {', '.join(map(repr, CONVENTIONS))}"
+        f"{DECLARATION.name} lists {', '.join(map(repr, unknown))} as not"
+        " tested, none of which is one of section 7's:"
+        f" {', '.join(map(repr, CONVENTIONS))}"
     )
 
     unaccounted = [
@@ -204,7 +205,7 @@ def test_the_two_halves_account_for_every_convention() -> None:
     # differing in whitespace alone from what the two halves wrote is
     # accounted for by neither, and bare it reads as the name they wrote
     assert not unaccounted, (
-        f"{', '.join(map(repr, unaccounted))} is neither declared tested nor"
-        " listed as not tested; section 7's conventions are what the two"
-        " halves must cover"
+        f"{DECLARATION.name} neither declares tested nor lists as not"
+        f" tested: {', '.join(map(repr, unaccounted))}; section 7's"
+        " conventions are what the two halves must cover"
     )
