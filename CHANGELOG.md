@@ -6676,3 +6676,28 @@ audit has no revision to compare against.
   `tests/__init__.py`, what the move took out of `grid_test.py` and
   what the pattern gained are unchanged, and the command the bullet
   prints is what answers for the population now.
+
+### `CLAUDE.md` names what asks the API for state, not how much each asks
+
+- **The bullet on `tests/conftest.py`'s per-session clone gives no
+  per-module request rate** (closes #953): the sentence removed with it
+  counted `backlog_test.py`'s documents by the distinct issues `BACKLOG`
+  cites, and the module asks after `PRECEDENT` as well — the closed
+  issue whose state is what says the rows were read at all. Section 9's
+  *Measure, don't assert* puts the command beside the number, and the
+  census command this bullet prints names the modules rather than what
+  each of them asks for.
+- **The clause about `grid_test.py` goes with it, and not for a mistake
+  in it**: that module's single `still_open` call sits in a
+  comprehension over the idle rows, so the clause answers for the module
+  as it stands. What decides both is the shape rather than the number —
+  a rate no command re-derives is a number the reader cannot check.
+- **The rejected alternative corrects the count and keeps the form**:
+  what it buys is a session budgeting the suite's network contact
+  without opening a module, and what it costs is a sentence re-derived
+  by hand every time a test gains a control, which is the edit a rate in
+  prose does not get.
+- **The entry above says the bullet names no population and no count**:
+  the rates are counts of the same kind, and this is the change that
+  makes that sentence answer for the whole bullet. It leaves that entry
+  where it is.

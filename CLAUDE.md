@@ -262,14 +262,11 @@ Do not use Fable unless explicitly instructed.
   the pattern because it is the read rather than a caller of one: it
   lives in `tests/__init__.py`, so a file reaching the API through it
   names neither `gh_json` nor a settings dict, and a pattern without it
-  answers a confident zero for that file. `grid_test.py` asks for one
-  document and only where a calendar row is idle — the state of the
-  issue section 10 says carries that row's debt — and
-  `backlog_test.py` asks for one per distinct issue its rows cite.
-  `tiers` is not among what the command names:
-  `tests/__init__.py`'s `tier()` reads `pyproject.toml` and `release.yml` off
-  the checkout, which `tiers_test.py` asks through the `tiers` fixture —
-  `conftest.py`'s one-liner over `trees` — rather than through `gh_json`.
+  answers a confident zero for that file. `tiers` is not among what the
+  command names: `tests/__init__.py`'s `tier()` reads `pyproject.toml`
+  and `release.yml` off the checkout, which `tiers_test.py` asks through
+  the `tiers` fixture — `conftest.py`'s one-liner over `trees` — rather
+  than through `gh_json`.
 - **A sibling tree's documentation build reads its `CHANGELOG.md`, so a
   changelog-only diff does not exempt the docs gate.** This tree has no
   `docs/`, but a session driven from this tracker runs the gates of the
