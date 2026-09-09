@@ -45,6 +45,18 @@ TESTS = Path(__file__).parent
 DECLARATION = TESTS / "README.md"
 """The file section 7 asks each repository to declare its testing in."""
 
+DECLARATION_FROM_ROOT = DECLARATION.relative_to(ROOT)
+"""What the assertions below call the declaration.
+
+`DECLARATION.name` is `README.md`, and the standard this module reads
+section 7's conventions off is `README.md` too, so a message opening on
+that name does not say which file it is about. Section 7 writes the
+declaration `tests/README.md`, which is this path. The absolute path is
+the rejected alternative: it is unambiguous as well, and it names where
+the file sat on the machine that ran rather than what a reader is to
+open.
+"""
+
 OPENING = "carries an exemption list that is allowed to grow"
 """The prose section 7's list of conventions follows."""
 
@@ -111,7 +123,7 @@ def test_every_module_named_exists(convention: str, module: str) -> None:
     :param module: the row's second cell.
     """
     assert (TESTS / module).is_file(), (
-        f"{DECLARATION.name} declares {convention!r} tested in {module},"
+        f"{DECLARATION_FROM_ROOT} declares {convention!r} tested in {module},"
         " which is not a file in this directory"
     )
 
@@ -161,7 +173,7 @@ def test_the_two_halves_account_for_every_convention() -> None:
     """
     found = NOT_TESTED.findall(DECLARATION.read_text(encoding="utf-8"))
     assert len(found) == 1, (
-        f'{DECLARATION.name} holds {len(found)} "Not tested here: ...."'
+        f'{DECLARATION_FROM_ROOT} holds {len(found)} "Not tested here: ...."'
         " lines; the declaration is half of one"
     )
     listed = " ".join(found[0].split())
@@ -182,7 +194,7 @@ def test_the_two_halves_account_for_every_convention() -> None:
     # reporting only names both halves hold: it stands on the separators
     # those halves have, where repr delimits a name whatever it holds.
     assert not overlap, (
-        f"{DECLARATION.name} both declares tested and lists as not tested:"
+        f"{DECLARATION_FROM_ROOT} both declares tested and lists as not tested:"
         f" {', '.join(map(repr, sorted(overlap)))}"
     )
 
@@ -191,7 +203,7 @@ def test_the_two_halves_account_for_every_convention() -> None:
     # section 7's bullet lands in a member of the list, and bare that
     # member reads as the name this same sentence quotes as missing
     assert not unknown, (
-        f"{DECLARATION.name} lists {', '.join(map(repr, unknown))} as not"
+        f"{DECLARATION_FROM_ROOT} lists {', '.join(map(repr, unknown))} as not"
         " tested, none of which is one of section 7's:"
         f" {', '.join(map(repr, CONVENTIONS))}"
     )
@@ -205,7 +217,7 @@ def test_the_two_halves_account_for_every_convention() -> None:
     # differing in whitespace alone from what the two halves wrote is
     # accounted for by neither, and bare it reads as the name they wrote
     assert not unaccounted, (
-        f"{DECLARATION.name} neither declares tested nor lists as not"
+        f"{DECLARATION_FROM_ROOT} neither declares tested nor lists as not"
         f" tested: {', '.join(map(repr, unaccounted))}; section 7's"
         " conventions are what the two halves must cover"
     )
