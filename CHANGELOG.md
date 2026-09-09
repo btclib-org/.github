@@ -6809,3 +6809,32 @@ audit has no revision to compare against.
 - **A message whose subject is a row's module does not name the
   declaration**: it reports the module the row declares, and no spelling
   of the declaration is in it.
+
+### `CLAUDE.md`'s docs-gate bullet names the trees its command answers in
+
+- **It names none of the trees the command answers nothing in**
+  (closes #955): the list it carried was short of `btclib-org.github.io`,
+  a repository of the organization whose `origin/main` holds no `docs/`.
+  Section 9's *Measure, don't assert* is what refuses a copy of a
+  command's answer written under the command that answers it.
+- **The reason a tree answers nothing stays, without the list**: the
+  command's pathspec is `docs/`, so a tree that has none answers nothing,
+  and the `README.md` control is what says that zero is an absence rather
+  than a miss.
+- **The rejected alternative adds the missing name**: what it buys is a
+  sentence right today, and what it costs is one more place to remember a
+  repository that joins the organization, which is the argument
+  `tests/__init__.py`'s `names()` gives for asking the API rather than
+  writing a list down.
+- **What the bullet says about this tree it says once**: it opens by
+  saying this tree has no `docs/`, and the list restated that for
+  `.github` beside it.
+- **The control is named by its perturbation**: it substitutes
+  `README.md` for `CHANGELOG.md` inside the pattern and leaves the
+  pathspec `docs/` alone, which is what section 9's *A control the same
+  fault silences is not a control* asks of a control's name — the
+  perturbation it applies rather than the property it is hoped to prove.
+- **The entry recording the bullet's arrival counts the trees that
+  answer nothing**: that clause describes a list the bullet no longer
+  carries, and what the same entry says about the five and about the
+  documentation build stands. It stays where it is.
