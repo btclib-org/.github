@@ -6945,3 +6945,40 @@ audit has no revision to compare against.
   other Python trees' hook entries and inline reasons follow in their
   own branches, `tests/hooks_test.py`'s `LOCAL` naming the new hook and a
   `BACKLOG` row carrying the trees it is not yet ported to.
+
+### Section 14 compares CLAUDE.md's primary-checkout section byte for byte
+
+- **Section 14 gains a third verbatim shape, a named section rather than
+  a whole file or a marked prefix** (issue #739): `CLAUDE.md`'s `## The
+  primary checkout is the maintainer's` section is now compared byte for
+  byte across every copy, `tests/verbatim_test.py` reading the heading
+  off section 14's own bullet rather than a second constant here that a
+  rename of the section would leave stale. `EXPECTED_DRIFT` excuses the
+  eight sibling copies until their own ports land; #739's own Done-when
+  is a section 9 sentence about the fence's write hazard, a different
+  question this branch does not answer.
+- **Two of the three clauses this tree alone carries in that section
+  stay; the third, its `wt-review` anecdote, is dropped** (issue #964):
+  the topic sentence and the `env` clause are the standard's by that
+  issue's own reading, with only their porting owed. The section being
+  now byte-identical across nine trees leaves no tree of its own for an
+  anecdote to stay local to, and `wt-review` names this
+  session-machinery's own history, which no sibling's log carries — a
+  reader of eight of the nine copies could never re-derive it, which
+  section 9 refuses. The rejected alternative, porting the anecdote into
+  the eight siblings' own logs, was never available: none of them holds
+  it.
+- **The worked example now names the tracker it is an example of**
+  (issue #969): `wt-github-255-btclib-coder` read as though every
+  copy's own reader were in `btclib`; naming `btclib-org/.github`'s
+  tracker explicitly makes the same bytes true of a reader in any of
+  the nine.
+- **A second docs-gate control is added, where a zero cannot be
+  genuine** (issue #958): the existing control took its own positive in
+  the same five trees the check already answers in, so a mangled
+  revision silenced check and control alike; the new control, on a
+  string one of the other four trees cannot fail to hold, is what a
+  wrong revision cannot also satisfy.
+- **This branch is stream S2 of the campaign's steering record**
+  (issue #976): the standard's own side of the decision; the eight
+  ports each land as a branch of their own, briefed after this one.

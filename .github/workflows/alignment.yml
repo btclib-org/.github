@@ -89,6 +89,7 @@ on:
       - CONTRIBUTING.md
       - REVIEWING.md
       - .gitattributes
+      - CLAUDE.md
 
 # least privilege: this reads the organization's repositories and writes
 # nothing, files nothing and publishes nothing

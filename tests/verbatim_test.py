@@ -16,6 +16,7 @@ tree that owes one from the tree the file does not apply to.
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
 import pytest
@@ -61,10 +62,24 @@ would have to be kept in step with that one.
 CONDITIONAL = "owed where "
 """How a bullet of section 14 opens where a copy is owed on a condition."""
 
+SECTION = re.compile(r"from `(#{1,6} [^`]+)`")
+"""How a bullet names the heading that opens the section it compares.
+
+Only a bullet naming a section this way is read for one; a bullet with
+no such clause is a whole-file bullet, by `MARKER` or by neither. The
+heading's own text lives in the bullet, in `README.md`, rather than in a
+second constant here that a rename of the section would leave stale.
+"""
+
 EXPECTED_DRIFT: dict[str, str] = {
     "REVIEWING.md": (
         "btclib-org/.github#353, and a second paragraph from "
         "btclib-org/.github#976 not yet ported to the other eight trees"
+    ),
+    "CLAUDE.md": (
+        "btclib-org/.github#739, whose own Done-when is a section 9 "
+        "sentence about the fence's write hazard rather than this "
+        "drift; resolved instead when the eight sibling ports land"
     ),
 }
 """A path section 14 names whose copies are known not to agree yet.
@@ -108,7 +123,51 @@ def verbatim() -> dict[str, str]:
     )
 
 
-def shared(path: Path) -> bytes:
+def section_heading(clause: str) -> str | None:
+    """Read the heading a bullet names its section by, where it names one.
+
+    :param clause: what the bullet says after its subject.
+    :returns: the heading line, `#` and all, or ``None`` where the
+        clause names no section.
+    """
+    found = SECTION.search(clause)
+    return found.group(1) if found else None
+
+
+def section(body: bytes, heading: str) -> bytes:
+    """Read one named section of a file, its own heading to the next.
+
+    A section's own heading opens what is compared and the next heading
+    at the same level closes it, so two copies whose surrounding
+    sections differ still compare equal here as long as the section
+    itself does not.
+
+    :param body: the file's bytes.
+    :param heading: the heading line that opens the section, `#` and
+        all.
+    :returns: from that heading to the line before the next one at the
+        same level, or to the end of the file where there is none,
+        ending at a single newline like every other shape `shared`
+        reads.
+    :raises LookupError: where the file holds no line matching
+        `heading`.
+    """
+    opening = heading.encode() + b"\n"
+    at = body.find(b"\n" + opening)
+    if at < 0:
+        if not body.startswith(opening):
+            msg = f"no {heading!r} heading in this copy"
+            raise LookupError(msg)
+        at = -1
+    start = at + 1
+    level = heading.split(" ", 1)[0].encode()
+    boundary = re.compile(b"\n" + re.escape(level) + b" ")
+    found = boundary.search(body, start + len(opening))
+    end = found.start() + 1 if found else len(body)
+    return body[start:end].rstrip(b"\n") + b"\n"
+
+
+def shared(path: Path, clause: str = "") -> bytes:
     """Read the half of a copy that every repository is meant to share.
 
     Both halves end at one newline, so a copy that leaves a blank line
@@ -116,13 +175,19 @@ def shared(path: Path) -> bytes:
     marker opens with a newline of its own, so the two spellings
     otherwise differ by the last byte of the half -- a difference a diff
     renders as nothing, in a report naming two groups of copies that look
-    identical.
+    identical. A clause naming a section reads that section alone,
+    ending the same way every other shape does.
 
     :param path: the file to read.
-    :returns: everything before the marker, or the whole file without
-        one, ending at a single newline.
+    :param clause: the bullet's own clause, read for a section it names.
+    :returns: the named section where the clause names one, everything
+        before the marker where the file carries one, or the whole file
+        otherwise -- each ending at a single newline.
     """
     body = path.read_bytes()
+    heading = section_heading(clause)
+    if heading is not None:
+        return section(body, heading)
     cut = body.find(MARKER)
     if cut >= 0:
         body = body[:cut]
@@ -184,11 +249,12 @@ def copies(trees: dict[str, Path], path: str) -> dict[bytes, list[str]]:
     :param path: the file, relative to a repository root.
     :returns: each distinct content against the repositories holding it.
     """
+    clause = verbatim()[path]
     out: dict[bytes, list[str]] = {}
     for repository, root in sorted(trees.items()):
         here = root / path
         if here.is_file():
-            out.setdefault(shared(here), []).append(repository)
+            out.setdefault(shared(here, clause), []).append(repository)
     return out
 
 
