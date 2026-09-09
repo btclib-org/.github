@@ -6876,3 +6876,21 @@ audit has no revision to compare against.
   already carrying the pending form is corrected where a reader finds
   it, and #962 covers the other half, the sentences in `README.md`
   itself that name an issue's state.
+
+### Section 10 says what an issue raises, section 11 when one stayed open
+
+- **Section 10's `fuzz` paragraph says what #342 raises, rather than
+  that the question is decided there** (closes #962): the reference is
+  what says where a question is written down, and the tracker is where
+  its state is current, which is section 9's *A citation names what the
+  issue records* read against the standard's own prose.
+- **Section 11's adjacency paragraph names the commit `#39` stayed
+  open past, in place of the tracker's state**: the paragraph earns
+  *unconfounded* from what those timelines record, so the state is doing
+  the work there and dropping it would take the reasoning with it.
+  `#39` stayed open past `214ed5f` is what says that commit's own pull
+  request did not close it, and it reads the same after the issue
+  closes; the `#153` clause beside it already named its sha.
+- **Section 14's `#267` paragraph stays as it stands**: *raised it*
+  names what that issue records, and *is open, not decided here* is a
+  claim about the standard rather than about the tracker.

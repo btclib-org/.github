@@ -3615,7 +3615,7 @@ its entry gains the tree when the workflow and the badge land together.
   on its own: whether a target there is allowed to reach the vendored C
   library at all — which would be fuzzing upstream's work rather than
   these bindings — decides what the sentinel would be run for, and
-  btclib-org/.github#342 is where that is decided. An entry taken before
+  btclib-org/.github#342 raises that question. An entry taken before
   that answer schedules a weekly run against a target nobody has agreed
   is this project's to write. Section 7's *Property tests* has how a
   fuzzer and the property layer stand to each other. What a fuzzer turns
@@ -4134,12 +4134,12 @@ fixes survives a future hand-copy, per #39`, and each entered its
 issue's timeline as `referenced` where `592f1bc` above entered
 `btclib-org/.github#81`'s as `closed`. Both are unconfounded, which is
 what a citation here has to be: `#153` stayed open four hours past
-`c6c1657` and was closed by a different landing, and `#39` is open
-still — where a commit whose own pull request closes the issue through
-its body records `referenced` whether the keyword bound or not, and
-proves neither. In both, a newline separates the verb from the number —
-and that a newline alone breaks the binding, in a keyword meant to fire,
-is btclib-org/.github#420's subject.
+`c6c1657` and was closed by a different landing, and `#39` stayed open
+past `214ed5f` — where a commit whose own pull request closes the issue
+through its body records `referenced` whether the keyword bound or not,
+and proves neither. In both, a newline separates the verb from the
+number — and that a newline alone breaks the binding, in a keyword
+meant to fire, is btclib-org/.github#420's subject.
 
 **Two parsers read a closing keyword, and a newline is where they part.**
 One answers `closingIssuesReferences` and reads the pull request's
