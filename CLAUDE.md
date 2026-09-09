@@ -290,13 +290,13 @@ Do not use Fable unless explicitly instructed.
     origin/main -- docs/
   ```
 
-  answers in each of the five and nothing in `.github`, `bbt` or
-  `portanode`, which have no `docs/` at all; the same pattern against
-  `README.md` answers in all five, which is the control saying the zero
-  is an absence rather than a miss. The trap is that *`docs/` is
-  unchanged* is a true sentence answering the wrong question: what
-  decides is what the tool reads, not which of its inputs moved. Skipping
-  the docs gate on that reasoning was caught by a reviewer, not by a run.
+  answers in each of the five and nothing in a tree with no `docs/` at all;
+  the same command with `README.md` substituted for `CHANGELOG.md` inside
+  the pattern answers in each of the five, which is the control saying the
+  zero is an absence rather than a miss. The trap is that *`docs/` is
+  unchanged* is a true sentence answering the wrong question: what decides
+  is what the tool reads, not which of its inputs moved. Skipping the docs
+  gate on that reasoning was caught by a reviewer, not by a run.
 
 ## Conventions to match
 
