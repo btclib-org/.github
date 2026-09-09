@@ -6649,3 +6649,30 @@ audit has no revision to compare against.
   this message's own names are the object of `lists` and `none of which
   is` is what says they are not section 7's, where the others follow the
   colon.
+
+### `CLAUDE.md`'s API-state census is the command, not a copy of its answer
+
+- **The bullet on `tests/conftest.py`'s per-session clone names no
+  population and no count** (closes #941): it printed the `git grep`
+  that finds what asks the API for state, then a list of files, then
+  how many of them a pattern without `still_open` misses. Section 9's
+  *Measure, don't assert* refuses a stated total, and one landing made
+  both stale at once, each falling short by the module that landing
+  gave a `still_open` call.
+- **The `still_open` argument keeps its reason and loses its
+  arithmetic**: a file reaching the API through that read alone names
+  neither `gh_json` nor a settings dict, so a pattern without
+  `still_open` answers a confident zero for it. That is why the term is
+  in the pattern, and running the pattern with the term and without it
+  is what measures the claim.
+- **The rejected alternative restates the list at its current length**:
+  a session reads this bullet to decide what reaches the network before
+  changing a module, and a list is read where a command has to be run.
+  What it costs is a list answering for whenever it was last edited
+  with nothing on the page saying so, which is how the module whose
+  only API contact is that read came to be missing from it.
+- **The entry recording that the census moved with `still_open` speaks
+  of a census this tree no longer keeps**: what moved to
+  `tests/__init__.py`, what the move took out of `grid_test.py` and
+  what the pattern gained are unchanged, and the command the bullet
+  prints is what answers for the population now.
