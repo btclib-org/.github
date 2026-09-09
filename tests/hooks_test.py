@@ -8,8 +8,8 @@
 does not run: a hook commented out with a reason beside it is read here
 exactly as one never added, which is the point -- section 4 lists these
 without a condition, so where a tree declines one the finding is either
-the tree's or the section's, and the issue the backlog names is where
-that is decided.
+the tree's or the section's, and a `BACKLOG` row is where that finding
+is recorded.
 """
 
 from __future__ import annotations
@@ -46,9 +46,10 @@ hook is owed exactly where the tree tracks its file type.
 LOCAL = ("toml-comment-width", "decoded-subprocess-encoding")
 """The two of section 4's local hooks that have a subject in any Python tree.
 
-`local-link-prefix` is the third and is compared by `verbatim_test.py`
-as part of the file that carries it; mypy is the fourth and is a test
-of its own below, section 6 asking for it by name.
+`local-link-prefix` is the third, and no test here has it as a subject:
+`.pre-commit-config.yaml` is not among section 14's verbatim paths, and
+`verbatim_test.py` compares no part of it. mypy is the fourth and is a
+test of its own below, section 6 asking for it by name.
 """
 
 MYPY = ("mypy", "mirrors-mypy")

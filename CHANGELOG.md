@@ -6894,3 +6894,35 @@ audit has no revision to compare against.
 - **Section 14's `#267` paragraph stays as it stands**: *raised it*
   names what that issue records, and *is open, not decided here* is a
   claim about the standard rather than about the tracker.
+
+### The standard lands with its gate, and the tracker counts work
+
+- **`README.md`'s *How to use this file* now binds a numbered section's
+  rule to what reads it** (issue #976): a rule only a reader enforces
+  turns every landing into a finding, which is the failure to converge
+  #976 records. The bullet binds the numbered sections rather than
+  stating a rule of its own kind, and what reads this preamble is the
+  review every change to this file gets, `REVIEWING.md`'s *This
+  repository in particular* asking whether the standard keeps the rule
+  it states.
+- **`REVIEWING.md`'s collateral section names which findings are never
+  filed** (issue #976): a wording defect in prose no user reads is fixed
+  in the diff that already touches the file and otherwise left as a note
+  at the foot of the review. `tests/verbatim_test.py`'s `EXPECTED_DRIFT`
+  entry for `REVIEWING.md` names this paragraph too, not yet ported to
+  the other eight trees.
+- **`tests/hooks_test.py`'s `LOCAL` docstring stops claiming a
+  comparison that does not exist** (issue #924): `.pre-commit-config.yaml`
+  is not among section 14's verbatim paths, and `verbatim_test.py`
+  compares no part of it, so `local-link-prefix`'s configuration is no
+  test's subject here.
+- **`tests/hooks_test.py`'s module docstring drops the pending citation
+  form** (issue #974): it now names the mechanism that records the
+  finding, a `BACKLOG` row, rather than an issue that may or may not
+  still hold the question.
+- **The `BACKLOG` row for #553 is removed** (closes #553):
+  `btclib-org.github.io` carries classic protection with the check its
+  `lint.yml` produces, `required_signatures` through the
+  `main-integrity` ruleset, a `tag-integrity` ruleset on `refs/tags/v*`,
+  and a row in section 2, so the suite's strict `XPASS` on the exemption
+  is answered by removing it rather than by carrying it forward.
