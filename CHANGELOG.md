@@ -6701,3 +6701,63 @@ audit has no revision to compare against.
   the rates are counts of the same kind, and this is the change that
   makes that sentence answer for the whole bullet. It leaves that entry
   where it is.
+
+### What dated the alignment fallback's failure was the suite
+
+- **This supersedes *The alignment sweep refuses the run it has no token
+  for* above, whose entry says every run took the right-hand side of
+  `secrets.ALIGNMENT_TOKEN || secrets.GITHUB_TOKEN` and failed inside
+  the suite at the fixture that fetches classic protection**
+  (closes #951): runs took that side and passed. A run is under the
+  fallback where its own head sha carries that expression, which is a
+  different set from the days the expression sat on `main`, the pull
+  request introducing it having run with it first. The runs come from
+
+  ```shell
+  gh api --paginate \
+    --jq '.workflow_runs[]|[.id,.conclusion,.created_at,.head_sha]' \
+    'repos/btclib-org/.github/actions/workflows/alignment.yml/runs?per_page=100'
+  ```
+
+  and each head sha answers for itself under
+  `git show "${sha}:.github/workflows/alignment.yml"`. Every run under
+  the fallback that passed ran a tree without `tests/protection_test.py`,
+  which `c6c1657` added together with a session fixture asking
+  `branches/main/protection` of every repository; none passed with that
+  fixture present, and the first to fail with it present fails there. So
+  what that entry says about the mechanism stands and what it says about
+  the scope is replaced.
+
+- **A fallback token's red is dated by how the suite reads, not by the
+  token.** This workflow's first run, `32576081147`, fails in
+  `settings_test.py` with `KeyError: 'bypass_actors'` — the field a
+  token without push access cannot see — where `enforcing()` at that
+  run's head sha `a5bb45a5` reads `ruleset["bypass_actors"]`. Its child
+  `297baa0f`, *An invisible bypass list is not an empty one*, reads
+  `ruleset.get("bypass_actors")`, and the direct form never reached
+  `main`: the omission became a skip carrying its reason, and the runs
+  went green until `c6c1657` asked for a document the run's token could
+  not fetch at all, which no `.get` absorbs. Every other failure under
+  the fallback that ran a tree without that fixture is drift, in
+  `verbatim_test.py` or `grid_test.py`, read from each run's own
+  `FAILED` lines: a pattern for the refused-call shape is blind to a
+  field the endpoint omitted.
+
+- **What the fallback answered green needed no credential.** `btclib`'s
+  rulesets are readable unauthenticated where its classic-protection
+  document is not:
+
+  ```shell
+  curl -s -o /dev/null -w '%{http_code}\n' \
+    https://api.github.com/repos/btclib-org/btclib/rulesets
+  curl -s -o /dev/null -w '%{http_code}\n' \
+    https://api.github.com/repos/btclib-org/btclib/branches/main/protection
+  ```
+
+  answering `200` and `401`. Run `32638537830` skipped the
+  `bypass_actors` questions and the merge-method one with the reason
+  that the run's token could not see them, and an unauthenticated read
+  returns a ruleset document with no `bypass_actors` in it either. The
+  settings question that run did answer — that a repository with tags
+  refuses an unsigned one — reads that ruleset document and
+  `tags?per_page=1`, and an unauthenticated read answers both.
