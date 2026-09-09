@@ -174,8 +174,16 @@ def test_the_two_halves_account_for_every_convention() -> None:
     tested = {convention for convention, _ in ROWS}
 
     overlap = tested.intersection(absent)
+    # repr on each name: a name may hold a comma -- `NOT_TESTED`'s
+    # docstring says so of the half it reads, and a cell takes one,
+    # `rows` splitting a row on a pipe -- so joined bare on a comma and
+    # a space, one such name reads as two. A separator either half
+    # refuses inside a name is the rejected alternative, this message
+    # reporting only names both halves hold: it stands on the separators
+    # those halves have, where repr delimits a name whatever it holds.
     assert not overlap, (
-        f"{', '.join(sorted(overlap))} is both declared tested and listed as not tested"
+        f"{', '.join(map(repr, sorted(overlap)))} is both declared tested"
+        " and listed as not tested"
     )
 
     unknown = [convention for convention in absent if convention not in CONVENTIONS]
