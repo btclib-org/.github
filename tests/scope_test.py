@@ -57,7 +57,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from . import ROOT, by_hand, sole
+from . import ORG, ROOT, by_hand, sole
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -116,6 +116,71 @@ alone leaves the indent's own spaces beside the one it writes. It asks
 for the claim as a string and counts occurrences rather than lines, a
 folded file being one line.
 """
+
+DEFAULT_BRANCH = re.compile(r"\.default_branch\b|repository's default branch")
+"""How a copy reads the default branch back, in either shape it is found.
+
+`btclib-node`'s own spelling is `default_branch: .default_branch`, which
+this also matches, and a prose sentence naming the setting without the
+jq filter is the second alternative -- both hold the leading dot or the
+words that only mean the GitHub setting, never Read the Docs' field of
+the same name.
+"""
+
+PAGES = re.compile(r"/pages\b", re.IGNORECASE)
+"""How a copy reads Pages back, on a tree that serves one or not.
+
+The endpoint is the same call either way, `gh api
+repos/<org>/<repo>/pages`, and its path is what every shape of the
+sentence around it carries.
+"""
+
+WIKI = re.compile(r"\.has_wiki\b")
+"""How a copy reads the wiki setting back, in the shape a `--jq` filter
+holds it -- the field access itself, not the bare word a copy may use to
+say the setting is outside its scope, a claim section 11 no longer makes.
+"""
+
+PROJECTS = re.compile(r"\.has_projects\b")
+"""The projects board's own field, read the same way as `WIKI` above."""
+
+PARAGRAPHS = re.compile(r"\n\s*\n")
+"""What a copy's own blank line splits its prose on.
+
+Both readback patterns are asked of one paragraph at a time rather than
+of the whole file, because `NEGATED` below has to bind to the paragraph
+that names the gap and not to an unrelated one that happens to carry a
+genuine reading elsewhere in the same file.
+"""
+
+NEGATED = re.compile(r"no (?:command|section) here (?:reads|records)", re.IGNORECASE)
+"""How a copy names a gap in itself, rather than closing it.
+
+Section 11 states no such sentence; this is a copy's own wording.
+`portanode`'s `REPOSITORY.md` carries it beside the endpoints themselves
+-- naming the call and, for Pages, the `404` it answers -- in the
+paragraph that says issue #549 is why neither is recorded, which is what
+makes a bare `PATTERN.search(text)` read that paragraph as the reading
+it explicitly says it is not. `btclib-node`'s carries the same phrase in
+an unrelated paragraph, *What this file passes over*'s opening sentence,
+which is the live control for why this is asked one paragraph at a time
+rather than of the whole file: that sentence must not suppress a genuine
+reading elsewhere in the same copy.
+"""
+
+
+def recorded(text: str, pattern: re.Pattern[str]) -> bool:
+    """Say whether some paragraph of a copy answers a pattern, unnegated.
+
+    :param text: the file's full text.
+    :param pattern: the readback to look for.
+    :returns: whether some paragraph carries it without also naming the
+        gap `NEGATED` reads.
+    """
+    return any(
+        pattern.search(paragraph) and not NEGATED.search(paragraph)
+        for paragraph in PARAGRAPHS.split(text)
+    )
 
 
 def quoted(opening: str) -> str:
@@ -278,4 +343,82 @@ def test_the_settings_file_carries_section_11s_three_limbs(
             "s/\\[([^]]+)\\]\\[[^]]*\\]/\\1/g' "
             f"| grep -oF {shlex.quote(clause)} | wc -l",
         )
+    )
+
+
+def test_the_settings_file_reads_the_default_branch_back(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 11: the default branch is inside the perimeter, and read back.
+
+    Section 16's checklist sets it on every new repository, which is
+    what puts it there by the general rule rather than by a sentence of
+    its own; a copy that never reads it back is answerable for a
+    setting the standard already asks about.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    path = trees[repository] / SETTINGS
+    if not path.is_file():
+        pytest.skip(f"{repository} has no {SETTINGS}")
+    text = path.read_text(encoding="utf-8")
+    assert recorded(text, DEFAULT_BRANCH), (
+        f"{SETTINGS} does not read the default branch back; "
+        + by_hand(repository, f"gh api repos/{ORG}/{repository} --jq .default_branch")
+    )
+
+
+def test_the_settings_file_says_whether_pages_is_configured(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 11: whether Pages is on is inside the perimeter on every tree.
+
+    Not only the one serving a site from its own root: the endpoint
+    answers the same question either way, and a tree that has never
+    turned Pages on is indistinguishable, on the API alone, from one
+    whose site was taken down -- so the answer is recorded rather than
+    left to be inferred from the absence of a *Pages and Read the Docs*
+    section.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    path = trees[repository] / SETTINGS
+    if not path.is_file():
+        pytest.skip(f"{repository} has no {SETTINGS}")
+    text = path.read_text(encoding="utf-8")
+    assert recorded(text, PAGES), (
+        f"{SETTINGS} does not say whether Pages is configured; "
+        + by_hand(repository, f"gh api repos/{ORG}/{repository}/pages")
+    )
+
+
+def test_the_settings_file_reads_the_wiki_and_the_projects_board_back(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 11: `has_wiki` and `has_projects` are inside the perimeter.
+
+    Section 11 no longer states the rejected alternative -- both outside
+    the perimeter, a copy explaining neither -- so a copy still carrying
+    that reading is answerable for a setting the standard now asks about,
+    same as the default branch and Pages above.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    path = trees[repository] / SETTINGS
+    if not path.is_file():
+        pytest.skip(f"{repository} has no {SETTINGS}")
+    text = path.read_text(encoding="utf-8")
+    missing = [
+        name
+        for name, pattern in (("has_wiki", WIKI), ("has_projects", PROJECTS))
+        if not recorded(text, pattern)
+    ]
+    assert not missing, f"{SETTINGS} does not read {missing} back; " + by_hand(
+        repository, f"gh api repos/{ORG}/{repository} --jq '{{has_wiki, has_projects}}'"
     )

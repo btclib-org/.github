@@ -6982,3 +6982,42 @@ audit has no revision to compare against.
 - **This branch is stream S2 of the campaign's steering record**
   (issue #976): the standard's own side of the decision; the eight
   ports each land as a branch of their own, briefed after this one.
+
+### Section 11 turns the wiki and the projects board off, and reads them back
+
+- **`has_wiki` and `has_projects` move inside the perimeter** (issue
+  #550): both are off, an unused wiki being a second place a reader can
+  land looking for what the tracker already records, and the projects
+  board being a per-user view of the same issues the tracker holds.
+  Section 16's checklist sets neither, so the obligation to record them
+  is this sentence's rather than the checklist's.
+- **This tree's own `REPOSITORY.md` reads them back**: the rule and the
+  setting disagree today, the API still answering `true` for both, and
+  the record agrees with the setting until the flip is made — after
+  which it is the record that is behind, until the copy is updated to
+  match.
+- **`settings_test.py` gets the test that reads the new rule**: every
+  repository is checked against `has_wiki: false` and `has_projects:
+  false`, and a `BACKLOG` row cites #550 for the repositories, `.github`
+  included, whose settings have not been flipped yet.
+- **`scope_test.py` gets the test that reads whether a copy records
+  either back**: most copies still carry the rejected alternative's own
+  wording, `has_wiki` and `has_projects` outside the perimeter, and a
+  `BACKLOG` row cites #550 for those and for `portanode`, which names
+  neither at all.
+
+### Section 11 puts whether Pages is configured inside the perimeter
+
+- **Whether GitHub Pages is configured is inside the perimeter on every
+  tree, not only the one serving a site from its own root** (issue
+  #549): the endpoint answers the same `404` either way, a tree that has
+  never turned Pages on being indistinguishable on the API from one whose
+  site was removed by hand. Recording the `404` is what would make a
+  later silent flip to `on` visible. The default branch was already
+  inside the perimeter by the general rule, section 16's checklist
+  setting it on every new repository.
+- **`scope_test.py` gets the two tests that read those settings back**,
+  across every repository's `REPOSITORY.md`. `portanode`'s own copy
+  names both gaps and cites this issue already, so a `BACKLOG` row does
+  the same rather than asking the test to read a paragraph that states
+  the absence as the finding.
