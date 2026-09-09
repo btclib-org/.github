@@ -2736,6 +2736,31 @@ sight rather than weighed.
   nothing there, and that bound only rises, so what it decides today it
   stops deciding. Section 15 audits none of this, and a reading is what
   tells a finding from a correct reference.
+- **A citation names what the issue records, not what state the tracker
+  holds it in.** This reaches every citation prose carries — a comment,
+  a docstring, a `CHANGELOG.md` entry — in every tree: a sentence
+  naming an issue for what was decided there is true whatever the
+  tracker later answers, and one naming it for a question still being
+  decided is false the day that issue closes. Section 2 writes the
+  first. The reference is the same string under both, so what separates
+  them is a reading rather than a pattern, the way *What a command
+  decides of that* above leaves the other half of a reference to one.
+  What a reader needs of a question nobody has answered is where it is
+  written down, and the reference alone says that; the tracker is where
+  its state is current. Nothing brings a reader back to correct such a
+  sentence: the docstrings `btclib-org/.github#935` records are one
+  carrier, and the changelog entries `btclib-org/.github#946` collects
+  are another that *Nothing already written is rewritten* below leaves
+  as it stands. A changelog citation's parentheses are outside this,
+  `(issue #N)` saying what the entry did about an issue rather than what
+  the tracker holds, so a later landing closing that issue leaves it
+  true. The rejected alternative permits the pending form where the
+  landing that answers the question has to edit the sentence anyway;
+  what it costs is a judgement about a landing nobody has made, taken
+  again by whoever closes the issue, who need not be reading the tree
+  the sentence sits in. What this rule costs is the emphasis: the page
+  says where a question lives and not that it is still live, and opening
+  the reference is what tells a reader which.
 - **No history in the prose.** Comments say why the code is as it is, in
   the present tense. History has two files of its own.
 - **80 columns everywhere prose lives** — markdown by MD013, tables
