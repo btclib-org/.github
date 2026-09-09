@@ -6926,3 +6926,22 @@ audit has no revision to compare against.
   `main-integrity` ruleset, a `tag-integrity` ruleset on `refs/tags/v*`,
   and a row in section 2, so the suite's strict `XPASS` on the exemption
   is answered by removing it rather than by carrying it forward.
+
+### A reasonless coverage pragma is refused by a hook
+
+- **A local pygrep hook refuses a `#`-comment pragma with no reason, at
+  the gate, narrower than section 8's own acceptance command** (issue
+  #965): `reasonless-coverage-pragma` catches a `pragma: no cover` or a
+  `pragma: no branch` with nothing after it on its line, before a commit
+  exists; the command stays the reader's wider check.
+- **Section 8's inline-reason rule now names both spellings** (issue
+  #968): the hook's pattern matches `pragma: no branch` exactly as it
+  matches `pragma: no cover`.
+- **The pattern wants the `#` a comment opens with, so a docstring
+  quoting the rule in backticks is not refused** (issue #842): section 8
+  already says prose drops the `#`, which is what tells a comment from a
+  string apart here without a reading.
+- **The standard's half of the change lands here** (issue #976): the
+  other Python trees' hook entries and inline reasons follow in their
+  own branches, `tests/hooks_test.py`'s `LOCAL` naming the new hook and a
+  `BACKLOG` row carrying the trees it is not yet ported to.

@@ -43,12 +43,16 @@ conditional on the tree through section 4's *file checking itself*:
 hook is owed exactly where the tree tracks its file type.
 """
 
-LOCAL = ("toml-comment-width", "decoded-subprocess-encoding")
-"""The two of section 4's local hooks that have a subject in any Python tree.
+LOCAL = (
+    "toml-comment-width",
+    "decoded-subprocess-encoding",
+    "reasonless-coverage-pragma",
+)
+"""The three of section 4's local hooks that have a subject in any Python tree.
 
-`local-link-prefix` is the third, and no test here has it as a subject:
+`local-link-prefix` is the fourth, and no test here has it as a subject:
 `.pre-commit-config.yaml` is not among section 14's verbatim paths, and
-`verbatim_test.py` compares no part of it. mypy is the fourth and is a
+`verbatim_test.py` compares no part of it. mypy is the fifth and is a
 test of its own below, section 6 asking for it by name.
 """
 
@@ -156,6 +160,10 @@ def test_the_local_hooks_run(repository: str, trees: dict[str, Path]) -> None:
     first locale-decoded call is refused by nothing. Not spelled as the
     keyword here: the hook is a pygrep over every Python line, a
     docstring's included, and this one is in its own file set.
+    `reasonless-coverage-pragma` has one wherever there is a Python file
+    at all, `types: [python]` rather than a narrower set: a tree with no
+    site today is the tree in which the first reasonless one is refused
+    by nothing, same as the hook above.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.

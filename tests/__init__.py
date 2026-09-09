@@ -341,6 +341,20 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-secp256k1",
         ),
     ),
+    # reasonless-coverage-pragma: the hook is this tree's, and the ports
+    # to the other Python trees are the next branches
+    (
+        965,
+        "test_the_local_hooks_run",
+        (
+            "bbt",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-benchmarks",
+            "btclib-node",
+            "btclib-secp256k1",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
