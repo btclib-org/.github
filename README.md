@@ -2980,6 +2980,25 @@ sight rather than weighed.
   neighbour — and `git show --numstat` reports no deletion on
   `CHANGELOG.md`. So this is not an exception to either bullet above; it
   is what they cost.
+- **What a live claim obliges is a change, not the passage of time.**
+  Every entry in an open section stays reachable by an append, and
+  reachability is not an obligation: the bullet above says what a new
+  entry owes one already there, and that is the whole of it. A branch
+  appending an entry that bears on an earlier one says what it does to
+  it, and a branch whose entry bears on nothing owes nothing, however
+  long the section has been open. A tree that releases nothing is where
+  the two readings part: no heading ever arrives over its entries, so a
+  duty carried by their age would grow by one entry every landing and be
+  discharged by none. An entry found false is worth a superseding entry
+  of its own, and finding one is a reading, the way this section leaves
+  a claim no command re-derives to a reader — never a sweep the open
+  section's length prescribes. The rejected alternative bounds the duty
+  by defining the open section as something narrower than the topmost
+  `##`; what it costs is section 12's invariant that the topmost `##`
+  heading on the default branch is a work-in-progress heading at every
+  commit, and a tree with no release to take a boundary from names one
+  in prose instead, which is the figure nothing re-derives that
+  *Measure, don't assert* above refuses.
 - **The form of an entry moves; what an entry claims does not.** That is
   the boundary, and `btclib-org/btclib`'s `49176251` is where it sits:
   it edits the open section — 105 insertions against 84 deletions on

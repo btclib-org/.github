@@ -6761,3 +6761,35 @@ audit has no revision to compare against.
   settings question that run did answer — that a repository with tags
   refuses an unsigned one — reads that ruleset document and
   `tags?per_page=1`, and an unauthenticated read answers both.
+
+### A live claim obliges a change, not the passage of time
+
+- **A later entry bearing on an earlier one is the whole of what the
+  open section obliges** (closes #948): every entry there stays
+  reachable by an append, and reachability is not an obligation. A
+  branch appending an entry that bears on an earlier one says what it
+  does to it, and a branch whose entry bears on nothing owes nothing,
+  however long the section has been open.
+- **A tree that releases nothing is where the two readings part**
+  (closes #948): no heading ever arrives over its entries, so a duty
+  carried by their age would grow by one entry every landing and be
+  discharged by none, where a duty carried by the change is bounded by
+  the diff at hand. This repository is such a tree.
+- **Defining the open section as something narrower than the topmost
+  `##` is the rejected alternative** (closes #948): it bounds the duty
+  by age, and what it costs is section 12's invariant that the topmost
+  `##` heading on the default branch is a work-in-progress heading at
+  every commit. A tree with no release to take a boundary from would
+  name one in prose, which is the figure nothing re-derives that
+  *Measure, don't assert* refuses.
+- **The bullet the open section already holds stays as written**: *An
+  entry the open section still holds is a live claim*, under *A
+  measured sentence's quantifier, and a live entry in the open
+  section*, scopes the obligation to a later entry bearing on an
+  earlier one, and the new bullet states the half it leaves unsaid —
+  that an entry nothing bears on owes nothing. It leaves that entry
+  where it is.
+- **No sweep of this file follows**: a sentence here naming an issue's
+  state is superseded when a reader finds it false, and not because the
+  section stays open. #946 covers the other half, the entries in the
+  sibling trees whose sentences name an issue's state.
