@@ -188,17 +188,14 @@ def still_open(issue: str) -> bool:
     its debt is open, and the backlog excuses a cell while the issue its
     row names is, and each exemption expires the day the issue closes.
 
-    A citation in a docstring is left to a reader, for the reason
-    section 9 gives about the qualifier a reference carries: the state
-    is the same shape. What looks like a reference in this tree includes
-    the form this call's parameter names, the fixture number
-    `backlog_test.py` plants in the suite it runs through `pytester`, and
-    a section anchor such as `./README.md#8-coverage-at-100` in
-    `REPOSITORY.md`. So the form of the citation is what keeps it from
-    expiring: section 2's btclib-org/.github#530 says what that issue
-    decided and is true whichever state this call reports, where a
-    sentence saying a question is still being decided is false the day it
-    closes.
+    A citation in a docstring is left to a reader: what keeps one from
+    expiring is its form, which section 9's *A citation names what the
+    issue records* rules, and nothing here reads a prose pointer. What
+    looks like a reference in this tree includes the form this call's
+    parameter names, the fixture number `backlog_test.py` plants in the
+    suite it runs through `pytester`, and a section anchor such as
+    `./README.md#8-coverage-at-100` in `REPOSITORY.md`, so a check over
+    the prose would want the reading it was meant to replace first.
 
     :param issue: the reference, qualified -- `owner/repo#123`.
     :returns: whether the API reports it open.

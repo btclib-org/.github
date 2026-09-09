@@ -6838,3 +6838,41 @@ audit has no revision to compare against.
   answer nothing**: that clause describes a list the bullet no longer
   carries, and what the same entry says about the five and about the
   documentation build stands. It stays where it is.
+
+### A citation names what the issue records, not what state it is in
+
+- **Section 9 rules what a citation may claim about the issue it
+  names** (closes #942): a sentence naming an issue for what was decided
+  there is true whatever the tracker later answers, and one naming it
+  for a question still being decided is false the day that issue closes.
+  The reference is the same string under both, so what separates them is
+  a reading rather than a pattern, as that section already leaves the
+  qualifier half of a reference to one.
+- **The reference alone is what replaces the pending form**: it says
+  where a question is written down, and the tracker is where its state
+  is current. What that costs is the emphasis — the page no longer says
+  a question is still live, and opening the reference is what tells a
+  reader.
+- **A changelog citation's parentheses are outside the rule**: `(issue
+  #N)` says what the entry did about an issue rather than what the
+  tracker holds, so a later landing closing that issue leaves it true.
+- **Permitting the pending form where the landing that answers the
+  question must edit the sentence anyway is the rejected alternative**:
+  it asks for a judgement about a landing nobody has made, and it is
+  taken again by whoever closes the issue, who need not be reading the
+  tree the sentence sits in. The docstrings #935 records and the
+  changelog entries #946 collects are what the pending form leaves
+  behind.
+- **`still_open`'s docstring points at the new bullet** and keeps what
+  is this tree's own: the issue-shaped strings here — this call's own
+  parameter names, a planted fixture number, a section anchor — that a
+  check over the prose would have to read before it could run.
+- **The entry this bears on stays where it is**: *A docstring cites an
+  issue for what it records, and nothing reads its state* said the form
+  is what keeps a citation from expiring and that section 9 rules the
+  same way for the qualifier a reference carries, and that section now
+  rules the state half itself rather than by that analogy.
+- **No sweep of the standard's own citations follows**: a sentence
+  already carrying the pending form is corrected where a reader finds
+  it, and #962 covers the other half, the sentences in `README.md`
+  itself that name an issue's state.
