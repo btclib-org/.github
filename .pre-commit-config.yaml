@@ -207,6 +207,19 @@ repos:
         language: pygrep
         entry: '\b(text|universal_newlines)=True'
         files: \.py$
+      # section 8's own acceptance command, run at the gate: a pragma
+      # with nothing after it on its line carries no reason, for no
+      # cover and no branch alike. The `#` immediately before pragma is
+      # what a comment always carries and a backticked reference to the
+      # rule in prose never does, section 8 already saying prose drops
+      # it -- so this does not refuse a docstring quoting the rule,
+      # which a pygrep reading one line could not otherwise tell from a
+      # site
+      - id: reasonless-coverage-pragma
+        name: a coverage pragma with no inline reason is refused
+        language: pygrep
+        entry: '#\s*pragma: no (cover|branch)$'
+        types: [python]
   # .github/dependabot.yml is validated by nothing else here: check-yaml
   # above asks whether it is yaml and nothing reads it as what it is. A
   # typo in a package-ecosystem or a directory is not an error to GitHub

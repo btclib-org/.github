@@ -1535,6 +1535,19 @@ pre-commit.ci does not have — the lint workflow covers it. No
   `universal_newlines=True`: a decoded child process takes the locale's
   encoding, which is the same defect ruff's `unspecified-encoding`
   catches one layer in, and no linter here has an opinion on the keyword.
+- **`reasonless-coverage-pragma`** — pygrep refusing a `#`-comment
+  `pragma: no cover` or `pragma: no branch` with nothing after it on its
+  own line, narrower than section 8's own acceptance command: the match
+  wants a `#` immediately before `pragma`, the mark a comment always
+  opens with and a backticked reference to the rule in prose never
+  carries, section 8 already saying prose drops it — so a pygrep, which
+  cannot otherwise tell a comment from a string, does not refuse a
+  docstring quoting the rule, and leaves a bare mention of the phrase in
+  a comment's own prose to the command instead. A test in this suite
+  reading every tree's Python for the same shape, beside
+  `surface_test.py`, is the rejected alternative: it would report a
+  reasonless pragma only once the pull request that added it has already
+  landed, where the hook refuses it before the commit exists.
 - **`local-link-prefix`** — pygrep refusing a markdown link whose
   destination is local and does not begin `./`. In every repository of
   the organization, this one included: the rule is the organization's
@@ -2333,24 +2346,37 @@ fail_under = 100.0
   covered by patching what stands in the way, or carries a
   `pragma: no cover` with its reason. Neither is a build left red.
 
-  **The reason goes on the pragma's own line, after ` -- `** — the dash
-  a comment writes, an em dash being this file's own. What the position
-  buys is that
+  **The reason goes on the pragma's own line, after ` -- `, for
+  `pragma: no cover` and `pragma: no branch` alike** — the dash a comment
+  writes, an em dash being this file's own; a branch a test never takes
+  is silenced for the same kind of reason a statement is, and the rule
+  does not stop at the one spelling. Section 8 could instead leave
+  `no branch` with no inline rule of its own, its reason written in the
+  comment above the line — which is what every `no branch` site in
+  `btclib` already does — and that is the rejected alternative: one form
+  for both spellings costs the port rewriting each of those into the
+  inline shape, and what it buys is a reader and the hook having one
+  thing to check rather than two. What the position buys is that
 
   ```shell
-  git grep -nE 'pragma: no cover$' -- '*.py'
+  git grep -nE 'pragma: no (cover|branch)$' -- '*.py'
   ```
 
   answers empty in a tree that keeps the rule, so every line it names is
   a defect under this rule: a site short of the inline half — whether or
   not a reason for it is written somewhere else — or a pragma inside a
-  string, which the paragraph below says is not a site at all. ` - ` is
+  string, which the paragraph below says is not a site at all. Section
+  4's `reasonless-coverage-pragma` hook refuses a `#`-comment pragma with
+  no ` -- ` reason at the gate, narrower than the command above: its
+  pattern wants the `#` immediately before `pragma`, so a bare mention of
+  the phrase in a comment's own prose, or in a string that carries none,
+  is left to a reader running the command rather than refused. ` - ` is
   the rejected alternative, and what it costs is a hyphen where a dash
   was meant, and a check written for one spelling answering a confident
   zero for a tree that writes the other, which is what
 
   ```shell
-  git grep -nE 'pragma: no cover - [^-]' -- '*.py'
+  git grep -nE 'pragma: no (cover|branch) - [^-]' -- '*.py'
   ```
 
   is for.
