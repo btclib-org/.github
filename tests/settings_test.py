@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""The rulesets, the merge method and the token section 11 describes.
+"""The rulesets, the merge method, the token, the wiki and the projects board.
 
 These are the rules that live in no tree: a repository setting is
 invisible to every gate, every hook and every reviewer, and the only
@@ -281,4 +281,31 @@ def test_the_workflow_token_is_read(repository: str) -> None:
     granted = gh_json(endpoint)["default_workflow_permissions"]
     assert granted == "read", f"the default workflow token is {granted!r}; " + by_hand(
         repository, f"gh api {endpoint}"
+    )
+
+
+def test_the_wiki_and_the_projects_board_are_off(
+    repository: str,
+    settings: dict[str, dict[str, Any]],
+) -> None:
+    """Section 11: `has_wiki` and `has_projects` are off on every tree.
+
+    An unused wiki is a second place a reader can land looking for what
+    the tracker already records, and the projects board is a per-user
+    view of the same issues the tracker holds -- both public fields, so
+    unlike the merge method above no token needs push access to read
+    them.
+
+    :param repository: the repository asked about.
+    :param settings: the repository documents.
+    """
+    document = settings[repository]
+    on = sorted(key for key in ("has_wiki", "has_projects") if document[key])
+    flip = (
+        f"gh api -X PATCH repos/{ORG}/{repository}"
+        " -F has_wiki=false -F has_projects=false"
+    )
+    assert not on, f"{on} still on; flip with `{flip}`; " + by_hand(
+        repository,
+        f"gh api repos/{ORG}/{repository} --jq '{{has_wiki, has_projects}}'",
     )

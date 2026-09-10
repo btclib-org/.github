@@ -3934,13 +3934,15 @@ blanket clause `nothing here is recoverable by reading the code`, one
 sentence shorter and refuted in such a tree's own file two sections
 further down.
 
-**`has_wiki` and `has_projects` are outside the perimeter**: this
-standard states no rule about either, and a copy neither reads them back
-nor explains an answer to them. The rejected alternative records each
-with a sentence saying no rule is stated, so that a reader sees the
-answer and is told it is nobody's divergence; what it costs is a file
-growing with GitHub's API rather than with this standard, in a wording
-each copy invents for itself.
+**`has_wiki` and `has_projects` are off, and a copy reads both back.**
+An unused wiki is a second place a reader can land looking for what the
+tracker already records; the projects board is a per-user view of the
+same issues the tracker holds. Section 16's checklist sets neither, so a
+copy's obligation to record them comes from this sentence rather than
+from the checklist. The rejected alternative leaves both outside the
+perimeter, on the ground that no section states a rule for either; what
+it costs is each copy inventing its own frame for the same two booleans,
+which is the divergence this decision closes.
 
 **`has_issues` is not with them.** `CONTRIBUTING.md` sends an issue about
 one repository alone to that repository's own tracker, and section 16's
@@ -3956,6 +3958,21 @@ bar once. The rejected alternative keeps both halves out of every copy, on the
 ground that the bar is section 10's to state; what it costs is the flip, after
 which the sentinel's row and its badge stand while the run stops producing a
 score, and the file a reader restores the repository from says nothing.
+
+**Whether GitHub Pages is configured is inside the perimeter too, on
+every tree and not only the one that serves a site from its own root.**
+*Pages and Read the Docs* below states a rule for that case alone, but
+the same call answers every repository — `gh api
+repos/<org>/<repo>/pages` — and a tree that has never turned Pages on
+reads the identical `404` a tree whose site was removed by hand would
+give. The default branch is already inside the perimeter by the general
+rule above, section 16's checklist setting it on every new repository; a
+copy reads both back with the commands that answer them. The rejected
+alternative leaves Pages outside the perimeter, on the ground that no
+behaviour here rests on its absence; what it costs is the flip nobody
+would notice — a recorded `404` is what makes a later silent flip to
+`on` visible, Pages defaulting off being exactly why an unrecorded flip
+would otherwise go unnoticed.
 
 ### Signatures
 

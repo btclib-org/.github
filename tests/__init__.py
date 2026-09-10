@@ -319,6 +319,48 @@ def names() -> list[str]:
 
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    # #550's own third box: the flip is a repository setting, not a
+    # commit, and is still owed on these
+    (
+        550,
+        "test_the_wiki_and_the_projects_board_are_off",
+        (
+            ".github",
+            "bbt",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-node",
+            "btclib-secp256k1",
+            "portanode",
+        ),
+    ),
+    # #550's own third box, the readback half: measured against each
+    # copy's own origin/main, these six still carry the rejected
+    # alternative's wording, and portanode carries neither
+    (
+        550,
+        "test_the_settings_file_reads_the_wiki_and_the_projects_board_back",
+        (
+            "bbt",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-benchmarks",
+            "btclib-node",
+            "btclib-secp256k1",
+            "portanode",
+        ),
+    ),
+    # portanode's own REPOSITORY.md names both gaps and cites #549 itself
+    (
+        549,
+        "test_the_settings_file_reads_the_default_branch_back",
+        ("portanode",),
+    ),
+    (
+        549,
+        "test_the_settings_file_says_whether_pages_is_configured",
+        ("portanode",),
+    ),
     # deps-oldest: these trees are short of the workflow; btclib-node
     # schedules it (btclib-org/btclib-node#739)
     (
