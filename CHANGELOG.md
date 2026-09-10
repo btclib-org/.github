@@ -7178,3 +7178,18 @@ audit has no revision to compare against.
   entry above named this debt and btclib-org/btclib-org.github.io#1 as
   what the row still owed; both are settled, the schedule landing and
   that issue's own closure.
+
+### The `BACKLOG` row for #982 drops `btclib-node`
+
+- **`tests/__init__.py`'s `BACKLOG` row for #982 names `bitcoin-core-rpc`
+  and `btclib-secp256k1`, and no longer `btclib-node`** (closes #994):
+  `btclib-node`'s `codeql.yml` aggregate reads the run's own job listing
+  (btclib-org/btclib-node#922), so
+  `test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing`
+  passes there, and a strict `xfail` over a passing cell is red on
+  `main`. *Section 10 says which shape an aggregate takes, not how it
+  detects reuse*'s entry above counts three `codeql.yml` aggregates on
+  the wrong shape and names `btclib-node` among them; that count speaks
+  of the day it landed, and this entry is the change that moves the
+  population it counted. #982 stays open for the trees the row still
+  names.
