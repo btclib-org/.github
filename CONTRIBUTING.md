@@ -235,7 +235,8 @@ this heading.
 
 uv is the only thing that has to be installed; it fetches interpreters
 and tools itself. There is a project here, and nothing installs it:
-`package = false`, its only Python being one test suite.
+`package = false`, its Python being one test suite and the local hooks
+under `.github/scripts/`.
 
 `gh` and `git` are the other two prerequisites and neither is a wheel:
 both are on every GitHub-hosted runner already, and the suite shells out

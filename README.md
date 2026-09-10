@@ -1749,6 +1749,41 @@ pre-commit.ci does not have — the lint workflow covers it. No
     and no other repository of the organization is, so unlike the two
     hooks above it costs each tree a pass over its own prose before that
     tree can carry it.
+- **`check-changelog`** — a local hook, `language: system`, running
+  `python3 .github/scripts/check_changelog.py` with `pass_filenames:
+  false` over `CHANGELOG.md`. It runs ahead of `markdownlint-cli2`
+  in `.pre-commit-config.yaml` so it reads the file before that hook's
+  `--fix` repairs the very seam the third check below exists to name.
+  `merge=union` stays on that file (btclib-org/.github#21's ruling),
+  and this is the gate its price bought back: two branches each adding
+  their own new heading with the same wording at the section's one
+  shared anchor is not a repeat at all -- the driver folds the two into
+  a single entry, which is what can hide two entries closing the same
+  issue under that one heading. A `###` heading is repeated only where
+  the matching text does not end up adjacent once the merge is done --
+  one side's own further entry landing between the two -- or where a
+  new heading repeats one already in the section at the branches'
+  shared base, no second branch needed for that shape at all; and a
+  heading left with no blank line above it is the blank the driver eats
+  at that seam (btclib-org/.github#760). The script's own docstring
+  carries the three checks and what they still cannot make without a
+  network call a `pre-commit` hook is the wrong place to put.
+
+    **A test of this repository's own suite is declined**, for what
+    that suite is: an audit run after the fact, so a duplicate it finds
+    is one that has already landed. The check has to fire before the
+    merge that creates it, which only a hook run on the branch does.
+    **News fragments are declined too**, at btclib-org/.github#305: they
+    dissolve the anchor this driver eats at, but the step that would
+    assemble them into a section is a release, and a tree that never
+    releases — this one among them — never runs it, so the directory
+    of fragments never empties. **A gate reading the order two landed
+    sections sit in is the third alternative**, and
+    btclib-org/.github#516 declines it as the weaker answer: it reads a
+    rebase's result after the fact, where reconstruction against the
+    branch's own base — CONTRIBUTING.md's *Committing and rebasing* —
+    is the discipline that catches a misplacement this hook does not
+    reach.
 
 ## 5. ruff
 
@@ -2923,7 +2958,19 @@ sight rather than weighed.
   file whose second heading sits against the bullet above it, which
   MD022 and MD032 both refuse. Section 4's autofix rule has
   `markdownlint-cli2` write the line back on the next hook run, rather
-  than only reporting it missing.
+  than only reporting it missing, and that hook reports the missing
+  line rather than the driver that ate it; section 4's `check-changelog`
+  is what names the seam and the rebase instead.
+- **Two entries closing the same issue under one heading is what the
+  driver's fold produces, not a repeated heading.** Two branches' own
+  identically-worded new headings at the section's shared anchor fold
+  into one entry rather than repeating, which is what can hide the
+  double close. A `###` heading repeats instead where the matching
+  text does not land adjacent once the merge is done, or where a new
+  heading alone repeats one already in the section -- no second branch
+  needed for that shape. Section 4's `check-changelog` reads the open
+  section for both, and what it cannot make of either without a
+  network call is in its own docstring rather than repeated here.
 - **A `###` names one entry, never a theme several entries share.** So
   the open section is the list of its entries, and the end of it is one
   place. Grouping by theme is the rejected alternative: nothing here
@@ -5477,6 +5524,11 @@ paths are what that test compares:
   invocation and not a second copy of the standard, and it stays a
   file of its own rather than folding into `CLAUDE.md`, which is read by
   every session including the one that wrote the diff.
+- `.github/scripts/check_changelog.py` — owed by every repository, every
+  tree carrying a `CHANGELOG.md` and every one of them `merge=union` in
+  `.gitattributes`. Section 4's `check-changelog` hook is what runs it.
+  btclib-org/.github#21 carries the debt for the trees still short of
+  the script and the hook that runs it.
 
 **Verbatim in part**, the file around it being the repository's own and
 so nothing a comparison by path can do: the `ci:` block of

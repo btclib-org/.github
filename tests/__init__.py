@@ -422,6 +422,37 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-secp256k1",
         ),
     ),
+    # check-changelog: section 14's bullet for check_changelog.py lands
+    # ahead of the trees it names owed of; btclib-org/.github#21 carries
+    # the port
+    (
+        21,
+        "test_a_repository_carries_the_verbatim_files_owed_of_it",
+        (
+            "bbt",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-benchmarks",
+            "btclib-node",
+            "btclib-org.github.io",
+            "btclib-secp256k1",
+            "portanode",
+        ),
+    ),
+    # check-changelog: same port, the hook side; the six Python trees
+    # of the #965 row above are what the gate reaches today
+    (
+        21,
+        "test_the_local_hooks_run",
+        (
+            "bbt",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-benchmarks",
+            "btclib-node",
+            "btclib-secp256k1",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 

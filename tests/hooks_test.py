@@ -48,6 +48,7 @@ LOCAL = (
     "decoded-subprocess-encoding",
     "reasonless-coverage-pragma",
     "unquoted-placeholder",
+    "check-changelog",
 )
 """Section 4's local hooks that have a subject in any Python tree.
 

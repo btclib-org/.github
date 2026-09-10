@@ -1,8 +1,9 @@
 ---
 # the lint gate of the repository that carries the organization
 # standard. Mostly the markdown half of it, this tree being mostly prose;
-# the Python half applies to tests/, which is the standard asking the
-# organization the questions no single repository can ask itself.
+# the Python half applies to tests/, the standard asking the
+# organization the questions no single repository can ask itself, and to
+# .github/scripts/, this tree's own local hooks.
 #
 # Skip a hook with SKIP=<id>, or all of them with "git commit -n".
 ci:
@@ -94,6 +95,22 @@ repos:
         args: [--write-changes, --force-exclude]
         types: [text]
         stages: [pre-commit, pre-merge-commit, pre-push, manual]
+  # `merge=union` stays on `CHANGELOG.md` (btclib-org/.github#21), and
+  # this is the gate its price bought back -- `.github/scripts/
+  # check_changelog.py`'s own docstring carries what the three checks
+  # catch, what they still cannot, and the alternatives declined
+  # (btclib-org/.github#305, btclib-org/.github#516). It runs ahead of
+  # markdownlint-cli2 below on purpose: that hook's `--fix` repairs the
+  # very seam the third check exists to name, so a hook reading the
+  # file after it would find nothing left to report.
+  - repo: local
+    hooks:
+      - id: check-changelog
+        name: the open CHANGELOG.md repeats no heading, closes no issue twice
+        entry: python3 .github/scripts/check_changelog.py
+        language: system
+        pass_filenames: false
+        files: ^(CHANGELOG\.md|\.github/scripts/check_changelog\.py)$
   # MD013 at 80 columns, tables included, and the shared configuration is
   # the one every repository of the organization carries: prose moves
   # between them, and a paragraph that lints in one has to lint here
@@ -306,7 +323,7 @@ repos:
         name: mypy (strict, in the project environment)
         entry: >
           uv run --locked --no-default-groups --group lint --group test
-          mypy tests
+          mypy tests .github/scripts
         language: system
         types: [python]
         pass_filenames: false

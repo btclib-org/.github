@@ -158,6 +158,15 @@ ignore = [
     "S603",
     "S607",
 ]
+# flake8-no-pep420: a pre-commit hook's own entry point, `python3
+# .github/scripts/check_changelog.py`, is never an import, and the
+# directory carries no `__init__.py` because it is not a package --
+# adding one to satisfy this rule would make it look like one
+".github/scripts/*.py" = ["INP001"]
+# the pre-commit hook that runs this reads a failing developer's
+# terminal, not a return value: what it prints is the line and the
+# reason, which is the whole of its report
+".github/scripts/check_changelog.py" = ["T20"]
 
 [tool.ruff.lint.mccabe]
 # ruff's default, as everywhere in the organization
