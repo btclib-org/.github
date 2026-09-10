@@ -75,22 +75,21 @@ within one tracker, so `btclib-org/.github#45` and
 `btclib-org/btclib#45` are different issues that would otherwise name
 the same worktree. `issue` is what prevents the collision that has
 actually happened — two worktrees of different work sharing a generic
-basename in one repository's own `.git`, keyed on its path's basename,
-which is what `wt-review` hit. `repo` prevents a different collision, a
-*path* one rather than a `.git` one: two repositories each keep their
-own `.git/worktrees/<basename>` and cannot collide there, but the
-workers of one session share one scratchpad directory, so a session
-carrying one issue into several repositories computes the same target
-path for each of them, and `git worktree add` refuses a directory that
-already exists — or worse, a second worker reads the first one's tree.
-`role` covers the narrower case of a coder and its reviewer holding a
-worktree at once, which the ordinary sequence avoids by each removing
-its own.
+basename in one repository's own `.git`, keyed on its path's basename.
+`repo` prevents a different collision, a *path* one rather than a `.git`
+one: two repositories each keep their own `.git/worktrees/<basename>`
+and cannot collide there, but the workers of one session share one
+scratchpad directory, so a session carrying one issue into several
+repositories computes the same target path for each of them, and `git
+worktree add` refuses a directory that already exists — or worse, a
+second worker reads the first one's tree. `role` covers the narrower
+case of a coder and its reviewer holding a worktree at once, which the
+ordinary sequence avoids by each removing its own.
 
-An issue of this tracker worked in `btclib` by a coder names its
-worktree `wt-github-255-btclib-coder`. No `uv sync` follows
-`git worktree add`, the gate doing that itself, and the editing, the
-gates and the commits all happen in the worktree before the push.
+An issue of `btclib-org/.github`'s tracker, worked in `btclib` by a
+coder, names its worktree `wt-github-255-btclib-coder`. No `uv sync`
+follows `git worktree add`, the gate doing that itself, and the editing,
+the gates and the commits all happen in the worktree before the push.
 
 ```shell
 WT=<scratchpad>/wt-<tracker>-<issue>-<repo>-<role>
@@ -223,12 +222,14 @@ Do not use Fable unless explicitly instructed.
   change to what a reader of every repository inheriting it sees.
 - **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` takes an entry where the copies
   converge by a landing the branch cannot make.** A branch touching the shared
-  half of a file section 14 compares — the whole file, or everything above
-  `## This repository in particular` where a copy carries that heading — owes
-  that entry and the issue it names, in the same diff. Dropping the heading
-  clause would lose the useful half of the old sentence, which said which part
-  of `CONTRIBUTING.md` is at stake; keeping it costs one clause and reaches
-  every path all the same, `shared()`'s own two returns being exactly this pair.
+  half of a file section 14 compares — the whole file, everything above a
+  marker heading such as `## This repository in particular`, or a named
+  section from its own heading to the next, the shape `CLAUDE.md`'s own
+  primary-checkout section takes — owes that entry and the issue it names, in
+  the same diff. Dropping the heading clause would lose the useful half of the
+  old sentence, which said which part of `CONTRIBUTING.md` is at stake;
+  keeping it costs one clause and reaches every path all the same,
+  `shared()`'s own three returns being exactly these three shapes.
   What the table takes is section 14's own sentence — a copy a fix converges,
   not one that cannot by design — so a port going out tree by tree qualifies,
   and so does a decision for the family whose outcomes all converge: `d000842`
@@ -293,10 +294,18 @@ Do not use Fable unless explicitly instructed.
   answers in each of the five and nothing in a tree with no `docs/` at all;
   the same command with `README.md` substituted for `CHANGELOG.md` inside
   the pattern answers in each of the five, which is the control saying the
-  zero is an absence rather than a miss. The trap is that *`docs/` is
-  unchanged* is a true sentence answering the wrong question: what decides
-  is what the tool reads, not which of its inputs moved. Skipping the docs
-  gate on that reasoning was caught by a reviewer, not by a run.
+  zero is an absence rather than a miss. That control takes its own
+  positive in the same five trees the check already answers in, so a
+  mangled revision silences check and control alike and a `0` from either
+  in one of the other four reads the same whether the tree has no `docs/`
+  or the revision is wrong. The control that tells the two apart runs in
+  one of those four on a string it cannot fail to hold:
+  `git -C <checkout> grep -l 'btclib' origin/main -- README.md` answers
+  `README.md` there, so a `0` from that same command is the revision and
+  never the tree. The trap is that *`docs/` is unchanged* is a true
+  sentence answering the wrong question: what decides is what the tool
+  reads, not which of its inputs moved. Skipping the docs gate on that
+  reasoning was caught by a reviewer, not by a run.
 
 ## Conventions to match
 

@@ -5375,10 +5375,21 @@ comparison stops:
   which is a comment to git and the marker to the comparison, so that a
   rule for one repository's paths is not a copy for every other to drift
   from.
+- `CLAUDE.md` — owed by every repository, and compared byte for byte
+  in each from `## The primary checkout is the maintainer's` to the
+  next heading at the same level. The section is what every session
+  reads before its first edit, and it states the same rule in every
+  tree; the rest of the file is that repository's own, by
+  section 13's own description of what it carries. The rejected
+  alternative, comparing the whole file, is rejected on the same ground
+  the `ci:` block above already gives: the file around a compared part
+  is the repository's own, and a comparison by path over the whole of
+  it would report drift in the part that is meant to differ.
 
 `tests/verbatim_test.py` compares what precedes that heading where a file
-carries one, and the whole file where it does not, each ending at a
-single newline — so the marker is the declaration, the blank line a copy
+carries one, the whole file where it does not, and only the section a
+bullet names where the bullet itself quotes one — each ending at a
+single newline, so the marker is the declaration, the blank line a copy
 puts before it is a spelling rather than content, and there is no second
 list of exceptions to keep in step.
 
