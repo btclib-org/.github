@@ -7308,3 +7308,12 @@ audit has no revision to compare against.
   `BACKLOG` rows drop the trees that landed since the last narrowing*'s
   entry above says the #550 row goes on citing the issue for three trees;
   it does so for two.
+
+### A bare closing keyword outside a parenthetical is witnessed as no token
+
+- **`tests/check_changelog_test.py` measures that `closes #N` written
+  into an entry's sentence names no closed token, beside `(closes #N)`
+  in the same text naming one**: the empty set on its own is also what
+  a pattern matching nothing answers, so the non-empty half is what
+  makes it a measurement. *The open section of `CHANGELOG.md` is read by
+  a hook*'s entry above names the script; it stands as written.
