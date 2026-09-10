@@ -7165,3 +7165,16 @@ audit has no revision to compare against.
   reading landed order are the alternatives declined**, at
   btclib-org/.github#21 itself, btclib-org/.github#305 and
   btclib-org/.github#516 in turn (issue #976).
+
+### Section 10's `homepage` bullet stops carrying the debt
+
+- **`btclib-org.github.io` schedules both `homepage` and `links` at the
+  minute section 10 gives it, so the bullet's debt sentence and its
+  `links` clause go, and nothing replaces them** (closes #558):
+  `test_every_row_of_the_calendar_names_something_that_exists` finds the
+  row scheduled, and what each sentinel's `cron:` there has to be is what
+  section 10's two tables say of every tree, so the bullet does not
+  restate it. *Section 10 calendars the rebuild and homepage sentinels*'s
+  entry above named this debt and btclib-org/btclib-org.github.io#1 as
+  what the row still owed; both are settled, the schedule landing and
+  that issue's own closure.
