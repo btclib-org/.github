@@ -1344,7 +1344,8 @@ what it holds.
   upstream minor and make a published artifact refuse a version it works
   with.
 - **Every comment carries the reason and the negative result**, held to
-  80 columns by the `toml-comment-width` hook.
+  section 9's 80 columns by the `toml-comment-width` hook, which reads
+  them as bytes.
 
 ## 4. The lint gate is `.pre-commit-config.yaml`
 
@@ -1528,9 +1529,10 @@ pre-commit.ci does not have — the lint workflow covers it. No
     resolves, and each `additional_dependencies` pin against the same
     package there. The second declaration is the price named above; that
     it is unchecked is the part worth knowing before choosing it.
-- **`toml-comment-width`** — pygrep, 80 columns on a toml comment.
-  `.{80}\S*[ \t]` reports a line only when whitespace is left past
-  column 80: a comment whose overflow is one unbroken token is exempt.
+- **`toml-comment-width`** — pygrep, 80 bytes on a toml comment, which
+  are columns where the comment is ASCII. `.{80}\S*[ \t]` reports a
+  line only when whitespace is left past byte 80: a comment whose
+  overflow is one unbroken token is exempt.
 - **`decoded-subprocess-encoding`** — pygrep refusing `text=True` and
   `universal_newlines=True`: a decoded child process takes the locale's
   encoding, which is the same defect ruff's `unspecified-encoding`
@@ -1827,17 +1829,16 @@ preview rule then runs only where `extend-select` names it exactly.
   diagnostic and silences no warning. The warning ruff prints over such a pair
   appears only where nothing has settled it.
 - **Code and prose have separate widths, and both are enforced**:
-  `ruff-format` reflows code to 88, and
-  `[tool.ruff.lint.pycodestyle] max-doc-length = 80` holds the
-  docstrings and whole-line comments — prose the formatter never
-  reflows — to the width markdown is already held to. A comment ending
-  in a URL is exempt on a condition, and one following code on its line
-  is outside the key: section 9 states both, with the reason — as it
-  states what a tree keeping `line-too-long` reports such a comment at,
-  the same table naming that width. `W505` is the rule that reads the
-  key and is inert without it, ruff having no default doc length: a
-  tree naming no `max-doc-length` states a width and enforces none,
-  `select` aside.
+  `ruff-format` reflows code to 88, and `[tool.ruff.lint.pycodestyle]
+  max-doc-length = 80` holds the docstrings and whole-line comments — prose
+  the formatter never reflows — to the width markdown is already held to. A
+  comment ending in a URL is exempt on a condition, and one following code on
+  its line is outside the key: section 9 states the condition, and its own
+  landed clause — *a Python comment following code on its line is outside the
+  number* — states the second; section 9 also states what a tree keeping
+  `line-too-long` reports such a comment at. `W505` is the rule that reads the
+  key and is inert without it, ruff having no default doc length: a tree
+  naming no `max-doc-length` states a width and enforces none, `select` aside.
 - **`max-complexity = 10`**, ruff's default, with a `# noqa` and a reason
   at each site over it rather than a global bound at the tree's worst.
   `RUF100` then fails the noqa as unused the moment a refactor brings the
@@ -2380,6 +2381,30 @@ fail_under = 100.0
   ```
 
   is for.
+
+  **Where a no-argument signature leaves `ruff format` nothing to reflow but
+  itself, the inline half moves to the decorator's line where one exists.**
+  Adding the reason after ` -- ` pushes such a `def` line past what the
+  formatter will leave on one line, and the formatter reflows the signature
+  rather than the pragma; on a decorated function the pragma goes on the
+  decorator's own line instead, and coverage excludes the whole node from a
+  pragma there exactly as it does from one on the unreflowed `def` line.
+
+  Where there is no decorator, the reflow happens anyway and the reason stays
+  on the signature's own last line:
+
+  ```python
+  def f() -> (
+      None
+  ):  # pragma: no cover -- reason
+  ```
+
+  coverage excludes the function in full from a pragma there too: every
+  physical line of one multi-line statement maps back to its first, so the
+  closing line answers for the same range the unreflowed `def` line did. A
+  whole-line comment written above the `def` instead is not this and excludes
+  nothing: coverage's decorator range starts at an undecorated `def`'s own
+  first line, and a comment one line above it sits outside that range.
 
   **A reason too long for the line goes above it as well, the inline
   half naming the case.** `btclib-node`'s `[tool.coverage.report]`

@@ -7114,3 +7114,35 @@ audit has no revision to compare against.
   the anchors GitHub renders them and checks every tree's tracked
   markdown against them, so a heading renamed here is caught without
   reaching the forge.
+
+### Section 4's width hook is named for what its pattern reads
+
+- **`toml-comment-width`'s `name:` states the pattern's own predicate, not a
+  lexical amnesty** (issue #843): the exemption is positional -- a comment
+  whose overflow is one unbroken final token -- and the name says so instead
+  of naming an unbreakable link, which is one shape among several the pattern
+  lets past.
+- **The hook's own width is bytes, and the standard says so** (issue #885):
+  `pygrep` matches `.{80}` against the raw line, so the limit is 80 bytes,
+  which are columns only where the comment is ASCII.
+- **`unquoted-placeholder` joins `tests/hooks_test.py`'s `LOCAL`, with a
+  `BACKLOG` row for the trees it has not reached** (issue #706): the hook
+  itself does not change and is this tree's alone; the ports to the other
+  Python trees are the next branches.
+- **A `def` line `ruff format` would reflow puts the inline reason on the
+  decorator's line, where one exists** (issue #841): coverage excludes the
+  whole node from a pragma there exactly as from one on the unreflowed `def`
+  line. Where none exists, the reflow happens anyway and the reason stays on
+  the signature's own last line, which coverage still excludes in full.
+- **Section 5's `max-doc-length` bullet points at the clause section 9
+  actually states** (issue #881): the reason and the table it pointed at
+  before did not exist.
+- **`.yamllint.yaml`'s `allow-non-breakable-words` comment states only the
+  setting's own predicate** (issue #883): MD013's own exemption is wider -- it
+  passes over a line with no break opportunity past the limit regardless of an
+  earlier space, where the setting exempts only a line that is one word end to
+  end -- so the comparison is dropped rather than corrected, and an
+  `EXPECTED_DRIFT` entry carries the file until the other eight trees
+  converge.
+- **The standard's half of the change lands here** (issue #976): the sibling
+  repositories' copies of these same sentences follow in their own branches.

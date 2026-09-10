@@ -81,6 +81,10 @@ EXPECTED_DRIFT: dict[str, str] = {
         "sentence about the fence's write hazard rather than this "
         "drift; resolved instead when the eight sibling ports land"
     ),
+    ".yamllint.yaml": (
+        "btclib-org/.github#976, the bare-URL claim #883 flags corrected "
+        "here and not yet ported to the other eight"
+    ),
 }
 """A path section 14 names whose copies are known not to agree yet.
 

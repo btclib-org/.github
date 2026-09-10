@@ -47,13 +47,14 @@ LOCAL = (
     "toml-comment-width",
     "decoded-subprocess-encoding",
     "reasonless-coverage-pragma",
+    "unquoted-placeholder",
 )
-"""The three of section 4's local hooks that have a subject in any Python tree.
+"""Section 4's local hooks that have a subject in any Python tree.
 
-`local-link-prefix` is the fourth, and no test here has it as a subject:
+`local-link-prefix` is not among them, and no test here has it as a subject:
 `.pre-commit-config.yaml` is not among section 14's verbatim paths, and
-`verbatim_test.py` compares no part of it. mypy is the fifth and is a
-test of its own below, section 6 asking for it by name.
+`verbatim_test.py` compares no part of it. mypy is not among them either
+and is a test of its own below, section 6 asking for it by name.
 """
 
 MYPY = ("mypy", "mirrors-mypy")
@@ -152,9 +153,10 @@ def test_name_tests_test_runs_at_its_default(
 def test_the_local_hooks_run(repository: str, trees: dict[str, Path]) -> None:
     """Section 4's local hooks with a subject in every Python tree.
 
-    `toml-comment-width` has one wherever there is a `pyproject.toml`,
-    which is what the tier says there is, and section 3 names it as what
-    holds that file's comments to 80 columns.
+    `toml-comment-width` has one wherever there is a `pyproject.toml`, which
+    is what the tier says there is; section 3 names it as what holds that
+    file's comments to 80 columns, and section 4 says the pattern reads them
+    as bytes.
     `decoded-subprocess-encoding` has one wherever a child process is
     decoded, and a tree that decodes none today is the tree in which the
     first locale-decoded call is refused by nothing. Not spelled as the
@@ -164,6 +166,10 @@ def test_the_local_hooks_run(repository: str, trees: dict[str, Path]) -> None:
     at all, `types: [python]` rather than a narrower set: a tree with no
     site today is the tree in which the first reasonless one is refused
     by nothing, same as the hook above.
+    `unquoted-placeholder` has one wherever there is a markdown file,
+    `types: [markdown]` rather than a narrower set: a tree with no
+    quoted placeholder today is the tree in which the first one pasted
+    is refused by nothing, same as the two hooks above.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
