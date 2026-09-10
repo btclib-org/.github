@@ -99,8 +99,9 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     that was, would match nothing and excuse nothing, and the strict
     expected failure it was meant to be would never be asked: the run
     would be green with a finding unfiled. So a row naming a test no
-    module of this suite asks per repository, or a repository the API
-    does not list, is an error of the collection and not a quiet no-op.
+    module of this suite asks per repository, a repository the API does
+    not list, or no repository at all, is an error of the collection and
+    not a quiet no-op.
     Per repository, because a test that runs once has no cell for the
     row to excuse, and a row naming one would pass this check and
     change nothing. The modules are read rather than the collected
@@ -125,12 +126,15 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
         if attribute.startswith("test_")
         and REPOSITORY in inspect.signature(function).parameters
     }
-    orphans = [
-        f"#{issue}: {test} on {repository}"
-        for issue, test, repositories in BACKLOG
-        for repository in repositories
-        if test not in defined or repository not in names()
-    ]
+    orphans: list[str] = []
+    for issue, test, repositories in BACKLOG:
+        if not repositories:
+            orphans.append(f"#{issue}: {test} names no repository")
+        orphans.extend(
+            f"#{issue}: {test} on {repository}"
+            for repository in repositories
+            if test not in defined or repository not in names()
+        )
     if orphans:
         msg = f"BACKLOG in tests/__init__.py lists rows no test answers to: {orphans}"
         raise pytest.UsageError(msg)
