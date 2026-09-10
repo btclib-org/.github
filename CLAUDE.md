@@ -59,14 +59,14 @@ the permitted side of *never work in it*, not an exception to it. Stop
 if the checkout is not on `main` or is not clean: that is no longer
 bringing it forward.
 
-**Every session works in a worktree**, its own, from the first edit,
-named `wt-<tracker>-<issue>-<repo>-<role>` rather than after the issue
-alone, most general part first: an issue filed in this tracker is the
-key and the repository is a detail of it — `#255` is one issue owed by
-seven repositories, `#177` by two — so the repository is what varies
-underneath an issue rather than the other way round, which is why
-`repo` comes after `issue`. Naming it that way also sorts every
-worktree of one issue together, which is what a port leaves behind.
+**Every session works in a worktree**, its own, from the first edit, named
+`wt-<tracker>-<issue>-<repo>-<role>` rather than after the issue alone, most
+general part first: an issue filed in `btclib-org/.github`'s tracker is the key
+and the repository is a detail of it — `btclib-org/.github#255` is one issue
+owed by seven repositories, `btclib-org/.github#177` by two — so the repository
+is what varies underneath an issue rather than the other way round, which is why
+`repo` comes after `issue`. Naming it that way also sorts every worktree of one
+issue together, which is what a port leaves behind.
 
 Each of the four parts earns its place against a different collision,
 and none of them is the same collision. `tracker` is the repository
@@ -97,15 +97,14 @@ git worktree add "$WT" origin/main -b <branch>
 git -C "$WT" push origin HEAD:refs/heads/<branch>
 ```
 
-`-b <branch>` sits after the path and the commit-ish so that the
-placeholder ends the command, which is section 9 of `README.md`'s rule.
-With the placeholder ahead of `"$WT"`, its `<` and its `>` are
-redirections performed left to right, so the `>` is reached only where
-the reader's own directory already holds the name `branch`: there the
-`<` succeeds, the line runs, and the `>` takes `"$WT"` as its target —
-a path with no directory at it is the file it creates. Ordinarily
-nothing holds that name, so the `<` fails first (`no such file or
-directory: branch`) and the line ends before the `>` opens anything.
+`-b <branch>` sits after the path and the commit-ish so that the placeholder
+ends the command, which is section 9 of `btclib-org/.github`'s rule. With the
+placeholder ahead of `"$WT"`, its `<` and its `>` are redirections performed
+left to right, so the `>` is reached only where the reader's own directory
+already holds the name `branch`: there the `<` succeeds, the line runs, and the
+`>` takes `"$WT"` as its target — a path with no directory at it is the file it
+creates. Ordinarily nothing holds that name, so the `<` fails first (`no such
+file or directory: branch`) and the line ends before the `>` opens anything.
 
 The push names the worktree with `git -C "$WT"` because a `cd` binds the
 shell that runs it: a session that runs each line as its own command

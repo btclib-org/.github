@@ -7021,3 +7021,16 @@ audit has no revision to compare against.
   names both gaps and cites this issue already, so a `BACKLOG` row does
   the same rather than asking the test to read a paragraph that states
   the absence as the finding.
+
+### `CLAUDE.md`'s shared section names the tracker it means
+
+- **The worktree-naming paragraph says `btclib-org/.github`'s tracker and
+  `btclib-org/.github#255`/`#177`, true of a reader in any of the nine
+  repositories** (issue #739): `this tracker` and a bare `#255`/`#177` are true
+  only of a reader inside `.github`, and the primary-checkout section lands
+  byte-for-byte in the eight other repositories, where a bare `#N` names a
+  different tracker's issue.
+- **The `-b <branch>` paragraph names `btclib-org/.github`'s own rule rather
+  than `README.md`'s** (issue #739): `README.md` is the standard only in this
+  repository, and `bitcoin-core-rpc`'s independent copy of the section already
+  carries the qualified form.
