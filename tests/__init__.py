@@ -335,17 +335,13 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ),
     ),
     # #550's own third box, the readback half: measured against each
-    # copy's own origin/main, these six still carry the rejected
+    # copy's own origin/main, these two still carry the rejected
     # alternative's wording, and portanode carries neither
     (
         550,
         "test_the_settings_file_reads_the_wiki_and_the_projects_board_back",
         (
-            "bbt",
-            "bitcoin-core-rpc",
             "btclib",
-            "btclib-benchmarks",
-            "btclib-node",
             "btclib-secp256k1",
             "portanode",
         ),
@@ -383,37 +379,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-secp256k1",
         ),
     ),
-    # reasonless-coverage-pragma: the Python trees the port has not
-    # reached
-    (
-        965,
-        "test_the_local_hooks_run",
-        (
-            "btclib",
-            "btclib-node",
-            "btclib-secp256k1",
-        ),
-    ),
-    # codeql.yml aggregates, called by nothing, that still read `needs`
-    # against section 10's rule
-    (
-        982,
-        "test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing",
-        (
-            "bitcoin-core-rpc",
-            "btclib-secp256k1",
-        ),
-    ),
-    # unquoted-placeholder: the Python trees the port has not reached
-    (
-        706,
-        "test_the_local_hooks_run",
-        (
-            "btclib",
-            "btclib-node",
-            "btclib-secp256k1",
-        ),
-    ),
     # check-changelog: section 14 owes check_changelog.py of every
     # repository, and these are short of it; btclib-org/.github#21
     # carries the port
@@ -421,22 +386,8 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         21,
         "test_a_repository_carries_the_verbatim_files_owed_of_it",
         (
-            "btclib",
-            "btclib-node",
             "btclib-org.github.io",
-            "btclib-secp256k1",
             "portanode",
-        ),
-    ),
-    # check-changelog: same port, the hook side; the Python trees of the
-    # #965 row above are what the gate reaches
-    (
-        21,
-        "test_the_local_hooks_run",
-        (
-            "btclib",
-            "btclib-node",
-            "btclib-secp256k1",
         ),
     ),
 )

@@ -7233,3 +7233,60 @@ audit has no revision to compare against.
   reason in the header as `codeql` and `integration-bitcoind` do; that
   entry stands, those being the workflows the sentence names, and this
   is the change that compares the names with the trees.
+
+### The `BACKLOG` rows drop the trees that landed since the last narrowing
+
+- **`tests/__init__.py`'s `BACKLOG` row for #982 is gone** (closes #1001,
+  closes #982): `bitcoin-core-rpc`'s `codeql.yml` aggregate reads the run's
+  own job listing (btclib-org/bitcoin-core-rpc#429), and so does
+  `btclib-secp256k1`'s (btclib-org/btclib-secp256k1#859), so
+  `test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing`
+  passes in both, and a strict `xfail` over a passing cell is red on
+  `main`. #1001 asked the row to drop `bitcoin-core-rpc`; `btclib-secp256k1`
+  landed while that was in review, and a row naming no tree excuses
+  nothing. #982 asked that each of its three trees read its own run's job
+  listing, and with btclib-org/btclib-node#922, the two above and this row
+  gone nothing of it is left. *The `BACKLOG` row for #982 drops
+  `btclib-node`*'s entry above says the row names `bitcoin-core-rpc` and
+  `btclib-secp256k1`; it names neither now. *Section 10 says which shape
+  an aggregate takes, not how it detects reuse*'s entry above names
+  `bitcoin-core-rpc` and `btclib-secp256k1` among the `codeql.yml`
+  aggregates reading `needs`; neither is one any more.
+- **The rows for #965, #706 and #21 over `test_the_local_hooks_run` are
+  gone** (issue #965, issue #706, issue #21): `btclib`, `btclib-node` and
+  `btclib-secp256k1` each carry in its `.pre-commit-config.yaml` every
+  local hook `tests/hooks_test.py`'s `LOCAL` names
+  (btclib-org/btclib#1985, btclib-org/btclib-node#923,
+  btclib-org/btclib-secp256k1#858), so the test passes in every tree
+  those rows named, and a row naming no tree excuses nothing. *A
+  reasonless coverage pragma is refused by a hook*'s entry above says a
+  `BACKLOG` row carries the trees `reasonless-coverage-pragma` is not yet
+  ported to, and *Section 4's width hook is named for what its pattern
+  reads*'s says the same of `unquoted-placeholder`, its ports to the
+  other Python trees being the next branches; both hooks have reached
+  every tree the rows named, and the rows those entries speak of are
+  gone. *The `BACKLOG` rows for the hook sweep drop the trees that landed
+  it*'s entry above says each of these rows goes on carrying the trees
+  its hook is not ported to; no tree is left for them to carry.
+- **The row for #21 over
+  `test_a_repository_carries_the_verbatim_files_owed_of_it` names
+  `btclib-org.github.io` and `portanode`** (issue #21): `btclib`,
+  `btclib-node` and `btclib-secp256k1` carry
+  `.github/scripts/check_changelog.py`, and neither of the trees the row
+  still names does. *The open section of `CHANGELOG.md` is read by a
+  hook*'s entry above says `BACKLOG` carries the script's path and #21
+  until the other repositories take it; this row is where it goes on
+  doing so, the row over the hook having gone with the bullet above.
+- **The row for #550 over
+  `test_the_settings_file_reads_the_wiki_and_the_projects_board_back`
+  drops `bbt`, `bitcoin-core-rpc`, `btclib-benchmarks` and
+  `btclib-node`** (issue #550): each copy's `REPOSITORY.md` reads
+  `.has_wiki` and `.has_projects` back now (btclib-org/bbt#48,
+  btclib-org/bitcoin-core-rpc#430, btclib-org/btclib-benchmarks#309,
+  btclib-org/btclib-node#924), and those landed while this branch was in
+  review. `btclib`, `btclib-secp256k1` and `portanode` stay, and the row
+  over `test_the_wiki_and_the_projects_board_are_off` is untouched: the
+  setting is not a file. *Section 11 turns the wiki and the projects
+  board off, and reads them back*'s entry above says most copies still
+  carry the rejected alternative's wording and a `BACKLOG` row cites #550
+  for those; the row goes on citing it for the three.
