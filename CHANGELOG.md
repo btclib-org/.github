@@ -7193,3 +7193,28 @@ audit has no revision to compare against.
   of the day it landed, and this entry is the change that moves the
   population it counted. #982 stays open for the trees the row still
   names.
+
+### The `BACKLOG` rows for the hook sweep drop the trees that landed it
+
+- **`tests/__init__.py`'s `BACKLOG` rows for #965, #706 and #21 no longer
+  name `bbt`, `bitcoin-core-rpc` or `btclib-benchmarks`** (issue #965,
+  issue #706, issue #21): each of the three carries in its
+  `.pre-commit-config.yaml` every local hook `tests/hooks_test.py`'s
+  `LOCAL` names, and carries `.github/scripts/check_changelog.py`, so
+  `test_the_local_hooks_run` and
+  `test_a_repository_carries_the_verbatim_files_owed_of_it` pass there,
+  and a strict `xfail` over a passing cell is red on `main`. The three
+  issues stay open for the trees the rows still name.
+- **The row for #965 goes on carrying the trees
+  `reasonless-coverage-pragma` is not ported to**, as *A reasonless
+  coverage pragma is refused by a hook*'s entry above says of it; the
+  trees named here are no longer among them.
+- **The row for #706 goes on carrying the trees `unquoted-placeholder`
+  is not ported to**: *Section 4's width hook is named for what its
+  pattern reads*'s entry above says the ports to the other Python trees
+  are the next branches, and the trees named here are the ones whose
+  branch has landed.
+- **Both rows for #21 go on carrying the repositories short of the
+  script**: *The open section of `CHANGELOG.md` is read by a hook*'s
+  entry above says `BACKLOG` carries the path and the issue until the
+  other repositories take it, and the trees named here have taken it.
