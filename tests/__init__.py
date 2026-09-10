@@ -383,16 +383,13 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-secp256k1",
         ),
     ),
-    # reasonless-coverage-pragma: the hook is this tree's, and the ports
-    # to the other Python trees are the next branches
+    # reasonless-coverage-pragma: the Python trees the port has not
+    # reached
     (
         965,
         "test_the_local_hooks_run",
         (
-            "bbt",
-            "bitcoin-core-rpc",
             "btclib",
-            "btclib-benchmarks",
             "btclib-node",
             "btclib-secp256k1",
         ),
@@ -407,47 +404,37 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-secp256k1",
         ),
     ),
-    # unquoted-placeholder: the hook is this tree's alone, and the ports
-    # to the other Python trees are the next branches
+    # unquoted-placeholder: the Python trees the port has not reached
     (
         706,
         "test_the_local_hooks_run",
         (
-            "bbt",
-            "bitcoin-core-rpc",
             "btclib",
-            "btclib-benchmarks",
             "btclib-node",
             "btclib-secp256k1",
         ),
     ),
-    # check-changelog: section 14's bullet for check_changelog.py lands
-    # ahead of the trees it names owed of; btclib-org/.github#21 carries
-    # the port
+    # check-changelog: section 14 owes check_changelog.py of every
+    # repository, and these are short of it; btclib-org/.github#21
+    # carries the port
     (
         21,
         "test_a_repository_carries_the_verbatim_files_owed_of_it",
         (
-            "bbt",
-            "bitcoin-core-rpc",
             "btclib",
-            "btclib-benchmarks",
             "btclib-node",
             "btclib-org.github.io",
             "btclib-secp256k1",
             "portanode",
         ),
     ),
-    # check-changelog: same port, the hook side; the six Python trees
-    # of the #965 row above are what the gate reaches today
+    # check-changelog: same port, the hook side; the Python trees of the
+    # #965 row above are what the gate reaches
     (
         21,
         "test_the_local_hooks_run",
         (
-            "bbt",
-            "bitcoin-core-rpc",
             "btclib",
-            "btclib-benchmarks",
             "btclib-node",
             "btclib-secp256k1",
         ),
