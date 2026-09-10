@@ -340,10 +340,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         550,
         "test_the_settings_file_reads_the_wiki_and_the_projects_board_back",
-        (
-            "btclib",
-            "btclib-secp256k1",
-        ),
+        ("btclib",),
     ),
     # deps-oldest: these trees are short of the workflow; btclib-node
     # schedules it (btclib-org/btclib-node#739)
@@ -365,17 +362,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "bitcoin-core-rpc",
             "btclib",
             "btclib-secp256k1",
-        ),
-    ),
-    # check-changelog: section 14 owes check_changelog.py of every
-    # repository, and these are short of it; btclib-org/.github#21
-    # carries the port
-    (
-        21,
-        "test_a_repository_carries_the_verbatim_files_owed_of_it",
-        (
-            "btclib-org.github.io",
-            "portanode",
         ),
     ),
 )

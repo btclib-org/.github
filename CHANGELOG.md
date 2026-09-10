@@ -7317,3 +7317,25 @@ audit has no revision to compare against.
   a pattern matching nothing answers, so the non-empty half is what
   makes it a measurement. *The open section of `CHANGELOG.md` is read by
   a hook*'s entry above names the script; it stands as written.
+
+### The rows for the script's last two trees and for secp256k1's readback go
+
+- **The `BACKLOG` row for #21 over
+  `test_a_repository_carries_the_verbatim_files_owed_of_it` is gone, and
+  the row for #550 over
+  `test_the_settings_file_reads_the_wiki_and_the_projects_board_back`
+  names `btclib` alone** (issue #21, issue #550): `btclib-org.github.io`
+  and `portanode` carry `.github/scripts/check_changelog.py` and the hook
+  that runs it (btclib-org/btclib-org.github.io#50,
+  btclib-org/portanode#534), so every repository does, and
+  `btclib-secp256k1`'s `REPOSITORY.md` reads `.has_wiki` and
+  `.has_projects` back (btclib-org/btclib-secp256k1#861). A row naming no
+  tree excuses nothing, and #21 stays open on its own two boxes, which
+  the port does not answer. *The `BACKLOG` rows drop the trees that landed
+  since the last narrowing*'s entry above says the #21 row is where
+  `BACKLOG` goes on carrying the script's path; it carries it nowhere
+  now. *The rows for portanode's settings readbacks are gone*'s entry
+  above says `btclib` and `btclib-secp256k1` stay on the #550 row; one
+  does. *The open section of `CHANGELOG.md` is read by a hook*'s entry
+  above says `BACKLOG` carries the script's path and #21 until the other
+  repositories take it; they have.
