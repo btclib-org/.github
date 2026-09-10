@@ -7146,3 +7146,22 @@ audit has no revision to compare against.
   converge.
 - **The standard's half of the change lands here** (issue #976): the sibling
   repositories' copies of these same sentences follow in their own branches.
+
+### The open section of `CHANGELOG.md` is read by a hook
+
+- **A `pre-commit` local hook, `check-changelog`, refuses a `###`
+  heading repeated in the open section, one issue `(closes #N)` by more
+  than one entry, and a heading left with no blank line above it**
+  (issue #21, issue #760): `.github/scripts/check_changelog.py` is the
+  script, and its own docstring states the one shape it cannot make
+  without a network call — issue numbers that differ from each other
+  while naming one duplicate defect.
+- **Section 4 names the hook and the alternatives declined for it,
+  section 9 points at it as what now reads the seam and the close, and
+  section 14 owes the script of every repository** (issue #21):
+  `tests/__init__.py`'s `BACKLOG` carries the path and the issue until
+  the other repositories take it.
+- **A test of this repository's own suite, news fragments and a gate
+  reading landed order are the alternatives declined**, at
+  btclib-org/.github#21 itself, btclib-org/.github#305 and
+  btclib-org/.github#516 in turn (issue #976).

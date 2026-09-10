@@ -86,6 +86,7 @@ on:
       - COPYRIGHT
       - LICENSE
       - .claude/commands/review.md
+      - .github/scripts/check_changelog.py
       - CONTRIBUTING.md
       - REVIEWING.md
       - .gitattributes

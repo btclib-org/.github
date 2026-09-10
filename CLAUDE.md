@@ -10,9 +10,12 @@ worked off. Read `README.md` before changing it: most of what a session
 here wants to add is already in it, with the alternative that was
 rejected beside it.
 
-The only Python is `tests/`, and its subject is the organization rather
-than this tree: whether the repositories still agree with `README.md`,
-which is the half of section 15's audit a machine can run.
+Most of the Python is `tests/`, and its subject is the organization
+rather than this tree: whether the repositories still agree with
+`README.md`, which is the half of section 15's audit a machine can run.
+The other Python is `.github/scripts/`, this tree's own local hooks,
+their subject being this tree's `CHANGELOG.md` rather than the
+organization.
 
 How to work here — what the issue tracker takes, the prose style, and
 how a pull request is opened and landed — is `CONTRIBUTING.md`, which is
