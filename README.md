@@ -3859,10 +3859,7 @@ its entry gains the tree when the workflow and the badge land together.
   a poll, and it wants a credential with write access to that tree,
   which nothing here holds. Asking it from this suite is the other, and
   what it costs is a red on `main` here for a drift another repository
-  owns. The minute this row gives that tree is `links`'s there too,
-  which it does not carry yet: btclib-org/btclib-org.github.io#1.
-  btclib-org/.github#558 carries the debt until that tree schedules the
-  workflow.
+  owns.
 - **`zkp-oracle` follows a tree with an implementation of its own to
   compare.** The sentinel compares two implementations of one primitive,
   so the tree it asks is the one holding the side written in Python;
