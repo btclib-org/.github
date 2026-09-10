@@ -7354,3 +7354,24 @@ audit has no revision to compare against.
   primary-checkout section byte for byte*'s entry above says the entry
   excuses the eight sibling copies until their own ports land; seven
   have landed, and it excuses `btclib`'s alone.
+
+### A `BACKLOG` row naming no repository is refused at collection
+
+- **`tests/conftest.py` refuses a `BACKLOG` row whose repository tuple
+  is empty, naming it the way it names a row over a test or a repository
+  that does not exist** (closes #1004): the guard read the tuple's
+  members, so a row with none was collected past it, reading as an
+  exemption while excusing no cell. `tests/backlog_test.py` drives the
+  hook through `pytester` with such a row beside the two shapes already
+  refused and a well-formed row in the same table, so the run that
+  witnesses the refusal witnesses what is not refused. *The `BACKLOG`
+  rows drop the trees that landed since the last narrowing*'s entry
+  above, *The rows for portanode's settings readbacks are gone*'s and
+  *The rows for the script's last two trees and for secp256k1's readback
+  go*'s each delete a row rather than leave it naming no tree, a row
+  naming none excusing nothing; they stand, and this is what makes the
+  collection say so where a narrowing leaves the tuple empty instead. *A
+  backlog row keyed on a closed issue fails the suite*'s entry above says
+  a row naming a test or a repository that does not exist excuses
+  nothing, so the run is not worth starting; a row naming no repository
+  is the same case.

@@ -7,7 +7,8 @@
 A row of `tests/__init__.py`'s `BACKLOG` excuses a failure the tracker
 records, as a strict expected failure, so that a repository that catches
 up is reported until its name is taken out. `conftest.py` refuses at
-collection a row naming a test or a repository that does not exist, and
+collection a row naming a test or a repository that does not exist, or
+no repository at all -- one `pytester` test here asks that of it -- and
 what is left to this module is the pair of ways a row stops recording
 anything with the report unchanged: the cell it excuses is skipped
 rather than asked, and the issue it cites is closed.
@@ -32,7 +33,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from . import BACKLOG, ORG, SELF, still_open
+from . import BACKLOG, ORG, SELF, conftest, hooks_test, still_open
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -117,6 +118,47 @@ def test_a_skip_on_an_excused_cell_fails(pytester: pytest.Pytester) -> None:
             ),
         ]
     )
+
+
+def test_a_row_naming_nothing_is_refused_at_collection(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The three shapes the guard refuses, in one table with one it must not.
+
+    A row whose repository tuple is empty, one naming a repository the
+    API does not list and one naming a test no module asks per
+    repository are refused by one run, which also carries a well-formed
+    row: the message naming exactly the three is what tells the guard
+    from one refusing everything or nothing. The well-formed row and the
+    two bad ones over a real test name it off the function rather than
+    by a string, so a rename reads as the rename and not as a fourth
+    refusal.
+
+    :param pytester: a pytest running in a directory of its own.
+    :param monkeypatch: what plants the table and the names in `conftest`.
+    """
+    asked = hooks_test.test_the_local_hooks_run.__name__
+    listed = "btclib"
+    planted: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+        (999, asked, ()),
+        (999, asked, ("nope",)),
+        (999, "test_renamed_away", (listed,)),
+        (999, asked, (listed,)),
+    )
+    monkeypatch.setenv(conftest.SWITCH, "1")
+    monkeypatch.setattr(conftest, "BACKLOG", planted)
+    monkeypatch.setattr(conftest, "names", lambda: [listed])
+    pytester.makeini("[pytest]\n")
+    pytester.makeconftest("from tests.conftest import pytest_collection_modifyitems\n")
+    pytester.makepyfile("def test_anything(): pass\n")
+    result = pytester.runpytest("-p", "no:cacheprovider")
+    assert result.ret == pytest.ExitCode.USAGE_ERROR
+    refused = [
+        f"#999: {asked} names no repository",
+        f"#999: {asked} on nope",
+        f"#999: test_renamed_away on {listed}",
+    ]
+    assert f"lists rows no test answers to: {refused}" in result.stderr.str()
 
 
 @pytest.mark.integration
