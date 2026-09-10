@@ -7290,3 +7290,21 @@ audit has no revision to compare against.
   board off, and reads them back*'s entry above says most copies still
   carry the rejected alternative's wording and a `BACKLOG` row cites #550
   for those; the row goes on citing it for the three.
+
+### The rows for portanode's settings readbacks are gone
+
+- **The two `BACKLOG` rows for #549 are gone, and the row for #550 over
+  `test_the_settings_file_reads_the_wiki_and_the_projects_board_back`
+  drops `portanode`** (closes #549, issue #550): `portanode`'s
+  `REPOSITORY.md` reads `.default_branch`, `/pages`, `.has_wiki` and
+  `.has_projects` back (btclib-org/portanode#531), the last copy short of
+  the first two, so every copy now answers #549's two boxes and the rows
+  that named it excuse nothing. `btclib` and `btclib-secp256k1` stay on
+  the #550 row; the row over `test_the_wiki_and_the_projects_board_are_off`
+  is untouched. *Section 11 puts whether Pages is configured inside the
+  perimeter*'s entry above says a `BACKLOG` row cites #549 for `portanode`
+  rather than asking the test to read a paragraph stating the absence;
+  that paragraph is gone from the copy and so are the rows. *The
+  `BACKLOG` rows drop the trees that landed since the last narrowing*'s
+  entry above says the #550 row goes on citing the issue for three trees;
+  it does so for two.
