@@ -239,8 +239,8 @@ def test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing(
     its aggregate reads `needs` instead, which stays scoped to the
     workflow that declares it either way; a workflow nothing calls reads
     the listing, which also catches a job `needs.*.result` misreports
-    (btclib-org/btclib#1001). btclib-org/.github#982 is the row below,
-    naming the three cells still on the wrong shape.
+    (btclib-org/btclib#1001). btclib-org/.github#982 is the `BACKLOG` row
+    in `tests/__init__.py` naming the cells still on the wrong shape.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
