@@ -77,9 +77,10 @@ EXPECTED_DRIFT: dict[str, str] = {
         "btclib-org/.github#976 not yet ported to the other eight trees"
     ),
     "CLAUDE.md": (
-        "btclib-org/.github#739, whose own Done-when is a section 9 "
-        "sentence about the fence's write hazard rather than this "
-        "drift; resolved instead when the eight sibling ports land"
+        "btclib-org/.github#1010, which records the drift itself now that "
+        "btclib-org/.github#739 closed on its own boxes; eight copies carry "
+        "the shared section byte for byte and btclib's does not yet, so the "
+        "entry goes when that port lands"
     ),
     ".yamllint.yaml": (
         "btclib-org/.github#976, the bare-URL claim #883 flags corrected "
