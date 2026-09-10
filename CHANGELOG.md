@@ -7218,3 +7218,18 @@ audit has no revision to compare against.
   script**: *The open section of `CHANGELOG.md` is read by a hook*'s
   entry above says `BACKLOG` carries the path and the issue until the
   other repositories take it, and the trees named here have taken it.
+
+### Section 10's census of unfiltered `pull_request` triggers is measured
+
+- **`tests/grid_test.py` reads the workflows section 10 grants an
+  unfiltered `pull_request` off *The set, and its cadence*'s own sentence,
+  and asks every tree for them** (closes #998): a calendar workflow whose
+  `pull_request` carries neither `paths` nor `paths-ignore` is red where
+  the sentence does not name it, and a name the sentence gives that no
+  tree carries that way is red the other way, so the sentence's
+  population is re-derived by a run rather than kept true by a reader.
+  The sentence stands as it is. *A sentinel is not a pull request's
+  business*'s entry above says an unfiltered `pull_request` states its
+  reason in the header as `codeql` and `integration-bitcoind` do; that
+  entry stands, those being the workflows the sentence names, and this
+  is the change that compares the names with the trees.
