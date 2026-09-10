@@ -86,10 +86,12 @@ second worker reads the first one's tree. `role` covers the narrower
 case of a coder and its reviewer holding a worktree at once, which the
 ordinary sequence avoids by each removing its own.
 
-An issue of `btclib-org/.github`'s tracker, worked in `btclib` by a
-coder, names its worktree `wt-github-255-btclib-coder`. No `uv sync`
-follows `git worktree add`, the gate doing that itself, and the editing,
-the gates and the commits all happen in the worktree before the push.
+An issue of `btclib-org/.github`'s tracker, worked in `btclib` by a coder, names
+its worktree `wt-github-255-btclib-coder`. The environment is created in the
+worktree, not the checkout, by whatever that tree's own `CONTRIBUTING.md` names
+under *The environment and the gates*, and a session reads that section, not
+this one, for the command. The editing, the gates and the commits all happen in
+the worktree before the push.
 
 ```shell
 WT=<scratchpad>/wt-<tracker>-<issue>-<repo>-<role>

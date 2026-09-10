@@ -7034,3 +7034,13 @@ audit has no revision to compare against.
   than `README.md`'s** (issue #739): `README.md` is the standard only in this
   repository, and `bitcoin-core-rpc`'s independent copy of the section already
   carries the qualified form.
+
+### The primary-checkout section defers the environment step
+
+- **The environment-creation sentence names `CONTRIBUTING.md`'s own *The
+  environment and the gates* rather than `uv sync`, and keeps only that the step
+  runs in the worktree** (closes #983): the previous wording, "No `uv sync`
+  follows `git worktree add`, the gate doing that itself," is true of `.github`
+  and false of the six trees whose `CONTRIBUTING.md` names `uv sync` under that
+  heading; a session reads that heading, not this section, for the command a
+  tree's own gate wants, or for none where the gate provisions itself.
