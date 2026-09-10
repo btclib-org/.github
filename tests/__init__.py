@@ -335,31 +335,12 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ),
     ),
     # #550's own third box, the readback half: measured against each
-    # copy's own origin/main, these six still carry the rejected
-    # alternative's wording, and portanode carries neither
+    # copy's own origin/main, these still carry the rejected
+    # alternative's wording
     (
         550,
         "test_the_settings_file_reads_the_wiki_and_the_projects_board_back",
-        (
-            "bbt",
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-benchmarks",
-            "btclib-node",
-            "btclib-secp256k1",
-            "portanode",
-        ),
-    ),
-    # portanode's own REPOSITORY.md names both gaps and cites #549 itself
-    (
-        549,
-        "test_the_settings_file_reads_the_default_branch_back",
-        ("portanode",),
-    ),
-    (
-        549,
-        "test_the_settings_file_says_whether_pages_is_configured",
-        ("portanode",),
+        ("btclib",),
     ),
     # deps-oldest: these trees are short of the workflow; btclib-node
     # schedules it (btclib-org/btclib-node#739)
@@ -380,76 +361,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         (
             "bitcoin-core-rpc",
             "btclib",
-            "btclib-secp256k1",
-        ),
-    ),
-    # reasonless-coverage-pragma: the hook is this tree's, and the ports
-    # to the other Python trees are the next branches
-    (
-        965,
-        "test_the_local_hooks_run",
-        (
-            "bbt",
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-benchmarks",
-            "btclib-node",
-            "btclib-secp256k1",
-        ),
-    ),
-    # three codeql.yml aggregates, called by nothing, still read `needs`
-    # against section 10's rule
-    (
-        982,
-        "test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing",
-        (
-            "bitcoin-core-rpc",
-            "btclib-node",
-            "btclib-secp256k1",
-        ),
-    ),
-    # unquoted-placeholder: the hook is this tree's alone, and the ports
-    # to the other Python trees are the next branches
-    (
-        706,
-        "test_the_local_hooks_run",
-        (
-            "bbt",
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-benchmarks",
-            "btclib-node",
-            "btclib-secp256k1",
-        ),
-    ),
-    # check-changelog: section 14's bullet for check_changelog.py lands
-    # ahead of the trees it names owed of; btclib-org/.github#21 carries
-    # the port
-    (
-        21,
-        "test_a_repository_carries_the_verbatim_files_owed_of_it",
-        (
-            "bbt",
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-benchmarks",
-            "btclib-node",
-            "btclib-org.github.io",
-            "btclib-secp256k1",
-            "portanode",
-        ),
-    ),
-    # check-changelog: same port, the hook side; the six Python trees
-    # of the #965 row above are what the gate reaches today
-    (
-        21,
-        "test_the_local_hooks_run",
-        (
-            "bbt",
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-benchmarks",
-            "btclib-node",
             "btclib-secp256k1",
         ),
     ),

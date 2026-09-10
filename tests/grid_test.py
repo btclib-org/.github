@@ -424,6 +424,121 @@ def test_every_cron_is_the_instant_the_calendar_names(
     assert not wrong, f"crons that are not on the calendar: {wrong}"
 
 
+CENSUS = "such reasons: "
+"""How section 10 opens its census of the calendar's unfiltered triggers.
+
+The sentence is *The set, and its cadence*'s, the one saying an
+unfiltered `pull_request` needs a reason of its own, stated in the
+header, and then counting the organization's. The phrase opening its
+list is what is looked for rather than the count word before it, so a
+sentence counting differently is still read, and the trees are what
+judge it.
+"""
+
+SENTENCE = re.compile(re.escape(CENSUS) + r"(.+?)\.(?: |$)")
+"""That sentence from its census to its full stop, the wrapping folded."""
+
+REASON = re.compile(r"`([^`]+)`, whose ")
+"""How the census names a reason: a stem quoted as code, then `whose`."""
+
+FILTERS = ("paths", "paths-ignore")
+"""The keys a `pull_request` filters its paths by, either of them."""
+
+
+def reasons() -> set[str]:
+    """Read the workflows section 10 grants an unfiltered `pull_request`.
+
+    The paragraph holding `CENSUS` is folded before it is read, the
+    sentence wrapping at the margin, and the reading stops at the full
+    stop ending it. Each reason is a workflow's stem quoted as code and
+    followed by `, whose`, so a code span in the sentence quoting
+    anything else is not one. A sentence read as naming no workflow is
+    refused rather than returned, for the reason `subjects` refuses a
+    bullet it cannot read: the test would report every unfiltered
+    trigger as unexplained, which is a finding about this reader and
+    not about the trees.
+
+    :returns: the stems, as the sentence quotes them.
+    :raises LookupError: where no paragraph, or more than one, holds the
+        census, or its sentence names no workflow.
+    """
+    document = ROOT / "README.md"
+    paragraphs = [
+        " ".join(paragraph.splitlines())
+        for paragraph in document.read_text(encoding="utf-8").split("\n\n")
+    ]
+    found = [paragraph for paragraph in paragraphs if CENSUS in paragraph]
+    if len(found) != 1:
+        msg = f"{document.name} has {len(found)} paragraphs holding {CENSUS!r}"
+        raise LookupError(msg)
+    sentence = SENTENCE.search(found[0])
+    stems = set(REASON.findall(sentence.group(1))) if sentence else set()
+    if not stems:
+        msg = f"section 10's census names no workflow: {found[0]!r}"
+        raise LookupError(msg)
+    return stems
+
+
+def unfiltered(on: dict[str, Any]) -> bool:
+    """Whether a trigger block runs on a pull request whatever its paths.
+
+    A bare `pull_request:` parses to `None` and one restricted to
+    `types:` or `branches:` to a mapping without either of `FILTERS`,
+    and each runs on a pull request touching anything: what section 10
+    asks of a calendar workflow is a `paths` filter, a branch filter
+    narrowing which targets rather than what a pull request pays for.
+
+    :param on: the trigger block, as `triggers` reads it.
+    :returns: whether it carries a `pull_request` with no path filter.
+    """
+    if "pull_request" not in on:
+        return False
+    trigger = on["pull_request"] or {}
+    return not any(key in trigger for key in FILTERS)
+
+
+def test_an_unfiltered_pull_request_on_the_calendar_is_one_section_10_names(
+    trees: dict[str, Path],
+) -> None:
+    """Section 10's census of unfiltered triggers, against the trees both ways.
+
+    A calendar workflow's `pull_request` is `paths`-filtered, and section
+    10 grants an unfiltered one to the workflows its census names, each
+    for a reason of its own. Every workflow declaring a `cron:` is read
+    for a `pull_request` carrying neither `paths` nor `paths-ignore`,
+    and the two directions are one finding each: a workflow so found
+    that the census does not name, and a name in the census that no
+    tree carries that way. A calendar workflow with no `pull_request`,
+    or with a filtered one, is what the rule asks and is not reported;
+    a workflow off the calendar is outside the paragraph's subject
+    whatever its trigger. No `BACKLOG` row can excuse a red here, for
+    the reason `test_every_cron_is_the_instant_the_calendar_names`
+    gives.
+
+    :param trees: the checkouts.
+    """
+    named = reasons()
+    carried: dict[str, list[str]] = {}
+    for repository, root in sorted(trees.items()):
+        for workflow in workflows(root):
+            on = triggers(workflow)
+            if on.get("schedule") and unfiltered(on):
+                carried.setdefault(workflow.stem, []).append(repository)
+    findings = {
+        "unfiltered on the calendar, and the census names no such reason": sorted(
+            f"{repository}/{stem}"
+            for stem, repositories in carried.items()
+            if stem not in named
+            for repository in repositories
+        ),
+        "named by the census, and no calendar workflow is unfiltered": sorted(
+            named - set(carried)
+        ),
+    }
+    findings = {finding: names for finding, names in findings.items() if names}
+    assert not findings, f"section 10's census against the trees: {findings}"
+
+
 def test_the_record_has_an_entry_per_row_of_the_calendar() -> None:
     """The record's entries are the calendar's rows, in the calendar's order.
 

@@ -10,9 +10,10 @@ why; this exercises both readings of it.
 this tree's own file, which is the same question the `pre-commit` hook
 asks on every commit -- and this repository's own open section is its
 whole history, there being no release to bound it, so a false positive
-here is not a corner case but the first thing a coder would hit. Every
-other test builds a small file of its own instead, one for each of the
-three checks and the shapes each must not answer to.
+here is not a corner case but the first thing a coder would hit. The
+other tests build a small file of their own instead, for the three
+checks and the shapes each must not answer to, or drive one function of
+the script on a fragment.
 
 The script is loaded by path, `.github/scripts` being no package.
 """
@@ -211,3 +212,22 @@ def test_main_reports_nothing_wrong_and_returns_0(
     assert script.main() == 0
     out = capsys.readouterr().out
     assert "repeats no heading" in out
+
+
+def test_a_bare_keyword_outside_a_parenthetical_names_no_token(
+    script: ModuleType,
+) -> None:
+    """`closes #N` in the sentence names no token; `(closes #N)` names it.
+
+    Section 9 of README.md puts the keyword inside parentheses where an
+    entry acts on the issue, and where an entry only names one the
+    reference leaves the parentheses and the keyword is dropped, so the
+    parentheses are what `closing_tokens()` reads: a keyword outside
+    them is a shape the standard refuses, not one it reads differently.
+    The empty set is measured beside the non-empty one from the same
+    text: on its own it is also what a pattern matching nothing answers.
+    """
+    bare = "- **first thing** closes #1: one."
+    parenthesised = bare.replace("closes #1", "(closes #1)")
+    assert script.closing_tokens(bare) == set()
+    assert script.closing_tokens(parenthesised) == {"#1"}

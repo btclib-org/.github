@@ -7165,3 +7165,177 @@ audit has no revision to compare against.
   reading landed order are the alternatives declined**, at
   btclib-org/.github#21 itself, btclib-org/.github#305 and
   btclib-org/.github#516 in turn (issue #976).
+
+### Section 10's `homepage` bullet stops carrying the debt
+
+- **`btclib-org.github.io` schedules both `homepage` and `links` at the
+  minute section 10 gives it, so the bullet's debt sentence and its
+  `links` clause go, and nothing replaces them** (closes #558):
+  `test_every_row_of_the_calendar_names_something_that_exists` finds the
+  row scheduled, and what each sentinel's `cron:` there has to be is what
+  section 10's two tables say of every tree, so the bullet does not
+  restate it. *Section 10 calendars the rebuild and homepage sentinels*'s
+  entry above named this debt and btclib-org/btclib-org.github.io#1 as
+  what the row still owed; both are settled, the schedule landing and
+  that issue's own closure.
+
+### The `BACKLOG` row for #982 drops `btclib-node`
+
+- **`tests/__init__.py`'s `BACKLOG` row for #982 names `bitcoin-core-rpc`
+  and `btclib-secp256k1`, and no longer `btclib-node`** (closes #994):
+  `btclib-node`'s `codeql.yml` aggregate reads the run's own job listing
+  (btclib-org/btclib-node#922), so
+  `test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing`
+  passes there, and a strict `xfail` over a passing cell is red on
+  `main`. *Section 10 says which shape an aggregate takes, not how it
+  detects reuse*'s entry above counts three `codeql.yml` aggregates on
+  the wrong shape and names `btclib-node` among them; that count speaks
+  of the day it landed, and this entry is the change that moves the
+  population it counted. #982 stays open for the trees the row still
+  names.
+
+### The `BACKLOG` rows for the hook sweep drop the trees that landed it
+
+- **`tests/__init__.py`'s `BACKLOG` rows for #965, #706 and #21 no longer
+  name `bbt`, `bitcoin-core-rpc` or `btclib-benchmarks`** (issue #965,
+  issue #706, issue #21): each of the three carries in its
+  `.pre-commit-config.yaml` every local hook `tests/hooks_test.py`'s
+  `LOCAL` names, and carries `.github/scripts/check_changelog.py`, so
+  `test_the_local_hooks_run` and
+  `test_a_repository_carries_the_verbatim_files_owed_of_it` pass there,
+  and a strict `xfail` over a passing cell is red on `main`. The three
+  issues stay open for the trees the rows still name.
+- **The row for #965 goes on carrying the trees
+  `reasonless-coverage-pragma` is not ported to**, as *A reasonless
+  coverage pragma is refused by a hook*'s entry above says of it; the
+  trees named here are no longer among them.
+- **The row for #706 goes on carrying the trees `unquoted-placeholder`
+  is not ported to**: *Section 4's width hook is named for what its
+  pattern reads*'s entry above says the ports to the other Python trees
+  are the next branches, and the trees named here are the ones whose
+  branch has landed.
+- **Both rows for #21 go on carrying the repositories short of the
+  script**: *The open section of `CHANGELOG.md` is read by a hook*'s
+  entry above says `BACKLOG` carries the path and the issue until the
+  other repositories take it, and the trees named here have taken it.
+
+### Section 10's census of unfiltered `pull_request` triggers is measured
+
+- **`tests/grid_test.py` reads the workflows section 10 grants an
+  unfiltered `pull_request` off *The set, and its cadence*'s own sentence,
+  and asks every tree for them** (closes #998): a calendar workflow whose
+  `pull_request` carries neither `paths` nor `paths-ignore` is red where
+  the sentence does not name it, and a name the sentence gives that no
+  tree carries that way is red the other way, so the sentence's
+  population is re-derived by a run rather than kept true by a reader.
+  The sentence stands as it is. *A sentinel is not a pull request's
+  business*'s entry above says an unfiltered `pull_request` states its
+  reason in the header as `codeql` and `integration-bitcoind` do; that
+  entry stands, those being the workflows the sentence names, and this
+  is the change that compares the names with the trees.
+
+### The `BACKLOG` rows drop the trees that landed since the last narrowing
+
+- **`tests/__init__.py`'s `BACKLOG` row for #982 is gone** (closes #1001,
+  closes #982): `bitcoin-core-rpc`'s `codeql.yml` aggregate reads the run's
+  own job listing (btclib-org/bitcoin-core-rpc#429), and so does
+  `btclib-secp256k1`'s (btclib-org/btclib-secp256k1#859), so
+  `test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing`
+  passes in both, and a strict `xfail` over a passing cell is red on
+  `main`. #1001 asked the row to drop `bitcoin-core-rpc`; `btclib-secp256k1`
+  landed while that was in review, and a row naming no tree excuses
+  nothing. #982 asked that each of its three trees read its own run's job
+  listing, and with btclib-org/btclib-node#922, the two above and this row
+  gone nothing of it is left. *The `BACKLOG` row for #982 drops
+  `btclib-node`*'s entry above says the row names `bitcoin-core-rpc` and
+  `btclib-secp256k1`; it names neither now. *Section 10 says which shape
+  an aggregate takes, not how it detects reuse*'s entry above names
+  `bitcoin-core-rpc` and `btclib-secp256k1` among the `codeql.yml`
+  aggregates reading `needs`; neither is one any more.
+- **The rows for #965, #706 and #21 over `test_the_local_hooks_run` are
+  gone** (issue #965, issue #706, issue #21): `btclib`, `btclib-node` and
+  `btclib-secp256k1` each carry in its `.pre-commit-config.yaml` every
+  local hook `tests/hooks_test.py`'s `LOCAL` names
+  (btclib-org/btclib#1985, btclib-org/btclib-node#923,
+  btclib-org/btclib-secp256k1#858), so the test passes in every tree
+  those rows named, and a row naming no tree excuses nothing. *A
+  reasonless coverage pragma is refused by a hook*'s entry above says a
+  `BACKLOG` row carries the trees `reasonless-coverage-pragma` is not yet
+  ported to, and *Section 4's width hook is named for what its pattern
+  reads*'s says the same of `unquoted-placeholder`, its ports to the
+  other Python trees being the next branches; both hooks have reached
+  every tree the rows named, and the rows those entries speak of are
+  gone. *The `BACKLOG` rows for the hook sweep drop the trees that landed
+  it*'s entry above says each of these rows goes on carrying the trees
+  its hook is not ported to; no tree is left for them to carry.
+- **The row for #21 over
+  `test_a_repository_carries_the_verbatim_files_owed_of_it` names
+  `btclib-org.github.io` and `portanode`** (issue #21): `btclib`,
+  `btclib-node` and `btclib-secp256k1` carry
+  `.github/scripts/check_changelog.py`, and neither of the trees the row
+  still names does. *The open section of `CHANGELOG.md` is read by a
+  hook*'s entry above says `BACKLOG` carries the script's path and #21
+  until the other repositories take it; this row is where it goes on
+  doing so, the row over the hook having gone with the bullet above.
+- **The row for #550 over
+  `test_the_settings_file_reads_the_wiki_and_the_projects_board_back`
+  drops `bbt`, `bitcoin-core-rpc`, `btclib-benchmarks` and
+  `btclib-node`** (issue #550): each copy's `REPOSITORY.md` reads
+  `.has_wiki` and `.has_projects` back now (btclib-org/bbt#48,
+  btclib-org/bitcoin-core-rpc#430, btclib-org/btclib-benchmarks#309,
+  btclib-org/btclib-node#924), and those landed while this branch was in
+  review. `btclib`, `btclib-secp256k1` and `portanode` stay, and the row
+  over `test_the_wiki_and_the_projects_board_are_off` is untouched: the
+  setting is not a file. *Section 11 turns the wiki and the projects
+  board off, and reads them back*'s entry above says most copies still
+  carry the rejected alternative's wording and a `BACKLOG` row cites #550
+  for those; the row goes on citing it for the three.
+
+### The rows for portanode's settings readbacks are gone
+
+- **The two `BACKLOG` rows for #549 are gone, and the row for #550 over
+  `test_the_settings_file_reads_the_wiki_and_the_projects_board_back`
+  drops `portanode`** (closes #549, issue #550): `portanode`'s
+  `REPOSITORY.md` reads `.default_branch`, `/pages`, `.has_wiki` and
+  `.has_projects` back (btclib-org/portanode#531), the last copy short of
+  the first two, so every copy now answers #549's two boxes and the rows
+  that named it excuse nothing. `btclib` and `btclib-secp256k1` stay on
+  the #550 row; the row over `test_the_wiki_and_the_projects_board_are_off`
+  is untouched. *Section 11 puts whether Pages is configured inside the
+  perimeter*'s entry above says a `BACKLOG` row cites #549 for `portanode`
+  rather than asking the test to read a paragraph stating the absence;
+  that paragraph is gone from the copy and so are the rows. *The
+  `BACKLOG` rows drop the trees that landed since the last narrowing*'s
+  entry above says the #550 row goes on citing the issue for three trees;
+  it does so for two.
+
+### A bare closing keyword outside a parenthetical is witnessed as no token
+
+- **`tests/check_changelog_test.py` measures that `closes #N` written
+  into an entry's sentence names no closed token, beside `(closes #N)`
+  in the same text naming one**: the empty set on its own is also what
+  a pattern matching nothing answers, so the non-empty half is what
+  makes it a measurement. *The open section of `CHANGELOG.md` is read by
+  a hook*'s entry above names the script; it stands as written.
+
+### The rows for the script's last two trees and for secp256k1's readback go
+
+- **The `BACKLOG` row for #21 over
+  `test_a_repository_carries_the_verbatim_files_owed_of_it` is gone, and
+  the row for #550 over
+  `test_the_settings_file_reads_the_wiki_and_the_projects_board_back`
+  names `btclib` alone** (issue #21, issue #550): `btclib-org.github.io`
+  and `portanode` carry `.github/scripts/check_changelog.py` and the hook
+  that runs it (btclib-org/btclib-org.github.io#50,
+  btclib-org/portanode#534), so every repository does, and
+  `btclib-secp256k1`'s `REPOSITORY.md` reads `.has_wiki` and
+  `.has_projects` back (btclib-org/btclib-secp256k1#861). A row naming no
+  tree excuses nothing, and #21 stays open on its own two boxes, which
+  the port does not answer. *The `BACKLOG` rows drop the trees that landed
+  since the last narrowing*'s entry above says the #21 row is where
+  `BACKLOG` goes on carrying the script's path; it carries it nowhere
+  now. *The rows for portanode's settings readbacks are gone*'s entry
+  above says `btclib` and `btclib-secp256k1` stay on the #550 row; one
+  does. *The open section of `CHANGELOG.md` is read by a hook*'s entry
+  above says `BACKLOG` carries the script's path and #21 until the other
+  repositories take it; they have.
