@@ -7339,3 +7339,18 @@ audit has no revision to compare against.
   does. *The open section of `CHANGELOG.md` is read by a hook*'s entry
   above says `BACKLOG` carries the script's path and #21 until the other
   repositories take it; they have.
+
+### The `CLAUDE.md` drift entry cites the issue recording it
+
+- **`EXPECTED_DRIFT`'s `CLAUDE.md` entry cites #1010 where it cited
+  #739** (issue #1010): #739 closed on its own two boxes, which every
+  tree's fence now answers, while the drift the entry excuses is still
+  one, `btclib`'s copy of the shared section being the one of nine not
+  yet byte for byte the standard's. A closed citation is what
+  `test_every_expected_drift_entry_cites_an_open_issue` refuses, so
+  `main` read one red with nothing in any branch touching the table;
+  #1010 is the record of that drift now, and the entry says it goes when
+  `btclib`'s port lands. *Section 14 compares `CLAUDE.md`'s
+  primary-checkout section byte for byte*'s entry above says the entry
+  excuses the eight sibling copies until their own ports land; seven
+  have landed, and it excuses `btclib`'s alone.
