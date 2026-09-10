@@ -397,6 +397,17 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-secp256k1",
         ),
     ),
+    # three codeql.yml aggregates, called by nothing, still read `needs`
+    # against section 10's rule
+    (
+        982,
+        "test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing",
+        (
+            "bitcoin-core-rpc",
+            "btclib-node",
+            "btclib-secp256k1",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 

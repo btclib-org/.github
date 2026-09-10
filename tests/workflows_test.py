@@ -158,3 +158,101 @@ def test_every_workflow_declares_permissions(
     assert not without, f"workflows with no permissions block: {without}; " + by_hand(
         repository, "grep -L '^permissions:' .github/workflows/*.yml"
     )
+
+
+AGGREGATE = re.compile(r": every job passed$")
+"""How section 10 names an aggregate job, with its own workflow."""
+
+
+def aggregates(workflow: Path) -> dict[str, dict[str, Any]]:
+    """Every aggregate job of a workflow, by id.
+
+    :param workflow: the file to read.
+    :returns: each aggregate job's id against its own mapping.
+    """
+    jobs = document(workflow).get("jobs") or {}
+    return {
+        job_id: job
+        for job_id, job in jobs.items()
+        if isinstance(job, dict) and AGGREGATE.search(str(job.get("name", "")))
+    }
+
+
+def calls(root: Path, name: str) -> bool:
+    """Say whether some workflow of this tree calls another, by file name.
+
+    :param root: the root of the checkout.
+    :param name: the called file's own name, `test.yml` and the like.
+    :returns: whether a job of any workflow of the tree `uses:` it.
+    """
+    target = f"{LOCAL}.github/workflows/{name}"
+    return any(
+        job.get("uses") == target
+        for workflow in workflows(root)
+        for job in (document(workflow).get("jobs") or {}).values()
+        if isinstance(job, dict)
+    )
+
+
+LISTING = "actions/runs"
+"""What an aggregate reading the run's own job listing asks the API for."""
+
+NEEDS = "needs.*.result"
+"""What an aggregate reading `needs` decides over, in either shape."""
+
+
+def shape(job: dict[str, Any]) -> str | None:
+    """Read which of section 10's two shapes an aggregate decides with.
+
+    Searched over the job's whole text rather than one step's `run:`,
+    because the decision is written three ways across the organization
+    -- a shell loop's `env:`, a shell loop inline, or a step's own
+    boolean `if:` -- and all three carry the same substring wherever
+    they read `needs` at all.
+
+    :param job: the aggregate job's own mapping.
+    :returns: "listing", "needs", or None where neither is found.
+    :raises LookupError: where the job's text carries both, which a
+        substring search cannot decide between.
+    """
+    blob = str(job)
+    listing = LISTING in blob
+    needs = NEEDS in blob
+    if listing and needs:
+        msg = f"an aggregate job's text carries both {LISTING!r} and {NEEDS!r}"
+        raise LookupError(msg)
+    if listing:
+        return "listing"
+    if needs:
+        return "needs"
+    return None
+
+
+def test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10's two shapes, asked of every aggregate of a tree.
+
+    A workflow something in the tree calls has no job listing of its own
+    run -- the caller's jobs and the called workflow's are one run -- so
+    its aggregate reads `needs` instead, which stays scoped to the
+    workflow that declares it either way; a workflow nothing calls reads
+    the listing, which also catches a job `needs.*.result` misreports
+    (btclib-org/btclib#1001). btclib-org/.github#982 is the row below,
+    naming the three cells still on the wrong shape.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    root = trees[repository]
+    wrong: list[str] = []
+    for workflow in gated(repository, trees):
+        wanted = "needs" if calls(root, workflow.name) else "listing"
+        for job_id, job in aggregates(workflow).items():
+            found = shape(job)
+            if found is not None and found != wanted:
+                wrong.append(f"{workflow.name}:{job_id} reads {found}, wants {wanted}")
+    assert not wrong, f"{wrong}; " + by_hand(
+        repository, "grep -n 'needs.\\*.result\\|actions/runs' .github/workflows/*.yml"
+    )

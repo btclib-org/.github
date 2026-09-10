@@ -3282,7 +3282,37 @@ Run it for the gate's workflow too, and count only the runs that
 completed: `skipped` and `cancelled` did none of the work, and
 averaging them in reports a fraction of the real cost. A sentinel too
 new to have runs to read is where the pair has no answer yet, and
-`workflow_dispatch` below is what gets it one. What the pair answers is
+`workflow_dispatch` below is what gets it one.
+
+**A rewrite owes the same dispatch, later rather than at the workflow's
+first day.** A schedule-only workflow whose steps change keeps the
+previous file's verdict as its newest run until its cron comes back
+round, and a stale green announces nothing the way `no status` does. A
+landing that changes such a workflow's steps dispatches it from `main`
+in the same motion, and the badge is read after that run; a landing
+touching only a comment owes nothing, a run measuring the steps rather
+than the prose beside them. What decides staleness is ancestry and not
+the trigger that produced the newest run — a dispatch fired for an
+unrelated reason answers exactly as a scheduled run would — so the
+question is whether that run's `head_sha` descends from the file's own
+last edit rather than from the commit that added it:
+
+```shell
+gh api repos/<owner>/<repo>/actions/workflows/<name>.yml/runs \
+  --jq '.workflow_runs[0].head_sha'
+git log -1 --format=%H -- .github/workflows/<name>.yml
+```
+
+the second an ancestor of the first, or the run is stale. This is a
+person's question rather than a gate's: it costs one call to the API
+per scheduled workflow of every tree, asked whether or not anything
+relevant changed, against a suite that already pays for reaching the
+forge across the organization — the same trade *What decides is the
+clock, not the trigger* above weighs for a workflow's own trigger,
+carried here to what asking the question costs rather than to what the
+workflow itself does.
+
+What the pair answers is
 how much the sweep *adds* to the wait rather than which check is
 longest — a sweep that outlasts the gate adds nothing to a pull request
 some slower check is still holding. Where the addition is seconds, a
@@ -3457,6 +3487,24 @@ therefore the linking tree's, which is why the flag belongs in every
 asks each tree's lychee step for it. The rejected alternative has a
 tree check only the anchors of its own headings, which measures the
 file a rename lands in and never the links pointing at it.
+
+**A `github.com/<owner>/<repo>#heading` link is unchecked by this flag
+the moment the step holds a token, which every `links.yml` does.**
+lychee's GitHub fallback answers a failed fragment check for that shape
+from the repositories API — the repository exists, so the answer is
+`200` — rather than from the page itself (btclib-org/.github#630); the
+`blob/main/<path>#heading` shape stays checked, its path failing that
+same fallback as an invalid GitHub URL rather than benefiting from it.
+The token stays regardless: `links.yml`'s own reason for holding one at
+all is github.com links alone, "where an unauthenticated runner is rate
+limited hard enough to look like rot", which is the worse failure of
+the two. What the flag
+and the token together cannot check is exactly the anchors this section
+exists for — a tree citing this file's own headings, the shape every
+`CONTRIBUTING.md`, `SECURITY.md` and `CODE_OF_CONDUCT.md` uses — so
+those are asked offline instead: `tests/links_test.py` reads this file's
+own headings and every tree's tracked markdown, rather than asking a
+run this flag cannot answer for them.
 
 **A sentinel's row arrives with the workflow, and one pull request can
 do both only where the first tree is this one.** `tests/grid_test.py`
@@ -3770,6 +3818,22 @@ named with its workflow — `test: every job passed` — because a check context
 keyed by name alone and two workflows with a job of the same name produce one
 ambiguous check.
 
+**Which of two shapes the aggregate reads is decided by whether
+something in the tree actually calls the workflow, not by whether it
+merely declares `workflow_call:`.** A workflow nothing calls reads that
+run's job listing, below, whatever trigger it carries; a workflow a
+`release.yml` or another workflow of the tree already `uses:` reads
+`needs` instead, further below, because a listing answers for the run
+and a reused run is not the workflow's alone — *The listing's unit is
+the run and not the workflow* has the reason. `btclib-benchmarks`'s
+`test.yml` carries `workflow_call:` and nothing in that tree calls it,
+so it keeps reading the listing; that workflow's own comment already
+names the day that stops holding — "the gate belongs to whoever owns
+the run, so either the caller carries it or that trigger goes." The two
+shapes are not interchangeable, and *One shape for all is refused in
+both directions* below is why neither covers
+what the other does.
+
 **A job engineered to conclude successfully whatever it finds makes no such
 claim, and stays out of `needs` for exactly as long as that holds.** A step
 tolerated with `continue-on-error: true`, reported by a step of its own
@@ -3804,8 +3868,8 @@ request, and the rule follows them.
   red required check of a cancellation the newer run already speaks for.
   `!cancelled()` skips the job on that run instead, and a job cancelled
   on its own — the run not being cancelled — still reaches the step.
-- **What the aggregate reads is its own run's job listing, asked of the
-  API rather than of `needs`** —
+- **What the aggregate of a workflow that is only ever a run's own reads
+  is that run's job listing, asked of the API rather than of `needs`** —
   `repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs`, each
   finished row's `conclusion`, in a step that fails on anything but
   `success` and `skipped`. The aggregate's own row is not one of them:
@@ -3837,41 +3901,70 @@ request, and the rule follows them.
   empty join.** `for` splits on words and an empty string contributes
   none, so the loop compares nothing and exits 0; it is sharpest where
   the aggregate has a single `needs`, and it is btclib-org/btclib#1454.
-- **What answers that vacuity here is a count of the run's unfinished
-  jobs, and the count is the aggregate itself alone.** A listing with
-  nothing unfinished is not a listing of the run the step is running in,
-  and one with something else unfinished is a run this job does not
-  `needs` the whole of. The count is what says so rather than a name,
-  a name being what a rename moves. The empty join has no counterpart
-  in this shape, there being no join.
-- **The listing's unit is the run and not the workflow.** A gate
-  `release.yml` reuses through `workflow_call` has no listing of its
-  own: the caller's jobs and the called workflow's are one run, every
-  row of it carries the caller's `workflow_name`, and the publishing
-  jobs are unfinished exactly because they wait on this one, so the
-  count above can never be the aggregate alone.
-- **The aggregate declines the reused run, on an input the caller
-  passes.** The reusable workflow declares a `workflow_call` input
-  `reused`, `type: boolean` with `default: false`; the calling job in
-  `release.yml` passes it `true` in its `with:` block; and the aggregate
-  carries `!inputs.reused` in the `if:` beside the conditions above. A
-  run that is not a call leaves the input unset, so the aggregate runs
-  wherever the listing is the workflow's own — which is where branch
-  protection reads it, a release being a tag push or a dispatch that no
-  rule waits on. What gates the release instead is the caller's own
-  `needs:` on the calling job: `bitcoin-core-rpc`'s `release.yml` run
-  `33236701141` had failing cells in the platform workflows it called,
-  and every publishing job of it reports `skipped`.
-- **The input carries the signal because nothing else in a called run
-  states it.** `github.event_name` is the caller's event —
-  `btclib-org/btclib`'s run `32458459305` was dispatched, and the
-  `changes` job of the workflow it called printed `workflow_dispatch` —
-  as `github.workflow` is the caller's name, which is why *What every
-  workflow does* above names a concurrency group literally; and no field
-  of a job row names the file that wrote it. Detecting reuse without the
-  input is therefore an inference over the caller's own values. The
-  other rejected alternative reads `needs.*.result` where the listing is
-  not the workflow's own, which reinstates btclib-org/btclib#1001.
+  A `case` ahead of the loop, over the string comma-joined rather than
+  space-joined, is what refuses it: `case ",$results," in *,,*)` catches
+  what the join drops silently — an empty first field, an empty last
+  one, an empty one between two others — because `join` writes one
+  separator between every pair of elements whatever they convert to, so
+  an empty result is an empty field and never a missing one.
+- **What answers that vacuity where the aggregate reads its own run's
+  job listing is a count of the run's unfinished jobs, and the count is
+  the aggregate itself alone.** A listing with nothing unfinished is not
+  a listing of the run the step is running in, and one with something
+  else unfinished is a run this job does not `needs` the whole of. The
+  count is what says so rather than a name, a name being what a rename
+  moves. The empty join has no counterpart in this shape, there being no
+  join.
+- **The listing's unit is the run and not the workflow, which is why the
+  count above is the own-run shape's alone.** A gate `release.yml`
+  reuses through `workflow_call` has no listing of its own: the
+  caller's jobs and the called workflow's are one run, every row of it
+  carries the caller's `workflow_name`, and the publishing jobs are
+  unfinished exactly because they wait on this one, so the count can
+  never be the aggregate alone — a listing conflates the two graphs
+  where `needs` does not.
+- **A workflow something in the tree actually calls keeps to `needs`
+  throughout, on a direct run exactly as on a reused one.** `needs.*.
+  result` is scoped to the workflow that declares it whether or not
+  something calls that workflow, so the `case` above is what such an
+  aggregate reads before the allowlist. The job is the same file
+  whichever trigger starts it, so splitting its shape by trigger would
+  ask the workflow to detect its own reuse, which *One shape for all*
+  below already refuses on other grounds; `btclib`'s `test.yml` is
+  `release.yml`'s own call, and its aggregate reads this guarded join
+  unconditionally, on a direct pull request exactly as on a reused run.
+  What that costs is real rather than hypothetical: `needs.*.result`
+  cannot cover a shape the context does not report, and
+  btclib-org/btclib#1001 is a run where it did not — four cells died in
+  *Set up job*, the run's own job listing carried each one's
+  `conclusion` as `failure`, and `needs.suite.result` read `success`
+  regardless, a shape no `case` guard against an empty field touches.
+  A workflow gating its own pull requests this way pays that price
+  the moment something else starts calling it too.
+- **What gates the release is the caller's own `needs:` on the calling
+  job, not a second reading of the aggregate from outside.** A
+  `workflow_call` job's result already reflects every job the called
+  workflow ran, this aggregate included, so nothing has to ask the
+  aggregate a second question from the caller's side:
+  `bitcoin-core-rpc`'s `release.yml` run `33236701141` had failing cells
+  in the platform workflows it called, and every publishing job of it
+  reports `skipped`, on the calling job's own `needs:` alone.
+- **One shape for all is refused in both directions, for two different
+  reasons.** The listing under `workflow_call` answers for jobs the
+  caller is still running, which no count can separate from this job's
+  own — *The listing's unit is the run and not the workflow* above.
+  `needs` on a workflow nothing calls gives up the listing's own
+  protection against the `#1001` shape above for nothing bought in
+  return: `btclib-benchmarks`'s `test.yml` and `codeql.yml` are called
+  by nothing and keep reading the listing, which is what a workflow only
+  ever run directly can safely do and a called one cannot. An aggregate
+  that detects reuse and declines itself, on a boolean `workflow_call`
+  input its caller passes, was weighed against keying the shape on being
+  called and is refused: nothing in a called run states plainly that it
+  is one — `github.event_name` and `github.workflow` are the caller's,
+  which is why *What every workflow does* above names a concurrency
+  group literally rather than through either — so the input would exist
+  only to reconstruct what being called already answers without it.
 - `skipped` is legitimate on purpose: when the run was superseded by its
   concurrency group, and when a `changes` job decided the diff touches
   nothing those jobs read. The listing reports it as a conclusion like

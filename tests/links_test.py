@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import by_hand
+from . import ORG, SELF, by_hand, tracked
 from .workflows_test import steps
 
 if TYPE_CHECKING:
@@ -204,4 +204,114 @@ def test_a_lychee_cache_is_kept_between_runs(
             repository,
             "grep -c 'actions/cache\\|lycheecache' .github/workflows/links.yml",
         )
+    )
+
+
+FENCE = re.compile(r"^```.*?^```\n?", re.DOTALL | re.MULTILINE)
+"""A fenced code block, so its own `#` comments are not read as headings.
+
+README.md's own `# 38` (a shell comment inside a `gh api` example) and
+two more comment lines are exactly this shape: not stripped, they read
+as headings GitHub never renders, and `anchors()` would answer three
+ids too many.
+"""
+
+HEADING = re.compile(r"^#{1,6} (.+)$", re.MULTILINE)
+"""One heading of a markdown file, its own text after the `#`s."""
+
+ROOT_LINK = re.compile(rf"github\.com/{re.escape(ORG)}/{re.escape(SELF)}#([\w-]+)")
+"""A link into this repository by anchor, the root shape lychee cannot
+check once its step holds a token (btclib-org/.github#630): the API
+answers that the repository exists, and lychee takes that for the
+anchor. This asks the same question offline, against this file's own
+headings.
+"""
+
+
+def slug(heading: str) -> str:
+    """Render a heading's text the way GitHub's own anchor does.
+
+    Lowercase, spaces to hyphens, everything but a word character, a
+    space or a hyphen already in the heading dropped -- which is what
+    strips a heading's backticks along with its punctuation, GitHub
+    slugging the rendered text rather than the markdown that produced
+    it.
+
+    :param heading: the heading's text, markdown and all.
+    :returns: the anchor GitHub renders for it.
+    """
+    return re.sub(r"\s+", "-", re.sub(r"[^\w\s-]", "", heading.lower()).strip())
+
+
+def anchors(markdown: str) -> set[str]:
+    """Read every heading of a file as the anchors GitHub gives them.
+
+    A repeated slug is suffixed `-1`, `-2` and so on, in heading order,
+    which is GitHub's own rule for a duplicate; README.md repeats none
+    today, but a link resolving is a claim about GitHub's rendering and
+    not only about this file's headings being distinct.
+
+    :param markdown: the file's text.
+    :returns: every anchor the file answers to.
+    """
+    seen: dict[str, int] = {}
+    out: set[str] = set()
+    for heading in HEADING.findall(FENCE.sub("", markdown)):
+        base = slug(heading)
+        count = seen.get(base, 0)
+        seen[base] = count + 1
+        out.add(base if count == 0 else f"{base}-{count}")
+    return out
+
+
+def test_slug_matches_three_headings_already_linked_by_anchor() -> None:
+    """GitHub's own rendering, read off three anchors already in the tree.
+
+    `tests/__init__.py`'s own docstring mentions `./README.md#8-coverage-at-100`
+    as an example anchor rather than a link, `SECURITY.md` links
+    `#2-the-tree` and `CODE_OF_CONDUCT.md` links
+    `#14-copied-verbatim-and-decided-per-repository` -- three anchors
+    already resolving on GitHub, against the headings they name.
+    """
+    known = {
+        "8. Coverage at 100%": "8-coverage-at-100",
+        "2. The tree": "2-the-tree",
+        "14. Copied verbatim, and decided per repository": (
+            "14-copied-verbatim-and-decided-per-repository"
+        ),
+    }
+    wrong = {
+        heading: slug(heading)
+        for heading, want in known.items()
+        if slug(heading) != want
+    }
+    assert not wrong, f"slug disagrees with a known anchor {known}: {wrong}"
+
+
+def test_a_root_link_into_this_files_heading_resolves(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """A `github.com/<org>/.github#<fragment>` link names a real heading.
+
+    This is the shape *A `github.com/<owner>/<repo>#heading` link is
+    unchecked by this flag* in section 10 names as the one lychee cannot
+    check once its step holds a token, so the check is made here,
+    offline, against this file's own headings rather than against the
+    forge.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    targets = anchors((trees[SELF] / "README.md").read_text(encoding="utf-8"))
+    root = trees[repository]
+    broken = sorted(
+        f"{path}: #{fragment}"
+        for path in tracked(root, "*.md")
+        for fragment in ROOT_LINK.findall((root / path).read_text(encoding="utf-8"))
+        if fragment not in targets
+    )
+    assert not broken, (
+        f"links no heading of README.md answers to: {broken}; "
+        + by_hand(repository, f"grep -rn 'github.com/{ORG}/{SELF}#' -- '*.md'")
     )

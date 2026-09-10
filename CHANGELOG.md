@@ -7044,3 +7044,73 @@ audit has no revision to compare against.
   and false of the six trees whose `CONTRIBUTING.md` names `uv sync` under that
   heading; a session reads that heading, not this section, for the command a
   tree's own gate wants, or for none where the gate provisions itself.
+
+### Section 10 says which shape an aggregate takes, not how it detects reuse
+
+- **A workflow nothing calls reads that run's job listing; a workflow
+  something in the tree actually calls reads `needs` instead** (closes
+  #474): a listing conflates the caller's jobs with the called
+  workflow's own in a reused run, where `needs` is scoped to the
+  workflow that declares it whether or not something calls it.
+  `btclib`'s `test.yml` already reads the `needs` shape unconditionally,
+  guarded against `join(needs.*.result, ' ')`'s empty join by a `case`
+  ahead of the allowlist, and `bitcoin-core-rpc`'s release run
+  `33236701141` already gates publishing on the calling job's own
+  `needs:` rather than on this aggregate read from outside. The rule
+  keys on being called and not on declaring `workflow_call:`:
+  `btclib-benchmarks`'s `test.yml` declares it, nothing calls it, and it
+  keeps the listing.
+- **An aggregate that detects reuse and declines itself, on a boolean
+  `workflow_call` input its caller passes, is the alternative section 10
+  named and this retracts**: nothing in a called run states plainly
+  that it is one, so the input would exist only to reconstruct what
+  being called already answers without it, and no tree ever carried it.
+- **One shape for all is refused for two different reasons**: the
+  listing under `workflow_call` answers for jobs the caller is still
+  running, which no count can separate from this job's own; `needs` on
+  a workflow nothing calls gives up the listing's protection against a
+  masked failure for nothing bought in return -- btclib-org/btclib#1001
+  is a run where four cells died in *Set up job*, the job listing
+  correctly carried each one's `conclusion` as `failure`, and
+  `needs.suite.result` read `success` regardless, a shape no empty-join
+  guard touches. A workflow something calls pays that price on its own
+  direct runs too, `needs` being the only shape available to it either
+  way.
+- **`tests/workflows_test.py` reads the rule off every aggregate of
+  every tree**, a job-level `uses:` deciding whether something calls the
+  workflow it belongs to: three `codeql.yml` aggregates -- called by
+  nothing -- read `needs` against it, `btclib-secp256k1`,
+  `btclib-node` and `bitcoin-core-rpc`, a `BACKLOG` row citing
+  btclib-org/.github#982, which the measurement above already names.
+
+### A rewritten schedule-only workflow owes the same dispatch a new one does
+
+- **A landing that changes a schedule-only workflow's steps dispatches
+  it from `main` in the same motion** (issue #853): section 10's
+  dispatch rule read a workflow with no runs at all, and a rewrite left
+  reading the previous file's verdict is the same absence, arriving
+  later and silently rather than as `no status`.
+- **What decides staleness is ancestry, not the trigger that produced
+  the newest run**, so the question is whether that run's `head_sha`
+  descends from the file's own last edit; it is written as a person's
+  command rather than gated, one call to the API per scheduled workflow
+  of every tree being disproportionate on a suite that already reaches
+  the forge for nine repositories.
+- **Dispatching the stale rows the issue's own table found is not this
+  branch's**: that is the orchestrator's to run.
+
+### `links` names what a token costs an anchor, checked offline instead
+
+- **lychee's GitHub fallback answers a failed fragment check on a
+  `github.com/<owner>/<repo>#heading` link from the repositories API
+  rather than from the page, once the step holds a token** (closes
+  #630): the token stays regardless, `links.yml`'s own reason for
+  holding one being github.com links alone, "where an unauthenticated
+  runner is rate limited hard enough to look like rot."
+  `blob/main/<path>#heading` is unaffected, its path failing the same
+  fallback as an invalid GitHub URL rather than benefiting from it.
+- **What the flag and the token together cannot check is asked offline
+  instead**: `tests/links_test.py` reads this file's own headings as
+  the anchors GitHub renders them and checks every tree's tracked
+  markdown against them, so a heading renamed here is caught without
+  reaching the forge.
