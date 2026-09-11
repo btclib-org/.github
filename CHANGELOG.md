@@ -7403,3 +7403,29 @@ nothing red follows from the copies disagreeing.
   `CLAUDE.md`'s primary-checkout section byte for byte*'s entry above
   says the entry excuses the sibling copies until their own ports land;
   all eight have.
+
+### `LOCAL` names the link-prefix hook and the hyphen hook
+
+- **`tests/hooks_test.py`'s `LOCAL` names `local-link-prefix` and
+  `no-hyphen-at-end-of-line`** (closes #986): `test_the_local_hooks_run`
+  asks each Python tree for every name in the tuple, so a gate that
+  drops either hook is a red cell where it was a hook the suite could
+  not report. Both are in the gate of every tree the suite measures, so
+  no `BACKLOG` row goes with them; what decides that is, in a checkout
+  of each repository at its `origin/main`,
+
+  ```shell
+  grep -cE '^ *- id: (local-link-prefix|no-hyphen-at-end-of-line)$' \
+    .pre-commit-config.yaml
+  ```
+
+  answering the same in every tree as in this one. The tuple's
+  docstring names mypy as the one bullet of section 4's *The local
+  hooks* it leaves out, that hook being `test_the_gate_runs_mypy`'s
+  subject; the sentence keeping `local-link-prefix` out by what
+  `tests/verbatim_test.py` compares is gone, that being a different
+  test's subject. What each tree gives `no-hyphen-at-end-of-line` as
+  types is btclib-org/.github#921's question and not this test's, which
+  reads the hook's id alone. `test_the_local_hooks_run`'s docstring says
+  of every name in the tuple where it has a subject, `check-changelog`
+  included, which the tuple named and the docstring did not.
