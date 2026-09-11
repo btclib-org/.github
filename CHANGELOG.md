@@ -7375,3 +7375,16 @@ audit has no revision to compare against.
   a row naming a test or a repository that does not exist excuses
   nothing, so the run is not worth starting; a row naming no repository
   is the same case.
+
+### The `mention` job's `pull-requests` grant carries its reason
+
+`claude-review.yml`'s `mention` job says at its `pull-requests: write`
+line what the grant is for (issue #915). The sentence is the one
+`btclib-node` and `btclib-benchmarks` carry above theirs, taken byte for
+byte so that one reason is not worded two ways across the copies; the
+`review` job's grant and the `id-token: write` beside this one each carry
+a reason at their line, and this grant carried none. Section 14 of
+`README.md` keeps the file out of `tests/verbatim_test.py`'s comparison —
+`claude-review.yml` "is owed by every repository section 11 governs, and
+section 15's existence loop is what checks that — not this list" — so
+nothing red follows from the copies disagreeing.
