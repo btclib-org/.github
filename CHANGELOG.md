@@ -7388,3 +7388,18 @@ a reason at their line, and this grant carried none. Section 14 of
 `claude-review.yml` "is owed by every repository section 11 governs, and
 section 15's existence loop is what checks that — not this list" — so
 nothing red follows from the copies disagreeing.
+
+### The `CLAUDE.md` drift entry goes
+
+- **`EXPECTED_DRIFT` no longer carries `CLAUDE.md`** (closes #1010): the
+  ninth copy of `## The primary checkout is the maintainer's` landed in
+  `btclib` (btclib-org/btclib#2005), so the nine copies of the section
+  are one blob and `test_a_recorded_drift_is_still_one[CLAUDE.md]`, a
+  strict expected failure, started passing, which is the signal the
+  table's own docstring names for deleting an entry. With the entry gone
+  the path is compared on every run again. *The `CLAUDE.md` drift entry
+  cites the issue recording it*'s entry above says the entry goes when
+  `btclib`'s port lands; it has, and it is gone. *Section 14 compares
+  `CLAUDE.md`'s primary-checkout section byte for byte*'s entry above
+  says the entry excuses the sibling copies until their own ports land;
+  all eight have.
