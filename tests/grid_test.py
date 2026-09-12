@@ -21,6 +21,7 @@ findings section 10 states beside the record, reported per tree.
 from __future__ import annotations
 
 import re
+from itertools import pairwise
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -48,14 +49,17 @@ FIELDS = 5
 pytestmark = pytest.mark.integration
 
 
-def calendar() -> dict[str, tuple[str, str]]:
+def calendar(document: Path = ROOT / "README.md") -> dict[str, tuple[str, str]]:
     """Read the workflow table of section 10.
 
-    :returns: each workflow name against its day and its hour.
+    :param document: the file holding it, this tree's `README.md` unless
+        a control plants a copy.
+    :returns: each workflow name against its day and its hour, in the
+        table's order.
     """
     return {
         name(row["workflow"]): (row["day"], row["hour"])
-        for row in rows(ROOT / "README.md", "workflow", "day", "hour")
+        for row in rows(document, "workflow", "day", "hour")
     }
 
 
@@ -219,6 +223,135 @@ def test_the_calendar_gives_each_workflow_an_instant_of_its_own() -> None:
         slots.setdefault(slot, []).append(workflow)
     shared = {slot: names for slot, names in slots.items() if len(names) > 1}
     assert not shared, f"section 10 gives one slot to several workflows: {shared}"
+
+
+LAST = "scorecard"
+"""The row section 10 keeps last, for section 2's badge line.
+
+Section 10: "section 2 puts the Scorecard badge at the head of the
+OpenSSF line because `scorecard` is the last row, so a sentinel appended
+past it takes that reason away."
+"""
+
+ORDER = "rows out of the week's order, Monday first"
+"""The finding for a row whose slot is not after the row above it."""
+
+TAIL = f"the last row, where section 2's badge line wants `{LAST}`"
+"""The finding for a table ending on any other row."""
+
+
+def week(slot: tuple[str, str]) -> tuple[int, int]:
+    """Read a slot as its place in the week the table is ordered by.
+
+    The table runs Monday to Sunday, so its week starts on Monday;
+    cron's, which `WEEKDAYS` numbers, starts on Sunday, and that is
+    `expression`'s business rather than the table's reading order.
+
+    :param slot: the day and the hour, as the table spells them.
+    :returns: the day counted from Monday, then the hour.
+    """
+    day, hour = slot
+    return (WEEKDAYS[day] - WEEKDAYS["Monday"]) % len(WEEKDAYS), int(hour)
+
+
+def misplaced(table: dict[str, tuple[str, str]]) -> dict[str, list[str]]:
+    """Read a calendar for what section 10 says of its rows' positions.
+
+    Each row's slot has to be later in the week than the row above it,
+    and the last row has to be `LAST`. A slot shared by two rows is
+    `test_the_calendar_gives_each_workflow_an_instant_of_its_own`'s
+    finding and fails here too, the second row being no later than the
+    first.
+
+    :param table: the calendar, in the table's order.
+    :returns: each finding against what it names, findings naming none
+        left out. `TAIL` names rows and `ORDER` names pairs, a sentence
+        per pair giving both rows and both slots.
+    """
+    names = list(table)
+    disordered = [
+        f"`{later}` at {' '.join(table[later])}, after `{earlier}` at"
+        f" {' '.join(table[earlier])}"
+        for earlier, later in pairwise(names)
+        if week(table[later]) <= week(table[earlier])
+    ]
+    findings = {
+        ORDER: disordered,
+        TAIL: [] if names and names[-1] == LAST else names[-1:],
+    }
+    return {finding: found for finding, found in findings.items() if found}
+
+
+def test_the_calendar_rows_are_in_the_weeks_order_and_scorecard_is_last() -> None:
+    """The position of a row is what section 10 reasons about, so it is read.
+
+    "The table's order is that order too: the day and the hour place the
+    row among the families as well as fixing when it runs" -- so a row is
+    read against the row above it, and the last row against `LAST`.
+    `test_the_record_has_an_entry_per_row_of_the_calendar` cannot see a
+    row written in the wrong place: it compares the record's order with
+    the calendar's, and a row moved together with its record entry
+    leaves the two orders equal.
+    """
+    findings = misplaced(calendar())
+    assert not findings, f"section 10's calendar, read row by row: {findings}"
+
+
+def planted(tmp_path: Path, table: list[tuple[str, str, str]]) -> Path:
+    """Write a calendar table for `calendar` to read.
+
+    :param tmp_path: where to write it.
+    :param table: the rows, each a workflow, a day and an hour.
+    :returns: the file, holding the table and nothing else.
+    """
+    document = tmp_path / "README.md"
+    lines = [
+        "| workflow | day | hour |",
+        "| --- | --- | --- |",
+        *(f"| `{workflow}` | {day} | {hour} |" for workflow, day, hour in table),
+    ]
+    document.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return document
+
+
+def test_a_row_past_scorecard_and_a_swapped_hour_are_each_found(
+    tmp_path: Path,
+) -> None:
+    """The two ways the table goes wrong, planted, are the two findings.
+
+    The tree's own table is written back out first and has to read as
+    itself, so that what the two probes measure is the order and not the
+    planting. Read as a list of pairs and not as a mapping, two mappings
+    of one set of rows in two orders being equal, which is the property
+    under test. A row moved below `LAST` is both findings, each naming it;
+    two rows of one day with their hours swapped is the order finding
+    alone, `LAST` still last.
+
+    :param tmp_path: where the copies are planted.
+    """
+    table = [(workflow, *slot) for workflow, slot in calendar().items()]
+    written = calendar(planted(tmp_path, table))
+    assert list(written.items()) == list(calendar().items())
+    moved, *kept = table
+    past = [*kept, moved]
+    assert past != table
+    found = misplaced(calendar(planted(tmp_path, past)))
+    assert set(found) == {ORDER, TAIL}, found
+    assert found[TAIL] == [moved[0]], found
+    assert any(f"`{moved[0]}`" in finding for finding in found[ORDER]), found
+    first = next(
+        (i for i, (row, after) in enumerate(pairwise(table)) if row[1] == after[1]),
+        None,
+    )
+    if first is None:
+        pytest.fail("no two rows of the calendar share a day, so no hour to swap")
+    swapped = list(table)
+    (workflow, day, hour), (other, _, later) = table[first], table[first + 1]
+    swapped[first], swapped[first + 1] = (workflow, day, later), (other, day, hour)
+    assert swapped != table
+    found = misplaced(calendar(planted(tmp_path, swapped)))
+    assert set(found) == {ORDER}, found
+    assert any(f"`{other}`" in finding for finding in found[ORDER]), found
 
 
 def test_the_calendar_gives_each_repository_a_minute_of_its_own() -> None:
