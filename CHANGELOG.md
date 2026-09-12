@@ -7802,3 +7802,47 @@ nothing red follows from the copies disagreeing.
   longer does, and it gives the check as one `tests/workflows_test.py`
   does not carry, which this adds. What it says about letting the
   allowlist follow the jobs stands.
+
+### The copies agree, so `EXPECTED_DRIFT` names nothing
+
+- **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` is empty** (closes
+  #1036): `REVIEWING.md`, `.yamllint.yaml` and `.gitattributes` each
+  carry one shared half across the organization, so every entry's
+  strict expected failure passed unexpectedly and turned red, which is
+  the signal the table's own docstring gives for deleting one. The
+  `.yamllint.yaml` entry cited btclib-org/.github#976, which is the
+  campaign's steering record rather than that drift and stays open.
+- **`REVIEWING.md`'s copies agree** (closes #353): the verdict wording,
+  the collateral section's paragraph on findings that are never filed,
+  and its unquoted placeholders are in every tree's shared half.
+  That issue's *Done when* asks for the entry to go in the same pull
+  request as the last box, which no branch can do — a box is a pull
+  request against another tree and the entry is here — so it goes in
+  the first branch after the last of them.
+- **`.gitattributes`'s copies agree** (closes #1026): the seam
+  paragraph and the rejected alternative beside it are in every tree's
+  shared half, carried byte for byte. Whether the `in exchange for`
+  clause is reworded is left where that issue's ruling puts it, in a
+  change originating here and re-ported under an entry of its own.
+- **`test_every_copy_of_a_verbatim_file_is_the_same_copy` compares
+  those three paths again**: an entry switches that test off for the
+  path it names, so while one stood a second and unrelated drift in
+  that path was reported by nothing.
+- **The table and the tests that read it stay**: a drift filed later
+  wants an entry here rather than a `BACKLOG` row, and the docstring
+  says that empty is where the table returns rather than where it
+  always is.
+- **`test_a_recorded_drift_is_still_one` is asked as a skip**:
+  parametrized over an empty table it collects one placeholder cell and
+  pytest skips it, `got empty parameter set for (path)`, rather than
+  collecting nothing or warning.
+- **This answers what the entries adding those paths say about the
+  table**: *`REVIEWING.md` says which artifact carries the verdict* and
+  *The standard lands with its gate, and the tracker counts work* above
+  say `EXPECTED_DRIFT` names `REVIEWING.md`, and *`.gitattributes`
+  states the price the union driver charges at the seam* says that path
+  has left the comparison; the table names neither path now. *Section
+  11 makes the ack of record a review* and *Section 4's width hook is
+  named for what its pattern reads* give an entry as standing until the
+  other trees converge, which is what has happened. What each says
+  about the text it landed stands.

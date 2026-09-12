@@ -71,20 +71,7 @@ heading's own text lives in the bullet, in `README.md`, rather than in a
 second constant here that a rename of the section would leave stale.
 """
 
-EXPECTED_DRIFT: dict[str, str] = {
-    "REVIEWING.md": (
-        "btclib-org/.github#353, and a second paragraph from "
-        "btclib-org/.github#976 not yet ported to the other eight trees"
-    ),
-    ".yamllint.yaml": (
-        "btclib-org/.github#976, the bare-URL claim #883 flags corrected "
-        "here and not yet ported to the other eight"
-    ),
-    ".gitattributes": (
-        "btclib-org/.github#1026, the union seam paragraph #760 asks the "
-        "line to carry, landed here and not yet ported to the other eight"
-    ),
-}
+EXPECTED_DRIFT: dict[str, str] = {}
 """A path section 14 names whose copies are known not to agree yet.
 
 The value is the issue that decides it, and the commit the drift came
@@ -97,6 +84,9 @@ passes unexpectedly, which strict turns red -- the signal to delete the
 entry. That red says the copies agree and not how they came to, so the
 commit is what tells whoever deletes the entry which way the drift was
 resolved.
+
+Empty is where this returns rather than where it always is: the table
+stands for the next drift a branch cannot converge on its own.
 """
 
 
