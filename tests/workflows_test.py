@@ -300,3 +300,85 @@ def test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing(
     assert not wrong, f"{wrong}; " + by_hand(
         repository, "grep -n 'needs.\\*.result\\|actions/runs' .github/workflows/*.yml"
     )
+
+
+ACCEPTED = ("success", "skipped")
+"""The conclusions section 10 fixes a listing aggregate's allowlist to.
+
+Both names whatever the workflow's own jobs can report today: what keeps
+a `skipped` row out of such a listing is a condition the tree can lose,
+and this constant is what the section says a check reads rather than
+re-deriving each workflow's condition graph.
+"""
+
+COMMENT = re.compile(r"^[ \t]*#.*$", re.MULTILINE)
+"""A whole-line shell comment, which a `run:` block scalar keeps.
+
+A comment above a step belongs to the YAML and is gone by the time
+`document` returns; one inside a block scalar is part of the string, and
+that is where these workflows argue about the allowlist --
+`btclib-benchmarks`' aggregate says in one that `skipped` is a
+conclusion it accepts. Reading that would answer for the argument rather
+than for the filter, which is this module's docstring on `--frozen` in
+the shape a block scalar gives it.
+"""
+
+
+def scalars(node: object) -> list[str]:
+    """List every string a job's mapping holds, at any depth.
+
+    `str(job)`, which `shape` searches, renders a newline as two
+    characters, so a pattern anchored on a line start matches nothing in
+    it; the strings themselves keep their lines.
+
+    :param node: a job's mapping, or anything nested inside one.
+    :returns: the strings, in the order the document holds them.
+    """
+    if isinstance(node, str):
+        return [node]
+    if isinstance(node, dict):
+        return [text for value in node.values() for text in scalars(value)]
+    if isinstance(node, list):
+        return [text for value in node for text in scalars(value)]
+    return []
+
+
+def allowlist(job: dict[str, Any]) -> str:
+    r"""Read the text a job's allowlist is written in, its comments dropped.
+
+    The job's whole text and not one step's `run:`, for the reason
+    `shape` gives. What is searched in it is the two words rather than
+    `"success"` with its quotes: `awk -F'\t' '$1 != "success"'` and
+    `case ... success | skipped) ;;` are one filter spelled two ways,
+    and both are section 10's.
+
+    :param job: the aggregate job's own mapping.
+    :returns: the job's strings joined, without their comment lines.
+    """
+    return COMMENT.sub("", "\n".join(scalars(job)))
+
+
+def test_a_listing_aggregate_accepts_success_and_skipped(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10's allowlist, asked of the aggregates that read a listing.
+
+    `shape` is what selects them: the bullet fixing the allowlist is the
+    one about an aggregate reading its own run's job listing, where an
+    aggregate reading `needs` judges a join and is the bullet below it.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    wrong: list[str] = []
+    for workflow in gated(repository, trees):
+        for job_id, job in aggregates(workflow).items():
+            if shape(job) != "listing":
+                continue
+            missing = [name for name in ACCEPTED if name not in allowlist(job)]
+            if missing:
+                wrong.append(f"{workflow.name}:{job_id} does not name {missing}")
+    assert not wrong, f"{wrong}; " + by_hand(
+        repository, "grep -n 'success' .github/workflows/*.yml"
+    )
