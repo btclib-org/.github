@@ -7486,3 +7486,24 @@ nothing red follows from the copies disagreeing.
   planting — then moves a row below `scorecard`, which is both findings
   naming the row, and swaps the hours of two rows of one day, which is
   the order finding alone.
+
+### `counts()` reads a count a relative clause follows as a shape
+
+- **`tests/changelog_test.py`'s `counts()` leaves alone a count that a
+  relative clause follows** (closes #980): `SHAPE` reads the text at the
+  count's end for `that`, `which` or `each`, the way `ELSEWHERE` reads
+  the text before the count, a comma before the word allowed and one
+  line break, the file wrapping at eighty columns; a blank line is not
+  crossed, a writer starting a paragraph having started a sentence.
+  `PERMITTED` carries one sentence per word of the alternation, so
+  dropping any of the three reddens a test. *Two entries that each close
+  one issue* restricts the entries to the ones the clause describes,
+  which is what several entries do and not how many the file holds, and
+  the issue's own sentence of that shape is in `PERMITTED`. A count of
+  the file that carries the same clause is reported, `ITS_OWN` reading
+  the owner named in front of the count and not the clause, and a
+  sentence of that shape is in `RESURRECTED`.
+  *`CHANGELOG.md` states no count of itself, and a test says so*'s entry
+  above says the test tells a count of the file from a count of
+  something else by whether a possessive in front of the count gives
+  what it counts an owner; it tells it by a clause after the count too.
