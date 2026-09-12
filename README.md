@@ -2590,12 +2590,12 @@ fail_under = 100.0
   no command here can name, and in an append-only file what section 9's
   *Nothing already written is rewritten* leaves standing.
 
-  Which of the two a line named by the commands above is, is a reading,
-  the output showing a string-borne pragma exactly as it shows a site.
-  What would answer it without a reading is a parser rather than a
-  pattern: `tokenize` tells a `COMMENT` token from a `STRING` one, and
-  the rules above leave the `#` form nowhere to be right inside the
-  second. No command here runs one, so the reading is what a tree has.
+  Which of the two a line named by the commands above is, the output
+  does not say, showing a string-borne pragma exactly as it shows a
+  site. What answers it is a parser rather than a pattern: `tokenize`
+  tells a `COMMENT` token from a `STRING` one, and the rules above leave
+  the `#` form nowhere to be right inside the second. Section 15 runs
+  one.
 - **Measured on one interpreter**, the one `.python-version` pins, which
   is enough at 100 only because no source branches on the version — a
   percentage below 100 could not promise that, the statement count moving
@@ -5899,6 +5899,50 @@ sed -nE '/^\[.*(targets\.sdist|uv\.build-backend)\]/,/^\[/{/^[a-z]/p;}' \
 uv run pre-commit run --all-files
 cat tests/README.md
 ```
+
+The reading section 8 leaves to whoever runs its acceptance commands,
+which name a line where a pragma written inside a string reads exactly
+as a site:
+
+```shell
+git ls-files '*.py' | python3 -c 'import re, sys, tokenize
+form = re.compile(r"#\s*pragma: no (cover|branch)")
+for path in sys.stdin.read().splitlines():
+    try:
+        with tokenize.open(path) as source:
+            tokens = list(tokenize.generate_tokens(source.readline))
+    except (OSError, SyntaxError, UnicodeDecodeError, tokenize.TokenError):
+        print(f"{path}\tunreadable")
+        continue
+    for t in tokens:
+        m = form.search(t.string)
+        if m is None or t.type == tokenize.COMMENT:
+            continue
+        line = t.start[0] + t.string[: m.start()].count("\n")
+        kind = tokenize.tok_name[t.type]
+        print(f"{path}:{line}\t{kind} opening at line {t.start[0]}")'
+```
+
+No output is the answer. A line naming a token is section 8's finding.
+Its two fields are where the `#` form was matched and where the token
+carrying it opens, which a string spanning several lines puts above the
+match.
+
+What the key reads is the token not being a `COMMENT` rather than its
+being a `STRING`: an f-string carrying the form is `FSTRING_MIDDLE` on
+3.14 and one `STRING` on 3.11, so a key on the string answers
+differently under two interpreters where this one answers the same.
+
+`unreadable` is a file `tokenize` did not read — an unterminated
+construct, a coding cookie naming no codec, a byte that codec refuses, a
+tracked path the tree no longer holds — and it is printed for the reason
+the sweeps below print a marker: a file dropped instead would leave this
+command's silence saying a tree keeps the rule.
+
+coverage's own parser is the alternative weighed. It answers what an
+exclusion costs rather than where the pragma is, and it asks for
+`coverage` in the tree being audited, which a tree owing no floor has no
+reason to hold — this repository's `uv.lock` names none.
 
 The metadata an index shows, which no command in the tree can compare
 because half of it is a repository setting. The lines chain because the

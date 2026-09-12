@@ -7846,3 +7846,35 @@ nothing red follows from the copies disagreeing.
   named for what its pattern reads* give an entry as standing until the
   other trees converge, which is what has happened. What each says
   about the text it landed stands.
+
+### Section 15 tells a pragma inside a string from a site
+
+- **A `tokenize` pass keyed on the `#` form outside a `COMMENT` token is
+  section 15's, run against the tree in front of you** (closes #842): no
+  output is a tree keeping section 8's rule, and a line names where the
+  form was matched and where the token carrying it opens. Measured by
+  planting both spellings in a tracked file of a clone: the form inside
+  a value string is named, and a mention written backticked and without
+  the `#`, which is what section 8 asks of prose, is not.
+- **The key is the token not being a `COMMENT` rather than its being a
+  `STRING`** (closes #842): an f-string carrying the form tokenizes as
+  `FSTRING_MIDDLE` on 3.14 and as one `STRING` on 3.11, so a `STRING`
+  key answers differently under the two interpreters. What it passes
+  over on the newer one costs the statement holding it, measured with
+  `coverage.parser.PythonParser` under coverage's `DEFAULT_EXCLUDE`
+  against the same source with the pragma text neutralised.
+- **A file `tokenize` does not read is named `unreadable` rather than
+  dropped** (closes #842): an unterminated construct, a coding cookie
+  naming no codec, a byte that codec refuses and a tracked path the tree
+  no longer holds each reach that marker, so what a file nobody read
+  prints is not the silence a tree keeping the rule prints.
+- **coverage's own parser is the alternative weighed** (closes #842): it
+  answers what an exclusion costs rather than where the pragma is, and
+  it asks for `coverage` in the tree being audited, which a tree owing
+  no floor has no reason to hold.
+- **This falsifies part of *Section 8 says a pragma inside a string is
+  not a site* above** (closes #842): its bullet has the section saying
+  the distinction is a reading no command here makes, where section 8
+  now points at section 15 for the command. What that entry says about
+  the mechanism, and about prose writing the pragma without its `#`,
+  stands.
