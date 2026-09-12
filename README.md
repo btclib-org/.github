@@ -951,6 +951,27 @@ before the mapping exists therefore measures the standard library rather
 than the documentation, and fills `nitpick_ignore` with entries whose
 reason is that sphinx was not told where python's objects live.
 
+**`intersphinx_cache_limit = 0` where a mapping names a sibling of this
+organization.** Sphinx writes each fetched inventory beside the doctrees
+and reads that copy back for as many days as the key allows, so which of
+the two a build resolved against is invisible to a diff and to `git
+status`, the doctree directory sitting under ignored build output, and
+`-E` discards the environment and reads the copy back all the same. What
+the key turns on is what the mapping names rather than a judgement about
+how fast an upstream moves: a sibling's `latest` is built from its own
+default branch, so its inventory moves on this organization's own
+landings and within a session, where python's moves on a release of
+CPython. The two directions the copy fails in are not symmetric — a name
+a sibling has removed still resolves off it, so the reference the gate
+exists to refuse passes on a checkout and fails on a runner, whose
+checkout carries none. Asking it of every tree that maps an inventory is
+the rejected alternative: it costs a fetch of each inventory on every
+build, and a build with no route to a mapped host then fails under `-W`,
+paid by every contributor to guard against CPython gaining a name. What
+the trigger as written does not reach is a mapping at some other
+project's rolling `latest`. `btclib-node` is the tree the key is set in,
+and its comment there prices the alternatives that tree weighed.
+
 **`nitpick_ignore` holds only entries whose reason is written beside
 them**, an entry being a reference that genuinely cannot resolve rather
 than one nothing was pointed at. What `-n` costs is paid there and
@@ -959,6 +980,28 @@ broad `nitpick_ignore_regex` buys a green build by giving up the check
 itself. That is the same trade section 5 makes over `ignore` and section
 8 over `exclude_also`, and it is why the first run of `-n` is triage
 rather than a pass.
+
+**`myst_heading_anchors` is 6.** A link into a heading of a root
+markdown file, spelled as GitHub derives the fragment from the heading
+text, resolves under `-n` only where myst generated an anchor at that
+heading's level, and where the key is unset it generates none at all: the
+fragment is then an xref to a target no page has, and `-W` fails on a
+link the forge renders correctly. Six is every level markdown heads at,
+which makes the number a fixed point rather than a value re-derived from
+files that move; myst validates the key against a seventh level as well,
+which no markdown heading reaches. A depth read off the tree's own
+headings is the rejected alternative, and what it costs is that
+re-derivation: nothing performs it, no test reading a `conf.py`, and
+part of what it would read belongs to no one tree —
+`CONTRIBUTING.md`'s shared half heads no deeper than
+`###` and section 14 ports it to every repository, so a heading added
+there moves the number in each of them at once, and which tree finds out
+is whichever carries a link into it. What the wider setting costs is
+measured and is nothing: btclib-org/.github#715 built one source at
+several depths and the rendered pages do not differ by a byte, docutils
+giving every section an id of its own whatever myst accepts as a target,
+while the repeated headings a changelog carries take `unique_slug`
+suffixes rather than a warning.
 
 **`--keep-going` is not passed.** In the sphinx `uv.lock` resolves, the
 flag is declared with `help=argparse.SUPPRESS` and the application
@@ -1285,13 +1328,24 @@ what it holds.
   convention no more than it reaches the `Implementation` classifier
   beside it — which is gated instead by a biconditional, the classifier
   present exactly where what it claims is run. The free-threading
-  convention takes that same shape, and its second side is the gate's
-  own matrix rather than every file CI holds, a sweep naming an
-  interpreter as readily as the gate does. Nothing local refuses a
-  classifier that is not a classifier at all — `twine check` reads the
-  long description and not this list, and a build accepts whatever the
-  file says; PyPI's upload endpoint is what rejects one, at the point
-  where a version is already being consumed.
+  convention takes that same shape, and its second side is the jobs the
+  required check waits on — the aggregate's own `needs` closure — rather
+  than every file CI holds, a sweep naming an interpreter as readily as
+  the gate does, and rather than every cell the gating workflow
+  declares, section 10 keeping a job that concludes successfully
+  whatever it finds outside that closure for as long as it cannot make
+  the claim it is named for: a classifier resting on such a cell is the
+  claim resting on a run nothing waits for that this bullet already
+  refuses. Reading the workflow file is the rejected alternative, and it
+  is the cheaper measurement, answering the same wherever no gating
+  workflow carries a job outside its aggregate's `needs:`; what it costs
+  is a tree's entitlement to the classifier turning on where such a job
+  is written, so that moving it into a workflow of its own takes the
+  classifier away with nothing about the package having changed.
+  Nothing local refuses a classifier that is not a classifier at all —
+  `twine check` reads the long description and not this list, and a
+  build accepts whatever the file says; PyPI's upload endpoint is what
+  rejects one, at the point where a version is already being consumed.
   `trove-classifiers` is the same list as a package, and comparing
   against it is the check that can run before then.
 
@@ -1311,6 +1365,28 @@ what it holds.
     this suite included.
 - **`[project.urls]`** carries homepage, documentation, download,
   changelog, repository, issues and pull requests.
+
+    **The names above are a publisher's, and a tree that declares the
+    table and releases nothing carries the ones with a referent.**
+    `documentation` and `changelog` are the two such a tree has none
+    for: btclib-org/.github#649 measured no Read the Docs project and no
+    Pages site behind `btclib-benchmarks`, and `changelog` is the name
+    each publisher here gives `RELEASE_NOTES.md`, which section 2 gives
+    a tier-1 tree alone. So a table short of those two is a name with
+    nowhere to point rather than a correction nobody made, which the
+    file cannot say for itself: an absent key carries no comment, and
+    nothing reads a `pyproject.toml`'s silence the way section 11 reads
+    a `REPOSITORY.md`'s. This paragraph is where it is said, and a tree
+    with a further reason of its own writes that at a key it does
+    carry, as `btclib-benchmarks` does at `homepage`.
+    Pointing `changelog` at the `CHANGELOG.md` every tier carries is the
+    rejected alternative: what it costs is one name serving two
+    documents across the organization, an index page giving a reader no
+    way to tell which of them it reached. The `keywords` bullet above
+    answers the same question the other way at its own key, and the two
+    do not disagree: a list of names the tree can be read against is
+    worth declaring where nothing is uploaded, where a URL naming a page
+    that does not exist is not.
 
     **A releasing tree's `homepage` is its own documentation site, in
     both surfaces that carry the name**: this field, which an index
@@ -1401,6 +1477,33 @@ pre-commit.ci does not have — the lint workflow covers it. No
   `pretty-format-json`.
 - **Python shape** — `debug-statements`, `check-docstring-first`, and
   `name-tests-test` at its default, the spelling section 7 states.
+
+    **`check-docstring-first` takes an exclusion naming the modules that
+    carry a PEP 258 attribute docstring.** The string literal after a
+    module-level assignment is what sphinx renders beside the name on a
+    built api page, where an ordinary `#` comment above the same name
+    renders nowhere, and the hook reads any such literal as a second module
+    docstring, having been written for a docstring placed below the
+    imports; the two are indistinguishable to it.
+    `.github/scripts/check_changelog.py` carries one, and section 14
+    owes that file to every repository byte for byte, so the exclusion
+    is the one place a tree acting alone can answer the finding.
+
+    **A `#:` doc comment is the alternative, and what rejects it is the
+    port rather than the page.** Sphinx reads such a comment, before the
+    assignment or after it, as that name's documentation, so the api
+    page is unchanged; the hook looks for a string literal and does not
+    object, exit 0 on the script rewritten that way where the same file
+    exits 1. What it costs is a change to a file every repository owes
+    byte for byte, so it lands in all of them together or takes an
+    `EXPECTED_DRIFT` entry for as long as the port takes, and a tree's
+    own modules carrying attribute docstrings are the same edit again in
+    each. Until such a port, a tree carries the exclusion.
+
+    The exclusion names paths rather than the directory holding them,
+    because `check-hooks-apply` beside it fails a hook left with no file
+    to read, and a tree whose Python is one test package has nothing
+    left once that package is named.
 - **secrets** — `detect-private-key` and `detect-secrets` against a
   committed `.secrets.baseline`. A baseline rather than an exclusion: an
   excluded file is unwatched, where a baseline entry is a finding
@@ -3941,7 +4044,19 @@ request, and the rule follows them.
   is that run's job listing, asked of the API rather than of `needs`** —
   `repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs`, each
   finished row's `conclusion`, in a step that fails on anything but
-  `success` and `skipped`. The aggregate's own row is not one of them:
+  `success` and `skipped`. **Both names, whatever the workflow's own
+  jobs can report today.** A workflow with no `changes` job, and no
+  job-level `if:` narrower than the aggregate's own, produces no
+  `skipped` row, and that is a condition rather than a property: either
+  one added later re-opens `skipped`, and what says the allowlist has
+  stopped matching the run is the required check failing on the first
+  run that legitimately skips. Letting the allowlist follow the jobs is
+  the rejected alternative, and it is sound where it is written, a
+  narrowing being able to redden a check and never to green one; what
+  it costs is an expiry condition nothing watches, and a check over the
+  allowlist that would have to re-derive each workflow's condition graph
+  where this one reads a constant. The aggregate's own row is not one of
+  them:
   its `conclusion` is `null` while the step is reading, and what judges
   that row is the unfinished count below. The job elevates to
   `actions: read` above the workflow's `contents: read` and hands
@@ -6264,6 +6379,65 @@ sdist target that only excludes. A `build-backend` other
 than `uv_build` in a project that compiles nothing is section 3's
 finding, and it is the one to read first: which table declares the
 inclusion follows from it.
+
+**`RELEASING.md`'s by-hand recovery paths are exercised by incident, and
+that is accepted rather than overlooked.** The `gh run download` and
+`gh release create` sequence for a `github-release` job that was skipped,
+and the *Rebuild a release from its tag* sequence beside it, are commands
+a person runs while a release is broken, so what exercises them is the
+next break. A job running the documented sequence against a scratch
+repository is the shape that would exercise them on purpose, and it costs
+a repository in the organization — a row in section 2's tier table, a
+`REPOSITORY.md`, topics, protection rules, and a place in every sweep
+above — for a procedure walked when a publish fails. A script extracted
+from the fenced blocks and unit-tested is the other shape, and what it
+buys is a test against a mock: it drifts from the forge exactly as the
+markdown does, one layer removed, and it costs the sequences the
+readability of being read in order by whoever is running them. What the
+decision leaves the reader is the record: a walk is written down in the
+tree that ran it, naming the release it recovered and what skipped the
+job. Where it is written is the tree's own choice and that it is written
+is not: the comment above `github-release` is one place, and the
+`CHANGELOG.md` entry for the release that broke is the other. The
+reading below is what asks a comment of the first kind whether it still
+describes the workflow under it, and this is what says which file to ask:
+
+```shell
+for r in <every publisher>; do
+  for f in .github/workflows/release.yml CHANGELOG.md; do
+    if body=$(gh api "repos/<org>/$r/contents/$f" \
+      -H "Accept: application/vnd.github.raw" 2>/dev/null) \
+      && [ -n "$body" ]
+    then n=$(printf '%s' "$body" | grep -ciE \
+      'recreated by hand|created by hand from|by hand from the run')
+    else n=unreadable
+    fi
+    printf '%s\t%s=%s\n' "$r" "$f" "$n"
+  done
+done
+```
+
+A publisher answering above zero in a column has its record in that
+file, which is where to look rather than what to conclude: a sentence
+describing the procedure counts the same as one recording a walk. A
+publisher answering `0` to both has either walked no recovery or walked
+one and written nothing down, and this command does not tell those two
+apart; what does is the run history of the release that looks short, a
+`github-release` job skipped with the release present being a walk.
+`unreadable` is the call rather than an absence — a repository with no
+`release.yml` answers it, and so does a fetch that failed — and is not a
+reading to act on until it is asked again.
+
+The raw media type is what the read takes rather than the JSON form every
+sweep above uses, and what decides it is the shape of that form's failure
+rather than the fact of one. For a file past its size limit the API
+answers `200` with `encoding` `none` and an empty `content`, so the
+pipeline the sweeps above use exits `0` at every stage and counts zero on
+the largest `CHANGELOG.md` in the organization rather than saying it
+could not read it. Above, it is the emptiness test and not the call's
+exit status that turns that answer into `unreadable`, which is why the
+test is there and why dropping it as redundant would put the silent zero
+back.
 
 ### Reading the workflow comments
 
