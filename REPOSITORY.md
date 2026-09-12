@@ -406,8 +406,8 @@ section is where they are read back.
   is the organization profile GitHub builds from `profile/README.md`,
   which is not a site anything deploys.
   `gh api repos/btclib-org/.github/pages` answers `404`, and the same
-  call against `btclib-org/btclib` answers `built` — the pair is what
-  makes the first an absence rather than a permission.
+  call against `btclib-org/btclib-org.github.io` answers `built` — the
+  pair is what makes the first an absence rather than a permission.
 - **A suite, and no coverage.** [Section 8's ratchet][s8] is a claim
   about a package's own code and this tree ships none, so what the number
   would measure is the suite measuring itself. What the suite does

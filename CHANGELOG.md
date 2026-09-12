@@ -7507,3 +7507,25 @@ nothing red follows from the copies disagreeing.
   above says the test tells a count of the file from a count of
   something else by whether a possessive in front of the count gives
   what it counts an owner; it tells it by a clause after the count too.
+
+### The Pages bullet reads its `404` against a repository that serves a site
+
+- **`REPOSITORY.md`'s *No Pages and no Read the Docs* names
+  `btclib-org/btclib-org.github.io` as the control, and the `built` that
+  repository's `/pages` answers** (closes #1005):
+  `gh api repos/btclib-org/btclib/pages` answers the same `404` as the
+  call under test, so a pair naming `btclib-org/btclib` leaves a token
+  that cannot read Pages anywhere indistinguishable from a repository
+  serving no site. Section 9's *A control the same fault silences is not
+  a control* asks for a control put where the answer already in hand is
+  impossible, and `built` is an answer a repository serving no site does
+  not give.
+- **`tests/scope_test.py`'s `PAGES` reads the endpoint's path**: the
+  pattern is `/pages`, which every shape of the sentence carries, so
+  which repository a copy names as its control is a reader's catch.
+- **The `built` an earlier entry names is a `404` now**: *`REPOSITORY.md`
+  states what it covers, and covers the topics*'s entry above says the
+  Pages call answers `404` here and `built` against `btclib-org/btclib`.
+  That repository's `/pages` answers `404`, and the sentence the entry
+  describes no longer names it; the control it reads as `built` is the
+  one named here.
