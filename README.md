@@ -4049,14 +4049,17 @@ request, and the rule follows them.
   job-level `if:` narrower than the aggregate's own, produces no
   `skipped` row, and that is a condition rather than a property: either
   one added later re-opens `skipped`, and what says the allowlist has
-  stopped matching the run is the required check failing on the first
-  run that legitimately skips. Letting the allowlist follow the jobs is
-  the rejected alternative, and it is sound where it is written, a
-  narrowing being able to redden a check and never to green one; what
-  it costs is an expiry condition nothing watches, and a check over the
-  allowlist that would have to re-derive each workflow's condition graph
-  where this one reads a constant. The aggregate's own row is not one of
-  them:
+  stopped matching the run is the aggregate going red on the first run
+  that legitimately skips. The job's own red and not a required check
+  failing: a branch rule names an aggregate or does not — *A matrix is
+  not what asks for one* above is the case where none can — so a signal
+  keyed on the check is absent from every aggregate no rule holds.
+  Letting the allowlist follow the jobs is the rejected alternative, and
+  it is sound where it is written, a narrowing being able to redden a
+  check and never to green one; what it costs is an expiry condition
+  nothing watches, and a check over the allowlist that would have to
+  re-derive each workflow's condition graph where this one reads a
+  constant. The aggregate's own row is not one of them:
   its `conclusion` is `null` while the step is reading, and what judges
   that row is the unfinished count below. The job elevates to
   `actions: read` above the workflow's `contents: read` and hands

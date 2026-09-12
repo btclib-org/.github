@@ -7775,3 +7775,30 @@ nothing red follows from the copies disagreeing.
   `test_every_copy_of_a_verbatim_file_is_the_same_copy` again. What that
   entry says about `portanode`'s move below its own heading stands
   untouched.
+
+### A listing aggregate's allowlist is checked, and the signal is the job's red
+
+- **`tests/workflows_test.py` reads what a listing aggregate's allowlist
+  accepts** (closes #990): `shape()` picks the aggregates the rule is
+  about, and the check asks the job's own text for both names, the shell
+  comments a `run:` block scalar keeps dropped first —
+  `btclib-benchmarks`' aggregate argues for `skipped` in one, and a
+  search reading that would answer for the argument rather than for the
+  filter. It looks for the words and not for `"success"` with its
+  quotes, an `awk` filter and a `case` arm being one filter spelled two
+  ways, and what it reads is the constant section 10 names rather than
+  the condition graph that section puts on the rejected alternative.
+- **Section 10 names the aggregate going red rather than the required
+  check failing** (issue #1028): a branch rule names an aggregate or
+  does not, so a signal keyed on the check is absent from every
+  aggregate no rule holds, and `codeql: every job passed` is held by
+  none. The tree-local half of that issue is `btclib`'s own `codeql.yml`
+  comment and is not this; the same claim in the section's own `skipped`
+  bullet is left standing, its population being a reading and filed as
+  btclib-org/.github#1032.
+- **This supersedes two claims of *A listing aggregate's allowlist is
+  `success` and `skipped`* above**: that entry gives the required check
+  failing as what says the allowlist has expired, which section 10 no
+  longer does, and it gives the check as one `tests/workflows_test.py`
+  does not carry, which this adds. What it says about letting the
+  allowlist follow the jobs stands.
