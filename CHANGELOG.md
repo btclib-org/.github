@@ -7569,3 +7569,178 @@ nothing red follows from the copies disagreeing.
   directory deeper than the path it was given, git's pathspec wildcard
   crossing a `/`, and for a name that merely ends with the subject's,
   which it declines.
+
+### `myst_heading_anchors` is 6 wherever a tree builds documentation
+
+- **Section 2's *The documentation* names the value and what makes it a
+  fixed point** (issue #715): six is every level markdown heads at, so
+  the number is not re-derived from files that move, where a depth read
+  off the tree's own headings is. Part of that re-derivation is not the
+  tree's own either: `CONTRIBUTING.md`'s shared half is section 14's,
+  ported to every repository, so a heading added there moves the number
+  in each of them at once and the tree that finds out is whichever
+  carries a link into it. What the wider value costs is the measurement
+  the issue records: pages built from one source at several depths do
+  not differ by a byte, and the repeated headings a changelog carries
+  take `unique_slug` suffixes rather than a warning.
+- **No `docs/source/conf.py` changes here** (issue #715): the trees that
+  build documentation do not agree with the sentence yet, and each is
+  brought to it in its own tree rather than by this branch.
+
+### `intersphinx_cache_limit` is owed where a mapping names a sibling
+
+- **Section 2's *The documentation* keys the setting on what the mapping
+  names** (closes #764): a sibling's `latest` is built from its own
+  default branch, so its inventory moves on this organization's own
+  landings, where python's moves on a release of CPython — which a
+  reader checks off the URL rather than judging how fast an upstream
+  goes. Sphinx reads back the copy it writes beside the doctrees, under
+  ignored build output that neither a diff nor `git status` shows and
+  `-E` does not discard, so a build that resolved against a copy is a
+  green nothing else records.
+- **Asking it of every tree that maps an inventory is the rejected
+  alternative**: it costs a fetch of each inventory on every build, and
+  a build with no route to a mapped host then fails under `-W`, paid by
+  every contributor to guard against CPython gaining a name. A mapping
+  at some other project's rolling `latest` is outside the trigger as
+  written, and no tree has one.
+- **No tree's `conf.py` changes**: `btclib-node`, whose mapping names
+  siblings, sets the key already, and a tree mapping python alone is not
+  asked for it. What the bullet adds is the reason, against the next
+  mapping somebody writes.
+
+### Section 3's `[project.urls]` names are a publisher's
+
+- **The bullet says which names a tree that declares the table and
+  releases nothing carries** (closes #766): the ones with a referent.
+  `documentation` and `changelog` are the two such a tree has none for —
+  btclib-org/.github#649 measured no Read the Docs project and no Pages
+  site behind `btclib-benchmarks`, and `changelog` is the name each
+  publisher gives `RELEASE_NOTES.md`, which section 2 gives a tier-1
+  tree alone. Pointing `changelog` at the `CHANGELOG.md` every tier
+  carries is the rejected alternative, and what it costs is one name
+  serving two documents across the organization.
+- **`tests/pyproject_test.py`'s `Tier.PUBLISHER` is what the sentence
+  agrees with**, so no test moves and no tier-2 table is short of
+  anything. An absent key carries no comment, which is why the sentence
+  is in the section rather than owed of each tree; a tree with a further
+  reason of its own writes that at a key it carries, as
+  `btclib-benchmarks` does at `homepage`.
+- **The `keywords` bullet keeps the opposite answer at its own key**: it
+  turns on the `[project]` table and not on the index, because topics
+  github.com shows need a list in the tree to be read against, where a
+  URL naming a page that does not exist has nothing to point at.
+- **The entry that scoped the `homepage` surfaces stands**: *Section 3
+  sends a releasing tree's two `homepage` surfaces to that site*'s entry
+  above says the condition is the rule's rather than the section's, and
+  this writes that for the rest of the table — the key binds a tier-2
+  tree, and the referent decides which names it carries.
+
+### The free-threading biconditional names the aggregate's `needs` closure
+
+- **Section 3 says which of two readings "the gate's own matrix" is**
+  (issue #634): the jobs the required check waits on, and not every cell
+  the gating workflow declares. The two differ exactly where a workflow
+  carries a job outside that closure, and what decides between them is
+  the section's own ground — a gate refuses the landing that breaks the
+  build, where a run nothing waits for is already the rejected
+  alternative there. Section 10 keeps a job that concludes successfully
+  whatever it finds out of the closure for as long as it cannot make the
+  claim it is named for, and `btclib-node`'s `pyproject.toml` declines
+  the classifier on that reading.
+- **Reading the workflow file is the rejected alternative**, and it is
+  the cheaper measurement: it answers the same wherever no gating
+  workflow carries a job outside its aggregate's `needs:`, at the price
+  of an entitlement that moves when such a job is moved into a workflow
+  of its own, with nothing about the package having changed.
+- **No tree gains or loses a classifier** (issue #634): none declares
+  `Free Threading`. `btclib-node` is the one tree the two readings
+  differ over, its `3.14t` cell reporting beside a gate that does not
+  wait on it, and its own `interpreters_test.py` reads the closure
+  already; where a gating workflow carries no `t` cell at all the two
+  readings answer the same, which is the other trees. So what the
+  sentence decides is the next case, and the copies reading the workflow
+  file converge in their own trees.
+- **The entry that put the biconditional in section 3 stands**: *A `Free
+  Threading` classifier is declared where the merge gate exercises the
+  free-threaded build*'s entry above says the section names the gate's
+  own matrix as the second side, which is the phrase this one reads —
+  the matrix is the closure, and nothing that entry says about the gate
+  and the sweep moves.
+
+### A listing aggregate's allowlist is `success` and `skipped`
+
+- **Section 10 says both names go in it whatever the workflow's own jobs
+  can report** (issue #990): the argument for narrowing to `success` —
+  no `changes` job, and no job condition narrower than the aggregate's
+  own — is a condition rather than a property, and what says it has
+  expired is the required check failing on the first run that
+  legitimately skips. Letting the allowlist follow the jobs is the
+  rejected alternative, and it is sound where it is written, a narrowing
+  being able to redden a check and never to green one; what it costs is
+  an expiry nothing watches.
+- **No check in `tests/workflows_test.py`** (issue #990): the question
+  belongs beside `shape()`, which reads which of the two shapes an
+  aggregate decides with rather than what its allowlist accepts, and a
+  check written now is red against the trees that narrow — a `BACKLOG`
+  row rather than a gate. It lands with the sweep that widens them.
+
+### `check-docstring-first` and `debug-statements` join this tree's gate
+
+- **Section 4's *Python shape* bullet is applied in the tree that states
+  it** (closes #995): both hooks are in `.pre-commit-config.yaml` here,
+  `check-docstring-first` with an exclusion naming the modules that
+  carry a PEP 258 attribute docstring. Section 14 owes
+  `.github/scripts/check_changelog.py` to every repository byte for
+  byte, so an exclusion is where a tree answers that file's finding, and
+  the siblings carrying one are now doing what the standard asks rather
+  than holding an interim.
+- **The bullet says the exclusion names paths and not the directory
+  holding them**: `check-hooks-apply` fails a hook left with no file to
+  read, and excluding `tests/` here leaves this one none —
+  `check-docstring-first does not apply to this repository` is what that
+  run answers. What the list costs is a red run on the day a module here
+  gives its first constant a docstring, answered by naming it.
+- **The convention this tree writes constants in is most of what the
+  hook reads**: the exclusion covers the script, `tests/__init__.py`,
+  `tests/conftest.py` and the test modules documenting a constant, and
+  the hook reads the modules documenting none. `debug-statements` takes
+  no exclusion and reports nothing here.
+- **A `#:` doc comment is the alternative, and the reason against it is
+  the port rather than the api page**: sphinx reads such a comment as
+  the name's documentation and the hook, which looks for a string
+  literal, does not object — the script rewritten that way exits 0 where
+  the file as it stands exits 1. What that costs is a change to a file
+  section 14 owes every repository byte for byte, landing in all of them
+  together or taking an `EXPECTED_DRIFT` entry for as long as the port
+  takes, and each tree's own modules again after it. The section says so
+  at the bullet rather than pricing the api page, which is what the
+  measurement refuted.
+
+### `RELEASING.md`'s recovery paths are exercised by incident
+
+- **Section 15 says so, and says it is accepted** (closes #50): the
+  `gh run download` and `gh release create` sequence for a skipped
+  `github-release` job, and the *Rebuild a release from its tag*
+  sequence beside it, are commands a person runs while a release is
+  broken, so what exercises them is the next break.
+- **A job replaying them against a scratch repository is the shape that
+  would exercise them on purpose**, and it costs a repository in the
+  organization — a tier row, a `REPOSITORY.md`, topics, protection rules
+  and a place in every sweep the suite runs. A script extracted from the
+  fenced blocks and unit-tested is the other shape, and it buys a test
+  against a mock while drifting from the forge one layer removed, at the
+  price of the sequences' readability.
+- **What the decision leaves the reader is the record**: a walk is
+  written down in the tree that ran it, naming the release it recovered
+  and what skipped the job. Where it is written is the tree's own choice
+  and that it is written is not — the comment above `github-release` is
+  one place and the `CHANGELOG.md` entry for the release that broke is
+  the other — and section 15 gains the sweep that says which file
+  carries a tree's. It reads through the raw media type rather than the
+  JSON form the sweeps beside it use, a `CHANGELOG.md` here outgrowing
+  that form's size limit.
+- **It holds of a tree that publishes**, `btclib-node` included, which
+  the issue's own list leaves out, and no tree's file changes for it:
+  each of the three the list names answers the sweep above zero, in the
+  file its own history put the record in.

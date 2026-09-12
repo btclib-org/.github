@@ -51,6 +51,36 @@ repos:
       - id: check-merge-conflict
       - id: check-vcs-permalinks
       - id: detect-private-key
+      - id: debug-statements
+      # a documented module-level constant here carries a PEP 258
+      # attribute docstring -- the string literal after the assignment,
+      # which is what sphinx reads where an ordinary `#` comment is not
+      # -- and this hook counts such a literal as a second module
+      # docstring, having been written for a docstring below the
+      # imports. The two are indistinguishable to it, so the modules
+      # carrying one are named below and the rest are read.
+      # .github/scripts/check_changelog.py is among them, and section 14
+      # of README.md owes that file to every repository byte for byte,
+      # so an exclusion is where a tree answers its finding -- which is
+      # what every sibling running this hook does
+      # (btclib-org/.github#995). Section 4 prices the `#:` doc comment
+      # that satisfies sphinx and this hook at once: what rejects it is
+      # the port rather than the page.
+      # By name and not by directory: `^tests/` with the script beside
+      # it leaves the hook no file to read at all, and check-hooks-apply
+      # above fails on that, "check-docstring-first does not apply to
+      # this repository". What the list costs is a red run on the day a
+      # module here gives its first constant a docstring, answered by
+      # adding the module to it
+      - id: check-docstring-first
+        exclude: |
+          (?x)^(\.github/scripts/check_changelog\.py
+            |tests/(__init__|conftest)\.py
+            |tests/(backlog|changelog|classifiers|conventions|copyright
+              |dependabot|grid|homepage|hooks|interpreters|issue_template
+              |layout|links|names|per_subject|protection
+              |pull_request_template|pyproject|root_files|scope|security
+              |surface|topics|verbatim|workflows)_test\.py)$
       - id: check-yaml
       # the toml here is read by taplo every run, but a format is not a
       # parse: what taplo cannot read fails its own hook, and what it can
