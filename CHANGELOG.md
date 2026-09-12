@@ -7459,3 +7459,30 @@ nothing red follows from the copies disagreeing.
   no longer names a `BACKLOG` row keyed on #982**: *The `BACKLOG` rows
   drop the trees that landed since the last narrowing*'s entry above
   deleted the row and left the sentence naming it.
+
+### The calendar's rows are read in the week's order, `scorecard` last
+
+- **`tests/grid_test.py` reads each row of section 10's day-and-hour
+  table against the row above it, and the last row against
+  `scorecard`** (closes #930): a row whose slot is not later in the week
+  than its neighbour's, and a table ending on any other row, are each a
+  finding naming the row. The week the key counts from starts on Monday,
+  the table running Monday to Sunday; `WEEKDAYS` numbers Sunday first
+  because cron does, which is `expression()`'s business and not the
+  table's reading order. Section 10 is what gives the position a meaning
+  — "the day and the hour place the row among the families as well as
+  fixing when it runs", and "section 2 puts the Scorecard badge at the
+  head of the OpenSSF line because `scorecard` is the last row" — and
+  `test_the_record_has_an_entry_per_row_of_the_calendar` cannot see a
+  row written in the wrong place, a row moved together with its record
+  entry leaving the record's order equal to the calendar's. The table,
+  `vendored-vectors` at Monday 03 to `scorecard` at Sunday 05, is in
+  that order. *One order for the badge row and the sentinel calendar*'s
+  entry above states the order; this is what reads it.
+- **The two probes are planted, and each is found**: `calendar()` takes
+  the document it reads, this tree's `README.md` unless a control names
+  another, and the control writes the tree's own table back out — read
+  as itself first, so that the probes measure the order and not the
+  planting — then moves a row below `scorecard`, which is both findings
+  naming the row, and swaps the hours of two rows of one day, which is
+  the order finding alone.
