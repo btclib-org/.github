@@ -24,10 +24,9 @@ import re
 from typing import TYPE_CHECKING, Any
 
 import pytest
-import yaml
 
 from . import ORG, ROOT, SELF, bulleted, by_hand, name, rows, still_open, subjects
-from .workflows_test import workflows
+from .workflows_test import triggers, workflows
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -178,22 +177,6 @@ def debts() -> dict[str, str]:
             raise LookupError(msg)
         out[row.group(1)] = reference(owed)
     return out
-
-
-def triggers(workflow: Path) -> dict[str, Any]:
-    """Read the `on:` block of a workflow file.
-
-    YAML 1.1 reads a bare `on` as the boolean it also spells `true`,
-    which is why the key is looked for twice: what the file means is the
-    same either way, and which one the parser hands back depends on how
-    the file happens to quote it.
-
-    :param workflow: the file to read.
-    :returns: the trigger block, empty if the file declares none.
-    """
-    document = yaml.safe_load(workflow.read_text(encoding="utf-8"))
-    on = document.get("on", document.get(True, {}))
-    return on if isinstance(on, dict) else {}
 
 
 def schedules(root: Path) -> dict[str, list[str]]:

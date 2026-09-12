@@ -48,14 +48,33 @@ def workflows(root: Path) -> list[Path]:
     return sorted(path for suffix in ("*.yml", "*.yaml") for path in here.glob(suffix))
 
 
-def document(workflow: Path) -> dict[str, Any]:
+def document(workflow: Path) -> dict[Any, Any]:
     """Parse a workflow file.
+
+    Keyed on whatever YAML read rather than on `str`, for the key
+    `triggers` looks up.
 
     :param workflow: the file to read.
     :returns: the document, empty where the file parses to nothing.
     """
     parsed = yaml.safe_load(workflow.read_text(encoding="utf-8"))
     return parsed if isinstance(parsed, dict) else {}
+
+
+def triggers(workflow: Path) -> dict[str, Any]:
+    """Read the `on:` block of a workflow file.
+
+    YAML 1.1 reads a bare `on` as the boolean it also spells `true`,
+    which is why the key is looked for twice: what the file means is the
+    same either way, and which one the parser hands back depends on how
+    the file happens to quote it.
+
+    :param workflow: the file to read.
+    :returns: the trigger block, empty if the file declares none.
+    """
+    parsed = document(workflow)
+    on = parsed.get("on", parsed.get(True, {}))
+    return on if isinstance(on, dict) else {}
 
 
 def steps(workflow: Path) -> list[dict[str, Any]]:
@@ -160,6 +179,32 @@ def test_every_workflow_declares_permissions(
     )
 
 
+def test_paths_ignore_is_only_on_push(repository: str, trees: dict[str, Path]) -> None:
+    """Section 10: `paths-ignore` only on `push`.
+
+    "The same list on `pull_request` would produce no run at all for a
+    prose-only diff, and a required check that produces no run blocks
+    the merge instead of passing it." Asked of every trigger but `push`,
+    as the rule is written, rather than of `pull_request` alone: GitHub's
+    workflow syntax gives the filter to `pull_request_target` as well,
+    and a required check on that trigger is blocked the same way. A
+    `paths` list is another question, the one section 10 asks of a
+    calendar workflow's `pull_request`.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    ignoring = [
+        f"{workflow.name}: {trigger}"
+        for workflow in gated(repository, trees)
+        for trigger, filters in triggers(workflow).items()
+        if trigger != "push" and isinstance(filters, dict) and "paths-ignore" in filters
+    ]
+    assert not ignoring, f"paths-ignore off push: {ignoring}; " + by_hand(
+        repository, "grep -n 'paths-ignore' .github/workflows/*.yml"
+    )
+
+
 AGGREGATE = re.compile(r": every job passed$")
 """How section 10 names an aggregate job, with its own workflow."""
 
@@ -239,8 +284,7 @@ def test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing(
     its aggregate reads `needs` instead, which stays scoped to the
     workflow that declares it either way; a workflow nothing calls reads
     the listing, which also catches a job `needs.*.result` misreports
-    (btclib-org/btclib#1001). btclib-org/.github#982 is the `BACKLOG` row
-    in `tests/__init__.py` naming the cells still on the wrong shape.
+    (btclib-org/btclib#1001).
 
     :param repository: the repository asked about.
     :param trees: the checkouts.

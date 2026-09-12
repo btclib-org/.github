@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from . import ROOT, still_open, subjects
-from .grid_test import triggers
+from .workflows_test import triggers
 
 if TYPE_CHECKING:
     from pathlib import Path

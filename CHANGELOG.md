@@ -7429,3 +7429,33 @@ nothing red follows from the copies disagreeing.
   reads the hook's id alone. `test_the_local_hooks_run`'s docstring says
   of every name in the tuple where it has a subject, `check-changelog`
   included, which the tuple named and the docstring did not.
+
+### `paths-ignore` under any trigger but `push` is a red cell
+
+- **`tests/workflows_test.py`'s `test_paths_ignore_is_only_on_push` reads
+  the `on:` block of every workflow of every repository the suite is
+  parametrized over and fails where `paths-ignore` sits under a trigger
+  other than `push`, naming the tree, the workflow and the trigger**
+  (closes #1002): section 10 says the same list on `pull_request`
+  produces no run at all for a prose-only diff and a required check that
+  produces no run blocks the merge, and nothing re-derived that.
+  `pull_request_target` is asked too: GitHub's workflow syntax gives the
+  filter to that trigger as well, and a required check filtered out of
+  running blocks the merge whichever trigger carried the filter.
+  `git grep -c 'paths-ignore' ed362d2a -- tests/` answers
+  `tests/grid_test.py` alone, its census of unfiltered `pull_request`
+  triggers, which asks a calendar workflow's `pull_request` to carry a
+  filter and not where `paths-ignore` may sit. Measured at each tree's
+  own `origin/main` when this entry was written, `paths-ignore` sits
+  under `push` alone, in the `test.yml` of the trees that carry it, so
+  no `BACKLOG` row is owed; `btclib`'s `test.yml` is the control,
+  `paths-ignore` under `push` and a green cell.
+- **`triggers()` is `tests/workflows_test.py`'s, beside `workflows()` and
+  `document()`, and `tests/grid_test.py` and `tests/verbatim_test.py`
+  import it from there**: `grid_test.py` imports `workflows()` from
+  `workflows_test.py`, so the import the other way would be a cycle.
+- **The docstring of
+  `test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing`
+  no longer names a `BACKLOG` row keyed on #982**: *The `BACKLOG` rows
+  drop the trees that landed since the last narrowing*'s entry above
+  deleted the row and left the sentence naming it.
