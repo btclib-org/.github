@@ -7529,3 +7529,43 @@ nothing red follows from the copies disagreeing.
   That repository's `/pages` answers `404`, and the sentence the entry
   describes no longer names it; the control it reads as `built` is the
   one named here.
+
+### Section 14's per-subject copies are located by a run
+
+- **`tests/per_subject_test.py` reads section 14's per-subject paragraphs
+  and asks each tree where its copy of each one is** (closes #695):
+  `verbatim_test.py` answers the location question for the paths in *The
+  same file in every repository*, `verbatim()` reading that list, and a
+  per-subject paragraph sits outside it by the sentence that put it
+  there, which left where those copies live unasked. A paragraph gives
+  the path it opens with, and beside it any tree that keeps its copy
+  elsewhere: a copy at another path is a red row naming the tree, and a
+  departure the standard states with no copy at it, and a subject no tree
+  carries at all, are red rows of their own.
+- **No paragraph is reworded, the shape a parser reads being the shape
+  the standard already writes**: each opens with its subject in
+  backticks, and a departure is stated as `btclib-node` keeps its copy at
+  `tests/unit/conventions_test.py`. What the reading costs is a rewording
+  turning a run red, and `per_subject` takes that cost loudly — a
+  paragraph carrying the phrase and opening with no subject raises, where
+  passing it over leaves a copy nothing asks about. The phrase a paragraph
+  is selected on leaves its copula out, so that *is decided per repository
+  by subject* — the neighbouring `.gitignore` sentence's *is decided per
+  repository* carried over — is selected and refused rather than stopping
+  being read at all.
+- **A command in section 15 is the rejected alternative**: that section
+  is the half of the audit a machine cannot run, and where a copy sits is
+  a path in a tree, which one `git ls-files` answers. The compared list
+  is read by a test, so a command there would leave one question with two
+  answers.
+- **Each probe is planted, and each is found on its own**: the standard's
+  own subjects written back out read as themselves, then a subject made
+  unreadable, a document naming none, and one subject in two paragraphs
+  each raise on the refusal that is theirs. A departure clause reworded
+  away reddens the location test on `btclib-node` and leaves the
+  departure test nothing to ask; a departure named for a tree carrying no
+  copy reddens that test alone; a subject renamed to a file no tree has
+  reddens the stale-subject test alone. The search is asked for a copy a
+  directory deeper than the path it was given, git's pathspec wildcard
+  crossing a `/`, and for a name that merely ends with the subject's,
+  which it declines.
