@@ -7744,3 +7744,34 @@ nothing red follows from the copies disagreeing.
   the issue's own list leaves out, and no tree's file changes for it:
   each of the three the list names answers the sweep above zero, in the
   file its own history put the record in.
+
+### `.gitattributes` states the price the union driver charges at the seam
+
+- **The comment beside `CHANGELOG.md merge=union` says what the driver
+  does where two sides' added lines abut** (closes #760): the blank line
+  between the two blocks is gone, and a block opening with a heading
+  leaves that heading against the line above it, while `git rebase`
+  exits 0 with a clean tree and each entry's own text untouched. Section
+  4's `check-changelog` hook is named there as what reports it, and as
+  running ahead of the markdownlint autofix that would repair the seam
+  before anything named it.
+- **Not setting the driver at all is recorded at the line as the
+  rejected alternative** (closes #760): every entry lands at one anchor,
+  so a branch rebasing over a landing that wrote one resolves that
+  anchor by hand, in exchange for a seam the hook reports.
+- **What that issue asks for past the line is already in the tree**:
+  *The open section of `CHANGELOG.md` is read by a hook* above put the
+  seam into `check-changelog`, which names the driver where
+  `markdownlint-cli2` reports a blank line missing above a heading, and
+  section 4 records the alternatives declined for that hook.
+- **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` names `.gitattributes`
+  against btclib-org/.github#1026** (closes #760): section 14 owes the
+  file to every repository, so the edit is a drift the comparison
+  reports until the copies agree, and an entry there excuses that one
+  path where a `BACKLOG` row would excuse the whole test.
+- **This falsifies part of *`.gitattributes` converges again, and
+  `EXPECTED_DRIFT` drops the entry* above**: the shared halves no longer
+  hash the same, and the path leaves
+  `test_every_copy_of_a_verbatim_file_is_the_same_copy` again. What that
+  entry says about `portanode`'s move below its own heading stands
+  untouched.
