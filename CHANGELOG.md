@@ -7878,3 +7878,33 @@ nothing red follows from the copies disagreeing.
   now points at section 15 for the command. What that entry says about
   the mechanism, and about prose writing the pragma without its `#`,
   stands.
+
+### `EXPECTED_DRIFT`'s second field is a commit, and a test reads it
+
+- **The field behind a value's comma is `<repo>@<sha>`** (closes #1030):
+  the docstring's *free to say anything* reads as a licence where the
+  sentence above it calls that field the commit the drift came from.
+  `names_a_commit` holds the field to the form, and the docstring gives
+  the form and names the readers in place of that sentence.
+- **The check carries its own literals rather than reading the table
+  alone** (closes #1030): the table is empty between drifts, so a check
+  parametrized over it is green however its reader behaves. One value of
+  the form, one whose field is prose and one naming a repository the
+  organization has not are what it is asked of on a day the table names
+  nothing, which is what `PRECEDENT` already does for the state read off
+  the first field.
+- **The sha is read for its shape and the repository half is resolved**
+  (closes #1030): `conftest.py` clones each tree `--depth=1`, and in
+  such a clone of `portanode` `git cat-file -e 309a098^{commit}` exits
+  128 where the tip's own abbreviation exits 0 and
+  `gh api repos/btclib-org/portanode/commits/309a098` answers with the
+  commit — so resolving a sha against the tree would fail for the
+  clone's reason rather than the entry's. That reason sits at the
+  constant giving the form, and the repository half is resolved against
+  the names the API answers with.
+- **Dropping the second field is the rejected alternative** (closes
+  #1030): the value would be the reference alone and the issue it names
+  would say which way the drift resolved, a deletion instead of a gate.
+  What it costs is the fact a full checkout answers without the network,
+  and the distinction between the two: the issue is where a drift is
+  argued, the commit is where it is resolved.
