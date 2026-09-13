@@ -8000,3 +8000,31 @@ nothing red follows from the copies disagreeing.
   the trees of section 10's `deps-oldest` entry that the row does not
   name are the ones that schedule the workflow, so a landing elsewhere
   costs the comment no sentence of its own.
+
+### Section 7 puts the guard's pragma on the case's `def`
+
+- **The `except` is not the site, and the paragraph says why in terms of
+  which lines run where** (closes #1044): the `except` and the
+  `pytest.skip` under it are the lines that do not run wherever the
+  capability is granted, so an exclusion there answers for the machine
+  that grants it and for no other — where the capability is refused the
+  skip ends the case, the assertions below it do not run, and the floor
+  counts them missed on the one machine the guard is there for, which
+  #1044 measured in `btclib-node`. What the exclusion on the `def` costs
+  is written into the paragraph, dead code inside the case no longer
+  being flagged, rather than left to be rediscovered per tree.
+- **The fuller reason is the comment over that line rather than the
+  docstring the case opens with** (closes #1044): section 8 gives the
+  docstring where one reason covers every pragma under it, which a case
+  carrying one pragma on its own `def` is not. *Where a pragma's reason
+  goes, and what a grep for it answers* above states both places and
+  stands, which of them a site takes being the line's.
+- **The bullet naming the `except` and the docstring at the site, under
+  *Section 7 asks for a guard where the platform may refuse the call*
+  above, is superseded** (closes #1044): what it gives as its reason —
+  the standard states the ruling once, and each case keeps the sentence
+  for its own line — is what the corrected paragraph still does, and
+  that entry's other bullets stand.
+- **No gate comes with it** (closes #1044): *How to use this file* binds
+  a rule entering the standard to what reads it, and this states which
+  line the pragma of a rule already here sits on.
