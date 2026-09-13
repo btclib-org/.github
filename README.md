@@ -5625,24 +5625,40 @@ beside it, with the same argument as `.vscode/`.
 configuration move between them, and a paragraph that lints in one has to
 lint in the others. Each bullet opens with its subject, the path, and
 then with who owes a copy: `owed by every repository`, or `owed where`
-and the condition. A condition written as one backticked path and nothing
-else says the tree tracks that path, and is the condition
-`tests/verbatim_test.py` of this repository reads off each tree; a
-condition written any other way is prose, and that test asks no tree
-about it. A file this section keeps out of the list because its subject
+and the condition. A condition is one backticked pathspec and nothing
+else, and says the tree tracks a file it names — a path, or a glob such
+as `*.toml`, which a reader answers with `git ls-files` and
+`tests/verbatim_test.py` of this repository reads off each tree by that
+same call. A file this section keeps out of the list because its subject
 is its own tree's is not compared and is owed all the same, so its own
 paragraph says who owes a copy in these same spellings.
+
+A clause's opening ends at a comma, a semicolon, a colon or a full stop,
+or at the end of the clause, and the rest of its prose goes after it. So
+a clause narrows by its condition and never by a qualifier written into
+`owed by every repository`, which owes the copy of every tree: that test
+refuses such a qualifier rather than reading past it, where a match on
+the phrase alone answers that every repository owes the file. It is a
+rule about a clause, and `claude-review.yml`'s paragraph below writes
+the same phrase where neither reading takes one: that paragraph is no
+bullet of the list, and it is not one naming a file this section keeps
+out by its subject, which is what the other reading selects on. The
+rejected alternative enumerates the continuations admitted after the
+phrase, which is a second list to keep in step with this one where the
+punctuation is read off the clause itself.
 
 A clause that test reads, it reads both ways: a tree short of a copy it
 is owed is a finding rather than a tree the comparison passes over, and
 so is a copy in a tree whose observable is absent, that copy being one
-the standard gives that tree no clause for. A condition left as prose is
-asked neither. `.taplo.toml`'s is left as prose because what it names is
-a file type and not a path, so no one path is its observable; that test
-enumerates the conditions left that way and refuses one that is neither
-read nor enumerated, so another cannot join them in silence. Whether the
-spelling should reach a pathspec instead, which would leave no condition
-unread, is open and not decided here: btclib-org/.github#1054 raised it.
+the standard gives that tree no clause for. Every condition this section
+writes is read that way, `.taplo.toml`'s file type included, and a
+clause in neither spelling raises rather than taking its tree out of
+both readings. The rejected alternative leaves a condition naming a file
+type as prose, on the ground that *the tree holds one of these* is a
+weaker claim to hang an obligation on than *the tree holds this file*: a
+reader checks the second by opening a file and the first by running a
+command. What it costs is an obligation nothing asks any tree about,
+which is what both readings above are for.
 
 The paths are what that test compares:
 
@@ -5661,10 +5677,9 @@ The paths are what that test compares:
   disabled rules carry the reason beside them, `comments` because dependabot
   writes the spacing it objects to and `truthy` because the `on:` a workflow
   opens with is the spelling GitHub Actions requires.
-- `.taplo.toml` — owed where the tree holds a `toml`; four-space indent,
-  `reorder_keys` left false because the order of a table is an argument,
-  `array_auto_collapse` false so that adding an entry is a one-line
-  diff.
+- `.taplo.toml` — owed where `*.toml`; four-space indent, `reorder_keys`
+  left false because the order of a table is an argument,
+  `array_auto_collapse` false so that adding an entry is a one-line diff.
 - `COPYRIGHT` — owed by every repository: the notice every source file
   opens with, three lines naming the holder and pointing at `LICENSE`,
   and the source the `notice-rgx` of section 5 is transcribed from. A

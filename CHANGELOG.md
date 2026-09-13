@@ -8346,3 +8346,84 @@ nothing red follows from the copies disagreeing.
   the reason -- one suite, one workflow, one runner, so section 1's rule
   for an application applies -- and sends the number to
   `.python-version`, which is the file the step above reads.
+
+### Section 14 reads every condition, and says what closes an opening
+
+- **`.taplo.toml`'s condition is `*.toml`, and `PROSE` goes with the
+  exemption** (closes #1054): `tests/__init__.py`'s `tracked` takes
+  pathspecs, so a glob is read off a tree by the call that reads
+  `REVIEWING.md` off it, and `observable` now answers a pathspec for
+  every condition section 14 writes where that one answered `None` and
+  took its row out of both readings. The enumeration keeping an unread
+  condition from joining another in silence has nothing left to
+  enumerate, and the test holding it to the section goes with it.
+- **What a pathspec costs is in section 14 beside the spelling** (closes
+  #1054): *the tree holds one of these* is checked by running a command
+  where *the tree holds this file* is checked by opening a file, which
+  is the weaker claim to hang an obligation on and is the ground the
+  rejected alternative stands on. What leaving the condition as prose
+  costs is an obligation nothing asks any tree about, and that is the
+  silence the two readings exist for.
+- **Section 14 says what closes a clause's opening** (closes #1056): a
+  comma, a semicolon, a colon or a full stop, or the end of the clause,
+  with the rest of the clause's prose after it. The section imposed no
+  such rule and its reader split a condition on `[,;:]`, so a bullet
+  author ending one any other way got a `LookupError` out of a rule
+  nothing stated.
+- **A qualifier written into `owed by every repository` is refused
+  rather than read past** (closes #1056): the phrase was matched by
+  `str.startswith`, which cannot tell an elaboration behind punctuation
+  from a narrowing inside the opening and answers that every repository
+  owes the file for both. Both spellings are matched from the clause's
+  opening with the terminator as a lookahead, so the same sentence in
+  section 14 decides both.
+- **An enumeration of the continuations admitted after the phrase is the
+  rejected alternative** (closes #1056): it is the shape the conditional
+  spelling's exemption had, and it is a second list to keep in step with
+  the section where punctuation is read off the clause itself. This
+  entry deletes the one that existed. Declining it leaves a residual: a
+  narrowing written behind the punctuation, `owed by every repository.
+  Only where the tree publishes.`, is prose to this reader and answers
+  that every repository owes the file. Section 14 forbids it in words
+  and no command reads it, which is where the enumeration would have
+  bought something.
+- **Both directions of the reading are proved on a planted tree**
+  (closes #1054) (closes #1056): every state a tree can be in against a
+  condition, asked of a glob as well as of a path -- one tracking a file
+  the glob names and carrying no copy, one carrying the copy and
+  tracking no such file, and the two states that are correct. The
+  planted subject sits outside its own glob, which is what leaves the
+  second finding reachable at all and is the bullet below's subject.
+  The refusals are asked of a clause opening with neither spelling, a
+  condition that is not one backticked pathspec, and an opening either
+  spelling narrows, each matched on its own message and each followed by
+  the same clause with the punctuation in place.
+- **`.taplo.toml`'s own row gets the first direction and not the
+  second** (closes #1054): the subject is itself a `*.toml`, so a
+  checkout carrying the copy tracks a file its condition names -- the
+  copy -- `unreached` is false there whatever else that tree holds, and
+  `test_a_repository_carries_no_copy_a_condition_does_not_reach` cannot
+  report the path. What the widening buys that row is the tree tracking
+  a `toml` and short of the copy, which is the direction the condition
+  was written for; the second is stated here as vacuous so that a reader
+  meeting a cell that cannot fail knows it was measured. The other
+  conditional clauses name an observable their subject is not, so both
+  directions stay live for each: on a tree tracking the subject alone
+  `unreached` answers true for `.claude/commands/review.md`,
+  `.github/scripts/check_vendored_vectors.py` and
+  `tests/conventions_test.py`, and false for `.taplo.toml`.
+- **Measured against every unarchived repository before landing**
+  (closes #1054): every tree tracks a `toml` and carries `.taplo.toml`,
+  so the widened condition turns no row red on the day it lands, and a
+  tree tracking a `toml` and short of the copy is a red row from here
+  rather than a finding nobody asks for.
+- **This supersedes part of *Section 14's condition is a path, and a
+  copy is read against it both ways* above** (closes #1054): its
+  `.taplo.toml` bullet leaves that condition as prose, gives `PROSE` as
+  the enumeration around it, and leaves the pathspec open at
+  btclib-org/.github#1054, which is what this entry answers. Its *Every
+  row is proved red on a planted tree* bullet names the refusal of a
+  condition that is neither a path nor a prose one, where the refusals
+  are now the three above. What that entry says about the two
+  directions, about the per-subject conditions and about
+  `.claude/commands/review.md`, stands.
