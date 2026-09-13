@@ -1,0 +1,126 @@
+---
+name: reusable-docs
+
+# The documentation build a repository's docs.yml calls, so the install,
+# the sphinx flags and the check over the built pages are written once.
+# The trigger, the concurrency group and the suffix a release call
+# appends to that group stay in the caller, whose run this job joins.
+#
+# Two inputs, and neither of them is a repository: a build importing a
+# package compiled from a git submodule needs that submodule checked out,
+# and a tree may ask something of its own built pages that the standard
+# asks of nobody else. Everything else takes one answer here: the
+# interpreter is the one .python-version names, which section 10 leaves a
+# gate no choice about, and the timeout bounds a hung job rather than
+# budgeting the work. An input for either would be a copy in disguise
+# (btclib-org/.github#35).
+
+on:
+  workflow_call:
+    inputs:
+      submodules:
+        description: >
+          Whether the checkout initializes the tree's git submodules.
+        type: boolean
+        default: false
+      post-build-script:
+        description: >
+          A script of the calling tree, run with the directory the build
+          wrote as its only argument once that build is green.
+        type: string
+        default: ""
+
+# least privilege for the GITHUB_TOKEN: everything running in a job
+# (actions, dependencies, the package sphinx imports) can read the token,
+# so the workflow default must not be able to write to the repository.
+# The job needs no elevation of its own, sphinx reading the tree and
+# writing nothing back
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    # the name the check context is keyed by, after the calling job's
+    # own: branch protection matches a context by name and not by the
+    # workflow that reported it
+    name: Build the documentation
+    # a draft pull request is work in progress: every push to one would
+    # build the documentation of a tree its author is not asking anyone
+    # to read yet. A closed one spends no runner either, a caller taking
+    # that event only to supersede a run its group is still holding.
+    # github.event is the caller's, which is the event its trigger took
+    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    # far above what the build needs, a submodule compiling included;
+    # what it bounds is a hung job holding a runner
+    timeout-minutes: 20
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment: a
+      # tag, let alone a branch, is a name its owner can move
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the build reads the tree and nothing pushes it back
+          persist-credentials: false
+          # autodoc imports the package it documents, so a tree whose
+          # package is compiled from a vendored source asks for it here
+          submodules: ${{ inputs.submodules }}
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          enable-cache: true
+      # Not --only-group docs: autodoc imports every module it documents,
+      # so the package and its dependencies have to be installed, and
+      # sphinx alone renders a bare heading per module and says nothing
+      # about it. A tree whose pages carry no autodoc directive pays an
+      # install it does not read, which is cheaper than a second spelling
+      # of the build.
+      # -W makes a failed import a failed build and reports every warning
+      # of the run before failing at the end of it, so one broken page
+      # does not hide the next; -n turns an unresolved cross-reference
+      # into a warning for -W to fail on, without which a renamed class
+      # in a :class: role builds green and links nowhere. conf.py's
+      # intersphinx_mapping and nitpick_ignore are what -n is checked
+      # against
+      - name: Build the docs
+        run: >
+          uv run --locked --no-default-groups --group docs
+          sphinx-build -n -W -b html docs/source docs/build/html
+      # a claim about the artifact rather than about the configuration:
+      # no page the build wrote carries an anchor to an id nothing has.
+      # A link myst cannot resolve renders as exactly that anchor, and
+      # the build fails on it on its own for as long as myst warns
+      # unconditionally and conf.py suppresses nothing; this step is what
+      # still answers for the artifact when either of those changes.
+      #
+      # One spelling, because the destination renders verbatim and
+      # section 4's local-link-prefix hook refuses a local destination
+      # that does not begin "./" in the commit that writes it: anchor,
+      # extension and nested path alike then render href="#./" when they
+      # break (btclib-org/.github#20). Not widened to "../", which
+      # reaches the same fallback by design, the RootFileLinks transform
+      # in conf.py declining a target that normalizes above the
+      # repository root; refusing at source is the only place that one is
+      # caught. Not lychee either: links.yml reads the sources, where
+      # "./CONTRIBUTING.md" is a correct path
+      - name: Check the built pages for unresolved links
+        run: |
+          if grep -rn 'href="#\./' docs/build/html --include='*.html'; then
+            echo "::error::the links above resolve to no page (unresolved relative path)"
+            exit 1
+          fi
+      # what a tree asks of its own pages, in the job that already
+      # installed the package and already wrote them: a second job would
+      # pay for the install and the build again to read the same html.
+      # The script is the calling tree's, so its own suite is where its
+      # logic is proven. What the caller passes is a path and it arrives
+      # through the environment, so it is an argument to python rather
+      # than text expanded into this run block, which is where an
+      # expansion would be code. A tree passing no script runs no step
+      - name: Check the built pages against the tree's own script
+        if: inputs.post-build-script != ''
+        env:
+          SCRIPT: ${{ inputs.post-build-script }}
+        run: >
+          uv run --locked --no-default-groups --group docs
+          python "$SCRIPT" docs/build/html
