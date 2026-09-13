@@ -2280,14 +2280,20 @@ without `SeCreateSymbolicLinkPrivilege` gets an `OSError` from
 `Lib/tarfile.py` where it names the exceptions that call may raise. What
 the guard is for is a contributor's own machine and not a runner — a
 runner holding the privilege runs the case either way, so its green cell
-answers for the gate rather than for that machine. The `except` runs
-only where the refusal happened, which is not the machine the floor is
-measured on, so it carries section 8's `pragma: no cover` with the
-inline half that section asks for, and the fuller reason is the
-docstring the case already opens with. Leaving the call bare is the
-rejected alternative, on the ground that no runner has refused it; what
-it costs is a red suite on the one machine that cannot run the case at
-all, naming a privilege where the case is about something else.
+answers for the gate rather than for that machine. The case's `def`
+carries section 8's `pragma: no cover`, with the inline half that
+section asks for and the fuller reason in the comment over that line.
+The `except` is not the site: it and the `pytest.skip` under it are the
+lines that do not run wherever the capability is granted, so an
+exclusion there answers for the machine granting it and for no other —
+where the capability is refused, the skip ends the case where it
+stands, so the assertions below it do not run and the floor that
+machine measures counts them missed. What the exclusion costs is that
+dead code inside the case stops being flagged, weighed against a floor
+the refusing machine could not otherwise reach. Leaving the call bare is
+the rejected alternative, on the ground that no runner has refused it;
+what it costs is a red suite on the one machine that cannot run the case
+at all, naming a privilege where the case is about something else.
 
 ### Integration tests
 
