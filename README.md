@@ -5605,14 +5605,26 @@ beside it, with the same argument as `.vscode/`.
 configuration move between them, and a paragraph that lints in one has to
 lint in the others. Each bullet opens with its subject, the path, and
 then with who owes a copy: `owed by every repository`, or `owed where`
-and the condition. The first is what `tests/verbatim_test.py` of this
-repository asks of every tree, so that one short of a copy is a finding
-rather than a tree the comparison passes over; the second is prose, and
-a tree the condition does not reach is absent and correctly so. A file
-this section keeps out of the list because its subject is its own
-tree's is not compared and is owed all the same, so its own paragraph
-says who owes a copy in these same two spellings. The paths are what
-that test compares:
+and the condition. A condition written as one backticked path and nothing
+else says the tree tracks that path, and is the condition
+`tests/verbatim_test.py` of this repository reads off each tree; a
+condition written any other way is prose, and that test asks no tree
+about it. A file this section keeps out of the list because its subject
+is its own tree's is not compared and is owed all the same, so its own
+paragraph says who owes a copy in these same spellings.
+
+A clause that test reads, it reads both ways: a tree short of a copy it
+is owed is a finding rather than a tree the comparison passes over, and
+so is a copy in a tree whose observable is absent, that copy being one
+the standard gives that tree no clause for. A condition left as prose is
+asked neither. `.taplo.toml`'s is left as prose because what it names is
+a file type and not a path, so no one path is its observable; that test
+enumerates the conditions left that way and refuses one that is neither
+read nor enumerated, so another cannot join them in silence. Whether the
+spelling should reach a pathspec instead, which would leave no condition
+unread, is open and not decided here: btclib-org/.github#1054 raised it.
+
+The paths are what that test compares:
 
 - `.markdownlint.jsonc` — owed by every repository; no rule disabled.
   What it names is a style where markdownlint's default is "consistent",
@@ -5644,7 +5656,7 @@ that test compares:
   range. A range is a line nobody updates, and `COPYRIGHT` states the
   holder without one, so the two would disagree the first January nobody
   remembered.
-- `.claude/commands/review.md` — owed where `REVIEWING.md` is: it is the
+- `.claude/commands/review.md` — owed where `REVIEWING.md`: it is the
   invocation and not a second copy of the standard, and it stays a
   file of its own rather than folding into `CLAUDE.md`, which is read by
   every session including the one that wrote the diff.
@@ -5785,13 +5797,12 @@ writes: it grows with every repository added, and a reader of one tree
 cannot tell from it which entries that tree needs.
 
 `.github/scripts/check_vendored_vectors.py` is per repository by subject, owed
-where the tree vendors test vectors, and deliberately outside the compared list
-above: each copy parses the pin file its own tree keeps, so the bytes differ
-wherever the subjects do, which no comparison by path can read as anything but
-drift. The condition's observable is `.github/workflows/vendored-vectors.yml`,
-which is what runs the script weekly: a tree vendoring nothing keeps no pin
-file for it to parse. `btclib-node` keeps its copy at
-`.github/scripts/check_vendored_pin.py`, a different name and not only
+where `.github/workflows/vendored-vectors.yml`, and deliberately outside the
+compared list above: each copy parses the pin file its own tree keeps, so the
+bytes differ wherever the subjects do, which no comparison by path can read as
+anything but drift. That workflow is what runs the script weekly, and a tree
+vendoring nothing keeps no pin file for it to parse. `btclib-node` keeps its
+copy at `.github/scripts/check_vendored_pin.py`, a different name and not only
 different bytes, and the departure is a decided one: the job is the same job, a
 vendored pin re-checked against upstream on that cadence, and that copy's own
 header says where it departs — it opens no tracking issue on drift, where
@@ -5804,29 +5815,29 @@ and the issue it would have opened never opens — so a fix that is not about on
 tree's entry shape, a `gh` call or a field spelling, is carried to every copy
 in the same campaign, the header being what says which parts those are.
 
-`tests/conventions_test.py` is per repository by subject, owed where the tree
-declares which conventions it tests, and outside the compared list for the same
-reason: each copy reads the declaration its own tree keeps, so its rows are
-that tree's, and so is the `tests/` root it resolves a declared module against
-— `btclib-node` keeps its copy at `tests/unit/conventions_test.py`, a different
-path and not only different bytes. The condition is section 7's own: it asks a
-suite to declare in `tests/README.md` which of its conventions it tests, and
-forces a test of that declaration rather than leaving it chosen, so a tree that
-declares nothing has nothing for this module to read. What the copies hold in
-common is a job rather than a text: read the declaration section 7 asks for and
-assert that every convention it names has a module holding a test for it. The
-header sentence a copy owes is about this module and not about how its tree
-names convention tests: what it reads, and which of its departures are decided
-rather than accidental. This repository's copy reads section 7's list of
-conventions off `README.md` rather than transcribing it — which a sibling
-cannot, the standard being in another repository — and says so. The failure
-mode is why the sentence is owed: a defect in the parsing that shared job needs
-sits in every copy carrying it and turns nothing red anywhere, so a fix that is
-not about one tree's rows or its root is carried to every copy in the same
-campaign, which is what `btclib-org/.github#651` records. A bullet in the
-compared list above is the rejected alternative: no two copies are byte-equal
-and that comparison is by path, so the bullet would report the copies as drift
-on the day it landed and could not reach `btclib-node`'s at all.
+`tests/conventions_test.py` is per repository by subject, owed where
+`tests/README.md`, and outside the compared list for the same reason: each copy
+reads the declaration its own tree keeps, so its rows are that tree's, and so
+is the `tests/` root it resolves a declared module against — `btclib-node`
+keeps its copy at `tests/unit/conventions_test.py`, a different path and not
+only different bytes. That file is where section 7 asks a suite to declare
+which of its conventions it tests, forcing a test of that declaration rather
+than leaving it chosen, so a tree that declares nothing has nothing for this
+module to read. What the copies hold in common is a job rather than a text:
+read the declaration section 7 asks for and assert that every convention it
+names has a module holding a test for it. The header sentence a copy owes is
+about this module and not about how its tree names convention tests: what it
+reads, and which of its departures are decided rather than accidental. This
+repository's copy reads section 7's list of conventions off `README.md` rather
+than transcribing it — which a sibling cannot, the standard being in another
+repository — and says so. The failure mode is why the sentence is owed: a
+defect in the parsing that shared job needs sits in every copy carrying it and
+turns nothing red anywhere, so a fix that is not about one tree's rows or its
+root is carried to every copy in the same campaign, which is what
+`btclib-org/.github#651` records. A bullet in the compared list above is the
+rejected alternative: no two copies are byte-equal and that comparison is by
+path, so the bullet would report the copies as drift on the day it landed and
+could not reach `btclib-node`'s at all.
 
 ## 15. Auditing a repository against this file
 

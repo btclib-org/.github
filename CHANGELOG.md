@@ -8028,3 +8028,75 @@ nothing red follows from the copies disagreeing.
 - **No gate comes with it** (closes #1044): *How to use this file* binds
   a rule entering the standard to what reads it, and this states which
   line the pragma of a rule already here sits on.
+
+### Section 14's condition is a path, and a copy is read against it both ways
+
+- **A condition written as one backticked path says the tree tracks that
+  path, and `tests/verbatim_test.py` reads it** (closes #1048): `owed`
+  answered false for every `owed where` clause, which took the trees a
+  condition names out of
+  `test_a_repository_carries_the_verbatim_files_owed_of_it` and the trees
+  it excludes out of anything at all. It is a question about the tree, so
+  it takes the checkout, and `observable` is what reads the condition off
+  the clause.
+- **A copy in a tree whose observable is absent is a finding beside the
+  copy a tree is short of** (closes #1048):
+  `test_a_repository_carries_no_copy_a_condition_does_not_reach` is that
+  second direction, which a comparison of the copies that exist cannot
+  reach — the standard gives such a tree no clause for what it carries. An
+  evaluator alone answers the first box and leaves this one, which is that
+  issue's own correction.
+- **The per-subject paragraphs and `.claude/commands/review.md` state
+  their condition as the path it is** (closes #1048):
+  `.github/workflows/vendored-vectors.yml`, `tests/README.md` and
+  `REVIEWING.md`. Every tree tracking one of those carries the copy and
+  every tree carrying a copy tracks it, so the reading turns no row red
+  where it lands; why each is the right observable stays in the prose
+  beside it.
+- **`.taplo.toml`'s condition is left as prose, and enumerated rather than
+  passed over** (closes #1048): what it names is a file type and not a
+  path. `PROSE` is that enumeration, and a condition neither read nor
+  named there raises — silence being the defect both issues are about.
+  Whether the spelling should reach a pathspec, which would leave no
+  condition unread, is open at btclib-org/.github#1054, and section 14
+  says so rather than deciding it.
+- **`tests/per_subject_test.py`'s `carried` searches every name a
+  paragraph gives** (closes #1047): the subject's and each departure's,
+  where it searched the subject's alone, so `btclib-node`'s
+  `.github/scripts/check_vendored_pin.py` was a copy the location test
+  could not see and a stray copy under that name was invisible anywhere.
+  `declared` already answered with both.
+- **What that search and the departure test divide is the direction**
+  (closes #1047): the search finds the copies a tree has and
+  `test_a_per_subject_copy_sits_where_section_14_puts_it` asks whether
+  each is where the standard puts it, where
+  `test_a_tree_section_14_sends_elsewhere_keeps_its_copy_there` takes each
+  departure the standard states and asks whether a copy is still at it.
+  The docstring gave the narrow search as a decision and pointed at the
+  second test for what it could not reach.
+- **Every row is proved red on a planted tree** (closes #1047) (closes
+  #1048): a tree against a condition in each state it can be in, the
+  findings and the correct answers alike; a clause opening with neither
+  spelling and a condition that is neither a path nor a prose one, each
+  refused on the message it is matched on; and a search asked for a copy
+  under a departure's name, one a directory deeper, and a name that merely
+  ends with a searched one.
+- **Measured against every unarchived repository before landing** (closes
+  #1047): a copy already astray, or already in a tree the condition does
+  not reach, is a red row on the day this lands rather than a finding
+  filed, and there is none.
+- **This falsifies part of *Section 14 says who owes a per-subject copy,
+  and drops a discharged debt* above** (closes #1048): its bullet has
+  `owed` answering false for both per-subject clauses, no copy demanded of
+  any tree, and reading a condition as a second grammar over every
+  conditional clause of the section. Both are read now, `.taplo.toml`'s is
+  not, and each paragraph states its condition as its observable rather
+  than in words. What that entry says about the departure, about
+  `declared` and `QUOTED_NOT_A_COPY`, and about the discharged debt,
+  stands.
+- **And part of *Who owes a verbatim copy is section 14's to say, and the
+  suite asks* above** (closes #1048): its first bullet leaves `owed where`
+  and its condition to the reader. A condition stated as a path is read
+  off the tree, and `.taplo.toml`'s is what is left there. What that entry
+  says about the two openings, about `subjects` answering with a bullet's
+  clause, and about the shared half ending at one newline, stands.
