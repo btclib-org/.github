@@ -318,18 +318,7 @@ def names() -> list[str]:
     )
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
-    # sdist-rebuild: the row landed ahead of the trees it names
-    (
-        523,
-        "test_a_tree_carries_the_sentinels_its_entries_give_it",
-        (
-            "btclib",
-            "btclib-node",
-            "btclib-secp256k1",
-        ),
-    ),
-)
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what
