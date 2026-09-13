@@ -2482,73 +2482,53 @@ against that, and what lengthens it without adding to it is deleted.
 ### What every workflow does
 
 - **Every action is pinned to a commit SHA**, with the tag in a trailing
-  comment. A tag is a name its owner can move, and these run in a job
-  that can read the workflow token. A call to a reusable workflow of
-  `btclib-org/.github` names `@main` instead: that repository has no tag
-  for Dependabot to move a SHA to, its `main` is held by section 11's
-  rulesets as the caller's is, and a fix reaches every tree in one
-  landing. zizmor is told so, `btclib-org/.github/*: ref-pin` under
-  `unpinned-uses`.
-- **`permissions: contents: read` at the workflow level**, and one
-  elevation per job where a job needs more: the job that writes a release
-  holds no OIDC token, and the job that signs writes no release.
-- **`timeout-minutes` on every job**, set far above what the work needs:
-  what it bounds is a hung job holding a runner.
+  comment. A tag is a name its owner can move, and these run in a job that can
+  read the workflow token. A call to a reusable workflow of `btclib-org/.github`
+  names `@main` instead: that repository has no tag for Dependabot to move a SHA
+  to, its `main` is held by section 11's rulesets as the caller's is, and a fix
+  reaches every tree in one landing. zizmor is told so,
+  `btclib-org/.github/*: ref-pin` under `unpinned-uses`.
+- **`permissions: contents: read` at the workflow level**, and one elevation per
+  job where a job needs more: the job that writes a release holds no OIDC token,
+  and the job that signs writes no release.
+- **`timeout-minutes` on every job**, set far above what the work needs: what it
+  bounds is a hung job holding a runner.
 - **`checkout` passes `persist-credentials: false`.**
 - **Concurrency groups are named literally** —
   `group: test-${{ github.head_ref || github.ref }}` — never through
-  `github.workflow`, which in a called workflow is the *caller's* name,
-  so two called workflows would share a group and cancel each other.
-  `head_ref` falls back to `ref` so a push run gets its own group, and a
-  pull request always groups by its own branch.
-- **Triggers**: `push: branches: [main]` and `pull_request`. A push
-  trigger on every branch would run the workflow twice for an open pull
-  request, into two groups that do not cancel each other; `main` keeps
-  its own trigger because a merge creates a commit the pull request never
-  tested, and because a cache is readable only from the branch that wrote
-  it and from the default branch.
-- **`pull_request` types** are `[opened, reopened, synchronize,
-  ready_for_review, closed]`. `ready_for_review` because a readied pull
-  request would otherwise wait for its next push; `closed` so the merge
-  lands in the pull request's own concurrency group and cancels the run
-  still holding it. Draft and closed pull requests decline the work in an
-  `if`.
-- **A workflow whose concurrency group sets `cancel-in-progress: false`
-  omits `closed`, and says beside its trigger that it does.** The type
-  is there for the cancellation, so where nothing is cancelled a closed
-  event supersedes no run and starts one: the `if` above then declines
-  that run in every job, which is a workflow scheduled in order to do
-  nothing. Such a workflow's `if` guards the draft alone, the event it
-  would otherwise decline being one it no longer receives. The rejected
-  alternative keeps the list flat and leaves the `if` to absorb the
-  event, which reads the same in every tree and costs a run per close,
-  with the reason the type is inert stated nowhere the trigger block
-  shows.
-- **`paths-ignore` only on `push`.** The same list on `pull_request`
-  would produce no run at all for a prose-only diff, and a required check
-  that produces no run blocks the merge instead of passing it.
-- **`workflow_dispatch` on everything**, including the gates: a branch
-  whose pull request is not open yet has no other way to ask.
+  `github.workflow`, which in a called workflow is the *caller's* name, so two
+  called workflows would share a group and cancel each other. `head_ref` falls
+  back to `ref` so a push run gets its own group.
+- **Triggers**: `push: branches: [main]` and `pull_request`. A push trigger on
+  every branch would run the workflow twice for an open pull request, in two
+  groups that do not cancel each other; `main` keeps its own trigger because a
+  merge creates a commit the pull request never tested, and because a cache is
+  readable only from the branch that wrote it and from the default branch.
+- **`pull_request` types** are
+  `[opened, reopened, synchronize, ready_for_review, closed]`.
+  `ready_for_review` because a readied pull request would otherwise wait for its
+  next push; `closed` so the merge lands in the pull request's own concurrency
+  group and cancels the run still holding it. Draft and closed pull requests
+  decline the work in an `if`.
+- **A workflow whose concurrency group sets `cancel-in-progress: false` omits
+  `closed`, and says beside its trigger that it does.** There a closed event
+  cancels nothing and only starts a run every job declines, so such a workflow's
+  `if` guards the draft alone.
+- **`paths-ignore` only on `push`.** On `pull_request` it would produce no run
+  for a prose-only diff, and a required check that produces no run blocks the
+  merge instead of passing it.
+- **`workflow_dispatch` on everything**, including the gates: a branch whose
+  pull request is not open yet has no other way to ask.
 - **`workflow_call`** where the release workflow reuses the gate.
 - Every step is a `uv` command with `--locked`.
 - **A step that waits for something outside the run is a script under
-  `.github/scripts` with a test, not a loop in a `run:` block.** What
-  such a step exists for is the verdict it reaches when the wait runs
-  out, and no trigger produces that verdict: what is waited on is
-  somebody else's work, so neither a release nor a rehearsal can arrange
-  for it to be late. A trigger added to reach the loop reaches its first
-  attempt instead, which is the branch a wait takes when there is
-  nothing to wait for. The lint gate reads the loop and passes it,
-  `actionlint` running `shellcheck` over the `run:` block and neither of
-  them reading it against the job header — so what stays unread until
-  the day the wait is needed is the budget, and a loop able to outlast
-  its own `timeout-minutes` is killed inside itself, the run carrying
-  the runner's message where the step was written to name the page to go
-  and read (btclib-org/btclib#1165). The wait therefore counts against a
-  deadline rather than against attempts, which states the budget once
-  instead of leaving it a product to be multiplied out, and its test
-  substitutes the transport and the clock to drive the loop past that
-  deadline.
+  `.github/scripts` with a test, not a loop in a `run:` block.** The step exists
+  for the verdict it reaches when the wait runs out, and no trigger can make
+  somebody else's work late, so only a test reaches that branch; a loop
+  outlasting its own `timeout-minutes` passes the lint gate and is killed with
+  the runner's message instead of its own (btclib-org/btclib#1165). The wait
+  counts against a deadline rather than against attempts, and its test
+  substitutes the transport and the clock to drive the loop past that deadline.
 
 ### The set, and its cadence
 
@@ -2562,105 +2542,66 @@ A gate runs on a pull request and on a push:
 | `release` | a tag, calling the others before it publishes |
 
 **One image and one interpreter.** `ubuntu-latest` and the version in
-`.python-version`, and nothing a gate runs varies further. The reason is
-one number, the ceiling the plan puts on an organization's concurrent
-jobs: at that ceiling a pull request's wall clock is the wait for a slot
-rather than the work, so a second image before a review buys a rarer
-answer at the price of every review. Everything else answers weekly and
-before a release instead — a regression sitting on `main` for at most a
-week, against every review paying for it.
+`.python-version`, and nothing a gate runs varies further. The plan puts a
+ceiling on an organization's concurrent jobs, and at that ceiling a pull
+request's wall clock is the wait for a slot rather than the work, so a second
+image before a review buys a rarer answer at the price of every review.
+Everything else answers weekly and before a release. The ceiling's figure lives
+in `REPOSITORY.md`'s *Plan-gated settings*, beside the command that re-derives
+it: a workflow header or `CONTRIBUTING.md` gives the reasoning with the ceiling
+unnumbered and points there.
 
-**The ceiling's figure has one home per tree, and it is not a workflow
-header.** The number is the plan's, so `REPOSITORY.md`'s *Plan-gated
-settings* is where it lives, beside the command that re-derives it and
-GitHub's own table. Prose that needs the reasoning — a workflow header,
-`CONTRIBUTING.md` — states it as this section does, ceiling unnumbered,
-and points there for the figure. A date beside the number is not the
-cure: the date says when it was true and nothing says it still is,
-where the command answers for the day it is run. This section names no
-number for the same reason.
+**An interpreter axis is a gate cell rather than a sentinel row exactly where
+the extra cell runs in parallel with the cells already gating the review, and
+where it is the pinned interpreter run a second time rather than a version the
+package newly claims to support.** `btclib-node`'s `test.yml` carries `3.14t` on
+this ground, in a `free-threaded` job beside the `coverage` job at `3.14`. Where
+either condition fails, the row belongs in the weekly calendar.
 
-**An interpreter axis is a gate cell rather than a sentinel row exactly
-where the extra cell runs in parallel with the cells already gating the
-review, so the ceiling absorbs it without lengthening the wait, and
-where what it claims is the same pinned interpreter run a second time
-rather than a version the package newly claims to support.** `btclib-node`'s
-`test.yml` carries `3.14t` on this ground, in a `free-threaded` job of
-its own beside the `coverage` job at `3.14`: the two run as parallel
-jobs rather than in sequence, and `3.14t` is `.python-version`'s own
-interpreter with the GIL off rather than a second interpreter the
-package claims to support. That job reports rather than gates,
-`test-passed` there leaving it out of `needs:` for the reason
-btclib-org/btclib-node#746 records; what the criterion weighs is the
-slot a cell occupies before a review, which it costs either way. Where
-either condition fails — the cells run in sequence, or the second cell
-is a version the package does not already claim — the row belongs in
-the weekly calendar instead, on the same trade that keeps a platform
-row there.
+**What runs weekly does not also gate**, so nothing is asked twice at the price
+a gate charges. The converse does not hold: a sentinel runs its matrix whole,
+the cells a gate covers included, so that its shape reads without re-deriving a
+hole from the gate. A sentinel cell that runs the suite passes `--no-cov`:
+section 8's floor is a claim about one interpreter on one image, and on the
+platform a sentinel watches the number is legitimately not 100.
 
-**What runs weekly does not also gate**, so nothing is asked twice at
-the price a gate charges. The converse does not hold: a sentinel runs
-its matrix whole, the cells a gate already covered included, because a
-matrix with a hole in it is one nobody can read the shape of, and the
-hole would be re-derived from the gate every time somebody asked what
-ran. A sentinel cell that runs the suite passes `--no-cov` for the same
-reason read from the other side: the floor is section 8's claim about
-one interpreter on one image, and a sentinel exists to ask whether the
-platform changes the answer — so the day it finds the `sys.platform`
-branch it watches for, the coverage number on that image is
-legitimately not 100, and a cell that gated the floor would go red
-naming the floor where the finding is the platform's.
+**A sentinel's own work is not a pull request's business either, and *not
+required* is not the free half of that**: a pull request waits on every check
+listed, gating or not. The deterministic half is the pull request's: an artifact
+committed to the tree and replayed by the suite costs milliseconds, where the
+sentinel's question — what is in the domain nobody has described yet — is one an
+hour once a week answers better than a minute on every push.
 
-**A sentinel's own work is not a pull request's business either, and
-*not required* is not the free half of that.** The rule above reads as
-though the cost were the gate's, so a job that runs on a pull request
-while gating nothing looks to have escaped it: it has not, because what
-a pull request charges is the wait, and a reader waits on the list
-rather than on the subset of it that gates. `fuzz` is where the trade is
-starkest: the exploration is the whole of the work and its length is
-what makes it worth anything, so a trigger firing it on a pull request
-charges that pull request the wait of a sentinel's full run for a
-verdict no merge waits on.
-
-**What decides is the clock, not the trigger** — provided the clock
-stays the thing the expensive work answers to, which is what a filter
-preserves and an unfiltered trigger destroys. The clock is how long one
-run takes: `links.yml` makes one pass over the tree's links and carries
-a `pull_request` trigger on its own configuration, where a mutation
-session runs its test command once per mutant. So a `pull_request`
-trigger on a calendar workflow is not forbidden. It is `paths`-filtered
-to the workflow's own configuration and to what that configuration
-reads, and what then runs is the whole sweep rather than some cheaper
-check of it: the filter bounds how *often* a pull request pays for the
-sweep, not what the sweep is. How rare the paths are is that multiplier
-rather than the thing multiplied, so counting the branches a filter
-selects settles nothing on its own: what a narrower list buys back is
-the wait one run adds to the checks a pull request already has, which
-the durations answer and the count does not.
+**What decides is the clock, not the trigger.** The clock is how long one run
+takes: `links.yml` makes one pass over the tree's links, where a mutation
+session runs its test command once per mutant. So a calendar workflow may carry
+a `pull_request` trigger `paths`-filtered to its own configuration and to what
+that configuration reads, and what then runs is the whole sweep rather than a
+cheaper check of it. What decides is how much one run adds to the wait on the
+checks a pull request already has — seconds keep the trigger, minutes or hours
+leave the calendar the whole of it — which the durations answer and a count of
+the branches a filter selects does not:
 
 ```shell
 gh run list --repo <owner>/<repo> --workflow <name>.yml \
   --json createdAt,updatedAt,conclusion
 ```
 
-Run it for the gate's workflow too, and count only the runs that
-completed: `skipped` and `cancelled` did none of the work, and
-averaging them in reports a fraction of the real cost. A sentinel too
-new to have runs to read is where the pair has no answer yet, and
-`workflow_dispatch` below is what gets it one.
+Run it for the gate's workflow too, counting only completed runs: `skipped` and
+`cancelled` did none of the work. This repository's `alignment.yml` is the
+seconds case, its list naming `README.md` so that nearly every branch selects
+it. `workflow_call` and `push: branches: [main]` are outside the question. An
+unfiltered `pull_request` needs a reason of its own, stated in the header, and
+the organization has two such reasons: `integration-bitcoind`, whose regtest job
+is a required check and where a required check that never runs blocks a merge,
+and `codeql`, whose result the OpenSSF Scorecard reads off a merged pull
+request's own commits.
 
-**A rewrite owes the same dispatch, later rather than at the workflow's
-first day.** A schedule-only workflow whose steps change keeps the
-previous file's verdict as its newest run until its cron comes back
-round, and a stale green announces nothing the way `no status` does. A
-landing that changes such a workflow's steps dispatches it from `main`
-in the same motion, and the badge is read after that run; a landing
-touching only a comment owes nothing, a run measuring the steps rather
-than the prose beside them. What decides staleness is ancestry and not
-the trigger that produced the newest run — a dispatch fired for an
-unrelated reason answers exactly as a scheduled run would — so the
-question is whether that run's `head_sha` descends from the file's own
-last edit rather than from the commit that added it:
+**A rewrite owes a dispatch.** A schedule-only workflow keeps the previous
+file's verdict as its newest run until its cron comes round, so a landing that
+changes its steps dispatches it from `main` and reads the badge after that run;
+a comment-only change owes nothing. Whatever triggered the newest run, it is
+stale unless its `head_sha` descends from the file's last edit:
 
 ```shell
 gh api repos/<owner>/<repo>/actions/workflows/<name>.yml/runs \
@@ -2668,52 +2609,12 @@ gh api repos/<owner>/<repo>/actions/workflows/<name>.yml/runs \
 git log -1 --format=%H -- .github/workflows/<name>.yml
 ```
 
-the second an ancestor of the first, or the run is stale. This is a
-person's question rather than a gate's: it costs one call to the API
-per scheduled workflow of every tree, asked whether or not anything
-relevant changed, against a suite that already pays for reaching the
-forge across the organization — the same trade *What decides is the
-clock, not the trigger* above weighs for a workflow's own trigger,
-carried here to what asking the question costs rather than to what the
-workflow itself does.
+This is a person's check rather than a gate's, which would cost an API call per
+scheduled workflow of every tree on every run. `workflow_dispatch` is also what
+runs a sentinel too new to have runs, or by hand before a release.
 
-What the pair answers is
-how much the sweep *adds* to the wait rather than which check is
-longest — a sweep that outlasts the gate adds nothing to a pull request
-some slower check is still holding. Where the addition is seconds, a
-filter selecting every branch costs a pull request seconds and
-narrowing it recovers seconds; where one run is minutes or hours, the
-same filter preserves no clock and the paths are wrong. This
-repository's own `alignment.yml` is the seconds case — its list names
-`README.md`, which is this tree's product, so nearly every branch here
-selects it, and what a selected branch waits for it is short enough
-that the alternative on offer, waiting for Saturday, is the worse
-trade.
-Where even a filtered sweep is too much to hang off a pull request, as
-an hours-long session is, the calendar is the whole of it. Two triggers
-are outside the question entirely — `workflow_call`, where the release
-workflow reuses a sentinel as a gate, which this section asks for
-elsewhere, and `push: branches: [main]`, where a merge commit is a
-census no pull request took. An unfiltered `pull_request` needs a reason
-of its own, stated in the header, and the organization has two such
-reasons: `integration-bitcoind`, whose regtest job is a required check
-and where a required check that never runs blocks a merge, and `codeql`,
-whose result the OpenSSF Scorecard reads off a merged pull request's own
-commits.
-
-The half a pull request does owe is the deterministic one: an artifact
-committed to the tree and replayed by the suite costs milliseconds and
-no container, where the sentinel's question — what is in the domain
-nobody has described yet — is one an hour once a week answers better
-than ten minutes on every push. That is also why shortening the arm is
-not the answer, and the alternative is named rather than left to be
-guessed at: a minute of fresh exploration per pull request is still the
-sentinel's work, done where it is worth least and waited on by somebody.
-`workflow_dispatch` is what runs a sentinel by hand before a release
-rather than waiting for its day.
-
-Two tables make the calendar, and they are the calendar — the workflow
-owns a day and an hour, the repository owns the minute:
+Two tables make the calendar, and they are the calendar — the workflow owns a
+day and an hour, the repository owns the minute:
 
 | workflow | day | hour |
 | --- | --- | --- |
@@ -2751,176 +2652,98 @@ owns a day and an hour, the repository owns the minute:
 | `bbt` | 32 |
 | `btclib-org.github.io` | 36 |
 
-**The rows are in the order of what they ask about**, family by family:
-the data a tree ships and did not write, the depth its suite is tested
-to, what it does against software it does not ship, what it depends on
-and what it publishes, which test is the authority for each arm of its
-code, the platforms, its own health, and its security. A new sentinel
-takes the slot its family already holds rather than the end of the
-table, and `scorecard` is why that is a rule rather than a tidiness:
-section 2 puts the Scorecard badge at the head of the OpenSSF line
-because `scorecard` is the last row, so a sentinel appended past it
-takes that reason away. The table's order is that order too: the day
-and the hour place the row among the families as well as fixing when
-it runs. So a slot standing free between two rows of another family
-does not seat a row beside its own, and where the band offers none
-that does, it grows downward.
+**The rows are in the order of what they ask about**, family by family: the data
+a tree ships and did not write, the depth its suite is tested to, what it does
+against software it does not ship, what it depends on and what it publishes,
+which test is the authority for each arm of its code, the platforms, its own
+health, and its security. A new sentinel takes the slot its family already holds
+rather than the end of the table: section 2 puts the Scorecard badge at the head
+of the OpenSSF line because `scorecard` is the last row, so a sentinel appended
+past it takes that reason away. The day and the hour place a row among the
+families, so a slot free between two rows of another family does not seat it,
+and where the band offers none, the band grows downward.
 
-**The week is the whole of the grid's period**, so every row is a weekly
-run, and a `cron:` repeating on any other cadence is one the calendar has
-no way to name. A workflow that would rather run monthly runs weekly
-instead: what the rarer schedule buys is a few runs nobody was waiting
-for, against an instant two tables state and a test checks.
+**The week is the whole of the grid's period**: every row is weekly, and a
+workflow that would rather run monthly runs weekly instead.
 
-**The weekday is the same in every repository**, so a failure
-notification names the workflow by the day it arrived, and one calendar
-is one thing to remember rather than one per tree. The minute is the
-repository's because GitHub queues same-minute schedules across every
-repository that asked for one, and a long enough queue drops a run
-outright; minute `:00` is in no row for the same reason, being the
-minute everybody else's cron picks.
+**The weekday is the same in every repository**, so a failure notification names
+the workflow by its day. The minute is the repository's because GitHub queues
+same-minute schedules across repositories and a long enough queue drops a run;
+`:00` is in no row, being the minute everybody else's cron picks.
 
-**The hour is chosen against this organization's own load, not
-GitHub's.** The queue the minute answers is the one GitHub documents,
-and GitHub documents it at the start of an hour: the remedy its note on
-`schedule` gives against the delay and the drop is a minute — "schedule
-your workflow to run at a different time of the hour" — and it names no
-hour of the day at all. An hour picked to miss a published peak is
-therefore picked against nothing. What an hour does decide is what the
-run competes with here: a row starts its workflow in every tree that has
-it, each running its matrix whole, so the rows sit in the hours before
-the working day, where the ceiling above is not being spent on a pull
-request somebody is waiting for and a failure is waiting to be read
-rather than arriving in the middle of one.
+**The hour is chosen against this organization's own load, not GitHub's**, whose
+documented remedy for its queue is the minute and names no hour. A row starts
+its workflow in every tree that has it, so the rows sit before the working day,
+when the ceiling is not being spent on a pull request somebody waits for.
 
-**The hour is UTC, and the band grows downward.** A `cron:` here names
-no `timezone:`, which is what leaves it UTC, and a fixed UTC hour falls
-later in the morning here for as long as the clocks are forward. The
-band's late end is what reaches the working day first, so the hour the
-band gains is the one below its earliest rather than the one above its
-latest. **A `timezone:` beside a `cron:` fails
-`tests/grid_test.py` outright**, rather than being converted before the
-calendar is compared, so a schedule cannot leave UTC by declaring one.
+**The hour is UTC, and the band grows downward.** A `cron:` here names no
+`timezone:`; a UTC hour falls later in the morning while the clocks are forward,
+and the band's late end reaches the working day first, so the band gains the
+hour below its earliest. **A `timezone:` beside a `cron:` fails
+`tests/grid_test.py` outright**, rather than being converted.
 
-A day is a slot rather than a census: it says when that workflow runs
-where a repository has it, not that every repository does, and *Which
-trees carry which sentinel* below is which repositories those are.
+A day is a slot rather than a census: *Which trees carry which sentinel* below
+is which repositories run it. Dependabot is in neither table and runs Thursday,
+the day `deps-latest` reports on the upgrade before the pull request arrives,
+with its own minute in `dependabot.yml`.
 
-Dependabot is in neither table and runs Thursday, that being the day
-`deps-latest` reports on the upgrade before the pull request arrives —
-it states its own schedule in `dependabot.yml`, in a different shape,
-and picks its own minute.
+`tests/grid_test.py` reads both tables and every `cron:` of every repository, in
+both directions: a schedule no row names fails there, and so does a row nothing
+in the organization answers to. Section 15 has the commands a human runs
+instead.
 
-`tests/grid_test.py` of this repository reads both tables and every
-`cron:` of every repository, in both directions: a schedule no row names
-fails there, and so does a row nothing in the organization answers to,
-which is what keeps a row here from being a claim nobody checks. The
-commands a human runs instead are in section 15.
+`deps-latest` is the sentinel that makes a Dependabot pull request a diff whose
+result is already known: it upgrades everything the resolver touches, runs the
+suite, the lint gate and the packaging checks, and commits nothing.
+`deps-oldest` is its mirror, verifying the claim a floor makes to whoever
+installs: `uv lock --resolution lowest-direct` where `deps-latest` runs
+`uv lock --upgrade`, in one cell on the oldest interpreter holding
+`requires-python` and the dependency specifiers together. Not `lowest`, which
+takes transitive dependencies to their minima too and resolves environments that
+do not install; and not a step of `release.yml`, which would reach only the
+trees that publish and put an old drift's red on a release. What it finds is an
+issue against the floor.
 
-`deps-latest` is the sentinel that makes a Dependabot pull request a diff
-whose result is already known: it upgrades everything the resolver
-touches, runs the suite, the lint gate and the packaging checks, and
-commits nothing.
+`links` runs lychee with `--include-fragments`, so a link into a heading is
+checked as an anchor. The forge serves a page whose fragment resolves to nothing
+rather than a 404, so a renamed heading breaks the links into it with nothing
+red in its own tree: the run that notices is the linking tree's, and
+`tests/links_test.py` asks every tree's lychee step for the flag.
+**A `github.com/<owner>/<repo>#heading` link is unchecked by this flag the
+moment the step holds a token, which every `links.yml` does**: lychee's GitHub
+fallback answers it from the repositories API with `200`
+(btclib-org/.github#630), while `blob/main/<path>#heading` stays checked. The
+token stays, an unauthenticated runner being rate limited hard enough to look
+like rot, so the anchors of this file's headings that every `CONTRIBUTING.md`,
+`SECURITY.md` and `CODE_OF_CONDUCT.md` cites are asked offline:
+`tests/links_test.py` reads them against every tree's tracked markdown.
 
-`deps-oldest` is its mirror, and what it verifies is the claim a floor
-makes to whoever installs: `uv lock --resolution lowest-direct` where
-`deps-latest` runs `uv lock --upgrade`, on the oldest interpreter alone.
-`lowest-direct` and not `lowest`, which takes the transitive
-dependencies to their minima as well and resolves environments that do
-not install, a red saying nothing about the tree. One cell, because a
-floor is two claims — `requires-python` and the dependency specifiers —
-and the cell holding both at once is what verifies them together, the
-rest of the matrix being `deps-latest`'s and `test`'s. What it finds is
-an issue against the floor it found, a floor raised because it was wrong
-being the point of the run.
+**A sentinel's row arrives with the workflow, and one pull request can do both
+only where the first tree is this one**, which then takes the row in the pull
+request giving it the workflow. Where the first tree is another repository the
+row lands first, so that tree's workflow comment cites a row that exists, and
+the debt issue its paragraph of *Which trees carry which sentinel* names carries
+it: `test_every_row_of_the_calendar_names_something_that_exists` asks GitHub
+whether that issue is open, so the exemption expires when it closes. An adoption
+pull request names the tree owing the workflow and the issue carrying the debt;
+a row missing either is refused, that direction of the test being the only check
+on a row for a workflow nobody wrote.
 
-Verifying at release time instead — a `lowest-direct` step in
-`release.yml` — is the rejected alternative. It reaches only the trees
-that publish, where a tree that releases nothing declares floors too,
-and it puts the red at the moment a release is being cut, over a drift
-that happened months earlier and has nothing to do with the release.
-
-`links` runs lychee with `--include-fragments`, so a link into a
-heading is checked as an anchor and not only as a page. A tree cites
-another tree's headings by anchor — this file's sections most of all,
-which the `CONTRIBUTING.md` of every repository links into — and the
-forge serves a page whose fragment resolves to nothing rather than
-answering 404, so a heading renamed here breaks those links with
-nothing red in the tree that renamed it. The run that would notice is
-therefore the linking tree's, which is why the flag belongs in every
-`links.yml` and not in this repository's alone; `tests/links_test.py`
-asks each tree's lychee step for it. The rejected alternative has a
-tree check only the anchors of its own headings, which measures the
-file a rename lands in and never the links pointing at it.
-
-**A `github.com/<owner>/<repo>#heading` link is unchecked by this flag
-the moment the step holds a token, which every `links.yml` does.**
-lychee's GitHub fallback answers a failed fragment check for that shape
-from the repositories API — the repository exists, so the answer is
-`200` — rather than from the page itself (btclib-org/.github#630); the
-`blob/main/<path>#heading` shape stays checked, its path failing that
-same fallback as an invalid GitHub URL rather than benefiting from it.
-The token stays regardless: `links.yml`'s own reason for holding one at
-all is github.com links alone, "where an unauthenticated runner is rate
-limited hard enough to look like rot", which is the worse failure of
-the two. What the flag
-and the token together cannot check is exactly the anchors this section
-exists for — a tree citing this file's own headings, the shape every
-`CONTRIBUTING.md`, `SECURITY.md` and `CODE_OF_CONDUCT.md` uses — so
-those are asked offline instead: `tests/links_test.py` reads this file's
-own headings and every tree's tracked markdown, rather than asking a
-run this flag cannot answer for them.
-
-**A sentinel's row arrives with the workflow, and one pull request can
-do both only where the first tree is this one.** `tests/grid_test.py`
-reads the calendar against the trees in both directions, so a row naming
-a workflow nothing in the organization schedules fails there exactly as
-a `cron:` no row names does. A sentinel whose first tree is this
-repository takes its row in the pull request that gives it the
-workflow — one repository, one landing, neither test red. A sentinel
-whose first tree is another repository cannot: the row is this tree's
-`README.md` and the schedule is that tree's workflow, always two pull
-requests, and one of them lands first. The order is the row first — the
-adoption is this file's own change, and the receiving tree's workflow
-comment then cites a row that exists from the moment it lands — and what
-carries the row in between is the debt issue its paragraph of *Which
-trees carry which sentinel* below names. That reference is what
-`test_every_row_of_the_calendar_names_something_that_exists` reads,
-asking GitHub whether the issue is open, so the exemption expires when
-the issue closes rather than when a reader thinks to look.
-The other order keeps that test green by turning
-`test_every_cron_is_the_instant_the_calendar_names` red instead, and
-asks a tree to schedule against a calendar that does not yet name it.
-What stays refused is a row written the day the rule is, which reads as
-the calendar being a plan rather than a description: an adoption pull
-request names the tree that owes the workflow and the issue that
-carries the debt, where a plan names nobody — and that direction of the
-test is the only thing anywhere that catches a row for a workflow
-nobody wrote, so spending it on a rollout with no debtor leaves it
-catching nothing.
-
-**A row that moves is red until the last tree follows it.** The row is
-this file's and each `cron:` is its own tree's, so a slot changed here
-and a schedule changed there are separate landings, and in between
-`test_every_cron_is_the_instant_the_calendar_names` names every tree
-still on the old instant. That list is the port's work rather than a
-defect of the trees on it, and it is bounded by the issue carrying the
-ports — a reader's check, where the debt issue an adoption names is one
-the run reads.
+**A row that moves is red until the last tree follows it**:
+`test_every_cron_is_the_instant_the_calendar_names` names every tree still on
+the old instant, which is the port's work, bounded by the issue carrying the
+ports.
 
 ### Which trees carry which sentinel
 
-Section 14 leaves *which optional workflows exist* to each repository,
-and these are not left there: what a tree owes is decided once and
-ported, a repository deciding for itself whether its own parser is
-fuzzed being a repository deciding what the organization's exposure is.
+Section 14 leaves *which optional workflows exist* to each repository, and these
+are not left there: what a tree owes is decided once and ported.
 
-This is the record: one entry per calendar row, naming the trees that
-carry that sentinel, in the order the two tables above give the rows and
-the repositories. A tree an entry names runs the workflow and shows its
-badge, section 2's row reading its sentinels from here rather than
-stating a rule of its own; a tree an entry does not name is asked
-nothing by that row.
+This is the record: one entry per calendar row, naming the trees that carry that
+sentinel, in the order the two tables above give the rows and the repositories.
+A tree an entry names runs the workflow and shows its badge, section 2's row
+reading its sentinels from here; a tree an entry does not name is asked nothing
+by that row.
 
 - `vendored-vectors` — `btclib`, `btclib-secp256k1`,
   `btclib-benchmarks`, `btclib-node`;
@@ -2954,413 +2777,213 @@ nothing by that row.
 - `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-node`.
 
-**An entry is what was decided, not what a tree happens to hold**,
-which is what separates it from the tier table of section 2: a tier is
-read off the tree by the two files that section names, where carrying a
-sentinel is a decision somebody took. So a tree short of what its entry
-names is a gap in that tree and not a correction owed here, and a tree
-that carries what no entry gives it is the same finding read from the
-other side — a workflow whose row does not name the tree, and a badge
-with no row behind it. `tests/grid_test.py` reads the workflow half of
-both against every tree, a red cell there bounded by the issue a
-`BACKLOG` row of `tests/__init__.py` names.
+**An entry is what was decided, not what a tree happens to hold**, where section
+2's tier is read off the tree. A tree short of what its entry names is a gap in
+that tree and not a correction owed here, and a tree carrying a sentinel no
+entry gives it is the same finding from the other side. `tests/grid_test.py`
+reads the workflow half of both against every tree, a red cell there bounded by
+the issue a `BACKLOG` row of `tests/__init__.py` names.
 
-Where a property of the tree decides membership it is stated below, so
-that the answer for a new repository is read off the tree rather than
-argued; where none does, the entry above is the whole of it. A tree that
-owes a sentinel it does not carry is a debt with an issue behind it, and
-its entry gains the tree when the workflow and the badge land together.
+Where a property of the tree decides membership it is stated below; where none
+does, the entry is the whole of it. A tree owing a sentinel it does not carry is
+a debt with an issue behind it, and its entry gains the tree when the workflow
+and the badge land together.
 
-- **`mutation` follows a suite over code the tree ships.** A coverage
-  floor at 100 says every line and branch ran and says nothing about
-  whether any assertion would have noticed the line being wrong — a
-  module imported and never asserted about reaches 100% of itself — so
-  the sentinel is worth most exactly where the floor is highest and
-  coverage has stopped saying anything new. Publishing is the wrong
-  property to key it on: `btclib-benchmarks` publishes nothing, holds a
-  suite and holds `fail_under = 100.0`, which is the tree where the
-  measurement has the most to say rather than the least. What owes it
-  nothing owes it for one reason rather than several: a mutant needs
-  code of the tree's own to change. `bbt` holds no suite at all, its material
-  being course notebooks and scripts, and gains the sentinel the day it
-  gains a suite over that material, which is btclib-org/.github#301's
-  question. `.github`'s suite is over the other repositories rather than
-  over anything this tree ships, so a mutant here would land in the
-  measuring instrument and the number would be the suite reporting on
-  itself.
-- **`scorecard` asks a repository that is public and is not a fork**,
-  and that is the bar rather than the key: clearing it leaves a tree
-  able to run the sentinel, and the entry above is what says whether it
-  does. Public is what the OpenSSF Scorecard reads at all, and
-  `ossf/scorecard-action`'s own README says running it on a fork is not
-  supported — so `gh api repos/<org>/<repo> --jq .fork` is the second
-  half of the bar, and no repository of the organization answers
-  `true` to it: that half is a rule with no instance, kept for the tree
-  that arrives as a fork rather than describing one that is here. A tree
-  the entry leaves out gives up the alerts the run files as well as the
-  score, `security-events: write` below being that half; the badge is
-  what the row is kept for, and a reading nobody displays is not worth
-  the run. What the sentinel buys is an opinion of the tree's
-  supply-chain posture formed outside the organization: this file is a
-  standard the organization holds itself to and every command in section
-  15 asks a question somebody here chose, where a score computed by a
-  third party is the one reading that can find what nobody thought to
-  ask for. **A check scoring below
-  its maximum is an issue against what it found**, never a sentence in
-  section 14 saying why this organization scores it that way — it
-  aligns by adopting the practice rather than by explaining the score,
-  and a derogation would make the outside opinion answerable to the
-  thing it measures. What that gives up is the case where a check is
-  simply wrong about this organization, which then costs an issue closed
-  on the measurement rather than a paragraph nobody revisits.
+- **`mutation` follows a suite over code the tree ships.** A coverage floor at
+  100 says every line and branch ran, not that an assertion would notice it
+  being wrong, so the sentinel is worth most where the floor is highest.
+  Publishing is not the key: `btclib-benchmarks` publishes nothing and holds
+  `fail_under = 100.0`. `bbt` holds no suite over its notebooks and scripts and
+  gains the sentinel the day it gains one (btclib-org/.github#301). `.github`'s
+  suite is over the other repositories, so a mutant here would land in the
+  measuring instrument.
+- **`scorecard` asks a repository that is public and is not a fork**, and that
+  is the bar rather than the key: the entry above says whether a tree clearing
+  it runs the sentinel. The OpenSSF Scorecard reads only public repositories,
+  and `ossf/scorecard-action`'s README does not support a fork, which
+  `gh api repos/<org>/<repo> --jq .fork` answers. What the sentinel buys is a
+  third party's opinion of the supply-chain posture, which can find what nobody
+  here thought to ask for; a tree left out gives up the alerts and the score,
+  and the badge is what the row is kept for. **A check scoring below its maximum
+  is an issue against what it found**, never a sentence in section 14 explaining
+  the score.
 
-    The badge and the published score want `publish_results: true`, and
-    the job wants `id-token: write` for the transparency-log entry,
-    `security-events: write` to file what it finds as code scanning
-    alerts, and `actions: read` with `contents: read` — the
-    elevation-per-job rule above, applied to a workflow that writes
-    nothing to the tree.
+    The badge and the published score want `publish_results: true`, and the job
+    wants `id-token: write` for the transparency-log entry,
+    `security-events: write` to file code scanning alerts, and `actions: read`
+    with `contents: read`.
 
-    **Its triggers are the action's and not this section's**, which is
-    the one exception to *`workflow_dispatch` on everything* above: that
-    README names `push` and `schedule` on the default branch as
-    supported and calls `workflow_dispatch` experimental, so a tree
-    following this section there would be asking for a trigger its
-    action does not stand behind. The same README reads repository rules
-    with the workflow's own `GITHUB_TOKEN` and wants an administrative
-    one where a repository's protection is the classic kind instead;
-    every repository here carries a ruleset set *and* classic
-    protection, section 16's checklist asking for both, so which of the
-    two the score rests on is a question a port answers and this
-    sentence does not.
+    **Its triggers are the action's and not this section's**, the one exception
+    to *`workflow_dispatch` on everything* above: that README supports `push`
+    and `schedule` on the default branch and calls `workflow_dispatch`
+    experimental. It also reads repository rules with `GITHUB_TOKEN` and wants
+    an administrative token for classic protection; every repository here
+    carries both, so which the score rests on is a question a port answers.
 
-    **The trees this entry names owe a registration at
-    bestpractices.dev**, the questionnaire answered, and section 2's row
-    carries the badge that renders its live state. `CII-Best-Practices`
-    is the check that reads that registration, so the trees the sentinel
-    runs in are the trees to register: registering one that runs no
-    Scorecard is attestation work nothing reads. Registering is an
-    account action rather than a pull request, and
-    btclib-org/.github#350 is where the registrations outstanding are
-    carried. What that costs is a second home, one per tree, for facts
-    this file already states — how a vulnerability is reported, how a
-    release is cut, what gates a change — so a change to any of them
-    owes a pass over the questionnaires, and nothing says so. That is
-    section 9's *One fact in one place* losing deliberately to being
-    legible from outside the organization.
-- **`fuzz` follows a tree that parses whatever a stranger sends.** Not
-  merely input the tree does not produce: the property is that nobody
-  stands between the parser and an adversary who chooses the bytes.
-  `btclib` and `btclib-secp256k1` read transactions, scripts, PSBTs,
-  signatures and extended keys off the wire, and `btclib-node` speaks
-  the peer-to-peer protocol, where the sender is by definition a
-  stranger. `bitcoin-core-rpc` reads a Bitcoin Core instance its own
-  operator runs, so the party on the other side is chosen rather than
-  arbitrary and the property does not reach it; that is a weaker threat
-  model and it is the reason, not an omission. `btclib-secp256k1` has
-  the property and no entry, and the property does not settle this one
-  on its own: whether a target there is allowed to reach the vendored C
-  library at all — which would be fuzzing upstream's work rather than
-  these bindings — decides what the sentinel would be run for, and
-  btclib-org/.github#342 raises that question. An entry taken before
-  that answer schedules a weekly run against a target nobody has agreed
-  is this project's to write. Section 7's *Property tests* has how a
-  fuzzer and the property layer stand to each other. What a fuzzer turns
-  up is a length prefix larger than the buffer, a truncated multibyte
-  sequence, a varint that overflows, a recursion depth that exhausts the
-  stack — found by the sentinel rather than by somebody else. A crash
-  the sentinel finds is an issue against the parser and never a
-  suppression, that being the whole of what it was run for.
-  The regression that crash becomes is the suite's and not the
-  sentinel's: an ordinary test, naming the input and what the parser is
-  now expected to do with it — which is usually to refuse it in the
-  tree's own exception rather than to accept it.
-  `fuzz/corpus/` is not that place, and a tree must not be told to put
-  it there. That directory is a *seed* corpus in the term's ordinary
-  sense — inputs committed beside a target so the fuzzer starts from
-  valid structures rather than from noise — and the gate over it,
-  `btclib`'s `tests/fuzz_corpus_test.py`, asks the opposite question:
-  that every seed is *still a valid serialization of what it parses*. A
-  crash input added there inverts that gate, because the hardening that
-  fixes the crash is exactly what makes the seed refused, and the only
-  way back to green would be to delete the regression. What the seed
-  gate does guarantee is acceptance by *one of* the entry points the
-  harness declares rather than by the intended one, and the module says
-  so itself, naming the harnesses where a parser narrowed to refuse its
-  own seed passes because a sibling still accepts it. That is a check on
-  the seeds — it keeps the fuzzer's starting point honest as the parsers
-  move under it — and what frees the sentinel from carrying a regression
-  suite is the ordinary test above rather than this gate.
-  What fills the workflow is the tree's — which entry points are targets
-  and which harness runs them, `atheris` under ClusterFuzzLite in
-  Actions or under OSS-Fuzz. What is fixed here is the name the calendar
-  keys on and which trees owe one.
+    **The trees this entry names owe a registration at bestpractices.dev**, and
+    section 2's row carries its badge: `CII-Best-Practices` is the check reading
+    it. Registering is an account action, carried by btclib-org/.github#350. The
+    questionnaire restates how a vulnerability is reported, how a release is cut
+    and what gates a change, so a change to any of them owes a pass over it:
+    section 9's *One fact in one place* losing deliberately to being legible
+    from outside.
+- **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
+  between the parser and an adversary choosing the bytes. `btclib` and
+  `btclib-secp256k1` read transactions, scripts, PSBTs, signatures and extended
+  keys off the wire, and `btclib-node` speaks the peer-to-peer protocol;
+  `bitcoin-core-rpc` reads an instance its own operator runs, which the property
+  does not reach. `btclib-secp256k1` has the property and no entry until
+  btclib-org/.github#342 answers whether a target may reach the vendored C
+  library. Section 7's *Property tests* has how a fuzzer and the property layer
+  stand to each other. A crash the sentinel finds is an issue against the
+  parser, never a suppression, and its regression is an ordinary test naming the
+  input and what the parser now does with it. It does not go in `fuzz/corpus/`,
+  a *seed* corpus that `btclib`'s `tests/fuzz_corpus_test.py` requires to stay
+  valid input, so the fix would redden it. What fills the workflow is the tree's
+  — which entry points are targets and which harness runs them, `atheris` under
+  ClusterFuzzLite in Actions or under OSS-Fuzz. What is fixed here is the name
+  the calendar keys on and which trees owe one.
 - **`deps-oldest` follows a tree that builds a distribution.** Its
-  `requires-python` and its dependency specifiers are a claim made to
-  whoever installs it, and that claim is what the resolution checks; a
-  tree that installs nothing makes none, so `bbt` and this repository
-  are outside the row whatever their `pyproject.toml` declares. It is
-  the same set `deps-latest` names, the two rows asking one question in
-  opposite directions: whether the code survives the newest releases,
-  and whether the oldest ones it declares install at all.
-- **`sdist-rebuild` follows a tree that publishes an attestation.** The
-  attestation vouches for bytes, so a released tag either rebuilds to
-  the sdist that was signed or it vouches for something no rebuild
-  answers for: section 12 states that property, and each tree's
-  `RELEASING.md` names the steps a rebuild replays. What the sentinel
-  compares against is the digests the attestation carries,
-  `gh attestation verify` over the rebuilt file passing only where the
-  two agree; reading the index's own digests for the release instead is
-  the rejected alternative, those saying what PyPI holds rather than
-  what was signed. Cutting the comparison into the release is the
-  other, and there it is a build against itself in the same job on the
-  same image: what moves between a release and the day somebody
-  verifies is a backend, a runner image or a toolchain, which is the
-  interval a weekly run covers and a release-time step has not reached.
-  The compiled wheel is outside the property for the reason section 12
-  gives, so the row is the sdist's rather than every file a rebuild
-  produces with one tree's exemption written into it. A rebuild that
-  disagrees is an issue against the tree it ran in.
-  btclib-org/.github#523 carries the debt until the first of them
-  schedules the workflow.
-- **`wheel-reproducibility` follows a tree that ships a compiled
-  wheel.** Section 12 puts the compiled wheels outside the property
-  `sdist-rebuild` re-derives, and this row is what asks how far that
-  stands. A wheel with nothing compiled in it is the checkout's own
-  files under the member metadata the backend fixes, which is the
-  ground `sdist-rebuild` already stands on. The sentinel builds one
-  interpreter's wheel twice on one image and diffs the two archives
-  member by member, then diffs the wheels two images of one platform
-  built, the second image being chosen to differ in the toolchain it
-  carries. What it answers for is narrower than what section 12
-  exempts. btclib-org/btclib-secp256k1#524 is where the property is
-  being reached for, on the platform section 12 names a pin for, and the
-  workflow this row schedules asks two builds in one directory and two
-  environments alike: a platform whose wheels disagree is an issue
-  against what the run names rather than a line here.
-  btclib-org/btclib-secp256k1#538 carries the port until that tree's
-  `cron:` is the instant above and its badge is in the row.
-- **`homepage` follows a tree serving a page generated from another
-  tree's file.** `btclib-org.github.io`'s `index.md` is derived from
-  `profile/README.md` here, and what the sentinel asks is whether the
-  served copy still says what that file says. The drift it watches for
-  arrives from a landing in this tree rather than from anything the
-  serving tree does, so no pull request there is the occasion to ask.
-  Sending a `repository_dispatch` from here when `profile/README.md`
-  lands is the rejected alternative: it is the exact signal rather than
-  a poll, and it wants a credential with write access to that tree,
-  which nothing here holds. Asking it from this suite is the other, and
-  what it costs is a red on `main` here for a drift another repository
-  owns.
-- **`zkp-oracle` follows a tree with an implementation of its own to
-  compare.** The sentinel compares two implementations of one primitive,
-  so the tree it asks is the one holding the side written in Python;
-  `btclib-secp256k1` is the comparison's other side, which the run
-  builds from its sdist, rather than a tree the row reaches.
-- **A platform row leaves a tree's entry where a gate cell asks the
-  whole of what that tree's sentinel asked.** *What runs weekly does not
-  also gate* above denies its own converse over a hole in a matrix, and
-  a sentinel the gate covers whole leaves none. That cell gates on the
-  suite passing and not on the coverage floor, for the reason the same
-  paragraph gives a sentinel cell its `--no-cov`, and its place before a
-  review is the trade *An interpreter axis is a gate cell rather than a
-  sentinel row* above names. Where that trade does not hold, or where
-  the cell is narrower than the sentinel's matrix — one of its images,
-  one of its interpreters — the sentinel keeps its whole matrix on the
-  calendar and the entry keeps the tree. `btclib-node` is out of the
-  `os-windows` entry on this ground, its `test.yml` gating a
-  `windows-latest` cell at the interpreter `.python-version` pins.
+  `requires-python` and its dependency specifiers are a claim made to whoever
+  installs it; a tree that installs nothing makes none, so `bbt` and this
+  repository are outside the row whatever their `pyproject.toml` declares. It is
+  the set `deps-latest` names, the two asking one question in opposite
+  directions.
+- **`sdist-rebuild` follows a tree that publishes an attestation.** A released
+  tag either rebuilds to the sdist that was signed or the attestation vouches
+  for bytes no rebuild answers for: section 12 states that property, and each
+  tree's `RELEASING.md` names the steps a rebuild replays. The sentinel compares
+  against the attestation's digests, `gh attestation verify` over the rebuilt
+  file, not against PyPI's, which say what the index holds rather than what was
+  signed. It runs weekly rather than in the release, where it would compare a
+  build with itself: a backend, a runner image or a toolchain moves after the
+  release. The compiled wheel is outside the property for the reason section 12
+  gives. A rebuild that disagrees is an issue against the tree it ran in.
+  btclib-org/.github#523 carries the debt until the first of them schedules the
+  workflow.
+- **`wheel-reproducibility` follows a tree that ships a compiled wheel**, asking
+  how far section 12's exemption of compiled wheels from `sdist-rebuild` stands.
+  It builds one interpreter's wheel twice on one image and diffs the archives
+  member by member, then diffs the wheels two images of one platform built, the
+  second with a different toolchain. btclib-org/btclib-secp256k1#524 is where
+  the property is being reached for; a platform whose wheels disagree is an
+  issue against what the run names. btclib-org/btclib-secp256k1#538 carries the
+  port until that tree's `cron:` is the instant above and its badge is in the
+  row.
+- **`homepage` follows a tree serving a page generated from another tree's
+  file.** `btclib-org.github.io`'s `index.md` is derived from
+  `profile/README.md` here, and the sentinel asks whether the served copy still
+  says what that file says. The drift arrives from a landing here, so no pull
+  request there is the occasion to ask; a `repository_dispatch` from here would
+  want write access to that tree, and asking from this suite would redden `main`
+  here for a drift another repository owns.
+- **`zkp-oracle` follows a tree with an implementation of its own to compare.**
+  The tree it asks holds the side written in Python; `btclib-secp256k1` is the
+  other side, built from its sdist, not a tree the row reaches.
+- **A platform row leaves a tree's entry where a gate cell asks the whole of
+  what that tree's sentinel asked.** That cell gates on the suite and not on the
+  coverage floor, and its place before a review is the trade *An interpreter
+  axis is a gate cell rather than a sentinel row* names. Where that trade does
+  not hold, or the cell is narrower than the sentinel's matrix, the sentinel
+  keeps its whole matrix on the calendar and the entry keeps the tree.
+  `btclib-node` is out of the `os-windows` entry on this ground, its `test.yml`
+  gating a `windows-latest` cell at the interpreter `.python-version` pins.
 
 ### The aggregate job, and the required check
 
 A workflow whose answer gates a pull request ends in a job that `needs` every
-other job in it whose own result is a claim about the pull request, and is
-named with its workflow — `test: every job passed` — because a check context is
-keyed by name alone and two workflows with a job of the same name produce one
+other job in it whose own result is a claim about the pull request, and is named
+with its workflow — `test: every job passed` — because a check context is keyed
+by name alone and two workflows with a job of the same name produce one
 ambiguous check.
 
-**Which aggregates this subsection is about is all of them, a required check
-being what a branch rule makes of one.** A rule names a context or it does not,
-and the job is written the same way either way: what an aggregate reports is
-its own result, and a merge waits on that result only where a rule names it. So
-a consequence stated below as a red job is a blocked merge in a tree whose rule
-holds that context and the job's red alone in one whose rule does not. Reading
-the subsection as the gating aggregate's is the rejected alternative, and what
-it costs is the aggregate no rule holds falling outside the subsection its own
-shape is written in.
+**This subsection is about every aggregate, a required check being what a branch
+rule makes of one**: a red job below is a blocked merge only where a rule holds
+its context.
 
-**Which of two shapes the aggregate reads is decided by whether
-something in the tree actually calls the workflow, not by whether it
-merely declares `workflow_call:`.** A workflow nothing calls reads that
-run's job listing, below, whatever trigger it carries; a workflow a
-`release.yml` or another workflow of the tree already `uses:` reads
-`needs` instead, further below, because a listing answers for the run
-and a reused run is not the workflow's alone — *The listing's unit is
-the run and not the workflow* has the reason. `btclib-benchmarks`'s
-`test.yml` carries `workflow_call:` and nothing in that tree calls it,
-so it keeps reading the listing; that workflow's own comment already
-names the day that stops holding — "the gate belongs to whoever owns
-the run, so either the caller carries it or that trigger goes." The two
-shapes are not interchangeable, and *One shape for all is refused in
-both directions* below is why neither covers
-what the other does.
+**Which of two shapes the aggregate reads is decided by whether something in the
+tree actually calls the workflow, not by whether it merely declares
+`workflow_call:`.** A workflow nothing calls reads its run's job listing; one a
+`release.yml` or another workflow `uses:` reads `needs`. `btclib-benchmarks`'s
+`test.yml` declares `workflow_call:` and nothing calls it, so it reads the
+listing. *One shape for all is refused in both directions* below is why.
 
 **A job engineered to conclude successfully whatever it finds makes no such
-claim, and stays out of `needs` for exactly as long as that holds.** A step
-tolerated with `continue-on-error: true`, reported by a step of its own
-rather than left to redden the run, is what gives such a job that shape:
-its green then says nothing about what the job is named for, so folding it
-into `needs` would make the aggregate cite a job whose passing is not
-evidence of anything. The exception is not a standing shape — it holds only
-while the job cannot make the claim it is named for, and it ends the day it
-can. `btclib-node`'s `free-threaded` job is out of `test-passed`'s own
-`needs:` on exactly this ground: its sync step is tolerated because the
-wheel it depends on does not publish, and it rejoins `needs` the day that
-changes (btclib-org/btclib-node#746).
+claim, and stays out of `needs` for exactly as long as that holds** — a step
+tolerated with `continue-on-error: true` and reported by a step of its own.
+`btclib-node`'s `free-threaded` job, which reports rather than gates, is out of
+`test-passed`'s `needs:` while the wheel its sync step depends on does not
+publish (btclib-org/btclib-node#746).
 
-**A matrix is not what asks for one.** A branch rule can name only a
-context a pull request produces, so a workflow triggered by `push` and
-`schedule` alone is one no rule can require, however many cells it runs,
-and an aggregate there is a name nothing can hold. Where such a workflow
-is to gate, the trigger and the aggregate arrive in the same pull
-request, and the rule follows them.
+**A matrix is not what asks for one.** A branch rule can name only a context a
+pull request produces, so a workflow on `push` and `schedule` alone cannot be
+required; where it is to gate, the trigger and the aggregate arrive in one pull
+request and the rule follows.
 
-- **Never name a matrix cell in the branch rule.** The rule lives outside
-  the repository, so a context that stops being produced blocks every
-  merge with nothing in the tree to explain why.
-- **The job carries an `if:` of its own: a job with `needs` and no `if:`
-  is skipped when one of those needs fails**, which is the outcome the
-  aggregate exists to report. The check then reports `skipped`, which is
-  silence about the failure rather than a report of it, and no step of
-  that job runs however unconditional the step is. The condition is
-  `!cancelled()`, beside the draft and closed conditions *What every
-  workflow does* gives above. `always()` is the wrong widening: a run its
-  own concurrency group superseded reaches the job and fails it, making a
-  red job of a cancellation the newer run already speaks for.
-  `!cancelled()` skips the job on that run instead, and a job cancelled
-  on its own — the run not being cancelled — still reaches the step.
-- **What the aggregate of a workflow that is only ever a run's own reads
-  is that run's job listing, asked of the API rather than of `needs`** —
-  `repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs`, each
-  finished row's `conclusion`, in a step that fails on anything but
-  `success` and `skipped`. **Both names, whatever the workflow's own
-  jobs can report today.** A workflow with no `changes` job, and no
-  job-level `if:` narrower than the aggregate's own, produces no
-  `skipped` row, and that is a condition rather than a property: either
-  one added later re-opens `skipped`, and what says the allowlist has
-  stopped matching the run is the aggregate going red on the first run
-  that legitimately skips. The job's own red and not a required check
-  failing: a branch rule names an aggregate or does not — *A matrix is
-  not what asks for one* above is the case where none can — so a signal
-  keyed on the check is absent from every aggregate no rule holds.
-  Letting the allowlist follow the jobs is the rejected alternative, and
-  it is sound where it is written, a narrowing being able to redden a
-  check and never to green one; what it costs is an expiry condition
-  nothing watches, and a check over the allowlist that would have to
-  re-derive each workflow's condition graph where this one reads a
-  constant. The aggregate's own row is not one of them:
-  its `conclusion` is `null` while the step is reading, and what judges
-  that row is the unfinished count below. The job elevates to
-  `actions: read` above the workflow's `contents: read` and hands
-  `github.token` to the call. What that buys is a source reporting what
-  the needs context does not.
+- **Never name a matrix cell in the branch rule.** The rule lives outside the
+  repository, so a context that stops being produced blocks every merge with
+  nothing in the tree to explain why.
+- **The job carries an `if:` of its own: a job with `needs` and no `if:` is
+  skipped when one of those needs fails**, and `skipped` is silence about the
+  failure it exists to report. The condition is `!cancelled()`, beside the draft
+  and closed conditions; `always()` would fail the job on a run its concurrency
+  group superseded.
+- **What the aggregate of a workflow that is only ever a run's own reads is that
+  run's job listing, asked of the API rather than of `needs`** —
+  `repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs`, each finished
+  row's `conclusion`, in a step failing on anything but `success` and `skipped`.
+  **Both names, whatever the workflow's own jobs can report today**: a `changes`
+  job or narrower `if:` added later re-opens `skipped`, and nothing would watch
+  an allowlist that followed the jobs. The job elevates to `actions: read` and
+  hands `github.token` to the call.
 - **The listing is asked for in full** — `gh api --paginate`, with
-  `per_page=100` on the query so that the pages are few. A page is a
-  bound on what comes back and nothing bounds a run's job count under
-  it, a matrix being what expands that count and the matrix being what
-  an aggregate exists for. Rows past the page are missing from the
-  answer with nothing in the answer saying so, so the allowlist above
-  and the count below are taken over a subset.
+  `per_page=100` — since a matrix makes a run's job count unbounded and rows
+  past a page go missing silently.
 - **A matrix reports one result to `needs` and one row per cell to the
-  listing.** btclib-org/btclib#1001 is a run whose cells died in *Set up
-  job* downloading a pinned action, codeload answering 429 and the
-  runner giving up, where `needs.<job>.result` was not `failure`.
-- **A boolean `if:` over `needs` decides nothing when it is false.** The
-  step is skipped, a skipped step leaves its job successful, and the job
-  branch protection names is green over a red matrix — which is what
-  btclib-org/btclib#1001 is a recorded run of.
-- **A shell allowlist over `join(needs.*.result, ' ')` is vacuous on an
-  empty join.** `for` splits on words and an empty string contributes
-  none, so the loop compares nothing and exits 0; it is sharpest where
-  the aggregate has a single `needs`, and it is btclib-org/btclib#1454.
-  A `case` ahead of the loop, over the string comma-joined rather than
-  space-joined, is what refuses it: `case ",$results," in *,,*)` catches
-  what the join drops silently — an empty first field, an empty last
-  one, an empty one between two others — because `join` writes one
-  separator between every pair of elements whatever they convert to, so
-  an empty result is an empty field and never a missing one.
-- **What answers that vacuity where the aggregate reads its own run's
-  job listing is a count of the run's unfinished jobs, and the count is
-  the aggregate itself alone.** A listing with nothing unfinished is not
-  a listing of the run the step is running in, and one with something
-  else unfinished is a run this job does not `needs` the whole of. The
-  count is what says so rather than a name, a name being what a rename
-  moves. The empty join has no counterpart in this shape, there being no
-  join.
-- **The listing's unit is the run and not the workflow, which is why the
-  count above is the own-run shape's alone.** A gate `release.yml`
-  reuses through `workflow_call` has no listing of its own: the
-  caller's jobs and the called workflow's are one run, every row of it
-  carries the caller's `workflow_name`, and the publishing jobs are
-  unfinished exactly because they wait on this one, so the count can
-  never be the aggregate alone — a listing conflates the two graphs
-  where `needs` does not.
-- **A workflow something in the tree actually calls keeps to `needs`
-  throughout, on a direct run exactly as on a reused one.** `needs.*.
-  result` is scoped to the workflow that declares it whether or not
-  something calls that workflow, so the `case` above is what such an
-  aggregate reads before the allowlist. The job is the same file
-  whichever trigger starts it, so splitting its shape by trigger would
-  ask the workflow to detect its own reuse, which *One shape for all*
-  below already refuses on other grounds; `btclib`'s `test.yml` is
-  `release.yml`'s own call, and its aggregate reads this guarded join
-  unconditionally, on a direct pull request exactly as on a reused run.
-  What that costs is real rather than hypothetical: `needs.*.result`
-  cannot cover a shape the context does not report, and
-  btclib-org/btclib#1001 is a run where it did not — four cells died in
-  *Set up job*, the run's own job listing carried each one's
-  `conclusion` as `failure`, and `needs.suite.result` read `success`
-  regardless, a shape no `case` guard against an empty field touches.
-  A workflow gating its own pull requests this way pays that price
-  the moment something else starts calling it too.
-- **What gates the release is the caller's own `needs:` on the calling
-  job, not a second reading of the aggregate from outside.** A
-  `workflow_call` job's result already reflects every job the called
-  workflow ran, this aggregate included, so nothing has to ask the
-  aggregate a second question from the caller's side:
-  `bitcoin-core-rpc`'s `release.yml` run `33236701141` had failing cells
-  in the platform workflows it called, and every publishing job of it
-  reports `skipped`, on the calling job's own `needs:` alone.
+  listing**, and **a boolean `if:` over `needs` decides nothing when it is
+  false**, the step being skipped and a skipped step leaving its job green: in
+  btclib-org/btclib#1001 cells died in *Set up job*, `needs.<job>.result` was
+  not `failure`, and the required job was green over a red matrix.
+- **A shell allowlist over `join(needs.*.result, ' ')` is vacuous on an empty
+  join** (btclib-org/btclib#1454): `for` gets no words and exits 0. A `case`
+  ahead of the loop refuses it, over the results comma-joined:
+  `case ",$results," in *,,*)` catches an empty field anywhere, `join` writing
+  one separator between every pair.
+- **What answers that vacuity where the aggregate reads its own run's job
+  listing is a count of the run's unfinished jobs, and the count is the
+  aggregate itself alone** — a count, because a name is what a rename moves. The
+  aggregate's own row has a `null` conclusion while the step reads, and this
+  count judges it.
+- **The listing's unit is the run and not the workflow, which is why the count
+  above is the own-run shape's alone.** Under `workflow_call` the caller's jobs
+  and the called workflow's are one run, and the publishing jobs are unfinished
+  because they wait on this one.
+- **A workflow something in the tree actually calls keeps to `needs` throughout,
+  on a direct run exactly as on a reused one**, reading the `case` above before
+  the allowlist: `btclib`'s `test.yml` is `release.yml`'s call. The price is the
+  btclib-org/btclib#1001 shape, which `needs` cannot see.
+- **What gates the release is the caller's own `needs:` on the calling job**: a
+  `workflow_call` job's result already reflects every job the called workflow
+  ran.
 - **One shape for all is refused in both directions, for two different
-  reasons.** The listing under `workflow_call` answers for jobs the
-  caller is still running, which no count can separate from this job's
-  own — *The listing's unit is the run and not the workflow* above.
-  `needs` on a workflow nothing calls gives up the listing's own
-  protection against the `#1001` shape above for nothing bought in
-  return: `btclib-benchmarks`'s `test.yml` and `codeql.yml` are called
-  by nothing and keep reading the listing, which is what a workflow only
-  ever run directly can safely do and a called one cannot. An aggregate
-  that detects reuse and declines itself, on a boolean `workflow_call`
-  input its caller passes, was weighed against keying the shape on being
-  called and is refused: nothing in a called run states plainly that it
-  is one — `github.event_name` and `github.workflow` are the caller's,
-  which is why *What every workflow does* above names a concurrency
-  group literally rather than through either — so the input would exist
-  only to reconstruct what being called already answers without it.
+  reasons.** The listing under `workflow_call` answers for the caller's
+  unfinished jobs; `needs` on a workflow nothing calls gives up the listing's
+  protection against the `#1001` shape for nothing. A `workflow_call` input
+  telling a run it is called would only reconstruct what being called already
+  answers, `github.event_name` and `github.workflow` being the caller's.
 - `skipped` is legitimate on purpose: when the run was superseded by its
-  concurrency group, and when a `changes` job decided the diff touches
-  nothing those jobs read. The listing reports it as a conclusion like
-  any other, so a filter naming only `success` fails the job on every run
-  a `changes` job empties.
-- **A `changes` job** is the cheapest job in the workflow and decides
-  whether the rest runs. It answers `true` on every trigger that has no
-  base to diff against, and the files it counts as prose are narrower
-  than they look: the README is the package's long description, the docs
-  are read by tests, and the history files are parsed by the suite.
+  concurrency group, and when a `changes` job decided the diff touches nothing
+  those jobs read. A filter naming only `success` fails the job on every run a
+  `changes` job empties.
+- **A `changes` job** is the cheapest job in the workflow and decides whether
+  the rest runs. It answers `true` on every trigger that has no base to diff
+  against, and the files it counts as prose are narrower than they look: the
+  README is the package's long description, the docs are read by tests, and the
+  history files are parsed by the suite.
 - Where a single job is what gates, **that job is the context**.
-- **Renaming a required check cannot be done in a pull request**: the
-  branch stops producing the old name while the rule still waits for it.
-  The rule moves first, against the branch, and the pull request follows.
+- **Renaming a required check cannot be done in a pull request**: the branch
+  stops producing the old name while the rule still waits for it. The rule moves
+  first, against the branch, and the pull request follows.
 
 ## 11. GitHub settings
 

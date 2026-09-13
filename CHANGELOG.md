@@ -8514,3 +8514,9 @@ nothing red follows from the copies disagreeing.
 - **Section 15 keeps every command and what its answer has to say**
   (issue #1075): the per-sweep marker explanations, rejected alternatives
   and mechanism narratives go, and short sweeps share a block.
+
+### Section 10 of the standard is shorter
+
+- **`README.md` section 10 keeps its rules and drops the rest** (issue
+  #1075): the rejected alternatives, examples and restated reasons go,
+  and the calendar, the record and the debt sentence stay as parsed.
