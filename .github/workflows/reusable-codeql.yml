@@ -1,0 +1,107 @@
+---
+name: reusable-codeql
+
+# The CodeQL analysis a repository's codeql.yml calls, so the matrix, the
+# pins and the category are written once. The trigger, the schedule, the
+# concurrency group and the aggregate job stay in the caller, whose run
+# these jobs join.
+#
+# No inputs: the trees carrying codeql.yml ask the same languages, the
+# same build mode and the same category, and an input for a difference
+# none of them has is a copy in disguise (btclib-org/.github#35).
+#
+# The calling job declares the token the analysis needs, permissions
+# being capped by the job that calls rather than inherited from it:
+# security-events: write, contents: read, actions: read.
+#
+# The aggregate a caller carries -- "codeql: every job passed" -- keeps
+# reading its run's own job listing, that run being the caller's: the
+# calling job is no row of it and the jobs below are, each under a name
+# the calling job's own prefixes.
+
+on:
+  workflow_call:
+
+# least privilege for the GITHUB_TOKEN: everything running in a job
+# (actions, dependencies, the CodeQL bundle itself) can read the token, so
+# the workflow default must not be able to write to the repository
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    # one job per language rather than one job analysing both, so a
+    # failure names the language in the checks list instead of sending a
+    # reader into the log to find out which half broke -- and so the two
+    # run in parallel
+    name: Analyze ${{ matrix.language }}
+    # a draft pull request is work in progress: every push to one would
+    # spend this analysis on a tree its author is not asking anyone to
+    # review yet. A closed one spends no runner either, a caller taking
+    # that event only to supersede a run its group is still holding.
+    # github.event is the caller's, which is the event its trigger took
+    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    # far above what either language needs; what it bounds is a hung job
+    # holding a runner for six hours
+    timeout-minutes: 20
+    # the elevation, on the job that needs it: security-events: write is
+    # what uploading a SARIF to code scanning takes, and the whole reason
+    # this job cannot run on the read-only token. actions: read is
+    # redundant while a calling repository is public -- it is what the
+    # CodeQL action needs to read run metadata in a *private* one -- and
+    # it is written down so that the file does not quietly stop working
+    # the day a caller stops being public. No packages: read, which
+    # fetching a private CodeQL pack would want and the default query
+    # suite does not.
+    # The trailing comments below are not that paragraph again for its own
+    # sake: zizmor's undocumented-permissions audit reads the line a
+    # permission is on and not the prose above the block, so one word there
+    # is what keeps `--persona=auditor` at zero findings for this file
+    permissions:
+      security-events: write # the SARIF upload, and nothing else needs it
+      contents: read
+      actions: read # run metadata, which only a private repository gates
+    strategy:
+      # one language failing must not cancel the other: which of the two
+      # is red is the information, and cancelling throws half of it away
+      fail-fast: false
+      matrix:
+        language:
+          - actions
+          - python
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment: a
+      # tag, let alone a branch, is a name its owner can move, and these
+      # run in a job that can write security events
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the analysis reads the tree and nothing pushes it back
+          persist-credentials: false
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
+        with:
+          languages: ${{ matrix.language }}
+          # both languages are interpreted, so no build step sits between
+          # init and analyze and no autobuild is attempted. Written out
+          # rather than left to the default because it is the input that
+          # would have to change first if a compiled language ever joined
+          # the matrix
+          build-mode: none
+          # no `queries`, no `packs` and no `config`, which is not an
+          # omission: unnamed, the analysis is the default code-scanning
+          # suite, and anything written here would widen it rather than
+          # pin it -- `queries: security-extended` is the widening, and
+          # it is a decision separate from where the file lives
+      - name: Analyze
+        uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
+        with:
+          # code scanning keys an analysis by category, so without one
+          # per language the second upload of a commit replaces the first
+          # and every alert of the other language reads as fixed. The
+          # spelling is the one a calling tree's own analyses are keyed
+          # by -- `gh api repos/<owner>/<repo>/code-scanning/analyses
+          # --jq '[.[].category] | unique'` -- so its alerts keep their
+          # history across the move rather than starting again
+          category: "/language:${{ matrix.language }}"
