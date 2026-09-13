@@ -8475,3 +8475,9 @@ nothing red follows from the copies disagreeing.
 
 - **`REPOSITORY.md` records both as `false`** (issue
   btclib-org/.github#550), the settings having been turned off.
+
+### The alignment sweep mints its token from a GitHub App
+
+- **`alignment.yml` takes its token from the btclib-org-alignment App**
+  (closes #628), replacing the `ALIGNMENT_TOKEN` of the issue #477 entry,
+  and refuses the run when the App's id or private key is missing.

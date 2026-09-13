@@ -423,14 +423,25 @@ out is left out by the scope above rather than by oversight.
 repository document, most of which is URLs, counts and derived state. The
 fields of it that are settings are the ones the sections above quote.
 
-**A credential this repository spends and does not hold.**
-`claude-review.yml` reads `secrets.CLAUDE_CODE_OAUTH_TOKEN`, and both
-secret stores here answer empty for it:
+**The App credentials this repository holds.** `alignment.yml` mints its
+token from the btclib-org-alignment GitHub App, and its id and key are
+the only entries in this repository's stores:
 
 ```shell
-gh api repos/btclib-org/.github/actions/secrets --jq .total_count
+gh api repos/btclib-org/.github/actions/secrets --jq '.secrets[].name'
+# ALIGNMENT_APP_PRIVATE_KEY
+gh api repos/btclib-org/.github/actions/variables --jq '.variables[].name'
+# ALIGNMENT_APP_ID
 gh api repos/btclib-org/.github/dependabot/secrets --jq .total_count
-# 0, both
+# 0
+```
+
+**A credential this repository spends and does not hold.**
+`claude-review.yml` reads `secrets.CLAUDE_CODE_OAUTH_TOKEN`, an
+[organization secret at `visibility=all`][s11-review] in both stores, so
+no copy of it is kept here:
+
+```shell
 gh api orgs/btclib-org/actions/secrets \
   --jq '.secrets[] | [.name, .visibility]'
 gh api orgs/btclib-org/dependabot/secrets \
@@ -438,33 +449,19 @@ gh api orgs/btclib-org/dependabot/secrets \
 # ["CLAUDE_CODE_OAUTH_TOKEN","all"], both
 ```
 
-Those two zeros record a decision, and it is [the standard's][s11-review]:
-the token is an organization secret at `visibility=all`, in both stores,
-so a repository adopting the workflow configures nothing for it, and a
-copy of it in a store here would be that decision undone.
-
 **A switch this repository does not set.** `claude-review.yml` guards
 its jobs with `vars.CLAUDE_REVIEW_ENABLED`, and neither variable store
-holds it:
+holds it: the repository's answers with `ALIGNMENT_APP_ID` alone, above,
+and the organization's is empty.
 
 ```shell
-gh api repos/btclib-org/.github/actions/variables --jq .total_count
-# 0
-gh api orgs/btclib-org/actions/variables --jq '.variables[].name'
-# (nothing)
 gh api orgs/btclib-org/actions/variables --jq .total_count
 # 0
 ```
 
-The organization secret above answering with a name is what makes these
-zeros absences rather than an endpoint that answers empty for everyone.
-The variable store prints nothing at all when it answers, so its own
-`total_count` of `0` is what shows the call reached it: one that does not
-reach it prints an error and exits non-zero. [Section 11 reads that empty
-name list as the switch's off state][s11-review]. Both stores are read
-because a variable set here would take precedence over one of the same
-name set on the organization, so the organization's answer alone would
-not show the switch off for this tree.
+[Section 11 reads that absence as the switch's off state][s11-review].
+Both stores are read because a variable set here would take precedence
+over one of the same name set on the organization.
 
 **A facility nobody reached for.** Self-hosted runners, webhooks, deploy
 keys, autolinks and custom property values each answer empty here, and an
