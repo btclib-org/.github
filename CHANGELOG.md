@@ -8502,3 +8502,9 @@ nothing red follows from the copies disagreeing.
 - **Section 11 keeps every rule** (issue #1075): its censuses, dated
   measurements, sha citations and rejected alternatives go, and
   `tests/links_test.py`'s `FENCE` docstring drops a removed example.
+
+### `BACKLOG` is empty
+
+- **The `sdist-rebuild` row goes** (issue #523): `btclib`, `btclib-node`
+  and `btclib-secp256k1` now carry `sdist-rebuild.yml`, as
+  `bitcoin-core-rpc` already did.
