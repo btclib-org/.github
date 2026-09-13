@@ -766,89 +766,46 @@ configured in it. Where a tool the lint gate runs looks for its
 configuration by name from the working directory and `pyproject.toml` is
 not among the names, it keeps a file of its own: the tool finds that
 file, so the hook passes no path, and a file has the room for reasoning
-that a hook argument has not. Section 14 names each of those files and
-what it holds.
+that a hook argument has not. Section 14 names each of those files.
 
 - **The build backend is `uv_build` where the project is pure Python.**
-  What the choice buys is where the sdist's inclusion is then declared:
-  glob patterns in `[tool.uv.build-backend]`, in this file and beside
-  the rest of the configuration, rather than in a file of its own with
-  an include and exclude language of its own. One backend across the
-  ordinary case is also one such language to learn rather than one per
-  project. What makes a project the exception is what it compiles:
+  The sdist's inclusion is then declared as glob patterns in
+  `[tool.uv.build-backend]`, beside the rest of the configuration rather
+  than in a file with an include and exclude language of its own, and
+  one backend across the ordinary case is one such language to learn.
+  What makes a project the exception is what it compiles:
   `btclib-secp256k1` builds a vendored C library through cffi and cmake,
   which hatchling answers with a build hook and a pure-Python backend
   does not answer at all.
 
     Section 2's `src/` rule matches each backend's own default, so
-    neither needs a key that states it. `uv_build` already looks under
-    `src/` unless `[tool.uv.build-backend] module-root` overrides it, so
-    that key disappears under the rule rather than changing value.
-    Hatchling names no directory at all: `<name>/__init__.py` at the
-    root is its first file-selection heuristic and `src/<name>/__init__.py`
-    its second, so the rule is answered by which heuristic matches
-    rather than by a setting.
+    neither needs a key that states it: `uv_build` looks under `src/`
+    unless `[tool.uv.build-backend] module-root` overrides it, and
+    hatchling names no directory at all, `<name>/__init__.py` at the
+    root and `src/<name>/__init__.py` being its first two
+    file-selection heuristics.
 
     `requires` names that backend with a floor and, under `uv_build`, a
     **ceiling at the next minor**, where the bullet below refuses an
     upper bound to a sibling dependency. What differs is what the bound
     costs: on a runtime dependency it makes a published artifact refuse
     a version somebody already has, where on a build requirement it only
-    narrows what an isolated build resolves for itself, and that build
-    resolves whatever the bound allows. What it buys is that uv bumps
-    its minor for a breaking change and releases this backend with
-    itself, so an unbounded requirement lets a published sdist build
-    under a backend nobody checked it against, with no release of this
-    project in between. Each bound carries the reason that chose it, and
-    PEP 639 below is one such reason.
+    narrows what an isolated build resolves for itself. uv bumps its
+    minor for a breaking change and releases this backend with itself,
+    so an unbounded requirement lets a published sdist build under a
+    backend nobody checked it against.
 
     The floor is the boundary of the property it keeps, and the comment
-    gives the measurement that found it. Under `uv_build` the sdist's
-    own `pyproject.toml` is a normalized copy of the file with the
-    verbatim one kept beside it as `pyproject.toml.orig` from `0.12.0`;
-    below that the sdist carries the verbatim file and no `.orig`.
-
-    The rejected alternative is a floor above that boundary, aligned
-    with the `uv` the gate pins through `uv-pre-commit` or with the
-    sibling the number was copied from, as an equality or as a bound the
-    floor stays under. It excludes backends that keep the property, and
-    nothing checks the number it lands on: under section 12's
-    `--installer=pip` the archive `check-sdist` compares against git is
-    packed by a backend `additional_dependencies` resolves from
-    `[build-system]`'s own range, which satisfies the floor by
-    construction. What does read the floor is `uv build`, and section 1
-    is where that costs: `[tool.uv] required-version` names the oldest
-    uv a tree admits, pre-commit.ci moves a hook rev on each
-    repository's own weekly schedule with nothing moving that key, and
-    on a uv the key admits but the floor excludes, uv looks past the
-    copy bundled in it for a `uv_build` meeting the floor instead, which
-    section 12 has too. `0.12.0` is below what `required-version`
-    names — section 15's sweep prints that key per tree — so a floor at
-    the boundary cannot contradict section 1.
-
-    The boundary is measured by calling the backend's own hook at each
-    version. `--with` puts `<version>` ahead of the command it
-    measures, so it cannot sit last as section 9 asks; the assignment
-    stands in a block of its own, for the reason section 9's bullet
-    gives, and the block below it writes `${version:?}`, unset being
-    what an unfilled paste of that block alone supplies:
-
-    ```shell
-    version=<version>
-    ```
-
-    ```shell
-    uv run --no-project --with uv_build=="${version:?}" python -c \
-      "import uv_build; print(uv_build.build_sdist('<outdir>'))"
-    ```
-
-    and not with `uv build` under a pinned `requires`: asking for a
-    backend older than the one running is always section 12's
-    ceiling-below case, where `uv build` falls back to the backend it
-    bundles and only warns, so it answers for that copy and not for the
-    pin, and the same command on a machine with another `uv` answers
-    differently. btclib-org/.github#143 has the table, the boundary read
-    off the last `0.11` release and the first `0.12`.
+    at the key gives the measurement that found it: under `uv_build` the
+    sdist's own `pyproject.toml` is a normalized copy of the file with
+    the verbatim one kept beside it as `pyproject.toml.orig` from
+    `0.12.0`, and below that the sdist carries the verbatim file and no
+    `.orig`. The boundary is found by calling the backend's own sdist
+    hook at each version, and not through `uv build` under a pinned
+    `requires`, which falls back to the backend it bundles and only
+    warns. A floor above that boundary — the `uv` the gate pins, or the
+    sibling the number was copied from — excludes backends that keep the
+    property, and nothing reads the number it lands on.
 - **The version is declared once**, in `[project]`. The package reads it
   back with `importlib.metadata`; the sphinx `conf.py` parses this file,
   metadata not being available to an uninstalled build. Two declarations
@@ -856,78 +813,57 @@ what it holds.
 - **The name in `[project]` is the distribution's, and the repository
   is named after it, hyphenated, never after the import package.** PEP
   503 normalizes runs of `-`, `_` and `.` in a distribution name to a
-  single `-`, so the hyphen is the canonical spelling; an import
-  package is a Python identifier and takes underscores instead, so the
-  two are spelled differently on purpose. The two rules do not carry
-  the same weight: the language's own grammar has no hyphen in an
-  identifier at all — `name_start` and `name_continue` admit letters,
-  digits and `_`, never `-` — where PEP 8's *Package and Module Names*
-  only discourages the underscore, as a matter of style. `bitcoin-core-rpc`
-  declares `name = "bitcoin-core-rpc"` and imports as `bitcoin_core_rpc`;
-  the repository takes the first spelling, not the second. The built
-  artifact escapes both the same way regardless: PEP 427's escaping
-  rule normalizes any run of `-`, `_` and `.` in a distribution name to
-  `_` for the wheel filename and the `.dist-info` directory, so
-  `bitcoin-core-rpc` and `bitcoin_core_rpc` would both name the same
-  `bitcoin_core_rpc-<version>` wheel.
+  single `-`, so the hyphen is the canonical spelling; an import package
+  is a Python identifier, whose grammar admits `_` and never `-`, so the
+  two are spelled differently on purpose. `bitcoin-core-rpc` declares
+  `name = "bitcoin-core-rpc"` and imports as `bitcoin_core_rpc`, and the
+  repository takes the first spelling. PEP 427's escaping rule folds
+  either to `bitcoin_core_rpc-<version>` for the wheel filename and the
+  `.dist-info` directory, so the built artifact does not tell them
+  apart.
 
-    **`name` itself takes that same canonical spelling.** Folding the
-    family together is right for asking whether a distribution and its
-    repository agree, and says nothing about which member of the
-    family the `[project]` table may pick for itself; this states that
-    it picks the hyphen too. `btclib-secp256k1` declares
-    `name = "btclib-secp256k1"`, the same hyphen the other four
-    publishers write. The wheel and the `.dist-info` directory read
-    `btclib_secp256k1-<version>` either way: the escaping rule above
-    already folds both spellings to the one string.
+    **`name` itself takes that same canonical spelling.** The rule above
+    folds the family together to ask whether a distribution and its
+    repository agree; this says which member of the family the
+    `[project]` table picks for itself.
 
-    **A requirement naming the distribution takes that spelling too**,
-    wherever it is written: a table a resolver parses, a command in a
-    document, a block somebody is meant to copy. The normalization above
-    is what hides the other spelling — it resolves and installs the same
-    distribution, and no gate reports it — so what the written form
-    decides is what a reader copies out and types.
-    `tests/names_test.py` asks this of every tree, reading the position
-    rather than the spelling: a name is a requirement where a table
-    declares it as one, or where a version specifier or an extras
-    bracket follows it, and an import package is written in neither
-    place.
-
-    **Every other place a person writes the name for somebody to copy
-    out takes it too**: a flag's value, an install target, a deployment
-    environment's `url:`, the message on a release tag. The reason is
-    the one above and it does not turn on the position — what the
-    written form decides is what a reader copies and types — so the rule
-    reaches wherever the thing named is the distribution rather than the
-    import package. Position is all `tests/names_test.py` can read, and
-    these sites have none, so this half is a reader's catch.
+    **Wherever the distribution is named for somebody to read or copy,
+    it takes that spelling**: a table a resolver parses, a command in a
+    document, a block somebody is meant to copy, a flag's value, an
+    install target, a deployment environment's `url:`, the message on a
+    release tag. The normalization above is what hides the other
+    spelling — it resolves and installs the same distribution, and no
+    gate reports it — so what the written form decides is what a reader
+    copies out and types. `tests/names_test.py` asks it of every tree,
+    reading the position rather than the spelling: a name is a
+    requirement where a table declares it as one, or where a version
+    specifier or an extras bracket follows it, and an import package is
+    written in neither place. The sites that carry no position are a
+    reader's catch.
 
     **A PyPI page is linked as `https://pypi.org/project/<name>/`**, the
     form `https://pypi.org/p/<name>` redirects to, and it spells the
     name canonically like any other written form: the site serves
     `/project/btclib_secp256k1/` and `/project/btclib-secp256k1/` alike
     and redirects neither, so which spelling a reader is shown is the
-    writer's. The rejected alternative is the short form, which saves
-    the characters and costs everybody who follows it the redirect. A
-    URL that settles its own spelling is outside the rule rather than an
-    exception to it: `/simple/` redirects to the hyphen PEP 503 folds
-    the name to, and asks nothing of whoever writes the link.
+    writer's, and the short form costs whoever follows it the redirect.
+    A URL that settles its own spelling is outside the rule rather than
+    an exception to it: `/simple/` redirects to the hyphen PEP 503 folds
+    the name to.
 
     **The bullet has no subject where a tree builds no distribution.**
     `bbt` and `.github` both declare `package = false` and a
-    `[project].name` of their own — `bbt` after the repository,
-    `.github` after what its suite does — and neither reading is
-    wrong, because neither key names a distribution. `.github` could
-    not take the repository-naming half even if it tried: PEP 503
-    normalizes `.github` to `-github`, which is not a distribution
+    `[project].name` of their own, and neither key names a distribution;
+    `.github` could not take the repository-naming half in any case, PEP
+    503 normalizing `.github` to `-github`, which is not a distribution
     name. A `package = false` tree's `name`, where it declares one, is
     its own choice.
 - **PEP 639 licensing**: `license = "MIT"` as an SPDX string and
   `license-files`, not the deprecated table and not a `License ::`
   classifier. The floor that carries them is the backend's own:
   `btclib-secp256k1` writes `hatchling>=1.27` because an older hatchling
-  rejects both halves above outright, where `uv_build`'s floor is set by
-  what its sdist carries and says that instead. A constant copied from
+  rejects both halves outright, where `uv_build`'s floor is set by what
+  its sdist carries and says that instead. A constant copied from
   another project is a requirement the build does not use.
 
     **`license-files` names `LICENSE` and `AUTHORS.md`, and nothing
@@ -936,66 +872,43 @@ what it holds.
     The MIT notice names a collective, and `AUTHORS.md` is where the
     archive says its members are listed — section 14 has what the file
     is, the vendored attribution it carries included, and why
-    `COPYRIGHT` is not named beside it. The alternative is `LICENSE`
-    alone: what it saves is shipping a file whose text is a pointer to
-    github.com, which a reader who has the archive and not the site
-    cannot follow, and what it costs is an archive that names the
-    collective and never says where its members are listed.
+    `COPYRIGHT` is not named beside it. `LICENSE` alone leaves an
+    archive that names the collective and never says where its members
+    are listed.
 
     **Nothing local refuses the classifier beside the expression**,
     which is why this is a rule rather than something a build catches.
-    One file carrying both, built under each backend — the probe and
-    what it printed are btclib-org/.github#113's — leaves `uv_build`
-    warning, hatchling saying nothing at all, and both archives carrying
-    `License-Expression: MIT` and the deprecated `Classifier:` line
-    together. `setuptools>=77` is what fails the build, and it is not a
-    backend this standard keeps. `twine check` passes both archives, and
-    so does the `trove-classifiers` comparison the `classifiers` bullet
-    names, which asks whether a string is a classifier at all: this one
-    is a current entry of that list and not a deprecated one. Whether
-    PyPI's upload endpoint refuses the pair is unmeasured, asking it
-    meaning publishing a version.
+    A file carrying both leaves `uv_build` warning, hatchling saying
+    nothing at all, and both archives carrying `License-Expression: MIT`
+    and the deprecated `Classifier:` line together; `twine check` passes
+    them, and so does the `trove-classifiers` comparison the
+    `classifiers` bullet names. Whether PyPI's upload endpoint refuses
+    the pair is unmeasured, asking it meaning publishing a version.
 - **`authors` names what the MIT notice names**, in every file that
   declares a `[project]` table, whether or not that file builds
-  anything. The collective is already fixed three times over — by
-  `COPYRIGHT`, by `LICENSE`, and by the header ruff's `CPY` holds every
-  source file to — so a per-tree literal here is a fourth statement of
-  one fact, and the one a package index prints as the package's author.
-  `btclib-node` published an sdist whose `LICENSE`, `AUTHORS.md` and
-  every source header named the collective while `Author-email` named an
-  individual: three to one, and the one on the page
-  (btclib-org/btclib-node#598).
-
-    The alternative is the scoping the bullet above uses — `license-files`
-    reaching only a file that declares a build backend — and what it
-    leaves is why it is not taken here. `bbt` and `.github` build
-    nothing, so the harm cannot reach them; but neither can the check,
-    and an unread key is where a tree drifts unobserved until somebody
-    gives it a backend. Declaring it costs each of them one line, and
-    what it buys is that the answer is the same wherever a reader opens
-    the file.
+  anything. The collective is already fixed by `COPYRIGHT`, by `LICENSE`
+  and by the header ruff's `CPY` holds every source file to, so a
+  per-tree literal here is one more statement of one fact, and the one a
+  package index prints as the package's author. Scoping the key to a
+  file that declares a build backend, as `license-files` above is,
+  leaves it unread in a tree that builds nothing, which is where a tree
+  drifts until somebody gives it a backend.
 
     **The address is fixed by the trees agreeing, not by a literal
     here.** `COPYRIGHT` carries the name and nothing carries the
     address, so spelling the address out in this file would put the one
     copy no command checks in the one document a tree cannot re-derive
-    it from — and the day it moved, every `pyproject.toml` would be
-    updated, the suite would stay green, and this sentence would go
-    stale with nothing reading it. What section 15's suite asks instead
-    is that the name be `COPYRIGHT`'s, transcribed the way `notice-rgx`
-    already is, and that every declaring tree answer the same address as
-    every other, an address none of them declares failing the same as
-    two that disagree. The trees are each other's authority: one changed
-    alone is a drift the suite names, and all of them changed together
-    is a decision rather than an accident.
+    it from. What section 15's suite asks instead is that the name be
+    `COPYRIGHT`'s, transcribed the way `notice-rgx` already is, and that
+    every declaring tree answer the same address as every other, an
+    address none of them declares failing the same as two that disagree.
 - **`keywords` are the GitHub topics**, the same names in the same
   lowercase spelling. The keywords carry an order and the topics do not:
   PyPI shows keywords as given, so they are ordered by relevance, while
   `gh api repos/<org>/<repo> --jq '.topics'` answers alphabetically
-  whatever was set. So the order is maintained on one side and compared
-  on neither, and what it decides is which name is left out when GitHub's
-  twenty are full — past twenty the topics are the first twenty
-  keywords, which is the one place the two may differ at all.
+  whatever was set. What the order decides is which name is left out
+  when GitHub's twenty are full — past twenty the topics are the first
+  twenty keywords, which is the one place the two may differ at all.
 
     Both name what the tree holds. A keyword nothing in the tree answers
     to is a claim made to whoever searched and not kept; something the
@@ -1006,61 +919,48 @@ what it holds.
     **The rule turns on the `[project]` table and not on the index.** A
     tree that uploads nothing declares the list all the same, so that
     the topics github.com shows have something in the tree to be read
-    against. The rejected alternative keys the rule on publishing, the
-    bullets around this one each being about metadata an index serves,
-    and what it costs is that reading: such a tree's topics then answer
-    to no list, and drift from what it holds with nothing red. A
-    repository with no `pyproject.toml` has no table and so no key to
-    write, and section 16's checklist is where its topics are recorded
-    instead.
+    against; keying the rule on publishing instead leaves such a tree's
+    topics answering to no list. A repository with no `pyproject.toml`
+    has no table and so no key to write, and section 16's checklist is
+    where its topics are recorded instead.
 - **`classifiers` are present**, and each is a claim about this tree
   rather than a line taken from a sibling's: `Typing :: Typed` and
   `py.typed` ship together or neither ships, the marker being PEP 561's
   promise to a downstream consumer that the installed package carries
-  types and the classifier that same promise on the index page, so one
-  without the other is a package whose two statements of one fact
-  disagree; an `Operating System` only where the package is built for it
-  and `OS Independent` only where nothing is compiled, and one
+  types and the classifier that same promise on the index page; an
+  `Operating System` only where the package is built for it and
+  `OS Independent` only where nothing is compiled; and one
   `Programming Language :: Python :: X.Y` per interpreter the matrix
-  runs. A `t` suffix in the matrix names that same `X.Y`, free-threading
-  being a build of one version and not a version of its own — unlike a
-  `pypy` prefix, a different implementation with a classifier of its own
-  under `Implementation`. PyPI's own `Free Threading` classifiers are a
-  maturity level an author claims for the code, and one is declared
-  where the merge gate exercises the free-threaded build: a gate refuses
-  the landing that breaks that build, where a sweep runs beside a
-  landing and blocks nothing. The rejected alternative is a green sweep,
-  which says the build passed somewhere and leaves the claim resting on
-  a run nothing waits for. These are conventions this section states, so
-  section 7's closing rule makes them tests rather than hopes: a tree
-  that publishes carries `interpreters_test.py`, which reads the floor,
-  the classifiers and the matrix and refuses a disagreement, section 15
-  saying why publishing is what decides that and not section 1's
-  library. That comparison is over a classifier naming one version, and
-  `Free Threading` names none, so it reaches the free-threading
-  convention no more than it reaches the `Implementation` classifier
-  beside it — which is gated instead by a biconditional, the classifier
-  present exactly where what it claims is run. The free-threading
-  convention takes that same shape, and its second side is the jobs the
-  required check waits on — the aggregate's own `needs` closure — rather
-  than every file CI holds, a sweep naming an interpreter as readily as
-  the gate does, and rather than every cell the gating workflow
-  declares, section 10 keeping a job that concludes successfully
-  whatever it finds outside that closure for as long as it cannot make
-  the claim it is named for: a classifier resting on such a cell is the
-  claim resting on a run nothing waits for that this bullet already
-  refuses. Reading the workflow file is the rejected alternative, and it
-  is the cheaper measurement, answering the same wherever no gating
-  workflow carries a job outside its aggregate's `needs:`; what it costs
-  is a tree's entitlement to the classifier turning on where such a job
-  is written, so that moving it into a workflow of its own takes the
-  classifier away with nothing about the package having changed.
-  Nothing local refuses a classifier that is not a classifier at all —
-  `twine check` reads the long description and not this list, and a
-  build accepts whatever the file says; PyPI's upload endpoint is what
-  rejects one, at the point where a version is already being consumed.
-  `trove-classifiers` is the same list as a package, and comparing
-  against it is the check that can run before then.
+  runs. A `t` suffix in the matrix names that same `X.Y`,
+  free-threading being a build of one version and not a version of its
+  own — unlike a `pypy` prefix, a different implementation with a
+  classifier of its own under `Implementation`.
+
+    PyPI's own `Free Threading` classifiers are a maturity level an
+    author claims for the code, and one is declared where the merge gate
+    exercises the free-threaded build: a gate refuses the landing that
+    breaks that build, where a sweep runs beside a landing and blocks
+    nothing. The gate is the jobs the required check waits on — the
+    aggregate's own `needs` closure — and not every file CI holds, nor
+    every cell the gating workflow declares, section 10 keeping a job
+    outside that closure for as long as it cannot make the claim it is
+    named for.
+
+    These are conventions this section states, so section 7's closing
+    rule makes them tests rather than hopes: a tree that publishes
+    carries `interpreters_test.py`, which reads the floor, the
+    classifiers and the matrix and refuses a disagreement, section 15
+    saying why publishing is what decides that and not section 1's
+    library. That comparison is over a classifier naming one version,
+    which `Free Threading` is not, so the free-threading convention is
+    gated as the `Implementation` classifier beside it is: by a
+    biconditional, the classifier present exactly where what it claims
+    is run. Nothing local refuses a classifier that is not a classifier
+    at all — a build accepts whatever the file says, and `twine check`
+    reads the long description and not this list — so a tree compares
+    against `trove-classifiers`, the same list as a package, rather than
+    waiting for the upload endpoint to reject one where a version is
+    already being consumed.
 
     Both halves of that pairing, and section 2's own `py.typed` bullet
     before it, are a promise about an installed package, and `.github`'s
@@ -1068,11 +968,8 @@ what it holds.
     `classifiers_test.py` ask `git ls-files`, holding no checkout of the
     trees it audits to build an archive from. What verifies the promise
     where a tree publishes is section 12's `check-sdist` and
-    `check-wheel-contents` — measured by building a tree with the marker
-    excluded once from the wheel and once from the sdist:
-    `check-sdist` drives no wheel at all, and passes an sdist that still
-    carries the marker while the wheel built alongside it does not, so
-    that half is `check-wheel-contents`'s, once
+    `check-wheel-contents`: the wheel's half is the second of the two,
+    `check-sdist` driving no wheel at all, once
     `[tool.check-wheel-contents]` names the package. A tree short of
     tier 1 owes the marker with no gate over whether a build carries it,
     this suite included.
@@ -1082,24 +979,16 @@ what it holds.
     **The names above are a publisher's, and a tree that declares the
     table and releases nothing carries the ones with a referent.**
     `documentation` and `changelog` are the two such a tree has none
-    for: btclib-org/.github#649 measured no Read the Docs project and no
-    Pages site behind `btclib-benchmarks`, and `changelog` is the name
-    each publisher here gives `RELEASE_NOTES.md`, which section 2 gives
-    a tier-1 tree alone. So a table short of those two is a name with
+    for: no documentation site stands behind it, and `changelog` is the
+    name each publisher here gives `RELEASE_NOTES.md`, which section 2
+    gives a tier-1 tree alone. A table short of those two is a name with
     nowhere to point rather than a correction nobody made, which the
-    file cannot say for itself: an absent key carries no comment, and
-    nothing reads a `pyproject.toml`'s silence the way section 11 reads
-    a `REPOSITORY.md`'s. This paragraph is where it is said, and a tree
-    with a further reason of its own writes that at a key it does
-    carry, as `btclib-benchmarks` does at `homepage`.
-    Pointing `changelog` at the `CHANGELOG.md` every tier carries is the
-    rejected alternative: what it costs is one name serving two
-    documents across the organization, an index page giving a reader no
-    way to tell which of them it reached. The `keywords` bullet above
-    answers the same question the other way at its own key, and the two
-    do not disagree: a list of names the tree can be read against is
-    worth declaring where nothing is uploaded, where a URL naming a page
-    that does not exist is not.
+    file cannot say for itself, an absent key carrying no comment. This
+    paragraph is where it is said, and a tree
+    with a further reason of its own writes that at a key it does carry,
+    as `btclib-benchmarks` does at `homepage`. Pointing `changelog` at
+    the `CHANGELOG.md` every tier carries is the rejected alternative,
+    and it costs one name serving two documents across the organization.
 
     **A releasing tree's `homepage` is its own documentation site, in
     both surfaces that carry the name**: this field, which an index
@@ -1108,30 +997,28 @@ what it holds.
     and not a project page, a sibling's or its own, and section 2's rule
     that a releasing tree provides documentation is what says there is
     one to name. A tree that releases nothing publishes no URL that
-    outlives a correction, so this asks it nothing. The
-    two are read apart, half of the pair being a setting no file in the
-    tree holds:
+    outlives a correction, so this asks it nothing. The two are read
+    apart, half of the pair being a setting no file in the tree holds:
 
     ```shell
     gh api repos/<org>/<repo> --jq '.homepage'
     sed -n '/^\[project.urls\]/,/^\[/p' pyproject.toml
     ```
 
-    Where they disagree, the alternative weighed was to move the setting
-    to whatever `pyproject.toml` declares. It is the cheaper edit, and it
-    consecrates the state rather than correcting it: a tree whose
-    declared home is another project's page keeps it, where the rule
-    sends both surfaces to the documentation the tree itself provides.
+    Where they disagree, moving the setting to whatever `pyproject.toml`
+    declares is the cheaper edit and consecrates the state rather than
+    correcting it: a tree whose declared home is another project's page
+    keeps it, where the rule sends both surfaces to the documentation
+    the tree itself provides.
 
     **`documentation` names that same URL, and stays.** What it costs is
     an index page showing two links to one page; what it buys is the
     field indexes and tools read for documentation specifically, which
     `homepage` does not stand in for.
 - **No upper bound on a sibling dependency.** Two projects developed
-  together coordinate a break at release time, which is what a ceiling
-  substitutes for when they cannot; a ceiling would cost a release per
-  upstream minor and make a published artifact refuse a version it works
-  with.
+  together coordinate a break at release time, where a ceiling costs a
+  release per upstream minor and makes a published artifact refuse a
+  version it works with.
 - **Every comment carries the reason and the negative result**, held to
   section 9's 80 columns by the `toml-comment-width` hook, which reads
   them as bytes.

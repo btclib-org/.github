@@ -8520,3 +8520,9 @@ nothing red follows from the copies disagreeing.
 - **`README.md` section 10 keeps its rules and drops the rest** (issue
   #1075): the rejected alternatives, examples and restated reasons go,
   and the calendar, the record and the debt sentence stay as parsed.
+
+### Section 3 of the standard, a third shorter
+
+- **Section 3 keeps every rule** (issue #1075): its measurement recipe,
+  rejected alternatives and restated reasons go, and the sites a
+  distribution's name is written at are one bullet rather than two.
