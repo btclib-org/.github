@@ -1431,7 +1431,7 @@ what it holds.
 
 **The lint workflow runs this very file.** There is never a second list
 of the same tools in a workflow: what CI enforces is exactly what a
-commit enforces, and a hook cannot be gated by pre-commit.ci alone.
+local run of it enforces, and a hook cannot be gated by pre-commit.ci alone.
 
 **Every hook that has a fix mode runs with it turned on.** A check-only
 hook reports a defect a machine already knows how to repair and spends a

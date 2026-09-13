@@ -8452,3 +8452,9 @@ nothing red follows from the copies disagreeing.
 - **Rules 1 to 4 of btclib-org/.github#1075** (closes #1033): what is
   filed is `REVIEWING.md`'s one test, `README.md` does not grow, section
   9 is cut back, and `check-changelog` refuses a body past three lines.
+
+### The lint gate's prose names a local run, not a commit
+
+- **`.pre-commit-config.yaml` and section 4 of `README.md` say
+  what a local run enforces and the inert `git commit` recipe goes**
+  (issue btclib-org/.github#966).
