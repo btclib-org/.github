@@ -8491,3 +8491,8 @@ nothing red follows from the copies disagreeing.
 
 - **`BACKLOG` names three trees for #523** (issue #523): `bitcoin-core-rpc`
   now carries `sdist-rebuild.yml`.
+
+### Section 2 of the standard is a third shorter
+
+- **`README.md`'s *The tree* keeps its rules and drops the rest**
+  (issue #1075): rejected alternatives, examples and restated reasons go.

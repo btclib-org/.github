@@ -340,8 +340,8 @@ second pin.
 
 This file is written for a Python package that publishes, and the
 organization holds repositories that are not one. How far it binds a
-repository is that repository's **tier**, and a tier is measured rather
-than declared, by two files:
+repository is that repository's **tier**, measured rather than declared,
+by two files:
 
 - a repository **is Python** where it holds a `pyproject.toml`;
 - it **publishes** where it holds `.github/workflows/release.yml`,
@@ -358,26 +358,20 @@ what tier 2 owes and more.
   table below, the rows marked for it.
 - **Tier 2 — a Python project that publishes nothing.** Everything but
   section 12 and the two workflows that exist for a release, `release`
-  and `pypi-install`, the second reading what the first put on the
-  index.
+  and `pypi-install`.
 - **Tier 1 — a Python package that publishes.** The whole file.
 
 A rule whose subject the tree does not hold asks nothing of it, at any
-tier: section 14 says so of `.taplo.toml` and a tree with no `toml`, and
-it is the same sentence for a section 11 ecosystem with no lock file to
-read. What the tier adds to that sentence is the difference between a
-rule with no subject here and a rule with a subject that is declined,
-which is the difference an alignment finding has to state.
+tier — `.taplo.toml` in a tree with no `toml`, a section 11 ecosystem
+with no lock file. An alignment finding states which it is: a rule with
+no subject here, or a rule with a subject that is declined.
 
 **A tier is a floor, not a ceiling.** Above it, a repository carries
-what its own practice needs: `portanode` carries the `RELEASING.md`
-that says how a release is cut by hand, which its tier does not ask
-for. Below it, a repository short of what its tier binds is a gap,
-filed here. A gap with the reason beside it, where a reader meets the
-repository — its `CLAUDE.md` or its `REPOSITORY.md` — is a decision
-rather than a gap; a sentence that declines a rule and gives no reason
-is a gap with a sentence in front of it, this file's own *a rule with
-no reason beside it* read from the other side.
+what its own practice needs, as `portanode` carries a `RELEASING.md`.
+Below it, a repository short of what its tier binds is a gap, filed
+here. A gap with the reason beside it, where a reader meets the
+repository — its `CLAUDE.md` or its `REPOSITORY.md` — is a decision; a
+sentence that declines a rule and gives no reason is still a gap.
 
 | repository | tier |
 | --- | --- |
@@ -391,12 +385,10 @@ no reason beside it* read from the other side.
 | `portanode` | 3 |
 | `btclib-org.github.io` | 3 |
 
-The table is a claim, and the loop below is what checks it, in either
-direction — a row the loop contradicts is the finding, and so is a
-repository the loop names and the table does not. A new repository is a
-row here in the pull request that creates it, section 16's first step.
-
-`<org>` sits last for the reason section 9 gives.
+The loop below checks the table in both directions: a row it
+contradicts is a finding, and so is a repository it names that the
+table does not. A new repository is a row here in the pull request that
+creates it, section 16's first step. `<org>` sits last by section 9.
 
 ```shell
 for r in $(gh repo list --json name --jq '.[].name' <org>); do
@@ -410,41 +402,27 @@ for r in $(gh repo list --json name --jq '.[].name' <org>); do
 done
 ```
 
-`.github` is this repository, and its row is measured like the others:
-a `pyproject.toml`, a suite, and no `release.yml`. What it declines of
-tier 2 — there is no coverage here, and of section 3 the metadata only
-an index reads — its `CLAUDE.md` says, with the reason.
-
-`btclib-org.github.io` is the organization site, served by Pages from
-the root of its `main`, and btclib-org/.github#530 is where that vehicle
-was decided and this repository rejected as the alternative. Its row is
-measured like the others too: no `pyproject.toml`, which is tier 3.
+`.github` is this repository, and its row is measured like the others;
+what it declines of tier 2 — coverage, and the metadata of section 3
+only an index reads — its `CLAUDE.md` says, with the reason.
+`btclib-org.github.io`, the organization site served by Pages from its
+`main` (btclib-org/.github#530), is measured the same way.
 
 **A tier-2 repository carries neither `RELEASING.md` nor `RELEASE_NOTES.md`.**
-What the first would say is that there is no release — which every such tree
-states under its own `CONTRIBUTING.md`'s *A version, and no release* — and a
-file whose content is its own absence is one sentence in `README.md`, not a
-file: the file's being there tells every reader who has not opened it that
-there is a procedure here, and `SECURITY.md`, which sends a reader to it for
-what a release is in a given tree, sends them instead to a line the `README.md`
-can hold. The second is what a user has to act on *at a release*, on top of the
-changelog, so where no release is cut it has nothing to be on top of;
-`CHANGELOG.md` stays, a change being noticed whether or not a version names it.
-The alternative weighed was carrying both ready, on the ground that a tier-2
-repository could release tomorrow. What that buys is a procedure nobody runs,
-kept in step with section 12 by nobody; and the day a release arrives it
-arrives with `release.yml`, which is the day the repository is tier 1 and the
-two files come with it.
+The first would only say there is no release, which every such tree states
+under its own `CONTRIBUTING.md`'s *A version, and no release*; a file there
+would tell a reader who has not opened it that a procedure exists. The second
+is what a user acts on *at a release*, so where none is cut it has nothing to
+add; `CHANGELOG.md` stays. A release arrives with `release.yml`, which makes
+the repository tier 1, and the two files come with it.
 
 ### Root files
 
 Each is one fact in one place, and the last column is which tiers owe
 the row. Where a row is not every tier's, the reason is beside whatever
-decides the tier — `SECURITY.md`'s under the table, the two release
-documents' in the paragraph above that keeps them out of a tier-2 tree,
-and `pyproject.toml`'s and `uv.lock`'s in the measurement this section
-opens with, a tree with no `pyproject.toml` being no Python project and
-having nothing to lock:
+decides it: `SECURITY.md`'s under the table, the release documents' in
+the paragraph above, and a tree with no `pyproject.toml` having nothing
+to lock:
 
 | file | what it is | tiers |
 | --- | --- | --- |
@@ -463,54 +441,35 @@ having nothing to lock:
 | `pyproject.toml` | the project and every tool's configuration | 1, 2 |
 | `uv.lock` | the pinned resolution | 1, 2 |
 
-**`SECURITY.md` is tier 1's row**, and what it turns on is that the
-repository publishes. The sdist carries the file, so a reader who has
-the archive and not github.com reads the policy from it, and a published
-package's own provenance — what its distributions attest to, and which
-of them is supported — is not something a file shared with every other
-repository can state. Where nothing is published there is no archive,
-and GitHub shows this repository's copy. What that costs is worth
-knowing: an inherited policy cannot name the flaws that are that tree's,
-or the project a report about it should go to instead, so a tree
+**`SECURITY.md` is tier 1's row**, because the repository publishes: the
+sdist carries the file to a reader who has the archive and not
+github.com, and a published package's provenance is not something a file
+shared with every repository can state. Where nothing is published,
+GitHub shows this repository's copy. An inherited policy cannot name a
+tree's own flaws, or another project a report should go to, so a tree
 with either to say says it in its `README.md` and its issue tracker.
 
 **The private channel that row promises is a setting as well as a
-file.** *Report a vulnerability* on a repository's Security tab does not
-wait on somebody remembering to read a mailbox, where the address beside
-it does. The file is tier 1's and the setting is every tier's, because
-the policy sends a reporter to the Security tab of the repository the
-defect is in, and that repository need not be one carrying a policy of
-its own; where the form is off, the policy offers a route the repository
-does not have.
+file.** *Report a vulnerability* on the Security tab does not wait on
+somebody reading a mailbox. The file is tier 1's and the setting is
+every tier's: the policy sends a reporter to the Security tab of the
+repository the defect is in, which need not carry a policy of its own.
 
 **The address kept beside the form** is *security at btclib dot org*,
-spelled out rather than written as a `mailto:` or with an `@`. Beside,
-because an address needs neither an account nor a repository setting to
-work; spelled out, because that is the form a harvester reading a public
-file does not lift, and a reporter reads either. One address for the
-organization rather than one per file, because whether a mailbox is
-answered is not something a reporter can check: a report sent to one
-that is not answered is the failure they never learn about. It names
-the subject rather than a team, so who answers a report can change
-without the policy changing.
+spelled out rather than as a `mailto:` or with an `@`, the forms a
+harvester lifts, and beside the form because it needs no account and
+no repository setting to work. It is one address for the organization, a
+reporter being unable to check whether a mailbox is answered, and it
+names the subject rather than a team.
 
 **The badges at a `README.md`'s head are never curated.** A curated
 list has no answer to *should this tree carry that badge*, so two trees
-curate differently and neither of them is wrong, which is how one file
-comes to open a different way in each tree. Where a property of the
+curate differently and neither is wrong. Where a property of the
 repository decides a badge the answer is read off the tree, and where
-none does the membership is written down — one place either way, and
-neither of them the tree's own taste.
-
-What that gives up is the head as a summary. A badge per sentinel means
-the row grows with section 10's calendar rather than staying the handful
-a reader takes in at once, so the tree running the most sentinels
-carries the longest row and the tree running the fewest carries a row
-all the same. That is the trade and it is deliberate: a
-row long enough to be an audit is worth more here than a row short
-enough to be decoration, because the rule below is what makes it an
-audit. A tree that wants the shorter row drops a sentinel, its badge
-going with it.
+none does the membership is written down. A badge per sentinel makes
+the row grow with section 10's calendar, deliberately: an audit is worth
+more than decoration, and a tree wanting a shorter row drops a sentinel
+and its badge.
 
 Which badge a tree carries, and what decides it:
 
@@ -530,249 +489,131 @@ Which badge a tree carries, and what decides it:
 - **a sentinel section 10's record names the tree in** — that
   sentinel's badge.
 
-**The suite's badge is the `test` workflow's**, and the property is
-that workflow rather than holding a suite: a tree that runs its suite
-somewhere else carries no `test` badge, and what goes red when the suite
-falls is the badge of the workflow that ran it. This repository is that
-tree, its suite running inside `alignment.yml`. Splitting the property
-as *builds documentation* and *served by Read the Docs* are split is the
-rejected alternative: there the two badges answer for a build and a
-subscription, where a `test` badge pointing at `alignment.yml` and the
-`alignment` badge beside it would be one workflow's status under two
-names, and a reader seeing them differ would be reading two measurements
-where there is one.
+**The suite's badge is the `test` workflow's**: a tree running its
+suite elsewhere, as this one does in `alignment.yml`, carries no `test`
+badge, which would be that workflow's status under a second name.
 
 **Building documentation and being served by Read the Docs are two
-properties**, the second not implied by the first: a tree that builds
-`docs/` and subscribes no service to it is complete rather than short of
-anything, which is what *The documentation* below says. Under one
-property covering both, that tree's absent Read the Docs badge and a
-badge a tree owes and does not carry read the same, and only the second
-is a finding. What the split gives up is *published documentation* read
-off the `docs` badge alone: the pair answers it instead, and the order
-below keeps the two adjacent, so a tree holding both carries them
-together.
+properties**: a tree that builds `docs/` and subscribes no service is
+complete, which *The documentation* below says, and one property for
+both could not tell that tree from one missing a badge it owes. Which
+trees are served is read from each tree's `REPOSITORY.md`, a
+subscription being a setting outside the tree; `.readthedocs.yaml` is in
+every tree that builds `docs/` and cannot answer it.
 
-Which trees the second names is read from each tree's own
-`REPOSITORY.md`. `.readthedocs.yaml` is in every tree that builds
-`docs/`, so the tree cannot be read for the property, and a subscription
-is a setting outside the tree rather than a membership the organization
-decides — which is section 11's file and not a record here.
-`btclib-benchmarks` is where that reads as a decision: it builds
-`docs/`, subscribes no service, and says so under its *What is not
-configured, and why*.
-
-**The licence badge is tier 1's for the reason `SECURITY.md` is**: the
-archive leaves github.com. A repository page states the licence beside
-the README of its own accord, which
-`gh api repos/<org>/<repo> --jq .license.spdx_id` is the source of, so
-on the page the badge sits on it restates what is already there, and it
-earns its line where the README travels — the long description an index
-renders, and the copy an unpacked sdist carries. What that gives up is
-a tier-2 tree's row saying what the licence is; the sidebar beside it
-says so, and the row is worth more for the questions no sidebar
-answers.
+**The licence badge is tier 1's**: the repository page already states
+the licence
+(`gh api repos/<org>/<repo> --jq .license.spdx_id`), and the badge earns
+its line where the README travels, to an index and in an sdist.
 
 **A sentinel's badge is recorded rather than derived**, because the
-sentinel is: section 10's *Which trees carry which sentinel* is the one
-record, and the badge and the workflow are one membership rather than
-two. Carrying the badge is why the workflow is there rather than the
-other way round, so a tree drops both together or keeps both.
+sentinel is, in section 10's *Which trees carry which sentinel*: a tree
+drops the badge and the workflow together or keeps both.
 
 **That badge is the workflow-run one for every sentinel but
 `scorecard`** —
-`github.com/<org>/<repo>/actions/workflows/<name>.yml/badge.svg`,
-answering whether the run passed. `scorecard` publishes a score rather
-than a pass or fail, and the property asks for that score:
-`api.scorecard.dev/projects/github.com/<org>/<repo>/badge`, which
-section 10's `scorecard` subsection already ties to the same
-`publish_results: true` the published score itself needs. A
-workflow-run badge there would answer whether the sentinel ran and not
-what it found, where what it found is the reason section 10 gives for
-running it at all.
+`github.com/<org>/<repo>/actions/workflows/<name>.yml/badge.svg`.
+`scorecard` publishes a score rather than a pass or fail, and its badge
+is that score, `api.scorecard.dev/projects/github.com/<org>/<repo>/badge`,
+tied by section 10's `scorecard` subsection to `publish_results: true`.
+A workflow-run badge there would say whether it ran, not what it found.
 
 **Every workflow-status badge carries `?branch=main`** on that URL, the
-gates' and the sentinels' alike. The row is an audit of `main`, and an
-unqualified badge is not always `main`'s: where the workflow has no run
-on `main` it renders another branch's, a deleted branch's included, and
-nothing in the render says so — the fallback is
-[GitHub's own](https://docs.github.com/en/actions/how-tos/monitoring-and-troubleshooting-workflows/monitoring-workflows/adding-a-workflow-status-badge).
-The qualified badge answers for `main` or answers `no status`, which
-*A badge that answers with anything but a measurement* below reads as
-a question: datable while the first `main` run is still ahead, a defect
-once its day has passed. Section 10's *`workflow_dispatch` on
-everything* is what gets a workflow its first `main` run before its
-day, so a tree that lands the badge dispatches the workflow from `main`
-rather than leaving it at `no status` until the schedule comes round.
-The rejected alternatives are the unqualified badge, whose fallback
-reports what the row does not audit, and a qualifier omitted where the
-workflow has no `main` run yet, which is a row re-derived per workflow
-and out of date the day the first run lands. The pre-commit.ci badge,
-`results.pre-commit.ci/badge/github/<org>/<repo>/main.svg`, is outside
-the rule, being the service's own and not a workflow-status badge: its
-branch is in its path.
+gates' and the sentinels' alike. The row is an audit of `main`, and
+where a workflow has no run on `main` an unqualified badge renders
+another branch's, a deleted one's included, with nothing saying so —
+[GitHub's own](https://docs.github.com/en/actions/how-tos/monitoring-and-troubleshooting-workflows/monitoring-workflows/adding-a-workflow-status-badge)
+fallback. The qualified badge answers for `main` or answers `no status`,
+which *A badge that answers with anything but a measurement* below reads
+as a question; a tree that lands the badge dispatches the workflow from
+`main`, by section 10's *`workflow_dispatch` on everything*, rather than
+waiting for the schedule. The pre-commit.ci badge,
+`results.pre-commit.ci/badge/github/<org>/<repo>/main.svg`, is the
+service's own and carries its branch in its path.
 
 **A workflow-status badge's link carries `?query=branch%3Amain`**, the
-same filter in the spelling the runs page takes: the image's
-`?branch=main` is ignored there, and a page ignoring it renders as the
-unfiltered one. A badge line is one claim, so the page the reader
-arrives on lists the runs the image answers for. An unqualified link
-lists every branch's, and a feature branch's red run at the top of that
-list says nothing about `main` — the confusion the qualifier above
-removes, arriving one click later. The rejected alternative is the
-unqualified link, which is how a reader reaches the pull request run
-that broke something and which the filter hides. It is rejected because
-that is a different question from the one the row answers, and because
-the filtered page carries a *Clear filters* control beside the filter it
-applied: the whole history stays one click from a reader who wants it,
-where a run of another branch read as the audit's is an error nothing
-announces.
+same filter in the spelling the runs page takes, the image's
+`?branch=main` being ignored there. The page a reader lands on then
+lists the runs the image answers for, rather than a feature branch's red
+run read as `main`'s; the whole history stays one *Clear filters* click
+away.
 
-**The order is fixed**, and it is three groups: what the software is,
-whether it works, and what the OpenSSF makes of it.
+**The order is fixed**, in three groups, and a tree skips what it does
+not own and keeps the rest in that order, so two `README.md` files
+compare like with like:
 
-The first opens with the release identity as a pair, the version beside
-`github/v/release`; then what the project is, the development status and
-the licence; then the rest of what the index carries, the downloads, the
-supported Python versions, `implementation` and `wheel`.
-
-The second is the gates and then the sentinels: pre-commit.ci, `lint`,
-`test`, `docs`, Read the Docs, then the sentinels in the order section
-10's calendar gives them. The calendar fixes the sentinels' order and
-nothing fixes the gates', so this list is where the gates' order is
-decided rather than read off something else. Read the Docs is among them
-because it answers with a state of the build as the workflow badges
-around it do and builds what `docs` builds.
-
-The third is the Scorecard badge and then the OpenSSF Best Practices
-badge, on a line of their own. `scorecard` is the calendar's last row,
-so the sentinels end where that line begins and the Scorecard's badge
-reads as the last of them without being among them.
-
-A tree skips what it does not own and keeps the rest in that order, so a
-reader comparing two `README.md` files compares like with like instead
-of hunting. Taking the sentinels' order from the calendar is one order
-to maintain rather than two, and what it costs is that a workflow moved
-to another day moves its badge in every `README.md` that carries it.
-That identity is over the sentinels alone: `lint`, `test` and `docs`
-have no row in section 10's calendar, so a reader who looks there for
-one is reading the wrong table rather than an incomplete one.
+1. what the software is — the version beside `github/v/release`, the
+   development status, the licence, the downloads, the supported Python
+   versions, `implementation` and `wheel`;
+1. whether it works — pre-commit.ci, `lint`, `test`, `docs` and Read the
+   Docs, which answers with a state of the build as they do, then the
+   sentinels in section 10's calendar order, so a workflow moved to
+   another day moves its badge; the calendar has no row for the gates,
+   and this list is where their order is decided;
+1. what the OpenSSF makes of it — the Scorecard badge, then the Best
+   Practices badge, on a line of their own; `scorecard` being the
+   calendar's last row, the sentinels end where that line begins.
 
 `img.shields.io/pypi/wheel` and `img.shields.io/pypi/implementation`
-are read off the files a release uploaded rather than off anything the
-project declares: `iniconfig` names no `Implementation` classifier and
-the second renders `cpython` for it anyway. `github/v/release` is read
-in a **pair** with the PyPI version badge, which the order above puts
-beside it: where the two disagree, a release reached the forge and not
-the index.
+are read off the files a release uploaded, not off what the project
+declares. `github/v/release` is read in a **pair** with the PyPI version
+badge: where the two disagree, a release reached the forge and not the
+index.
 
 **A badge that answers with anything but a measurement is a question
-with two answers**, and which one is the point: either the thing it
-reads has not happened yet — a workflow short of its first scheduled
-run, a project not yet built — which is datable and not a defect, or it
-should have happened and did not, which is. That is what keeps the row
-an audit rather than decoration, and it is what catches a workflow
-renamed out from under a badge still pointing at the old file.
+with two answers**: the thing it reads has not happened yet — a first
+scheduled run, a first build — which is datable and not a defect, or it
+should have happened and did not, which is, as for a renamed workflow.
+Each service words that answer its own way — `no status`, `unknown`,
+`repo not found` — and rewords it without notice, so it is read, not
+matched; a command settles the narrower half, a badge not served at all.
+Section 15 has both.
 
-Reading it is a reading and not a pattern, because each service says so
-in its own words and changes them without telling anybody: a GitHub
-workflow badge answers `no status`, pre-commit.ci and Read the Docs
-`unknown`, the Scorecard `invalid repo path`, and shields a phrase per
-family — `repo not found`, `package or version not found`, `no releases
-or repo not found`. A pattern written from that list passes the day a
-service rewords its own failure, and passes silently, which is the one
-way this rule can fail without anybody noticing. What a command settles
-is the narrower half: a badge not served at all, which is what a renamed
-workflow and a deleted project both answer with. Section 15 has both.
-
-What is refused, and the reason is nearly the same one each time:
+What is refused:
 
 - **a badge that asserts a tool rather than measuring one** —
-  `linted with ruff`, `code style: black` and the rest. The string is
-  written into the URL, so it renders the same the day the tool is
-  removed;
-- **`img.shields.io/badge/license-MIT-blue`**, which is that defect in
-  small: it renders `license MIT` because the URL says so, where the
-  derived form renders it because `LICENSE` does. The derived form
-  replaces it rather than sitting beside it, two badges of one fact
-  being two things to keep true;
-- **`last-commit`, `commit-activity` and `contributors`** — derived, and
-  the objection is not that: they measure activity rather than the tree,
-  so a quiet month on a finished library reads as decay;
-- **a coverage badge** — section 8's floor already refuses a fall, so
-  the badge would restate what a gate enforces in exchange for an upload
-  to a third party;
-- **REUSE compliance** — it renders `reuse unregistered`, which is a
-  registration with that service and not a property of the tree;
-- **`img.shields.io/pypi/types`**, which looks like the one badge
-  reading the **shipped artifact** and is not: it reads the
-  `Typing :: Typed` classifier. `urllib3` ships `urllib3/py.typed` in
-  its wheel, declares no such classifier, and the badge renders
-  `untyped`. So it restates section 3's classifier, which section 3
-  already pairs with `py.typed` by rule, and a badge restating a rule
-  the tree gates is the objection made of a coverage badge two entries
-  up. What that gives up is a reader of the index page seeing the
-  typing promise at a glance, which the classifier list on that same
-  page carries anyway;
-- **a link to the repository** — it renders the repository's name
-  because the URL says so, and the row is an audit, so the item that
-  measures nothing is the one that does not belong in it. What that
-  gives up is the reader who meets this file as the long description an
-  index renders or as the `README.md` an unpacked sdist carries, where
-  the repository is not one click away: section 3's `[project.urls]`
-  reaches that reader instead, `repository` being a `Project-URL` line
-  in the sdist's own `PKG-INFO` and a field the index serves.
+  `linted with ruff`, `code style: black`, rendering the same once the
+  tool is gone;
+- **`img.shields.io/badge/license-MIT-blue`**, that defect again, which
+  the derived licence badge replaces;
+- **`last-commit`, `commit-activity` and `contributors`** — they measure
+  activity rather than the tree, so a quiet month on a finished library
+  reads as decay;
+- **a coverage badge** — section 8's floor already refuses a fall;
+- **REUSE compliance** — `reuse unregistered` is a registration with a
+  service, not a property of the tree;
+- **`img.shields.io/pypi/types`**, which reads the `Typing :: Typed`
+  classifier and not the shipped `py.typed`, so it restates section 3's
+  classifier rule;
+- **a link to the repository** — it measures nothing; section 3's
+  `[project.urls]` reaches a reader of the index page or the sdist
+  instead.
 
-The Read the Docs host is `app.readthedocs.org` and not `readthedocs.org`
-because the second answers `307` and redirects to the first: one spelling
-because two are two things to keep true, and that one because it is where
-the other lands, a redirect being something its owner can retire.
-
-The Best Practices badge is admitted where REUSE's is refused, and the
-line between them is what the render measures. For a registered project
-the badge answers with the questionnaire's live state — in progress with
-its percentage, passing, silver, gold — a state that moves when an
-answer stops being true, and it is the same state the Scorecard's
-`CII-Best-Practices` check scores, so the row and the `scorecard`
-sentinel read one fact from two sides. REUSE's stays refused for the
-reason its own bullet above gives, which this render escapes: the
-questionnaire's state is a measurement, where `reuse unregistered` is
-not. Registration is the maintainer's attestation and not a pull
-request. Which trees it reaches is section 10's `scorecard` entry, that
-sentinel's `CII-Best-Practices` check being what reads the
-questionnaire, so a tree the entry does not name has a row complete
-without the badge.
-
-The downloads badge is pepy's rather than `img.shields.io/pypi/dm`, and
-both of them render: the first answers with the project's whole life and
-the second with the last month, so the second is a figure that falls
-without anything having happened to the tree. What that gives up is the
-reading `pypi/dm` is better at, whether the package is being taken up
-now.
-
-**The badge links to `pepy.tech/projects/<name>`, plural, and not
-`pepy.tech/project/<name>`**: the singular answers `308` and redirects
-to the plural, the same reason the Read the Docs host above is
-`app.readthedocs.org` and not `readthedocs.org` — a redirect being
+The Read the Docs host is `app.readthedocs.org` and not `readthedocs.org`,
+which redirects to it: one spelling, and the target, a redirect being
 something its owner can retire.
 
+The Best Practices badge is admitted where REUSE's is refused, because
+for a registered project it renders the questionnaire's live state —
+in progress with its percentage, passing, silver, gold — the state the
+Scorecard's `CII-Best-Practices` check scores. Registration is the
+maintainer's attestation and not a pull request, and a tree section 10's
+`scorecard` entry does not name has a row complete without the badge.
+
+The downloads badge is pepy's rather than `img.shields.io/pypi/dm`,
+which counts the last month and so falls with nothing changed.
+
+**The badge links to `pepy.tech/projects/<name>`, plural, and not
+`pepy.tech/project/<name>`**, which redirects to the plural, for the
+Read the Docs host's reason.
+
 **`CONTRIBUTING.md`'s badge block is inside this rule's reach, and it is
-not the row.** Some trees open *This repository in particular* with a
-block of toolchain badges, and the block's first line is its own
-admission rule: each badge names a choice the sections below explain, or
-a place to go, and the README keeps the ones that can turn red. That
-sentence is the rule, stated where the block is, and it is what makes
-the block a function rather than a curation: a badge belongs there
-because a section of that same file explains the choice it names, so two
-trees' blocks differ exactly where their toolchains do and nowhere else.
-The repository link, refused from the row above as the item that
-measures nothing, is admitted here as the one badge of the *place to go*
-clause — `CONTRIBUTING.md` travels in the sdist and renders where the
-repository is not one click away — so a tree that carries the block
-carries it. The block itself is not owed: a tree without one has nothing
-to explain away, its sections carrying the same choices unbadged. What
-is refused is only a block without its sentence, which is a curated list
-wearing the shape of a rule.
+not the row.** Where *This repository in particular* opens with toolchain
+badges, the block's first line is its admission rule: each badge names a
+choice the sections below explain, or a place to go, and the README
+keeps the ones that can turn red. The repository link is admitted there
+as the *place to go*, and a tree carrying the block carries it. The
+block is not owed; a block without its sentence is refused.
 
 **A publishing repository's `README.md` ends with the line naming who
 supports the work**, under a thematic break:
@@ -784,28 +625,11 @@ The btclib organization and its projects are actively supported by
 [DGI](https://dgi.io) and [CheckSig](https://checksig.com).
 ```
 
-It is tier 1's for the reason `SECURITY.md` is: the archive leaves
-github.com. The README is the long description an index renders, so a
-reader who has that page and not the repository meets the project with
-no organization beside it, and should not have to work out whether it is
-somebody's weekend project. Where nothing is published the README is
-read on github.com under `btclib-org`, and `profile/README.md` — the
-page the owner link reaches — is where the organization says it, once
-and for all of them. The alternative weighed was every tier: what that
-buys below tier 1 is a second copy of a sentence a reader is one click
-from, and what it costs is a claim whose subject is the organization
-kept true in every tree separately. This repository publishes nothing,
-so `profile/README.md` is its only copy.
-
-Identical wherever it appears, and identical on purpose: reworded per
-repository it would be several claims to keep true instead of one, and
-the `links` workflow is what notices if either URL stops resolving. It
-is the organization the line names, not `btclib`: that is one package's
-name, and the siblings that publish beside it would otherwise credit the
-support to one of the things being supported.
-
-The rule is a claim about the repositories, and the loop is what checks
-it:
+It is tier 1's for the reason `SECURITY.md` is: an index renders the
+README with no organization beside it. Below tier 1, `profile/README.md`
+says it once for all, and is this repository's only copy. The line is
+identical everywhere, one claim to keep true, with `links` noticing a
+dead URL, and it names the organization, not one of its packages.
 
 ```shell
 for r in <every repository that publishes>; do
@@ -835,220 +659,105 @@ both tracked.
   `PULL_REQUEST_TEMPLATE.md`, `scripts/` and `mutation/`.
 
 `.github/` is every tier's, and holds what the sections the tier binds
-ask of it. The other three name a package as their subject rather than a
-tier — the package directory *is* the package, `tests/` mirrors it, and
-`docs/source/` documents what it ships — so a tree installing none owes
-none of the three: tier 1 is a package by what that tier is, and a
-project that publishes nothing may install nothing — `package = false`,
-or a build backend given no module to build. Where there is no package a
-bullet has no subject: a floor is over the rules whose subject a tree
-holds, and does not supply one.
+ask of it. The other three have a package as their subject, not a tier,
+so a tree installing none — `package = false`, or a build backend given
+no module to build — owes none of the three. Tier 1 is a package by
+what that tier is.
 
-**`PULL_REQUEST_TEMPLATE.md` sits under `.github/`.** GitHub reads the
-file from `.github/`, from the root or from `docs/`, in that order — in
-a repository's own tree, and in this one for a repository that carries
-none of its own — so where it goes is this file's to say and not the
-forge's, and a copy under `.github/` is the one served whatever else a
-tree holds. It goes there because it is the forge's input rather than a
-document a reader opens, which is what `dependabot.yml` and
-`ISSUE_TEMPLATE/` beside it in the bullet above are as well. What that
-costs is the reader who would have met the template in the repository
-listing, the same trade this section makes for the package directory
-under `src/`.
+**`PULL_REQUEST_TEMPLATE.md` sits under `.github/`**, with the forge's
+other inputs, though GitHub also reads it from the root or `docs/`.
+Wherever GitHub reads it is rejected: trees would differ for nothing.
 
-The rejected alternative is the file wherever GitHub reads one, which
-leaves two trees of one organization differing in shape for nothing and
-cannot be read back off the forge:
-`repos/<org>/<repo>/community/profile` answers
-`files.pull_request_template.url` with this repository's copy for a tree
-that has none of its own, so that endpoint cannot tell a repository
-carrying no template from one carrying its own.
-
-**The package directory sits under `src/`.** A package at the
-repository root is on `sys.path` whenever anything runs from that
-root, so an import can resolve to the checkout instead of to the
-installed distribution, and section 7's convention tests exist to tell
-those two apart. Under `src/` the checkout root holds no importable
-package, so the suite tests what was built or fails outright, and the
-two cannot be silently confused. The root layout costs one directory
-less and puts the package where a reader of the repository listing
-meets it first; that is what this gives up.
+**The package directory sits under `src/`.** A package at the root is
+on `sys.path` whenever anything runs from there, so an import can
+resolve to the checkout instead of the installed distribution, which
+section 7's convention tests exist to tell apart. Under `src/` the suite
+tests what was built or fails outright. What that gives up is one
+directory level and the package first in the repository listing.
 
 **The package directory is singular by the rule and not by omission.**
-`uv_build` lets a project name more than one module in `module-name`, a
-namespace package sharing a distribution between them, and that is a
-shape this file does not state: one tree here is one distribution
-carrying one package, and a project wanting several stays several
-repositories or several `module-name`s of its own rather than one tree
-answering to two directories. The same key also reads a dot as that
-backend's other namespace-package shape -- `module-name = "foo.bar"`
-builds the module `bar` under the shared namespace `foo`, at
-`src/foo/bar`, rather than naming this tree's own package -- and that is
-a shape this file does not state either, for the same reason: the
-package a tree here carries is its own, not a leaf sharing a namespace
-with a module another distribution installs beside it.
-`tests/surface_test.py`'s `package()` reads the key rather than
-resolving it, so a tree declaring either shape meets a message naming
-the repository and the key instead of a directory this file never
-promised it one.
+One tree is one distribution carrying one package of its own. A
+`module-name` listing several modules, and a dotted `module-name =
+"foo.bar"` building a leaf under a shared namespace, are both shapes
+this file does not state; a project wanting several packages stays
+several repositories. `tests/surface_test.py`'s `package()` reads the
+key rather than resolving it, so a tree declaring either shape meets a
+message naming the repository and the key.
 
-A tree without a package may still keep `tests/` above the floor:
-`.github`'s own suite is over the organization rather than over a
-package this repository does not hold, and a tier is free to carry more
-than it is asked for.
+A tree without a package may still keep `tests/` above the floor, as
+`.github`'s own suite over the organization does.
 
 ### The documentation
 
 **A tree that releases a Python package provides documentation; a tree
 that documents need not release.** A release carries a URL no later pull
 request can correct, for the reason section 11's *Pages and Read the
-Docs* gives, so what a published version points a reader at has to
-exist. The converse does not follow: building this directory says
-nothing about publishing, so a tree that keeps it and subscribes no
-service to it is complete rather than short of a release. The badge rule
-above reads *builds documentation* off a tree as a property, and this is
-where a releasing tree owes it — a state recorded rather than work asked
-of anybody, and the next tree kept from arriving without it.
+Docs* gives, so what it points at has to exist. The converse does not
+follow: a tree that builds `docs/` and subscribes no service is
+complete.
 
-What `docs/source/` holds is a few hand-written pages around a reference
-sphinx generates from the docstrings of a typed public API, one set per
-tree and none of them large.
+`docs/source/` holds a few hand-written pages around a reference sphinx
+generates from the docstrings of a typed public API.
 
 **The theme is `furo`**, declared in the `docs` group and named in
-`docs/source/conf.py`. It is built for that shape: the content first,
-the navigation in the left sidebar and the page's own contents in the
-right, light and dark from one setting. It is also what the part of the
-Python ecosystem these projects sit in reads as ordinary — `pip`, which
-it was written for, `black`, `urllib3`, `attrs` and the Python
-developer's guide. The alternative weighed was `shibuya`, which
-Emscripten, Sentry's Python libraries and Authlib use: it is the better
-theme for a product site, and its announcement bars, landing pages and
-`sphinx-design` components are what decides against it here, being
-surface these trees would carry and not use. That surface is what
-choosing `furo` gives up, so a tree that later wants a landing page
-changes theme rather than extending this one. `sphinx_rtd_theme` is
-where a Read the Docs project starts by default, which is a reason to
-find it in a tree and not a reason to keep it.
-
-Whether sphinx stays the generator is open and not decided here: a tree
-that left it would take its theme with it, so nothing above turns on the
-answer.
+`docs/source/conf.py`: built for that shape — the content first, the
+navigation and the page's contents in sidebars, light and dark from one
+setting — and what `pip`, `black`, `urllib3` and `attrs` use.
+`shibuya`'s landing pages and components are surface these trees would
+not use, and `sphinx_rtd_theme` being Read the Docs' default is no
+reason to keep it.
+Whether sphinx stays the generator is open, and nothing here turns on it.
 
 **The build runs `-n` as well as `-W`.** `-W` turns a warning into an
-error and never sees a cross-reference that resolves to nothing: a
-renamed class in a `:class:` role, a parameter type no longer in the
-tree, a moved function is not a warning at all, so the build is green
-and the link goes nowhere. For documentation generated from the
-docstrings of a typed public API that is the documentation half of
-running mypy without `strict` — the tool is there, the flag that makes
-it strict is not, and the gap is invisible because the gate passes. `-n`
-is what makes an unresolved reference a warning for `-W` to refuse.
+error, and an unresolved cross-reference — a renamed class in a
+`:class:` role, a moved function — is not a warning without `-n`, so the
+build is green and the link goes nowhere.
 
 **`sphinx.ext.intersphinx` comes first**, with a mapping for python and
-for whatever else the annotations reach. Without an inventory to resolve
-against, a name from outside the tree resolves to nothing and is
-reported as the tree's own broken link: sphinx's own domain answers for
-the builtins, so `int` and `bytes` are silent, but
-`collections.abc.Sequence`, `pathlib.Path` and `os.getcwd` each draw a
-`reference target not found` with nowhere to look. Turning `-n` on
-before the mapping exists therefore measures the standard library rather
-than the documentation, and fills `nitpick_ignore` with entries whose
-reason is that sphinx was not told where python's objects live.
+for whatever else the annotations reach. Without one, a name from
+outside the tree — `collections.abc.Sequence`, `pathlib.Path` — draws
+`reference target not found`, and `-n` measures the standard library
+while `nitpick_ignore` fills with entries whose only reason is the
+missing mapping.
 
 **`intersphinx_cache_limit = 0` where a mapping names a sibling of this
-organization.** Sphinx writes each fetched inventory beside the doctrees
-and reads that copy back for as many days as the key allows, so which of
-the two a build resolved against is invisible to a diff and to `git
-status`, the doctree directory sitting under ignored build output, and
-`-E` discards the environment and reads the copy back all the same. What
-the key turns on is what the mapping names rather than a judgement about
-how fast an upstream moves: a sibling's `latest` is built from its own
-default branch, so its inventory moves on this organization's own
-landings and within a session, where python's moves on a release of
-CPython. The two directions the copy fails in are not symmetric — a name
-a sibling has removed still resolves off it, so the reference the gate
-exists to refuse passes on a checkout and fails on a runner, whose
-checkout carries none. Asking it of every tree that maps an inventory is
-the rejected alternative: it costs a fetch of each inventory on every
-build, and a build with no route to a mapped host then fails under `-W`,
-paid by every contributor to guard against CPython gaining a name. What
-the trigger as written does not reach is a mapping at some other
-project's rolling `latest`. `btclib-node` is the tree the key is set in,
-and its comment there prices the alternatives that tree weighed.
+organization.** Sphinx reuses a fetched inventory for as many days as the
+key allows, invisibly to a diff and even under `-E`, and a sibling's `latest`
+moves on this organization's own landings: a name it removed still
+resolves on a checkout and fails on a runner. Asked of every mapping, it
+would cost every build a fetch and fail offline under `-W`.
+`btclib-node` is the tree the key is set in.
 
 **`nitpick_ignore` holds only entries whose reason is written beside
-them**, an entry being a reference that genuinely cannot resolve rather
-than one nothing was pointed at. What `-n` costs is paid there and
-nowhere else: every entry is a reference the build stops checking, so a
-broad `nitpick_ignore_regex` buys a green build by giving up the check
-itself. That is the same trade section 5 makes over `ignore` and section
-8 over `exclude_also`, and it is why the first run of `-n` is triage
-rather than a pass.
+them**, an entry being a reference that genuinely cannot resolve. Every
+entry is a reference the build stops checking, so a broad
+`nitpick_ignore_regex` gives up the check itself — the trade section 5
+makes over `ignore` and section 8 over `exclude_also`.
 
-**`myst_heading_anchors` is 6.** A link into a heading of a root
-markdown file, spelled as GitHub derives the fragment from the heading
-text, resolves under `-n` only where myst generated an anchor at that
-heading's level, and where the key is unset it generates none at all: the
-fragment is then an xref to a target no page has, and `-W` fails on a
-link the forge renders correctly. Six is every level markdown heads at,
-which makes the number a fixed point rather than a value re-derived from
-files that move; myst validates the key against a seventh level as well,
-which no markdown heading reaches. A depth read off the tree's own
-headings is the rejected alternative, and what it costs is that
-re-derivation: nothing performs it, no test reading a `conf.py`, and
-part of what it would read belongs to no one tree —
-`CONTRIBUTING.md`'s shared half heads no deeper than
-`###` and section 14 ports it to every repository, so a heading added
-there moves the number in each of them at once, and which tree finds out
-is whichever carries a link into it. What the wider setting costs is
-measured and is nothing: btclib-org/.github#715 built one source at
-several depths and the rendered pages do not differ by a byte, docutils
-giving every section an id of its own whatever myst accepts as a target,
-while the repeated headings a changelog carries take `unique_slug`
-suffixes rather than a warning.
+**`myst_heading_anchors` is 6.** Unset, myst generates no heading
+anchors, and a link into a root markdown file's heading fails `-W` under
+`-n`. Six is every level markdown heads at, a fixed point rather than a
+depth re-derived from headings that move.
 
-**`--keep-going` is not passed.** In the sphinx `uv.lock` resolves, the
-flag is declared with `help=argparse.SUPPRESS` and the application
-records it as unused, so it is missing from `--help` and accepted by the
-parser at once: an unrecognized argument is refused, and this one
-builds. `-W` on its own reports every warning a build raises and fails
-at the end of it — a warning raised while reading and one raised while
-writing arrive from the same run — so what the flag's name asks for is
-what the build does without it. Keeping it with a comment naming what it
-buys is the alternative, and there is nothing for that comment to say.
+**`--keep-going` is not passed.** In the sphinx `uv.lock` resolves the
+flag is accepted, hidden from `--help` and unused: `-W` alone reports
+every warning a build raises and fails at the end, which is what the
+flag's name asks for.
 
 **`exclude_patterns` names what the tree writes under `docs/source/`,
-and is empty where nothing does.** `sphinx-quickstart` seeds it with
-`_build`, `Thumbs.db` and `.DS_Store`. Sphinx reads a file as a document
-only where its name ends in one of `source_suffix`'s suffixes and
-something is left over to be the document's name, so under the `.md` and
-`.rst` these trees declare neither of the last two is a candidate to
-exclude at all. `_build` is a live entry only for a build directory
-written inside the source directory, a page under one being read and
-then failing `-W` for belonging to no toctree; a tree whose build goes
-beside `docs/source/` has nothing there to name. Carrying the stock list
-anyway is the alternative, rejected because it reads as a statement
-about the tree's layout while naming paths that layout does not produce.
+and is empty where nothing does.** `sphinx-quickstart` seeds `_build`,
+`Thumbs.db` and `.DS_Store`: the last two are never documents under the
+`.md` and `.rst` suffixes these trees declare, and `_build` is live only for a
+build directory written inside the source directory. The stock list
+reads as a statement about a layout the tree does not have.
 
 **`templates_path` names the directory under `docs/source/` where the
 tree keeps its own templates, and a tree keeping none does not carry the
-key.** `sphinx-quickstart` seeds it with `_templates` and creates that
-directory empty; git carries no empty directory, so the key arrives in a
-repository without the directory it names. Each entry is prepended to
-the jinja loader chain and none is checked for existence, where
-`html_static_path` warns on a directory that is not there, so a key
-naming nothing builds green while reading as a theme override the tree
-does not make. Where the directory is there the key is what finds the
-template, an override the loader chain does not reach being silent in
-the same way. It also keeps that directory out of the document set: a
-template whose name ends in one of `source_suffix`'s suffixes —
-`sphinx.ext.autosummary`'s stock templates are `.rst` — is otherwise
-read as a document and fails `-W` for belonging to no toctree, which is
-`_build` above under another name. Writing the key empty, as
-`exclude_patterns` above is written, is the rejected alternative: that
-key says which of the things under a directory the tree has are not
-documents, where an empty `templates_path` describes a directory the
-tree does not have.
+key.** `sphinx-quickstart` seeds `_templates` and git carries no empty
+directory, so the key arrives naming nothing, and sphinx builds green on
+it while it reads as a theme override. Where the directory is there, the
+key finds the template and keeps a `.rst` one out of the document set,
+where it would fail `-W` for belonging to no toctree.
 
 ## 3. `pyproject.toml` is the configuration
 
