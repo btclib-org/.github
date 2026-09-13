@@ -8526,3 +8526,9 @@ nothing red follows from the copies disagreeing.
 - **Section 3 keeps every rule** (issue #1075): its measurement recipe,
   rejected alternatives and restated reasons go, and the sites a
   distribution's name is written at are one bullet rather than two.
+
+### Section 12 of the standard, a third shorter
+
+- **Section 12 keeps every rule** (issue #1075): its measurement
+  narratives and rejected alternatives go, and the sdist bullet now names
+  the weekly `sdist-rebuild.yml` re-deriving the property on a tag.

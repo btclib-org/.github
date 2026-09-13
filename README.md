@@ -3474,305 +3474,181 @@ of every version already on the index, which no later release corrects.
 
 ## 12. Releasing
 
-- **Calendar versioning, `YYYY.M.D`.** Between releases the declared
-  version is `YYYY.M`, month only, so a checkout of `main` reports itself
-  as work in progress. A fourth component exists only for a release that
-  shipped broken and cannot be reuploaded. No release candidates: there
-  is no pre-release, only a version not yet tagged, and a check refuses
-  anything that is not digits and dots. The one exemption is a wrapper
-  whose version names the upstream it wraps: `btclib-secp256k1` releases
-  `M.N.P` for the libsecp256k1 `vM.N.P` inside it, its own `README.md`
-  stating the scheme, because a wrapper dated by its own calendar makes
-  a caller read a changelog to answer *which upstream is this*. The
-  exemption is this section's rather than an entry on section 14's
-  *decided per repository* list, so a future wrapper re-argues it here
-  instead of inheriting an answer nobody is asked for — and its fourth
-  component means a rewrap of the same upstream, not the broken-release
-  meaning above, the two schemes never sharing a tree.
+- **Calendar versioning, `YYYY.M.D`.** Between releases the declared version is
+  `YYYY.M`, month only, so a checkout of `main` reports itself as work in
+  progress. A fourth component exists only for a release that shipped broken and
+  cannot be reuploaded. No release candidates: there is no pre-release, only a
+  version not yet tagged, and a check refuses anything that is not digits and
+  dots. The one exemption is a wrapper whose version names the upstream it
+  wraps, its own `README.md` stating the scheme and a fourth component there
+  meaning a rewrap: `btclib-secp256k1` releases `M.N.P` for the libsecp256k1
+  `vM.N.P` inside it, a wrapper dated by its own calendar making a caller read a
+  changelog to answer *which upstream is this*. The exemption is stated here
+  rather than on section 14's *decided per repository* list.
 - **A rehearsal on TestPyPI** uses `.dev<run number>`, patched in by the
   workflow rather than typed, so it is unique per run and sorts below the
   release it rehearses.
-- **The tag is signed**, is checked to be an ancestor of `main`, and is
-  checked to say what `pyproject.toml` says.
-- **The release pull request closes the cycle's sections and opens the
-  next.** It retitles the work-in-progress section of `CHANGELOG.md` and
-  of `RELEASE_NOTES.md` to the version being tagged, and opens an empty
-  work-in-progress section above them in the same pull request, so the
-  topmost `##` heading of either file on the default branch is a
-  work-in-progress heading at every commit and a branch landing across a
-  release day has an open section to append to. Opening the next cycle
-  in a pull request of its own, ahead of anything else landing, is the
-  rejected alternative: the window it leaves is one pull request wide,
-  and the merge freeze that covers it is a rule about how a person
-  sequences merges on the day several branches are in flight, enforced
-  by nothing, where retitling and opening together leaves no window to
-  sequence around. The next generic version does not travel with the
-  retitle: the tag is checked to say what `pyproject.toml` says, above,
-  so a pull request that released and bumped at once would cut its tag
-  on a tree declaring a version that tag does not name, and the version
-  bump stays in the pull request that sets it. The empty section is
-  not what a release publishes: the notes are lifted from the section
-  whose heading is the tag's own, which is the one just retitled.
-- **A published sdist reproduces from its tag.** The attestation every
-  publisher attaches vouches for bytes, so a release rebuilt from the
-  commit its tag names — by running what the release ran — gives those
-  bytes back, or the attestation vouches for something no rebuild can
-  check. What the release ran is the repository's to state and this
-  file's to require: `RELEASING.md` names the steps between the tag and
-  the archive with the reason beside each, so replacing one of them is a
-  change to that file and not to this one, where a rule naming the
-  script of the day would date itself the day it is replaced. Section
-  3's backends already differ underneath it — `uv_build` ignores
-  `SOURCE_DATE_EPOCH` and writes fixed member metadata into both
-  archives, where hatchling reads the variable and writes a constant of
-  its own without it — and what either publisher owes is the same. The
-  released bytes are that pipeline's output rather than the backend's: a
-  normalization step run after the build replaces the member metadata
-  the backend wrote, so the digest the attestation signs is the step's,
-  and not a belt over a backend that fixes that metadata on its own. On
-  `bitcoin-core-rpc` the step moves every member's mtime from `0` to the
-  tagged commit's second and the digest with it, btclib-org/.github#140
-  having the figures, so a publisher that runs such a step and one that
-  does not attest different bytes of the same tree rather than making
-  one guarantee in two styles. Leaving each publisher to weigh whether
-  its backend has made the step redundant is the rejected alternative,
-  that being the reading under which a migration drops it as inert and
-  moves what the attestation vouches for. `SOURCE_DATE_EPOCH` itself is
-  exported from the tagged commit for what reads it — the normalizer,
-  and the bill of materials below — and under `uv_build` for nothing
-  else, its archives being the same bytes either way. Under hatchling
-  the variable reaches the archives too, so exporting it for the bill of
-  materials moves the digests the attestation vouches for. The compiled
-  wheels are outside the property and are named rather than passed over.
-  `btclib-secp256k1` publishes two builders' wheels and `release.yml`
-  downloads them under one artifact pattern, so the index attests every
-  one beside the sdist, PEP 740 covering every file the publish job
-  uploads, and a verifier who rebuilds one and gets other bytes has
-  nothing to tell them whether that is a defect. One tool does not
-  rebuild both: cibuildwheel builds the `cp3XX` and `pp3XX` wheels
-  against a compiler and a toolchain nothing pins, where the
-  `py3-none-*` wheels are cffi ABI-mode builds `python -m build` writes
-  on the runner, and cibuildwheel run against one of those produces a
-  file of another name rather than other bytes. What is measured is
-  narrower than what either builder writes: `wheel-reproducibility.yml`
-  builds one interpreter's wheel twice in one image and diffs the
-  archives, and whether a wheel of another ABI tag reproduces is
-  measured on no trigger — the published `py3-none-*` ones being
-  btclib-org/btclib-secp256k1#540. Saying nothing about the wheels is
-  the rejected alternative for that reason, an attestation
-  reading as one guarantee over every file it covers. Pinning the
-  environment so they reproduce across two of them is the other, and in
-  the tree that compiles them it is one measurement across the platforms
-  rather than one decision: a digest on the container the Linux build
-  compiles inside states that environment to anybody who can pull it,
-  which is btclib-org/btclib-secp256k1#524, where Xcode and the MSVC
-  toolset are chosen from what a runner image already carries, so the
-  same pin on macOS and Windows states nothing to a verifier who was
-  never on the machine and is declined rather than pending —
-  btclib-org/btclib-secp256k1#554. Nothing yet re-derives the property
-  on a released tag — the command that rebuilds one and verifies it
-  against the attestation is one a person runs — and that half is
-  btclib-org/.github#523's.
-- **A bill of materials is published beside the distribution files**,
-  by every publisher, and the attestation signs it with them. One answer
-  rather than an answer and its exemptions, for the reason every
-  publisher signs: a consumer reading the organization's releases should
-  not have to learn which of them describes itself and why. What makes
-  it reproducible is the variable the bullet above exports for it: its
-  timestamp is `SOURCE_DATE_EPOCH` and its serial number derives from
-  the distribution files' digests, so a rebuild of a released tag writes
-  the same document and the attestation verifies it exactly as it does
-  the archives. The exemption that carried weight was
-  `btclib-secp256k1`'s — a document naming only
-  `cffi` where the package's content is a C library at a pinned commit
-  invites a reader to trust a silence — and it is an argument about the
-  generator, which btclib-org/btclib#1280 has describe what a
-  distribution contains rather than what it declares, not one against
-  the document. `bitcoin-core-rpc`'s was weaker: `components: []` is
-  true rather than misleading, and a signed statement a consumer can
-  read is not the assertion inside a run that consumer never sees.
-  btclib-org/.github#144 carries the trees that still owe one.
+- **The tag is signed**, is checked to be an ancestor of `main`, and is checked
+  to say what `pyproject.toml` says.
+- **The release pull request closes the cycle's sections and opens the next.**
+  It retitles the work-in-progress section of `CHANGELOG.md` and of
+  `RELEASE_NOTES.md` to the version being tagged and opens an empty
+  work-in-progress section above them, in the same pull request, so the topmost
+  `##` heading of either file on the default branch is a work-in-progress
+  heading at every commit and a branch landing across a release day has an open
+  section to append to. Opening the next cycle in a pull request of its own
+  leaves a window to sequence merges around. The next generic version does not
+  travel with the retitle: the tag says what `pyproject.toml` says, so the bump
+  stays in the pull request that sets it. A release publishes the section just
+  retitled, whose heading is the tag's own, and not the empty one above it.
+- **A published sdist reproduces from its tag.** The attestation every publisher
+  attaches vouches for bytes, so a release rebuilt from the commit its tag names
+  — by running what the release ran — gives those bytes back, or the attestation
+  vouches for something no rebuild can check. What the release ran is
+  `RELEASING.md`'s to name: the steps between the tag and the archive, with the
+  reason beside each. Every publisher runs a normalization step after the build,
+  replacing the member metadata the backend wrote, whatever section 3's backend
+  fixes on its own: the digest the attestation signs is the pipeline's output,
+  and a publisher left to judge the step redundant moves what the attestation
+  vouches for. `SOURCE_DATE_EPOCH` is exported from the tagged commit for what
+  reads it — the normalizer, and the bill of materials below.
+  `sdist-rebuild.yml` re-derives the property weekly, rebuilding the latest
+  release's sdist from its tag and running `gh attestation verify` over it;
+  section 10's record names the trees that carry it.
+- **The compiled wheels are outside that property**, and are named rather than
+  passed over, the index attesting every one beside the sdist under PEP 740: a
+  verifier who rebuilds one and gets other bytes would otherwise not know
+  whether that is a defect. No one tool rebuilds both families
+  `btclib-secp256k1` publishes, cibuildwheel building the `cp3XX` and `pp3XX`
+  wheels against a compiler and a toolchain nothing pins where the `py3-none-*`
+  wheels are cffi ABI-mode builds `python -m build` writes on the runner, and
+  what is measured is narrower still: `wheel-reproducibility.yml` builds one
+  interpreter's wheel twice in one image and diffs the archives, and whether a
+  wheel of another ABI tag reproduces is measured on no trigger, the published
+  `py3-none-*` ones being btclib-org/btclib-secp256k1#540. Pinning the
+  environment so they reproduce across two images is a digest on the container
+  the Linux build compiles inside, btclib-org/btclib-secp256k1#524; on macOS and
+  Windows the toolchain is chosen from what a runner image already carries, so
+  the same pin states nothing to a verifier who was never on the machine and is
+  declined — btclib-org/btclib-secp256k1#554.
+- **A bill of materials is published beside the distribution files**, by every
+  publisher, and the attestation signs it with them: one answer rather than an
+  answer and its exemptions, so that a consumer need not learn which of the
+  organization's releases describes itself and why. What makes it reproducible
+  is the variable the bullet above exports for it: its timestamp is
+  `SOURCE_DATE_EPOCH` and its serial number derives from the distribution files'
+  digests, so a rebuild of a released tag writes the same document and the
+  attestation verifies it as it does the archives. Whether the document names a
+  vendored C library rather than only the `cffi` it is reached through is
+  btclib-org/btclib#1280, an argument about the generator and not one against
+  the document. btclib-org/.github#144 carries the trees that still owe one.
 - **What is published is inspected first** — `twine check --strict`,
-  `check-wheel-contents` and `pyroma --min 10` on the files the release
-  will publish; then the wheel is installed from an empty directory and
-  smoke-tested, so the import finds the wheel and not the source tree.
-  Those read a distribution's *metadata*, and an unconfigured
-  `check-wheel-contents` reads the wheel's own `RECORD`, which is the
-  wheel's account of itself: none of them asks what the tree the wheel
-  was built from has. A `py.typed` dropped by a `package-data` typo gives
-  a wheel that installs, imports, type checks as `Any`, and passes all of
-  the above.
-- **So the wheel is diffed against the package tree it claims to carry**,
-  in both directions, and where that tree is the whole of the wheel's
-  library the diff is `[tool.check-wheel-contents]` naming it — a line of
-  configuration rather than a check to write, test and keep in step with
-  a page. Where the wheel is *not* one package tree, that flag has no
-  wording for it: a compiled artifact at the wheel's own root is reported
-  as a file outside the package whether or not it is the one the build
-  intends, and the repository owes a script saying what the flag cannot,
-  its allowlist stated in prose and compared against the script's
-  constants by a test, in both directions, so neither is free to drift.
-  Some other check implying the same diff does not stand in for the flag
-  where the flag applies: that is the same assertion bought with code to
-  maintain, and it moves what the `dist` job knows about the artifact
-  into a chain that holds only while every link runs.
+  `check-wheel-contents` and `pyroma --min 10` on the files the release will
+  publish; then the wheel is installed from an empty directory and smoke-tested,
+  so the import finds the wheel and not the source tree. Those read a
+  distribution's *metadata*, and an unconfigured `check-wheel-contents` reads
+  the wheel's own `RECORD`: none of them asks what the tree the wheel was built
+  from has. A `py.typed` dropped by a `package-data` typo gives a wheel that
+  installs, imports and type checks as `Any`, and passes all of them.
+- **So the wheel is diffed against the package tree it claims to carry**, in
+  both directions, and where that tree is the whole of the wheel's library the
+  diff is `[tool.check-wheel-contents]` naming it — a line of configuration
+  rather than a check to maintain. Where the wheel is *not* one package tree,
+  that flag has no wording for it: a compiled artifact at the wheel's own root
+  is reported as a file outside the package whether or not it is the one the
+  build intends, and the repository owes a script saying what the flag cannot,
+  its allowlist stated in prose and compared against the script's constants by a
+  test, in both directions, so neither is free to drift. Another check implying
+  the same diff does not stand in for the flag where the flag applies.
 - **The sdist is diffed against what git tracks**, in both directions, by
-  `check-sdist` in the gate of every repository that builds one. It
-  builds the archive and compares it against the index, and its exit code
-  says which way the two differ: a tracked file the archive dropped, or a
-  member git does not track. The first is an include list's failure — a
-  tracked file nobody added to `source-include` — and it is silent. The
-  second is an exclude list's, and it is not loud either: an archive too
-  wide is noticed by whoever reads the archive, and nothing else in a
-  release path does, `twine check`, `check-wheel-contents` and `pyroma`
-  each reading a distribution's account of itself, so a local build
-  artifact or a vendored tree mid-update reaches the index with nothing
-  asking. Both directions being quiet is why the check is not conditional
-  on the inclusion being an include list, and what it costs an
-  exclude-list tree is a `[tool.check-sdist]` table naming the tracked
-  files its archive leaves out on purpose. Which table declares the
-  inclusion is the backend's: `uv_build` reads `[tool.uv.build-backend]`
-  and hatchling `[tool.hatch.build.targets.sdist]`, neither reads the
-  other's, and a table the declared backend does not read is
-  configuration that looks like a rule and governs nothing. So
-  `check-sdist` keys a plugin on `[build-system]` and reads that
-  backend's own exclusions, which is what leaves `[tool.check-sdist]`
-  holding only what no pattern of the backend's accounts for. Past that,
-  an allowlist for the sdist — which members may sit at the archive's
-  root, that every member is a regular file or a directory where a tar
-  can carry a symlink or a device node, that no directory holds another
-  distribution's metadata — is the escalation a repository takes when its
-  archive carries more than the package.
-- **A hook that builds the project builds it with the backend
-  `[build-system]` admits**, and what that takes differs between the two
-  hooks, because only one of them builds through PEP 517 at all. Both
-  build without isolation, pre-commit.ci being unable to create the
-  isolated environment.
+  `check-sdist` in the gate of every repository that builds one. It builds the
+  archive and compares it against the index, and its exit code says which way
+  the two differ: a tracked file the archive dropped, or a member git does not
+  track. Neither direction is loud otherwise, the metadata checks above each
+  reading a distribution's account of itself, so the check is not conditional on
+  the inclusion being an include list, and what it costs an exclude-list tree is
+  a `[tool.check-sdist]` table naming the tracked files its archive leaves out
+  on purpose. Which table declares the inclusion is the backend's — `uv_build`
+  reads `[tool.uv.build-backend]`, hatchling `[tool.hatch.build.targets.sdist]`
+  — so `check-sdist` keys a plugin on `[build-system]` and reads that backend's
+  own exclusions, leaving `[tool.check-sdist]` holding only what no pattern of
+  the backend's accounts for. Past that, an allowlist for the sdist — which
+  members may sit at the archive's root, what kind of member the tar holds,
+  whether a directory holds another distribution's metadata — is the escalation
+  a repository takes when its archive carries more than the package.
+- **A hook that builds the project builds it with the backend `[build-system]`
+  admits**, and what that takes differs between the two hooks, because only one
+  of them builds through PEP 517 at all. Both build without isolation,
+  pre-commit.ci being unable to create the isolated environment.
 
-    `pyroma` reads the metadata through
-    `build.util.project_wheel_metadata`, and its non-isolated path never
-    reads `requires` at all: there is no `check_dependencies` call on
-    that branch, so it returns metadata once the backend's own PEP 517
-    hook does, whatever else the list names. What falls back to an
-    isolated build is pyroma's own wrapper, on a `BuildException` from
-    that first attempt — so the hook carries `additional_dependencies`
-    naming the backend at `[build-system]`'s own specifier: that keeps
-    the backend importable, which is what the first, requires-blind
-    attempt needs in order not to raise, and the fallback — a virtual
-    environment pre-commit.ci cannot create — is never asked for.
-    btclib-org/.github#145 has the run.
+    `pyroma`'s non-isolated path never reads `requires`: it returns metadata
+    once the backend's own PEP 517 hook does. So the hook carries
+    `additional_dependencies` naming the backend at `[build-system]`'s own
+    specifier, which keeps the backend importable — what that requires-blind
+    attempt needs in order not to fall back on an isolated build pre-commit.ci
+    cannot create.
 
-    `check-sdist` drives `uv build`, and that is not PEP 517 for this
-    backend: given `build-backend = "uv_build"` it builds with the copy
-    bundled in the running uv, whether or not isolation is disabled and
-    whether or not the environment holds a `uv_build` at all. Where
-    `requires` excludes that uv with a ceiling below it, it warns and
-    builds with the bundled copy anyway; where the exclusion is a floor
-    above it, uv looks past its own copy for a `uv_build` meeting that
-    floor instead and the build fails when none does — `import uv_build`
-    raising `ModuleNotFoundError` under `--no-build-isolation`, the shape
-    this hook takes. Either way naming the backend there decides
-    nothing, the target environment's own `uv_build` being what neither
-    branch consults, and what packs the archive the gate compares
-    against git is the hook environment's `uv`, which the manifest
-    installs unpinned. `args: [--inject-junk, --installer=pip]`
-    is what brings the hook under the rule: check-sdist then builds
-    through `build --no-isolation`, which does read the environment, so
-    the backend `additional_dependencies` names is the one that packs
-    the archive. `--inject-junk` is repeated because `args:` replaces
-    the manifest's list rather than adding to it, and uv's own
-    `--force-pep517` is out of reach, check-sdist writing that command
-    line itself.
+    `check-sdist` drives `uv build`, which is not PEP 517 for this backend:
+    given `build-backend = "uv_build"` it builds with the copy bundled in the
+    running uv, warning where `requires` excludes that uv with a ceiling below
+    it, and failing where the exclusion is a floor above it, uv looking past its
+    own copy for a `uv_build` that meets the floor. Naming the backend there
+    decides nothing either way, so the hook takes
+    `args: [--inject-junk, --installer=pip]`: check-sdist then builds through
+    `build --no-isolation`, which does read the environment, so the backend
+    `additional_dependencies` names is the one that packs the archive.
+    `--inject-junk` is repeated because `args:` replaces the manifest's list
+    rather than adding to it.
 
-    **What the failure keeps is the hook environment inside `requires`**,
-    which is the whole of what this bullet asks: `build --no-isolation`
-    refuses an environment that does not satisfy it — `ERROR Missing
-    dependencies` — so the backend that packs the archive is one
-    `[build-system]` admits or there is no archive. It does not keep the
-    two specifiers equal, and nothing does: a specifier written in two
-    files is still a range that drifts when the ceiling is raised in one
-    of them, and a `requires` widened past the hook's line leaves that
-    line satisfying it and green. That half btclib-org/.github#145 leaves
-    open, there being no bot to close it — section 10 has why hook
-    revisions have no Dependabot ecosystem, and what bumps a `rev` leaves
-    an `additional_dependencies` specifier where it is. Pinning `uv` on
-    the hook is the alternative, and it is what the default path would
-    need, the driver being the backend there; it is refused because it
-    leaves even the first half silent, a `uv` pinned outside `requires`
+    **What the failure keeps is the hook environment inside `requires`**:
+    `build --no-isolation` refuses an environment that does not satisfy it, so
+    the backend that packs the archive is one `[build-system]` admits or there
+    is no archive. It does not keep the two specifiers equal, and nothing does —
+    a `requires` widened past the hook's line leaves that line satisfying it and
+    green, which btclib-org/.github#145 leaves open. Pinning `uv` on the hook
+    instead leaves even that first half silent, a `uv` pinned outside `requires`
     warning where the `pip` installer refuses.
 - **A release is checked against the last one for a break in the public
-  surface**, by `griffe check` in the release path, comparing the tag
-  being cut against the tag before it. Section 7's public-surface census
-  asserts that `__all__` is declared and that what it names exists,
-  which answers *is this module's surface stated* and never *did this
-  release take something the last one gave*; `RELEASE_NOTES.md` is where
-  a caller is told to act and is written by hand, so nothing in the tree
-  can tell that an entry is missing. `griffe check` walks the public API
-  of two git references and reports what broke, each finding named by
-  the kind of break it is — a public object removed, a parameter's
-  default or kind changed, a parameter added as required, a return or
-  attribute type no longer compatible, a public name now pointing at a
-  different kind of thing — and it exits non-zero having found any. It
-  loads each reference from a git worktree of its own rather than from
-  an installed distribution, so a pure-Python tree needs nothing built;
-  and it is the loader `mkdocstrings` reads a Python API with, which is
-  what makes it a maintained tool rather than a script somebody wrote
-  once — it is a dependency taken on for this and nothing else here, and
-  that is the cost. What it reports is either a
-  `RELEASE_NOTES.md` entry or a reason for not being one, written where
-  the release is being written.
+  surface**, by `griffe check` in the release path, comparing the tag being cut
+  against the tag before it. Section 7's census answers *is this module's
+  surface stated* and never *did this release take something the last one gave*,
+  and `RELEASE_NOTES.md` is written by hand, so nothing else can tell that an
+  entry is missing. `griffe check` walks the public API of two git references,
+  names each break by the kind of break it is, and exits non-zero having found
+  any. What it reports is either a `RELEASE_NOTES.md` entry or a reason for not
+  being one, written where the release is being written.
 
-    **The release path and not the merge gate**, which is the choice
-    worth stating because the second is the one that reads as stricter.
-    A gate comparing the branch against the last release makes a
-    caller-visible break a decision taken in the pull request that makes
-    it, and before 1.0 a package breaks its surface deliberately: a gate
-    that reports every such break has nothing to say about which of them
-    are allowed, so every run ends in a human deciding — which is the
-    release path's answer arriving earlier and more often rather than a
-    stricter check. It becomes a gate the day btclib-org/btclib#651
-    settles a deprecation policy and not before, that policy being the
-    missing half — the question stops being *did the surface change* and
-    becomes *did it change without the release of warning the policy
-    owes*, which a command can answer on its own. So the release path's
-    invocation is written to take a second reference pair rather than to
-    be replaced by one.
+    **The release path and not the merge gate.** Before 1.0 a package breaks its
+    surface deliberately, so a gate comparing the branch against the last
+    release ends every run in a human deciding which breaks are allowed. It
+    becomes a gate the day btclib-org/btclib#651 settles a deprecation policy,
+    the question then being *did the surface change without the release of
+    warning the policy owes*, which a command can answer on its own; so the
+    invocation takes a second reference pair rather than being replaced by one.
 
 - **A job named in `needs:` that is not a gate takes `always()` in the
-  dependent's own guard**, beside an explicit `needs.<job>.result ==
-  'success'` for each listed job that is one. The public-surface check
-  above is such a job: it exits non-zero on any break, which is what a
-  cycle before 1.0 is expected to produce, and `needs:` alone refuses to
-  start a job whose listed dependency failed or was skipped. Listing it
-  orders the reading before the upload, and the guard is what says the
-  reading's result decides nothing. `always()` here and not the
-  `!cancelled()` section 10 gives an aggregate: what that section weighs
-  `always()` against is a superseded run turning a required check red,
-  and a release workflow, triggered by a tag push and a dispatch,
-  produces no required check.
-- **The widening does not propagate, so each dependent states it for
-  itself.** A bare `needs:` reads back through the listed job's own
-  `needs:` chain, so a job two hops from the non-gating one is skipped
-  although the dependency it names succeeded — which is how a
-  post-publish check comes to be skipped by a job it does not name.
-  Putting `always()` on the non-gating job itself is the rejected
-  alternative and moves nothing: what a dependent reads is that job's
-  result, and a job that ran and failed stops it exactly as a skipped one
-  does. Dropping it from `needs:` is the other, and it costs the
-  ordering: the surface is then read beside the upload rather than before
-  it, which is a reading arriving too late to bear on the release it was
-  written for.
-- **A release run is audited job by job for `skipped`, not for red.** A
-  failed job is loud; a skipped one carries no step, starts and completes
-  in the same second, and gives a reader looking for a failure nothing to
-  look at, so a release whose post-publish check never ran reads as a
-  release that finished. What answers is the run's own job listing — the
-  endpoint section 10's aggregate reads from inside its run, asked here
-  of a run that has ended. The run id is quoted for the query string
-  beside it, so the assignment stands in a block of its own, for the
-  reason section 9's bullet gives, and the block below it writes
-  `${run:?}`, unset being what an unfilled paste of that block alone
-  supplies:
+  dependent's own guard**, beside an explicit `needs.<job>.result == 'success'`
+  for each listed job that is one. The public-surface check above is such a job:
+  it exits non-zero on any break, which a cycle before 1.0 is expected to
+  produce, and `needs:` alone refuses to start a job whose listed dependency
+  failed or was skipped. Listing it orders the reading before the upload, and
+  the guard is what says the reading's result decides nothing. `always()` here
+  and not section 10's `!cancelled()`: what that section weighs `always()`
+  against is a superseded run turning a required check red, and a release
+  workflow produces no required check.
+- **The widening does not propagate, so each dependent states it for itself.** A
+  bare `needs:` reads back through the listed job's own `needs:` chain, so a job
+  two hops from the non-gating one is skipped although the dependency it names
+  succeeded. Putting `always()` on the non-gating job itself moves nothing, a
+  job that ran and failed stopping a dependent exactly as a skipped one does;
+  dropping it from `needs:` costs the ordering, the surface then being read
+  beside the upload rather than before it.
+- **A release run is audited job by job for `skipped`, not for red.** A failed
+  job is loud; a skipped one carries no step, so a release whose post-publish
+  check never ran reads as a release that finished, and an audit for red says
+  nothing about what a failure took with it. What answers is the run's own job
+  listing, its run id in a block of its own for the reason section 9's bullet
+  gives:
 
     ```shell
     run=<id>
@@ -3784,79 +3660,38 @@ of every version already on the index, which no later release corrects.
       --jq '.jobs[] | [.conclusion, (.steps|length), .name] | @tsv'
     ```
 
-    read against the jobs the release was expected to hold. Auditing for
-    red alone is the rejected alternative, and it is what a reader does
-    unprompted: it finds whatever went wrong and says nothing about what
-    the failure took with it.
-- **The smoke test runs again in the release job, without constraints**,
-  after the upload rather than before: installing a dependency executes
-  its code, and a compromised one must not reach a `dist/` still to be
-  handed on.
+    read against the jobs the release was expected to hold.
+- **The smoke test runs again in the release job, without constraints**, after
+  the upload rather than before: installing a dependency executes its code, and
+  a compromised one must not reach a `dist/` still to be handed on.
 - **A scheduled workflow installs from the index** and asks whether the
   published artifact *works*, not whether it installs — an import runs
-  `__init__.py` alone, where a data file missing from the wheel is opened
-  only at the first call that needs it.
-- **That workflow is where the post-publish check lives, called by the
-  release as a job of its own, and never a step appended to a publish
-  job.** A publish job downloads the distribution files and hands them to
-  `pypa/gh-action-pypi-publish`, so nothing in it provisions a toolchain:
-  what the runner carries is whatever its image ships and nothing the
-  tree chose — no `uv`, and an interpreter at the image's version rather
-  than at the one `requires-python` asks for. A step appended there
-  provisions its own or fails in one of two ways: on the command's name
-  where what it calls is `uv`, `127` being the shell's answer to a
-  command that is not there, and on the interpreter's version where it
-  is not — or, where `requires-python` admits the image's version, it
-  passes on an interpreter the tree did not choose, which says nothing.
-  Neither failure names the runner as its cause. The reusable workflow
-  provisions its own toolchain, so nobody placing the check there has
-  to know either.
-- **Placement also decides whether the failure is legible.** Both
-  placements run after the upload, so either can only report an act
-  already irreversible — a filename on the index is not retractable. A
-  job that fails is a row of its own in the listing above, red beside a
-  publish job that stayed green; a step that fails turns the publish job
-  itself red, and every job guarded on that job's `success` skips with
-  it — the attestation and the GitHub release among them — leaving a
-  release published, unattested and unannounced behind one red job that
-  names none of it.
+  `__init__.py` alone, where a data file missing from the wheel is opened only
+  at the first call that needs it.
+- **That workflow is where the post-publish check lives, called by the release
+  as a job of its own, and never a step appended to a publish job.** A publish
+  job downloads the distribution files and hands them to
+  `pypa/gh-action-pypi-publish`, so nothing in it provisions a toolchain: no
+  `uv`, and an interpreter at the runner image's version rather than at the one
+  `requires-python` asks for. A step appended there fails on the command's name
+  or on the interpreter's version, or passes on an interpreter the tree did not
+  choose where `requires-python` admits the image's; neither failure names the
+  runner as its cause. The reusable workflow provisions its own toolchain, so
+  nobody placing the check there has to know any of this.
+- **Placement also decides whether the failure is legible.** Both placements run
+  after the upload, so either can only report an act already irreversible. A job
+  that fails is a row of its own in the listing above, red beside a publish job
+  that stayed green; a step that fails turns the publish job itself red, and
+  every job guarded on that job's `success` skips with it — the attestation and
+  the GitHub release among them — leaving a release published, unattested and
+  unannounced behind one red job that names none of it.
 - **The check reads the index for the version the tag names**, so a first
-  release is no different from any other: the call passes the tag, the
-  wait holds until the index serves that version, and it fails on its
-  deadline rather than let the matrix install the version the tag
-  replaces. Inlining the check because the index has nothing to read
-  before a first release is the rejected alternative, and what it answers
-  is a different run: the release's own call runs after its upload, and
-  what has nothing to read is the schedule, which passes no version,
-  waits for nothing and installs whatever the index serves at the time. A
-  rehearsal has no such job either — the check reads the release index,
-  and what a rehearsal exercises is the publish step rather than what an
-  index then serves.
-
-Worked answers, each named for the property of its distribution that
-decides it rather than as a shape to copy, and each re-derived by section
-15's tree commands rather than taken on trust. `bitcoin-core-rpc` points
-`package` at its package directory and stops there — measured against a
-wheel built with `py.typed` stripped and `RECORD` edited to match, which
-installs and imports cleanly and which the unconfigured tool passes —
-because a single-module package with no data directory has no member that
-the flag and the sdist check between them leave unpinned.
-`btclib-secp256k1` has no package to name: every wheel it ships carries a
-compiled artifact at the wheel's own root, so it keeps `ignore = ["W003",
-"W009"]` for the top-level member that is not a mistake, and its script
-asks what the flag has no wording for — which artifact a wheel of that
-tag must carry, and that it is not the zero-byte one a half-finished
-build step leaves behind. Its sdist target is an exclude list, so what
-`check-sdist` costs it is the `[tool.check-sdist]` table naming the
-tracked files its archive leaves out on purpose, and what the check buys
-it is the case a check conditional on an include list would exempt: a
-file git does not track reaching the index through an archive nothing
-else reads, the vendored library's tree included, since the check lists a
-submodule's files with git's own. `btclib`'s `source-include` is a glob
-include list and its archive carries the suite and the vendored vectors,
-so what the same check catches there is the silent half — a tracked file
-the list never named — and which files may sit at the root and what kind
-of member the tar holds are the questions nothing it runs otherwise asks.
+  release is no different from any other: the call passes the tag, the wait
+  holds until the index serves that version, and it fails on its deadline rather
+  than let the matrix install the version the tag replaces. What has nothing to
+  read before a first release is the schedule, which passes no version, waits
+  for nothing and installs whatever the index serves at the time. A rehearsal
+  has no such job either: the check reads the release index.
 
 ## 13. Editor and agent configuration
 
