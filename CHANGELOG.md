@@ -8179,3 +8179,24 @@ nothing red follows from the copies disagreeing.
   the criterion behind it. `tests/grid_test.py` reads the subsection's
   heading as the line section 10's calendar paragraphs stop at, and the
   heading is unchanged.
+
+### The `BACKLOG` row for `deps-oldest` drops `bitcoin-core-rpc`
+
+- **`tests/__init__.py`'s `BACKLOG` row keyed on the issue names
+  `btclib` and `btclib-secp256k1`** (issue #323): `bitcoin-core-rpc`
+  schedules `deps-oldest.yml`, which btclib-org/bitcoin-core-rpc#447
+  landed as `ca9db975`, and section 10's *Which trees carry which
+  sentinel* is where the roster is read rather than off the row. The
+  issue stays open for the trees the row still names.
+- **The `523` row excuses the same cell, so no run reports the
+  narrowing**: `bitcoin-core-rpc` is short of `sdist-rebuild` too, so
+  `test_a_tree_carries_the_sentinels_its_entries_give_it` fails there
+  either way and its `XFAIL` names btclib-org/.github#523 where it named
+  that issue and this one. What licenses the name coming out is the
+  workflow read at that tree's own `origin/main`, not a cell that
+  changed colour.
+- **This bears on *The `BACKLOG` row for `deps-oldest` drops
+  `btclib-benchmarks`* above** (issue #323): its first bullet names
+  `bitcoin-core-rpc` among the row's trees, which is the name this entry
+  takes out. What it says about the comment above the row stands, that
+  comment naming no tree.
