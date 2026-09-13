@@ -12,7 +12,10 @@ copies, and the failure they hide is silent by construction: a hook config
 that drifts still lints, it just stops asking the same question everywhere.
 A tree with no copy at all hides the same way -- a comparison of what is
 there has nothing to say about it, and the clause is what separates the
-tree that owes one from the tree the file does not apply to.
+tree that owes one from the tree the file does not apply to. Where the
+clause states its condition as a path, that separation is read off the
+tree, so the copy a tree is owed none of is a finding beside the copy it
+is short of.
 """
 
 from __future__ import annotations
@@ -22,8 +25,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from . import ORG, ROOT, still_open, subjects
-from .per_subject_test import declared, per_subject
+from . import ORG, ROOT, still_open, subjects, tracked
+from .per_subject_test import declared, per_subject, sown
 from .workflows_test import triggers
 
 if TYPE_CHECKING:
@@ -55,17 +58,36 @@ step with the first, and the file is the thing being compared anyway.
 EVERYWHERE = "owed by every repository"
 """How section 14 says a copy is owed of every tree.
 
-The other spelling is `owed where` and a condition, which is prose this
-does not read: a tree the condition does not reach carries no copy and
-is short of nothing. Reading the clause off the standard is what keeps
-the answer where it states it, rather than in a list here that would
-have to be kept in step with that one. A bullet of the compared list
-opens with it, and so does a paragraph naming a file that list leaves
-out by its subject, that file being uncompared and owed all the same.
+The other spelling is `owed where` and a condition. Reading the clause
+off the standard is what keeps the answer where it states it, rather
+than in a list here that would have to be kept in step with that one. A
+bullet of the compared list opens with it, and so does a paragraph
+naming a file that list leaves out by its subject, that file being
+uncompared and owed all the same.
 """
 
 CONDITIONAL = "owed where "
 """How section 14 opens where a copy is owed on a condition."""
+
+DELIMITER = re.compile(r"[,;:]")
+"""What closes a condition and opens the rest of the clause's prose."""
+
+AS_A_PATH = re.compile(r"`([^`]+)`")
+"""How a condition states its observable: one backticked path, alone.
+
+Held to the whole of the condition rather than searched for in it, so
+that a condition mentioning a path among other words stays prose and is
+not read as that path.
+"""
+
+PROSE = frozenset({"the tree holds a `toml`"})
+"""The conditions section 14 states in prose rather than as a path.
+
+That section is where each says why no one path is its observable, and
+this is the enumeration that keeps another from joining them in silence:
+a condition neither read nor named here raises, where answering false
+for it takes every tree out of both readings below.
+"""
 
 SECTION = re.compile(r"from `(#{1,6} [^`]+)`")
 """How a bullet names the heading that opens the section it compares.
@@ -230,23 +252,82 @@ def shared(path: Path, clause: str = "") -> bytes:
     return body.rstrip(b"\n") + b"\n"
 
 
-def owed(path: str, clause: str) -> bool:
-    """Say whether section 14 owes a file of every repository.
+def condition(clause: str) -> str:
+    """Read the condition a conditional clause opens with.
+
+    :param clause: what section 14 says after a subject, opening with
+        `CONDITIONAL`.
+    :returns: the text between that opening and the punctuation closing
+        it, which is where the rest of the clause's prose begins.
+    """
+    return DELIMITER.split(clause.removeprefix(CONDITIONAL), maxsplit=1)[0].strip()
+
+
+def observable(path: str, clause: str) -> str | None:
+    """Read the path a clause makes its condition of, where it states one.
 
     :param path: the file the clause is about, for the message.
     :param clause: what section 14 says after that subject.
-    :returns: whether every repository is meant to carry a copy.
-    :raises LookupError: where the clause opens with neither spelling.
+    :returns: the path the condition is stated as, or ``None`` for a
+        clause owing the file of every repository and for a condition
+        `PROSE` names, which the clause's own opening tells apart.
+    :raises LookupError: where the clause opens with neither spelling, or
+        opens conditionally on a condition that is neither a path nor one
+        section 14 states in prose.
     """
     if clause.startswith(CONDITIONAL):
-        return False
+        stated = condition(clause)
+        found = AS_A_PATH.fullmatch(stated)
+        if found is not None:
+            return found.group(1)
+        if stated in PROSE:
+            return None
+        msg = (
+            f"section 14's condition for {path} is neither a path nor one"
+            f" of {sorted(PROSE)}: {stated!r}"
+        )
+        raise LookupError(msg)
     if clause.startswith(EVERYWHERE):
-        return True
+        return None
     msg = (
         f"section 14's clause for {path} opens with neither {EVERYWHERE!r}"
         f" nor {CONDITIONAL!r}: {clause!r}"
     )
     raise LookupError(msg)
+
+
+def owed(root: Path, path: str, clause: str) -> bool:
+    """Say whether section 14 owes this tree a copy of a file.
+
+    A condition stated as a path is answered off the tree, so this is a
+    question about the repository and not about the clause alone.
+
+    :param root: the root of the checkout.
+    :param path: the file the clause is about, for the message.
+    :param clause: what section 14 says after that subject.
+    :returns: whether this repository is meant to carry a copy.
+    :raises LookupError: where the clause is one `observable` refuses.
+    """
+    where = observable(path, clause)
+    if where is None:
+        return clause.startswith(EVERYWHERE)
+    return bool(tracked(root, where))
+
+
+def unreached(root: Path, path: str, clause: str) -> bool:
+    """Say whether a condition a command reads is one this tree is outside.
+
+    False for a clause owed of every repository and for a condition
+    section 14 leaves as prose: neither says that a tree carrying a copy
+    carries one the standard gives it no clause for.
+
+    :param root: the root of the checkout.
+    :param path: the file the clause is about, for the message.
+    :param clause: what section 14 says after that subject.
+    :returns: whether the clause states an observable this tree lacks.
+    :raises LookupError: where the clause is one `observable` refuses.
+    """
+    return observable(path, clause) is not None and not owed(root, path, clause)
 
 
 def unowed(root: Path, paragraphs: dict[str, str]) -> list[str]:
@@ -261,13 +342,34 @@ def unowed(root: Path, paragraphs: dict[str, str]) -> list[str]:
     :param root: the root of the checkout.
     :param paragraphs: each subject against its clause.
     :returns: the subjects this tree owes a copy of and holds none of.
-    :raises LookupError: where a clause opens with neither spelling.
+    :raises LookupError: where a clause is one `observable` refuses.
     """
     return [
         subject
         for subject, clause in paragraphs.items()
-        if owed(subject, clause)
+        if owed(root, subject, clause)
         and not any((root / path).is_file() for path in declared(subject, clause))
+    ]
+
+
+def unbidden(root: Path, paragraphs: dict[str, str]) -> list[str]:
+    """List the per-subject files a tree carries and is owed none of.
+
+    Any path the paragraph gives counts as a copy, which is the reading
+    `unowed` answers a paragraph by: a departure is where the standard
+    puts that tree's copy, so a tree outside the condition holding one
+    there holds one all the same.
+
+    :param root: the root of the checkout.
+    :param paragraphs: each subject against its clause.
+    :returns: the subjects this tree holds a copy of and is owed none of.
+    :raises LookupError: where a clause is one `observable` refuses.
+    """
+    return [
+        subject
+        for subject, clause in paragraphs.items()
+        if unreached(root, subject, clause)
+        and any((root / path).is_file() for path in declared(subject, clause))
     ]
 
 
@@ -351,7 +453,7 @@ def test_a_repository_carries_the_verbatim_files_owed_of_it(
     copies that exist, so a tree with none reads as one the standard
     passes over. `EXPECTED_DRIFT` is not consulted: an entry there
     records copies that disagree, which is a different finding from a
-    copy that is not there.
+    copy that is not there. The other direction is the test below.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -360,29 +462,82 @@ def test_a_repository_carries_the_verbatim_files_owed_of_it(
     missing = [
         path
         for path, clause in verbatim().items()
-        if owed(path, clause) and not (root / path).is_file()
+        if owed(root, path, clause) and not (root / path).is_file()
     ]
     missing += unowed(root, per_subject())
     assert not missing, f"section 14 files this tree does not carry: {missing}"
 
 
-PLANTED = "here/probe.py"
-"""The subject of a paragraph written for the check below, not read from one.
+def test_a_repository_carries_no_copy_a_condition_does_not_reach(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """A copy in a tree the standard gives no clause for is a finding too.
 
-Both per-subject paragraphs name a condition, so `owed` answers false
-for each and neither asks any tree for a copy. A check parametrized over
-them alone is green however it behaves, which is what
+    The test above reports a tree short of a copy it is owed; this
+    reports a copy of a file whose condition this tree is outside, which
+    is the direction a comparison of the copies that exist cannot reach.
+    Asked only where the condition is stated as a path: a clause owed of
+    every repository excuses nothing, and a condition section 14 states
+    in prose is one no command here decides either way.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    root = trees[repository]
+    spare = [
+        path
+        for path, clause in verbatim().items()
+        if unreached(root, path, clause) and (root / path).is_file()
+    ]
+    spare += unbidden(root, per_subject())
+    assert not spare, (
+        f"section 14 owes this tree none of these, and it carries them: {spare}"
+    )
+
+
+def test_every_condition_left_as_prose_is_one_section_14_states() -> None:
+    """A condition `PROSE` names and the section no longer writes is stale.
+
+    An entry there takes its clause out of both readings above, so one
+    the section has reworded excuses nothing and hides the refusal the
+    rewording is owed.
+    """
+    stated = {
+        condition(clause)
+        for clause in (*verbatim().values(), *per_subject().values())
+        if clause.startswith(CONDITIONAL)
+    }
+    stale = sorted(PROSE - stated)
+    assert not stale, (
+        "section 14 states none of these conditions, and each takes its"
+        f" clause out of both readings of a copy: {stale}"
+    )
+
+
+PLANTED = "here/probe.py"
+"""The subject of a paragraph written for the checks below, not read from one.
+
+A check parametrized over the live paragraphs alone is green wherever
+the trees agree with the standard, which is the state a suite is kept
+in, so it is green however the reading behaves -- which is what
 `test_the_field_behind_the_comma_names_a_repository_and_a_commit` is
-asked of literals for; these are that, for the reading that decides a
-missing copy.
+asked of literals for. These are that, for the readings that decide a
+copy.
 """
 
 BY_ANOTHER_NAME = "under/probe_by_another_name.py"
 """Where the planted paragraph says one tree keeps its copy.
 
 A departure by name rather than by directory, which is `btclib-node`'s
-for `.github/scripts/check_vendored_vectors.py` and the one a check
-keyed on the path alone reads as a tree short of a copy.
+for `.github/scripts/check_vendored_vectors.py`.
+"""
+
+WATCHED = "here/probe.yml"
+"""The observable the planted condition is stated as.
+
+A path of the planted tree's own and none of the standard's, so that
+what these measure is the reading rather than what section 14 says.
 """
 
 
@@ -395,14 +550,10 @@ def test_a_departure_answers_a_paragraph_and_dropping_it_reddens_the_tree(
     first answer is one only a reader of the departure gives. The second
     is the same tree against the same clause with that sentence gone,
     which is what says the check cannot pass by finding nothing to read.
-    A condition in place of the spelling asks nothing of the tree at all,
-    which is the state both live paragraphs are in.
 
     :param tmp_path: where the tree is built.
     """
-    root = tmp_path / "tree"
-    (root / BY_ANOTHER_NAME).parent.mkdir(parents=True)
-    (root / BY_ANOTHER_NAME).write_text("", encoding="utf-8")
+    root = sown(tmp_path, [BY_ANOTHER_NAME])
     stated = f"{EVERYWHERE}. `btclib-node` keeps its copy at `{BY_ANOTHER_NAME}`."
     assert not unowed(root, {PLANTED: stated})
     silent = f"{EVERYWHERE}, and no tree is sent anywhere else."
@@ -410,7 +561,66 @@ def test_a_departure_answers_a_paragraph_and_dropping_it_reddens_the_tree(
         "a paragraph naming one path and a tree carrying another read as"
         " a copy that is there: the departure is not what is being read"
     )
-    assert not unowed(root, {PLANTED: f"{CONDITIONAL}the tree has one."})
+
+
+@pytest.mark.parametrize(
+    ("sows", "short", "spare"),
+    [
+        pytest.param([WATCHED], [PLANTED], [], id="owed-and-absent"),
+        pytest.param([WATCHED, PLANTED], [], [], id="owed-and-carried"),
+        pytest.param([PLANTED], [], [PLANTED], id="carried-and-unowed"),
+        pytest.param(["here/neither.py"], [], [], id="neither"),
+    ],
+)
+def test_a_condition_stated_as_a_path_reddens_a_tree_either_way(
+    tmp_path: Path,
+    sows: list[str],
+    short: list[str],
+    spare: list[str],
+) -> None:
+    """Every state a tree can be in against a condition, and the findings.
+
+    A tree tracking the observable and carrying no copy is short of one;
+    a tree carrying a copy and not tracking the observable holds one the
+    standard gives it no clause for. The rest are the states that are
+    correct, and they are what says neither finding is reported of every
+    tree.
+
+    :param tmp_path: where the tree is built.
+    :param sows: what it tracks.
+    :param short: the answer `unowed` owes for it.
+    :param spare: the answer `unbidden` owes for it.
+    """
+    clause = f"{CONDITIONAL}`{WATCHED}`, which is what the copy is there for."
+    root = sown(tmp_path, sows)
+    assert unowed(root, {PLANTED: clause}) == short
+    assert unbidden(root, {PLANTED: clause}) == spare
+
+
+def test_a_clause_this_cannot_read_raises_rather_than_answering(
+    tmp_path: Path,
+) -> None:
+    """Silence is what both readings above are against, so neither is silent.
+
+    A clause answered false takes its tree out of one reading and its
+    copy out of the other, and nothing says it was not read. Each
+    refusal is named in the message it is matched on: a clause opening
+    with neither spelling, and a condition that is neither a path nor
+    one `PROSE` names. A condition `PROSE` does name is read and asks
+    nothing, which is what says the refusal is about the wording and not
+    about every condition.
+
+    :param tmp_path: where the tree is built.
+    """
+    root = sown(tmp_path, [PLANTED])
+    with pytest.raises(LookupError, match="opens with neither"):
+        owed(root, PLANTED, "owed of whoever wants one.")
+    with pytest.raises(LookupError, match="is neither a path nor one of"):
+        owed(root, PLANTED, f"{CONDITIONAL}the tree feels like it.")
+    for stated in sorted(PROSE):
+        clause = f"{CONDITIONAL}{stated}; and the rest of the bullet."
+        assert not owed(root, PLANTED, clause)
+        assert not unreached(root, PLANTED, clause)
 
 
 @pytest.mark.parametrize(

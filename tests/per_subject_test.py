@@ -14,7 +14,7 @@ compared list and, by construction, of nothing outside it: `verbatim()`
 reads that list, and these two paragraphs are outside it by the sentence
 that put them there.
 
-What each paragraph says after its subject is a clause of the same two
+What each paragraph says after its subject is a clause of the same
 spellings that list's bullets carry, and `verbatim_test.py` reads it off
 this module's reading rather than walking the prose a second time: who
 owes a copy is one question, asked wherever section 14 answers it.
@@ -173,39 +173,58 @@ def declared(subject: str, clause: str) -> list[str]:
     return [subject, *departures(clause).values()]
 
 
-def carried(root: Path, subject: str) -> list[str]:
-    """List every copy under a per-subject file's own name, wherever it is.
+def carried(root: Path, names: list[str]) -> list[str]:
+    """List every copy under a name a paragraph gives, wherever it is.
 
-    By that name and not by the path section 14 gives it: the question is
-    where the copies are, and a search of the declared path alone cannot
-    see one anywhere else. Tracked rather than walked, so a checkout's
-    own environment is not read as part of it. A copy a paragraph places
-    under a name of its own is outside this search, and
-    `test_a_tree_section_14_sends_elsewhere_keeps_its_copy_there` is what
-    asks whether that one is where the paragraph puts it.
+    By those names and not by the paths section 14 gives them: the
+    question is where the copies are, and a search of the declared paths
+    alone cannot see one anywhere else. Every name the paragraph gives,
+    because a departure stated as a name of its own is a name copies of
+    that subject sit under, and a search of the subject's name answers
+    nothing for the tree keeping one. Tracked rather than walked, so a
+    checkout's own environment is not read as part of it.
+
+    What this search and the departure test divide is the direction.
+    `test_a_per_subject_copy_sits_where_section_14_puts_it` takes the
+    copies this finds and asks whether each is where the standard puts
+    it; `test_a_tree_section_14_sends_elsewhere_keeps_its_copy_there`
+    takes each departure the standard states and asks whether a copy is
+    at it, and reads no copy list at all -- `tracked` at the declared
+    path is the whole of it. A departure a tree no longer makes is red in
+    both, and a copy at a path no paragraph names is red in the first
+    alone. The other reader of this is
+    `test_a_per_subject_path_is_one_some_repository_carries`, which asks
+    the widened question of the organization rather than of a tree: a
+    subject carried everywhere under a departure's name only resolves
+    through that name here instead of reading as a path nobody keeps.
 
     :param root: the root of the checkout.
-    :param subject: the path section 14 opens the paragraph with.
+    :param names: the paths the paragraph gives, `declared`'s answer.
     :returns: the paths, relative to the root, in git's order.
     """
-    basename = Path(subject).name
+    wanted = {Path(path).name for path in names}
     return [
-        path for path in tracked(root, f"*{basename}") if Path(path).name == basename
+        path
+        for path in tracked(root, *(f"*{name}" for name in sorted(wanted)))
+        if Path(path).name in wanted
     ]
 
 
-def listing(subjects: dict[str, str]) -> str:
+def listing(paragraphs: dict[str, str]) -> str:
     """Give the command that lists a tree's copies of these files.
 
     The pathspecs are the ones `carried` passes, so what a reader runs is
     what the test ran.
 
-    :param subjects: what `per_subject` read.
+    :param paragraphs: what `per_subject` read.
     :returns: the `git ls-files` a reader runs in a checkout.
     """
-    pathspecs = " ".join(
-        shlex.quote(f"*{Path(subject).name}") for subject in sorted(subjects)
-    )
+    wanted = {
+        Path(path).name
+        for subject, clause in paragraphs.items()
+        for path in declared(subject, clause)
+    }
+    pathspecs = " ".join(shlex.quote(f"*{name}") for name in sorted(wanted))
     return f"git ls-files -- {pathspecs}"
 
 
@@ -229,7 +248,8 @@ def test_a_per_subject_copy_sits_where_section_14_puts_it(
     astray: dict[str, list[str]] = {}
     for subject, clause in subjects.items():
         here = departures(clause).get(repository, subject)
-        found = [path for path in carried(root, subject) if path != here]
+        copies = carried(root, declared(subject, clause))
+        found = [path for path in copies if path != here]
         if found:
             astray[here] = found
     assert not astray, (
@@ -254,8 +274,8 @@ def test_a_per_subject_path_is_one_some_repository_carries(
     """
     unknown = [
         subject
-        for subject in per_subject()
-        if not any(carried(root, subject) for root in trees.values())
+        for subject, clause in per_subject().items()
+        if not any(carried(root, declared(subject, clause)) for root in trees.values())
     ]
     assert not unknown, (
         f"section 14 names these per repository by subject, and no"
@@ -387,10 +407,10 @@ def sown(tmp_path: Path, paths: list[str]) -> Path:
     return root
 
 
-def test_a_copy_a_directory_deeper_is_found_and_a_near_miss_is_not(
+def test_every_name_a_paragraph_gives_is_searched_and_a_near_miss_is_not(
     tmp_path: Path,
 ) -> None:
-    """`carried` searches the tree, and by the whole of the file's name.
+    """`carried` searches the tree, by each whole name, and by no other.
 
     Its pathspec is a wildcard, and what decides whether a copy one
     directory deeper is seen at all is whether that wildcard crosses a
@@ -399,12 +419,23 @@ def test_a_copy_a_directory_deeper_is_found_and_a_near_miss_is_not(
     `test_a_per_subject_copy_sits_where_section_14_puts_it` green having
     asked nothing -- and section 14 names a departure exactly one
     directory deeper, so that is the live case rather than a contrived
-    one. The near miss is a file whose name merely ends with the
-    subject's, which the pathspec admits and the name decides against.
-    The subject here is the control's own and no path of the standard's:
-    what is measured is the search, not what section 14 says.
+    one. A departure under a name of its own is the other live case,
+    `btclib-node`'s `.github/scripts/check_vendored_pin.py`, and a
+    search of the subject's name answers with nothing for that tree. The
+    near miss is a file whose name merely ends with a searched one,
+    which the pathspec admits and the name decides against. The paths
+    here are the control's own and none of the standard's: what is
+    measured is the search, not what section 14 says.
 
     :param tmp_path: where the tree is built.
     """
-    root = sown(tmp_path, ["probe.py", "under/one/probe.py", "here/not_probe.py"])
-    assert carried(root, "here/probe.py") == ["probe.py", "under/one/probe.py"]
+    root = sown(
+        tmp_path,
+        ["probe.py", "under/one/probe.py", "here/not_probe.py", "by_another_name.py"],
+    )
+    assert carried(root, ["here/probe.py"]) == ["probe.py", "under/one/probe.py"]
+    assert carried(root, ["here/probe.py", "gone/by_another_name.py"]) == [
+        "by_another_name.py",
+        "probe.py",
+        "under/one/probe.py",
+    ]
