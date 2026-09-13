@@ -142,14 +142,18 @@ they are applied per repository, which section 15 is how to verify.
   waits on another says there what it waits for.
 - **A rule with no reason beside it is not this file's rule.** Every
   setting below was decided against an alternative, and the alternative
-  is what stops the next reader from undoing it.
+  is what stops the next reader from undoing it — in a sentence, not in
+  a paragraph.
 - **A numbered section's rule enters this file together with what reads
   it — a hook of section 4 or a test of `tests/` — or it does not
-  enter**, the way btclib-org/.github#976 records a rule only a reader
-  enforces turning every landing into a finding. This preamble binds
-  those rules rather than stating one of their kind, and what reads it
-  is the review every change here gets, REVIEWING.md's *This repository
-  in particular* asking whether the standard keeps the rule it states.
+  enter**: a rule only a reader enforces turns every landing into a
+  finding. This preamble is read by the review, `REVIEWING.md`'s *This
+  repository in particular*.
+- **This file does not grow.** A landing that adds lines removes at
+  least as many, and `git diff --numstat origin/main -- README.md` is
+  the read. A census, a dated measurement, a line number and the tour
+  of rejected alternatives belong to the pull request that made the
+  change, not here (btclib-org/.github#1075).
 
 ## 1. Toolchain and environment
 
@@ -1841,8 +1845,8 @@ pre-commit.ci does not have — the lint workflow covers it. No
     being right about the line and wrong about the rule — is rewrite the
     line rather than waive the hook. The value the reader supplies goes
     into an assignment block above the fence and the program carries
-    `${name:?}`, which is what section 9's *The fence a split leaves
-    below is live* already asks of the lower fence and the shape
+    `${name:?}`, which is what section 9's placeholder bullet already
+    asks of the lower fence and the shape
     section 3's `uv_build` read is written in. Reflowing the program
     onto one line is the other answer available and it is declined:
     what decides whether it fits is 80 columns rather than the reading,
@@ -1868,9 +1872,10 @@ pre-commit.ci does not have — the lint workflow covers it. No
   new heading repeats one already in the section at the branches'
   shared base, no second branch needed for that shape at all; and a
   heading left with no blank line above it is the blank the driver eats
-  at that seam (btclib-org/.github#760). The script's own docstring
-  carries the three checks and what they still cannot make without a
-  network call a `pre-commit` hook is the wrong place to put.
+  at that seam (btclib-org/.github#760); and, section 9's bound, an
+  entry whose body runs past three lines. The script's own docstring
+  carries the checks and what they still cannot make without a network
+  call a `pre-commit` hook is the wrong place to put.
 
     **A test of this repository's own suite is declined**, for what
     that suite is: an audit run after the fact, so a duplicate it finds
@@ -1970,11 +1975,11 @@ preview rule then runs only where `extend-select` names it exactly.
   `ruff-format` reflows code to 88, and `[tool.ruff.lint.pycodestyle]
   max-doc-length = 80` holds the docstrings and whole-line comments — prose
   the formatter never reflows — to the width markdown is already held to. A
-  comment ending in a URL is exempt on a condition, and one following code on
-  its line is outside the key: section 9 states the condition, and its own
-  landed clause — *a Python comment following code on its line is outside the
-  number* — states the second; section 9 also states what a tree keeping
-  `line-too-long` reports such a comment at. `W505` is the rule that reads the
+  comment ending in a URL is exempt where everything ahead of the URL fits
+  the width, and one following code on its line is outside the key — *a
+  Python comment following code on its line is outside the number*, section
+  9; a tree keeping `line-too-long` reports such a line at `line-length`,
+  88. `W505` is the rule that reads the
   key and is inert without it, ruff having no default doc length: a tree
   naming no `max-doc-length` states a width and enforces none, `select` aside.
 - **`max-complexity = 10`**, ruff's default, with a `# noqa` and a reason
@@ -2678,632 +2683,90 @@ fail_under = 100.0
 ## 9. Prose, comments and docstrings
 
 Nothing checks prose the way the suite checks code, so every line of it
-is one a later change can falsify in silence. That is what its length is
-weighed against, and what lengthens it without adding to it is deleted on
-sight rather than weighed.
+is one a later change can falsify in silence. Its length is weighed
+against that, and what lengthens it without adding to it is deleted.
 
 - **Tone: neutral, factual, dry.** Explanatory detail is wanted;
   decoration is not, and the sentence that only introduces the next one
   is decoration.
-- **A docstring states the contract** — what the call takes, what it
-  returns or raises, and the rule the behaviour comes from. Not a
-  restatement of the name.
-- **A comment carries the reasoning, including the negative result** —
-  why the code is as it is, and why *not* the obvious alternative. The
-  second half is what stops the next reader from "fixing" a deliberate
-  choice, and it is what makes a configuration file reviewable rather
-  than merely readable. The negative result is the rejected alternative
-  and what rejects it, and the tour of the others is not part of it.
+- **A docstring states the contract; a comment carries the reasoning.**
+  The docstring says what the call takes, returns or raises, and the
+  rule the behaviour comes from — not the name again. The comment says
+  why the code is as it is and why not the obvious alternative, which is
+  what stops the next reader from "fixing" a deliberate choice. The
+  rejected alternative and what rejects it is the whole of that; a tour
+  of the others is not.
 - **Cite the authority.** Where behaviour comes from a standard, name it;
   where the project deviates, say so and say why.
 - **Measure, don't assert.** A number in prose comes from a command, and
-  the command belongs beside it. Never state a count that nothing checks,
-  and never state how many of anything a file holds: a stated total is a
-  line every open branch has to edit, and two branches moving it to the
-  same wrong number merge without a conflict.
-- **A measurement's quantifier is not the sentence's.** The bullet above
-  is satisfied by a command that ran and a number that is right, and a
-  sentence saying *every*, *the only*, *none* or *always* where the
-  command asked about one instance claims more than the command beside
-  it answers. So the reading is two questions in order: what the
-  measurement covers, and what the sentence it licensed claims. Where
-  the second is the wider, either the measurement widens or the sentence
-  narrows, a universal owing a hunted counterexample.
-  `btclib-org/btclib`'s `40e75d87` is the narrow form: its entry holds a
-  chaininfo reply, a block hash and a header each `to the size their
-  endpoint answers rather than to something wider`, and the same bullet
-  says what makes the narrower claim measurable — `A reply one octet
-  over the limit is refused with that limit in the message, and the
-  recorded answer inside it is accepted`, a check on each side of the
-  bound. The reader-side form is the one with a
-  shape on the page: a sentence about a mechanism names the command that
-  would falsify it. A quantifier too wide is invisible in prose and a
-  missing command name is not, so the second is how a reader finds the
-  first.
-- **A control the same fault silences is not a control.** *Measure,
-  don't assert* and the bullet above ask that a number come from a
-  command and that the sentence claim no more than the command answered;
-  neither asks whether the command measured anything. An apparatus fails
-  symmetrically where whatever silences the check silences the control
-  with it — a pattern that matches nothing, a revision the shell
-  mangled, a status read off the wrong process — and a control that
-  differs from the check only in what it looks for is the one that fails
-  that way, so the two agree and the agreement is what convinces. Name a
-  control by the perturbation it applies rather than by the property it
-  is hoped to prove, and put it where the answer already in hand is
-  impossible: a revision that cannot hold the file, a file that cannot
-  hold the string. Zero is not the tell. `git show` handed a mangled
-  revision writes its complaint to stderr, so a count of its stdout is
-  the zero a real absence gives and a count of the streams merged is a
-  small plausible number. The rejected alternative writes this into each
-  repository's `CLAUDE.md`, among the failure modes a session meets
-  there; what it costs is a copy per repository of one fact, and the
-  reader it reaches is whoever works in a tree rather than whoever
-  writes the sentence a measurement is for.
-- **The guard goes into the instrument, not into the reader's
-  recognition.** A rule applied where it is recognised is not applied at
-  the site nobody looked at, so what survives is the form written
-  unconditionally. A control runs unchained, `grep -c` exiting 1 on a
-  count of zero so that `check && control` prints one number where two
-  were due and never reaches the second. A parameter expansion a `:`
-  follows is braced: `zsh` takes the character after an unbraced
-  `$name:` as a modifier where it is one and consumes the pair, so
-  `"$sha:AUTHORS.md"` asks `git` for a revision that does not exist
-  where `"${sha}:AUTHORS.md"` asks for the file, and `:a`, `:A` and `:P`
-  resolve what is left against the working directory. The trigger is
-  literal text, which makes a path arriving in a variable immune by
-  mechanism rather than by care. A status is read from the command
-  rather than from a pipeline, `$?` after `cmd | head` being `head`'s.
-  The rejected alternative writes down which characters bite; what it
-  costs is a lookup at every use site, and the site that gets no lookup
-  is the one the rule was for.
-- **A reference derived from what it tests is not a reference.** A
-  reconstruction is evidence while its inputs are independent of the
-  subject, and one built out of the tip it is meant to check carries
-  whatever damaged that tip, so the comparison exits 0 and reads exactly
-  as a clean one does. The block comes from the blob before the
-  operation, or the two sides come from different commits.
-- **A placeholder standing as a whole argument is unquoted**, so that a
-  paste made before it is filled in fails at the shell rather than
-  reaching the tool. Quoting is what an argument holding spaces
-  otherwise asks for, and it makes `<` and `>` ordinary text: the
-  command runs, and the tool takes the placeholder as the value. What a
-  bare one fails with is the bullet below, and what that failure leaves
-  unguarded is the one after that. A placeholder *inside* a larger
-  string is not this: `"repos/<org>/$r/contents/$1"` is quoted for the
-  variable beside it, and unquoting it would be wrong shell rather than
-  a guard. Nor is a quote another language needs — a `python -c`
-  program's string, a TOML value. Nor is a `<...>` whose spelling is not
-  a placeholder at all — an element name the command is looking for,
-  `<title>` in a badge SVG being the instance. Such a token is a
-  literal, and the unquoting repair is not available to it: what it
-  takes instead is the exemption above, on purpose — inside a larger
-  string carrying the neighbouring literal text the match needs,
-  `grep -oE '<title>[^<]*</title>'` rather than `grep '<title>'` alone,
-  the form section 15's own badge-render loop already writes. What
-  decides is the token's neighbourhood, not its spelling: the same
-  token is a genuine placeholder standing alone as a flag's whole
-  argument elsewhere, where unquoting is exactly the right repair. The
-  rejected alternative is a list of literals the rule exempts by name;
-  what it costs is a ruling per line, on a page where nothing
-  distinguishes a literal from a value — the larger-string form is
-  visible in the fence itself, and it is the same test a reader already
-  applies to `"repos/<org>/$r/contents/$1"`.
-- **A bare placeholder goes at the end of its command**, where the `>`
-  closing it has no target and the line is a parse error before it is a
-  command. `<` and `>` are the shell's redirection operators, so a paste
-  made before the placeholder is filled in is a pair of redirections
-  wherever the placeholder sits; what the position decides is whether
-  the line can run at all. Where a word follows the placeholder, `>`
-  takes the word as its target and the line fails at run time on the `<`
-  — `no such file or directory: org` — except in a reader's directory
-  holding the placeholder's own name, where the `<` succeeds, the line
-  runs, and the `>` writes one named for the word that follows. What
-  decides is the direction of the open and not what the name holds: POSIX
-  gives `open(2)` an `EISDIR` only where the flags ask to write or to
-  execute, so the `<` opens for reading and succeeds on a directory as
-  readily as on a file, and the `read(2)` that would fail is one the shell
-  never performs. The rejected alternative names the two objects — a file
-  or a directory — in place of the rule; what it costs is the `>` side,
-  where a directory is what the open fails on, so the pair would read as
-  taken back where the bullet reaches `/` rather than following from what
-  is said here.
-  A placeholder inside a path puts that word at the root of the filesystem:
-  `orgs/<org>/installations` gives the `>` the target `/installations`, so
-  the paste writes nothing in the directory the reader is standing in and a
-  sweep that lists that directory reports the block as clean. A sweep of
-  `/` reports the same on macOS, where `/` is read-only: the open of a name
-  not already there answers `EROFS`, and the `>` creates nothing. That
-  errno is the platform's answer measured rather than its page's: macOS's
-  own `open(2)` gives `EROFS` for a file that resides on a read-only file
-  system and is to be modified, and a name that is not there resides
-  nowhere. The rejected alternative explains the reader's clean directory
-  by the write having landed at the root; what it costs is a reader hunting
-  at `/` for a file this platform does not write. `/` alone is not that
-  case — the open fails, and one command's redirections are performed in
-  order, so the `>` after it in `repos/<org>/<repo>` is never reached and
-  that command writes nothing. What the open fails with on macOS is not the
-  `EISDIR` above: a `>` asks to create as well as to write, and at `/` the
-  errno names the create rather than the direction. macOS answers `EEXIST`,
-  which its own `open(2)` gives only for `O_CREAT` with `O_EXCL`; a `>`
-  sets `O_CREAT` alone, so the platform departs from its own page. `/.`
-  names the same directory and answers `EISDIR`, so the answer belongs to
-  the spelling and not to the directory it names. Neither errno decides
-  anything here, the open failing under both. The rejected alternative
-  leaves the general reason a directory gets; what it costs is a reader
-  carrying the `EISDIR` above down onto the one target this sentence is
-  about.
-  A redirection that fails is the one command's rather than the line's,
-  so the other side of a pipeline runs whatever it did:
-  `git show v<version>:pyproject.toml | grep '^version'` reaches the
-  `grep`. At the end of the line there is nothing for `>` to open, so
-  the line writes nothing whatever the directory holds. Where the
-  command's own shape refuses the position — `--with <version>` precedes
-  what it measures, and an endpoint's path continues past `<org>` — the
-  placeholder's line is a block of its own, with nothing under it for a
-  paste that stops at the fence to reach; what that stopping rests on is
-  the bullet below.
-- **A line that writes goes in a fence of its own**, the parse error
-  guarding only the line it sits on: an interactive shell answers it by
-  discarding that line together with its trailing `&&` and reading the
-  next as a fresh command, so the chain never forms and a write below it
-  runs. The run-time failure is the one a trailing `&&` short-circuits,
-  and that guard rests on the reader's directory rather than on the
-  line. The fence rests on something of the reader's too — on their
-  taking the one fence, which github.com affords by giving each its own
-  copy button. A drag across the rendered passage is one paste instead,
-  and what a shell makes of one paste is the bullet below.
-- **What any of that is measured with is a paste into a terminal, and
-  the shell decides how much of one paste is a command.** `zsh` takes a
-  bracketed paste — what a terminal emulator wraps one in — as a single
-  buffer and abandons all of it on the parse error, where `bash` and
-  `sh` submit it a line at a time and reach the write with the markers
-  present or absent. Feeding the block to a shell as a script measures
-  something else, and not the same something for every shell: `zsh`
-  reading it from stdin discards the parse error and carries on as an
-  interactive shell does, where `-c` and a file abort. So a harness
-  built on `cat block | zsh` reads as the aborting case and is the
-  other one.
-- **A fence with nothing in it that fails at the parse is live**,
-  whether a split left it below another or nothing split it at all. A
-  paste of it alone is a command and it runs with every value the reader
-  was to set empty. A placeholder in it settles nothing: section 3's
-  `uv_build` read carries `<outdir>` inside a `python -c` program's
-  string, which the unquoting bullet above exempts, so what stops that
-  line is its `${version:?}` rather than the placeholder. Where no split
-  has left such a fence, the guard is what splits it: a placeholder that
-  bullet exempts is text the line sends to the tool rather than a stop,
-  so section 12's job listing, whose run id is quoted for the query
-  string beside it, puts that id in an assignment block of its own above
-  the fence and reads it from there. The fence writes each of those
-  values as `${name:?}` and joins its lines with `&&`, and reads one of
-  them at or above its first line that writes, a guard below that line
-  arriving too late. Neither is the guard by itself: an interactive
-  shell's `${name:?}` abandons the one command it stands in, so a line
-  under it that reads nothing of the reader's runs anyway, and a chain
-  with nothing failing in it runs to its end. Chained, a `${name:?}`
-  failure is the run-time one the fence bullet above says a trailing
-  `&&` short-circuits. Prose beside the fence says what `:?` is doing
-  there, since a reader who is not told deletes it. Leaving such a line
-  alone because the endpoint it names only reads is the rejected
-  alternative: what a call does at the far end is not on the page, so
-  that test is a ruling per line where the parse is something the fence
-  shows.
-- **A trailing `#` comment goes above the fence, as prose.** `zsh`
-  leaves `INTERACTIVE_COMMENTS` unset, so an interactive one takes `#`
-  as an ordinary word and what follows it as arguments to the command on
-  that line. A chain whose `&&` is followed by a comment has its
-  right-hand side on that same line, so it is complete where the file
-  shows it continuing, and the lines under it start a chain of their
-  own. An apostrophe in the comment opens a quote instead. A later
-  apostrophe closes it, and the command runs with the lines between the
-  two as a single argument, the lines past the second running as they
-  were written. With none to close it the buffer ends unterminated, and
-  neither that command nor the lines below it run. That stop is not a
-  guard: nothing puts the apostrophe there for it, and the next
-  rewording of the comment takes it away. The prose above the fence has
-  the room a line beside a command does not. The same mechanism reaches
-  a whole-line comment too: `#` is an ordinary word to an interactive
-  `zsh` wherever it opens the line, not only where it follows `&&`, so
-  an apostrophe among that line's own words opens the same unterminated
-  quote and kills the fence beneath it. A backtick in such a comment is
-  a command substitution to the same shell, and a paste attempts to run
-  it. A whole-line `#` comment inside a fence carries neither an
-  apostrophe nor a backtick, and one that needs either goes above the
-  fence as prose beside the rest. What decides is not the first
-  character being `#` — a word the shell fails to find and moves past —
-  but what the rest of the line hands it, and that stop is no more a
-  guard than the trailing case's: nothing puts the plain words there for
-  it, and the next rewording can add the apostrophe. The rejected
-  alternative moves every whole-line comment above the fence, as the
-  trailing one goes; what it costs is every fence in the organization
-  that carries one, for a shape that is harmless while it keeps to plain
-  words, and a comment on a line of its own is where a reader finds why
-  a flag is there. No gate reads this — a heading and a comment both
-  begin with `#`, so a line-based hook cannot tell them apart — and that
-  absence is a fence-aware runner's, not this bullet's.
+  the command belongs beside it. Never state how many of anything a file
+  holds: a stated total is a line every open branch has to edit, and two
+  branches moving it to the same wrong number merge without a conflict.
+  A sentence claims no more than its command answered — *every*, *the
+  only* and *none* owe a hunted counterexample — and a control is a
+  perturbation the same fault cannot silence, not the check run again
+  with another pattern.
 - **One fact in one place.** Two files stating the same thing become two
-  files disagreeing about it; the second points at the first.
-- **A package upstream of another does not name the one downstream.**
-  What a consumer of it reads has to stand on its own: the organization
-  that publishes it and where it sits in the family are context, and
-  everything else about a dependent is a cross-reference to a project
-  that reader does not have.
+  files disagreeing about it; the second points at the first. What a
+  package's reader does not have — the repositories downstream of it —
+  it does not name.
 - **A reference to another repository is qualified.** A bare `#123`
   resolves inside the repository it is written in, so a cross-repository
   reference is `owner/repo#123` or it points somewhere else in silence.
-  The one exemption is mechanical: a pull request's closing keyword is
-  read by the forge, so it takes the forge's own form.
-- **What a command decides of that is the half naming a repository, and
-  it decides that half as candidates.** `repo#N` against `owner/repo#N`
-  is a substitution with nothing to read, so a pattern reaches it
-  whatever organization the repository belongs to, and a guard on the
-  character before the name is what keeps the tail of an
-  already-qualified reference out of the answer. The same pattern
-  matches a name that is no repository's — a standards name, a version
-  in front of a URL fragment — so what comes back is read before it is
-  a finding. The bare form is not reachable at all: the number carries
-  no tracker, so another tree's issue, the tree's own and a number that
-  names no issue are one string. A tree's own highest issue-or-pull
-  number bounds part of that form, a bare number above it naming
-  nothing there, and that bound only rises, so what it decides today it
-  stops deciding. Section 15 audits none of this, and a reading is what
-  tells a finding from a correct reference.
-- **A citation names what the issue records, not what state the tracker
-  holds it in.** This reaches every citation prose carries — a comment,
-  a docstring, a `CHANGELOG.md` entry — in every tree: a sentence
-  naming an issue for what was decided there is true whatever the
-  tracker later answers, and one naming it for a question still being
-  decided is false the day that issue closes. Section 2 writes the
-  first. The reference is the same string under both, so what separates
-  them is a reading rather than a pattern, the way *What a command
-  decides of that* above leaves the other half of a reference to one.
-  What a reader needs of a question nobody has answered is where it is
-  written down, and the reference alone says that; the tracker is where
-  its state is current. Nothing brings a reader back to correct such a
-  sentence: the docstrings `btclib-org/.github#935` records are one
-  carrier, and the changelog entries `btclib-org/.github#946` collects
-  are another that *Nothing already written is rewritten* below leaves
-  as it stands. A changelog citation's parentheses are outside this,
-  `(issue #N)` saying what the entry did about an issue rather than what
-  the tracker holds, so a later landing closing that issue leaves it
-  true. The rejected alternative permits the pending form where the
-  landing that answers the question has to edit the sentence anyway;
-  what it costs is a judgement about a landing nobody has made, taken
-  again by whoever closes the issue, who need not be reading the tree
-  the sentence sits in. What this rule costs is the emphasis: the page
-  says where a question lives and not that it is still live, and opening
-  the reference is what tells a reader which.
+  The one exemption is a pull request's closing keyword, which the forge
+  reads in its own form. A citation names what the issue records, never
+  what state the tracker holds it in: the first stays true when the
+  issue closes, the second goes false that day.
 - **No history in the prose.** Comments say why the code is as it is, in
   the present tense. History has two files of its own.
 - **80 columns everywhere prose lives** — markdown by MD013, tables
   included; a Python docstring and a whole-line comment by ruff's
   `max-doc-length`; a toml comment by a pygrep hook. Code is 88, the
-  width `ruff format` produces, and what reports a line past it is
-  `line-too-long`, a rule each tree keeps or ignores; yaml is 100,
-  because an action pinned to a commit SHA with its tag in a trailing
-  comment is past 80 before anything else is said.
-
-    **A Python comment following code on its line is outside the
-    number**, and nothing holds it to that width: `max-doc-length`
-    reaches a docstring and a whole-line comment and stops there, and
-    `ruff format` does not rewrap one. What such a comment may use is
-    whatever the code leaves, and a reason that will not fit goes into
-    the comment above the line — for a `pragma: no cover`, above the
-    inline half section 8 keeps rather than replaces.
-
-    A gate is the rejected alternative rather than a missing one, and
-    what it would buy is the number holding without anybody reading for
-    it. What overflows is typically a `type: ignore`, a `noqa` or a
-    pragma's inline half: the first two are a tool's own spelling and
-    the third names which case the line is, so the only thing left to
-    shorten is the code the comment sits after. And a line-oriented
-    pattern reads a `#` inside a string as a comment, which no spelling
-    of such a pattern fixes.
-
-    **What holds a Python line to 88 is not the formatter alone.**
-    `ruff format` counts a trailing comment in the line's width and
-    splits the code to fit it where a split fits; where none does —
-    the statement admitting no split, or the comment leaving nothing
-    to split into — the line stays past 88, and that is the line left
-    over. A tree keeping `line-too-long` reports it at the width
-    `max-line-length` names, falling back to `line-length` — 88, the
-    width this section already fixes — where that key is unset, and
-    with no fix ruff can apply; a tree naming the rule in section 5's
-    `ignore` measures it nowhere. Fixing the
-    choice for every tree is the rejected alternative: what a line has
-    to spare differs with the code on it, and section 5's `ignore` is
-    already where a rule declined on its own merits is argued.
-
-    `line-too-long` does not report every over-long line. Which lines it
-    passes over and which pragmas it recognises are ruff's and move with
-    ruff, so neither list is here; what is stated is what this
-    standard's own decisions rest on. A line whose last word contains
-    `://` is passed over where everything ahead of that word fits the
-    width, which is the condition section 5 leaves here rather than
-    wording it a second time. A pragma ruff recognises need not end the
-    line: from it the rest goes unmeasured, so the width a finding
-    names is the one ahead of it. That much is `preview`'s, which
-    section 5 sets: without it the whole line is reported. A comment
-    opening with such a pragma is passed over whichever way `preview`
-    is set, by an exemption that is not this one. Each of these holds
-    under `max-doc-length` too, at its own width. What section 8 needs
-    is that `pragma: no cover` is outside the set ruff recognises, an
-    inline half being measured like any other trailing comment.
-- **A comment whose first word is `shellcheck` is a directive, so where a
-  sentence wraps decides whether one gets written.** A wrap that puts the
-  word there does so by accident, and what follows it on that line
-  decides which failure it is: what the tool cannot parse as a directive
-  is a parse error — `SC1072`, and a red gate — while a line that does
-  read as a valid directive can be honoured, the run exiting 0 with a
-  real finding suppressed by a sentence that was never about it. The
-  second is the one the rule is for: a gate that passes having measured
-  less than it appears to leaves nothing to notice. Any comment
-  `shellcheck` reads is in scope, including the `run:` block section 10
-  has `actionlint` hand it. Wrap so the word does not begin a line — the
-  same sentence with it pulled up onto the line above is prose again.
+  width `ruff format` produces; yaml is 100, because an action pinned to
+  a commit SHA with its tag in a trailing comment is past 80 before
+  anything else is said. A Python comment following code on its line is
+  outside the number: nothing rewraps it, and a reason that will not fit
+  goes into the comment above the line.
+- **A placeholder is bare, and last.** `<` and `>` are the shell's
+  redirections, so a paste made before `<org>` is filled in fails at the
+  parse where the placeholder stands bare and last, and reaches the tool
+  with the placeholder as a value where quotes make it text. A
+  placeholder inside a larger string — `"repos/<org>/$r"` — or a quote
+  another language needs is outside this. A line that writes gets a
+  fence of its own, since a shell discards a parse error's line and runs
+  the next; a value the reader sets goes in an assignment block above
+  the fence and is read as `${name:?}`, so a paste of the fence alone
+  stops. A comment goes above the fence as prose: to an interactive
+  `zsh` a `#` is a word, and an apostrophe after it opens a quote that
+  swallows the lines below.
+- **A comment whose first word is `shellcheck` is a directive.** Wrap so
+  the word does not begin a line: a sentence that happens to parse as a
+  directive suppresses a real finding, and the gate exits 0.
 
 ### `CHANGELOG.md` and `RELEASE_NOTES.md`
 
-- The changelog gets an entry for anything a user would notice. The
-  release notes are what a user has to *act* on.
-- **One fact each**: the breaking-changes list lives in the release
-  notes and the detail behind it in the changelog, so neither restates
-  the other.
-- **Both are `merge=union` in `.gitattributes`.** Two branches each
-  appending an entry at the same anchor conflict on the insertion point,
-  which is a conflict with nothing to decide; union keeps both sides'
-  added lines, on rebases included. Its price is that on a checkout the
-  two files never conflict at all, so the *same* entry edited on two
-  branches merges in silence — which is the second reason neither file
-  states a count.
-- **The driver is a checkout's, and the forge does not apply it**, so
-  the price has a second half no local command predicts. A pull request
-  whose `CHANGELOG.md` or `RELEASE_NOTES.md` overlaps its base is
-  reported `CONFLICTING` however cleanly the same pair merges under the
-  driver:
-
-  ```shell
-  git merge-tree --write-tree origin/main <branch>
-  gh pr view --json mergeable --jq .mergeable <n>
-  ```
-
-  `UNKNOWN` from the second is the forge computing the merge rather than
-  an answer, so it is asked again. A rebase on a checkout is what clears
-  a `CONFLICTING`, and the driver applies during that rebase — so the
-  silence above is a rebase's, and what the merge button lands never had
-  the driver applied to it at all.
-- **Union drops the blank line between two sections it joins.** Two
-  branches each adding a `###` section under `## Unreleased` produce a
-  file whose second heading sits against the bullet above it, which
-  MD022 and MD032 both refuse. Section 4's autofix rule has
-  `markdownlint-cli2` write the line back on the next hook run, rather
-  than only reporting it missing, and that hook reports the missing
-  line rather than the driver that ate it; section 4's `check-changelog`
-  is what names the seam and the rebase instead.
-- **Two entries closing the same issue under one heading is what the
-  driver's fold produces, not a repeated heading.** Two branches' own
-  identically-worded new headings at the section's shared anchor fold
-  into one entry rather than repeating, which is what can hide the
-  double close. A `###` heading repeats instead where the matching
-  text does not land adjacent once the merge is done, or where a new
-  heading alone repeats one already in the section -- no second branch
-  needed for that shape. Section 4's `check-changelog` reads the open
-  section for both, and what it cannot make of either without a
-  network call is in its own docstring rather than repeated here.
-- **A `###` names one entry, never a theme several entries share.** So
-  the open section is the list of its entries, and the end of it is one
-  place. Grouping by theme is the rejected alternative: nothing here
-  says what the themes are, so each tree names its own set and an entry
-  belonging to two of them has to pick one, and the append point becomes
-  the theme's rather than the section's — which is the anchor the two
-  bullets below are read against. Where an open section already carries
-  theme headings, the next entry goes after them, at the end of the
-  section, and nothing above it moves.
-- **A new entry goes at the end of the open section**, after the entries
-  already there and immediately above the heading of the latest released
-  version — at the end of the file where the tree has released nothing.
-  The union driver decides that rather than how the section reads: it
-  joins two branches that appended at one anchor by placing the side
-  arriving second below the side already there, so the entries end up in
-  the order they landed in.
-- **A rebase's result is read, because nothing else reads it.** `git
-  rebase` exits 0, there is no conflict marker, and no gate reads the
-  order two `###` sections sit in — only whether the blank line between
-  them survived, which the union bullet above covers. The diff is what
-  says the branch's own block is still at the end of the open section:
-
-  ```shell
-  git diff origin/main..HEAD -- CHANGELOG.md
-  ```
-
-  A block sitting anywhere else is moved back before pushing — *Nothing
-  already written is rewritten* below is what turns leaving it there
-  into a standing misplacement once it lands.
-- **Newest first is the rejected alternative, and under it that same
-  driver is silently wrong.** A branch that inserted at the top of the
-  section comes back from its rebase sitting under a neighbour it was
-  not written for, its text byte for byte what its author wrote and only
-  the position changed: the diff reports an addition and counts no
-  deletion. What newest first buys is a section a person reads as a
-  timeline, and that is all it buys — the entries of a section that has
-  not shipped are a set of changes rather than a sequence, and the
-  release that closes the section gives it a version heading, after
-  which their order answers nothing.
-- **Putting the position on section 14's *decided per repository* list
-  was the other alternative, and it is declined.** A tree whose entries
-  land in both places has no reason of the kind that list takes, so an
-  entry for it would record an accident as a decision.
-- **An entry making several claims has a list for a body, and one making
-  a single claim may have a paragraph.** What a list does is keep claims
-  apart, and an entry making one has nothing to keep it apart from, so
-  the marker is available to it rather than owed. The rejected
-  alternative is a list whatever the entry holds: what it buys is one
-  shape for every body, so that a reader looking for an entry's citation
-  looks in the same place each time, and what it costs is a list of one
-  standing for a separation the entry does not make.
-- **An entry answering an issue that the change closes cites it `(closes
-  #N)`.** An entry answering an issue the change does not close — a fix
-  that leaves a mechanism unexplained, one half of a bundle — cites it
-  `(issue #N)`. Across repositories the qualified `owner/repo#N` sits
-  inside the same parentheses, the qualifier rule above reaching a
-  changelog citation exactly as it reaches any other cross-repository
-  reference.
-- **The citation sits in the text making the claim — the bullet of a
-  list body, the paragraph of a paragraph body — and not on the heading
-  above it.** An entry's bullets are separate facts and cite separately,
-  so a citation gathered onto the heading answers for the entry as a
-  whole while the bullets under it name issues of their own, and nothing
-  says how the two sets relate. A paragraph body makes one claim and
-  raises no such pairing; what keeps its citation off the heading is
-  what a heading is, *A `###` names one entry* above making it the
-  entry's name where a citation says what the entry did about an issue.
-  The rejected alternative is the heading citation, and what it buys is
-  a section whose issue numbers a reader collects by scanning the
-  headings alone.
-- **The reason the pair has two spellings rather than one** is that it
-  is then checkable against the landing commit's own subject, written at
-  a different moment and the half that gets re-read before merging. One
-  spelling for both cases makes an entry inherited from a superseded
-  branch unfalsifiable, and such an entry has already told a reader an
-  issue was open on the day it closed.
-- **The rejected alternative is the bare `(#N)`**, which some
-  repositories use: GitHub numbers issues and pull requests in one
-  sequence, so `(#N)` does not say which it names — and a squash lands
-  with the pull request's own number appended to the commit subject
-  already, so the bare form in an entry reads as that number instead.
-- **The qualifier does not stand in for the keyword.** `(owner/repo#N)`
-  with nothing before the number says which object it names and not what
-  the entry did about it, so it fails the falsifiability above exactly
-  as the bare form does while reading as more careful; the
-  cross-repository citations are `(closes owner/repo#N)` and
-  `(issue owner/repo#N)`, keyword and qualifier together. Entries
-  already landed in the keywordless form stay as they are, the bullet
-  below being why.
-- **An issue the entry names without acting on it is written into the
-  sentence, not into the parentheses.** The parentheses say what the
-  entry did about an issue, and there is nothing to say of one it did
-  nothing about, so a reference put there bare is the shape the bullet
-  above refuses and reads as a citation with its keyword dropped. What
-  the move sheds is the keyword and the parentheses, never the qualifier
-  *A reference to another repository is qualified* above requires, and
-  the sentence says what the issue is to the entry — where a decision
-  lives, which issue covers the other half.
-- **Nothing already written is rewritten.** Both files are append-only
-  in practice and `merge=union` in fact; the rule binds what is written
-  next, not the entries that predate it. What the next entry owes one
-  still sitting in the open section is *An entry in the open section is
-  a live claim* below.
-- **A count that expires inside a landed entry stays there.** An entry
-  speaks of its own day — the one its release heading dates, or the day
-  it landed where a changelog releases nothing — so a sentence that
-  counted a moving population — trees yet to take a rule, repositories
-  short of a file — was true when it landed and is not corrected when
-  the population moves; the change that moves the population is what
-  gets the new entry, and the reader is served by that entry rather than
-  by a rewrite the bullet above already refuses. What the no-counts rule
-  of this section forbids is writing the next such sentence: a new entry
-  counts nothing that moves underneath it. A structure the entry itself
-  names — `build` and `check` are two rows, and it lists the two — is a
-  description rather than a count, and the rule does not reach it. That
-  day is what a reader dates the count against, and a release heading is
-  what announces it: an entry the open section still holds has the day
-  and not the heading, so it is met as current rather than as a record.
-  *An entry in the open section is a live claim* below is that case.
-- **An entry in the open section is a live claim.** *Nothing already
-  written is rewritten* and *A count that expires inside a landed entry
-  stays there* above are about an entry a reader meets as a record: the
-  release heading over it says which day the entries beneath it speak
-  of. The open section carries no such heading, so its entries are met
-  as what the tree holds now, and the release that closes the section
-  ships them whole — and where a tree releases nothing, as this one
-  does, that section is the whole file and no heading ever arrives. So a
-  later entry in that same section bearing on an earlier one leaves the
-  file making two claims at once, with nothing saying which the tree
-  holds. What is owed is a sentence in the new entry saying what it does
-  to the earlier one, and the append stays an append.
-  `btclib-org/btclib`'s `babf6fd8` puts a bullet under one the open
-  section already held and says `It leaves the entry above where it
-  was`, giving the reason that entry's rule survives — while the same
-  commit rewrites the prompt that entry's own last paragraph calls
-  unchanged, which is what makes it a claim borne on rather than a
-  neighbour — and `git show --numstat` reports no deletion on
-  `CHANGELOG.md`. So this is not an exception to either bullet above; it
-  is what they cost.
-- **What a live claim obliges is a change, not the passage of time.**
-  Every entry in an open section stays reachable by an append, and
-  reachability is not an obligation: the bullet above says what a new
-  entry owes one already there, and that is the whole of it. A branch
-  appending an entry that bears on an earlier one says what it does to
-  it, and a branch whose entry bears on nothing owes nothing, however
-  long the section has been open. A tree that releases nothing is where
-  the two readings part: no heading ever arrives over its entries, so a
-  duty carried by their age would grow by one entry every landing and be
-  discharged by none. An entry found false is worth a superseding entry
-  of its own, and finding one is a reading, the way this section leaves
-  a claim no command re-derives to a reader — never a sweep the open
-  section's length prescribes. The rejected alternative bounds the duty
-  by defining the open section as something narrower than the topmost
-  `##`; what it costs is section 12's invariant that the topmost `##`
-  heading on the default branch is a work-in-progress heading at every
-  commit, and a tree with no release to take a boundary from names one
-  in prose instead, which is the figure nothing re-derives that
-  *Measure, don't assert* above refuses.
-- **The form of an entry moves; what an entry claims does not.** That is
-  the boundary, and `btclib-org/btclib`'s `49176251` is where it sits:
-  it edits the open section — 105 insertions against 84 deletions on
-  `CHANGELOG.md`, and no other file — turning paragraphs sitting bare
-  under a `###` into bullets split at a bold lead-in, of which the
-  citation moving into the bullet that makes the claim is one
-  consequence. No sentence changes its truth value across those
-  deletions, and that is established rather than asserted: normalizing
-  both sides — every citation removed wherever it sat, emphasis and
-  list markers stripped, sentence punctuation dropped — and comparing
-  the word sequences of the whole file leaves one clause reordered in
-  the `btclib.minikey` entry, carrying the same facts, and the commit's
-  own new entry. A session that finds that commit and stops there reads
-  the open section as editable, and one that finds *Nothing already
-  written is rewritten* above and stops there reads it as frozen. The
-  deletions are what `git show --numstat` reports: `grep -c '^-[^-]'`
-  over the same diff answers 76, being blind to a deleted blank line,
-  which is a `-` with no second character; to a deleted markdown bullet,
-  which gives `-- **`; and to a wrapped line opening on the house `--`,
-  which gives `---`. Every one of those shapes undercounts, and a diff
-  holding nothing else answers 0 and reads as the pure append it is not,
-  which is why a boundary is argued from `--numstat` and not from a
-  pattern.
-- **No command in section 15 audits this.** Entries already landed put a
-  pointer inside parentheses with nothing before the number, and
-  *Nothing already written is rewritten* above keeps them there, so a
-  pattern over the file matches one of those as readily as a citation.
-  Telling the two apart is a reading, the way this file already treats a
-  claim no command re-derives.
-- **A value the standard owns is named where the entry decides it and
-  cited where the entry uses it.** The entry giving a sentinel its day
-  and hour states the instant, that being what it decided, and it ages
-  into truth: the decision belongs to that instant whatever the calendar
-  says later. The entry moving a `cron:` onto that instant
-  cites the section and copies nothing out of it, a copy there ageing
-  into a falsehood *Nothing already written is rewritten* above refuses
-  to correct. So what decides how an entry is written is the value's
-  role in it rather than its presence.
-
-    **Ownership tells the two roles apart.** Section 10's calendar is
-    this repository's, so a weekday and an hour beside a citation of
-    that section here is the entry that decided them, and the same pair
-    in another tree's changelog is a copy of what this one says.
-
-    The rejected alternative is a flat refusal to restate any value the
-    standard owns. It is the shorter rule, and it forbids an entry that
-    decides a calendar row from stating the row, which is the whole of
-    what such an entry records.
-
-    **A copy already landed stays**, for the reason *A count that
-    expires inside a landed entry stays there* above gives: the change
-    that moves the value is what gets the next entry, and that entry is
-    what serves the reader. So both files are records rather than
-    references, and a schedule, a floor or a setting is read from the
-    section that owns it.
+- **An entry is a `###` title and at most three lines.** The title says
+  what changed. The body cites the issue in its own text — `(closes #N)`
+  where the change closes it, `(issue #N)` where it does not, and
+  `(closes owner/repo#N)` across repositories — and carries no
+  measurement, no count and no history; the reasoning is the pull
+  request's. Section 4's `check-changelog` refuses a longer body.
+- **A `###` names one entry, and a new entry goes at the end of the open
+  section**, above the heading of the latest release — at the end of the
+  file where nothing has been released. The changelog takes what a user
+  would notice; the release notes take what a user has to act on;
+  neither restates the other.
+- **Both files are `merge=union` in `.gitattributes`.** Two branches
+  appending at one anchor rebase without a conflict, the driver keeping
+  both sides in landing order and sometimes eating the blank line
+  between them; the forge does not run the driver, so the same pair
+  reads `CONFLICTING` there until one side is rebased. `check-changelog`
+  names the seam, a repeated heading and a double close; the rebase's
+  result is read by hand, since no gate reads the order entries land in.
+- **Nothing already written is rewritten.** An entry speaks of its own
+  day, and a count in it that has since moved stays. An entry in the
+  open section is a live claim, though: a later entry that bears on it
+  says so in a sentence, and the append stays an append.
 
 ## 10. Workflows
 

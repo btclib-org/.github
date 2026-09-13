@@ -98,8 +98,8 @@ def test_a_heading_glued_to_the_line_above_is_caught(script: ModuleType) -> None
 def test_the_same_entry_closing_twice_is_not_reported(script: ModuleType) -> None:
     """A list body citing the issue its heading answers again is normal.
 
-    Section 9 of README.md lets an entry make several related claims
-    about the one issue it answers, each bullet citing it again.
+    Section 9 of README.md has the body cite the issue in its own text,
+    so a list body cites it in each bullet that claims something of it.
     """
     text = _CLEAN.replace(
         "- **first thing** (closes #1): one.\n",
@@ -182,6 +182,39 @@ def test_a_quoted_example_is_not_read_as_a_citation(script: ModuleType) -> None:
         " `(closes #1)` verbatim.",
     )
     assert script.problems(text) == []
+
+
+_LONG = "- one\n- two\n- three\n- four\n"
+
+
+def test_a_long_body_after_the_rule_entry_is_caught(script: ModuleType) -> None:
+    """The fourth check reads from the entry the rule entered with."""
+    rule = f"### {script.RULE_HEADING}\n\n- rule.\n"
+    found = script.problems(f"{_CLEAN}\n{rule}\n### Long\n\n{_LONG}")
+    assert len(found) == 1
+    assert "'Long'" in found[0]
+    assert "4 lines" in found[0]
+
+
+def test_a_long_body_before_the_rule_entry_is_not_reported(script: ModuleType) -> None:
+    """An entry above the rule entry predates the rule and stays."""
+    rule = f"### {script.RULE_HEADING}\n\n- rule.\n"
+    assert script.problems(f"{_CLEAN}\n### Long\n\n{_LONG}\n{rule}") == []
+
+
+def test_link_definitions_are_not_lines_of_the_body(script: ModuleType) -> None:
+    """btclib-benchmarks ends its file with a block of reference links."""
+    links = "".join(f"[iss{n}]: https://example.invalid/{n}\n" for n in range(9))
+    assert script.problems(f"{_CLEAN}\n### Short\n\n- one\n\n{links}") == []
+
+
+def test_every_entry_is_measured_where_the_rule_entry_is_released(
+    script: ModuleType,
+) -> None:
+    """With no rule entry in the open section, the bound reaches every entry."""
+    found = script.problems(f"{_CLEAN}\n### Long\n\n{_LONG}")
+    assert len(found) == 1
+    assert "'Long'" in found[0]
 
 
 def test_main_reports_a_problem_and_returns_1(

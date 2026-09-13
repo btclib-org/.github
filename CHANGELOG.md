@@ -8446,3 +8446,9 @@ nothing red follows from the copies disagreeing.
   backticked path says the tree tracks that path* is narrowed rather
   than falsified: it is true of a path, and the spelling now reaches any
   pathspec, which is what that entry's heading says of a condition too.
+
+### A changelog entry is its title and at most three lines
+
+- **Rules 1 to 4 of btclib-org/.github#1075** (closes #1033): what is
+  filed is `REVIEWING.md`'s one test, `README.md` does not grow, section
+  9 is cut back, and `check-changelog` refuses a body past three lines.
