@@ -3375,79 +3375,47 @@ alongside it. It says what falls outside that scope too, so a setting it
 is silent about reads as a decision rather than as an omission.
 
 **A copy carries all three limbs in the standard's own words** rather
-than wording them for itself. Two spellings are what that forecloses:
-`README.md` written into the second limb names a sibling's own file, and
-a bare `it` there reaches for section 16's checklist, where the third
-limb's `it` is this standard. The rejected alternative leaves the wording
-to each copy, and what it costs is a reading per tree of a claim they are
-all making once.
+than wording them for itself: `README.md` written into the second limb
+names a sibling's own file, and a bare `it` there reaches for section
+16's checklist.
 
 The claim rejected is `this file is the whole of them`, which no command
-checks: the repository document answers with fields this file states no
-rule about, and telling those apart from the settings a repository
-decides is a reading. What the narrower claim gives up is the promise
-that a reader holding the file holds everything; what it buys is a
-perimeter this file fixes rather than the endpoint, which is what a copy
-can be held to.
+checks: telling the fields a repository decides from the rest of the
+endpoint's answer is a reading, where the perimeter above is one this
+file fixes and a copy can be held to.
 
 **The section headed `## What this file passes over` is where a copy
 says what falls outside that scope.** Whether the section is there is
 what a command asks; whether it is honest about the perimeter is a
-reading, as the wider claim above is. The rejected alternative leaves
-the second obligation to a reader's check with nothing to run, and what
-it costs is a copy that deletes the rejected claim and says nothing of
-what it leaves out reading as converged.
+reading.
 
 **A copy does not claim that nothing it records has another form in the
 tree.** The topics are section 3's `keywords`, a releasing tree's
 `.homepage` is the `[project.urls]` field of that name, and a Pages
 custom domain has the root `CNAME` carrying the same value — so where a
 tree holds one of those, the record is a second copy read back for
-comparison rather than the only place the answer lives, which is what
-that copy's own section on it says. The rejected alternative is the
-blanket clause `nothing here is recoverable by reading the code`, one
-sentence shorter and refuted in such a tree's own file two sections
-further down.
+comparison, and that copy's own section on it says so.
 
-**`has_wiki` and `has_projects` are off, and a copy reads both back.**
-An unused wiki is a second place a reader can land looking for what the
-tracker already records; the projects board is a per-user view of the
-same issues the tracker holds. Section 16's checklist sets neither, so a
-copy's obligation to record them comes from this sentence rather than
-from the checklist. The rejected alternative leaves both outside the
-perimeter, on the ground that no section states a rule for either; what
-it costs is each copy inventing its own frame for the same two booleans,
-which is the divergence this decision closes.
+**`has_wiki` and `has_projects` are off, and a copy reads both back**,
+this sentence being what puts them inside the perimeter: an unused wiki
+is a second place to look for what the tracker records, and the projects
+board a per-user view of the same issues.
 
-**`has_issues` is not with them.** `CONTRIBUTING.md` sends an issue about
-one repository alone to that repository's own tracker, and section 16's
-checklist gives every repository an `ISSUE_TEMPLATE/`, so a behaviour
-this standard describes rests on the setting and a copy records it.
+**`has_issues` is not with them**, and a copy records it: `CONTRIBUTING.md`
+and section 16's `ISSUE_TEMPLATE/` both rest on each repository's tracker.
 
-**Section 10's `scorecard` bar splits on that same test.** Public is what the
-sentinel reads at all, so a behaviour this standard describes rests on
-`.visibility` and a copy reads it back, which puts a flip to private one
-command from being seen. Nothing sets `.fork`: a repository arrives as a fork
-or it does not, so no limb reaches it and section 10 states that half of the
-bar once. The rejected alternative keeps both halves out of every copy, on the
-ground that the bar is section 10's to state; what it costs is the flip, after
-which the sentinel's row and its badge stand while the run stops producing a
-score, and the file a reader restores the repository from says nothing.
+**Section 10's `scorecard` bar splits on that same test.** The sentinel
+reads a public repository only, so a copy reads `.visibility` back and a
+flip to private is one command from being seen. Nothing sets `.fork`: a
+repository arrives as a fork or it does not, so no limb reaches it and
+section 10 states that half of the bar.
 
 **Whether GitHub Pages is configured is inside the perimeter too, on
 every tree and not only the one that serves a site from its own root.**
-*Pages and Read the Docs* below states a rule for that case alone, but
-the same call answers every repository — `gh api
-repos/<org>/<repo>/pages` — and a tree that has never turned Pages on
-reads the identical `404` a tree whose site was removed by hand would
-give. The default branch is already inside the perimeter by the general
-rule above, section 16's checklist setting it on every new repository; a
-copy reads both back with the commands that answer them. The rejected
-alternative leaves Pages outside the perimeter, on the ground that no
-behaviour here rests on its absence; what it costs is the flip nobody
-would notice — a recorded `404` is what makes a later silent flip to
-`on` visible, Pages defaulting off being exactly why an unrecorded flip
-would otherwise go unnoticed.
+`gh api repos/<org>/<repo>/pages` answers every repository, and a
+recorded `404` is what makes a later silent flip to `on` visible. The
+default branch is inside by the general rule, section 16's checklist
+setting it; a copy reads both back with the commands that answer them.
 
 ### Signatures
 
@@ -3487,31 +3455,22 @@ and classic protection, taking the most restrictive combination:
 **The bypass mode is the whole of the design.** `pull_request` excuses
 its holder *while merging a pull request* and at no other time, which
 answers the one thing a solo-maintainer repository cannot do — produce
-someone else's approval. A direct push to `main` is refused for everyone.
-The other mode, `always`, would permit a direct push, and what it would
-buy is worth nothing once the rule is read as asking for a valid
-signature rather than for a particular signer.
+someone else's approval. A direct push to `main` is refused for everyone;
+`always` would permit one, for nothing a valid signature does not
+already give.
 
-**What it excuses is the rule, not the approval count.** Its holder [can
-then choose to bypass any branch protections and merge that pull
-request](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository#granting-bypass-permissions-for-your-branch-or-tag-ruleset),
-and the guard against merging a head an approval no longer covers is a
-parameter of that same rule: `dismiss_stale_reviews_on_push`, [the
-approval dismissed once a push changes the diff it was
-given](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#require-a-pull-request-before-merging).
-So the dismissal binds every merge except the ones this organization
-makes, and the `sha` on `CONTRIBUTING.md`'s merge call is not a second
-belt over a forge rule that would have refused the moved head anyway.
+**What it excuses is the rule, not the approval count**, and
+`dismiss_stale_reviews_on_push` is a parameter of that same rule. So the
+dismissal binds every merge except the ones this organization makes, and
+the `sha` on `CONTRIBUTING.md`'s merge call is what refuses a moved head.
 
 Two settings hold the door, not one: the classic review requirement is
 cleared for the maintainer by `enforce_admins: false` *plus* admin, and
 turning `enforce_admins` on would deadlock every solo merge. That setting
-clears the whole of classic protection for that account rather than its
-review rule alone, `strict` included, so being up to date with `main` is
-a rebase somebody runs and not a rule the forge holds. A branch merged
-behind `main` lands a tree nothing has run: the branch is green against
-the base it was gated on, `main` is green against its own tip, and the
-squash produces neither.
+clears the whole of classic protection for that account, `strict`
+included, so being up to date with `main` is a rebase somebody runs and
+not a rule the forge holds: a branch merged behind `main` lands a tree
+nothing has run.
 
 When patching required checks, use the `checks` array and a JSON body on
 stdin: `contexts` has no field for an app, so sending it silently
@@ -3529,13 +3488,8 @@ deliberately removed, since it replays a branch's review steps onto
 `main`.
 
 **`allow_auto_merge` is on**, and a copy reads it back with the other
-merge settings: the sentence above rests on the setting rather than
-describing it. Off, auto-merge is not offered, every landing waits on
-somebody pressing *Squash and merge* at the moment the last check goes
-green, and nothing turns red. The rejected alternative leaves it to each
-repository as a convenience rather than a setting of this standard's,
-and what that costs is a section describing a landing path the tree no
-longer offers, with no command anywhere to catch it.
+merge settings. Off, every landing waits on somebody pressing *Squash
+and merge* when the last check goes green, and nothing turns red.
 
 One method is also one entry in a dropdown that GitHub preselects from
 whatever was used last — and the dialog that switches auto-merge on
@@ -3544,29 +3498,18 @@ carries the same dropdown, hours before anything merges.
 `squash_merge_commit_title` and `squash_merge_commit_message` are set so
 that a single-commit branch lands under its own subject and a longer one
 under the pull request's title, with the branch's commit messages as the
-body — never the pull request's description.
+body — never the pull request's description. `delete_branch_on_merge`
+is on.
 
 **A subject is one physical line.** `%s` joins a wrapped subject up to
-the first blank line where the squash does not, so `git log --oneline`
-and every read through `%s` show a whole sentence the landing will cut —
-a wrapped subject lands truncated at its first line, the citation it
-carried left behind in the body, and nothing turns red. The read that
-does not conceal the wrap is the first line of `%B`:
+the first blank line where the squash does not, so a wrapped subject
+lands truncated at its first line, the citation it carried left in the
+body, and nothing turns red. The first line of `%B` is the read that
+shows the wrap:
 
 ```shell
 git show -s --format=%B <sha> | head -1
 ```
-
-`79fb1df` is where that happened here. `git show -s --format=%s 190d5bd`
-reads the whole subject the branch carried, `(closes #686) (closes #692)`
-and all; the first line of the same commit's `%B` is the fragment the
-squash landed. The rest of the subject is on `main` as the body's own
-first line, `what they mean (closes #686) (closes #692)` sitting where a
-paragraph belongs, in a message nothing rewrites. The issues closed
-anyway, GitHub having parsed them from the pull request title, so
-nothing went red and the only signal was the sentence stopping mid-clause.
-
-`delete_branch_on_merge` is on.
 
 ### What a pull request says it is
 
@@ -3574,197 +3517,82 @@ nothing went red and the only signal was the sentence stopping mid-clause.
 parentheses**: `Say when github-release runs instead of relying on no if
 (closes #1142)`. Which of the title and the branch's own commit subject
 lands is *Merge method*'s rule, so the parentheses belong on whichever
-one that is — not only on the title; whether they survive the landing at
-all is that same rule, a subject that wraps taking its citation off the
-subject with it. Either way the number reaches `git log` and stays
-reachable from a checkout with no forge in front of it.
+one that is, and a subject that wraps takes its citation off the subject
+with it. Either way the number reaches `git log` and stays reachable
+from a checkout with no forge in front of it.
 
 **A pull request that advances an issue it does not close names it the
-same way, `(issue #N)`**, and for the same reason, which reaches further
-here: without the citation the subject carries no number at all, so from
-a checkout with no forge the connection is not weakened but lost. The
-token holds one meaning wherever the standard writes it — section 9's
-`CHANGELOG.md` citation and this one both name an issue the change does
-not close — and which of the two a change carries is decided by what is
-true of it. Neither is the closing mechanism: the description is, and
-the paragraphs below have the read that says what it closed.
-
-**The rejected alternative reserves `(issue #N)` for `CHANGELOG.md`
-alone**, so that parentheses on a subject always mean a close. What it
-costs is the number: a branch answering half an issue then lands with
+same way, `(issue #N)`**: without it the subject carries no number at
+all. The token holds one meaning wherever the standard writes it —
+section 9's `CHANGELOG.md` citation and this one both name an issue the
+change does not close — and which of the two a change carries is decided
+by what is true of it. Reserving `(issue #N)` for `CHANGELOG.md` alone
+is rejected, since a branch answering half an issue would then land with
 nothing in `git log` pointing at what it answered.
 
 A pull request that neither closes nor advances an issue carries no
-parentheses, and adding some because the shape looks right is how a
-wrong number gets in. Nothing already landed is rewritten, a title and a
-landed commit subject included: section 9's *Nothing already written is
+parentheses. Nothing already landed is rewritten, a title and a landed
+commit subject included: section 9's *Nothing already written is
 rewritten* is this same rule, read from the title's side of it.
 
 **A title citing several issues joins them for the reader, and the
-parser binds the verb to the first.** `(closes #319, #388)` is, to the
-parser, a keyword on the adjacent number and a bare mention of the
-rest — which costs nothing where the description carries every keyword,
-the check below having counted them, and the landed subject's own
-keyword then meets issues already closed. That safety is the
-description's, not the subject's: a commit that had to close on its own
-subject would repeat the verb for each reference — `(closes #319)
-(closes #388)`, adjacency being the test — and everything here reaches
-`main` through a pull request whose description is what closes.
+parser binds the verb to the first**: `(closes #319, #388)` closes only
+the first on its own, so a subject that must close alone repeats the
+verb, `(closes #319) (closes #388)`. The description carries every
+keyword either way.
 
-**The verb is checked against the forge's own parse, not against
-intent.** `closingIssuesReferences` is what GitHub actually read out of
-the description, and *what a pull request closes is read before it is
-merged*, below, has the command — one read answering both questions.
-A title or an entry carrying `closes` for a number missing from that
-answer, or `issue` for one present in it, is wrong on the parser's own
-evidence — landed pull requests have carried the second defect, closing
-their issue while citing it `(issue #N)` in the changelog, the release
-notes and the title at once, and one of them got the title right while
-both prose files beside it stayed wrong, so a correct title is not
-evidence for the citations it travels with. The answer can lag the
-create by a moment; a zero that survives repeated reads spaced apart is
-not lag but a parse that never ran, and an edit that resubmits the body
-is what re-triggers it.
-
-The title is not the closing mechanism. `Closes #N` in the
+**The title is not the closing mechanism.** `Closes #N` in the
 *description* is what GitHub acts on, and both are wanted: the
-description closes the issue, the title records which one. The bare
-`#N` form is repository-local: written in another repository it names
-that repository's own issue N, not this one's. The qualified
-`owner/repo#N` form closes across repositories exactly as `#N` closes
-within one — measured on `btclib-org/btclib-secp256k1#366`'s squash
-commit, `592f1bc`, whose message named `btclib-org/.github#81` after a
-keyword: the issue closed on that merge, its timeline crediting the
-commit rather than a Development-panel link.
+description closes the issue, the title records which one. The bare `#N`
+form is repository-local; the qualified `owner/repo#N` form closes
+across repositories exactly as `#N` closes within one.
 
-That qualified form is also section 9's own citation style for another
-tracker's issue, so an ordinary cross-repository mention already
-carries what a keyword needs to fire — and GitHub does not parse
-negation, so the sentence declaring that a keyword closes nothing is
-the sentence most likely to hold one: the commit above read `No keyword
-closes btclib-org/.github#81 here`, and a same-repository pull request
-body read `I close #291 by hand once the last lands` — each put a
-keyword verb directly in front of the number it meant to spare. So a
+**GitHub does not parse negation**, so a sentence declaring that a
+keyword closes nothing is the sentence most likely to hold one. A
 mention that must not close names the issue with no verb immediately in
-front of it, negated or not — `tracking issue: owner/repo#N`, never
+front of it — `tracking issue: owner/repo#N`, never
 `<verb> owner/repo#N` — and a cross-repository task keeps its tracking
 issue open this way until every one of its pull requests has landed, and
 somebody closes it by hand.
 
-**Adjacency is the test, and an issue's timeline is what measures it.**
-A verb the number does not immediately follow does not fire the parser:
-`btclib-org/.github`'s `c6c1657` reads `none is resolved here; what it
-found beyond them is #153`, and its `214ed5f` reads `Which of these
-fixes survives a future hand-copy, per #39`, and each entered its
-issue's timeline as `referenced` where `592f1bc` above entered
-`btclib-org/.github#81`'s as `closed`. Both are unconfounded, which is
-what a citation here has to be: `#153` stayed open four hours past
-`c6c1657` and was closed by a different landing, and `#39` stayed open
-past `214ed5f` — where a commit whose own pull request closes the issue
-through its body records `referenced` whether the keyword bound or not,
-and proves neither. In both, a newline separates the verb from the
-number — and that a newline alone breaks the binding, in a keyword
-meant to fire, is btclib-org/.github#420's subject.
-
-**Two parsers read a closing keyword, and a newline is where they part.**
-One answers `closingIssuesReferences` and reads the pull request's
-description; the other closes on a push and reads the message that
-landed. A physical line is what the first requires, and #420's
-measurement is of that one. It is not reproducible, the pull request it
-was taken on having been corrected before it merged, and what stands in
-its place is a pair of negations, read on 2026-08-30:
-`btclib-org/.github#510` says `does not close #466` on one line, its
-only mention of that issue, and `closingIssuesReferences` names it;
-`btclib-org/bitcoin-core-rpc#182` says the same negation at the end of
-a line with `btclib-org/btclib#1157` beginning the next, and the same
-read answers empty. The two differ in the reference form as well as in
-the newline, and the sweep below is what controls for that: its
-adjacent hits carry the bare and the qualified form alike and are
-parsed alike, so the newline is what is left between the pair. The most
-recent pull requests of every repository in the organization are asked
-the same question:
-
-```shell
-gh pr list --repo <org>/<repo> --state all --limit 200 \
-  --json number,body,closingIssuesReferences
-```
-
-— the verbs reaching a reference on one line being the positive control,
-without which the absence of the others measures nothing.
-
-**The second parser crosses the newline, and a `closed` event's commit
-id is what says so.** That field carries a sha where the push closed the
-issue and null where the description did:
-`btclib-org/btclib-secp256k1#366` names `btclib-org/.github#81` with no
-verb anywhere in its description and `closingIssuesReferences` empty,
-and the close of #81 carries `592f1bc`; `btclib-org/.github#504`'s
-squash message carries no keyword at all, its description closes #477,
-and that close carries no sha. So `btclib-org/btclib`'s `825c74e2` is
-the measurement of the second parser on a newline: it writes `closes` at
-the end of a line and `btclib-org/.github#402`, its only occurrence, at
-the start of the next, and the close of #402 names that sha. Where both
-parsers could fire, the event records whichever did, so a null there
-says nothing against it.
-
-**So the keyword and its reference share a physical line, and a block of
-several is written one keyword per line.** That is the description
-parser's requirement stated where a wrapper can break it rather than a
-second rule: this section asks each issue for its own verb and section 9
-wraps prose at eighty columns, and a body that follows both as one long
-line loses precisely the keywords the wrap splits, every one of them
-individually well-formed, the text reading correctly to a person and
-only the API answering short. One keyword per line is the shape a wrapper cannot
-split, and no formatter is let reflow the block. What catches a loss is
-counting the registrations against the number intended. `<n>` sits last
-for the reason section 9 gives:
-
-```shell
-gh pr view --json closingIssuesReferences \
-  --jq '.closingIssuesReferences | length' <n>
-```
-
-The failure is stable, so asking twice answers only the indexing lag —
-a five where eight were meant reads exactly like a correct answer for a
-smaller set, and only the count knows what was meant.
-
-**What is not measured here is a gap on one line**, a verb and a number
-with only text between them; no commit in this tracker isolates it, and
-not for one reason — a same-line instance closes at that same merge
-through its pull request's body, or lands against an issue closed hours
-earlier by something else, or names a pull request or another tree's
-number. Read the rule as adjacency and write to it, rather than as a
-licence to put a verb on the same line as a number it must not close:
+**Adjacency is the test, and two parsers read a keyword.** A verb the
+number does not immediately follow does not fire. One parser reads the
+description and answers `closingIssuesReferences`, and it needs the
+keyword and the number on one physical line; the other closes on a push,
+reads the landed message, and crosses a newline. An issue's timeline
+says which fired — a `closed` event carries the commit's sha where the
+push closed it and null where the description did, so a null says
+nothing against the push:
 
 ```shell
 gh api repos/<org>/<repo>/issues/<n>/timeline --paginate \
   --jq '.[] | select(.commit_id != null) | {event, commit_id}'
 ```
 
-So a rule forbidding a keyword verb anywhere ahead of a reference
-forbids a shape the forge does not act on, and a sweep written to it
-reports landings that closed nothing. What covers the doubt is the
-`closingIssuesReferences` read below rather than a wider rule, it being
-an answer about the pull request in front of you.
+A gap on one line, a verb and a number with only text between them, is
+not measured, and is no licence to put a verb before a number it must
+not close.
 
-**A manual link carries no form to get right and no keyword to omit**,
-which is what makes it the sharper trap: made by hand in the
-Development panel, it closes its issue on merge regardless of
-repository, and it appears in no diff, no commit message and no
-description, so every surface a reviewer reads can say the opposite of
-what merging will do. `btclib-org/bitcoin-core-rpc#178` carried exactly
-such a link to `btclib-org/btclib#1160`, confirmed by
-`closingIssuesReferences`, while its own body said in as many words
-that it did not close that issue. Merging
-`btclib-org/bitcoin-core-rpc#178` did not close
-`btclib-org/btclib#1160` either: the issue had already been closed by
-hand, deliberately, once a maintainer found the same undisclosed link
-on two more pull requests racing it. What kept the sentence from being
-false is a person noticing in time, not the mechanism — the link would
-have closed `btclib-org/btclib#1160` on merge had
-`btclib-org/bitcoin-core-rpc#178` landed first.
+**So the keyword and its reference share a physical line, and a block of
+several is written one keyword per line**, which no wrapper can split
+and no formatter is let reflow. What catches a loss is counting the
+registrations against the number intended. `<n>` sits last for the
+reason section 9 gives:
 
-So **what a pull request closes is read before it is merged**, from the
-one place that answers. The variables follow the query, which puts `<n>`
+```shell
+gh pr view --json closingIssuesReferences \
+  --jq '.closingIssuesReferences | length' <n>
+```
+
+The failure is stable, so asking twice answers only the indexing lag; a
+zero that survives repeated reads is a parse that never ran, and an edit
+that resubmits the body re-triggers it.
+
+**A manual link carries no form to get right and no keyword to omit.**
+Made in the Development panel, it closes its issue on merge regardless
+of repository and appears in no diff, commit message or description. So
+**what a pull request closes is read before it is merged**, from the one
+place that answers. The variables follow the query, which puts `<n>`
 last for the reason section 9 gives:
 
 ```shell
@@ -3778,66 +3606,23 @@ query($owner:String!,$name:String!,$num:Int!){
 ```
 
 An issue there that the description does not name is the finding, and a
-cross-repository one is the finding this rule exists for: a tracking
-issue closed on the first of three repositories leaves the other two
-answering to nothing.
+cross-repository one is the finding this rule exists for. A title or an
+entry carrying `closes` for a number missing from that answer, or `issue`
+for one present in it, is wrong on the parser's own evidence, and a
+correct title is not evidence for the citations it travels with.
 
-**That read describes the pull request, not what a squash will land.**
-`closingIssuesReferences` reads the description as it stands when the
-call runs, and a squash lands a second, separately authored text — the
-commit message composed at merge time, in a field the description never
-populates. `dde42cd` (PR 512) is the gap made concrete: the pull
-request's title read `(issue #468)`, its body's first line said why —
-one of three *Done when* items, the others sibling copies — and
-`closingIssuesReferences` answered empty for #468. Landing it, the
-maintainer typed `(closes #468)` into the squash subject, a text the
-description-based read never sees, and #468 came back CLOSED on it:
+**That read describes the pull request, not what a squash will land**:
+the squash message is composed at merge time, after any pre-merge read.
+So the read is taken twice — `closingIssuesReferences` before the merge,
+and the timeline read above after it, for every reference the landed
+message names. A `closed` event naming the just-landed sha for a
+reference the first read did not name is the finding. Taking the title
+verbatim as the squash subject is declined as a rule about how a person
+presses the button, where the second read runs however it was pressed.
 
-```shell
-gh api "repos/btclib-org/.github/issues/468/timeline?per_page=100" \
-  --jq '[.[] | select(.event=="closed" or .event=="reopened") |
-         {event, at: (.created_at | fromdateiso8601)}] | (.[1].at - .[0].at)'
-# 38
-```
-
-— reopened by hand thirty-eight seconds later, the number the command
-above prints rather than one read off the page. Nothing in the pull
-request was wrong, and `closingIssuesReferences` answered correctly for
-the object it reads; the squash subject is a different document,
-written after that read, and no pre-merge check reaches a document that
-does not exist yet.
-
-**So the read is taken twice: `closingIssuesReferences` before the
-merge, as above, and, for every reference the landed commit's own
-message names, the per-issue timeline read given above, after it.** A
-`closed` event naming the just-landed sha for a reference the first read
-did not name is the finding — #468's shape, caught before it costs a
-reopen rather than after.
-
-**The alternative weighed and declined takes the pull request's title as
-the squash subject verbatim, rather than composing one, so there is only
-one text to disagree with itself.** It is cheaper and removes the
-divergence instead of detecting it, but it is a rule about how a person
-presses the button, the weaker kind this file already carries one of —
-the negation paragraph above — and #468 is what that kind looks like
-once broken. Comparing the two reads is a check that runs regardless of
-how the button was pressed, which is why it is the one kept.
-
-**The negation paragraph above is checked directly, against the
-branch's own commit subjects and bodies, because the forge's two reads
-of the same words can disagree.** `f47899a` (PR 491)'s body carried
-`This does not close btclib-org/.github#365`; `closingIssuesReferences`
-answered empty for it while the pull request stood open, and the issue
-still closed once the identical sentence was the landed commit's own
-text. Counting that answer against the number you mean to close,
-above, is what already reaches a different mechanism —
-`btclib-org/portanode#238` quoted another commit's `(closes #188)` in
-its own body, and the same read answered three where two were meant, a
-surplus the count would have shown had it been read rather than only
-printed. Neither reading closes the gap `f47899a` opened, because the
-pull request's own description held the same words the push later
-acted on differently. What reaches that gap is a read that never asks
-the forge at all:
+**Negation is checked against the branch's own commit subjects and
+bodies**, since the forge's two parsers can read the same words
+differently. Before the pull request is opened:
 
 ```shell
 git log <base>..<branch> --format='%H%x00%B%x00' | python3 -c '
@@ -3851,14 +3636,10 @@ for sha, body in zip(fields[0::2], fields[1::2]):
 '
 ```
 
-run over the branch before it is opened, against the same expectation:
-every hit outside the title's own `(closes #N)` parentheses is the
+Every hit outside the title's own `(closes #N)` parentheses is the
 finding, and a number the title carries that the scan does not find is
-a closing keyword the title declares that the branch's own words never
-state. Its separator is `\s`, which crosses a newline, because the
-parser this text will meet is the one that reads a landed message: a
-space or a tab would miss the shape `825c74e2` closed an issue with,
-which is the shape this scan exists to catch.
+a keyword the branch's own words never state. The separator is `\s`,
+crossing a newline, because the landed message meets the push parser.
 
 ### Review
 
@@ -3874,8 +3655,7 @@ and what answers it is another push. `NACK` is Bitcoin's sense of the
 word: the disagreement is with the change itself, so no alteration is
 asked for and none would earn an ack, and what answers it is an argument
 or a closed pull request. A review that delivers no verdict is a reading
-and not an unfinished review; `REVIEWING.md` states that distinction,
-and why, for whoever reviews.
+and not an unfinished review; `REVIEWING.md` states that distinction.
 
 **The ack of record is posted as a review of type COMMENT**, whichever
 of the three it carries — `gh pr review --comment` — and never as a
@@ -3887,52 +3667,30 @@ gh api orgs/<org>/actions/permissions/workflow \
 gh api repos/<org>/<repo>/pulls/<n>/reviews --jq '.[].user.login'
 ```
 
-The first answers `false`, which closes the route a `GITHUB_TOKEN`
-would take, and *Tokens, publishing, scanning* below has why it is set
-that way. The second answers `claude[bot]` — a GitHub App's identity,
-not `github-actions[bot]` — so that setting is not what governs the
-credential in play. What forbids `--approve` here is the prompt saying
-never to, `Bash(gh pr:*)` in `claude_args` permitting it otherwise: a
-rule of this file held by a sentence in a prompt, and worth naming as
-that rather than as a setting. The self-approval refusal above is not
-the reason either — it reaches an author, and the workflow does not run
-as one.
-
-`--request-changes` is available and goes unused, one shape for the
-three keeping the answer in one place: the verdict is the body's last
-line, which is what the job's own verification step reads, and a review
-type saying something for one verdict of the three would be a second
-place for the answer to live and to disagree.
+The first answers `false`, closing the route a `GITHUB_TOKEN` would
+take. The second answers `claude[bot]`, a GitHub App's identity, which
+that setting does not govern: what forbids `--approve` is the prompt,
+`Bash(gh pr:*)` in `claude_args` permitting it otherwise. The
+self-approval refusal is not the reason either, the workflow not running
+as the author. `--request-changes` goes unused, so that the body's last
+line, which the job's verification step reads, is the one place the
+verdict lives.
 
 **What the forge then holds is a record of the review and not an
-approval.** That second call lists a COMMENT review as it lists any
-other, so the rule this file states is visible in an artifact rather
-than only here. It does not buy the OpenSSF Scorecard's `Code-Review`
-check: that check credits an approval on the forge or a merger
-different from the committer, and its own documentation says that a
-review by a bot, one powered by a model included, does not count as
-code review — so the approval this workflow does not have would not
-have satisfied it either. What it asks for is a second person who
-understands the change, in its own words, and no workflow is one.
+approval**, and it does not buy the OpenSSF Scorecard's `Code-Review`
+check, which does not count a review by a bot as code review.
 
 **btclib-org/.github#341 holds the removal of the ruleset's
-`bypass_actors`.** The bypass is what lets a merge happen with no
-approving review on the pull request, and the workflow's verdict is not
-one, so removing it puts a person's approval on the critical path of
-every merge. What that buys is the rule enforced by the forge rather
-than by whoever is landing, and what it costs is that nothing lands
-while nobody is available. That is the trade the issue decides.
+`bypass_actors`**, which would put a person's approval on the critical
+path of every merge: the rule enforced by the forge, at the cost that
+nothing lands while nobody is available.
 
 **The ack of record is `claude-review.yml`'s**, and an author's own is
-not one. A comment from the account that opened the pull request is a
-statement that its gates were run — worth having, and not a reading. The
-distinction is the whole of why the review requirement exists: an author
-verifying their own work cannot find what they did not think to look
-for, which is the class of defect a second reader exists to catch. What
-triggers the workflow is `opened`, `reopened`, `synchronize` and
-`ready_for_review`, and a comment naming `@claude` — that last is how a
-head that moved after the review gets a fresh one, since the ack does
-not follow the branch.
+not one: a comment from the account that opened the pull request says
+its gates were run, and is not a reading. What triggers the workflow is
+`opened`, `reopened`, `synchronize` and `ready_for_review`, and a comment
+naming `@claude` — which is how a head that moved after the review gets
+a fresh one.
 
 **The workflow is present and neither of its jobs runs.** Each carries
 `if: vars.CLAUDE_REVIEW_ENABLED == 'true'`, an organization variable:
@@ -3942,92 +3700,54 @@ gh api orgs/<org>/actions/variables --jq '.variables[].name'
 ```
 
 It names nothing, and an undefined `vars.X` is the empty string, so the
-absence is the off state and creating it with that value is the whole of
-what a tree carrying the gate needs to start reviewing. Nothing else has
-to be written that day, which is why the file is kept current rather than
-deleted from a tree and written into it a second time. A tree whose gate
-is off carries no ack of record, and what a landing reads there is
-whatever reading a person made. The switch is the organization's rather
-than each repository's because one setting is one thing to remember: a
-variable per tree is one that can be set in some and forgotten in others,
-with nothing saying which.
+absence is the off state and creating it with that value is the whole
+switch; the file is kept current meanwhile. A tree whose gate is off has
+no ack of record, and a landing there reads a person's reading. The
+switch is the organization's so that no tree can be forgotten.
 
-**A pull request that adds or edits `claude-review.yml` gets no ack**,
-that being the exception the rule above has, until the change is on
-`main`; what refuses it is in the workflow's own header, below. That is
-not something to work around — it is the honest shape of "no review
-happened" — and such a pull request lands on its gates and on a
-description saying so. It carries that change alone, since anything
-travelling with it lands unreviewed too. The refusal is keyed on that
-file, so a pull request touching another workflow is reviewed like any
-other.
+**A pull request that adds or edits `claude-review.yml` gets no ack**
+until the change is on `main`, for the reason the workflow's own header
+gives. It lands on its gates and a description saying so, and carries
+that change alone; one touching another workflow is reviewed as usual.
 
 **A green check is an ack of the head, and nothing weaker.** The job's
-last step reads back what was posted and refuses to report anything
-else: a refusal, a verdict never written, and an ack naming a sha the
-branch has moved past are a red row each. What the row cannot say is
-what the review found, which is the comment's to say and is read
-whatever the colour.
+last step reads back what was posted: a refusal, a verdict never
+written, and an ack naming a sha the branch has moved past are a red row
+each. What the review found is the comment's to say, whatever the
+colour.
 
-It is deliberately **not a required check**, and its own header says it
-must not become one. Requiring it would make a review a gate to be
-satisfied rather than a reading to be answered, and would hand the merge
-button to whatever the workflow happened to say. What it is instead is
-the thing a human landing the pull request reads before pressing. That
-is a different mechanism from the review it posts: a required check is
-a context a branch rule names and nothing else can supply, where the
-approval a `pull_request` rule counts is satisfied by whoever reviews.
+It is **not a required check**, its own header saying why: it is what a
+person landing the pull request reads before pressing.
 
-`REVIEWING.md` is the standard: a diff is acked when
-it leaves the tree better than it found it, a matter of taste is not a
-finding, and work the diff never set out to do becomes an issue rather
-than a comment. Every finding is labelled blocking, non-blocking, nit or
-question.
+`REVIEWING.md` is the standard: a diff is acked when it leaves the tree
+better than it found it, a matter of taste is not a finding, and work
+the diff never set out to do becomes an issue rather than a comment.
+Every finding is labelled blocking, non-blocking, nit or question.
 
-**A review pass runs locally against the branch before it is pushed**,
-and `.claude/commands/review.md` with no argument is what runs it: the
-diff of the current branch against `origin/main`, read against
-`REVIEWING.md` as the workflow reads a pull request. It posts nothing,
-replaces no round on the forge and is not the ack of record; what it buys
-is that the forge's round is the last rather than the first. What it
-reaches is what the gates do not — a count nothing re-derives, a bare
+**A review pass runs locally against the branch before it is pushed**:
+`.claude/commands/review.md` with no argument reads the diff against
+`origin/main` and `REVIEWING.md`, posts nothing and is not the ack of
+record, so that the forge's round is the last rather than the first. It
+reaches what the gates do not — a count nothing re-derives, a bare
 cross-repository reference, a paragraph a change elsewhere falsified —
 and the count is not reachable by a pattern either, a number being a
-defect for what it counts rather than for the string it is. The
-distinction the ack of record rests on holds here too: a pass run from
-the session that wrote the diff re-performs the author's reading.
+defect for what it counts. A pass run from the session that wrote the
+diff re-performs the author's reading.
 
-**A gate already run on this sha is relied on, and the run is named.**
-Where the required checks run beside the review on that commit, or an
-author hands over a branch they gated themselves and said so, the review
-says whose run it is rather than repeating it; where no such run is on
-the record it runs them, and a gate that fails is the strongest finding
-available. The sha is the whole of the condition, so a rebase voids it —
-the branch was gated and then the tree moved under the gate — and naming
-the run is what lets a reader tell a gate relied on from one nobody
-looked at.
+**A gate already run on this sha is relied on, and the run is named**;
+where none is on the record the review runs the gates, a failing one
+being the strongest finding available. A rebase voids the reliance.
 
-**What a diff decides with is run, not read.** Where a diff adds
-something that decides an outcome by matching or computing — a regex, a
-pattern in a hook, a grep, a script, a query — the review executes it,
-against the shapes the diff's own prose claims to cover and the shapes
-the tree actually holds, and the finding quotes what it printed.
-Reading it again is not a second check: the author read it and believed
-it. A claim the prose makes about the tree takes the same treatment,
-"every link here is already `./`-prefixed" being one `git grep`'s worth
-of evidence and the reason a change is offered as safe. None of it is a
-run of the gates — those run beside the review on the same sha, or are
-the author's to run before pushing — because what the diff adds has
-been run against nothing until a review runs it. Where what is at hand
-cannot run it — a script or a query wanting an interpreter, where a
-pattern against the tree needs only a grep and is the usual case — the
-summary says so in those words, that it was not run: a hand trace is
-the author's reading performed a second time, and it can carry a
-finding but not an ack.
+**What a diff decides with is run, not read.** A regex, a hook pattern,
+a grep, a script or a query the diff adds is executed by the review,
+against the shapes its prose claims and the shapes the tree holds, and
+the finding quotes what it printed; a claim the prose makes about the
+tree is checked the same way. Where it cannot be run, the summary says
+so in those words: a hand trace can carry a finding but not an ack.
 
 **What a force-push costs is the review attached to the sha it
 replaces**, a bot's included, and whether there is one is read before the
-push rather than remembered:
+push:
 
 ```shell
 gh pr list --repo <org>/<repo> --state open --head <branch> --json number
@@ -4035,33 +3755,11 @@ gh api repos/<org>/<repo>/pulls/<n>/reviews \
   --jq '.[] | "\(.user.login) \(.state) \(.commit_id[0:8])"'
 ```
 
-`reviews` is the endpoint that answers, and `pulls/<n>/comments` is the
-one that reads as an absence: it counts inline review comments, so a
-review carrying none answers zero there and one here. The first command
-finding no pull request is the rule's own limit — a reading taken before
-one exists is attached to nothing, and no push can orphan it.
-
-**A pull request that exists leaves no window.** `sourcery-ai[bot]`
-submits against the head within seconds of one opening — `created_at` on
-the pull request against `submitted_at` on the review, read on
-2026-08-30 — so a push following the open has no interval in which
-nothing is attached yet. That is not the same as every pull request
-carrying one, which is why what decides is the read and not the timing.
-What carries the correction does not reach this either: an amend and a
-commit of its own both move the head, and a review describes the sha it
-names rather than the branch. What the read buys is that a review left
-pinned to the replaced sha is known to be stale rather than taken for a
-reading of the head, and *A green check is an ack of the head* above is
-what shows it. The one force-push that stays right is a rebase carrying
-no new work.
-
-**The rejected alternative is an ordering rule**: open the pull request
-only once a reading has cleared the sha, so that no push ever follows a
-review. It needs no read at all, and what it costs is being a rule about
-what a session remembers per branch — the weaker kind, for the reason
-*What a pull request says it is* gives above — where a session holding
-several branches at once has nothing telling it which of them is already
-open. The commands above are that same rule as a check that runs.
+`pulls/<n>/comments` counts inline comments only, so it reads zero for a
+review carrying none. An open pull request may already carry one, a bot
+reviewing within seconds of the open, so the read decides rather than the
+timing: an amend and a new commit alike leave a review pinned to the
+replaced sha, and a rebase carrying no new work stays right.
 
 #### The workflow, and what a port of it has to adapt
 
@@ -4076,33 +3774,22 @@ gh api orgs/<org>/dependabot/secrets \
   --jq '.secrets[] | "\(.name) \(.visibility)"'
 ```
 
-The first answers with the name or with nothing, and `--silent` is for
-the reason section 15's publishing sweep gives.
+The first answers with the name or nothing, `--silent` for the reason
+section 15's publishing sweep gives. The token is an
+**organization** secret at `visibility=all`, so a repository adopting
+the workflow configures nothing for it. It is in both stores for the
+reason *Dependabot and pre-commit.ci* gives below; without the second,
+every pull request Dependabot opens gets a red review. Why the job has
+the shape it has is in the workflow's own header.
 
-The token is an **organization** secret at `visibility=all`, so a
-repository adopting the workflow configures nothing for it. That is worth
-stating because the answer *nothing* is invisible from a repository's own
-settings page, and it is the first question a port asks. It is in both
-stores for the reason *Dependabot and pre-commit.ci* gives below, and a
-repository that configures Dependabot gets a red review on every pull
-request Dependabot opens while the second is missing.
+**Two of the three things a port adapts** are claims about the receiving
+tree: the prompt names `REVIEWING.md` and says the gates run beside it on
+this sha, so a tree without that file or those workflows needs a prompt
+that says something true of it.
 
-**Two of the three things a port must adapt** are claims about the
-receiving tree rather than settings. The prompt names `REVIEWING.md`, and
-it tells the reviewer that the gates are running beside it on this sha —
-so a repository without that file, or without those workflows, needs a
-prompt that says something true instead of inheriting a claim about files
-it does not have. Copying the workflow faithfully into a tree that has
-neither is the same defect as copying any other shared file that
-describes one tree, committed by the act of spreading it.
-
-**The third is a citation**, and it is not about the receiving tree at
-all. The prompt cites the rules a finding is written against, and this
-repository's copy cites `README.md`, this being the tree that holds them;
-everywhere else that file is section 2's — what the repository is, to
-whoever arrives at it — so a citation carried over verbatim names the
-wrong file. A receiving copy cites this standard instead, in one of
-these shapes:
+**The third is a citation.** This repository's prompt cites `README.md`,
+which everywhere else is section 2's file about that repository, so a
+receiving copy cites this standard in one of these shapes:
 
 - `section 11 of the organization's standard`, where the rule cited is in
   this section and no one subsection of it holds the rule, and wherever
@@ -4113,51 +3800,27 @@ these shapes:
   cited is not in this section.
 
 **What chooses the shape is what holds the rule, never where the
-sentence sits.** A copy that shortens to the subsection form after its
-first citation is precise and wrong the moment it cites a rule that
-subsection does not hold: the two secret stores a Dependabot-initiated
-run reads are stated in this section's own prose and in *Dependabot and
-pre-commit.ci*, so a citation of them names no subsection at all, wherever
-in the file it falls. What a copy does owe its own reader is that the
-standard is named in full somewhere in it, since `section 11` alone does
-not say which document it is a section of — that, and not the order,
-is what a copy citing only subsections fails.
+sentence sits**: the two secret stores a Dependabot-initiated run reads
+are stated in this section's own prose and in *Dependabot and
+pre-commit.ci*, so their citation names no subsection. A copy names the
+standard in full somewhere, `section 11` alone not saying which document
+it is a section of. A finding about prose cites section 9 and one about
+a rule stated without its reason cites *How to use this file*, not
+section 11.
 
-The last shape is the one worth stating, since naming section 11 there
-would be precise and wrong. This section is *GitHub settings*, where a
-finding about the prose cites section 9 and a finding about a rule
-stated without the reason that chose it cites *How to use this file*; a
-citation of the wrong place sends a reader further astray for being
-precise than a vague one does.
-
-**Why the job has the shape it has** is in the workflow's own header, in
-every copy of it: why a missing credential had to be made loud, why the
-action's refusal to run under an edited copy arrives as a green skip and
-what makes that red, why the fork condition is a fact about secrets
-rather than a policy, and why `id-token: write` is required for
-something other than what it looks like. That file is where each was
-written by whoever was bitten by it, and repeating them here would make
-this the second place either can be wrong. What that refusal costs a
-landing is above, with the rule it excepts.
-
-**A review reads more than the sha.** The tree it judges is the
-commit's; the title and description it judges are what the forge
-answered when the reviewer asked, and a correction to either lands
-seconds behind the push that fired the run — behind the reviewer's first
-read, on the pull request that measured it — so the prompt here has the
-reviewer ask again before a finding about them. A correction landing
-after that read is invisible to it, and with no `edited` trigger nothing
-re-fires, so such a finding cannot clear itself except through a further
+**A review reads more than the sha.** The title and description are what
+the forge answered when the reviewer asked, and a correction lands
+seconds behind the push that fired the run, so the prompt has the
+reviewer ask again before a finding about them. With no `edited`
+trigger, a later correction clears such a finding only through a further
 push or a `close`/`reopen`.
 
 ### Tokens, publishing, scanning
 
 - **The default `GITHUB_TOKEN` is read-only repository-wide**; a job
-  needing more declares it. This is a *setting* and not a property of
-  the workflows, and it is inherited from an organization default that
-  ships as `write` — so a new repository is writable until somebody says
-  otherwise, and the workflow-level `permissions:` block is the braces
-  and not the belt:
+  needing more declares it. This is a *setting*, inherited from an
+  organization default that ships as `write`, and the workflow-level
+  `permissions:` block is the braces and not the belt:
 
     ```shell
     gh api -X PUT orgs/<org>/actions/permissions/workflow \
@@ -4171,48 +3834,26 @@ push or a `close`/`reopen`.
 
     **The inheritance is one-way, and its absence is unreadable.** A
     repository that sets its own value stops following the organization
-    default and there is no way back: the endpoint takes `read` or
-    `write` and has neither `null` nor `inherit`, and no endpoint
-    reports which repositories carry an override. The only way to find
-    one is to move the organization default and see which repositories
-    do *not* move — and that survey is blind to any repository already
-    holding the new value, which is therefore untested rather than
-    known good. So a repository that pins its own is recorded in its
-    `REPOSITORY.md`, that file being the one place the fact can live,
-    and whoever moves the organization default moves those with it.
+    default for good — the endpoint takes neither `null` nor `inherit`,
+    and none reports which repositories override. So a repository that
+    pins its own is recorded in its `REPOSITORY.md`, and whoever moves
+    the organization default moves those with it.
 - **A caller's `permissions:` block bounds the workflow it calls rather
-  than standing in for what that workflow declares.** A job of the
-  called workflow with no block of its own is granted what that workflow
-  declares at its own top level, and not what the caller grants beyond
-  it. What says so is the `GITHUB_TOKEN Permissions` group each job's
-  log opens with, read one job at a time:
+  than standing in for what that workflow declares.** A called job with
+  no block of its own gets what the called workflow declares at its top
+  level, not what the caller grants beyond it; the
+  `GITHUB_TOKEN Permissions` group each job's log opens with says so:
 
     ```shell
     gh api --allow-escape-sequences repos/<org>/<repo>/actions/jobs/<id>/logs
     ```
 
-    `bitcoin-core-rpc`'s release run 33753542084 grants `contents: read`
-    and `pull-requests: read` at the call, over a `test.yml` declaring
-    `contents: read` at its own top level: every job of it carrying no
-    block of its own logs `Contents: read` and no `PullRequests`, where
-    `changes`, reached through the same `uses:` in the same run, declares
-    `pull-requests: read` and logs it. That is the control that could
-    have failed, so those absences are absences.
-
-    **The bound refuses rather than trims.** A scope a called *job*
-    declares and the caller's list leaves off fails the run before a job
-    of it starts, the caller's own included: `btclib-secp256k1`'s
-    `v0.8.0.3` at `79ed35c6`, whose caller grants `contents: read` alone
-    over a `changes` declaring `pull-requests: read`, is a
-    `startup_failure` with no job scheduled (run 32392845488), and the
-    same tag succeeds at `eadcc131`, which adds that scope to the
-    caller's list and the comment beside it (run 32404708595). So a
-    caller's list names the scopes the jobs of the workflow it calls
-    declare. What a run does where the *callee's* top-level declaration
-    falls outside the caller's list is not measured, and the refusal
-    above is not evidence for it (btclib-org/.github#912) — naming that
-    workflow's top-level scopes in the caller's list too is what keeps
-    the question out of a release.
+    **The bound refuses rather than trims.** A scope a called job
+    declares that the caller's list leaves off fails the run before any
+    job starts, as a `startup_failure`. So a caller's list names the
+    scopes the called jobs declare, and naming the called workflow's
+    top-level scopes too keeps an unmeasured case out of a release
+    (btclib-org/.github#912).
 - **Secret scanning, its push protection and Dependabot security updates
   are on.** All three are free on a public repository and off by
   default; push protection is the one that refuses the push rather than
@@ -4221,75 +3862,54 @@ push or a `close`/`reopen`.
   environments requiring a review, and `pypi` is restricted to `v*` tags.
   Trusted publishing via OIDC, so no long-lived token exists.
 - **A repository declares `pypi` and `testpypi` where it publishes, and
-  no environment besides.** Each of the two is named by a job of the
-  release workflow and carries the review the bullet above asks for; an
-  environment no workflow names and no protection rule gates does
-  nothing the setting exists for, and the endpoint is where it is
-  found:
+  no environment besides.** Each is named by a job of the release
+  workflow and carries the review above; an environment nothing names
+  and nothing gates is found at the endpoint, not recorded:
 
     ```shell
     gh api repos/<org>/<repo>/environments \
       --jq '.environments[] | "\(.name) \(.protection_rules | length)"'
     ```
 
-    **`github-pages` is GitHub's**, created by enabling Pages rather
-    than by the repository, and its protection rule is GitHub's too, so
-    it is outside the rule above and outside `REPOSITORY.md`: reading it
-    back would record a value nobody here can set. Serving Pages is what
-    gives a tree the environment, so that answer is read off the
-    repository rather than written down.
-
-    Two alternatives are rejected. **Saying nothing** leaves every other
-    environment outside the perimeter a `REPOSITORY.md` claims, where
-    that file's silence reads as a decision, so each copy would assert
-    that whatever is there is fine. **Recording whatever a repository
-    holds** writes a stray environment down rather than finding it,
-    which is what legitimises it.
+    **`github-pages` is GitHub's**, created by enabling Pages and
+    protected by GitHub, so it is outside the rule above and outside
+    `REPOSITORY.md`.
 - **Code scanning**: the analysis runs from a workflow, and GitHub's
   default setup is *off* — the two cannot both be on, and while the
-  setting is on the workflow runs, the analysis completes, and the upload
-  is refused. Turning it off has an order that never leaves `main`
-  unmergeable: drop the context from the rule, disable the setting,
-  re-run, merge.
+  setting is on the upload is refused. Turning it off has an order that
+  never leaves `main` unmergeable: drop the context from the rule,
+  disable the setting, re-run, merge.
 - **Secret scanning's non-provider patterns and validity checks are
   plan-gated**, and the API answers a `PATCH` with 200 while leaving them
   disabled. The `detect-secrets` hook is the compensating control.
 
 ### Dependabot and pre-commit.ci
 
-`github-actions` everywhere — the required check and the review workflow
-are every tier's, so every tree has workflows for it to read — and three
-more where the tree has what they watch: `uv` where a `uv.lock` exists,
-`bundler` where a site Gemfile does, `gitsubmodule` where a submodule
-does. The three are conditional by section 2's rule for a subject the
-tree does not hold, so a tree with no lock file and no `uv` entry is
-keeping this section rather than departing from it. Pre-commit hook
-revisions have no Dependabot ecosystem — pre-commit.ci updates them
-weekly instead, except a hook whose `repo:` is `local`: `autoupdate`
-skips that value entirely, so a version pinned inside one, such as
-`.github`'s own `typos`, moves by hand alone.
+`github-actions` everywhere, every tree having workflows for it to read,
+and three more where the tree has what they watch: `uv` where a
+`uv.lock` exists, `bundler` where a site Gemfile does, `gitsubmodule`
+where a submodule does — conditional by section 2's rule for a subject
+the tree does not hold. Pre-commit hook revisions have no Dependabot
+ecosystem, so pre-commit.ci updates them weekly, except a hook whose
+`repo:` is `local`, which `autoupdate` skips: a version pinned inside
+one, such as `.github`'s own `typos`, moves by hand.
 
 `gitsubmodule` follows upstream's *default branch*, so its pull request
 says that upstream moved and is not the bump: a release pins the tagged
-commit by hand. It answers the half the local hook does not — the hook
-refuses an unpinned or moved pointer, and says nothing about upstream.
+commit by hand. The local hook refuses an unpinned or moved pointer and
+says nothing about upstream.
 
 Each ecosystem groups its updates into one pull request, since every pull
 request runs the whole matrix. Weekly with a seven-day cooldown: a
-compromised release is usually yanked within days, and the sentinel
-workflow has already exercised the drift, so each pull request is a small
-diff whose result is known. None declares a `target-branch`: without one
-the default branch is the target, and a `target-branch` naming a branch
-that is not there is not an error anywhere — it is a repository where
-nothing is ever proposed.
+compromised release is usually yanked within days. None declares a
+`target-branch`: one naming a missing branch fails nowhere and proposes
+nothing.
 
-**A Dependabot pull request reads a different secret store.** GitHub
-hands a `pull_request` run whose actor is `dependabot[bot]` the
-Dependabot secrets rather than the Actions secrets, so a secret held only
-in the second resolves to the empty string on exactly those runs. A
-workflow that needs one there needs it registered in both, under the same
-name; a workflow that fails loudly on an empty secret is what turns the
-omission from a silent pass into a red check.
+**A Dependabot pull request reads a different secret store.** A
+`pull_request` run whose actor is `dependabot[bot]` gets the Dependabot
+secrets rather than the Actions secrets, so a secret a workflow needs
+there is registered in both, under the same name; failing loudly on an
+empty one is what turns the omission into a red check.
 
 An action may refuse a bot besides. The review action does, unless the
 bot is named in `allowed_bots` — name the one that opens pull requests
@@ -4303,8 +3923,7 @@ build type and the CNAME are settings rather than files, and a workflow
 builds the same site so that a failure is a red check rather than a page
 served broken. Read the Docs' `latest` follows the default branch,
 `stable` is the highest release tag, and an automation rule activates
-each new tag. The project's public API answers for each of those
-without a token:
+each new tag. The project's public API answers without a token:
 
 ```shell
 p=https://app.readthedocs.org/api/v3/projects/<slug>
@@ -4312,20 +3931,13 @@ curl -s "$p/"
 curl -s "$p/versions/?active=true"
 ```
 
-The first answers with `default_branch` and with `repository.url`, which
-says which repository the slug serves. The second comes back with
-`latest` as a branch and `stable` as a tag whose `ref` is the highest
-release tag, beside the tags the rule has activated — the rule's result
-rather than the rule itself, which that API does not expose:
-`automation-rules/` answers 404 where an endpoint needing a token
-answers 401.
+The first answers `default_branch` and the `repository.url` the slug
+serves; the second, `latest`, `stable` and the tags the rule activated.
 
 **What connects a repository to Read the Docs is the organization-wide
 `read-the-docs-community` GitHub App, not a per-repository webhook**, so
-what a repository records on the GitHub side is the installation and an
-empty hook list. Both names stand in a block of their own, the
-endpoints' paths continuing past them being the position section 9
-refuses:
+a repository records the installation and an empty hook list. Both
+names stand in a block of their own, for the reason section 9 gives:
 
 ```shell
 org=<org>
@@ -4339,31 +3951,16 @@ gh api "orgs/${org:?}/installations" \
 gh api "repos/${org:?}/${repo:?}/hooks" --jq length
 ```
 
-`repository_selection: all` is what makes one installation the
-connection for every repository at once rather than a setting each tree
-carries its own copy of. A hook the second command finds is stale and is
-deleted rather than repaired, the App already doing the whole of what it
-was for; btclib-org/bitcoin-core-rpc#291 records one that was found and
-removed.
-
-The per-repository webhook is the rejected alternative, and the secret
-is why: Read the Docs issues it on the project's own integration page
-and GitHub returns it masked, so nothing read back from the repository
-says whether a hook still carries the right one, and one that has
-stopped delivering sits `active: true` while the App carries the build
-regardless.
+`repository_selection: all` makes one installation the connection for
+every repository. A hook the second command finds is stale and is
+deleted rather than repaired, the App doing all it was for and its
+masked secret leaving nothing read back to say whether it still works.
 
 The **slug** is what serves the site, and it is not the project's name:
-renaming the project leaves the slug where it was, so a repository
-renamed while its documentation was not is a URL that 404s over a build
-that succeeds. Renaming the slug is a dashboard action of its own, and
-the old one stops answering rather than redirecting.
-
-Get that URL right before a release rather than after, because
-`pyproject.toml`'s `documentation` reaches where no pull request does:
-the metadata of every version already on the index, and the body of every
-release that quotes it. A wrong one is superseded by the next release and
-corrected in none of the ones that shipped.
+renaming the project leaves the slug, and renaming the slug makes the old
+one stop answering rather than redirect. Get that URL right before a
+release, because `pyproject.toml`'s `documentation` reaches the metadata
+of every version already on the index, which no later release corrects.
 
 ## 12. Releasing
 
