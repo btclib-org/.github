@@ -8464,3 +8464,9 @@ nothing red follows from the copies disagreeing.
 - **`EXPECTED_DRIFT` is empty again** (issue btclib-org/.github#1075):
   `CONTRIBUTING.md`, `REVIEWING.md` and `check_changelog.py` are one
   copy in every repository.
+
+### `links.yml` calls a reusable workflow
+
+- **`reusable-links.yml` holds the lychee job** (issue #35): `links.yml`
+  passes its paths as `targets`, `tests/links_test.py` reads the flags
+  through the call, and section 10 gives the call `@main`.

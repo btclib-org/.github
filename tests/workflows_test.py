@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 import yaml
 
-from . import by_hand
+from . import ORG, SELF, by_hand
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -36,6 +36,11 @@ LOCAL = "./"
 A composite action or a reusable workflow called by path runs at the
 calling commit, so there is nothing its owner could move.
 """
+
+REUSABLE = re.compile(
+    rf"^{re.escape(ORG)}/{re.escape(SELF)}/\.github/workflows/reusable-[\w-]+\.yml@main$"
+)
+"""A call to a reusable workflow of this repository, at section 10's `@main`."""
 
 
 def workflows(root: Path) -> list[Path]:
@@ -133,7 +138,8 @@ def test_every_action_is_pinned_to_a_commit(
 
     A `uses:` naming a tag or a branch is a name its owner can move, in
     a job that can read the workflow token. A path into this tree is
-    not one, for the reason `LOCAL` gives.
+    not one, for the reason `LOCAL` gives, and a call `REUSABLE` matches
+    is section 10's exception.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -149,7 +155,9 @@ def test_every_action_is_pinned_to_a_commit(
                 if "uses" in job
             ),
         ]
-        if not uses.startswith(LOCAL) and not PINNED.search(uses)
+        if not uses.startswith(LOCAL)
+        and not PINNED.search(uses)
+        and not REUSABLE.match(uses)
     ]
     assert not unpinned, f"actions not pinned to a commit: {unpinned}; " + by_hand(
         repository,

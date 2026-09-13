@@ -2774,7 +2774,12 @@ against that, and what lengthens it without adding to it is deleted.
 
 - **Every action is pinned to a commit SHA**, with the tag in a trailing
   comment. A tag is a name its owner can move, and these run in a job
-  that can read the workflow token.
+  that can read the workflow token. A call to a reusable workflow of
+  `btclib-org/.github` names `@main` instead: that repository has no tag
+  for Dependabot to move a SHA to, its `main` is held by section 11's
+  rulesets as the caller's is, and a fix reaches every tree in one
+  landing. zizmor is told so, `btclib-org/.github/*: ref-pin` under
+  `unpinned-uses`.
 - **`permissions: contents: read` at the workflow level**, and one
   elevation per job where a job needs more: the job that writes a release
   holds no OIDC token, and the job that signs writes no release.
@@ -2834,11 +2839,7 @@ against that, and what lengthens it without adding to it is deleted.
   deadline rather than against attempts, which states the budget once
   instead of leaving it a product to be multiplied out, and its test
   substitutes the transport and the clock to drive the loop past that
-  deadline. `btclib`'s `wait_for_hwi_device.py` is a wait in that shape,
-  and `btclib-secp256k1`'s `verify_wheel_contents.py` is tested that way
-  for the reason a wait shares: a run cannot produce the failure on
-  purpose, so what the test gives the script is synthetic, and for a
-  wait that is the clock.
+  deadline.
 
 ### The set, and its cadence
 
@@ -3565,10 +3566,6 @@ request, and the rule follows them.
   listing.** btclib-org/btclib#1001 is a run whose cells died in *Set up
   job* downloading a pinned action, codeload answering 429 and the
   runner giving up, where `needs.<job>.result` was not `failure`.
-  `btclib-benchmarks`' `602f51d` narrows the mechanism by experiment
-  rather than by argument: a cell pointed at an action SHA that does not
-  exist propagates `failure` normally, and the abandoned download does
-  not.
 - **A boolean `if:` over `needs` decides nothing when it is false.** The
   step is skipped, a skipped step leaves its job successful, and the job
   branch protection names is green over a red matrix — which is what

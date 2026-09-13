@@ -37,17 +37,17 @@ on:
   # so a change to this file is checked by the thing it configures
   pull_request:
     # ready_for_review so a pull request marked ready gets the run the
-    # draft condition below withheld while it was a draft: the default
-    # types do not include it. closed too, though the job declines the
-    # real work on it -- the same superseding the other workflows here
-    # take it for
+    # draft condition in reusable-links.yml withheld while it was a
+    # draft: the default types do not include it. closed too, though the
+    # job declines the real work on it -- the same superseding the other
+    # workflows here take it for
     types: [opened, reopened, synchronize, ready_for_review, closed]
     paths:
       - .github/workflows/links.yml
+      - .github/workflows/reusable-links.yml
 
-# least privilege for the GITHUB_TOKEN. lychee is handed it below for
-# github.com links only, where an unauthenticated runner is rate limited
-# hard enough to look like rot, and reading is all that takes.
+# least privilege for the GITHUB_TOKEN, which a called workflow cannot
+# widen: lychee is handed it for github.com links only.
 # Deliberately not issues: write. An automatic "link rot" issue is the
 # usual next step, and it would make this the only workflow here that can
 # write anything, to save a maintainer from reading a failure
@@ -67,72 +67,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # the job, its flags and its pins are reusable-links.yml's, and what is
+  # this tree's is the paths. Every markdown file, where the sibling
+  # repositories name the prose and exclude the source: the globs name
+  # the prose, and a citation in a docstring is a reference rather than a
+  # link a reader clicks.
+  # By path and not zizmor's `$/` self-repository form, which the
+  # actionlint hook here rejects as a malformed call
   links:
-    name: Check the documentation links
-    # a draft spends no runner, and a closed pull request spends none
-    # either: the trigger above takes the closed event only to supersede
-    # a run this ref's group is still holding
-    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
-    runs-on: ubuntu-latest
-    # every link the tree holds, with retries; a job past this is hung on
-    # one of them
-    timeout-minutes: 15
-    steps:
-      # every action pinned to a commit SHA with the tag in the comment:
-      # a tag, let alone a branch, is a name its owner can move
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          # lychee reads the tree and nothing pushes it back
-          persist-credentials: false
-      - name: Check the links
-        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
-        with:
-          # every markdown file, where the sibling repositories name the
-          # prose and exclude the source: the globs below name the prose,
-          # and the source is excluded by not being named -- a citation
-          # in a docstring is a reference rather than a link a reader
-          # clicks.
-          # --no-progress because the log is not a terminal. The retries,
-          # the wait and a timeout well past lychee's default of 20
-          # seconds are what keep a slow or throttling host from being
-          # reported as a dead one, which is the one failure this
-          # workflow must not produce: it gates nothing, so a false red
-          # costs an investigation and buys nothing.
-          # --accept is lychee's own default range with 429 added to it,
-          # rather than a list of codes: `lychee --help` gives that
-          # default as 100..=103,200..=299, so the "200,206,429" the
-          # sibling repositories pass narrows it -- a 201 or a 204
-          # becomes a dead link -- to add a 206 the default already
-          # covered. 429 is the one code worth adding, a rate limit
-          # being an answer from a host that is alive.
-          # No --cache: a run starts from a fresh workspace, so the
-          # cache file one run writes is read by the next only if a
-          # step restores it, and none does. Restoring it would buy
-          # nothing either: this runs weekly, so an entry cached at any
-          # age worth setting is expired before the next run reads it,
-          # and within one run lychee
-          # asks each URL once whatever the flag says
-          # --include-fragments, or a heading rename breaks an anchor
-          # into it with nothing red anywhere: REPOSITORY.md links into
-          # README.md by heading, and lychee checks a fragment only when
-          # asked. It reaches a remote URL's fragment too, which is
-          # somebody else's page to move rather than this tree's -- but
-          # a fragment check reads a page already fetched for the plain
-          # link check above it, so it adds no request and, measured
-          # against every #fragment this tree currently links to
-          # (github.com and docs.github.com), no false red either.
-          args: >-
-            --no-progress
-            --max-retries 3
-            --retry-wait-time 10
-            --timeout 45
-            --accept 100..=103,200..=299,429
-            --include-fragments
-            "*.md" "profile/*.md" ".claude/commands/*.md"
-          # fail the job rather than only summarizing: a green run that
-          # found dead links is the state this workflow exists to end
-          fail: true
-        env:
-          # for github.com links only, per the permissions comment above
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    uses: ./.github/workflows/reusable-links.yml # zizmor: ignore[self-repository]
+    with:
+      targets: '"*.md" "profile/*.md" ".claude/commands/*.md"'

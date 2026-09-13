@@ -1,0 +1,73 @@
+---
+name: reusable-links
+
+# The lychee job a repository's links.yml calls, so its flags are written
+# once. What a tree passes is the one thing the trees rightly differ on,
+# the paths it documents; the trigger, the cron minute and the
+# concurrency group stay in the caller, whose run this is.
+
+on:
+  workflow_call:
+    inputs:
+      targets:
+        description: the paths and URLs lychee reads, quoted as for a shell
+        required: true
+        type: string
+
+# least privilege for the GITHUB_TOKEN. lychee is handed it below for
+# github.com links only, where an unauthenticated runner is rate limited
+# hard enough to look like rot, and reading is all that takes
+permissions:
+  contents: read
+
+jobs:
+  links:
+    name: Check the documentation links
+    # a draft spends no runner, and a closed pull request spends none
+    # either: a caller takes the closed event only to supersede a run
+    # its group is still holding
+    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    # every link the tree holds, with retries; a job past this is hung on
+    # one of them
+    timeout-minutes: 15
+    steps:
+      # every action pinned to a commit SHA with the tag in the comment:
+      # a tag, let alone a branch, is a name its owner can move
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # lychee reads the tree and nothing pushes it back
+          persist-credentials: false
+      - name: Check the links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          # --no-progress because the log is not a terminal. The retries,
+          # the wait and a timeout well past lychee's default of 20
+          # seconds keep a slow or throttling host from being reported
+          # as a dead one: this gates nothing, so a false red costs an
+          # investigation and buys nothing.
+          # --accept is lychee's own default, 100..=103,200..=299 by
+          # `lychee --help`, with 429 added: a rate limit is an answer
+          # from a host that is alive, and a shorter list turns a 201 or
+          # a 204 into a dead link.
+          # No --cache: a run starts from a fresh workspace and no step
+          # restores the file, and within one run lychee asks each URL
+          # once whatever the flag says.
+          # --include-fragments, or a heading rename breaks an anchor
+          # into it with nothing red anywhere; a fragment is read off a
+          # page the plain check already fetched, so it adds no request
+          args: >-
+            --no-progress
+            --max-retries 3
+            --retry-wait-time 10
+            --timeout 45
+            --accept 100..=103,200..=299,429
+            --include-fragments
+            ${{ inputs.targets }}
+          # fail the job rather than only summarizing: a green run that
+          # found dead links is the state this workflow exists to end
+          fail: true
+        env:
+          # for github.com links only, per the permissions comment above
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
