@@ -319,14 +319,6 @@ def names() -> list[str]:
 
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
-    # #550's own third box, the readback half: measured against each
-    # copy's own origin/main, these still carry the rejected
-    # alternative's wording
-    (
-        550,
-        "test_the_settings_file_reads_the_wiki_and_the_projects_board_back",
-        ("btclib",),
-    ),
     # sdist-rebuild: the row landed ahead of the trees it names
     (
         523,

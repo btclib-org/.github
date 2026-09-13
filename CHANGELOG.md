@@ -8481,3 +8481,8 @@ nothing red follows from the copies disagreeing.
 - **`alignment.yml` takes its token from the btclib-org-alignment App**
   (closes #628), replacing the `ALIGNMENT_TOKEN` of the issue #477 entry,
   and refuses the run when the App's id or private key is missing.
+
+### Every copy reads the wiki and the projects board back
+
+- **`BACKLOG` holds no row for #550** (closes #550): btclib's
+  `REPOSITORY.md` reads both settings back, as the other eight do.
