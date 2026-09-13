@@ -8458,3 +8458,9 @@ nothing red follows from the copies disagreeing.
 - **`.pre-commit-config.yaml` and section 4 of `README.md` say
   what a local run enforces and the inert `git commit` recipe goes**
   (issue btclib-org/.github#966).
+
+### The eight ports of the second campaign's rules have landed
+
+- **`EXPECTED_DRIFT` is empty again** (issue btclib-org/.github#1075):
+  `CONTRIBUTING.md`, `REVIEWING.md` and `check_changelog.py` are one
+  copy in every repository.
