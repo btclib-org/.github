@@ -21,10 +21,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from . import ROOT, still_open, subjects
+from . import ORG, ROOT, still_open, subjects
 from .workflows_test import triggers
 
 if TYPE_CHECKING:
+    from collections.abc import Collection
     from pathlib import Path
 
 pytestmark = pytest.mark.integration
@@ -71,19 +72,29 @@ heading's own text lives in the bullet, in `README.md`, rather than in a
 second constant here that a rename of the section would leave stale.
 """
 
+COMMIT = re.compile(r"(?P<repository>[A-Za-z0-9._-]+)@[0-9a-f]{7,40}")
+"""The form of the field behind an `EXPECTED_DRIFT` value's comma.
+
+The repository half is resolved against the names the organization
+answers with. The sha is read for its shape alone: `conftest.py`
+clones each tree `--depth=1`, so its object store holds the tip commit
+and answers no to an arbitrary historical sha, for the clone's reason
+rather than the entry's.
+"""
+
 EXPECTED_DRIFT: dict[str, str] = {}
 """A path section 14 names whose copies are known not to agree yet.
 
 The value is the issue that decides it, and the commit the drift came
-from where one commit made it -- a reference, then a comma, then that
-clause where one exists. `drift_reference` reads only the first field,
-so the clause behind it is free to say anything. An entry here is a
-strict expected failure rather than a red row: the suite stays green on
-a drift that is already filed, and the day the copies agree the test
-passes unexpectedly, which strict turns red -- the signal to delete the
-entry. That red says the copies agree and not how they came to, so the
-commit is what tells whoever deletes the entry which way the drift was
-resolved.
+from where one commit made it -- a reference, then a comma, then
+`<repo>@<sha>` where one exists. `drift_reference` reads the first
+field, and `names_a_commit` holds the second to that form. An entry
+here is a strict expected failure rather than a red row: the
+suite stays green on a drift that is already filed, and the day the
+copies agree the test passes unexpectedly, which strict turns red -- the
+signal to delete the entry. That red says the copies agree and not how
+they came to, so the commit is what tells whoever deletes the entry
+which way the drift was resolved.
 
 Empty is where this returns rather than where it always is: the table
 stands for the next drift a branch cannot converge on its own.
@@ -101,6 +112,34 @@ def drift_reference(value: str) -> str:
     :returns: the reference alone, qualified the way `still_open` reads it.
     """
     return value.split(",", maxsplit=1)[0]
+
+
+def drift_commit(value: str) -> str:
+    """Read the commit field out of an `EXPECTED_DRIFT` value.
+
+    :param value: an `EXPECTED_DRIFT` entry's value.
+    :returns: the field behind the first comma, or the empty string
+        where the value is a reference and nothing else.
+    """
+    return value.partition(",")[2].strip()
+
+
+def names_a_commit(value: str, repositories: Collection[str]) -> bool:
+    """Say whether a value's commit field is `<repo>@<sha>` of this tree's.
+
+    A value that is a reference and nothing else has no field to hold
+    to the form, and answers true.
+
+    :param value: an `EXPECTED_DRIFT` entry's value.
+    :param repositories: the organization's repository names.
+    :returns: whether the field behind the first comma is absent, or
+        is `<repo>@<sha>` naming one of those repositories.
+    """
+    commit = drift_commit(value)
+    if not commit:
+        return True
+    found = COMMIT.fullmatch(commit)
+    return found is not None and found["repository"] in repositories
 
 
 def verbatim() -> dict[str, str]:
@@ -324,10 +363,57 @@ def test_a_recorded_drift_is_still_one(trees: dict[str, Path], path: str) -> Non
     assert len(found) == 1, f"{path} is {len(found)} distinct files"
 
 
+WELL_FORMED = "btclib-org/.github#830, portanode@309a098"
+"""An `EXPECTED_DRIFT` value of the shape the checks below ask for."""
+
+MALFORMED = "btclib-org/.github#830, not yet ported to the other trees"
+"""A value whose commit field is prose, read as a control on that shape.
+
+The table is empty between drifts, so a check reading it alone is green
+however its reader behaves. These literals are what the check is asked
+of on a day the table names nothing.
+"""
+
+STRANGER = "btclib-org/.github#830, not-a-repository@309a098"
+"""A value of that shape naming a repository the organization has not."""
+
+
 def test_drift_reference_reads_only_the_field_before_the_first_comma() -> None:
     """A value naming a commit besides the issue still yields it alone."""
-    value = "btclib-org/.github#830, from portanode@309a098"
-    assert drift_reference(value) == "btclib-org/.github#830"
+    assert drift_reference(WELL_FORMED) == "btclib-org/.github#830"
+
+
+def test_the_field_behind_the_comma_names_a_repository_and_a_commit(
+    repositories: list[str],
+) -> None:
+    """An `EXPECTED_DRIFT` value's commit field is `<repo>@<sha>`.
+
+    Asked of the literals above as well as of the table, which is
+    empty between drifts: a check reading the table alone passes with
+    its reader deleted.
+
+    :param repositories: the organization's repository names.
+    """
+    assert names_a_commit(WELL_FORMED, repositories)
+    assert names_a_commit(drift_reference(WELL_FORMED), repositories)
+    assert not names_a_commit(MALFORMED, repositories), (
+        f"{MALFORMED!r} read as naming a commit: the field behind the"
+        " comma is not being held to `<repo>@<sha>`"
+    )
+    assert not names_a_commit(STRANGER, repositories), (
+        f"{STRANGER!r} read as naming a commit: either the organization"
+        " has taken a repository by that name, and this control wants"
+        " another, or the repository half is no longer read"
+    )
+    faulty = {
+        path: drift_commit(value)
+        for path, value in EXPECTED_DRIFT.items()
+        if not names_a_commit(value, repositories)
+    }
+    assert not faulty, (
+        "EXPECTED_DRIFT values whose field behind the comma is not"
+        f" `<repo>@<sha>` of {ORG}: {faulty}"
+    )
 
 
 PRECEDENT = "btclib-org/.github#367"
