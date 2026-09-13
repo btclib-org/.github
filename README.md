@@ -1027,16 +1027,16 @@ that a hook argument has not. Section 14 names each of those files.
 
 **The lint workflow runs this very file.** There is never a second list
 of the same tools in a workflow: what CI enforces is exactly what a
-local run of it enforces, and a hook cannot be gated by pre-commit.ci alone.
+local run of it enforces, and a hook cannot be gated by pre-commit.ci
+alone.
 
 **Every hook that has a fix mode runs with it turned on.** A check-only
-hook reports a defect a machine already knows how to repair and spends a
-human round reading a finding a flag would have applied; a fixer instead
-leaves the correction already made, in the tree, for whoever committed to
-read before the commit lands — a pre-commit hook that fixes a file fails
-the run rather than applying itself unseen. A hook stays check-only where
-it has none to turn on: a validator has nothing to rewrite, and neither
-does a rule with no mechanical repair for what it finds.
+hook spends a human round on a finding a flag would have applied, where
+a fixer leaves it in the tree for whoever committed to read — a
+pre-commit hook that fixes a file fails the run rather than applying
+itself unseen. A hook stays check-only where it has none: a validator
+has nothing to rewrite, and neither does a rule with no mechanical
+repair.
 
 ### The `ci:` block
 
@@ -1048,19 +1048,19 @@ ci:
   skip: [mypy]
 ```
 
-`autofix_prs: false` because a bot committing to a branch is at odds with
-a setup where no workflow token can write; a failing hook is fixed by its
-author. `skip: [mypy]` because that hook shells out to uv, which
+`autofix_prs: false` because a bot committing to a branch is at odds
+with a setup where no workflow token can write; a failing hook is fixed
+by its author. `skip: [mypy]` because that hook shells out to uv, which
 pre-commit.ci does not have — the lint workflow covers it. No
 `autoupdate_branch`: the default branch is the only branch.
 
 ### What the hooks cover
 
 - **the file checking itself** — `meta`'s `check-hooks-apply` and
-  `check-useless-excludes`, so a pattern that has stopped matching is a
-  failure rather than a rule that quietly stopped running; and a local
-  `pinned-rev` pygrep hook refusing a `rev:` that names a bare major or a
-  prerelease, both of which `autoupdate` offers as readily as a release.
+  `check-useless-excludes`, so a pattern that has stopped matching fails
+  rather than quietly stopping; and a local `pinned-rev` pygrep hook
+  refusing a `rev:` that names a bare major or a prerelease, both of
+  which `autoupdate` offers as readily as a release.
 - **hygiene** — `trailing-whitespace`, `end-of-file-fixer`,
   `mixed-line-ending --fix=lf`, `check-case-conflict`,
   `fix-byte-order-marker`, `check-merge-conflict`,
@@ -1069,9 +1069,9 @@ pre-commit.ci does not have — the lint workflow covers it. No
   scripts.
 - **submodules** — the rule is *pinned*, not *forbidden*.
   `forbid-submodules` where there are none, a submodule being the one
-  dependency that sits in neither the lock file nor an sdist; where one
-  is legitimate, a local hook refusing an unpinned or moved submodule
-  takes its place, and section 11's `gitsubmodule` ecosystem says when
+  dependency in neither the lock file nor an sdist; where one is
+  legitimate, a local hook refusing an unpinned or moved submodule takes
+  its place, and section 11's `gitsubmodule` ecosystem says when
   upstream moved.
 - **syntax** — `check-yaml`, `check-json`, `check-toml`,
   `pretty-format-json`.
@@ -1079,121 +1079,80 @@ pre-commit.ci does not have — the lint workflow covers it. No
   `name-tests-test` at its default, the spelling section 7 states.
 
     **`check-docstring-first` takes an exclusion naming the modules that
-    carry a PEP 258 attribute docstring.** The string literal after a
-    module-level assignment is what sphinx renders beside the name on a
-    built api page, where an ordinary `#` comment above the same name
-    renders nowhere, and the hook reads any such literal as a second module
-    docstring, having been written for a docstring placed below the
-    imports; the two are indistinguishable to it.
+    carry a PEP 258 attribute docstring.** Sphinx renders such a literal
+    beside the name on a built api page where an ordinary `#` comment
+    renders nowhere, and the hook reads it as a second module docstring.
     `.github/scripts/check_changelog.py` carries one, and section 14
     owes that file to every repository byte for byte, so the exclusion
-    is the one place a tree acting alone can answer the finding.
-
-    **A `#:` doc comment is the alternative, and what rejects it is the
-    port rather than the page.** Sphinx reads such a comment, before the
-    assignment or after it, as that name's documentation, so the api
-    page is unchanged; the hook looks for a string literal and does not
-    object, exit 0 on the script rewritten that way where the same file
-    exits 1. What it costs is a change to a file every repository owes
-    byte for byte, so it lands in all of them together or takes an
-    `EXPECTED_DRIFT` entry for as long as the port takes, and a tree's
-    own modules carrying attribute docstrings are the same edit again in
-    each. Until such a port, a tree carries the exclusion.
-
-    The exclusion names paths rather than the directory holding them,
-    because `check-hooks-apply` beside it fails a hook left with no file
-    to read, and a tree whose Python is one test package has nothing
-    left once that package is named.
+    is the one place a tree acting alone can answer it; the `#:` doc
+    comment sphinx reads instead leaves the api page unchanged and the
+    hook silent, and what defers it is the port it would take. The
+    exclusion names paths and not the directory holding them:
+    `check-hooks-apply` fails a hook left with no file to read, and a
+    tree whose Python is one test package has nothing left once that
+    package is named.
 - **secrets** — `detect-private-key` and `detect-secrets` against a
-  committed `.secrets.baseline`. A baseline rather than an exclusion: an
+  committed `.secrets.baseline`. A baseline, not an exclusion: an
   excluded file is unwatched, where a baseline entry is a finding
   somebody has read. The two entropy plugins stay off where the vectors
-  are hex strings, a new one being what a legitimate addition looks like.
-  Not gitleaks: every one of its hook ids passes `--staged`, so under
+  are hex strings, a new one being what a legitimate addition looks
+  like. Not gitleaks: its hook ids all pass `--staged`, so under
   `--all-files` it scans nothing and passes.
 - **spelling** — `codespell` and `typos`, both configured in
   `pyproject.toml`, both skipping vendored vectors: a typo inside an
   upstream vector is part of the vector. `typos` is a `local` hook,
   pinned through `additional_dependencies` rather than `rev:`; the
-  comment beside the entry in `.pre-commit-config.yaml` says why.
+  comment beside the entry says why, and `typos --version` answers its
+  release, an index install putting no upstream clone in the loop.
 
     **`codespell --version` answers `0.1.dev1+g<sha>` and not the
-    release its `rev:` names.** pre-commit fetches the pinned ref by
-    name, shallowly, and checks out `FETCH_HEAD`; the other strategy in
-    `pre_commit/store.py` fetches `--tags` and is reached only where
-    that one raises. Each half of that fetch sets a field of the string
-    `setuptools_scm` computes at install time. The clone holds no tag to
-    describe, so `0.1.dev` stands where the release number would be; the
-    number after `dev` is the clone's own commit count, which the depth
-    holds at one — a full-history fetch of the same ref is equally
-    tagless and puts the whole history's count there instead. What
-    follows the `g` is the commit the `rev:` resolved to, abbreviated,
-    and this names it in full, `<rev>` last for the reason section 9
-    gives:
+    release its `rev:` names**, pre-commit's shallow checkout of the
+    pinned ref leaving `setuptools_scm` a clone with no tag to describe.
+    What follows the `g` is the commit the `rev:` resolved to, and this
+    names it in full, `<rev>` last for the reason section 9 gives:
 
     ```shell
     gh api --jq .sha repos/codespell-project/codespell/commits/<rev>
     ```
 
-    The commits endpoint and not `git/ref/tags`, so that the command
-    holds whichever way the pinned repository tags: an annotated tag
-    resolves to the tag object there and to the commit here.
-
-    `typos --version` answers its release: a `local` hook's
-    `additional_dependencies` installs straight from the index, with no
-    upstream clone in the loop for a tag to be missing from.
+    The commits endpoint and not `git/ref/tags`, so the command holds
+    whichever way the pinned repository tags.
 - **prose and markup** — `markdownlint-cli2`, `prettier` (yaml and
   jsonc), `taplo-format`, `yamllint`.
 - **schemas** — `check-dependabot`, `check-readthedocs`,
   `check-github-issue-config` and `check-github-issue-forms`, because a
-  typo in any of those files is not an error to the service that reads
-  it: it silently does nothing. `dependabot.yml`'s evidence is a pull
-  request that never arrives; an issue form's is the *New issue* page,
-  where the reader is a person and not a run. The issue pair selects
-  narrowly, both hooks carrying `types: [yaml]`: `config.yml` under that
-  spelling for the first, the directory's yaml that is neither
-  `config.yml` nor `config.yaml` for the second, a markdown template for
-  neither. `check-hooks-apply` above fails a hook that matches no file,
-  so each goes where `ISSUE_TEMPLATE/` holds what it selects.
+  typo in one of them is not an error to the service that reads it: it
+  silently does nothing. The issue pair selects narrowly, both carrying
+  `types: [yaml]`: `config.yml` under that spelling for the first, the
+  directory's yaml that is neither `config.yml` nor `config.yaml` for
+  the second, a markdown template for neither. Each goes where
+  `ISSUE_TEMPLATE/` holds what it selects, `check-hooks-apply` failing a
+  hook that matches no file.
 - **workflows** — `actionlint` and `zizmor`, both at zero findings, both
   required to stay there. actionlint via its Python packaging, the
-  upstream hook's only non-docker id needing a go toolchain everywhere.
+  upstream hook's only non-docker id needing a go toolchain.
 - **Python** — `ruff-check --fix` and `ruff-format`.
-- **docstrings against signatures** — `pydoclint` over the package. The
-  `D` family checks that a docstring *exists*; this checks that it
-  describes the parameters and the return the signature declares, which
-  is the half that goes wrong silently when a signature changes.
+- **docstrings against signatures** — `pydoclint` over the package: the
+  `D` family checks that a docstring *exists*, this that it describes
+  the parameters and the return the signature declares — the half that
+  goes wrong silently when a signature changes.
   `skip-checking-short-docstrings` is **each repository's to set, and
-  what decides it is the form a docstring's contract takes there**. Left
-  at its default, a docstring carrying sections is held against the
-  signature and one carrying none is taken at its word, its length making
-  no difference to that; set `false`, a docstring owes an `Args` and a
-  `Returns` section for whatever the signature declares. Section 9 asks a
-  docstring for the contract and does not ask for a section, so the
-  answer is `false` where a section is how that tree's docstrings say
-  what the call takes and returns, and the default where they say it in
-  prose — a paragraph naming each parameter, or a summary that already
-  states the return. pydoclint reads a section and not a sentence, so
-  `false` over prose asks for the same fact a second time, which section
-  9's *One fact in one place* refuses. Prose that leaves a parameter
-  unmentioned is a docstring that does not state the contract, which
-  section 9 asks for whatever this key says, and no value of the key
-  finds it: the default holds nothing against a docstring carrying no
-  section, and `false` reports the prose that names every parameter and
-  the prose that names none alike. What a repository writes beside the
-  key is which of the two its docstrings are; what changing the setting
-  would cost belongs to the issues tracking it — btclib-org/btclib#1178,
-  btclib-org/btclib-benchmarks#128 and btclib-org/bitcoin-core-rpc#172 —
-  cost being a reason to defer a decision rather than one that decides
-  it. Where the answer goes is section 3's rule and not a new one:
-  `[tool.pydoclint]` in `pyproject.toml`. What is *not* offered is
-  `false` for the public API and the default elsewhere: pydoclint has no
-  such split, so it would take two invocations over two file lists plus a
-  rule about which files are public that nothing checks.
+  what decides it is the form a docstring's contract takes there**: at
+  its default a docstring carrying sections is held against the
+  signature and one carrying none taken at its word; set `false`, every
+  docstring owes an `Args` and a `Returns` for what the signature
+  declares. Section 9 asks for the contract and not for a section, so
+  `false` where a section is how that tree's docstrings state it and the
+  default where they state it in prose, pydoclint reading a section and
+  not a sentence so that `false` over prose asks for the same fact twice
+  — section 9's *One fact in one place*. Prose leaving a parameter
+  unmentioned states no contract, and no value of the key finds it. The
+  answer goes in `[tool.pydoclint]`, section 3's rule and not a new one;
+  `false` for the public API and the default elsewhere is not offered,
+  pydoclint having no such split.
 - **types** — a mypy hook, below.
 - **packaging** — `uv-lock`, `pyroma`, and `check-sdist` wherever an
-  sdist is built, which is section 12's condition rather than a second
-  one.
+  sdist is built, section 12's condition rather than a second one.
 
 ### The local hooks
 
@@ -1202,292 +1161,144 @@ pre-commit.ci does not have — the lint workflow covers it. No
   or misspelled import into `Any`, which is the opposite of strict, and
   `mirrors-mypy` supplies it by default.
 
-    - **A local hook**, `language: system`, running
-      `uv run --locked --no-default-groups --group lint --group test
-      mypy <package> tests .github/scripts` with
-      `pass_filenames: false`. The gate then checks against the
-      project's own locked environment: one declaration of what the
-      dependencies are, and the real ones behind the types. Its price is
-      `skip: [mypy]` in the `ci:` block, `uv` being absent on
-      pre-commit.ci.
+    - **A local hook**, `language: system`, running `uv run --locked
+      --no-default-groups --group lint --group test mypy <package> tests
+      .github/scripts` with `pass_filenames: false`. The gate then
+      checks against the project's own locked environment: one
+      declaration of the dependencies, and the real ones behind the
+      types. Its price is `skip: [mypy]` in the `ci:` block, `uv` being
+      absent on pre-commit.ci.
     - **`mirrors-mypy` with pinned `additional_dependencies`**, where
-      the type check needs a small, stable set that can be pinned by
-      hand and kept in step with `uv.lock`. Its price is that second
-      declaration; what it buys is the type gate running on
-      pre-commit.ci too.
+      the type check needs a small, stable set pinnable by hand and kept
+      in step with `uv.lock`. Its price is that second declaration; what
+      it buys is the type gate running on pre-commit.ci too.
 
-    The criterion is which price is smaller: a project whose types rest
-    on its own package wants the first, one whose types rest on a
-    handful of stub packages can afford the second.
-
-    **What the `skip:` then costs** is answered where that key is:
-    the lint workflow covers the hook. What is left to say here is what
-    pre-commit.ci is still kept for — the pull request that bumps the
-    revisions pinned in this file — and that a local hook has no
-    revision to bump, `uv.lock` moving its mypy instead, on Dependabot's
-    own day.
+    The criterion is which price is smaller: types resting on the
+    project's own package want the first, types resting on a handful of
+    stubs can afford the second. Under the local hook pre-commit.ci is
+    kept for the pull request bumping this file's pinned revisions, a
+    local hook having none and `uv.lock` moving its mypy instead.
 
     **Under the mirror, two declarations have to stay equal**, and
     nothing makes them: the hook's `rev` against the mypy `uv.lock`
     resolves, and each `additional_dependencies` pin against the same
-    package there. The second declaration is the price named above; that
-    it is unchecked is the part worth knowing before choosing it.
-- **`toml-comment-width`** — pygrep, 80 bytes on a toml comment, which
-  are columns where the comment is ASCII. `.{80}\S*[ \t]` reports a
-  line only when whitespace is left past byte 80: a comment whose
-  overflow is one unbroken token is exempt.
+    package there.
+- **`toml-comment-width`** — pygrep, 80 bytes on a toml comment, columns
+  where the comment is ASCII. `.{80}\S*[ \t]` reports a line only when
+  whitespace is left past byte 80: a comment whose overflow is one
+  unbroken token is exempt.
 - **`decoded-subprocess-encoding`** — pygrep refusing `text=True` and
   `universal_newlines=True`: a decoded child process takes the locale's
-  encoding, which is the same defect ruff's `unspecified-encoding`
-  catches one layer in, and no linter here has an opinion on the keyword.
+  encoding, the same defect ruff's `unspecified-encoding` catches one
+  layer in, and no linter here has an opinion on the keyword.
 - **`reasonless-coverage-pragma`** — pygrep refusing a `#`-comment
   `pragma: no cover` or `pragma: no branch` with nothing after it on its
   own line, narrower than section 8's own acceptance command: the match
-  wants a `#` immediately before `pragma`, the mark a comment always
-  opens with and a backticked reference to the rule in prose never
-  carries, section 8 already saying prose drops it — so a pygrep, which
-  cannot otherwise tell a comment from a string, does not refuse a
-  docstring quoting the rule, and leaves a bare mention of the phrase in
-  a comment's own prose to the command instead. A test in this suite
-  reading every tree's Python for the same shape, beside
-  `surface_test.py`, is the rejected alternative: it would report a
-  reasonless pragma only once the pull request that added it has already
-  landed, where the hook refuses it before the commit exists.
+  wants a `#` immediately before `pragma`, which a comment always opens
+  with and a backticked reference in prose never carries, so a docstring
+  quoting the rule is not refused and a bare mention in a comment's
+  prose is left to the command. A test of this suite would report one
+  only after the pull request that added it had landed.
 - **`local-link-prefix`** — pygrep refusing a markdown link whose
-  destination is local and does not begin `./`. In every repository of
-  the organization, this one included: the rule is the organization's
-  and not the publishing repositories', because one spelling is what
-  lets a check downstream key on one pattern, and a standard whose own
-  tree does not keep it is a standard with a counter-example at the top
-  of it.
+  destination is local and does not begin `./`, in every repository of
+  the organization, this one included: one spelling lets a check
+  downstream key on one pattern, and a standard whose own tree breaks it
+  carries a counter-example at the top.
 
-    What it buys where documentation is built: `docs.yml` greps the
-    built html for `href="#./`, which is what MyST renders in place of a
-    link the `RootFileLinks` transform in `docs/source/conf.py` cannot
-    resolve — an anchor to an id no page has, and a dead link `-W` sees
-    nothing wrong with once a suppression is added back. MyST renders
-    the destination verbatim, so what that grep can match is decided by
-    how the link was written, upstream of the workflow entirely.
+    Where documentation is built, `docs.yml` greps the built html for
+    `href="#./`, what MyST renders in place of a link the
+    `RootFileLinks` transform in `docs/source/conf.py` cannot resolve —
+    an anchor to an id no page has, and a dead link `-W` sees nothing
+    wrong with once a suppression is added back.
 
-    **The prefix is the rule, and not the extension**, because
-    btclib-org/btclib#1175's table settles it: `DOES_NOT_EXIST.txt`,
-    `sub/DOES_NOT_EXIST.md`, `DOES_NOT_EXIST` and
-    `../DOES_NOT_EXIST.md` each reach that fallback and each is missed
-    by the union of both greps a repository ran, so an `.md`-scoped
-    rule leaves every one of them writable. A prefix refuses all four
-    where they are written.
+    **The prefix is the rule, and not the extension**: an extensionless
+    destination, a `.txt` and a path into a subdirectory reach that
+    fallback too, so an `.md`-scoped rule leaves them writable. `../`
+    reaches that fallback by design, `RootFileLinks` *deliberately
+    declining* a target that normalizes above the repository root, so
+    the built-html grep neither reaches it nor is widened for it:
+    refusing at source is the only place it is caught.
 
-    **A badge nests a link inside a link**, and
-    `[![license: MIT](…)](./LICENSE)` is the
-    shape: the image is the link text, so a link text written `[^]]*`
-    stops at the `]` closing the alt text and reads the image `src` in
-    place of the badge's own href. Link text is therefore
-    `(?:[^]]|\]\([^)]*\))*`, a character that is not `]` or a whole
-    `](…)` group, which steps over the image and still checks the `src`
-    by backtracking. Measured: a badge href renders exactly what a
-    plain href renders, so every row of the table above can be written
-    as a badge destination.
-
-    Measured in each publishing repository, with an unresolvable
-    link written each way: `./page.md`, `./page.md#anchor`,
-    `./page.txt`, `./sub/page.md` and an extensionless `./page` each
-    render `#./` followed by the destination, so one pattern sees every
-    one; the same destinations written without the `./` render the
-    destination alone, which no single pattern reaches without also
-    matching the autodoc anchors those pages carry.
-
-    **`../` is refused with the rest, and it is the row that most needs
-    a reason beside it.** `RootFileLinks` *deliberately declines* to
-    resolve a target that normalizes to something starting `..`, on the
-    reasoning that nothing above the repository root is a document that
-    build can answer for. So `../page.md` reaches MyST's fallback by
-    design rather than through a gap in the transform, renders
-    `href="#../page.md"`, and is matched by neither surviving grep —
-    and the grep should not be widened to reach it, because a link
-    climbing out of the root has nothing to resolve to in the first
-    place. Refusing it at source is the only place that shape can be
-    caught at all.
-
-    The pattern's first branch asks for a whole `[text](destination)`
-    whose `[` is not preceded by a backtick, so prose can quote the
-    refused shape in a code span and grep output carrying no `[` is not
-    matched. Its second branch reads a link reference definition,
-    `[label]: page.md`, which carries no `(` and renders the same
-    fallback; it is anchored at the start of the line, because a
-    reference *use* followed by a colon is ordinary prose and an
-    unanchored pattern reports it — measured, in
-    `btclib-benchmarks`'s changelog. pygrep is line based and cannot
-    see a fenced block, so an example of the refused shape inside one
-    fails the hook; the code span is the way round it, and this file is
-    written accordingly.
+    A `[` preceded by a backtick is exempt, so prose quotes the refused
+    shape in a code span, pygrep being blind to a fence; a badge, whose
+    image is its link text, and a link reference definition at the
+    line's start are reached too.
 - **`no-hyphen-at-end-of-line`** — pygrep refusing a line that ends
   inside a word, at that word's own hyphen, in the file types whose
   prose a build renders: markdown, reStructuredText and Python. Markdown
   joins two source lines with a space, so a word wrapped there renders
   with the hyphen *and then a space* inside it. The source looks
-  correct, which is why reading a diff does not find one; the instance
-  that produced this rule was found by scanning rendered `<code>` spans
-  in built html across the organization, which is the only gate here
-  that reads output rather than source, and there is no such gate.
+  correct, so reading a diff does not find one, and no other tool here
+  covers it.
 
     **A docstring reaches that rendering by another route**, which is
-    what puts Python in the list: docutils leaves the source break
-    inside the paragraph it builds and html collapses it to a space, so
-    the page reads the hyphen and a space as the markdown one does.
-    Section 9's width holds a docstring to 80 columns through ruff's
-    `max-doc-length` and has no opinion on where a line ends, so the
-    break this hook refuses is one that width asks for.
+    what puts Python in the list rather than leaving the hook to
+    markdown: docutils leaves the break in the paragraph it builds and
+    html collapses it to a space. Section 9's width holds a docstring to
+    80 columns and has no opinion on where a line ends, so the break
+    this hook refuses is one that width asks for.
 
-    **Over Python it refuses more than a build renders** — a `#`
-    comment, a test's docstring — and that is what a location costs.
-    pygrep reads a line at a time, where a pattern telling a docstring
-    from a comment has to consume the file from its start: it then
-    names the file's first line, prints everything up to the match, and
-    answers once per file however many the file holds. The repair is
-    the same reflow wherever the refused line sits, and in a formatted
-    tree there is nothing but prose to refuse: `ruff format` puts a
-    binary operator at the start of the next line rather than at the
-    end of this one.
-
-    Leaving the hook to markdown is the alternative declined: what
-    reaches a docstring then is a scan of built html, which is the gate
-    the paragraph above says there is none of. Scoping the Python half
-    by path — a tree's tests, its `docs/source/conf.py` — is the other,
-    and it costs section 14's default of one answer for every tree, the
-    paths being each tree's own.
-
-    Nothing else covers it. markdownlint has no rule for it, the width
-    rules read a line rather than what two lines become, and
-    `sphinx-build -W` is not asked whether a token means anything. It
-    matters most where the token is a command or an identifier, because
-    a reader copies what the page shows.
-
-    **What it cannot see**, stated so the rule is not mistaken for the
-    class: a code span whose content breaks at a `/` or a `.` renders
-    with the same intruding space and has no hyphen to match, and a file
-    type the list does not name — a stub, a notebook holding markdown
-    cells — is not selected at all. Reading the built html is what
-    catches those, and this hook is not it.
-
-    Measured before it was proposed: every repository of the
-    organization was clean under `git grep -n -E '[A-Za-z0-9]-$' --
-    '*.md'` once `btclib-secp256k1`'s three were fixed, so the markdown
-    half costs nothing today and exists to keep the next one from being
-    written. The same expression over `'*.py'` is what a tree reads
-    before the rest of the hook is green there, each hit being a line to
-    reflow — so this half costs a pass over a tree's own docstrings and
-    comments, which is `unquoted-placeholder`'s shape below rather than
-    the two hooks above.
+    Over Python it refuses more than a build renders — a `#` comment, a
+    test's docstring — which is the price of reading a line at a time;
+    the repair is the same reflow wherever the refused line sits. It
+    cannot see a code span breaking at a `/` or a `.`, which renders the
+    same intruding space with no hyphen to match, nor a file type the
+    list does not name.
 - **`unquoted-placeholder`** — pygrep refusing a placeholder that stands
-  as a whole argument and carries quotes. Section 9 is the rule and what
-  the quoting costs: quotes make the angle brackets ordinary text, so a
+  as a whole argument and carries quotes, in every repository of the
+  organization, this one included. Section 9 is the rule and what the
+  quoting costs: quotes make the angle brackets ordinary text, so a
   paste made before the placeholder is filled in reaches the tool with
-  the placeholder as its value rather than failing at the shell. In
-  every repository of the organization, this one included: the rule is
-  section 9's and binds them alike, and the paste it guards against is
-  made by a reader of whichever tree they have open.
+  the placeholder as its value instead of failing at the shell.
 
     **`CHANGELOG.md` and `RELEASE_NOTES.md` are outside it**, by
-    `exclude: ^(CHANGELOG|RELEASE_NOTES)\.md$`. Section 9 makes both
-    append-only, so the refused shape in an entry that has landed has no
-    repair and the tree carrying the hook over it no green state to
-    reach — what is left to such a tree is a `SKIP=` on every run, or no
-    hook at all. What the exclusion gives up is a file a reader pastes
-    from like any other prose, so what holds the rule there is somebody
-    reading the entry before it lands.
-
-    The narrower exclusion, keyed on the entries written before the
-    rule, is the alternative declined for being unavailable rather than
-    unwanted: `exclude:` selects files and pygrep reads whole ones.
-    Leaving the scope to each tree is the other, and what it costs is
-    what this bullet opens by asking for — the same entry in every
-    repository, rather than each deciding which of its own files the
-    rule reaches. `RELEASE_NOTES.md` is named in a tree that carries
-    none because `check-useless-excludes` asks an exclusion to match
-    some file the hook selects rather than each name in it, and section
-    2's table gives `CHANGELOG.md` to every tier.
+    `exclude: ^(CHANGELOG|RELEASE_NOTES)\.md$`: section 9 makes both
+    append-only, so a refused shape in a landed entry has no repair and
+    the tree no green state to reach, and what holds the rule there is
+    somebody reading the entry first. `RELEASE_NOTES.md` is named in a
+    tree carrying none because `check-useless-excludes` asks an
+    exclusion to match some file the hook selects, not each name in it.
 
     **What separates an exempt quote from a refused one is a property of
-    the line, not of the fence around it.** Section 9 exempts a quote
-    another language needs, which a reader tells apart by the fence a
-    line sits in. A pattern cannot: Python's `re` takes a look-behind
-    only at a fixed width, so a pygrep matching across lines has to
-    consume the file from its start, and it then names the first line
-    and prints everything up to the match — a verdict carrying no
-    location. Both exemptions are read off the line instead. No shell
-    puts a space around an assignment's `=`, `x = y` being the command
-    `x` run with two arguments, so a spaced one belongs to another
-    language and its value is that language's to quote; and a quote
+    the line, not of the fence around it**: a pattern that read the file
+    whole in order to see a fence would report only its own first line.
+    So both of section 9's exemptions are read off the line: no shell
+    puts a space around an assignment's `=`, so a spaced one is another
+    language's and its value that language's to quote; and a quote
     nested inside a quote of the other kind is a nested program's.
 
-    **What it cannot see** is three things, each of them the price of
-    reading one line at a time, and two of them over-reports rather than
-    misses. An array written one element to a line: no element line
-    carries the assignment that exempts a value, so the elements are
-    reported and the rule does not reach them. A program in another
-    language written across two lines: the quote that makes the
-    placeholder that language's sits on the line above, so what section
-    9 exempts by name is reported. And a placeholder that shares its
-    line with an earlier quote of its own kind, an apostrophe in the
-    prose or a second argument alike: the pattern crosses a quoted run
-    of the *other* kind to reach a placeholder and stops at one of the
-    same, so that line goes unreported.
-
-    Widening for either of the first two wants a match that spans lines,
-    which costs what is measured above: pygrep matching at once names the
-    file's first line and prints everything up to the match.
-
-    **What a reader meeting the second of those does** — the report
-    being right about the line and wrong about the rule — is rewrite the
-    line rather than waive the hook. The value the reader supplies goes
-    into an assignment block above the fence and the program carries
-    `${name:?}`, which is what section 9's placeholder bullet already
-    asks of the lower fence and the shape
-    section 3's `uv_build` read is written in. Reflowing the program
-    onto one line is the other answer available and it is declined:
-    what decides whether it fits is 80 columns rather than the reading,
-    and a program too long for one line has nowhere left to go.
-
-    Measured before it was proposed: this tree is clean under the hook
-    and no other repository of the organization is, so unlike the two
-    hooks above it costs each tree a pass over its own prose before that
-    tree can carry it.
+    Reading one line at a time over-reports an array written one element
+    to a line and a program split over two, the exempting assignment or
+    quote sitting on another line, and misses a placeholder sharing its
+    line with an earlier quote of its kind. A reader meeting one
+    rewrites the line rather than waiving the hook: the value goes into
+    an assignment block above the fence and the program carries
+    `${name:?}`, as section 9's placeholder bullet already asks of the
+    lower fence.
 - **`check-changelog`** — a local hook, `language: system`, running
   `python3 .github/scripts/check_changelog.py` with `pass_filenames:
-  false` over `CHANGELOG.md`. It runs ahead of `markdownlint-cli2`
-  in `.pre-commit-config.yaml` so it reads the file before that hook's
-  `--fix` repairs the very seam the third check below exists to name.
-  `merge=union` stays on that file (btclib-org/.github#21's ruling),
-  and this is the gate its price bought back: two branches each adding
-  their own new heading with the same wording at the section's one
-  shared anchor is not a repeat at all -- the driver folds the two into
-  a single entry, which is what can hide two entries closing the same
-  issue under that one heading. A `###` heading is repeated only where
-  the matching text does not end up adjacent once the merge is done --
-  one side's own further entry landing between the two -- or where a
-  new heading repeats one already in the section at the branches'
-  shared base, no second branch needed for that shape at all; and a
-  heading left with no blank line above it is the blank the driver eats
-  at that seam (btclib-org/.github#760); and, section 9's bound, an
-  entry whose body runs past three lines. The script's own docstring
-  carries the checks and what they still cannot make without a network
-  call a `pre-commit` hook is the wrong place to put.
+  false` over `CHANGELOG.md`. It runs ahead of `markdownlint-cli2` so it
+  reads the file before that hook's `--fix` repairs the seam the
+  blank-line check names. `merge=union` stays on that file
+  (btclib-org/.github#21's ruling), and this is the gate its price
+  bought back: it refuses a repeated `###` heading, a heading left with
+  no blank line above it — the blank the driver eats at that seam
+  (btclib-org/.github#760) — and, section 9's bound, an entry whose body
+  runs past three lines. The script's own docstring carries the checks
+  and what they cannot make, a network call being what a hook is the
+  wrong place for.
 
-    **A test of this repository's own suite is declined**, for what
-    that suite is: an audit run after the fact, so a duplicate it finds
-    is one that has already landed. The check has to fire before the
-    merge that creates it, which only a hook run on the branch does.
-    **News fragments are declined too**, at btclib-org/.github#305: they
-    dissolve the anchor this driver eats at, but the step that would
-    assemble them into a section is a release, and a tree that never
-    releases — this one among them — never runs it, so the directory
-    of fragments never empties. **A gate reading the order two landed
-    sections sit in is the third alternative**, and
-    btclib-org/.github#516 declines it as the weaker answer: it reads a
-    rebase's result after the fact, where reconstruction against the
-    branch's own base — CONTRIBUTING.md's *Committing and rebasing* —
-    is the discipline that catches a misplacement this hook does not
-    reach.
+    Two branches adding the same new heading at the section's one shared
+    anchor is not a repeat: the driver folds them into one entry, which
+    can hide two entries closing one issue. A heading is repeated only
+    where the matching text does not end up adjacent once the merge is
+    done, or where a new heading repeats one already in the section at
+    the shared base.
+
+    The check has to fire before the merge that creates the duplicate,
+    which only a hook on the branch does and a test of this suite, an
+    audit after the fact, cannot; news fragments and a landed-order gate
+    are declined at btclib-org/.github#305 and btclib-org/.github#516.
 
 ## 5. ruff
 

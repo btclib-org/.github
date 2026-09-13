@@ -8537,3 +8537,9 @@ nothing red follows from the copies disagreeing.
 
 - **Every publishing tree schedules the sentinel** (closes #523), so the
   paragraph saying the row waits on the first of them to do so goes.
+
+### Section 4 of the standard, a third shorter
+
+- **The lint gate keeps every hook and every rule** (issue #1075): the
+  censuses, the derivations a command already shows and the
+  rejected-alternative paragraphs go.
