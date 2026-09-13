@@ -8470,3 +8470,8 @@ nothing red follows from the copies disagreeing.
 - **`reusable-links.yml` holds the lychee job** (issue #35): `links.yml`
   passes its paths as `targets`, `tests/links_test.py` reads the flags
   through the call, and section 10 gives the call `@main`.
+
+### The wiki and the projects board are off
+
+- **`REPOSITORY.md` records both as `false`** (issue
+  btclib-org/.github#550), the settings having been turned off.
