@@ -4642,52 +4642,28 @@ could not reach `btclib-node`'s at all.
 
 ## 15. Auditing a repository against this file
 
-Alignment is measured, not remembered. Each command below answers for
-one section above.
+Alignment is measured, not remembered: each command below answers for one
+section above. **Much of it runs on its own**: `tests/`, weekly from
+`alignment.yml`, asks every repository these questions, a test per question and
+a row per repository, since no tree holds this file. Module docstrings name
+their sections, and section 2's tier the repositories, a tree it does not bind
+skipped with the reason. The backlog in `tests/__init__.py` runs recorded
+failures as strict expected failures naming the issue, so a tree that catches up
+is reported until its row goes.
 
-**Much of it runs on its own.** `tests/` of this repository is a suite
-that asks every repository the questions below, one test per question
-and one row per repository, so that a run is the matrix and a failure
-names the tree and the command that decides it by hand. It asks them
-here and not in each tree's own convention tests because what is
-measured is agreement with this file, which no tree holds a copy of: a
-test there answers for that repository's reading of a rule, and the
-rule has moved since. Which section each module reads is that module's
-own docstring, and there is no second copy of the list here to keep in
-step with it. Which repositories a question is asked of is section 2's
-tier, measured off each tree as that section measures it, and a tree the
-tier does not bind is skipped with the reason. Which failures the
-tracker already records is the backlog in `tests/__init__.py`: those run
-as strict expected failures naming the issue, so a repository that
-catches up is reported until its row is deleted. `alignment.yml` runs it
-weekly.
+The commands below ask the same of the tree in front of you, and what the suite
+does not ask yet or cannot, such as reading `tests/README.md` against section 7
+or the workflow comments. A repository answers for itself where it can:
+`interpreters_test.py`, `conventions_test.py`, the hook-pin tests. Section 3's
+rule that the classifiers name a tree's interpreters is `interpreters_test.py`
+where a tree publishes and the window sweep below where it does not: publishing
+decides, not being a library, because an index shows the classifiers of any
+distribution. A workflow's interpreters against the window stay a reading: one
+outside it is correct where the reason is beside it.
 
-The commands below are the same questions for the tree in front of you,
-and the questions the suite does not ask yet or cannot. Which it asks is
-each module's docstring; what it never will is a reading rather than a
-comparison — `tests/README.md` against section 7, and the workflow
-comments, below. A repository answers for itself where it can —
-`interpreters_test.py`, `conventions_test.py`, the hook-pin tests — and
-this file is where the rest is written down.
-
-Section 3 states the convention that the classifiers name the
-interpreters a tree runs, and says a tree that publishes carries it as
-`interpreters_test.py`; this file is what carries it for a tree that
-does not: a published tree's classifiers are what an index shows whoever
-is choosing the package, where an unpublished tree's declarations are
-read by whoever opens the repository. Publishing and not section 1's
-library is what decides that, an index showing the three declarations
-whatever the distribution on it is. So the ends of an unpublished tree's
-window are compared here rather than by a module of its own. The other
-answer weighed was dropping the classifiers such a tree shows to no
-index, and what that costs is the comparison itself — the floor and the
-matrix are declared either way, and nothing would be left to read them
-against. What no command here compares is the classifiers
-against the interpreters a workflow runs, which stays a reading: a job
-naming one outside the window is correct where the reason is beside it,
-and no command here can read a reason.
-
-The settings, which is where the defects have actually been:
+The settings: squash the only method, signatures required with an **empty**
+bypass list, the self-merge bypass in `pull_request` mode and never `always`,
+and a token that is `read`:
 
 ```shell
 R=<org>/<repo>
@@ -4702,11 +4678,7 @@ gh api repos/$R/branches/main/protection \
          checks: [.required_status_checks.checks[]?.context]}'
 ```
 
-What the answer has to say: squash the only method, signatures required
-with an **empty** bypass list, the self-merge bypass in `pull_request`
-mode and never `always`, and a token that is `read`.
-
-The tree:
+The tree, reading exit codes and not filtered output:
 
 ```shell
 grep -n 'strict = true\|fail_under = 100\|branch = true\|"FIX"\|"TD"' \
@@ -4727,9 +4699,21 @@ uv run pre-commit run --all-files
 cat tests/README.md
 ```
 
-The reading section 8 leaves to whoever runs its acceptance commands,
-which name a line where a pragma written inside a string reads exactly
-as a site:
+- `strict = true` with no `id: mypy` is section 6's finding and a finding on its
+  own: the strictness is configured and nothing runs it.
+- An action not pinned to forty hex digits, a workflow with no `permissions:`
+  block, and a `--frozen` anywhere are each a finding.
+- A `build-backend` other than `uv_build` in a project compiling nothing is
+  section 3's finding, and decides which table declares inclusion. Section 12
+  owes a `package` naming a one-package wheel, else the ignored codes and an
+  escalating repository's page, script and test together; `check-sdist` gates
+  wherever an sdist is built, with `[tool.check-sdist]` beside an sdist target
+  only excluding.
+- `tests/README.md` is section 7's answer and no command computes it: a bullet
+  owed by that section and not claimed is the finding, and a claimed one is
+  answered by the test asserting it.
+
+Section 8's pragmas, telling a site from a string carrying the form:
 
 ```shell
 git ls-files '*.py' | python3 -c 'import re, sys, tokenize
@@ -4750,30 +4734,13 @@ for path in sys.stdin.read().splitlines():
         print(f"{path}:{line}\t{kind} opening at line {t.start[0]}")'
 ```
 
-No output is the answer. A line naming a token is section 8's finding.
-Its two fields are where the `#` form was matched and where the token
-carrying it opens, which a string spanning several lines puts above the
-match.
+No output is the answer; a line is section 8's finding, where the form matched
+and where its token opens. The key is not-`COMMENT`, not `STRING`, as f-strings
+tokenize differently on 3.11 and 3.14; `unreadable` keeps silence from covering
+a skipped file.
 
-What the key reads is the token not being a `COMMENT` rather than its
-being a `STRING`: an f-string carrying the form is `FSTRING_MIDDLE` on
-3.14 and one `STRING` on 3.11, so a key on the string answers
-differently under two interpreters where this one answers the same.
-
-`unreadable` is a file `tokenize` did not read — an unterminated
-construct, a coding cookie naming no codec, a byte that codec refuses, a
-tracked path the tree no longer holds — and it is printed for the reason
-the sweeps below print a marker: a file dropped instead would leave this
-command's silence saying a tree keeps the rule.
-
-coverage's own parser is the alternative weighed. It answers what an
-exclusion costs rather than where the pragma is, and it asks for
-`coverage` in the tree being audited, which a tree owing no floor has no
-reason to hold — this repository's `uv.lock` names none.
-
-The metadata an index shows, which no command in the tree can compare
-because half of it is a repository setting. The lines chain because the
-last of them writes, which is section 9's rule:
+The metadata an index shows, half a repository setting, chained because the last
+command writes (section 9); the first two name one set, up to GitHub's twenty:
 
 ```shell
 gh api repos/<org>/<repo> --jq '.topics | join(", ")' &&
@@ -4781,12 +4748,9 @@ sed -n '/^keywords = \[/,/^\]/p' pyproject.toml &&
 uv build --sdist && uvx twine check dist/*.tar.gz
 ```
 
-The first two have to name the same things, up to GitHub's twenty — as
-sets and not as sequences, the first command answering alphabetically
-whatever was set, where the second echoes an order somebody chose. The
-third checks less than its name suggests — section 3 says what it does
-and does not read — so the classifiers are asked about separately, and
-before a release rather than during one:
+`twine check` reads less than its name suggests (section 3), so the classifiers
+are asked before a release; an empty list is the answer, and a string is one
+PyPI refuses on upload:
 
 ```shell
 uvx --with trove-classifiers python -c '
@@ -4798,18 +4762,11 @@ declared = tomllib.loads(
 print([c for c in declared if c not in classifiers])'
 ```
 
-An empty list is the answer. A string in it is one PyPI would refuse on
-upload, at the point where a version is already being consumed.
-
-`gh api` puts a failure's body on stdout and exits non-zero, so a
-command that filters nothing out of what it fetched reports its own
-failure, which is what the settings block above does. Where a `sed`
-reads the fetch instead, or a capture parses it as content, both signals
-are lost and a call that failed is one blank with a repository that owes
-nothing — a sweep's row and a single repository's answer alike. The
-reading is written once. `read_or_mark` takes the path in `$r`'s tree as
-`$1` and sets `$content` and `$ok`; `list_or_mark` names `$r`'s
-workflows and sets `$names` and `$ok`:
+`gh api` puts a failure's body on stdout and exits non-zero, so a `sed` over the
+fetch turns a failed call into a blank that reads as a repository owing nothing.
+Sweeps reading a file or the workflow list use two helpers setting `$ok` to
+`found`, `absent` for a `(HTTP 404)`, or `unreadable`, which is no reading until
+asked again and is printed rather than dropped:
 
 ```shell
 read_or_mark() {
@@ -4830,18 +4787,8 @@ list_or_mark() {
 }
 ```
 
-`found` is a file that answered, `absent` the `(HTTP 404)` a repository
-without that path gives, and `unreadable` anything else — a call that
-did not answer, which is no reading to act on until it is asked again. A
-sweep whose line has fields writes the marker into the field the call
-would have filled; one that prints a line only where it has something to
-say prints a line naming what could not be read, having no field to
-write into. The `--silent` existence checks reach the same three values
-by exit code, there being no content to decode.
-
-Section 1's interpreter window, declared once in `requires-python`,
-again in the classifiers, again in `.python-version` and a fourth time
-in the matrix the platform sweeps run:
+Section 1's interpreter window, in `requires-python`, classifiers, pin and
+matrix:
 
 ```shell
 for r in <every repository>; do
@@ -4886,32 +4833,13 @@ for r in <every repository>; do
 done
 ```
 
-One line per repository. Where a line carries classifiers, the floor is
-the lowest of them, the pin is the highest, and the matrix runs every
-one. The `library` lines are the same window as each other, that window
-being python.org's; an `application` line is read against the comment in
-its own `.python-version` instead, which is where section 1 puts the
-dependency that set the ceiling. Which of the two a line is, section 1
-decides and this reads: `release.yml` among the workflow names, and the
-library classifier anywhere in the file rather than among the
-per-version ones the `classifiers` column keeps. A `kind` of
-`unreadable` is either call not answering, and neither half is guessed
-from the other.
+Where a line carries classifiers, the floor is the lowest, the pin the highest,
+and the matrix, which only this compares, runs every one, the pin running where
+it is empty. `library` lines share python.org's window; an `application` line is
+read against the comment in its `.python-version`.
 
-The matrix column is empty where no workflow names a list of them,
-which is a tree whose workflows name no interpreter at all and a tree
-that runs a single one as a key: either way the pin is what runs. A
-column reading `unreadable` is the call and not the declaration, and
-`matrix` carries the marker among version strings where one workflow of
-several could not be read.
-Section 3 has what a `t` suffix and a `pypy` prefix each name a
-classifier as; this command reads the first as its own `X.Y` and drops
-the second, there being no version string for an implementation to
-match. Reading the matrix against the classifiers is this command's
-work: what the suite compares them with is the floor and the pin, and
-no workflow.
-
-Section 1's uv floor, and the ceiling it is set at:
+Section 1's uv floor, and the ceiling Dependabot's bundled updater ships, above
+which it refuses to re-lock:
 
 ```shell
 if d=$(gh api repos/dependabot/dependabot-core/contents/uv/Dockerfile \
@@ -4934,36 +4862,14 @@ for r in <every repository>; do
 done
 ```
 
-`ceiling=` is the uv Dependabot's own bundled updater ships, above
-which it refuses to re-lock rather than upgrading itself. It is read
-outside the organization, where `read_or_mark` builds no path, so the
-reading is spelled out with the helper's markers: `absent` is the
-`Dockerfile` gone from that path and an empty value is its image line
-no longer matching the pattern — either is `dependabot-core` moving
-what this block rests on, and is acted on the day it prints — where
-`unreadable` is the call not answering, and is asked again. The
-alternative gives `read_or_mark` a second argument naming another
-repository; what it costs is every call inside the organization
-carrying a default for the one outside it.
+`ceiling=absent` or empty is `dependabot-core` moving what this rests on, acted
+on that day. `lock=yes` with an empty `floor=` is the finding; `lock=no` owes
+none. A `floor=` version other than `ceiling=` is a finding: below, the tree
+admits a uv older than its lock updates; above, those updates have stopped.
 
-`lock=yes` names a tree that owes the floor; `floor=` empty beside it is
-the finding, a tree committing a lock with nothing capping the uv that
-reads it. `lock=no` owes no floor, so an empty `floor=` beside it is
-silent rather than a finding, whatever the ceiling is that day. A `floor=`
-that is not `ceiling=` is a finding on either side of it, section 1's
-sentence being that the floor is set at the ceiling rather than below
-it. Below the ceiling, the tree still admits a uv older than the one
-its lock updates are written with. Above it, the refusal `ceiling=`
-names has already stopped that tree's uv updates. `lock=unreadable` is
-neither: the call itself failed, told apart from a genuine `no` by the
-`(HTTP 404)` `--silent` would otherwise swallow, and `floor=` beside it
-answers nothing until the sweep is run again. `floor=unreadable` says it
-of the other call, which fails independently of this one: an empty
-`floor=` is the finding above, where `floor=unreadable` is nothing at
-all until the `pyproject.toml` fetch answers.
-
-Which repositories publish, which is what section 2's first tier turns
-on and so what decides whether a `SECURITY.md` is owed or inherited:
+Which repositories publish, deciding under section 2's first tier whether a
+`SECURITY.md` is owed, and section 11's `claude-review.yml` everywhere, which
+`tests/` does not ask; `--silent` because `--jq` puts a 404's body on stdout:
 
 ```shell
 for r in <every repository>; do
@@ -4973,10 +4879,21 @@ for r in <every repository>; do
          || w=unreadable; }
   printf '%s\trelease=%s\n' "$r" "$w"
 done
+
+for r in <every repository>; do
+  e=$(gh api "repos/<org>/$r/contents/.github/workflows/claude-review.yml" \
+    --silent 2>&1) && continue
+  printf '%s' "$e" | grep -q '(HTTP 404)' \
+    && echo "$r has no claude-review.yml" \
+    || echo "$r: claude-review.yml unreadable"
+done
 ```
 
-The index's path continues past the name, which is the position section
-9 refuses, so it stands in a block of its own:
+Both halves are the question, `release.yml` and the index, and neither answers
+alone. A repository the endpoint cannot find also answers `(HTTP 404)`, so a
+stale roster reads as `none`. The index is asked for a link back to this
+organization, not a `200`, as somebody else may publish the name; `<name>` is
+`pyproject.toml`'s, in its own block as the path continues past it (section 9):
 
 ```shell
 name=<name>
@@ -4993,27 +4910,11 @@ else:
     print(u[0] if u else "on the index, another project")'
 ```
 
-Both halves are the question, and neither answers alone. The first is
-asked by the exit code: `--silent` prints nothing on success and sends
-the failure to stderr, where `--jq .name` would put a 404's *body* on
-stdout and `|| echo none` would append to it. That stderr is now
-captured rather than let through: a `(HTTP 404)` in it is `release.yml`
-genuinely absent, and anything else is the call itself failing —
-`w=unreadable`, told apart from a real `none` rather than folded into
-it. The second reads the project urls rather than the status code,
-because a name this
-organization does not publish may be served by somebody else's project
-of the same name — so the discriminator is a link back to the
-organization and not a `200`. `<name>` is what `pyproject.toml`
-declares, which is not always the repository's.
-
-`(HTTP 404)` is what a genuinely absent `release.yml` answers with, and
-also what a repository this loop names but the endpoint cannot find
-answers with — a stale roster reads as `none` rather than
-`unreadable`, a gap this shape does not close.
-
-The private channel section 2 owes, which is a setting in every
-repository and an address in the files that carry the policy:
+Section 2's private channel: a setting that answers `true` everywhere, and an
+address. *no SECURITY.md* is an inheriting repository, read beside the
+publishing sweep; a blank line is a policy with no address found; an `@` form is
+the finding. No other spelled-out address matches, since `btclib-secp256k1`
+rightly gives upstream's:
 
 ```shell
 for r in <every repository>; do
@@ -5036,31 +4937,11 @@ for r in <every repository>; do
 done
 ```
 
-`true` from every repository is the answer to the first, a `false` being
-a policy that links a form the reporters of that repository do not have,
-and *unreadable* an endpoint that answered neither — captured rather
-than let through, an error body on stdout being what the publishing
-sweep above uses `--silent` against.
-
-The second answers one line per repository.
-*security at btclib dot org* is a repository carrying a policy and
-giving the address; *no SECURITY.md* is one inheriting this
-repository's, read beside the publishing sweep since at tier 1 that is
-the missing file; a blank line is a policy the pattern found no address
-in — another spelled-out mailbox, or none at all — and printing the
-missing file rather than leaving it blank is what tells a blank from a
-policy that is not there. An `@` form is the finding wherever it prints,
-that being the spelling the address is written to avoid. The grep reads
-no further: a pattern taking any spelled-out address would report the
-one `btclib-secp256k1` gives for the C library it binds, which is
-upstream's and correctly there. *unreadable* is the call itself
-failing, the same `(HTTP 404)` capture the publishing sweep uses telling
-it apart from a genuine `no SECURITY.md`.
-
-Section 2's badge rule, whose subject is the head of a file no tree can
-read for another, and section 10's record beside it. The first loop is
-membership and order, one line per badge and none at all for a
-`README.md` that carries no badge:
+Section 2's badge rule and section 10's record, read by source and not alt text,
+which can say `license: MIT` over a refused
+`img.shields.io/badge/license-MIT-blue.svg`. A badge neither gives the tree, one
+the row lacks, and a row out of order are each a finding; `(absent)` is a
+`README.md` section 2 owes:
 
 ```shell
 for r in <every repository>; do
@@ -5072,22 +4953,9 @@ for r in <every repository>; do
 done
 ```
 
-A repository whose `README.md` did not answer takes the second column
-instead of a badge source: `(unreadable)` is the call, and `(absent)`
-the file, which section 2's *Root files* owes at every tier. The
-parentheses are what no source has, so neither reads as one.
-
-The badge's **source** and not its alt text, which is prose its author
-chose: a badge can write `license: MIT` over section 2's refused
-`img.shields.io/badge/license-MIT-blue.svg`, and a loop reading the alt
-text reports a licence badge and stops.
-Read the sources against section 2's list and section 10's record, in
-the order they arrive: a badge neither gives the tree, one they give it
-and the row does not carry, and a row out of order are each a finding,
-and no command tells them apart from each other.
-
-The second asks what each badge renders, which is what a reader of the
-rendered file sees and a reader of its source cannot:
+What each badge renders: anything but `200` is the finding, and its title is
+read against the rule; Read the Docs and pepy print `(no title)` and are read
+from the image:
 
 ```shell
 r=<repo>
@@ -5105,33 +4973,11 @@ else printf '%s' "$content" \
 fi
 ```
 
-One line per badge, and it prints rather than judging: anything but
-`200` is the finding a command can decide, and the message beside it is
-the reading the rule above asks for. Read the Docs and pepy carry no
-`<title>` and print `(no title)`, so those two are read from the
-rendered image or from the page they link to. Where the `README.md`
-itself did not answer, the marker takes the whole line, there being no
-badge for it to sit beside.
-
-Section 11's rule that `claude-review.yml` is in every repository, which
-no single tree can answer for the others and nothing in `tests/` asks:
-
-```shell
-for r in <every repository>; do
-  e=$(gh api "repos/<org>/$r/contents/.github/workflows/claude-review.yml" \
-    --silent 2>&1) && continue
-  printf '%s' "$e" | grep -q '(HTTP 404)' \
-    && echo "$r has no claude-review.yml" \
-    || echo "$r: claude-review.yml unreadable"
-done
-```
-
-Silent where the rule is kept, one line naming a repository missing it,
-and a differently worded line where the call itself failed rather than
-answered — `--silent` for the reason the publishing sweep gives.
-
-The calendar of section 10, across the organization, an audit no single
-tree can answer:
+Section 10's calendar and its Dependabot row. A file on a different day from its
+namesake sorts out of place; two repositories on one minute of one day and hour,
+for section 10's reason, and a tree the workflow's record entry does not name
+are findings too, as are ecosystems on several days. `absent` is a
+`.github/dependabot.yml` section 2's *Directories* owes:
 
 ```shell
 for r in <every repository>; do
@@ -5145,27 +4991,7 @@ for r in <every repository>; do
     else echo "$r $f $ok"; fi
   done
 done | sort -k2
-```
 
-Sorted by workflow, so a file running on a different day from its
-namesake in another tree is one line out of place. A minute shared by two
-repositories at the same day and hour is the other finding, for the
-reason section 10 gives beside the table. A line for a tree that
-workflow's entry in section 10's record does not name is the third, and
-the one no comparison of instants can show: the cron is right and the
-row is not the tree's.
-
-A repository with no schedule prints nothing, so the marker takes a line
-of its own rather than a field, and it sorts under the name of what did
-not answer: a workflow's, or `workflows` for the listing, whose `absent`
-is a repository with no `.github/workflows` at all.
-
-That loop reads `cron:` and reaches no further, so the calendar's
-Dependabot row is not in it: that schedule is an `interval` and a `day`
-in `.github/dependabot.yml`, a different shape in a different file, and
-it takes a second command.
-
-```shell
 for r in <every repository>; do
   read_or_mark .github/dependabot.yml
   [ "$ok" = found ] || { echo "$r dependabot $ok"; continue; }
@@ -5173,36 +4999,8 @@ for r in <every repository>; do
 done
 ```
 
-One line per repository where every ecosystem agrees, more than one
-where they do not — which is itself the finding, an ecosystem opening on
-a day the sentinel before it does not precede. `absent` in place of the
-day is a repository with no `.github/dependabot.yml`, which section 2's
-*Directories* owes, and `unreadable` is the call.
-
-`strict = true` in `pyproject.toml` with no `id: mypy` in
-`.pre-commit-config.yaml` is section 6's finding and a finding on its
-own: the strictness is configured and nothing runs it, which is the half
-of that section a tool table cannot answer for.
-
-An action not pinned to forty hex digits, a workflow with no
-`permissions:` block, and a `--frozen` anywhere are each a finding on
-their own. Check exit codes, not filtered output.
-
-`tests/README.md` is section 7's answer, and no command computes it —
-that section says why. Read it against section 7's list and that
-section's rule for which bullets a repository owes: a bullet owed and
-not claimed is the finding, and a bullet claimed is answered by the test
-in that repository that asserts the claim. Across the organization the
-same command run in each tree is the matrix, and there is no shorter way
-to it.
-
-Section 7's vendored-data pins, which sit in the data directory and so
-wherever that directory sits: the sweep asks the tree for its
-`README.md` paths rather than naming any, a tree whose data sits beside
-the script that reads it having no path a fixed list would hold. The
-root `README.md` is passed over, being section 2's rather than a data
-directory's, and this one carrying section 7's block as the shape to
-write, which no count tells from a pin:
+Section 7's vendored-data pins: `workflow=no` beside a path, or a workflow with
+no path, is the finding; `pins=none` is nothing vendored or other provenance:
 
 ```shell
 for r in <every repository>; do
@@ -5226,55 +5024,13 @@ for r in <every repository>; do
 done
 ```
 
-A path with a count beside it is a file carrying the block, which
-section 7 asks a tree for one of; the loop names a path only where the
-count is above zero. A path with `workflow=no` is section 7's finding: a
-tree pinning an upstream commit with nothing rechecking it on section
-10's schedule. The reverse — a workflow present where no path answers —
-is the same finding read from the other side.
-
-`pins=none` is no `README.md` of the tree carrying the block, which is a
-tree with nothing to vendor and equally a tree whose provenance is
-written some other way; this command does not tell those two apart, and
-what does is the reading section 7 asks of `tests/README.md` above.
-`pins=unreadable` is the tree listing failing, `unreadable` beside a
-path is that file's own fetch, and `workflow=unreadable` the third call;
-the last two are told from a genuine absence by the same `(HTTP 404)`
-capture the sweeps above use. None of the three is a reading to act on
-until it is asked again.
-
-What the package-content lines have to say: where the wheel is one
-package tree, a `package` naming it, whose absence is section 12's
-finding; where the wheel is not one, the codes the tool is told to
-ignore, and the page, the script and the test that a repository which
-escalates owes together rather than singly. `check-sdist` in the gate
-wherever an sdist is built, and a `[tool.check-sdist]` table beside an
-sdist target that only excludes. A `build-backend` other
-than `uv_build` in a project that compiles nothing is section 3's
-finding, and it is the one to read first: which table declares the
-inclusion follows from it.
-
-**`RELEASING.md`'s by-hand recovery paths are exercised by incident, and
-that is accepted rather than overlooked.** The `gh run download` and
-`gh release create` sequence for a `github-release` job that was skipped,
-and the *Rebuild a release from its tag* sequence beside it, are commands
-a person runs while a release is broken, so what exercises them is the
-next break. A job running the documented sequence against a scratch
-repository is the shape that would exercise them on purpose, and it costs
-a repository in the organization — a row in section 2's tier table, a
-`REPOSITORY.md`, topics, protection rules, and a place in every sweep
-above — for a procedure walked when a publish fails. A script extracted
-from the fenced blocks and unit-tested is the other shape, and what it
-buys is a test against a mock: it drifts from the forge exactly as the
-markdown does, one layer removed, and it costs the sequences the
-readability of being read in order by whoever is running them. What the
-decision leaves the reader is the record: a walk is written down in the
-tree that ran it, naming the release it recovered and what skipped the
-job. Where it is written is the tree's own choice and that it is written
-is not: the comment above `github-release` is one place, and the
-`CHANGELOG.md` entry for the release that broke is the other. The
-reading below is what asks a comment of the first kind whether it still
-describes the workflow under it, and this is what says which file to ask:
+**`RELEASING.md`'s by-hand recovery paths are exercised by incident, and that is
+accepted rather than overlooked**: a scratch repository would join every sweep,
+an extracted script tests a mock. A walk is written down above `github-release`
+or in the broken release's `CHANGELOG.md` entry, naming the release and what
+skipped the job. A column above zero is where to look; with `0` in both, a
+skipped `github-release` beside a present release is a walk. The raw media type
+and emptiness test catch a `200` with empty `content` past the limit:
 
 ```shell
 for r in <every publisher>; do
@@ -5291,72 +5047,28 @@ for r in <every publisher>; do
 done
 ```
 
-A publisher answering above zero in a column has its record in that
-file, which is where to look rather than what to conclude: a sentence
-describing the procedure counts the same as one recording a walk. A
-publisher answering `0` to both has either walked no recovery or walked
-one and written nothing down, and this command does not tell those two
-apart; what does is the run history of the release that looks short, a
-`github-release` job skipped with the release present being a walk.
-`unreadable` is the call rather than an absence — a repository with no
-`release.yml` answers it, and so does a fetch that failed — and is not a
-reading to act on until it is asked again.
-
-The raw media type is what the read takes rather than the JSON form every
-sweep above uses, and what decides it is the shape of that form's failure
-rather than the fact of one. For a file past its size limit the API
-answers `200` with `encoding` `none` and an empty `content`, so the
-pipeline the sweeps above use exits `0` at every stage and counts zero on
-the largest `CHANGELOG.md` in the organization rather than saying it
-could not read it. Above, it is the emptiness test and not the call's
-exit status that turns that answer into `unreadable`, which is why the
-test is there and why dropping it as redundant would put the silent zero
-back.
-
 ### Reading the workflow comments
 
-A reading rather than a command, and no tool covers it: `actionlint`
-reads the workflow, `zizmor` reads it for injection, the gate reads the
-code — and a sentence asserting that a job "calls three reusable
-workflows" sits unchallenged beside a file that calls six. It reads as
-authoritative precisely because it sits next to the thing it describes.
+No tool checks them: a comment saying a job "calls three reusable workflows"
+sits unchallenged beside a file that calls six.
 
-1. **Read every comment, end to end.** Not a grep for suspicious words:
-   the stale ones read exactly like the true ones.
-1. **Check each claim against this repository's tree**, never against
-   another comment. Named triggers against the `on:` block; call-graph
-   claims against the actual `uses:` and `needs:` lines, grepped and
-   counted rather than eyeballed; context references against what they
-   resolve to; cron days against every other schedule here and against
-   `dependabot.yml`; any file, line or count a comment names re-derived
-   independently. **Never against the sibling the file was copied from
-   either**: prose moves between these repositories more easily than
-   configuration does, so a paragraph true where it was written is an
-   ordinary way for a comment to be wrong where it now sits.
-1. **Run the command a comment gives, and read it for what it reaches.**
-   A comment quoting a command's output is the hardest kind to doubt, and
-   the command can confirm a claim rather than test it: a paginated
-   endpoint asked without `--paginate` answers for its newest page alone,
-   so "nothing here has ever been X" survives every X older than that
-   page.
-1. **`git log -S <phrase>` on every mismatch**, to separate *was true,
-   drifted* from *never matched*. That axis decides whether the fix is
-   the comment or the code, and a comment describing a safer design that
-   was never built is a finding against the code.
-1. **Follow anomalous width.** A comment line past 80 columns breaks
-   section 9's rule, and in practice it is the un-rewrapped remainder of
-   an earlier fix — the one property of a comment a reader notices
-   without reading it, and worth following into the paragraph around it:
+1. **Read every comment, end to end**: stale ones read like true ones.
+1. **Check each claim against this repository's tree**, never another comment or
+   the sibling it came from: triggers against `on:`, call graphs against `uses:`
+   and `needs:` counted, context references against what they resolve to, cron
+   days against every schedule and `dependabot.yml`, any file, line or count
+   re-derived.
+1. **Run the command a comment gives**, reading what it reaches: without
+   `--paginate` an endpoint answers for its newest page alone.
+1. **`git log -S <phrase>` on every mismatch**: *drifted* or *never matched*
+   decides whether the comment or the code is fixed, and a comment describing a
+   safer design never built is a finding against the code.
+1. **Follow a comment line past 80 columns**, usually an un-rewrapped fix;
+   section 9's yaml 100 is for a pinned SHA line only:
 
    ```shell
    awk 'length > 80 && /^ *#/ {print FILENAME ":" FNR}' .github/workflows/*.yml
    ```
-
-   The 100 columns yaml gets in section 9 are for a line pinned to a
-   commit SHA with its tag after it. A comment is not that line.
-
-The file set divides cleanly across readers by size, each file being
-independent and the checklist the same for each.
 
 ## 16. Checklists
 

@@ -8508,3 +8508,9 @@ nothing red follows from the copies disagreeing.
 - **The `sdist-rebuild` row goes** (issue #523): `btclib`, `btclib-node`
   and `btclib-secp256k1` now carry `sdist-rebuild.yml`, as
   `bitcoin-core-rpc` already did.
+
+### Section 15 of the standard is a third shorter
+
+- **Section 15 keeps every command and what its answer has to say**
+  (issue #1075): the per-sweep marker explanations, rejected alternatives
+  and mechanism narratives go, and short sweeps share a block.
