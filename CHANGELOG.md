@@ -8496,3 +8496,9 @@ nothing red follows from the copies disagreeing.
 
 - **`README.md`'s *The tree* keeps its rules and drops the rest**
   (issue #1075): rejected alternatives, examples and restated reasons go.
+
+### Section 11 of the standard, shorter
+
+- **Section 11 keeps every rule** (issue #1075): its censuses, dated
+  measurements, sha citations and rejected alternatives go, and
+  `tests/links_test.py`'s `FENCE` docstring drops a removed example.

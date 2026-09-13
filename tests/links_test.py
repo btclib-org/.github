@@ -288,10 +288,9 @@ def test_a_lychee_cache_is_kept_between_runs(
 FENCE = re.compile(r"^```.*?^```\n?", re.DOTALL | re.MULTILINE)
 """A fenced code block, so its own `#` comments are not read as headings.
 
-README.md's own `# 38` (a shell comment inside a `gh api` example) and
-two more comment lines are exactly this shape: not stripped, they read
-as headings GitHub never renders, and `anchors()` would answer three
-ids too many.
+README.md's own comment lines inside its `toml` example are exactly
+this shape: not stripped, they read as headings GitHub never renders,
+and `anchors()` would answer ids no heading gives.
 """
 
 HEADING = re.compile(r"^#{1,6} (.+)$", re.MULTILINE)
