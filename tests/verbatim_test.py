@@ -112,7 +112,11 @@ and answers no to an arbitrary historical sha, for the clone's reason
 rather than the entry's.
 """
 
-EXPECTED_DRIFT: dict[str, str] = {}
+EXPECTED_DRIFT: dict[str, str] = {
+    ".github/scripts/check_changelog.py": "btclib-org/.github#1075",
+    "CONTRIBUTING.md": "btclib-org/.github#1075",
+    "REVIEWING.md": "btclib-org/.github#1075",
+}
 """A path section 14 names whose copies are known not to agree yet.
 
 The value is the issue that decides it, and the commit the drift came
