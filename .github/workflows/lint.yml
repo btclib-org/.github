@@ -96,6 +96,17 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
 
+      # the interpreter pre-commit runs under, and so the one every
+      # `language: python` hook environment is built against. `uvx`
+      # resolves an interpreter without reading `.python-version`, so
+      # without this step the runner image's own `python3` decides what
+      # syntax a hook that parses this tree's Python will accept, and
+      # `debug-statements` is such a hook. No version is written here:
+      # `uv python install` with no argument installs the one
+      # `.python-version` names, which is where section 1 keeps it
+      - name: Install the interpreter .python-version names
+        run: uv python install
+
       # the cache key needs the runner image, not only the OS: a
       # pre-commit environment built on one image is not always usable on
       # the next one, and a stale hit fails in the hook rather than here
@@ -107,15 +118,15 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/pre-commit
-          # the hook config alone, where the sibling repositories hash
-          # .python-version beside it: every environment pre-commit
-          # builds is named by a rev this file pins, and the interpreter
-          # .python-version names belongs to the project environment the
-          # mypy hook resolves through uv, which is not pre-commit's to
-          # cache
+          # the interpreter beside the hook config: a `language: python`
+          # hook's environment is built against the Python the step
+          # above installs and is cached under a name carrying that
+          # version, so a key naming the config alone stands for the
+          # environments of two interpreters at once and restores ones
+          # pre-commit rebuilds rather than runs
           key: >-
             pre-commit-${{ runner.os }}-${{ steps.image.outputs.os }}-${{
-            hashFiles('.pre-commit-config.yaml') }}
+            hashFiles('.pre-commit-config.yaml', '.python-version') }}
           restore-keys: |
             pre-commit-${{ runner.os }}-${{ steps.image.outputs.os }}-
 
