@@ -342,15 +342,14 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_the_settings_file_reads_the_wiki_and_the_projects_board_back",
         ("btclib",),
     ),
-    # deps-oldest: these trees are short of the workflow; btclib-node
-    # schedules it (btclib-org/btclib-node#739)
+    # deps-oldest: these trees are short of the workflow; the rest of
+    # section 10's entry schedules it
     (
         323,
         "test_a_tree_carries_the_sentinels_its_entries_give_it",
         (
             "bitcoin-core-rpc",
             "btclib",
-            "btclib-benchmarks",
             "btclib-secp256k1",
         ),
     ),
