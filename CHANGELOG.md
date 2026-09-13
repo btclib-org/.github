@@ -8100,3 +8100,82 @@ nothing red follows from the copies disagreeing.
   off the tree, and `.taplo.toml`'s is what is left there. What that entry
   says about the two openings, about `subjects` answering with a bullet's
   clause, and about the shared half ending at one newline, stands.
+
+### Sections 8 and 10 state a criterion where they closed the cases
+
+- **Section 8 gives the criterion an argument is judged by, in place of
+  the cases it named** (closes #1021): an argument about that job rather
+  than a second copy of a tree-wide setting, the two told apart by
+  whether the run does anything differently without it. `btclib`'s
+  `no-bindings` job is what the enumeration left in breach while
+  conforming — folded, `cov-fail-under` answers nothing in that tree's
+  `pyproject.toml` where `fail_under` and `--cov` both answer, so
+  `--cov-fail-under=0` copies nothing, and the job's own construction is
+  what puts the run outside the floor that file states.
+- **The criterion agrees with the hook bullet under it** (closes #1021):
+  *A selective run is reported and not gated* leaves an explicit
+  `--cov-fail-under` unoverruled, and section 8 says an argument of that
+  kind is the job's own wherever its construction asks for it, where the
+  standard granted the flag in one bullet and refused it in the one
+  above.
+- **`btclib`'s `coverage-union` job is on the other side of the
+  criterion**: its step types `coverage report --fail-under=100` where
+  `[tool.coverage.report]` states `fail_under = 100.0`, and the same
+  report without the flag exits 2 naming that configured floor, so the
+  flag restates it. The branch changes the standard rather than that
+  tree, and the finding is btclib-org/btclib#2057.
+- **Section 10's *The aggregate job, and the required check* says which
+  aggregates it is about** (closes #1032): all of them, a required check
+  being what a branch rule makes of one, where its opening sentence gave
+  the aggregate a rule holds and its bullets govern every one. A
+  consequence written there as a red job is a blocked merge in a tree
+  whose rule holds the context and the job's red alone in one whose rule
+  does not.
+- **The `always()` clause and the `skipped` bullet name the red as the
+  job's** (closes #1032): `codeql: every job passed` is a context no
+  branch rule of the organization holds, and a branch rule is written on
+  either of two mechanisms, so both were read. The classic
+  `branches/main/protection` endpoint of each of the nine answers it
+  nowhere, the same read answering `test: every job passed` in the five
+  that require it as the control that it reaches an aggregate's context
+  at all; the nine trees' twenty-seven active rulesets carry no
+  `required_status_checks` rule of any kind, where the same read of them
+  answers `required_signatures`, `pull_request` and three rule types
+  besides. So both clauses spoke of a check a listing aggregate need not
+  produce. The `skipped` one is true of every case the organization has
+  today, every workflow carrying a `changes` job having an aggregate
+  some rule requires: `^  changes:` over `.github/workflows/` of the nine
+  answers `test.yml` in `bitcoin-core-rpc`, `btclib`, `btclib-node` and
+  `btclib-secp256k1` and nothing anywhere else, and each of those four
+  trees requires that workflow's `test: every job passed`. The direction
+  does not reverse — an aggregate a rule requires need not have a
+  `changes` job over it — and the invariant form is what rests on
+  neither.
+- **This supersedes half of *Section 8 keeps one copy of the flags and
+  section 10 ungates the sentinels* above**: its first bullet gives the
+  two job-own arguments as named, which section 8 no longer names. What
+  it says about a sentinel cell's `--no-cov` and about coverage
+  configuration being read from wherever the run starts stands.
+- **And half of *The aggregate reads its own run, not the needs context*
+  above**: its `skipped` bullet gives the filter's consequence as
+  failing a check a merge waits for, which is the clause reworded here.
+  What it says about a `changes` job leaving its dependants `skipped`
+  and about the API reporting that conclusion like any other stands.
+- **This is what *A listing aggregate's allowlist is checked, and the
+  signal is the job's red* above leaves open**: that entry records the
+  same claim in the `skipped` bullet as left standing, its population
+  being a reading, and filed as btclib-org/.github#1032.
+- **The fourth site of the idiom is left as it is**: *The aggregate
+  recipe says what runs the job, and what it may judge* above opens on a
+  step that always runs sitting inside a job the red matrix never
+  reaches, and the check a merge waits for reporting `skipped` rather
+  than the failure. That is the mechanism #479 closed, read out in the
+  trees whose rule holds the context, and it is true of them; what this
+  entry rewords are the two clauses that gave a consequence of every
+  aggregate.
+- **No gate comes with it** (closes #1021) (closes #1032): *How to use
+  this file* binds a rule entering the standard to what reads it, and
+  neither of these enters one, each replacing a closed set of cases with
+  the criterion behind it. `tests/grid_test.py` reads the subsection's
+  heading as the line section 10's calendar paragraphs stop at, and the
+  heading is unchanged.
