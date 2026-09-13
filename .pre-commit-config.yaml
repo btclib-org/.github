@@ -5,7 +5,7 @@
 # organization the questions no single repository can ask itself, and to
 # .github/scripts/, this tree's own local hooks.
 #
-# Skip a hook with SKIP=<id>, or all of them with "git commit -n".
+# Skip a hook with SKIP=<id>.
 ci:
   # a bot committing to a branch is at odds with a setup where no
   # workflow token can write: a failing hook is fixed by its author
