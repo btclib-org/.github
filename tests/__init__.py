@@ -319,21 +319,6 @@ def names() -> list[str]:
 
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
-    # #550's own third box: the flip is a repository setting, not a
-    # commit, and is still owed on these
-    (
-        550,
-        "test_the_wiki_and_the_projects_board_are_off",
-        (
-            ".github",
-            "bbt",
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-node",
-            "btclib-secp256k1",
-            "portanode",
-        ),
-    ),
     # #550's own third box, the readback half: measured against each
     # copy's own origin/main, these still carry the rejected
     # alternative's wording

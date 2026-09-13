@@ -255,7 +255,7 @@ rather than merged.
 gh api repos/btclib-org/.github \
   --jq '{issues: .has_issues, visibility: .visibility,
          wiki: .has_wiki, projects: .has_projects}'
-# {"issues":true,"projects":true,"visibility":"public","wiki":true}
+# {"issues":true,"projects":false,"visibility":"public","wiki":false}
 ```
 
 Issues are where this organization's cross-repository findings live, and
@@ -271,8 +271,7 @@ public and named `.github`.
 [The standard turns the wiki and the projects board off on every
 tree][s11]: an unused wiki is a second place a reader can land looking
 for what the tracker already records, and the projects board is a
-per-user view of the same issues. The call above still answers `true`
-for both — neither has been turned off here yet.
+per-user view of the same issues.
 
 ## Topics
 
