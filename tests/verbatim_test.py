@@ -6,7 +6,8 @@
 
 The list is prose with a reason under each entry, which is what a person
 reading it needs; each bullet opens with a path and with who owes a copy,
-which is what this needs. Nothing else in the organization compares those
+which is what this needs, and so does each paragraph naming a file the
+list leaves out by its subject. Nothing else in the organization compares those
 copies, and the failure they hide is silent by construction: a hook config
 that drifts still lints, it just stops asking the same question everywhere.
 A tree with no copy at all hides the same way -- a comparison of what is
@@ -22,6 +23,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from . import ORG, ROOT, still_open, subjects
+from .per_subject_test import declared, per_subject
 from .workflows_test import triggers
 
 if TYPE_CHECKING:
@@ -51,17 +53,19 @@ step with the first, and the file is the thing being compared anyway.
 """
 
 EVERYWHERE = "owed by every repository"
-"""How a bullet of section 14 says a copy is owed of every tree.
+"""How section 14 says a copy is owed of every tree.
 
 The other spelling is `owed where` and a condition, which is prose this
 does not read: a tree the condition does not reach carries no copy and
-is short of nothing. Reading the clause off the bullet is what keeps the
-answer where the standard states it, rather than in a list here that
-would have to be kept in step with that one.
+is short of nothing. Reading the clause off the standard is what keeps
+the answer where it states it, rather than in a list here that would
+have to be kept in step with that one. A bullet of the compared list
+opens with it, and so does a paragraph naming a file that list leaves
+out by its subject, that file being uncompared and owed all the same.
 """
 
 CONDITIONAL = "owed where "
-"""How a bullet of section 14 opens where a copy is owed on a condition."""
+"""How section 14 opens where a copy is owed on a condition."""
 
 SECTION = re.compile(r"from `(#{1,6} [^`]+)`")
 """How a bullet names the heading that opens the section it compares.
@@ -229,20 +233,42 @@ def shared(path: Path, clause: str = "") -> bytes:
 def owed(path: str, clause: str) -> bool:
     """Say whether section 14 owes a file of every repository.
 
-    :param path: the file the bullet is about, for the message.
-    :param clause: what the bullet says after its subject.
+    :param path: the file the clause is about, for the message.
+    :param clause: what section 14 says after that subject.
     :returns: whether every repository is meant to carry a copy.
-    :raises LookupError: where the bullet opens with neither spelling.
+    :raises LookupError: where the clause opens with neither spelling.
     """
     if clause.startswith(CONDITIONAL):
         return False
     if clause.startswith(EVERYWHERE):
         return True
     msg = (
-        f"section 14's bullet for {path} opens with neither {EVERYWHERE!r}"
+        f"section 14's clause for {path} opens with neither {EVERYWHERE!r}"
         f" nor {CONDITIONAL!r}: {clause!r}"
     )
     raise LookupError(msg)
+
+
+def unowed(root: Path, paragraphs: dict[str, str]) -> list[str]:
+    """List the per-subject files a tree owes and carries no copy of.
+
+    A paragraph is answered by any path it gives a copy of its subject:
+    the one it opens with, or one it sends a tree to. That is what keeps
+    a departure in the prose a reader reads rather than in a second copy
+    of it here, and it is why a departure worded away is a red row and
+    not a question nobody asks.
+
+    :param root: the root of the checkout.
+    :param paragraphs: each subject against its clause.
+    :returns: the subjects this tree owes a copy of and holds none of.
+    :raises LookupError: where a clause opens with neither spelling.
+    """
+    return [
+        subject
+        for subject, clause in paragraphs.items()
+        if owed(subject, clause)
+        and not any((root / path).is_file() for path in declared(subject, clause))
+    ]
 
 
 def test_section_14_names_files(trees: dict[str, Path]) -> None:
@@ -318,10 +344,14 @@ def test_a_repository_carries_the_verbatim_files_owed_of_it(
 ) -> None:
     """A file section 14 owes of every repository is missing from none.
 
-    Every other question about these files is asked of the copies that
-    exist, so a tree with none reads as one the standard passes over.
-    `EXPECTED_DRIFT` is not consulted: an entry there records copies that
-    disagree, which is a different finding from a copy that is not there.
+    Asked of the compared list and of the per-subject paragraphs alike:
+    a file outside the comparison by its subject is inside the obligation
+    all the same, and section 14 says who owes one of it in the same two
+    spellings. Every other question about these files is asked of the
+    copies that exist, so a tree with none reads as one the standard
+    passes over. `EXPECTED_DRIFT` is not consulted: an entry there
+    records copies that disagree, which is a different finding from a
+    copy that is not there.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -332,7 +362,55 @@ def test_a_repository_carries_the_verbatim_files_owed_of_it(
         for path, clause in verbatim().items()
         if owed(path, clause) and not (root / path).is_file()
     ]
+    missing += unowed(root, per_subject())
     assert not missing, f"section 14 files this tree does not carry: {missing}"
+
+
+PLANTED = "here/probe.py"
+"""The subject of a paragraph written for the check below, not read from one.
+
+Both per-subject paragraphs name a condition, so `owed` answers false
+for each and neither asks any tree for a copy. A check parametrized over
+them alone is green however it behaves, which is what
+`test_the_field_behind_the_comma_names_a_repository_and_a_commit` is
+asked of literals for; these are that, for the reading that decides a
+missing copy.
+"""
+
+BY_ANOTHER_NAME = "under/probe_by_another_name.py"
+"""Where the planted paragraph says one tree keeps its copy.
+
+A departure by name rather than by directory, which is `btclib-node`'s
+for `.github/scripts/check_vendored_vectors.py` and the one a check
+keyed on the path alone reads as a tree short of a copy.
+"""
+
+
+def test_a_departure_answers_a_paragraph_and_dropping_it_reddens_the_tree(
+    tmp_path: Path,
+) -> None:
+    """A tree at a stated departure owes nothing; unstate it and it owes one.
+
+    The planted tree carries the departure and not the subject, so the
+    first answer is one only a reader of the departure gives. The second
+    is the same tree against the same clause with that sentence gone,
+    which is what says the check cannot pass by finding nothing to read.
+    A condition in place of the spelling asks nothing of the tree at all,
+    which is the state both live paragraphs are in.
+
+    :param tmp_path: where the tree is built.
+    """
+    root = tmp_path / "tree"
+    (root / BY_ANOTHER_NAME).parent.mkdir(parents=True)
+    (root / BY_ANOTHER_NAME).write_text("", encoding="utf-8")
+    stated = f"{EVERYWHERE}. `btclib-node` keeps its copy at `{BY_ANOTHER_NAME}`."
+    assert not unowed(root, {PLANTED: stated})
+    silent = f"{EVERYWHERE}, and no tree is sent anywhere else."
+    assert unowed(root, {PLANTED: silent}) == [PLANTED], (
+        "a paragraph naming one path and a tree carrying another read as"
+        " a copy that is there: the departure is not what is being read"
+    )
+    assert not unowed(root, {PLANTED: f"{CONDITIONAL}the tree has one."})
 
 
 @pytest.mark.parametrize(

@@ -7908,3 +7908,80 @@ nothing red follows from the copies disagreeing.
   What it costs is the fact a full checkout answers without the network,
   and the distinction between the two: the issue is where a drift is
   argued, the commit is where it is resolved.
+
+### Section 14 says who owes a per-subject copy, and drops a discharged debt
+
+- **Each per-subject paragraph opens with who owes a copy, in the two
+  spellings the compared list uses** (closes #1023): a file that list
+  leaves out by its subject is uncompared and owed all the same, and the
+  section said nothing about who owes one — so a tree short of a copy it
+  ought to have was a finding for the list and no finding at all for
+  `.github/scripts/check_vendored_vectors.py` or
+  `tests/conventions_test.py`. `owed` reads the clause off a paragraph
+  the way it reads a bullet's, `OPENING` answering with what follows the
+  phrase, and a second grammar beside that one is the rejected
+  alternative.
+- **The script is owed where the tree vendors test vectors, the module
+  where the tree declares which conventions it tests** (closes #1023):
+  the first condition's observable is
+  `.github/workflows/vendored-vectors.yml`, which is what runs the
+  script weekly, so a tree vendoring nothing keeps no pin file for it to
+  parse; the second is section 7's, which asks a suite to declare in
+  `tests/README.md` which of its conventions it tests and forces a test
+  of that declaration rather than leaving it chosen.
+- **`btclib-node` keeps its copy at `.github/scripts/check_vendored_pin.py`**
+  (closes #1023): a departure by name where the sibling paragraph's is
+  by directory, and the one a check keyed on the path reads as a tree
+  short of a copy rather than as a tree calling it something else. The
+  job is the same job — a vendored pin re-checked against upstream on
+  the weekly cadence — and the departure is decided: that copy's own
+  header says it opens no tracking issue on drift, where `btclib`'s
+  does. The paragraph's header sentence is owed of the siblings doing
+  that job and not of the siblings of the same name, a copy under
+  another name being one of them. *Section 14 decides `.gitignore` per
+  repository*'s entry above says that header sentence names the siblings
+  of that name; it names the siblings doing the same job now, and the
+  plural that entry gave it stands.
+- **A paragraph is answered by any path it names, and
+  `test_a_repository_carries_the_verbatim_files_owed_of_it` asks it of
+  every tree** (closes #1023): the path it opens with and the path
+  behind each departure it states, so what excuses a tree stays in the
+  prose a reader reads rather than in a second copy of it inside a dict.
+  `declared` reads those and no other backticked token, `QUOTED_NOT_A_COPY`
+  being the control on that: a rule taking every one of them would be
+  answered by this repository's own `README.md`, which every tree
+  carries, and by the workflow the first condition is observed by, which
+  every tree owing the script carries.
+- **Both clauses name a condition, so the reading that decides a missing
+  copy is asked of a planted one** (closes #1023): `owed` answers false
+  for each, which leaves the live paragraphs held to the spelling alone
+  and a check over them green however it behaves. A tree carrying a
+  stated departure and not the subject answers the paragraph, and the
+  same tree against the same clause with that sentence removed is a red
+  row — the shape `PRECEDENT` and the `EXPECTED_DRIFT` literals already
+  answer for their own readers. What this reaches live is the spelling,
+  a clause opening with neither raising, and not a copy demanded of any
+  tree: `owed` evaluating a condition rather than reading its opening is
+  a second grammar over every conditional clause of the section, and
+  btclib-org/.github#1048 is where that half is recorded.
+- **The `.github/scripts/check_changelog.py` bullet no longer gives
+  btclib-org/.github#21 a debt for the trees short of the script**
+  (closes #1027): every repository carries the script and the hook that
+  runs it, and that issue is closed, so the sentence pointed a reader at
+  an unfinished port that is finished. The bullet's other sentences —
+  who owes a copy, and section 4's hook as what runs it — stand.
+- **No gate lands with that deletion** (closes #1027): a gate is owed of
+  a rule the standard adds, and removing a false sentence adds none. A
+  check reading section 14's debt sentences for the state of the issue
+  each names is the rejected alternative — `still_open`'s own docstring
+  says nothing here reads a prose pointer, and such a check would
+  falsify that sentence in the same landing.
+- **This bears on *Section 14's per-subject copies are located by a run*
+  above** (closes #1023): its bullet has no paragraph reworded, the
+  shape a parser reads being the shape the standard already writes. Both
+  paragraphs are reworded here, for the clause the section now states
+  rather than for the reading, and `OPENING` takes what follows the
+  phrase as that clause — so a paragraph carrying the phrase and nothing
+  after it raises where it used to read as a subject with no departures.
+  What that entry says about where a copy sits, and about what reading
+  prose costs, stands.

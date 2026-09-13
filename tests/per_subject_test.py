@@ -14,6 +14,11 @@ compared list and, by construction, of nothing outside it: `verbatim()`
 reads that list, and these two paragraphs are outside it by the sentence
 that put them there.
 
+What each paragraph says after its subject is a clause of the same two
+spellings that list's bullets carry, and `verbatim_test.py` reads it off
+this module's reading rather than walking the prose a second time: who
+owes a copy is one question, asked wherever section 14 answers it.
+
 The silence section 14 gives as the reason those paragraphs exist is what
 this closes for them -- a copy at a path the standard does not give
 reported on the day it lands rather than on the day somebody greps the
@@ -65,12 +70,33 @@ read at all. Selecting on the whole opening would make that rewording a
 paragraph nothing asks about, which is the state this module is against.
 """
 
-OPENING = re.compile(r"^`([^`]+)` is per repository by subject\b")
-"""How such a paragraph names the file, and the path its copies are at.
+OPENING = re.compile(r"^`([^`]+)` is per repository by subject, (.+)$")
+"""How such a paragraph names the file, and what it says after that.
 
 The subject opens the paragraph, which is where a reader looks for it and
-so where this reads it.
+so where this reads it. What follows the phrase is the clause: who owes a
+copy, in one of the two spellings section 14 gives its bullets, and then
+the rest of the paragraph -- the same answer `subjects` in
+`tests/__init__.py` gives for a bullet, read by `verbatim_test.py`'s
+`owed` the same way. A paragraph carrying the phrase and saying nothing
+after it is unread here rather than read as owing nothing of anybody.
 """
+
+QUOTED_NOT_A_COPY = ("README.md", ".github/workflows/vendored-vectors.yml")
+"""Paths these paragraphs quote that are a copy of no subject of theirs.
+
+One is what this repository's copy of `tests/conventions_test.py` reads
+section 7's list of conventions off, and the other is the workflow whose
+presence the vendored-pin condition is observed by. Every repository
+carries the first, and each tree owing the script carries the second, so
+an extraction taking every backticked token would find one of them
+wherever it looked and report no tree as short of anything. They are what
+`declared` is held against; where the prose stops quoting one, the
+control wants another token and not deleting.
+"""
+
+BACKTICKED = re.compile(r"`([^`]+)`")
+"""Every inline-code token of a paragraph, read by that control alone."""
 
 ELSEWHERE = re.compile(r"`([^`]+)` keeps its copy at `([^`]+)`")
 """How such a paragraph names a tree that keeps its copy somewhere else.
@@ -82,8 +108,8 @@ naming the tree, rather than a question nothing asks.
 """
 
 
-def per_subject(document: Path = STANDARD) -> dict[str, dict[str, str]]:
-    """Read section 14's per-subject paragraphs as a path and its departures.
+def per_subject(document: Path = STANDARD) -> dict[str, str]:
+    """Read section 14's per-subject paragraphs, each subject against the rest.
 
     Every way of reading nothing is an error rather than an empty answer,
     for the reason `subjects` in `tests/__init__.py` refuses a list it
@@ -92,12 +118,13 @@ def per_subject(document: Path = STANDARD) -> dict[str, dict[str, str]]:
 
     :param document: the file to read, this tree's `README.md` unless a
         control names another.
-    :returns: each subject path against the repositories the paragraph
-        sends elsewhere, by the path each is sent to.
+    :returns: each subject path against what its paragraph says after the
+        phrase, which is the clause `owed` reads and the sentences
+        `departures` reads.
     :raises LookupError: where the document holds no such paragraph, one
-        whose subject this cannot read, or two naming one subject.
+        this reads no subject and clause off, or two naming one subject.
     """
-    read: list[tuple[str, dict[str, str]]] = []
+    read: list[tuple[str, str]] = []
     unread: list[str] = []
     for block in PARAGRAPHS.split(document.read_text(encoding="utf-8")):
         paragraph = WRAPPED.sub(" ", block).strip()
@@ -107,25 +134,55 @@ def per_subject(document: Path = STANDARD) -> dict[str, dict[str, str]]:
         if found is None:
             unread.append(paragraph)
         else:
-            read.append((found.group(1), dict(ELSEWHERE.findall(paragraph))))
+            read.append((found.group(1), found.group(2)))
     out = dict(read)
     if unread or not out or len(out) != len(read):
         msg = (
             f"{document.name}: {len(read)} paragraphs carry {PHRASE!r} with"
-            f" a subject of their own, {len(out)} distinct among them, and"
-            f" these carry it with no subject: {unread}"
+            f" a subject and a clause of their own, {len(out)} distinct"
+            f" among them, and these carry it with no subject and clause:"
+            f" {unread}"
         )
         raise LookupError(msg)
     return out
 
 
-def carried(root: Path, subject: str) -> list[str]:
-    """List every copy of a per-subject file a tree tracks, wherever it is.
+def departures(clause: str) -> dict[str, str]:
+    """Read the trees a paragraph sends elsewhere, by the path each is sent to.
 
-    By the file's own name and not by the path section 14 gives it: the
-    question is where the copies are, and a search of the declared path
-    alone cannot see one anywhere else. Tracked rather than walked, so a
-    checkout's own environment is not read as part of it.
+    :param clause: what the paragraph says after its subject.
+    :returns: each repository against the path it keeps its copy at.
+    """
+    return dict(ELSEWHERE.findall(clause))
+
+
+def declared(subject: str, clause: str) -> list[str]:
+    """Every path a per-subject paragraph gives a copy of its subject.
+
+    The path it opens with, and the one behind each departure it states.
+    No other backticked token is read, `QUOTED_NOT_A_COPY` being what
+    that costs to get wrong: a paragraph quotes a workflow, a repository
+    name and this tree's own `README.md` too, and a rule taking every one
+    of them would answer that a tree carrying anything the prose mentions
+    carries a copy.
+
+    :param subject: the path the paragraph opens with.
+    :param clause: what it says after that.
+    :returns: the paths, the subject's own first.
+    """
+    return [subject, *departures(clause).values()]
+
+
+def carried(root: Path, subject: str) -> list[str]:
+    """List every copy under a per-subject file's own name, wherever it is.
+
+    By that name and not by the path section 14 gives it: the question is
+    where the copies are, and a search of the declared path alone cannot
+    see one anywhere else. Tracked rather than walked, so a checkout's
+    own environment is not read as part of it. A copy a paragraph places
+    under a name of its own is outside this search, and
+    `test_a_tree_section_14_sends_elsewhere_keeps_its_copy_there` is what
+    asks whether that one is where the paragraph puts it.
 
     :param root: the root of the checkout.
     :param subject: the path section 14 opens the paragraph with.
@@ -137,7 +194,7 @@ def carried(root: Path, subject: str) -> list[str]:
     ]
 
 
-def listing(subjects: dict[str, dict[str, str]]) -> str:
+def listing(subjects: dict[str, str]) -> str:
     """Give the command that lists a tree's copies of these files.
 
     The pathspecs are the ones `carried` passes, so what a reader runs is
@@ -170,11 +227,11 @@ def test_a_per_subject_copy_sits_where_section_14_puts_it(
     subjects = per_subject()
     root = trees[repository]
     astray: dict[str, list[str]] = {}
-    for subject, elsewhere in subjects.items():
-        declared = elsewhere.get(repository, subject)
-        found = [path for path in carried(root, subject) if path != declared]
+    for subject, clause in subjects.items():
+        here = departures(clause).get(repository, subject)
+        found = [path for path in carried(root, subject) if path != here]
         if found:
-            astray[declared] = found
+            astray[here] = found
     assert not astray, (
         "section 14 gives each of these subjects one path in this tree, and"
         f" the copies here are at others: {astray}; "
@@ -224,8 +281,8 @@ def test_a_tree_section_14_sends_elsewhere_keeps_its_copy_there(
         organization does not have.
     """
     stale: dict[str, str] = {}
-    for subject, elsewhere in per_subject().items():
-        for repository, path in elsewhere.items():
+    for subject, clause in per_subject().items():
+        for repository, path in departures(clause).items():
             if repository not in trees:
                 msg = (
                     f"section 14 sends {repository} elsewhere for {subject},"
@@ -270,25 +327,47 @@ def test_an_unread_paragraph_a_missing_one_and_a_repeated_one_each_raise(
     """
     live = per_subject()
     paragraphs = [
-        " ".join(
-            [f"`{subject}` is {PHRASE}."]
-            + [
-                f"`{repository}` keeps its copy at `{path}`."
-                for repository, path in elsewhere.items()
-            ]
-        )
-        for subject, elsewhere in live.items()
+        f"`{subject}` is {PHRASE}, {clause}" for subject, clause in live.items()
     ]
     assert per_subject(planted(tmp_path, paragraphs)) == live
     first, *rest = paragraphs
     unread = [first.replace("`", "", 2), *rest]
     assert unread != paragraphs
-    with pytest.raises(LookupError, match=r"no subject: \['"):
+    # the paragraphs carry apostrophes, so `repr` quotes one of them
+    # with `"` and a pattern naming the opening quote matches neither
+    with pytest.raises(LookupError, match=r"no subject and clause: \["):
         per_subject(planted(tmp_path, unread))
+    clauseless = [f"`{subject}` is {PHRASE}." for subject in live]
+    with pytest.raises(LookupError, match=r"no subject and clause: \["):
+        per_subject(planted(tmp_path, clauseless))
     with pytest.raises(LookupError, match="0 paragraphs carry"):
         per_subject(planted(tmp_path, ["Nothing here names a subject."]))
     with pytest.raises(LookupError, match=r"2 paragraphs carry.*1 distinct"):
         per_subject(planted(tmp_path, [first, first]))
+
+
+def test_the_paths_a_paragraph_names_are_not_its_backticked_tokens() -> None:
+    """`declared` reads the subject and each departure, and nothing else.
+
+    Both paragraphs are dense with inline code that is no copy of
+    anything, and the failure of a rule taking all of it is silent: the
+    tokens in `QUOTED_NOT_A_COPY` are carried by the trees that would
+    then read as satisfied.
+    """
+    quoted: set[str] = set()
+    named: set[str] = set()
+    for subject, clause in per_subject().items():
+        quoted |= set(BACKTICKED.findall(clause))
+        named |= set(declared(subject, clause))
+    for token in QUOTED_NOT_A_COPY:
+        assert token in quoted, (
+            f"section 14's per-subject prose no longer quotes {token!r}:"
+            " the control wants a token it does quote, not deleting"
+        )
+        assert token not in named, (
+            f"{token!r} is read as a path a copy of a subject sits at:"
+            " the extraction is taking backticked tokens that are none"
+        )
 
 
 def sown(tmp_path: Path, paths: list[str]) -> Path:
