@@ -8532,3 +8532,8 @@ nothing red follows from the copies disagreeing.
 - **Section 12 keeps every rule** (issue #1075): its measurement
   narratives and rejected alternatives go, and the sdist bullet now names
   the weekly `sdist-rebuild.yml` re-deriving the property on a tag.
+
+### Section 10 drops the `sdist-rebuild` debt
+
+- **Every publishing tree schedules the sentinel** (closes #523), so the
+  paragraph saying the row waits on the first of them to do so goes.
