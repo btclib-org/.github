@@ -5602,8 +5602,11 @@ then with who owes a copy: `owed by every repository`, or `owed where`
 and the condition. The first is what `tests/verbatim_test.py` of this
 repository asks of every tree, so that one short of a copy is a finding
 rather than a tree the comparison passes over; the second is prose, and
-a tree the condition does not reach is absent and correctly so. The
-paths are what that test compares:
+a tree the condition does not reach is absent and correctly so. A file
+this section keeps out of the list because its subject is its own
+tree's is not compared and is owed all the same, so its own paragraph
+says who owes a copy in these same two spellings. The paths are what
+that test compares:
 
 - `.markdownlint.jsonc` — owed by every repository; no rule disabled.
   What it names is a style where markdownlint's default is "consistent",
@@ -5642,8 +5645,6 @@ paths are what that test compares:
 - `.github/scripts/check_changelog.py` — owed by every repository, every
   tree carrying a `CHANGELOG.md` and every one of them `merge=union` in
   `.gitattributes`. Section 4's `check-changelog` hook is what runs it.
-  btclib-org/.github#21 carries the debt for the trees still short of
-  the script and the hook that runs it.
 
 **Verbatim in part**, the file around it being the repository's own and
 so nothing a comparison by path can do: the `ci:` block of
@@ -5777,41 +5778,49 @@ one file copied into every tree, holding the union of what any of them
 writes: it grows with every repository added, and a reader of one tree
 cannot tell from it which entries that tree needs.
 
-`.github/scripts/check_vendored_vectors.py` is per repository by
-subject, and deliberately outside the compared list above: each copy
-parses the pin file its own tree keeps, so the bytes differ wherever
-the subjects do, which no comparison by path can read as anything but
-drift. What every copy owes instead is a header sentence naming what it
-parses and where it departs from the siblings of the same name —
-`btclib-node`'s workflow already carries one — so a reader holding two
-copies knows which difference was decided. Its failure mode is why the
-sentence is owed: an entry shape the script does not match is skipped,
-the run is green, and the issue it would have opened never opens — so a
-fix that is not about one tree's entry shape, a `gh` call or a field
-spelling, is carried to every copy in the same campaign, the header
-being what says which parts those are.
+`.github/scripts/check_vendored_vectors.py` is per repository by subject, owed
+where the tree vendors test vectors, and deliberately outside the compared list
+above: each copy parses the pin file its own tree keeps, so the bytes differ
+wherever the subjects do, which no comparison by path can read as anything but
+drift. The condition's observable is `.github/workflows/vendored-vectors.yml`,
+which is what runs the script weekly: a tree vendoring nothing keeps no pin
+file for it to parse. `btclib-node` keeps its copy at
+`.github/scripts/check_vendored_pin.py`, a different name and not only
+different bytes, and the departure is a decided one: the job is the same job, a
+vendored pin re-checked against upstream on that cadence, and that copy's own
+header says where it departs — it opens no tracking issue on drift, where
+`btclib`'s does. What every copy owes instead is a header sentence naming what
+it parses and where it departs from the siblings doing the same job —
+`btclib-node`'s workflow already carries one — so a reader holding two copies
+knows which difference was decided. Its failure mode is why the sentence is
+owed: an entry shape the script does not match is skipped, the run is green,
+and the issue it would have opened never opens — so a fix that is not about one
+tree's entry shape, a `gh` call or a field spelling, is carried to every copy
+in the same campaign, the header being what says which parts those are.
 
-`tests/conventions_test.py` is per repository by subject too, and outside
-the compared list for the same reason: each copy reads the declaration
-its own tree keeps, so its rows are that tree's, and so is the `tests/`
-root it resolves a declared module against — `btclib-node` keeps its copy
-at `tests/unit/conventions_test.py`, a different path and not only
-different bytes. What the copies hold in common is a job rather than a
-text: read the declaration section 7 asks for and assert that every
-convention it names has a module holding a test for it. The header
-sentence a copy owes is about this module and not about how its tree
-names convention tests: what it reads, and which of its departures are
-decided rather than accidental. This repository's copy reads section 7's
-list of conventions off `README.md` rather than transcribing it — which a
-sibling cannot, the standard being in another repository — and says so.
-The failure mode is why the sentence is owed: a defect in the parsing
-that shared job needs sits in every copy carrying it and turns nothing
-red anywhere, so a fix that is not about one tree's rows or its root is
-carried to every copy in the same campaign, which is what
-`btclib-org/.github#651` records. A bullet in the compared list above is
-the rejected alternative: no two copies are byte-equal and that
-comparison is by path, so the bullet would report the copies as drift on
-the day it landed and could not reach `btclib-node`'s at all.
+`tests/conventions_test.py` is per repository by subject, owed where the tree
+declares which conventions it tests, and outside the compared list for the same
+reason: each copy reads the declaration its own tree keeps, so its rows are
+that tree's, and so is the `tests/` root it resolves a declared module against
+— `btclib-node` keeps its copy at `tests/unit/conventions_test.py`, a different
+path and not only different bytes. The condition is section 7's own: it asks a
+suite to declare in `tests/README.md` which of its conventions it tests, and
+forces a test of that declaration rather than leaving it chosen, so a tree that
+declares nothing has nothing for this module to read. What the copies hold in
+common is a job rather than a text: read the declaration section 7 asks for and
+assert that every convention it names has a module holding a test for it. The
+header sentence a copy owes is about this module and not about how its tree
+names convention tests: what it reads, and which of its departures are decided
+rather than accidental. This repository's copy reads section 7's list of
+conventions off `README.md` rather than transcribing it — which a sibling
+cannot, the standard being in another repository — and says so. The failure
+mode is why the sentence is owed: a defect in the parsing that shared job needs
+sits in every copy carrying it and turns nothing red anywhere, so a fix that is
+not about one tree's rows or its root is carried to every copy in the same
+campaign, which is what `btclib-org/.github#651` records. A bullet in the
+compared list above is the rejected alternative: no two copies are byte-equal
+and that comparison is by path, so the bullet would report the copies as drift
+on the day it landed and could not reach `btclib-node`'s at all.
 
 ## 15. Auditing a repository against this file
 
