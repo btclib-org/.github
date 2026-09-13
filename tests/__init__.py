@@ -349,6 +349,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         (
             "bitcoin-core-rpc",
             "btclib",
+            "btclib-node",
             "btclib-secp256k1",
         ),
     ),

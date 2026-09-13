@@ -8253,3 +8253,53 @@ nothing red follows from the copies disagreeing.
   carry. What survives of it is its own subject -- that `btclib-node`
   carries `deps-oldest.yml` with a `schedule:` -- which this entry's
   census confirms at `0f777682`.
+
+### Section 10's `sdist-rebuild` roster follows the property it states
+
+- **`btclib-node` joins the roster, which named three trees where the
+  property the entry states holds of four** (issue #523). The entry
+  opens *"`sdist-rebuild` follows a tree that publishes an
+  attestation"*, and `btclib-node` publishes and attests: measured at
+  each tree's own default-branch tip, `grep -c 'uses: actions/attest'`
+  over `release.yml` answers 1 in `btclib` (`1a1a8708`),
+  `btclib-secp256k1` (`af788bf2`), `btclib-node` (`0f777682`) and
+  `bitcoin-core-rpc` (`ca9db975`), and `grep -c 'gh attestation
+  verify'` over `RELEASING.md` answers 5, 4, 5 and 7. The control that
+  the `release.yml` read resolves rather than answering a silent zero:
+  `grep -c 'uses:'` over `btclib-node`'s copy at the same ref answers
+  23.
+- **The `BACKLOG` row keyed on the issue gains the same tree, in the
+  same diff.** Without it the roster's new name makes
+  `test_a_tree_carries_the_sentinels_its_entries_give_it[btclib-node]`
+  red for a debt that tree has always owed and nobody has recorded;
+  without the roster the row would excuse a debt nothing asks of it. The
+  cell moves from passing to `XFAIL`, no tree of the entry carrying
+  `sdist-rebuild.yml` -- `git ls-tree` over `.github/workflows/` at each
+  of the four tips answers none, the non-empty listing being its own
+  control that the path and the ref resolve.
+- **What is corrected is a census and not a rule.** The entry already
+  states the property, the clock, what the sentinel compares against and
+  why a release-time check is not it; nothing of that moves. This is the
+  list of names underneath the property catching up with it, which is the
+  argument for a roster stated as a property rather than as names -- a
+  wider change than this one, and not taken here.
+- **Section 10's *carries the debt until the first of them schedules the
+  workflow* stands**: none of the four schedules it, so the sentence is
+  as true of four trees as it was of three.
+- **This bears on *Section 10 calendars the rebuild and homepage
+  sentinels* above** (issue #523): its first bullet says the entry names
+  `btclib`, `btclib-secp256k1` and `bitcoin-core-rpc`, and that
+  `test_every_row_of_the_calendar_names_something_that_exists` names the
+  row until the first of the three schedules the workflow. The list is
+  four names now and that clause is the first of four. Nothing else in
+  the bullet moves: the clock, the digests the comparison is against and
+  the compiled wheel staying outside section 12's property each name no
+  tree at all.
+- **This bears on *Section 10 says when a platform row leaves a tree's
+  entry* above** (issue #523): its *Two more rows go with it, both
+  excusing a cell that now passes* calls
+  `test_a_tree_carries_the_sentinels_its_entries_give_it[btclib-node]` a
+  cell that passes, which it did over a roster of three. The row this
+  entry adds excuses it again, for the debt the fourth name creates
+  rather than the one the deleted row recorded. What that bullet did
+  stands: the row it deleted had expired, and this one has not.

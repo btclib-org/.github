@@ -3774,7 +3774,8 @@ nothing by that row.
 - `links` — every repository;
 - `alignment` — `.github`;
 - `wheel-reproducibility` — `btclib-secp256k1`;
-- `sdist-rebuild` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`;
+- `sdist-rebuild` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `btclib-node`;
 - `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
 - `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
