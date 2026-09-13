@@ -20,8 +20,8 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import ORG, SELF, by_hand, tracked
-from .workflows_test import steps
+from . import ORG, ROOT, SELF, by_hand, tracked
+from .workflows_test import document, steps
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -29,6 +29,18 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.integration
 
 ACTION = "lycheeverse/lychee-action"
+
+REUSABLE = "reusable-links.yml"
+"""The workflow of this repository holding the lychee job a tree calls."""
+
+LOCAL = f"./.github/workflows/{REUSABLE}"
+"""A call to `REUSABLE` by path, which runs the calling tree's own copy."""
+
+REMOTE = f"{ORG}/{SELF}/.github/workflows/{REUSABLE}@main"
+"""A call to this repository's `REUSABLE`, at section 10's `@main`."""
+
+TARGETS = "${{ inputs.targets }}"
+"""Where `REUSABLE`'s `args:` takes the caller's paths."""
 
 SUCCESS = set(range(100, 104)) | set(range(200, 300))
 """lychee's own default for `--accept`: `100..=103,200..=299`.
@@ -42,8 +54,11 @@ RANGE = re.compile(r"^(\d+)(?:\.\.=(\d+))?$")
 """One entry of an `--accept` list: a code, or an inclusive range."""
 
 
-def lychee(repository: str, trees: dict[str, Path]) -> tuple[dict[str, Any], Path]:
-    """Find the lychee step of a repository's `links.yml`, with the file.
+def lychee(
+    repository: str,
+    trees: dict[str, Path],
+) -> tuple[dict[str, Any], Path, str]:
+    """Find the lychee step of a repository's `links.yml`, with its file.
 
     Skipped where there is no `links.yml`: section 10's record gives the
     workflow to every repository, so a tree without one is a gap in that
@@ -51,22 +66,88 @@ def lychee(repository: str, trees: dict[str, Path]) -> tuple[dict[str, Any], Pat
     here. An error where the file exists and no step calls the action,
     since the file is then not what its name says.
 
+    A job calling `REUSABLE` runs that file's steps, so they are read
+    from the tree the call names -- the calling tree's own for `LOCAL`,
+    this repository's for `REMOTE` -- with the job's `targets` put where
+    `args:` takes them: the step returned is the one the call runs.
+
     :param repository: the repository's name.
     :param trees: the checkouts.
-    :returns: the step mapping and the workflow file.
+    :returns: the step mapping, the workflow file holding it, and the
+        repository that file is in.
     :raises LookupError: where `links.yml` calls the action no times or
-        more than once.
+        more than once, or calls `REUSABLE` without `targets` or where
+        the tree the call names has no such file.
     """
     workflow = trees[repository] / ".github" / "workflows" / "links.yml"
     if not workflow.is_file():
         pytest.skip(f"{repository} has no links.yml")
-    found = [
-        step for step in steps(workflow) if step.get("uses", "").startswith(ACTION)
-    ]
+    found: list[tuple[dict[str, Any], Path, str]] = []
+    for job in (document(workflow).get("jobs") or {}).values():
+        if not isinstance(job, dict):
+            continue
+        owner = {LOCAL: repository, REMOTE: SELF}.get(job.get("uses", ""))
+        if owner is None:
+            found.extend(
+                (step, workflow, repository)
+                for step in job.get("steps") or []
+                if step.get("uses", "").startswith(ACTION)
+            )
+            continue
+        targets = (job.get("with") or {}).get("targets")
+        if targets is None:
+            msg = f"{repository}/links.yml calls {REUSABLE} without targets"
+            raise LookupError(msg)
+        called = trees[owner] / ".github" / "workflows" / REUSABLE
+        if not called.is_file():
+            msg = f"{repository}/links.yml calls {REUSABLE}, and {owner} has none"
+            raise LookupError(msg)
+        for step in steps(called):
+            if step.get("uses", "").startswith(ACTION):
+                given = dict(step.get("with") or {})
+                given["args"] = str(given.get("args", "")).replace(
+                    TARGETS, str(targets)
+                )
+                found.append(({**step, "with": given}, called, owner))
     if len(found) != 1:
         msg = f"{repository}/links.yml calls {ACTION} {len(found)} times"
         raise LookupError(msg)
-    return found[0], workflow
+    return found[0]
+
+
+def relative(workflow: Path) -> str:
+    """Name a workflow file the way a command in its checkout does.
+
+    :param workflow: the file `lychee` returned.
+    :returns: its path from the root of the tree holding it.
+    """
+    return f".github/workflows/{workflow.name}"
+
+
+def test_a_call_is_read_from_the_tree_it_names(tmp_path: Path) -> None:
+    """A call by path reads the caller's own copy, and `@main` this one's.
+
+    A sibling calling `LOCAL` runs a file its own runner checks out, so
+    this repository's copy answering for it would pass a tree whose run
+    fails. Planted trees: this repository's with `REUSABLE`, a sibling
+    without it, and the sibling's `links.yml` calling each way in turn.
+
+    :param tmp_path: where the trees are planted.
+    """
+    here = tmp_path / SELF / ".github" / "workflows"
+    here.mkdir(parents=True)
+    source = ROOT / ".github" / "workflows" / REUSABLE
+    (here / REUSABLE).write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+    sibling = tmp_path / "sibling" / ".github" / "workflows"
+    sibling.mkdir(parents=True)
+    trees = {SELF: tmp_path / SELF, "sibling": tmp_path / "sibling"}
+    call = "jobs:\n  links:\n    uses: {}\n    with:\n      targets: docs\n"
+    (sibling / "links.yml").write_text(call.format(REMOTE), encoding="utf-8")
+    step, workflow, owner = lychee("sibling", trees)
+    assert (owner, workflow, arguments(step)[-1]) == (SELF, here / REUSABLE, "docs")
+    (sibling / "links.yml").write_text(call.format(LOCAL), encoding="utf-8")
+    with pytest.raises(LookupError, match="sibling has none"):
+        lychee("sibling", trees)
 
 
 def arguments(step: dict[str, Any]) -> list[str]:
@@ -142,11 +223,11 @@ def test_lychee_accepts_every_success_code(
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    step, _ = lychee(repository, trees)
+    step, workflow, owner = lychee(repository, trees)
     lost = sorted(SUCCESS - accepted(arguments(step)))
     assert not lost, (
         f"success codes --accept turns into errors: {ranges(lost)}; "
-        + by_hand(repository, "grep -o -- '--accept [^ ]*' .github/workflows/links.yml")
+        + by_hand(owner, f"grep -o -- '--accept [^ ]*' {relative(workflow)}")
     )
 
 
@@ -166,14 +247,11 @@ def test_lychee_checks_a_link_into_a_heading(
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    step, _ = lychee(repository, trees)
+    step, workflow, owner = lychee(repository, trees)
     assert "--include-fragments" in arguments(step), (
         "lychee checks a fragment only when asked, and a link into "
         "another tree's heading is checked by this tree's run alone; "
-        + by_hand(
-            repository,
-            "grep -c include-fragments .github/workflows/links.yml",
-        )
+        + by_hand(owner, f"grep -c include-fragments {relative(workflow)}")
     )
 
 
@@ -192,7 +270,7 @@ def test_a_lychee_cache_is_kept_between_runs(
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    step, workflow = lychee(repository, trees)
+    step, workflow, owner = lychee(repository, trees)
     if "--cache" not in arguments(step):
         return
     kept = any(
@@ -201,8 +279,8 @@ def test_a_lychee_cache_is_kept_between_runs(
     assert kept, (
         "--cache is passed and no step restores or saves .lycheecache; "
         + by_hand(
-            repository,
-            "grep -c 'actions/cache\\|lycheecache' .github/workflows/links.yml",
+            owner,
+            f"grep -c 'actions/cache\\|lycheecache' {relative(workflow)}",
         )
     )
 

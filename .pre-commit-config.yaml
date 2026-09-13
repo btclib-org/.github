@@ -289,7 +289,7 @@ repos:
       # this tree still holds one of each
       - id: check-github-issue-config
       - id: check-github-issue-forms
-  # the four workflows are yaml with expressions, contexts and `run:`
+  # the workflows are yaml with expressions, contexts and `run:`
   # bodies in them, and nothing else here validates any of that: an
   # unknown key, a typo in a context reference, a job depending on one
   # that is not there are things a run discovers by failing.
