@@ -8200,3 +8200,56 @@ nothing red follows from the copies disagreeing.
   `bitcoin-core-rpc` among the row's trees, which is the name this entry
   takes out. What it says about the comment above the row stands, that
   comment naming no tree.
+
+### The `BACKLOG` row for `deps-oldest` goes away, and so does the debt
+
+- **`tests/__init__.py`'s row keyed on #323 is deleted, the last two
+  trees it named having landed the workflow** (closes #323):
+  `btclib-secp256k1` at `af788bf2` and `btclib` at `1a1a8708`, both
+  today. The row is gone whole, with the comment above it, rather than
+  emptied: an entry excusing nobody is a row a reader has to check.
+- **The census is re-derived at each tree's own default-branch tip
+  rather than read off the row.** Section 10's *Which trees carry which
+  sentinel* gives `deps-oldest` to `btclib`, `btclib-secp256k1`,
+  `bitcoin-core-rpc`, `btclib-benchmarks` and `btclib-node`, and the
+  contents API under `Accept: application/vnd.github.raw` answers the
+  workflow at all five -- `btclib` (1a1a8708), `btclib-secp256k1`
+  (af788bf2), `bitcoin-core-rpc` (ca9db975), `btclib-benchmarks`
+  (ef96af25), `btclib-node` (0f777682) -- with `deps-latest.yml` read at
+  the same tips as the control that the path and the ref resolve. A read
+  is classified on its exit status: `gh api` writes a 404 body to
+  stdout, so an emptiness test reports a missing file as present.
+- **No cell changes colour, and that is the reason this deletion is
+  deliberate rather than prompted.** The `523` row excuses the same
+  cells for `sdist-rebuild`, which no tree of that entry carries, so
+  `test_a_tree_carries_the_sentinels_its_entries_give_it` keeps failing
+  for `btclib` and `btclib-secp256k1` either way and the strict `xfail`
+  stays satisfied. The mechanism a `BACKLOG` row relies on -- a
+  sibling's landing turning an expired exemption red -- is masked here
+  by a second live row on the same cell, so nothing would have said the
+  debt was discharged.
+- **Section 10's `deps-oldest` bullet loses its last sentence**, which
+  read *"btclib-org/.github#323 carries the debt for the trees of the
+  entry still short of the workflow"*: there are none, and the sentence
+  is deleted rather than restated as a census, the standard stating what
+  a tree owes and not which trees have paid.
+- **This bears on the two landed entries that enumerate the row**, *The
+  `BACKLOG` row for `deps-oldest` drops `bitcoin-core-rpc`* and *... drops
+  `btclib-benchmarks`* above: the first names `btclib` and
+  `btclib-secp256k1` as the trees still short of the workflow and the
+  second names `bitcoin-core-rpc`, `btclib` and `btclib-secp256k1`, and
+  the row all of them describe is gone. Each also says the comment above
+  the row stands because it names no tree; that comment is deleted here
+  with the row, so what stands in each is the census it took at a tree's
+  own tip and not what it says about the comment. The `(issue #323)`
+  each carries is untouched by this landing, section 9 saying an entry's
+  citation records what the entry did rather than what the tracker
+  holds.
+- **And on *Section 10's worked examples follow the trees they name*
+  above**, whose third bullet is about the very sentence this entry
+  deletes: that bullet reads *The `deps-oldest` bullet says what
+  btclib-org/.github#323 still carries*, and after this landing the
+  README bullet it describes says nothing, there being nothing left to
+  carry. What survives of it is its own subject -- that `btclib-node`
+  carries `deps-oldest.yml` with a `schedule:` -- which this entry's
+  census confirms at `0f777682`.

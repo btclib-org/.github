@@ -3929,8 +3929,6 @@ its entry gains the tree when the workflow and the badge land together.
   the same set `deps-latest` names, the two rows asking one question in
   opposite directions: whether the code survives the newest releases,
   and whether the oldest ones it declares install at all.
-  btclib-org/.github#323 carries the debt for the trees of the entry
-  still short of the workflow.
 - **`sdist-rebuild` follows a tree that publishes an attestation.** The
   attestation vouches for bytes, so a released tag either rebuilds to
   the sdist that was signed or it vouches for something no rebuild
