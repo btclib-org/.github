@@ -8543,3 +8543,9 @@ nothing red follows from the copies disagreeing.
 - **The lint gate keeps every hook and every rule** (issue #1075): the
   censuses, the derivations a command already shows and the
   rejected-alternative paragraphs go.
+
+### The CodeQL analysis is one workflow
+
+- **`reusable-codeql.yml` holds the analysis a tree's `codeql.yml` will
+  call** (issue #35): it takes no input, and the schedule, the
+  concurrency group and the aggregate job stay in the caller.
