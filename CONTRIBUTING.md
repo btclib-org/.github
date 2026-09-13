@@ -261,6 +261,12 @@ the first. The last one is worth running before pushing a change to the
 hook config: it catches what a wrong `types_or` tag or a malformed entry
 would otherwise turn into a red lint job.
 
+**`uv python install` before the first of these, and again after
+`.python-version` moves.** Without it pre-commit builds its Python hook
+environments against whatever interpreter `uvx` resolves, which need not
+be the one `.python-version` names; `lint.yml` runs the same command as
+a step of its own, and its comment there carries the rest.
+
 **Check exit codes, not filtered output.** `pre-commit run ... | grep -v
 Passed` hides a failure, and `grep` finding nothing exits 1, which is not
 the gate's answer to anything.

@@ -8303,3 +8303,46 @@ nothing red follows from the copies disagreeing.
   entry adds excuses it again, for the debt the fourth name creates
   rather than the one the deleted row recorded. What that bullet did
   stands: the row it deleted had expired, and this one has not.
+
+### The lint gate runs the interpreter `.python-version` names
+
+- **`lint.yml` installs that interpreter before it runs the hooks**
+  (closes #1062): `uvx` resolves a Python without reading
+  `.python-version`, so pre-commit built its Python hook environments
+  with the runner image's own `python3`, and `debug-statements` read
+  `tests/names_test.py` under a version that refuses its PEP 758
+  `except` clause while a machine where `uvx` resolves a 3.14 answered
+  green. `uv python install` takes no version argument, the one
+  `.python-version` gives being what it installs, so the number stays
+  where section 1 keeps it.
+- **Rewriting the `except` clause is the rejected alternative** (closes
+  #1062): `except (OSError, UnicodeDecodeError):` parses under every
+  version and reads the same, and what it leaves standing is the
+  disagreement -- the next construct written at the version this tree
+  declares reddens the gate again, in the same direction, with its
+  author green.
+- **`default_language_version` in `.pre-commit-config.yaml` is
+  declined** (closes #1062): it would name a version `.python-version`
+  already carries, with nothing keeping the two equal, and it cannot
+  stand on its own in any case -- `ubuntu-latest` carries no
+  `python3.14` for pre-commit to build an environment with until the
+  step above installs one.
+- **The cache key carries `.python-version` beside the hook config**
+  (closes #1062): a `language: python` hook's environment is built
+  against the interpreter that step installs and is cached under a name
+  carrying its version, so a key naming the config alone stands for the
+  environments of two interpreters at once. The reason the key gave for
+  naming the config alone -- that the interpreter belonged to the
+  project environment the mypy hook resolves through uv -- goes with the
+  change that made it false.
+- **`Lint` is a required check, and what lets a red one land is
+  `enforce_admins: false`** (closes #1062): the classic protection is
+  where the required check is bound, and `REPOSITORY.md`'s *Required
+  checks on main* carries that setting with what it exempts beside it.
+  The ruleset `bypass_actors` entry does not reach it, being
+  `main-self-merge`'s, whose one rule is `pull_request`.
+- **The version this tree's own sources may target is stated already**
+  (closes #1062): `pyproject.toml`'s comment at `requires-python` gives
+  the reason -- one suite, one workflow, one runner, so section 1's rule
+  for an application applies -- and sends the number to
+  `.python-version`, which is the file the step above reads.
