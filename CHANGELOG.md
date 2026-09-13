@@ -7985,3 +7985,18 @@ nothing red follows from the copies disagreeing.
   after it raises where it used to read as a subject with no departures.
   What that entry says about where a copy sits, and about what reading
   prose costs, stands.
+
+### The `BACKLOG` row for `deps-oldest` drops `btclib-benchmarks`
+
+- **`tests/__init__.py`'s `BACKLOG` row keyed on the issue names
+  `bitcoin-core-rpc`, `btclib` and `btclib-secp256k1`** (issue #323):
+  `btclib-benchmarks` schedules `deps-oldest.yml`, which
+  btclib-org/btclib-benchmarks#321 landed, and a row is a strict
+  expected failure, so its cell of
+  `test_a_tree_carries_the_sentinels_its_entries_give_it` reported
+  `XPASS(strict)` and this tree's suite was red until the name came out.
+  The issue stays open for the trees the row still names.
+- **The comment above the row explains the gap without naming a tree**:
+  the trees of section 10's `deps-oldest` entry that the row does not
+  name are the ones that schedule the workflow, so a landing elsewhere
+  costs the comment no sentence of its own.
