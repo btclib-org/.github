@@ -2611,9 +2611,20 @@ fail_under = 100.0
   `[tool.coverage.report]` the floor and the report options, and a copy
   typed into a workflow is a copy a maintainer never runs, so the local
   gate and the CI gate stop being the same measurement with nothing
-  turning red. Two arguments are a job's own rather than second copies:
-  the `--no-cov` a platform sentinel passes, and the `COVERAGE_FILE` of
-  a job that combines runs.
+  turning red. What a job may still type is an argument about that job
+  rather than a second copy of a tree-wide setting, and what tells the
+  two apart is whether the run does anything differently without it: a
+  job whose own construction puts it outside what the configuration
+  describes types the argument that says so, where a job typing what
+  `pyproject.toml` already states leaves two lines to keep equal, and a
+  reason written beside the second does not make it the first. An
+  explicit `--cov-fail-under` is an argument of the first kind wherever
+  the job's construction asks for it, and *A selective run is reported
+  and not gated* below is the local hook leaving that same caller
+  unoverruled. Enumerating the arguments that qualify is the rejected
+  alternative, and what it costs is the argument nobody has typed yet: a
+  job whose case the list does not hold either drops a flag its
+  construction asks for or stands in breach of a standard it keeps.
 - **The configuration is read from wherever the run starts.** coverage
   looks for its configuration in the directory the process started in,
   so a suite run from `tests/` finds no `source`, no `branch = true`
@@ -3996,6 +4007,16 @@ named with its workflow — `test: every job passed` — because a check context
 keyed by name alone and two workflows with a job of the same name produce one
 ambiguous check.
 
+**Which aggregates this subsection is about is all of them, a required check
+being what a branch rule makes of one.** A rule names a context or it does not,
+and the job is written the same way either way: what an aggregate reports is
+its own result, and a merge waits on that result only where a rule names it. So
+a consequence stated below as a red job is a blocked merge in a tree whose rule
+holds that context and the job's red alone in one whose rule does not. Reading
+the subsection as the gating aggregate's is the rejected alternative, and what
+it costs is the aggregate no rule holds falling outside the subsection its own
+shape is written in.
+
 **Which of two shapes the aggregate reads is decided by whether
 something in the tree actually calls the workflow, not by whether it
 merely declares `workflow_call:`.** A workflow nothing calls reads that
@@ -4043,7 +4064,7 @@ request, and the rule follows them.
   `!cancelled()`, beside the draft and closed conditions *What every
   workflow does* gives above. `always()` is the wrong widening: a run its
   own concurrency group superseded reaches the job and fails it, making a
-  red required check of a cancellation the newer run already speaks for.
+  red job of a cancellation the newer run already speaks for.
   `!cancelled()` skips the job on that run instead, and a job cancelled
   on its own — the run not being cancelled — still reaches the step.
 - **What the aggregate of a workflow that is only ever a run's own reads
@@ -4161,8 +4182,8 @@ request, and the rule follows them.
 - `skipped` is legitimate on purpose: when the run was superseded by its
   concurrency group, and when a `changes` job decided the diff touches
   nothing those jobs read. The listing reports it as a conclusion like
-  any other, so a filter naming only `success` fails the check a merge
-  waits for on every run a `changes` job empties.
+  any other, so a filter naming only `success` fails the job on every run
+  a `changes` job empties.
 - **A `changes` job** is the cheapest job in the workflow and decides
   whether the rest runs. It answers `true` on every trigger that has no
   base to diff against, and the files it counts as prose are narrower
