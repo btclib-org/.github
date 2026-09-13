@@ -8486,3 +8486,8 @@ nothing red follows from the copies disagreeing.
 
 - **`BACKLOG` holds no row for #550** (closes #550): btclib's
   `REPOSITORY.md` reads both settings back, as the other eight do.
+
+### The `sdist-rebuild` row drops `bitcoin-core-rpc`
+
+- **`BACKLOG` names three trees for #523** (issue #523): `bitcoin-core-rpc`
+  now carries `sdist-rebuild.yml`.

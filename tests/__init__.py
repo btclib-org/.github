@@ -324,7 +324,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         523,
         "test_a_tree_carries_the_sentinels_its_entries_give_it",
         (
-            "bitcoin-core-rpc",
             "btclib",
             "btclib-node",
             "btclib-secp256k1",
