@@ -2746,8 +2746,6 @@ and the badge land together.
   build with itself: a backend, a runner image or a toolchain moves after the
   release. The compiled wheel is outside the property for the reason section 12
   gives. A rebuild that disagrees is an issue against the tree it ran in.
-  btclib-org/.github#523 carries the debt until the first of them schedules the
-  workflow.
 - **`wheel-reproducibility` follows a tree that ships a compiled wheel**, asking
   how far section 12's exemption of compiled wheels from `sdist-rebuild` stands.
   It builds one interpreter's wheel twice on one image and diffs the archives
