@@ -190,9 +190,9 @@ def test_every_workflow_declares_permissions(
 def test_paths_ignore_is_only_on_push(repository: str, trees: dict[str, Path]) -> None:
     """Section 10: `paths-ignore` only on `push`.
 
-    "The same list on `pull_request` would produce no run at all for a
-    prose-only diff, and a required check that produces no run blocks
-    the merge instead of passing it." Asked of every trigger but `push`,
+    "On `pull_request` it would produce no run for a prose-only diff, and
+    a required check that produces no run blocks the merge instead of
+    passing it." Asked of every trigger but `push`,
     as the rule is written, rather than of `pull_request` alone: GitHub's
     workflow syntax gives the filter to `pull_request_target` as well,
     and a required check on that trigger is blocked the same way. A

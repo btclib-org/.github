@@ -285,8 +285,7 @@ def misplaced(table: dict[str, tuple[str, str]]) -> dict[str, list[str]]:
 def test_the_calendar_rows_are_in_the_weeks_order_and_scorecard_is_last() -> None:
     """The position of a row is what section 10 reasons about, so it is read.
 
-    "The table's order is that order too: the day and the hour place the
-    row among the families as well as fixing when it runs" -- so a row is
+    "The day and the hour place a row among the families" -- so a row is
     read against the row above it, and the last row against `LAST`.
     `test_the_record_has_an_entry_per_row_of_the_calendar` cannot see a
     row written in the wrong place: it compares the record's order with
