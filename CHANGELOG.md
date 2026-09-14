@@ -8561,3 +8561,9 @@ nothing red follows from the copies disagreeing.
 - **`reusable-lint.yml` holds the job a tree's `lint.yml` will call**
   (issue #35): its inputs are a submodule checkout and its depth, and
   the trigger and the concurrency group stay in the caller.
+
+### The unresolved-link comment states the true reason
+
+- **The comment no longer claims "../" is caught only at source**
+  (issue #35): `-W` already fails on it the same way as "./", so the
+  grep backstops "./" alone, the spelling every hook lets it write.
