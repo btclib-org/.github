@@ -8555,3 +8555,9 @@ nothing red follows from the copies disagreeing.
 - **`reusable-docs.yml` holds the build a tree's `docs.yml` will call**
   (issue #35): its inputs are a submodule checkout and a script over the
   built pages, and the trigger and the concurrency group stay in the caller.
+
+### The lint gate is one workflow
+
+- **`reusable-lint.yml` holds the job a tree's `lint.yml` will call**
+  (issue #35): its inputs are a submodule checkout and its depth, and
+  the trigger and the concurrency group stay in the caller.
