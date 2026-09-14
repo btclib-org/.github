@@ -1,0 +1,158 @@
+---
+name: reusable-lint
+
+# The pre-commit run a repository's lint.yml calls, so the install, the
+# hook-environment cache and the command are written once. The trigger,
+# the concurrency group and the suffix a release call appends to that
+# group stay in the caller, whose run this job joins.
+#
+# Two inputs, and both of them are the checkout's: a tree whose hooks
+# assert something about a vendored source needs that source checked
+# out, and a hook resolving a release name in the vendored clone's own
+# refs needs the tags a shallow clone does not carry. Everything else
+# takes one answer here -- pre-commit comes out of the lint group a
+# calling tree's pyproject.toml holds, the interpreter is the one
+# .python-version names, and the timeout bounds a hung job rather than
+# budgeting the work. An input for any of those would be a copy in
+# disguise (btclib-org/.github#35).
+#
+# What calls this is a tree whose pyproject.toml carries that lint
+# group. The trees that run `uvx pre-commit` under a job named `Lint`,
+# this repository among them, keep a lint.yml of their own:
+# `uvx pre-commit run --all-files` is what each of their
+# CONTRIBUTING.md files gives an author, and this repository's own
+# lint.yml carries why its gate runs the author's command rather than
+# this one.
+
+on:
+  workflow_call:
+    inputs:
+      submodules:
+        description: >
+          Whether the checkout initializes the tree's git submodules.
+        type: boolean
+        default: false
+      fetch-depth:
+        description: >
+          How many commits of history the checkout fetches, 0 for all.
+        type: number
+        default: 1
+
+# least privilege for the GITHUB_TOKEN: everything running in a job
+# (actions, dependencies, every hook) can read the token, so the
+# workflow default must not be able to write to the repository. No job
+# elevates it, an in-place fixer here fixing a checkout that is thrown
+# away
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    # the name the check context is keyed by, after the calling job's
+    # own: branch protection matches a context by name and not by the
+    # workflow that reported it, and the context a caller reports is
+    # the calling job's own name and this one, joined. That is the
+    # string a branch rule naming this gate has to hold
+    name: Lint and type-check
+    # a draft pull request is work in progress: every push to one would
+    # lint a tree its author is not asking anyone to read yet. A closed
+    # one spends no runner either, a caller taking that event only to
+    # supersede a run its group is still holding. github.event is the
+    # caller's, which is the event its trigger took
+    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    # far above what the hooks need; what it bounds is a hung job
+    # holding a runner. The run it has to clear is the one with no
+    # cache to restore, where pre-commit builds every hook's
+    # environment before a hook runs at all
+    timeout-minutes: 20
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment:
+      # a tag, let alone a branch, is a name its owner can move
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the hooks read the tree and nothing pushes it back
+          persist-credentials: false
+          # a hook that asserts a submodule is checked out, or that
+          # reads a file inside one, needs the submodule's working tree,
+          # which a checkout without this does not create
+          submodules: ${{ inputs.submodules }}
+          # actions/checkout passes its depth down to the submodule, and
+          # a depth-1 clone carries no tag, so a hook resolving a
+          # release name in the vendored clone's own refs is what asks
+          # for 0 here. The action's own default otherwise: history is
+          # the largest thing this job could fetch, and a tree with no
+          # such hook reads none of it
+          fetch-depth: ${{ inputs.fetch-depth }}
+      # uv is the only prerequisite and this is the step that supplies
+      # it. The cache asked for here is uv's own, over the wheels of the
+      # lint group -- pre-commit itself among them -- and the
+      # environment the mypy hook type checks against; the hook
+      # environments are the step below
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          enable-cache: true
+      # ImageOS is set by the runner image ("ubuntu24"), not by this
+      # workflow, and the env context holds only what a workflow, job or
+      # step declares -- so "${{ env.ImageOS }}" in the key below would
+      # interpolate to the empty string and leave the images
+      # indistinguishable in it. Read here, in a shell, where it is an
+      # ordinary environment variable.
+      # ImageOS and not ImageVersion: the version moves every week or
+      # two for patches no hook environment depends on, and keying on it
+      # would rebuild all of them that often
+      - name: Identify the runner image
+        id: image
+        run: echo "os=${ImageOS:-unknown}" >> "$GITHUB_OUTPUT"
+      # what this caches is what pre-commit builds rather than what it
+      # reads: the hook environments, which turn over when
+      # .pre-commit-config.yaml or the interpreter does, and those two
+      # are what the key hashes.
+      # The runner image is in the key as well, because what is cached
+      # is virtualenvs: a hook environment is built against the Python
+      # pre-commit runs under, which is the one .python-version names,
+      # and against the toolchain the image supplies for whatever
+      # language the hook declares. The config hash alone would survive
+      # an ubuntu-latest rotation and restore environments built on the
+      # previous image under the same key.
+      # restore-keys then makes a revision bump cheap rather than a
+      # cold start: pre-commit keys a hook's environment on the clone
+      # of the rev it came from, so only the hooks whose rev moved are
+      # rebuilt, and it health-checks each restored environment before
+      # reusing it -- for a python hook, the interpreter against the
+      # version that environment's pyvenv.cfg records -- so a stale one
+      # is rebuilt rather than run.
+      # This step follows the one above, whose output its key reads;
+      # where it falls against Setup uv is free, neither reading the
+      # other
+      - name: Cache the pre-commit hook environments
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/pre-commit
+          key: >-
+            pre-commit-${{ runner.os }}-${{ steps.image.outputs.os }}-${{
+            hashFiles('.pre-commit-config.yaml', '.python-version') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-${{ steps.image.outputs.os }}-
+      # pre-commit out of the calling tree's lint group, pinned by its
+      # uv.lock, rather than out of uvx, which fetches whatever the
+      # index holds that morning: this is the gate, an author runs the
+      # locked version, and pinning every hook while leaving the tool
+      # that decides what "clean" means unpinned is the gap this closes.
+      # --only-group omits the project, so this job builds and installs
+      # nothing a hook does not ask for itself; the mypy hook is a
+      # `language: system` entry whose own `uv run` installs what it
+      # type checks against. No interpreter step beside it: uv run
+      # resolves
+      # the one .python-version names and installs it where the runner
+      # lacks it, so a version written here would be that file's number
+      # a second time.
+      # --show-diff-on-failure changes no hook's answer -- it prints
+      # what an in-place fixer changed, so a red job says what to apply
+      # rather than only that something is unclean
+      - name: Run the pre-commit hooks
+        run: >
+          uv run --locked --only-group lint
+          pre-commit run --all-files --show-diff-on-failure
