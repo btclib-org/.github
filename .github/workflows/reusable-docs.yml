@@ -97,12 +97,15 @@ jobs:
       # section 4's local-link-prefix hook refuses a local destination
       # that does not begin "./" in the commit that writes it: anchor,
       # extension and nested path alike then render href="#./" when they
-      # break (btclib-org/.github#20). Not widened to "../", which
-      # reaches the same fallback by design, the RootFileLinks transform
-      # in conf.py declining a target that normalizes above the
-      # repository root; refusing at source is the only place that one is
-      # caught. Not lychee either: links.yml reads the sources, where
-      # "./CONTRIBUTING.md" is a correct path
+      # break (btclib-org/.github#20). Not widened to "../": conf.py's
+      # RootFileLinks declines that target the same way it declines a
+      # missing one, and -W already fails the build on it before this
+      # step runs, exactly as it does on "./". This step backstops "./"
+      # alone, the spelling section 4's hook lets every repository write;
+      # where a repository's own hook lets "../" through too, the
+      # backstop does not cover it there -- btclib-org/.github#1095
+      # records which trees do. Not lychee either: links.yml reads the
+      # sources, where "./CONTRIBUTING.md" is a correct path
       - name: Check the built pages for unresolved links
         run: |
           if grep -rn 'href="#\./' docs/build/html --include='*.html'; then
