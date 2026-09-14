@@ -1206,18 +1206,21 @@ pre-commit.ci does not have — the lint workflow covers it. No
   carries a counter-example at the top.
 
     Where documentation is built, `docs.yml` greps the built html for
-    `href="#./`, what MyST renders in place of a link the
-    `RootFileLinks` transform in `docs/source/conf.py` cannot resolve —
-    an anchor to an id no page has, and a dead link `-W` sees nothing
-    wrong with once a suppression is added back.
+    `href="#./` or `href="#../`, what MyST renders in place of a link
+    the `RootFileLinks` transform in `docs/source/conf.py` cannot
+    resolve — an anchor to an id no page has, and a dead link `-W` sees
+    nothing wrong with once a suppression is added back.
 
     **The prefix is the rule, and not the extension**: an extensionless
     destination, a `.txt` and a path into a subdirectory reach that
     fallback too, so an `.md`-scoped rule leaves them writable. `../`
-    reaches that fallback by design, `RootFileLinks` *deliberately
-    declining* a target that normalizes above the repository root, so
-    the built-html grep neither reaches it nor is widened for it:
-    refusing at source is the only place it is caught.
+    reaches that fallback the same way, `RootFileLinks` *deliberately
+    declining* a target that normalizes above the repository root the
+    same way it declines a missing one, and the built-html grep now
+    backstops that spelling too, for a repository whose own hook lets
+    `../` through where this one does not (btclib-org/.github#1095
+    records which trees diverge). Refusing at source stays the primary
+    defence either way.
 
     A `[` preceded by a backtick is exempt, so prose quotes the refused
     shape in a code span, pygrep being blind to a fence; a badge, whose

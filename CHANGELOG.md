@@ -8567,3 +8567,9 @@ nothing red follows from the copies disagreeing.
 - **The comment no longer claims "../" is caught only at source**
   (issue #35): `-W` already fails on it the same way as "./", so the
   grep backstops "./" alone, the spelling every hook lets it write.
+
+### The unresolved-link grep backstops "../" too
+
+- **The built-html grep now matches `href="#./` or `href="#../`**
+  (issue #35): the entry above, saying it backstops "./" alone, no
+  longer holds once a repository's own hook lets "../" through too.
