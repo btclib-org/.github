@@ -8573,3 +8573,21 @@ nothing red follows from the copies disagreeing.
 - **The built-html grep now matches `href="#./` or `href="#../`**
   (issue #35): the entry above, saying it backstops "./" alone, no
   longer holds once a repository's own hook lets "../" through too.
+
+### The tag and version checks are one workflow
+
+- **`reusable-version-check.yml` holds the checks a tree's `release.yml`
+  will call** (issue #35): its one input gates the calendar-day check,
+  and `btclib-secp256k1`'s submodule-pin step stays that tree's own.
+
+### The public API check is one workflow
+
+- **`reusable-public-api.yml` holds the griffe walk a tree's
+  `release.yml` will call** (issue #35): its one input is the package,
+  with no default, and `--exclude 'v0.1.0'` is dropped as dead.
+
+### The read the docs wait is one workflow
+
+- **`reusable-documented.yml` holds the wait a tree's `release.yml`
+  will call** (issue #35): its one input is the read the docs slug,
+  with no default, equal to the repository name in every tree today.
