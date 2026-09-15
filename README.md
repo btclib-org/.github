@@ -2183,6 +2183,17 @@ against that, and what lengthens it without adding to it is deleted.
   day, and a count in it that has since moved stays. An entry in the
   open section is a live claim, though: a later entry that bears on it
   says so in a sentence, and the append stays an append.
+- **A released section may leave `CHANGELOG.md` for its own
+  `changelog/v<version>.md`**, that file holding one release and the
+  index in `CHANGELOG.md`'s preamble linking it. Past a size ceiling
+  GitHub's contents API answers a file with an empty `content` at HTTP
+  200, which reads as an empty file rather than as an error, and a file
+  per release is what keeps each of them under it. Nothing already
+  written in an archived file is rewritten either: what it names, it
+  names as the release named it, so a check of what the tree declares
+  reads past it as it reads past the file it came from. It takes no
+  `merge=union` driver, nothing appending to a release its own tag has
+  sealed.
 
 ## 10. Workflows
 

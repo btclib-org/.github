@@ -8597,3 +8597,9 @@ nothing red follows from the copies disagreeing.
 - **A local destination is refused only where it is not explicitly
   relative, neither `./` nor `../`** (issue #1095): whether it exists,
   an escape above the root included, is the link checker's question.
+
+### An archived changelog section is a record
+
+- **Section 9 gives a released section its own `changelog/v<version>.md`,
+  where nothing already written is rewritten either** (closes #1107):
+  `names_test.py` reads past it as it reads past `CHANGELOG.md`.
