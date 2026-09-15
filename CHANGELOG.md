@@ -8591,3 +8591,9 @@ nothing red follows from the copies disagreeing.
 - **`reusable-documented.yml` holds the wait a tree's `release.yml`
   will call** (issue #35): its one input is the read the docs slug,
   with no default, equal to the repository name in every tree today.
+
+### The local-link-prefix hook admits `../` as well as `./`
+
+- **A local destination is refused only where it is not explicitly
+  relative, neither `./` nor `../`** (issue #1095): whether it exists,
+  an escape above the root included, is the link checker's question.

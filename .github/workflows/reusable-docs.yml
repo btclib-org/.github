@@ -94,23 +94,22 @@ jobs:
       # still answers for the artifact when either of those changes.
       #
       # The destination renders verbatim and section 4's
-      # local-link-prefix hook refuses a local one that does not begin
-      # "./" in the commit that writes it: anchor, extension and nested
-      # path alike then render href="#./" when they break
+      # local-link-prefix hook refuses a local one that is not
+      # explicitly relative -- neither "./" nor "../" -- in the commit
+      # that writes it: anchor, extension and nested path alike then
+      # render href="#./" or href="#../" when they break
       # (btclib-org/.github#20). -W already fails the build on that
       # spelling on its own, for as long as myst warns unconditionally
       # and conf.py suppresses nothing -- that is the defence, and this
       # step backstops it against being weakened, never the defence
-      # itself. RootFileLinks declines a "../" target the same way it
-      # declines a "./" or a missing one, so -W is the defence there
-      # too, and some repositories' own local-link-prefix hook diverges
-      # from section 4's canonical one and lets a "../" destination
-      # through, rendering href="#../" the same way when it breaks.
-      # This step's backstop now covers that spelling too, not only
-      # "./". Which spelling each repository's own hook should permit
-      # is a separate, open decision -- btclib-org/.github#1095 records
-      # which trees diverge. Not lychee either: links.yml reads the
-      # sources, where "./CONTRIBUTING.md" is a correct path
+      # itself. RootFileLinks declines only a target that normalizes
+      # above the repository root, not a "../" one as such, so -W is the
+      # defence there too, for whichever repository's local-link-prefix
+      # hook lets "../" through; some still permit only "./"
+      # (btclib-org/.github#1095 tracks which have converged). This
+      # step's backstop covers both spellings regardless. Not lychee
+      # either: links.yml reads the sources, where "./CONTRIBUTING.md"
+      # is a correct path
       - name: Check the built pages for unresolved links
         run: |
           if grep -rn 'href="#\.\.\?/' docs/build/html --include='*.html'; then
