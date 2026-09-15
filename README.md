@@ -1200,10 +1200,11 @@ pre-commit.ci does not have — the lint workflow covers it. No
   prose is left to the command. A test of this suite would report one
   only after the pull request that added it had landed.
 - **`local-link-prefix`** — pygrep refusing a markdown link whose
-  destination is local and does not begin `./`, in every repository of
-  the organization, this one included: one spelling lets a check
-  downstream key on one pattern, and a standard whose own tree breaks it
-  carries a counter-example at the top.
+  destination is local and is not explicitly relative, beginning
+  neither `./` nor `../`, in every repository of the organization, this
+  one included: an explicit relative prefix is what lets a check
+  downstream key on one pattern, and a standard whose own tree breaks
+  it carries a counter-example at the top.
 
     Where documentation is built, `docs.yml` greps the built html for
     `href="#./` or `href="#../`, what MyST renders in place of a link
@@ -1214,13 +1215,18 @@ pre-commit.ci does not have — the lint workflow covers it. No
     **The prefix is the rule, and not the extension**: an extensionless
     destination, a `.txt` and a path into a subdirectory reach that
     fallback too, so an `.md`-scoped rule leaves them writable. `../`
-    reaches that fallback the same way, `RootFileLinks` *deliberately
-    declining* a target that normalizes above the repository root the
-    same way it declines a missing one, and the built-html grep now
-    backstops that spelling too, for a repository whose own hook lets
-    `../` through where this one does not (btclib-org/.github#1095
-    records which trees diverge). Refusing at source stays the primary
-    defence either way.
+    is admitted for the same reason `./` is — an explicit relative
+    prefix is what the fallback grep can key on — and not because a
+    `../` destination is known to escape the repository:
+    `RootFileLinks` declines only a target that normalizes *above* the
+    root, and `docs/source/migrating.md`'s `../../README.md`
+    normalizes *to* it, which it resolves instead. Whether a
+    destination exists at all, an escape above the root included, is
+    not a property of the line it is written on, and no regex over one
+    line decides it; that is section 10's `links` workflow's question,
+    which resolves the target itself and reports what is missing.
+    Refusing at source stays this hook's job for the one thing it can
+    see — the prefix — and nothing more.
 
     A `[` preceded by a backtick is exempt, so prose quotes the refused
     shape in a code span, pygrep being blind to a fence; a badge, whose
@@ -1524,7 +1530,7 @@ check the same code where no source is conditional on the version.
   collects `test_*.py` and `*_test.py` alike, and a file named outside
   both is not a red test but no test, nothing but the report's count
   moving. Between the two, one is the organization's, for
-  `local-link-prefix`'s reason — one spelling is what lets a check
+  `local-link-prefix`'s reason — one shape is what lets a check
   downstream key on one pattern — and the hook's default is which.
 - Shared test code lives in a package `__init__.py` — vector loaders,
   helpers — never in a module whose name says "test" and holds none.
