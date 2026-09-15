@@ -137,6 +137,8 @@ jobs:
       # version too, which is what the check above covers
       - name: Check that the tag matches the declared version (release only)
         if: github.event_name == 'push'
+        env:
+          TAG_REQUIRES_DAY: ${{ inputs.tag-requires-day }}
         run: |
           version=$(uv version --short)
           echo "pyproject.toml declares $version"
@@ -164,7 +166,7 @@ jobs:
           # it, "v2026.8" would pass every check above it and publish a
           # version with no day, indistinguishable from the placeholder
           # that names the same month
-          if [ "${{ inputs.tag-requires-day }}" = "true" ] &&
+          if [ "$TAG_REQUIRES_DAY" = "true" ] &&
              ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
             msg="a release is YYYY.M.D, optionally YYYY.M.D.N for a patch"
             echo "::error::$version has no day; $msg"
