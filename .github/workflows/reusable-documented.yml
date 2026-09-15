@@ -28,7 +28,7 @@ on:
   workflow_call:
     inputs:
       readthedocs-slug:
-        description: the project slug read the docs serves this tree under
+        description: the project slug read the docs serves the calling tree under
         required: true
         type: string
 
