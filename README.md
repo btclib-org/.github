@@ -2206,6 +2206,18 @@ against that, and what lengthens it without adding to it is deleted.
   to, its `main` is held by section 11's rulesets as the caller's is, and a fix
   reaches every tree in one landing. zizmor is told so,
   `btclib-org/.github/*: ref-pin` under `unpinned-uses`.
+- **A tree pins an action at one commit throughout its own workflows**, so
+  a new workflow takes the pin the tree already carries rather than the
+  newest release: two commits of one action are two versions in effect at
+  once, with nothing in either file saying so.
+- **A caller's pin does not reach the callee.** A job calling a reusable
+  workflow of `btclib-org/.github` runs the pins that repository carries,
+  moved by that repository's own Dependabot, so a tree's workflow files
+  do not name every version its runs use. One pin for the whole
+  organization is the rejected alternative: only a `workflow_call` input
+  could carry a caller's version across, which those workflows refuse as
+  a copy in disguise (btclib-org/.github#35), and the two schedules would
+  part them again the week after.
 - **`permissions: contents: read` at the workflow level**, and one elevation per
   job where a job needs more: the job that writes a release holds no OIDC token,
   and the job that signs writes no release.

@@ -92,6 +92,23 @@ def steps(workflow: Path) -> list[dict[str, Any]]:
     return [step for job in jobs.values() for step in (job.get("steps") or [])]
 
 
+def uses(workflow: Path) -> list[str]:
+    """List what a workflow `uses:`, its jobs' calls and its steps' actions.
+
+    Section 10's rule on what a `uses:` may name does not tell the two
+    apart: a job calling another workflow names a revision as a step
+    naming an action does.
+
+    :param workflow: the file to read.
+    :returns: the values, the jobs' after the steps'.
+    """
+    jobs = (document(workflow).get("jobs") or {}).values()
+    return [
+        *(step["uses"] for step in steps(workflow) if "uses" in step),
+        *(job["uses"] for job in jobs if "uses" in job),
+    ]
+
+
 def gated(repository: str, trees: dict[str, Path]) -> list[Path]:
     """List the workflows of one repository, or skip where it has none.
 
@@ -145,23 +162,94 @@ def test_every_action_is_pinned_to_a_commit(
     :param trees: the checkouts.
     """
     unpinned = [
-        f"{workflow.name}: {uses}"
+        f"{workflow.name}: {value}"
         for workflow in gated(repository, trees)
-        for uses in [
-            *(step["uses"] for step in steps(workflow) if "uses" in step),
-            *(
-                job["uses"]
-                for job in (document(workflow).get("jobs") or {}).values()
-                if "uses" in job
-            ),
-        ]
-        if not uses.startswith(LOCAL)
-        and not PINNED.search(uses)
-        and not REUSABLE.match(uses)
+        for value in uses(workflow)
+        if not value.startswith(LOCAL)
+        and not PINNED.search(value)
+        and not REUSABLE.match(value)
     ]
     assert not unpinned, f"actions not pinned to a commit: {unpinned}; " + by_hand(
         repository,
         r"grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'",
+    )
+
+
+TAGGED = re.compile(r"@([0-9a-f]{40})[ \t]+#[ \t]*(\S+)")
+"""A pin and the tag comment section 10 asks to trail it.
+
+Read out of the file's text rather than off `document`, a tag comment
+being a YAML comment and gone by the time the parser returns.
+"""
+
+
+def pins(workflow: Path) -> list[tuple[str, str]]:
+    """Read every action a workflow pins, against the commit it names.
+
+    Keyed on the action's repository and not on the whole `uses:`: two
+    paths into one repository -- `github/codeql-action/init` beside
+    `.../analyze` -- name one repository at one commit, so a `uses:`
+    into a subdirectory is the same pin as one into another.
+
+    :param workflow: the file to read.
+    :returns: each pinned `owner/name` with the commit, in file order,
+        a `uses:` naming no commit left out.
+    """
+    return [
+        ("/".join(value.split("@")[0].split("/")[:2]), value.rpartition("@")[2])
+        for value in uses(workflow)
+        if PINNED.search(value)
+    ]
+
+
+def tags(workflow: Path) -> dict[str, str]:
+    """Read the tag comment written beside each pin of a workflow.
+
+    For the failure message and nothing else: what a job runs is the
+    commit, and the tag is how section 10 asks a reader to be able to
+    name it.
+
+    :param workflow: the file to read.
+    :returns: each commit against the tag trailing it, a pin with no
+        comment beside it left out.
+    """
+    return dict(TAGGED.findall(workflow.read_text(encoding="utf-8")))
+
+
+def test_a_tree_pins_an_action_at_one_commit(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10: one commit per action across a tree's own workflows.
+
+    A tree naming two commits of one action runs two versions of it at
+    once, and neither file says so. What splits a tree is a pin written
+    by hand, a new workflow taking the newest release while the tree
+    around it sits on what section 11's grouped bump last landed.
+
+    Asked within a tree and not across the organization, which is the
+    other half of section 10's rule and the half no reading of one
+    checkout decides: a caller runs the callee's pins, and the callee is
+    another repository.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    named: dict[str, dict[str, str]] = {}
+    for workflow in gated(repository, trees):
+        beside = tags(workflow)
+        for action, commit in pins(workflow):
+            named.setdefault(action, {})[commit] = beside.get(commit, commit[:7])
+    split = [
+        f"{action} at {sorted(seen.values())}"
+        for action, seen in sorted(named.items())
+        if len(seen) > 1
+    ]
+    assert not split, f"actions this tree pins two ways: {split}; " + by_hand(
+        repository,
+        "grep -hoE 'uses: [^ ]+@[0-9a-f]{40}' .github/workflows/*.yml"
+        " | sed -E 's|uses: ([^/]+/[^/@]+)[^@]*@|\\1 |'"
+        " | sort -u | cut -d' ' -f1 | uniq -d",
     )
 
 

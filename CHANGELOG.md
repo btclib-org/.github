@@ -8603,3 +8603,9 @@ nothing red follows from the copies disagreeing.
 - **Section 9 gives a released section its own `changelog/v<version>.md`,
   where nothing already written is rewritten either** (closes #1107):
   `names_test.py` reads past it as it reads past `CHANGELOG.md`.
+
+### A tree pins an action at one commit, and the callee at its own
+
+- **Section 10 asks a tree to name one commit per action, and says a
+  caller's pin does not reach the callee** (closes #1109):
+  `workflows_test.py` asks the first, and this tree's own workflows meet it.
