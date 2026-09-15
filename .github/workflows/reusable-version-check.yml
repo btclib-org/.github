@@ -1,0 +1,253 @@
+---
+name: reusable-version-check
+
+# The tag and version checks a repository's release.yml runs before
+# anything publishes, so the ancestry check, the version comparison and
+# the retitling check are written once. The trigger -- a tag push, or a
+# workflow_dispatch rehearsal -- and everything after this job stay in
+# the caller, whose run this job joins.
+#
+# One input: a release of this organization's calendar-versioned trees
+# is YYYY.M.D, optionally YYYY.M.D.N for a patch, and the day is checked
+# as well as the year and the month. btclib-secp256k1 is not calendar-
+# versioned -- 0.8.0.7 tracks libsecp256k1's own release -- so it passes
+# tag-requires-day: false and keeps the rest of the check, the
+# digits-and-dots comparison against the declared version. An input for
+# the rest of this job would be a copy in disguise (btclib-org/.github#35):
+# every tree with a release.yml runs the same checkout, the same lock
+# check, the same ancestry check and the same retitling check, line for
+# line.
+#
+# The ancestry check reads github.event.repository.default_branch rather
+# than a hardcoded "main": this is the one check whose subject is that
+# branch, so it has to keep meaning what it says the day the name
+# changes. fetch-depth: 0 on the checkout below is what puts that ref in
+# this job's clone at all, which the check's own guard says when it is
+# missing.
+#
+# btclib-secp256k1 also carries a step that reads the submodule's pinned
+# commit and refuses a README.md naming a different release tag against
+# upstream. It does not come into this file, in any shape: an input
+# whose only non-default caller is one repository is the copy-in-disguise
+# failure this header already refuses above, and that step gates a fact
+# about the tree rather than about the tag or the declared version, which
+# is what every other step of this job is about. It stays as that
+# repository's own job in its own release.yml, beside the publishing
+# jobs that already stay there.
+
+on:
+  workflow_call:
+    inputs:
+      tag-requires-day:
+        description: >
+          Whether a release version is required to carry a day
+          (YYYY.M.D, optionally YYYY.M.D.N for a patch) rather than
+          only a year and a month.
+        type: boolean
+        default: true
+    outputs:
+      version-suffix:
+        description: >
+          The rehearsal suffix a workflow_dispatch run appends to the
+          declared version, empty on a tag push.
+        value: ${{ jobs.version-check.outputs.version-suffix }}
+
+# least privilege for the GITHUB_TOKEN: everything running in a job
+# (actions, dependencies) can read the token, so the workflow default
+# must not be able to write to the repository. No job elevates it --
+# this one reads the tree and the tag and writes nothing back, an OIDC
+# token being what the caller's own publish jobs hold and not this job
+permissions:
+  contents: read
+
+jobs:
+  version-check:
+    # the name the check context is keyed by, after the calling job's
+    # own: branch protection matches a context by name and not by the
+    # workflow that reported it
+    name: Check the tag and the declared versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      version-suffix: ${{ steps.suffix.outputs.version-suffix }}
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment: a
+      # tag, let alone a branch, is a name its owner can move, and these
+      # run in a job whose caller holds an OIDC token PyPI accepts
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # the whole history, where every other job in this family
+          # takes the default single commit: the ancestry check below
+          # has nothing to answer with otherwise, and it is also what
+          # puts origin/<default branch> in this checkout at all. Only
+          # this job pays for it, and it pays once per release
+          fetch-depth: 0
+      # a tag is a name that can point anywhere, and nothing else here
+      # asks where: every check below reads the tree the tag names
+      # rather than where that tree came from. So a tag pushed from a
+      # stale worktree, from a branch whose pull request is still open,
+      # or from a commit squashed away on its way into the default
+      # branch, would publish code no review ever approved and no
+      # branch contains. `git merge-base --is-ancestor` is the whole of
+      # the question. Release-only, like the two checks below and for
+      # the same reason: a rehearsal is dispatched from a branch on
+      # purpose, that being what it is for
+      - name: Check that the tag is merged into the default branch (release only)
+        if: github.event_name == 'push'
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if ! git rev-parse --verify --quiet "origin/$DEFAULT_BRANCH" >/dev/null; then
+            msg="fetch-depth: 0 on the checkout above is what puts it there"
+            echo "::error::origin/$DEFAULT_BRANCH is not in this checkout; $msg"
+            exit 1
+          fi
+          commit=$(git rev-parse HEAD)
+          if ! git merge-base --is-ancestor "$commit" "origin/$DEFAULT_BRANCH"; then
+            msg="a release is tagged on a commit that branch contains"
+            echo "::error::$commit is not an ancestor of $DEFAULT_BRANCH; $msg"
+            exit 1
+          fi
+          echo "$commit is an ancestor of $DEFAULT_BRANCH"
+      # caching off in this job, unlike every other in this family: a
+      # cache entry is written by whichever run populated it, and read
+      # here through the scoping that gives a tag push the caches of the
+      # default branch. This is the job whose caller holds an OIDC
+      # token PyPI accepts, so it downloads its dependencies afresh
+      # every time -- it costs seconds, once per release. Spelled out
+      # rather than left off: the input defaults to "auto", which means
+      # enabled on a GitHub-hosted runner
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          enable-cache: false
+      # every other uv command in this family passes --locked, which
+      # asserts the same thing, so this is the named early gate rather
+      # than the only one. --locked and not --frozen, there and here:
+      # --frozen takes uv.lock as it finds it and never checks it, so a
+      # dependency added to pyproject.toml without a re-lock goes
+      # unnoticed while nothing installs it
+      - name: Check that uv.lock is up to date
+        run: uv lock --check
+      # one comparison: pyproject.toml is the only place the version is
+      # declared in any of these trees, so there is no second
+      # declaration to disagree with. uv.lock carries the project
+      # version too, which is what the check above covers
+      - name: Check that the tag matches the declared version (release only)
+        if: github.event_name == 'push'
+        env:
+          TAG_REQUIRES_DAY: ${{ inputs.tag-requires-day }}
+        run: |
+          version=$(uv version --short)
+          echo "pyproject.toml declares $version"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match the declared version $version"
+            exit 1
+          fi
+          # the trigger decides the index, so a tagged pre-release goes
+          # to PyPI itself: a v2026.8rc1 tag on a tree declaring
+          # 2026.8rc1 passes the comparison above and burns a version
+          # that a --pre install would then resolve. RELEASING.md sends
+          # a trial run to TestPyPI through workflow_dispatch and says
+          # never to tag one; this is the check for it. Digits and dots
+          # only, and nothing PEP 440 reads as a pre-release, a dev
+          # build or a post release
+          if ! echo "$version" | grep -Eq '^[0-9]+(\.[0-9]+)*$'; then
+            msg="rehearse on TestPyPI via workflow_dispatch instead"
+            echo "::error::$version is not a final version; $msg"
+            exit 1
+          fi
+          # three components at least, on a tree asking for a day: it is
+          # not optional on anything this pushes to PyPI, only on the
+          # placeholder "Open the next cycle" sets between releases --
+          # which is never tagged, so this check never sees it. Without
+          # it, "v2026.8" would pass every check above it and publish a
+          # version with no day, indistinguishable from the placeholder
+          # that names the same month
+          if [ "$TAG_REQUIRES_DAY" = "true" ] &&
+             ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
+            msg="a release is YYYY.M.D, optionally YYYY.M.D.N for a patch"
+            echo "::error::$version has no day; $msg"
+            exit 1
+          fi
+      # the release notes are RELEASE_NOTES.md's section for the tag,
+      # lifted by the caller's own github-release job, and its fallback
+      # fires only on an *empty* section: "## v2026.8 (work in progress,
+      # not released yet)" matches that job's heading regex, the tag
+      # being followed by a space, so a forgotten retitle publishes the
+      # work-in-progress text as the release notes, silently. This is
+      # the check for it, and it belongs here rather than in the
+      # caller's own job because that one runs after PyPI has accepted
+      # the files, and a version cannot be unpublished.
+      # CHANGELOG.md is checked too: RELEASING.md retitles the two
+      # together, RELEASE_NOTES.md's section points at CHANGELOG.md's
+      # for the detail, and a heading left as "work in progress" makes
+      # that a link into nothing.
+      # Release-only, like the comparison above and for the same
+      # reason: a rehearsal is what runs *before* the retitle, so
+      # requiring it there would forbid the dry run it exists to be.
+      # String comparison rather than a regex, so that the dots of the
+      # version match dots and not any character, and awk rather than
+      # grep, one pass answering all three questions
+      - name: Check that the release notes are retitled for the tag (release only)
+        if: github.event_name == 'push'
+        run: |
+          version=$(uv version --short)
+          for file in RELEASE_NOTES.md CHANGELOG.md; do
+            awk -v tag="v$version" -v file="$file" '
+              $0 == "## " tag {heading = NR; next}
+              index($0, "## " tag " ") == 1 {heading = NR; extra = $0; next}
+              /^## / && heading {exit}
+              heading && NF {body = 1}
+              END {
+                if (!heading) {
+                  printf "::error::%s has no \"## %s\" section\n", file, tag
+                  exit 1
+                }
+                if (extra) {
+                  printf "::error::%s:%d is \"%s\"; the heading must be \"## %s\" alone\n",
+                    file, heading, extra, tag
+                  exit 1
+                }
+                if (!body) {
+                  printf "::error::%s section \"## %s\" is empty\n", file, tag
+                  exit 1
+                }
+                printf "%s has a non-empty \"## %s\" section\n", file, tag
+              }
+            ' "$file"
+          done
+      # TestPyPI refuses a version it has already seen: the rehearsal
+      # appends .dev<run*100+attempt>, unique per dispatch and per
+      # re-run of one, and sorted before the release it rehearses (PEP
+      # 440). A re-run keeps the run's own id and number and only raises
+      # run_attempt, so .dev<run number> alone -- the previous shape of
+      # this suffix -- was identical across every re-run of one dispatch
+      # and collided with itself on TestPyPI the moment a rehearsal was
+      # re-run rather than freshly dispatched (btclib-org/btclib#1156,
+      # filed again as btclib-org/bitcoin-core-rpc#157). Multiplying the
+      # run number by 100 and adding the attempt keeps both properties
+      # at once: every attempt of every run is still unique, and,
+      # because the attempt never reaches the run number's own place
+      # value, attempt 2 of run 7 (702) still sorts after every attempt
+      # of run 6 (600-699) -- the ordering .dev<run><attempt>
+      # concatenation would have kept only while the two numbers' digit
+      # counts happened to line up. The two digits reserved for the
+      # attempt are checked, not assumed.
+      # Computed here rather than inside the caller's own build job:
+      # every job the caller's run dispatches during one release has to
+      # agree on the same suffix, and this is the one job every one of
+      # them already depends on, directly or through `test`
+      - name: Compute the rehearsal version suffix
+        id: suffix
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "$GITHUB_RUN_ATTEMPT" -gt 99 ]; then
+            echo "::error::attempt $GITHUB_RUN_ATTEMPT exceeds the two digits reserved for it"
+            exit 1
+          fi
+          suffix=".dev$((GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT))"
+          echo "run $GITHUB_RUN_NUMBER attempt $GITHUB_RUN_ATTEMPT: $suffix"
+          echo "version-suffix=$suffix" >> "$GITHUB_OUTPUT"
