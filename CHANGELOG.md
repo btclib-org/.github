@@ -8753,3 +8753,9 @@ nothing red follows from the copies disagreeing.
 - **A concurrency group keys on the pull request's number and carries a
   release call's suffix** (closes #1147): `head_ref` is a branch name two
   pull requests can share, and a called run takes the caller's `github.ref`.
+
+### Section 14 says who owes `mutation_counts.py`
+
+- **A tree tracking `.github/workflows/mutation.yml` owes a copy**
+  (issue #1152): `EXPECTED_DRIFT` holds the copies that disagree, and a
+  `BACKLOG` row the trees running the sentinel without one.

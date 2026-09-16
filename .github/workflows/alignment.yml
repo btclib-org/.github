@@ -77,6 +77,7 @@ on:
       - LICENSE
       - .claude/commands/review.md
       - .github/scripts/check_changelog.py
+      - .github/scripts/mutation_counts.py
       - CONTRIBUTING.md
       - REVIEWING.md
       - .gitattributes

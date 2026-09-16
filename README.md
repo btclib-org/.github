@@ -3715,6 +3715,11 @@ The paths are what that test compares:
 - `.github/scripts/check_changelog.py` — owed by every repository, every
   tree carrying a `CHANGELOG.md` and every one of them `merge=union` in
   `.gitattributes`. Section 4's `check-changelog` hook is what runs it.
+- `.github/scripts/mutation_counts.py` — owed where
+  `.github/workflows/mutation.yml`: that workflow is what runs it, and
+  section 10's `mutation` entry is what decides which trees carry the
+  workflow. It counts a Cosmic Ray session by outcome, so a tree the
+  sentinel leaves out has no session for it to read.
 
 **Verbatim in part**, the file around it being the repository's own and
 so nothing a comparison by path can do: the `ci:` block of
