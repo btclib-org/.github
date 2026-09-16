@@ -8669,3 +8669,9 @@ nothing red follows from the copies disagreeing.
 - **A tree's `targets:` covers the `*.rst` it tracks, the documentation
   build's own `sphinx-build -n -W` fetching no URL** (issue #1117): the
   `docs/README.rst` a build reaches through nothing is checked by a term.
+
+### The `BACKLOG` row for #1117 goes
+
+- **`btclib-node` and `btclib-secp256k1` both pass the cell the row
+  excused** (closes #1117): the strict `xfail` no longer needs a row to
+  swallow a passing result.
