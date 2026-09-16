@@ -78,7 +78,7 @@ repos:
             |tests/(__init__|conftest)\.py
             |tests/(backlog|changelog|classifiers|conventions|copyright
               |dependabot|grid|homepage|hooks|interpreters|issue_template
-              |layout|links|names|per_subject|protection
+              |layout|links|names|per_subject|pins|protection
               |pull_request_template|pyproject|release|root_files|scope
               |security|surface|topics|verbatim|workflows)_test\.py)$
       - id: check-yaml

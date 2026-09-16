@@ -8675,3 +8675,9 @@ nothing red follows from the copies disagreeing.
 - **`btclib-node` and `btclib-secp256k1` both pass the cell the row
   excused** (closes #1117): the strict `xfail` no longer needs a row to
   swallow a passing result.
+
+### Section 10 says where a pin's tag comment sits
+
+- **The tag trails the pin, or sits above it where trailing would cross the
+  width `.yamllint.yaml` sets, with a command in section 15 and a test reading
+  the file's own text** (closes #1113): section 9's *Measure, don't assert*.
