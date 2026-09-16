@@ -3393,10 +3393,9 @@ of every version already on the index, which no later release corrects.
   is the variable the bullet above exports for it: its timestamp is
   `SOURCE_DATE_EPOCH` and its serial number derives from the distribution files'
   digests, so a rebuild of a released tag writes the same document and the
-  attestation verifies it as it does the archives. Whether the document names a
-  vendored C library rather than only the `cffi` it is reached through is
-  btclib-org/btclib#1280, an argument about the generator and not one against
-  the document. btclib-org/.github#144 carries the trees that still owe one.
+  attestation verifies it as it does the archives. An exemption for a wrapper
+  does not follow from `Requires-Dist` naming only its `cffi`: the vendored
+  library is a component too, at the commit its submodule pins.
 - **What is published is inspected first** — `twine check --strict`,
   `check-wheel-contents` and `pyroma --min 10` on the files the release will
   publish; then the wheel is installed from an empty directory and smoke-tested,
