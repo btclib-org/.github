@@ -8687,3 +8687,9 @@ nothing red follows from the copies disagreeing.
 - **`reusable-changes.yml` holds the job a repository's `test.yml` will
   call** (issue #35): the pattern naming a tree's own prose is the
   caller's, and `workflow_call` declares the `code` output a caller reads.
+
+### Section 3 says why `conf.py` reads the version from `pyproject.toml`
+
+- **The rendered version must not depend on what the documentation build
+  has installed** (closes #1131): a reason that holds whether or not that
+  build installs the project.

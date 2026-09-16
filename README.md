@@ -815,8 +815,8 @@ that a hook argument has not. Section 14 names each of those files.
     property, and nothing reads the number it lands on.
 - **The version is declared once**, in `[project]`. The package reads it
   back with `importlib.metadata`; the sphinx `conf.py` parses this file,
-  metadata not being available to an uninstalled build. Two declarations
-  are two things a release has to compare.
+  so the rendered version does not depend on what the documentation build
+  has installed. Two declarations are two things a release has to compare.
 - **The name in `[project]` is the distribution's, and the repository
   is named after it, hyphenated, never after the import package.** PEP
   503 normalizes runs of `-`, `_` and `.` in a distribution name to a
