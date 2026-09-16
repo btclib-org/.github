@@ -8699,3 +8699,9 @@ nothing red follows from the copies disagreeing.
 - **`check-changelog` reads the seam and not the position** (issue
   #1097): `CONTRIBUTING.md` gives the `awk` printing the open section's
   headings in order, and `REVIEWING.md` asks a reviewer to run it.
+
+### The `EXPECTED_DRIFT` entries for #1097 go
+
+- **Every tree now carries the identical `CONTRIBUTING.md` and
+  `REVIEWING.md`** (closes #1097): the strict `xfail` no longer needs
+  either entry to swallow the copies agreeing.
