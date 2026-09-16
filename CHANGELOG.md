@@ -8621,3 +8621,9 @@ nothing red follows from the copies disagreeing.
 - **`reusable-deps-oldest.yml` holds the job a tree's `deps-oldest.yml`
   will call** (issue #35): its inputs are the tree's own floor, a
   submodule checkout and a script over the resolution.
+
+### `BACKLOG` returns to empty
+
+- **The repositories the row named now pass the cell it excused**
+  (closes #1104): the strict `xfail` no longer needs a placeholder to
+  swallow a result the cell already earns.
