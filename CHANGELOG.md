@@ -8681,3 +8681,9 @@ nothing red follows from the copies disagreeing.
 - **The tag trails the pin, or sits above it where trailing would cross the
   width `.yamllint.yaml` sets, with a command in section 15 and a test reading
   the file's own text** (closes #1113): section 9's *Measure, don't assert*.
+
+### The changed-file decision is one workflow
+
+- **`reusable-changes.yml` holds the job a repository's `test.yml` will
+  call** (issue #35): the pattern naming a tree's own prose is the
+  caller's, and `workflow_call` declares the `code` output a caller reads.
