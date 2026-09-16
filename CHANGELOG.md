@@ -8693,3 +8693,9 @@ nothing red follows from the copies disagreeing.
 - **The rendered version must not depend on what the documentation build
   has installed** (closes #1131): a reason that holds whether or not that
   build installs the project.
+
+### Section 9 says no gate reads where a new entry goes
+
+- **`check-changelog` reads the seam and not the position** (issue
+  #1097): `CONTRIBUTING.md` gives the `awk` printing the open section's
+  headings in order, and `REVIEWING.md` asks a reviewer to run it.

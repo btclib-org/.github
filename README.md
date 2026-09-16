@@ -2184,8 +2184,8 @@ against that, and what lengthens it without adding to it is deleted.
   both sides in landing order and sometimes eating the blank line
   between them; the forge does not run the driver, so the same pair
   reads `CONFLICTING` there until one side is rebased. `check-changelog`
-  names the seam, a repeated heading and a double close; the rebase's
-  result is read by hand, since no gate reads the order entries land in.
+  names the seam, a repeated heading and a double close, and not the
+  position, which a person reads off a command `CONTRIBUTING.md` has.
 - **Nothing already written is rewritten.** An entry speaks of its own
   day, and a count in it that has since moved stays. An entry in the
   open section is a live claim, though: a later entry that bears on it
