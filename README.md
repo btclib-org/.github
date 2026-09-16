@@ -2214,6 +2214,16 @@ against that, and what lengthens it without adding to it is deleted.
   actionlint enforces: `timeout-minutes`, `runs-on`, `steps` and `env` are off
   that list, so each is the callee's to set, and an input carrying a caller's
   value across is a copy in disguise (btclib-org/.github#35).
+- **A called job that runs Python takes its interpreter from the calling tree
+  where the version is a claim that tree makes, and from the callee where it
+  is not.** `uv run --locked` resolves what the caller's `.python-version`
+  names; where the subject is a version that pin does not give — the floor
+  `requires-python` declares, the interpreters a tree says it supports — the
+  callee takes it as a required input with no default, a default being a
+  claim this repository cannot make for a tree and one no tree's own suite
+  reads; and a job reading no lock names the version on the command line,
+  `uv run --no-project` otherwise taking the caller's pin and `uvx` whatever
+  uv resolves, neither of which anything here chose (btclib-org/.github#35).
 - **A caller's pin does not reach the callee**, whose own Dependabot moves it,
   so a tree's workflow files do not name every version its runs use; one pin
   for the whole organization would part again the week after.
