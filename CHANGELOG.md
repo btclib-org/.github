@@ -8663,3 +8663,9 @@ nothing red follows from the copies disagreeing.
 - **A rule's lines come out of what its arrival makes redundant where it
   lands, and a pull request finding nothing to take names the place it
   read** (closes #1115): a line found there is the payment.
+
+### Section 10 says whether `*.rst` is a link-checked source
+
+- **A tree's `targets:` covers the `*.rst` it tracks, the documentation
+  build's own `sphinx-build -n -W` fetching no URL** (issue #1117): the
+  `docs/README.rst` a build reaches through nothing is checked by a term.
