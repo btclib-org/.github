@@ -8657,3 +8657,9 @@ nothing red follows from the copies disagreeing.
 - **`reusable-os-suite.yml` holds the job `os-ubuntu.yml`, `os-macos.yml`
   and `os-windows.yml` will call** (issue #35): the images and the
   interpreters arrive as JSON arrays, and `shell: bash` is unconditional.
+
+### `README.md`'s growth rule says where a landing pays for its lines
+
+- **A rule's lines come out of what its arrival makes redundant where it
+  lands, and a pull request finding nothing to take names the place it
+  read** (closes #1115): a line found there is the payment.

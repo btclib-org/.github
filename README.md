@@ -149,11 +149,18 @@ they are applied per repository, which section 15 is how to verify.
   enter**: a rule only a reader enforces turns every landing into a
   finding. This preamble is read by the review, `REVIEWING.md`'s *This
   repository in particular*.
-- **This file does not grow.** A landing that adds lines removes at
-  least as many, and `git diff --numstat origin/main -- README.md` is
-  the read. A census, a dated measurement, a line number and the tour
-  of rejected alternatives belong to the pull request that made the
-  change, not here (btclib-org/.github#1075).
+- **This file does not grow by accretion.** What a rule costs in lines —
+  the sentence of reason this list asks of it included — comes out of
+  what its arrival makes redundant where it lands, and
+  `git diff --numstat origin/main -- README.md` is the read. Two ways of
+  meeting it are refused: paying out of a section the change was not
+  sent to, which loses standard nobody reviewed, and asserting there was
+  nothing to take, where what the pull request owes is the place it read
+  looking and a reviewer naming a line there has named the payment. The
+  file grows where that search comes back empty and nowhere else. A
+  census, a dated measurement, a line number and the tour of rejected
+  alternatives are refused outright, and belong to the pull request that
+  made the change (btclib-org/.github#1075).
 
 ## 1. Toolchain and environment
 
