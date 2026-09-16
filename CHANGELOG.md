@@ -8645,3 +8645,9 @@ nothing red follows from the copies disagreeing.
 - **Every publisher is asked whether its release attaches the bill of
   materials and the attestation signs it** (closes #1121): the directory
   comes off the download, so `dist/` answers as a directory of its own.
+
+### Section 10 says whose a called job's interpreter is
+
+- **A version no calling tree claims is named on the command line that runs
+  it** (closes #1112): the read the docs wait and the griffe walk carry the
+  one this repository pins, and `tests/interpreters_test.py` reads them.
