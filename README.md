@@ -1293,12 +1293,12 @@ pre-commit.ci does not have — the lint workflow covers it. No
     lower fence.
 - **`check-changelog`** — a local hook, `language: system`, running
   `python3 .github/scripts/check_changelog.py` with `pass_filenames:
-  false` over `CHANGELOG.md`. It runs ahead of `markdownlint-cli2` so it
-  reads the file before that hook's `--fix` repairs the seam the
-  blank-line check names. `merge=union` stays on that file
-  (btclib-org/.github#21's ruling), and this is the gate its price
-  bought back: it refuses a repeated `###` heading, a heading left with
-  no blank line above it — the blank the driver eats at that seam
+  false` and `always_run: true` over `CHANGELOG.md`. It runs ahead of
+  `markdownlint-cli2` so it reads the file before that hook's `--fix`
+  repairs the seam the blank-line check names. `merge=union` stays on
+  that file (btclib-org/.github#21's ruling), and this is the gate its
+  price bought back: it refuses a repeated `###` heading, a heading left
+  with no blank line above it — the blank the driver eats at that seam
   (btclib-org/.github#760) — and, section 9's bound, an entry whose body
   runs past three lines. The script's own docstring carries the checks
   and what they cannot make, a network call being what a hook is the
@@ -1315,6 +1315,18 @@ pre-commit.ci does not have — the lint workflow covers it. No
     which only a hook on the branch does and a test of this suite, an
     audit after the fact, cannot; news fragments and a landed-order gate
     are declined at btclib-org/.github#305 and btclib-org/.github#516.
+
+    **The hook runs on every invocation, and carries no `files:`.** The
+    script reads the open section off disk and is handed no file list,
+    so a filter decides nothing about its input and only whether the
+    hook runs at all — keyed on a diff the script never consults, and
+    empty after the rebase that eats the seam the blank-line check
+    exists to name. `check-hooks-apply` passes over an `always_run`
+    hook, so a `files:` kept beside one is a pattern nothing refuses
+    once it stops matching, which is what *the file checking itself*
+    above is for. The rejected alternative keeps the filter and asks
+    whoever runs the gate to remember `--all-files`, which is a
+    convention held in prose where this is a hook that fires.
 
 ## 5. ruff
 
