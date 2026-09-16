@@ -8711,3 +8711,9 @@ nothing red follows from the copies disagreeing.
 - **The comment cites README.md section 11's mechanism, not `capped`**
   (closes #1134): a caller missing one of the three scopes gets a
   `startup_failure`, not a quiet reduction.
+
+### `check-changelog` runs on every invocation of the gate
+
+- **`always_run: true`, and no `files:`** (closes #1138): the script
+  reads the open section off disk, and the rebase that eats the seam
+  stages nothing.

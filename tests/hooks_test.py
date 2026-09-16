@@ -179,7 +179,7 @@ def test_the_local_hooks_run(repository: str, trees: dict[str, Path]) -> None:
     is refused by nothing, same as `decoded-subprocess-encoding` and
     `reasonless-coverage-pragma` above.
     `check-changelog` has one wherever there is a `CHANGELOG.md`, which
-    its `files:` names and section 2's table owes every tier.
+    section 2's table owes every tier.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
