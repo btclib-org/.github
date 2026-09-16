@@ -10,12 +10,18 @@ a step passing `--frozen` -- each read from the document rather than
 grepped for: a comment arguing against `--frozen` is not a step passing
 it, and the grep section 15 gives reports both alike. The grep is what
 the failure message carries, because it is what a person runs.
+
+A tag comment is a YAML comment, and the parser has dropped it by the
+time it returns. `pinned` reads it off the file's text instead, counting
+what the text gives against what the document uses so that a pattern
+which stops matching is an error rather than a run over nothing.
 """
 
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any
+from collections import Counter
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import pytest
 import yaml
@@ -184,12 +190,116 @@ def test_every_action_is_pinned_to_a_commit(
     )
 
 
-TAGGED = re.compile(r"@([0-9a-f]{40})[ \t]+#[ \t]*(\S+)")
-"""A pin and the tag comment section 10 asks to trail it.
+TAG = re.compile(r"^[ \t]*#[ \t]*(\S+)[ \t]*$")
+"""A comment that is one word, which is the shape a tag comment takes.
 
-Read out of the file's text rather than off `document`, a tag comment
-being a YAML comment and gone by the time the parser returns.
+Section 10 asks a pin for the tag it sits at and for nothing else, so a
+comment of several words is prose about the step rather than the tag.
+One shape for both places the section allows: trailing the pin, or alone
+on the line above it.
 """
+
+PIN_LINE = re.compile(
+    r"^[ \t]*(?:-[ \t]+)?uses:[ \t]*(?P<value>\S+@[0-9a-f]{40})(?P<rest>[ \t].*|)$"
+)
+"""Where a pin is written, anchored on the `uses:` key that opens it.
+
+A commented-out `uses:` carries a `#` before that anchor and does not
+match, which is the difference between reading a rule about text and
+grepping for a substring. A `uses:` written inside a `run:` block scalar
+is `pinned`'s to settle.
+"""
+
+
+class Pin(NamedTuple):
+    """A pinned `uses:` as the file writes it, with the comments beside it.
+
+    `trailing` and `above` are the tag each comment names, None where
+    that comment is absent or is prose. `width` is what the line already
+    takes, which is what decides whether the tag can trail.
+    """
+
+    value: str
+    trailing: str | None
+    above: str | None
+    width: int
+    where: str
+
+
+def pinned(workflow: Path) -> list[Pin]:
+    """Read every pin of a workflow off its text, with the comments beside it.
+
+    Off the text and not off `document`: a tag comment is a YAML comment,
+    and the parser has dropped it by the time it returns.
+
+    What the text gives is counted against what the document uses, so a
+    line this matches that the document does not use -- one written
+    inside a `run:` block scalar, say -- is an error here rather than a
+    finding against the tree, and a pattern that stops matching is an
+    error too rather than a run that classifies nothing and passes.
+
+    :param workflow: the file to read.
+    :returns: the pins, in file order.
+    :raises LookupError: where the text and the document disagree about
+        what the file pins.
+    """
+    lines = workflow.read_text(encoding="utf-8").splitlines()
+    found: list[Pin] = []
+    for number, line in enumerate(lines, start=1):
+        written = PIN_LINE.match(line)
+        if written is None:
+            continue
+        trailing = TAG.match(written["rest"])
+        above = TAG.match(lines[number - 2]) if number > 1 else None
+        found.append(
+            Pin(
+                value=written["value"],
+                trailing=trailing.group(1) if trailing else None,
+                above=above.group(1) if above else None,
+                width=len(line),
+                where=f"{workflow.name}:{number}",
+            )
+        )
+    read = Counter(pin.value for pin in found)
+    used = Counter(value for value in uses(workflow) if PINNED.search(value))
+    if read != used:
+        msg = (
+            f"{workflow.name}: {sorted((read - used).elements())} is pinned to"
+            f" the text alone and {sorted((used - read).elements())} to the"
+            " document alone"
+        )
+        raise LookupError(msg)
+    return found
+
+
+def budget(root: Path) -> int:
+    """Read the columns a tree's yamllint allows a yaml line to take.
+
+    Off that tree's own `.yamllint.yaml`, which section 14 owes every
+    repository, rather than off a number written here: the width is what
+    decides where a pin's tag comment sits, so both read it in one place.
+
+    :param root: the root of the checkout.
+    :returns: the columns a line may take.
+    """
+    configured = yaml.safe_load((root / ".yamllint.yaml").read_text(encoding="utf-8"))
+    return int(configured["rules"]["line-length"]["max"])
+
+
+def above_instead(pin: Pin, width: int) -> bool:
+    """Say whether section 10 puts a pin's tag on the line above it.
+
+    Where the pin plus the comment would take the line past the width,
+    which is a property of the columns the pin spends and not of which
+    action it names. That is what keeps this from excusing a pin whose
+    tag was simply dropped: a pin with room for the comment is owed it
+    wherever anything is written above.
+
+    :param pin: the pin, as `pinned` read it.
+    :param width: the columns the tree's yamllint allows a line.
+    :returns: whether the comment above is where section 10 wants it.
+    """
+    return pin.above is not None and pin.width + len(f" # {pin.above}") > width
 
 
 def pins(workflow: Path) -> list[tuple[str, str]]:
@@ -216,13 +326,54 @@ def tags(workflow: Path) -> dict[str, str]:
 
     For the failure message and nothing else: what a job runs is the
     commit, and the tag is how section 10 asks a reader to be able to
-    name it.
+    name it. From either place that section allows the comment, so a pin
+    at the width names its tag here as any other pin does.
 
     :param workflow: the file to read.
-    :returns: each commit against the tag trailing it, a pin with no
-        comment beside it left out.
+    :returns: each commit against the tag beside it, a pin with no tag
+        comment left out.
     """
-    return dict(TAGGED.findall(workflow.read_text(encoding="utf-8")))
+    beside = {
+        pin.value.rpartition("@")[2]: pin.trailing or pin.above
+        for pin in pinned(workflow)
+    }
+    return {commit: tag for commit, tag in beside.items() if tag is not None}
+
+
+def test_every_pin_names_its_tag_in_a_comment(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10: the tag beside every pin, trailing it or above it.
+
+    A commit is what a job runs and is no version a reader can name, so
+    a pin carrying neither comment leaves which release a job runs
+    unreadable off the file. Which of the two places the comment takes
+    is `above_instead`'s question, and turns on the width alone.
+
+    What keeps this from passing over nothing is `pinned`, whose count
+    against the parsed document a broken pattern does not survive, and
+    the pins themselves: a tree with workflows and no pin in them is a
+    tree this cannot ask, not one that keeps the rule.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    read = [pin for workflow in gated(repository, trees) for pin in pinned(workflow)]
+    assert read, (
+        f"{repository} has workflows and no pin in them, so this classified"
+        " nothing and is asking the tree nothing"
+    )
+    width = budget(trees[repository])
+    unnamed = [
+        pin.where
+        for pin in read
+        if pin.trailing is None and not above_instead(pin, width)
+    ]
+    assert not unnamed, f"pins naming no tag: {unnamed}; " + by_hand(
+        repository,
+        "grep -nE -B1 'uses: [^ ]+@[0-9a-f]{40}[^#]*$' .github/workflows/*.yml",
+    )
 
 
 def test_a_tree_pins_an_action_at_one_commit(

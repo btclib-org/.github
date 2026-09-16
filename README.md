@@ -2206,8 +2206,11 @@ against that, and what lengthens it without adding to it is deleted.
 
 ### What every workflow does
 
-- **Every action is pinned to a commit SHA**, with the tag in a trailing
-  comment. A tag is a name its owner can move, and these run in a job that can
+- **Every action is pinned to a commit SHA**, with the tag in a comment beside
+  the pin: trailing it, or above it where a trailing one would take the line
+  past the width `.yamllint.yaml` sets. A commit is not a version anybody can
+  read, so what the width decides is where the tag sits and not whether it is
+  written. A tag is a name its owner can move, and these run in a job that can
   read the workflow token. A call to a reusable workflow of `btclib-org/.github`
   names `@main` instead: that repository has no tag for Dependabot to move a SHA
   to, its `main` is held by section 11's rulesets as the caller's is, and a fix
@@ -3906,6 +3909,7 @@ grep -n 'strict = true\|fail_under = 100\|branch = true\|"FIX"\|"TD"' \
 grep -n 'id: mypy' .pre-commit-config.yaml
 git ls-files 'TODO*' '**/TODO*'
 grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'
+grep -nE -B1 'uses: [^ ]+@[0-9a-f]{40}[^#]*$' .github/workflows/*.yml
 grep -L '^permissions:' .github/workflows/*.yml
 grep -rn -- '--frozen' .github/workflows/
 grep -rn 'merge=union' .gitattributes
@@ -3923,6 +3927,9 @@ cat tests/README.md
   own: the strictness is configured and nothing runs it.
 - An action not pinned to forty hex digits, a workflow with no `permissions:`
   block, and a `--frozen` anywhere are each a finding.
+- A pin with no trailing tag comment is a finding unless the line printed above
+  it carries the tag, which is what section 10 asks of a pin a trailing comment
+  would take past the width.
 - A `build-backend` other than `uv_build` in a project compiling nothing is
   section 3's finding, and decides which table declares inclusion. Section 12
   owes a `package` naming a one-package wheel, else the ignored codes and an
