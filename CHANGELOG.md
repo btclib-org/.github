@@ -8723,3 +8723,9 @@ nothing red follows from the copies disagreeing.
 - **The docstring names the comparison instead of citing a section no
   tree has** (issue #1137): a reconstruction against the new base is the
   rebase's, and `EXPECTED_DRIFT` holds the path until the ports land.
+
+### Section 10 says what of a gate workflow becomes a call
+
+- **An aggregate waits on the jobs of its own file, so what moves into a
+  shared workflow is a cell and not the gate** (issue #35): `test.yml`
+  stays copied, its `changes` job a call.

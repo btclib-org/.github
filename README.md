@@ -2232,6 +2232,17 @@ against that, and what lengthens it without adding to it is deleted.
   a new workflow takes the pin the tree already carries rather than the
   newest release: two commits of one action are two versions in effect at
   once, with nothing in either file saying so.
+- **An aggregate waits on the jobs of its own file, so a gate the trees do
+  not run job for job alike is copied rather than called, and what becomes
+  a call is a cell of it.** An aggregate written into a shared workflow
+  would have to take the cells with it, `needs:` naming only the jobs
+  beside it, and would report under the calling job's name where a branch
+  rule holds the bare one. What such a file would then hold for every
+  caller is what one tree runs alone: the wheels its release is built
+  from, a second coverage pass, a platform cell. `test.yml` is copied on
+  that ground, with its `changes` job a call of `reusable-changes.yml`
+  where a tree has one, and `needs:` lists that stop differing are what
+  reopens the question (btclib-org/.github#35).
 - **A calling job carries only the keywords GitHub's list allows**, which
   actionlint enforces: `timeout-minutes`, `runs-on`, `steps` and `env` are off
   that list, so each is the callee's to set, and an input carrying a caller's
