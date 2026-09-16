@@ -427,8 +427,8 @@ def test_lychee_reads_every_markdown_file_a_tree_tracks(
     checked, so a tracked file outside it is one this workflow never
     reads and a dead destination in it is found by whoever follows the
     link. Markdown is what this asks about because it is what every
-    repository holds; a term naming another file type is the tree's own
-    to add, and this asks nothing about it.
+    repository holds; the `rst` a tree tracks is the cell below, asked
+    separately so that a tree owing one term is not excused the others.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -437,6 +437,43 @@ def test_lychee_reads_every_markdown_file_a_tree_tracks(
     missed = outside(call.targets, tracked(trees[repository], "*.md"))
     assert not missed, (
         f"tracked markdown no term of targets reaches: {missed}; "
+        + by_hand(repository, f"lychee --dump-inputs --offline {call.targets}")
+    )
+
+
+def test_a_docs_term_reaches_the_directory_it_names_and_below_it() -> None:
+    """`**` stands for no component as well as for several.
+
+    The term section 10 gives for a tree's documentation source reaches
+    `docs/README.rst` beside `docs/source/index.rst`, which is what the
+    walker answers: `lychee --dump-inputs --offline 'docs/**/*.rst'` in
+    a tree holding both names both.
+    """
+    assert reached("docs/**/*.rst", "docs/source/index.rst")
+    assert reached("docs/**/*.rst", "docs/README.rst")
+    assert not reached("docs/**/*.rst", "README.rst")
+
+
+def test_lychee_reads_every_rst_file_a_tree_tracks(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """A tree's `targets:` reaches every `*.rst` that tree tracks.
+
+    Section 10's rejected alternative here is the documentation build's
+    own `sphinx-build -n -W`: it fails on a cross-reference that does not
+    resolve and fetches no URL, so what a term adds is the external link,
+    in a file such as `docs/README.rst` that `docs/source/` reaches
+    through no `toctree` and no `include`. A tree tracking no `rst` is
+    asked nothing, there being no file for a term to cover.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    call = lychee(repository, trees)
+    missed = outside(call.targets, tracked(trees[repository], "*.rst"))
+    assert not missed, (
+        f"tracked documentation source no term of targets reaches: {missed}; "
         + by_hand(repository, f"lychee --dump-inputs --offline {call.targets}")
     )
 
