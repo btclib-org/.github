@@ -2210,19 +2210,19 @@ against that, and what lengthens it without adding to it is deleted.
   a new workflow takes the pin the tree already carries rather than the
   newest release: two commits of one action are two versions in effect at
   once, with nothing in either file saying so.
-- **A caller's pin does not reach the callee.** A job calling a reusable
-  workflow of `btclib-org/.github` runs the pins that repository carries,
-  moved by that repository's own Dependabot, so a tree's workflow files
-  do not name every version its runs use. One pin for the whole
-  organization is the rejected alternative: only a `workflow_call` input
-  could carry a caller's version across, which those workflows refuse as
-  a copy in disguise (btclib-org/.github#35), and the two schedules would
-  part them again the week after.
+- **A calling job carries only the keywords GitHub's list allows**, which
+  actionlint enforces: `timeout-minutes`, `runs-on`, `steps` and `env` are off
+  that list, so each is the callee's to set, and an input carrying a caller's
+  value across is a copy in disguise (btclib-org/.github#35).
+- **A caller's pin does not reach the callee**, whose own Dependabot moves it,
+  so a tree's workflow files do not name every version its runs use; one pin
+  for the whole organization would part again the week after.
 - **`permissions: contents: read` at the workflow level**, and one elevation per
   job where a job needs more: the job that writes a release holds no OIDC token,
   and the job that signs writes no release.
-- **`timeout-minutes` on every job**, set far above what the work needs: what it
-  bounds is a hung job holding a runner.
+- **`timeout-minutes` on every job that runs steps**, far above what the work
+  needs: it bounds a hung job holding a runner. A called job's is the callee's,
+  one number for every caller, which only a caller the bound would cut raises.
 - **`checkout` passes `persist-credentials: false`.**
 - **Concurrency groups are named literally** —
   `group: test-${{ github.head_ref || github.ref }}` — never through

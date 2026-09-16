@@ -82,14 +82,24 @@ def triggers(workflow: Path) -> dict[str, Any]:
     return on if isinstance(on, dict) else {}
 
 
+def jobs(workflow: Path) -> dict[str, dict[str, Any]]:
+    """Read a workflow's jobs, by id.
+
+    :param workflow: the file to read.
+    :returns: the job mappings, empty where the file declares none.
+    """
+    return document(workflow).get("jobs") or {}
+
+
 def steps(workflow: Path) -> list[dict[str, Any]]:
     """List every step of every job of a workflow, in file order.
 
     :param workflow: the file to read.
     :returns: the step mappings, empty for a workflow of calls alone.
     """
-    jobs = document(workflow).get("jobs") or {}
-    return [step for job in jobs.values() for step in (job.get("steps") or [])]
+    return [
+        step for job in jobs(workflow).values() for step in (job.get("steps") or [])
+    ]
 
 
 def uses(workflow: Path) -> list[str]:
@@ -102,10 +112,9 @@ def uses(workflow: Path) -> list[str]:
     :param workflow: the file to read.
     :returns: the values, the jobs' after the steps'.
     """
-    jobs = (document(workflow).get("jobs") or {}).values()
     return [
         *(step["uses"] for step in steps(workflow) if "uses" in step),
-        *(job["uses"] for job in jobs if "uses" in job),
+        *(job["uses"] for job in jobs(workflow).values() if "uses" in job),
     ]
 
 
@@ -272,6 +281,39 @@ def test_every_workflow_declares_permissions(
     ]
     assert not without, f"workflows with no permissions block: {without}; " + by_hand(
         repository, "grep -L '^permissions:' .github/workflows/*.yml"
+    )
+
+
+def test_every_job_that_runs_steps_is_bounded(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10: `timeout-minutes` on every job that runs steps.
+
+    Asked of those jobs and of no others, which is the whole of the rule
+    rather than an exemption written beside it: a job calling a reusable
+    workflow may not carry the keyword, so the bound it would have set
+    is the callee's own job's, and a cell asking every job alike would
+    be asking for a file actionlint refuses.
+
+    Nothing falls between the two and goes unasked. A job carrying both
+    `steps` and `uses` is refused the same way, and one carrying neither
+    is refused for a missing `runs-on`, so the two are a partition and
+    not merely what the trees happen to hold today.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    unbounded = [
+        f"{workflow.name}: {job}"
+        for workflow in gated(repository, trees)
+        for job, block in jobs(workflow).items()
+        if "steps" in block and "timeout-minutes" not in block
+    ]
+    assert not unbounded, f"jobs that run steps unbounded: {unbounded}; " + by_hand(
+        repository,
+        "grep -n -e '^  [a-z].*:$' -e '^    steps:'"
+        " -e '^    timeout-minutes:' .github/workflows/*.yml",
     )
 
 

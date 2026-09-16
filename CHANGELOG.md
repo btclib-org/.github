@@ -8633,3 +8633,9 @@ nothing red follows from the copies disagreeing.
 - **A vendored library is a component at the commit its submodule pins**
   (issue #144): the exemption a wrapper's `Requires-Dist` would support is
   refused in the section, and the pointer at trees still owing one is gone.
+
+### Section 10 asks a timeout of the job that can carry one
+
+- **A called job's `timeout-minutes` is the callee's, one for every caller**
+  (closes #1114): the keyword list a calling job is held to is a bullet of
+  its own, and `tests/workflows_test.py` asks the jobs that run steps.
