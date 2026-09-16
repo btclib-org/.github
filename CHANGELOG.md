@@ -8615,3 +8615,9 @@ nothing red follows from the copies disagreeing.
 - **`targets:` names the hidden directories, no wildcard reaching one**
   (issue #1104): `tests/links_test.py` asks each tree's string against
   its own tracked markdown.
+
+### The floor sentinel is one workflow
+
+- **`reusable-deps-oldest.yml` holds the job a tree's `deps-oldest.yml`
+  will call** (issue #35): its inputs are the tree's own floor, a
+  submodule checkout and a script over the resolution.

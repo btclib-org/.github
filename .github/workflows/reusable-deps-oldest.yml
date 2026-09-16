@@ -1,0 +1,145 @@
+---
+name: reusable-deps-oldest
+
+# The floor sentinel a repository's deps-oldest.yml calls, so the
+# resolution mode, the lock it writes and the suite run over that lock
+# are written once. The trigger, the cron minute section 10's calendar
+# gives the calling repository, and the concurrency group stay in the
+# caller, whose run this job joins.
+#
+# What the row asks is section 10's: the claim a floor makes to whoever
+# installs, every direct dependency taken down to the oldest release
+# its own specifier allows and then put through the suite.
+#
+# Three inputs. The interpreter carries no default: it is the floor the
+# calling tree's requires-python declares, which is the claim this
+# sentinel exists to verify, and the trees do not share one -- a
+# default would be right for whoever happened to hold it and silently
+# wrong for the rest, which is the shape reusable-public-api.yml's
+# package input already refuses. The submodule checkout is the right
+# difference reusable-lint.yml and reusable-docs.yml already take. The
+# third is a script of the calling tree, run against the floor
+# resolution before the suite: a tree that asserts something about what
+# its floor resolved -- that a binding still serves, or which artifact
+# each install resolved to -- does it in that slot, between the lock
+# this job writes and the pytest below. A caller contributes jobs and
+# not steps, so a tree with such a step and no input for it keeps the
+# whole file rather than the step. The rejected alternative is a named
+# step per tree, which is what a path-taking string refuses to become:
+# it names no repository, any tree can pass one, and this file learns
+# nothing about who calls it.
+#
+# Everything else takes one answer here: the resolution mode is the
+# whole subject, the timeout bounds a hung job rather than budgeting
+# the work, and --no-cov is what section 10 asks of a sentinel cell
+# that runs the suite. An input for any of those would be a copy in
+# disguise (btclib-org/.github#35).
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: >
+          The interpreter the suite runs on, which is the floor the
+          calling tree's requires-python declares.
+        required: true
+        type: string
+      submodules:
+        description: >
+          Whether the checkout initializes the tree's git submodules.
+        type: boolean
+        default: false
+      pre-suite-script:
+        description: >
+          A script of the calling tree, run against the floor
+          resolution before the suite.
+        type: string
+        default: ""
+
+# least privilege for the GITHUB_TOKEN: everything running in a job
+# (actions, the floor releases this one installs, whatever they build
+# from source) can read the token, so the workflow default must not be
+# able to write to the repository. No job elevates it, this one writing
+# a lock it throws away and reporting a red no branch introduced
+permissions:
+  contents: read
+
+jobs:
+  suite-oldest:
+    # the name the check context is keyed by, after the calling job's
+    # own: branch protection matches a context by name and not by the
+    # workflow that reported it
+    name: Run the suite, dependencies at their declared floor
+    runs-on: ubuntu-latest
+    # the resolution mode, declared for the whole job rather than
+    # passed to the step that resolves. `uv lock` records a non-default
+    # mode inside uv.lock, and a later uv command running under the
+    # default `highest` reads that lock as stale -- so the --locked
+    # below would refuse the lock the step above it had just written,
+    # before installing anything and before reaching pytest. Setting it
+    # here is what makes every command of the job agree, and keeps
+    # --locked meaning what it says
+    env:
+      UV_RESOLUTION: lowest-direct
+    # far above what a run of the suite needs, the resolution and the
+    # source builds an old release may want included; what it bounds is
+    # a hung job holding a runner
+    timeout-minutes: 40
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment:
+      # a tag, let alone a branch, is a name its owner can move, and
+      # these run in a job that can read the workflow token
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the job reads the tree and nothing pushes it back
+          persist-credentials: false
+          # a tree whose package is compiled from a vendored source
+          # needs that source checked out before the suite can import
+          # what it built
+          submodules: ${{ inputs.submodules }}
+          # no fetch-tags: the tags would buy a comparison against the
+          # tree's own releases that this sentinel is not asking for,
+          # and with none fetched a test making one skips, which the
+          # --no-cov below keeps from falling under a coverage floor
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          # a week in which no floor moved is a full hit, and a week in
+          # which one did is the week this job has work to do anyway
+          enable-cache: true
+          python-version: ${{ inputs.python-version }}
+      # re-resolves every direct dependency to the oldest release its
+      # own specifier in the calling tree's pyproject.toml allows, the
+      # mode coming from the job's env above. This rewrites uv.lock,
+      # harmless on an ephemeral checkout and worth knowing before
+      # running the same command in a working tree
+      - name: Resolve every direct dependency to its declared floor
+        run: uv lock
+      # what a tree asks of its own floor resolution, in the job that
+      # has just written it: a second job would resolve again to read
+      # the same answer. The script is the calling tree's, so its own
+      # suite is where its logic is proven. What the caller passes is a
+      # path and it arrives through the environment, so it is an
+      # argument to python rather than text expanded into this run
+      # block, which is where an expansion would be code. A tree
+      # passing no script runs no step
+      - name: Run the calling tree's own script over the floor
+        if: inputs.pre-suite-script != ''
+        env:
+          SCRIPT: ${{ inputs.pre-suite-script }}
+        run: >
+          uv run --locked --no-default-groups --group test
+          python "$SCRIPT"
+      # still --locked, which is not a contradiction: the resolution
+      # step wrote that lock under this job's own mode, so this asserts
+      # nothing moved between the two.
+      # --no-cov is what section 10 asks of a sentinel cell that runs
+      # the suite, section 8's floor being a claim about one
+      # interpreter on one image. What this cell asks is whether the
+      # declared floors install and the suite holds on them, and a
+      # floor resolution taking a branch the locked one does not would
+      # otherwise report a number under the ratchet and name the
+      # ratchet, with the finding in the resolution
+      - name: Run pytest
+        run: uv run --locked --no-default-groups --group test pytest --no-cov
