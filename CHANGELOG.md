@@ -8747,3 +8747,9 @@ nothing red follows from the copies disagreeing.
 - **The matrix arrives as JSON and the dispatch dropdown stays in the
   caller, a `choice` being illegal on `workflow_call`** (issue #35): the
   loop it runs is one copy, where the scopes and the budgets are a tree's.
+
+### Section 10's concurrency example keys on the pull request's number
+
+- **A concurrency group keys on the pull request's number and carries a
+  release call's suffix** (closes #1147): `head_ref` is a branch name two
+  pull requests can share, and a called run takes the caller's `github.ref`.

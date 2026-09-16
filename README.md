@@ -2268,10 +2268,15 @@ against that, and what lengthens it without adding to it is deleted.
   one number for every caller, which only a caller the bound would cut raises.
 - **`checkout` passes `persist-credentials: false`.**
 - **Concurrency groups are named literally** —
-  `group: test-${{ github.head_ref || github.ref }}` — never through
-  `github.workflow`, which in a called workflow is the *caller's* name, so two
-  called workflows would share a group and cancel each other. `head_ref` falls
-  back to `ref` so a push run gets its own group.
+  `group: test-${{ github.event.pull_request.number || github.ref }}` — never
+  through `github.workflow`, the *caller's* name in a called workflow, so two
+  called workflows would share a group and cancel each other. `github.ref` is
+  the caller's there too, so a gate the release workflow calls appends
+  `${{ inputs.concurrency-suffix }}` to keep a rehearsal out of the group a
+  push to the same branch holds (btclib-org/.github#1083). The key is the
+  pull request's own number, not `github.head_ref`, a branch name two forks
+  each pushing `patch-1` share (btclib-org/btclib#1158); a run with no pull
+  request falls back to `ref`.
 - **Triggers**: `push: branches: [main]` and `pull_request`. A push trigger on
   every branch would run the workflow twice for an open pull request, in two
   groups that do not cancel each other; `main` keeps its own trigger because a
