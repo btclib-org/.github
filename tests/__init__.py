@@ -318,7 +318,13 @@ def names() -> list[str]:
     )
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    (
+        1104,
+        "test_lychee_reads_every_markdown_file_a_tree_tracks",
+        ("portanode", "bbt", "btclib-org.github.io"),
+    ),
+)
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what

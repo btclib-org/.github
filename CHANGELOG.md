@@ -8609,3 +8609,9 @@ nothing red follows from the copies disagreeing.
 - **Section 10 asks a tree to name one commit per action, and says a
   caller's pin does not reach the callee** (closes #1109):
   `workflows_test.py` asks the first, and this tree's own workflows meet it.
+
+### `links.yml` reads every markdown file a tree tracks
+
+- **`targets:` names the hidden directories, no wildcard reaching one**
+  (issue #1104): `tests/links_test.py` asks each tree's string against
+  its own tracked markdown.
