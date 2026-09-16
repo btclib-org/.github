@@ -8741,3 +8741,9 @@ nothing red follows from the copies disagreeing.
 - **`workflows_test.py` gains a check for `needs.<job>.outputs.<name>`,
   resolved through `uses:` so a remote call is covered too** (closes
   #1132): undeclared, the read is silently the empty string.
+
+### `reusable-mutation.yml` carries the mutation loop for every caller
+
+- **The matrix arrives as JSON and the dispatch dropdown stays in the
+  caller, a `choice` being illegal on `workflow_call`** (issue #35): the
+  loop it runs is one copy, where the scopes and the budgets are a tree's.

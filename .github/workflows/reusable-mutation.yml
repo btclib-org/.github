@@ -1,0 +1,312 @@
+---
+name: reusable-mutation
+
+# The mutation sentinel a repository's mutation.yml calls, so the baseline
+# check, the session loop, the restore guard, the counts and the upload are
+# written once. The trigger, the cron minute section 10's calendar gives the
+# calling repository, the concurrency group and the dropdown a dispatch
+# offers stay in the caller, whose run this job joins.
+#
+# What the row asks is section 10's: whether the calling tree's suite would
+# notice one of its own lines being wrong, which is the question coverage
+# does not ask. It gates nothing, and that is the design rather than a
+# caution -- a mutant survives because a test is missing, so a red merge
+# would block whoever next touched the file for a hole somebody else left.
+#
+# What runs is what the calling tree's .github/mutation/*.toml says, one list
+# of scopes and test commands rather than a second copy of them here, and the
+# counts are that tree's own .github/scripts/mutation_counts.py: a caller owes
+# both, and the baseline step below fails the run where a configuration is
+# missing.
+#
+# Three inputs, the first of them the whole matrix. Which scopes a tree
+# mutates, what each is given and what the job is called are that tree's own
+# facts, where the loop around them is not, so no reader of this file could
+# write any tree's profiles value -- the mark of a right difference rather
+# than a copy in disguise (btclib-org/.github#35). The interpreter is not a
+# fourth: `uv run --locked` below resolves what the calling tree's
+# .python-version names, and section 10 leaves a version that tree claims to
+# that tree.
+#
+# No piece of the machinery is behind an input -- the address-space limit,
+# the operator filter, the restore guard and the counter run for every
+# caller -- and each carries the reason it is here. Two of those reasons are
+# a calling tree's own: btclib-org/btclib#948 for the limit and the memory
+# sampler, btclib-org/btclib#392 for the interrupt a budget is cut with.
+
+on:
+  workflow_call:
+    inputs:
+      profiles:
+        description: >
+          The scopes to mutate, JSON-encoded: an array of objects, each
+          carrying a profile (what the job is named for), a slug (what
+          selects it and names its artifact), a ceiling in minutes for
+          the job, and sessions, one "<configuration> <budget>" line per
+          session in the order they run.
+        required: true
+        type: string
+      selected:
+        description: >
+          One profile's slug, or "all", which is every profile.
+        type: string
+        default: all
+      submodules:
+        description: >
+          Whether the checkout initializes the tree's git submodules.
+        type: boolean
+        default: false
+
+# least privilege for the GITHUB_TOKEN: everything running in a job can read
+# it, and nothing here writes. In particular no issues: write -- filing an
+# issue per survivor is the obvious next step and the wrong one, a survivor
+# being a test to write rather than a defect to track
+permissions:
+  contents: read
+
+jobs:
+  mutation:
+    # the calling tree's own phrase for what this cell mutates, which is
+    # the half of a profile no file here could write
+    name: Mutate ${{ matrix.profile }}
+    runs-on: ubuntu-latest
+    # the cell's, and this is the keyword section 10 leaves to a callee:
+    # what the ceiling bounds is a job hung outside a session, each session
+    # being cut on its own by the `timeout` below, so what it is set above
+    # is the budgets the cell already carries plus the environment. A
+    # single number here would cancel the reports of any caller whose
+    # budgets sum past it, and would leave a hung job holding a runner for
+    # hours in one whose sessions are minutes
+    timeout-minutes: ${{ matrix.ceiling }}
+    # whether this profile is one the run asked for. It is an `env` and not
+    # the job's `if`, which cannot see `matrix`: the context is offered to
+    # `timeout-minutes` above and to `env` here, and withheld from `if`, so
+    # a job cannot decline itself on what the matrix gave it. The steps
+    # below decline instead, an unasked-for profile taking a runner and
+    # giving it back without running a session.
+    # The empty case is the caller's schedule: a dispatch input forwarded
+    # from a run that has no `inputs` arrives here as an empty string,
+    # which is every profile rather than none
+    env:
+      SELECTED: >-
+        ${{ !inputs.selected || inputs.selected == 'all'
+            || inputs.selected == matrix.slug }}
+    strategy:
+      # one profile's runner dying is not a reason to take another's
+      # numbers with it
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.profiles) }}
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment: a
+      # tag, let alone a branch, is a name its owner can move, and these run
+      # in a job that can read the workflow token
+      - name: Checkout code
+        if: env.SELECTED == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the job reads the tree and nothing pushes it back
+          persist-credentials: false
+          # a tree whose package is compiled from a vendored source needs
+          # that source checked out before its suite can import what it
+          # built, and a mutant is judged by that suite
+          submodules: ${{ inputs.submodules }}
+      - name: Setup uv
+        if: env.SELECTED == 'true'
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          # the wheels the caller's uv.lock pins do not change between runs,
+          # so the cache is the difference between a download and a copy
+          enable-cache: true
+      # the test command of each configuration, run once against the
+      # unmutated tree. Without this a stale path or a renamed test file
+      # fails every mutant identically, and the session reports a perfect
+      # kill rate -- the one failure mode of a mutation run that looks like
+      # good news.
+      #
+      # The matrix value reaches the shell through the environment rather
+      # than through a `${{ }}` inside the script, which would be text
+      # pasted into it: the value is the caller's, and this is what zizmor's
+      # template-injection rule is asking for.
+      #
+      # Under the same address-space limit as the sessions below, which is
+      # what makes this step that limit's own test: one too low for what the
+      # test commands legitimately need fails here, against the unmutated
+      # tree, rather than reporting every mutant killed
+      - name: Check the baselines
+        if: env.SELECTED == 'true'
+        env:
+          SESSIONS: ${{ matrix.sessions }}
+        run: |
+          ulimit -v 8388608
+          while read -r config _; do
+            [ -n "$config" ] || continue
+            uv run --locked --no-default-groups --group test --group mutation \
+              cosmic-ray baseline ".github/mutation/$config"
+          done <<< "$SESSIONS"
+      # init enumerates the mutants, the filter marks as skipped whatever the
+      # configuration excludes by operator -- a no-op for one that excludes
+      # none, so the decision stays in the toml and the same commands run any
+      # of them -- and exec runs the rest, one at a time, in this working
+      # tree: the local distributor writes each mutation into the file itself
+      # and restores it afterwards, so the sessions run in sequence and
+      # nothing else may read the source while they do.
+      #
+      # `timeout` and not the job's timeout-minutes, which would cancel the
+      # job and take the reports and the artifact with it: what is wanted is
+      # the numbers for the mutants that did run. 124 is what timeout exits
+      # with when it cuts a session, and a session is resumable --
+      # `cosmic-ray exec` runs the jobs still pending -- so a partial run is
+      # a partial answer rather than a lost one.
+      #
+      # --signal=INT, not the default SIGTERM (btclib-org/btclib#392): the
+      # local distributor applies a mutant and restores it from a `finally`
+      # block that only runs if the process can unwind. SIGTERM kills it
+      # outright, mid-mutant, before that block runs; SIGINT is what Python
+      # turns into a catchable KeyboardInterrupt, letting it unwind, and
+      # timeout exits 124 either way
+      - name: Run the mutation sessions
+        if: env.SELECTED == 'true'
+        env:
+          SESSIONS: ${{ matrix.sessions }}
+        run: |
+          # address space, inherited by `cosmic-ray exec` and by every test
+          # command under it, which is what turns btclib-org/btclib#948's
+          # dead host into a recorded verdict: a mutant that widens a size
+          # bound asks for the whole of a runner's memory, and one killed by
+          # a refused allocation is still killed, where a host that goes
+          # away reports nothing at all.
+          # High enough to clear what a multithreaded toolchain reserves
+          # before it runs anything -- `ulimit -v` counts address space
+          # rather than the memory a process touches -- and low enough that
+          # the process dies before the runner does. What it costs a caller
+          # whose test command legitimately needs more is a red baseline
+          # step above, which is the loud half of the same mechanism
+          ulimit -v 8388608
+          # what the host's memory is doing while the mutants run, to stdout,
+          # and that is the whole point of it rather than a detail: the
+          # reports and the artifact are exactly what a dead host does not
+          # leave behind, and a log line already streamed is what it cannot
+          # take back. Every 15 s, because the allocation that matters
+          # develops over tens of seconds and a minute of spacing would
+          # sample either side of it
+          report_memory() {
+            while true; do
+              free -m | awk '/^Mem:/ {
+                print "memory: " $3 " MiB used, " $7 " MiB available"
+              }'
+              sleep 15
+            done
+          }
+          report_memory &
+          memory_reporter=$!
+          # the sessions are what this step waits for, so the sampler has to
+          # be reaped whichever way they end -- including the `return` below
+          # on an unsound status, which leaves the step without running
+          # anything after the loop
+          trap 'kill "$memory_reporter" 2> /dev/null || true' EXIT
+          run_session() {
+            local config=".github/mutation/$1" session="${1%.toml}.sqlite"
+            local budget="$2" status=0
+            uv run --locked --no-default-groups --group test --group mutation \
+              cosmic-ray init "$config" "$session"
+            uv run --locked --no-default-groups --group test --group mutation \
+              cr-filter-operators "$session" "$config"
+            timeout --signal=INT "$budget" \
+              uv run --locked --no-default-groups --group test --group mutation \
+              cosmic-ray exec "$config" "$session" || status=$?
+            # belt and braces beside the signal above: a session that
+            # restores every mutant it applies leaves the tracked source
+            # identical to HEAD, so anything git still sees changed here is
+            # an unwind that did not happen, whatever left it that way.
+            # Caught and restored before the next session in this loop can
+            # inherit it -- untracked files (the .sqlite session, the
+            # reports written below) are untouched, git diff not seeing them
+            # in the first place
+            if ! git diff --quiet; then
+              echo "::warning::$config left the tracked source changed after" \
+                "exec; restoring before the next session"
+              git checkout -- .
+            fi
+            if [ "$status" -ne 0 ] && [ "$status" -ne 124 ]; then
+              return "$status"
+            fi
+            if [ "$status" -eq 124 ]; then
+              echo "::notice::$config: cut at $budget, see the report"
+            fi
+          }
+          while read -r config budget; do
+            [ -n "$config" ] || continue
+            run_session "$config" "$budget"
+          done <<< "$SESSIONS"
+      # always(), because the reports are the whole product: a session cut
+      # short, or one whose exec died, still holds every verdict reached
+      # before that, and those are what somebody reads afterwards
+      - name: Write the reports
+        if: always() && env.SELECTED == 'true'
+        env:
+          SESSIONS: ${{ matrix.sessions }}
+        run: |
+          # what the counter said, kept until every session has been
+          # reported: a step that exited at the first unsound one would take
+          # the reports of the sessions after it with it, and those are the
+          # product
+          counted=0
+          while read -r config _; do
+            [ -n "$config" ] || continue
+            session="${config%.toml}"
+            [ -f "$session.sqlite" ] || continue
+            # --surviving-only with the diff, which is the whole of what
+            # anybody acts on: a killed mutant is the suite working, and
+            # printing every one of them buries the few that are not. Not
+            # --show-output, which is the pytest run of every mutant,
+            # megabytes of it; the html below has the full picture
+            uv run --locked --no-default-groups --group test --group mutation \
+              cr-report --surviving-only --show-diff "$session.sqlite" \
+              > "$session-survivors.txt"
+            uv run --locked --no-default-groups --group test --group mutation \
+              cr-html "$session.sqlite" > "$session-report.html"
+            # the one line worth reading in the log rather than in the
+            # artifact, and not `cr-rate`: that tool's `is_killed` is
+            # `test_outcome != SURVIVED`, so a mutant the filter skipped
+            # counts as a kill and the rate divides by every result, which on
+            # a session nothing has run yet reads a perfect 0.00%.
+            # `cr-report`'s summary line is wrong the same way, and the
+            # calling tree's mutation_counts.py says why it reads the session
+            # file rather than `cosmic-ray dump`.
+            #
+            # No threshold on the rate: a survivor is a test nobody has
+            # written yet, and this workflow is not allowed to be red about
+            # one. An outcome that is no verdict -- INCOMPETENT, or a worker
+            # that raised -- is the other thing, and the counter exits
+            # non-zero for it, which is why the session label is an argument
+            # rather than a `sed` after a pipe: a pipeline's status is its
+            # last command's, and this step runs under `bash -e` without
+            # `pipefail`, so piping would discard exactly the status it
+            # reports
+            uv run --locked --no-default-groups \
+              python .github/scripts/mutation_counts.py \
+              "$session.sqlite" "$session" || counted=$?
+          done <<< "$SESSIONS"
+          exit "$counted"
+      # the sessions as well as the reports: a .sqlite is what `cr-report`
+      # and `cr-html` are re-run against, and what a later `cosmic-ray exec`
+      # resumes, so downloading one is how a cut session gets finished on
+      # somebody's machine.
+      # One artifact per profile, the profiles being parallel jobs: two
+      # uploads under one name is an error, and the slug is what tells them
+      # apart in the Actions tab
+      - name: Upload the sessions and the reports
+        if: always() && env.SELECTED == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: mutation-${{ matrix.slug }}-sessions
+          path: |
+            *.sqlite
+            *-survivors.txt
+            *-report.html
+          # an empty upload is another way for a broken run to look green
+          if-no-files-found: error
+          # long enough to compare a run with the one before it, short
+          # enough that a weekly job does not accumulate a year of sqlite
+          retention-days: 90
