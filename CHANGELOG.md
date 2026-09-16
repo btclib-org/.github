@@ -8705,3 +8705,9 @@ nothing red follows from the copies disagreeing.
 - **Every tree now carries the identical `CONTRIBUTING.md` and
   `REVIEWING.md`** (closes #1097): the strict `xfail` no longer needs
   either entry to swallow the copies agreeing.
+
+### `reusable-codeql.yml`'s comment names the right mechanism
+
+- **The comment cites README.md section 11's mechanism, not `capped`**
+  (closes #1134): a caller missing one of the three scopes gets a
+  `startup_failure`, not a quiet reduction.
