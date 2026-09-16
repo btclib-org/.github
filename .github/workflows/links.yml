@@ -19,10 +19,10 @@ name: links
 # its checks as literal strings.
 #
 # Not the unresolved-link grep the sibling repositories run: that one
-# reads href="#./" out of docs/build/html, an artifact a sphinx build
-# leaves when a cross-reference resolves to no page. There is no docs
-# build here and no built html for it to read, so it would check nothing
-# and pass -- which is the shape a gate must never take.
+# reads href="#./" and href="#../" out of docs/build/html, an artifact a
+# sphinx build leaves when a cross-reference resolves to no page. There
+# is no docs build here and no built html for it to read, so it would
+# check nothing and pass -- which is the shape a gate must never take.
 
 on:
   schedule:
@@ -68,13 +68,11 @@ concurrency:
 
 jobs:
   # the job, its flags and its pins are reusable-links.yml's, and what is
-  # this tree's is the paths. Every markdown file, where the sibling
-  # repositories name the prose and exclude the source: the globs name
-  # the prose, and a citation in a docstring is a reference rather than a
-  # link a reader clicks.
+  # this tree's is the paths: every markdown file it tracks, spelled as
+  # section 10 spells it.
   # By path and not zizmor's `$/` self-repository form, which the
   # actionlint hook here rejects as a malformed call
   links:
     uses: ./.github/workflows/reusable-links.yml # zizmor: ignore[self-repository]
     with:
-      targets: '"*.md" "profile/*.md" ".claude/commands/*.md"'
+      targets: '"**/*.md" ".github/**/*.md" ".claude/**/*.md"'

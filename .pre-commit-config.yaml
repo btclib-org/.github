@@ -78,9 +78,9 @@ repos:
             |tests/(__init__|conftest)\.py
             |tests/(backlog|changelog|classifiers|conventions|copyright
               |dependabot|grid|homepage|hooks|interpreters|issue_template
-              |layout|links|names|per_subject|protection
-              |pull_request_template|pyproject|root_files|scope|security
-              |surface|topics|verbatim|workflows)_test\.py)$
+              |layout|links|names|per_subject|pins|protection
+              |pull_request_template|pyproject|release|root_files|scope
+              |security|surface|topics|verbatim|workflows)_test\.py)$
       - id: check-yaml
       # the toml here is read by taplo every run, but a format is not a
       # parse: what taplo cannot read fails its own hook, and what it can
@@ -133,6 +133,11 @@ repos:
   # markdownlint-cli2 below on purpose: that hook's `--fix` repairs the
   # very seam the third check exists to name, so a hook reading the
   # file after it would find nothing left to report.
+  #
+  # `always_run: true`, and no `files:`: the rebase that eats the seam
+  # stages nothing, so a hook keyed on the diff is unreachable after the
+  # event the blank-line check exists to name. Section 4 carries the
+  # rest.
   - repo: local
     hooks:
       - id: check-changelog
@@ -140,7 +145,7 @@ repos:
         entry: python3 .github/scripts/check_changelog.py
         language: system
         pass_filenames: false
-        files: ^(CHANGELOG\.md|\.github/scripts/check_changelog\.py)$
+        always_run: true
   # MD013 at 80 columns, tables included, and the shared configuration is
   # the one every repository of the organization carries: prose moves
   # between them, and a paragraph that lints in one has to lint here
@@ -159,7 +164,7 @@ repos:
   - repo: local
     hooks:
       - id: local-link-prefix
-        name: a local markdown link destination begins with ./
+        name: a local markdown link destination begins with ./ or ../
         language: pygrep
         # one line, and no literal space in it -- "\x20" is the space the
         # reference branch allows -- so yamllint reads the value as a
@@ -168,7 +173,7 @@ repos:
         # folded scalar was rejected: folding joins lines with a space,
         # which would land inside the regex
         entry: |-
-          (?<![`!\[])(?:!?\[(?:[^]]|\]\([^)]*\))*\]\(|^\x20{0,3}\[[^]]+\]:\s*)(?!\./|#|[A-Za-z][A-Za-z0-9+.-]*:)[^)\s]
+          (?<![`!\[])(?:!?\[(?:[^]]|\]\([^)]*\))*\]\(|^\x20{0,3}\[[^]]+\]:\s*)(?!\.\.?/|#|[A-Za-z][A-Za-z0-9+.-]*:)[^)\s]
         types: [markdown]
       # a line that ends inside a word, at that word's own hyphen.
       # Section 4 of README.md is the rule: what such a line renders as,

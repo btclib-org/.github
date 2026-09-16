@@ -86,6 +86,13 @@ rule, so what they hold is out of the comparison rather than excused in
 it.
 """
 
+ARCHIVED = re.compile(r"changelog/v[^/]+\.md")
+"""Where section 9 puts a released section that has left `CHANGELOG.md`.
+
+It is the text `HISTORIES` is excused for, at another path, so what
+answers here is the path and not the name.
+"""
+
 
 def family(name: str) -> str:
     """Return the pattern matching every spelling of a name.
@@ -138,7 +145,7 @@ def written(root: Path, name: str, pattern: re.Pattern[str]) -> list[str]:
     """Find every requirement in a tree that spells a name another way.
 
     Read out of the files a reader or a resolver meets, which is what the
-    tree tracks less the two histories and less its Python: a requirement
+    tree tracks less its histories and less its Python: a requirement
     inside Python source is a string the program uses, an argument it
     assembles or a fixture it feeds, so what that string is, is the
     program's to say. A file this cannot decode is not one a reader reads
@@ -151,7 +158,7 @@ def written(root: Path, name: str, pattern: re.Pattern[str]) -> list[str]:
     """
     out: list[str] = []
     for path in tracked(root):
-        if path in HISTORIES or path.endswith(".py"):
+        if path in HISTORIES or ARCHIVED.fullmatch(path) or path.endswith(".py"):
             continue
         try:
             text = (root / path).read_text(encoding="utf-8")

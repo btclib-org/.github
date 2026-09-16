@@ -1,0 +1,153 @@
+---
+name: reusable-os-suite
+
+# The platform sweep a repository's os-ubuntu.yml, os-macos.yml and
+# os-windows.yml call, so the checkout, the interpreter and the suite run
+# over one cell are written once. The trigger, the cron minute section
+# 10's calendar gives the calling repository, the concurrency group and
+# the two lists this job sweeps stay in the caller, whose run this job
+# joins.
+#
+# The two axes arrive as JSON arrays, and that is a mechanism rather than
+# a preference: a workflow_call input can only be a string, a matrix
+# dimension is expanded before any step of the job runs, and of the
+# expression language's functions fromJSON alone turns a string into a
+# sequence. Neither carries a default. The images a tree sweeps and the
+# interpreters it says it supports are that tree's own claims, and a
+# caller writing its list out in its own file is what keeps that tree's
+# tests able to read it (btclib-org/.github#1119).
+#
+# The submodule checkout is the right difference reusable-lint.yml and
+# reusable-docs.yml already take. fetch-tags is the caller's because one
+# tag and no tags are different states: on a tag build the checkout
+# resolves the ref it builds, so that tag alone is in the clone and a
+# test comparing every released section against its own tag reports the
+# rest gone missing, where with none fetched it skips. The script input
+# is a script of the calling tree, run before the suite in the slot
+# reusable-deps-oldest.yml's own pre-suite-script names -- a tree that
+# records what its install resolved to does it there, and a tree passing
+# none runs no step.
+#
+# Everything else takes one answer here. --no-cov is what section 10 asks
+# of a sentinel cell that runs the suite, section 8's floor being a claim
+# about one interpreter on one image. `shell: bash` is declared
+# unconditionally, which is the whole prize: on a Windows runner a `run:`
+# with no `shell:` is PowerShell, where "$GITHUB_ENV" and the rest of the
+# POSIX spelling are literals rather than variables, so a step goes green
+# having done nothing (btclib-org/btclib#1148). Written once here, that
+# defect cannot be written again a platform at a time. An input for
+# either would be a copy in disguise (btclib-org/.github#35).
+#
+# No `if:` declining a draft pull request: actionlint allows `if` on a
+# calling job -- `name`, `uses`, `with`, `secrets`, `needs`, `if` and
+# `permissions` being the whole of that list -- so a caller whose trigger
+# takes the event guards it in its own file.
+
+on:
+  workflow_call:
+    inputs:
+      runners:
+        description: >
+          The images to sweep, JSON-encoded: '["ubuntu-latest",
+          "ubuntu-24.04-arm"]'.
+        required: true
+        type: string
+      python-versions:
+        description: >
+          The interpreters to sweep, JSON-encoded: '["3.10", "3.11"]',
+          which is the calling tree's own claim about what it supports.
+        required: true
+        type: string
+      submodules:
+        description: >
+          Whether the checkout initializes the tree's git submodules.
+        type: boolean
+        default: false
+      fetch-tags:
+        description: >
+          Whether the checkout fetches the tree's tags, which a caller
+          reached from a tag needs.
+        type: boolean
+        default: false
+      pre-suite-script:
+        description: >
+          A script of the calling tree, run against the installed
+          environment before the suite.
+        type: string
+        default: ""
+
+# least privilege for the GITHUB_TOKEN: everything running in a job
+# (actions, dependencies, whatever they build from source) can read the
+# token, so the workflow default must not be able to write to the
+# repository. No job elevates it, this one reading the tree and reporting
+# a red no branch introduced
+permissions:
+  contents: read
+
+jobs:
+  suite:
+    # the name the check context is keyed by, after the calling job's
+    # own: branch protection matches a context by name and not by the
+    # workflow that reported it, and the cell is what a reader of a red
+    # one needs
+    name: Run the suite on ${{ matrix.python }}, ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    # far above what a run of the suite needs, the source builds a
+    # vendored dependency may want included; what it bounds is a hung job
+    # holding a runner rather than budgeting the work. A called job's is
+    # one number for every caller, and no caller's own bound stands above
+    # it
+    timeout-minutes: 40
+    strategy:
+      # every cell to the end: which interpreter fails on which image is
+      # the whole answer, and stopping at the first one hides the rest.
+      # The matrix is whole, the cells the caller's merge gate covers
+      # included, which is what section 10 asks of a sentinel: a shape
+      # with a hole in it is one nobody can read without re-deriving the
+      # hole from another file
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON(inputs.runners) }}
+        python: ${{ fromJSON(inputs.python-versions) }}
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment: a
+      # tag, let alone a branch, is a name its owner can move, and these
+      # run in a job that can read the workflow token
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the job reads the tree and nothing pushes it back
+          persist-credentials: false
+          # a tree whose package is compiled from a vendored source needs
+          # that source checked out before the suite can import what it
+          # built
+          submodules: ${{ inputs.submodules }}
+          # the header has why this is the caller's and not a value this
+          # file may hold either way
+          fetch-tags: ${{ inputs.fetch-tags }}
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python }}
+      # what a tree asks of the environment this cell installed, in the
+      # job that has it. The script is the calling tree's, so its own
+      # suite is where its logic is proven. What the caller passes is a
+      # path and it arrives through the environment, so it is an argument
+      # to python rather than text expanded into this run block, which is
+      # where an expansion would be code
+      - name: Run the calling tree's own script over the cell
+        if: inputs.pre-suite-script != ''
+        shell: bash
+        env:
+          SCRIPT: ${{ inputs.pre-suite-script }}
+        run: >
+          uv run --locked --no-default-groups --group test
+          python "$SCRIPT"
+      # --no-cov, against the --cov a tree's pyproject.toml addopts
+      # carries: what this matrix asks is whether every (image,
+      # interpreter) pair passes, and on the platforms a sentinel watches
+      # the number is legitimately not 100
+      - name: Run pytest
+        shell: bash
+        run: uv run --locked --no-default-groups --group test pytest --no-cov

@@ -339,6 +339,10 @@ one, is where the rule lives.
   branch meant it to say, and the release notes with it where the
   repository has them? Section 9 marks them `merge=union`, so they never
   conflict and a rebase can put back a line the branch had removed.
+- Does the branch's own `CHANGELOG.md` entry sit **last in the open
+  section**? Section 9 puts it there and `check-changelog` reads no
+  position, so a green gate says nothing about it; `CONTRIBUTING.md` has
+  the command that prints the section's headings in order.
 - A new or changed workflow: section 10 of the standard, and
   `REPOSITORY.md` before any rule or setting is touched. A renamed job
   is a required check renamed out of existence.
@@ -482,5 +486,11 @@ because that document, and not this one, is where the rule lives.
 - **Does the standard keep the rule it states, here?** This repository is
   governed by `README.md` as much as any other, and the rule it fails is
   the one nobody thought to apply to the tree holding it.
+- **What paid for the lines a diff adds to `README.md`, and where was it
+  looked for?** The standard's *How to use this file* asks for them
+  where the rule lands, so a deletion in a section the branch was not
+  sent to read is a finding rather than the payment; and a pull request
+  reporting nothing to take names the place it read, which this review
+  reads too, a line to take found there being what the diff owes.
 - **Does a change to `profile/README.md` read as the organization's front
   page?** It is what github.com/btclib-org renders.

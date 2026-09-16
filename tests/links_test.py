@@ -16,7 +16,9 @@ reassemble.
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any
+import shlex
+from fnmatch import fnmatchcase
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import pytest
 
@@ -54,10 +56,26 @@ RANGE = re.compile(r"^(\d+)(?:\.\.=(\d+))?$")
 """One entry of an `--accept` list: a code, or an inclusive range."""
 
 
+class Call(NamedTuple):
+    """What a repository's `links.yml` runs, and the paths it runs it over."""
+
+    step: dict[str, Any]
+    """The lychee step, its `args:` holding the caller's paths."""
+
+    workflow: Path
+    """The file the step is written in."""
+
+    owner: str
+    """The repository that file is in."""
+
+    targets: str
+    """The caller's `targets:` input, empty where the call is direct."""
+
+
 def lychee(
     repository: str,
     trees: dict[str, Path],
-) -> tuple[dict[str, Any], Path, str]:
+) -> Call:
     """Find the lychee step of a repository's `links.yml`, with its file.
 
     Skipped where there is no `links.yml`: section 10's record gives the
@@ -73,8 +91,7 @@ def lychee(
 
     :param repository: the repository's name.
     :param trees: the checkouts.
-    :returns: the step mapping, the workflow file holding it, and the
-        repository that file is in.
+    :returns: the call, its fields as `Call` names them.
     :raises LookupError: where `links.yml` calls the action no times or
         more than once, or calls `REUSABLE` without `targets` or where
         the tree the call names has no such file.
@@ -82,14 +99,14 @@ def lychee(
     workflow = trees[repository] / ".github" / "workflows" / "links.yml"
     if not workflow.is_file():
         pytest.skip(f"{repository} has no links.yml")
-    found: list[tuple[dict[str, Any], Path, str]] = []
+    found: list[Call] = []
     for job in (document(workflow).get("jobs") or {}).values():
         if not isinstance(job, dict):
             continue
         owner = {LOCAL: repository, REMOTE: SELF}.get(job.get("uses", ""))
         if owner is None:
             found.extend(
-                (step, workflow, repository)
+                Call(step, workflow, repository, "")
                 for step in job.get("steps") or []
                 if step.get("uses", "").startswith(ACTION)
             )
@@ -108,7 +125,7 @@ def lychee(
                 given["args"] = str(given.get("args", "")).replace(
                     TARGETS, str(targets)
                 )
-                found.append(({**step, "with": given}, called, owner))
+                found.append(Call({**step, "with": given}, called, owner, str(targets)))
     if len(found) != 1:
         msg = f"{repository}/links.yml calls {ACTION} {len(found)} times"
         raise LookupError(msg)
@@ -143,8 +160,13 @@ def test_a_call_is_read_from_the_tree_it_names(tmp_path: Path) -> None:
     trees = {SELF: tmp_path / SELF, "sibling": tmp_path / "sibling"}
     call = "jobs:\n  links:\n    uses: {}\n    with:\n      targets: docs\n"
     (sibling / "links.yml").write_text(call.format(REMOTE), encoding="utf-8")
-    step, workflow, owner = lychee("sibling", trees)
-    assert (owner, workflow, arguments(step)[-1]) == (SELF, here / REUSABLE, "docs")
+    read = lychee("sibling", trees)
+    assert (read.owner, read.workflow, read.targets, arguments(read.step)[-1]) == (
+        SELF,
+        here / REUSABLE,
+        "docs",
+        "docs",
+    )
     (sibling / "links.yml").write_text(call.format(LOCAL), encoding="utf-8")
     with pytest.raises(LookupError, match="sibling has none"):
         lychee("sibling", trees)
@@ -223,11 +245,11 @@ def test_lychee_accepts_every_success_code(
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    step, workflow, owner = lychee(repository, trees)
-    lost = sorted(SUCCESS - accepted(arguments(step)))
+    call = lychee(repository, trees)
+    lost = sorted(SUCCESS - accepted(arguments(call.step)))
     assert not lost, (
         f"success codes --accept turns into errors: {ranges(lost)}; "
-        + by_hand(owner, f"grep -o -- '--accept [^ ]*' {relative(workflow)}")
+        + by_hand(call.owner, f"grep -o -- '--accept [^ ]*' {relative(call.workflow)}")
     )
 
 
@@ -247,11 +269,11 @@ def test_lychee_checks_a_link_into_a_heading(
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    step, workflow, owner = lychee(repository, trees)
-    assert "--include-fragments" in arguments(step), (
+    call = lychee(repository, trees)
+    assert "--include-fragments" in arguments(call.step), (
         "lychee checks a fragment only when asked, and a link into "
         "another tree's heading is checked by this tree's run alone; "
-        + by_hand(owner, f"grep -c include-fragments {relative(workflow)}")
+        + by_hand(call.owner, f"grep -c include-fragments {relative(call.workflow)}")
     )
 
 
@@ -270,18 +292,189 @@ def test_a_lychee_cache_is_kept_between_runs(
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    step, workflow, owner = lychee(repository, trees)
-    if "--cache" not in arguments(step):
+    call = lychee(repository, trees)
+    if "--cache" not in arguments(call.step):
         return
     kept = any(
-        other.get("uses", "").startswith("actions/cache") for other in steps(workflow)
+        other.get("uses", "").startswith("actions/cache")
+        for other in steps(call.workflow)
     )
     assert kept, (
         "--cache is passed and no step restores or saves .lycheecache; "
         + by_hand(
-            owner,
-            f"grep -c 'actions/cache\\|lycheecache' {relative(workflow)}",
+            call.owner,
+            f"grep -c 'actions/cache\\|lycheecache' {relative(call.workflow)}",
         )
+    )
+
+
+def reached(term: str, path: str) -> bool:
+    """Say whether a `targets:` term makes lychee read a file.
+
+    lychee's walker skips a hidden directory unless a term names it
+    literally: `.github/**/*.md` answers and needs no `--hidden`, where
+    `.git*/**/*.md` and `[.]github/**/*.md` answer nothing until
+    `--hidden` is passed. So a string built of `*` and `**` alone leaves
+    `.github/` and `.claude/` outside it whatever it spells, and
+    `links.yml` passes no `--hidden`. Read back with
+    `lychee --dump-inputs --offline '<term>'` in a tree holding one.
+
+    This reads lychee 0.24.2, which is the version a run uses:
+    `lychee-action`'s `lycheeVersion` input defaults to it and
+    `reusable-links.yml` pins the action at a commit, so what the
+    walker does moves only when that pin moves.
+
+    :param term: one path term of a `targets:` string.
+    :param path: a path from the root of a tree, as git spells it.
+    :returns: whether lychee reads that file when handed that term.
+    """
+    return _matches(term.split("/"), path.split("/"))
+
+
+def _matches(term: list[str], path: list[str]) -> bool:
+    """Match a path's components against a term's segments.
+
+    `**` stands for any run of components and `*` for part of one, and
+    neither crosses a component whose name begins with a dot: that one
+    is matched by a segment equal to it and by nothing else.
+
+    :param term: the term's segments.
+    :param path: the path's components.
+    :returns: whether the segments match the components.
+    """
+    if not term:
+        return not path
+    head, rest = term[0], term[1:]
+    if head == "**":
+        for across in range(len(path) + 1):
+            if across and path[across - 1].startswith("."):
+                return False
+            if _matches(rest, path[across:]):
+                return True
+        return False
+    if not path:
+        return False
+    first = path[0]
+    named = first == head if first.startswith(".") else fnmatchcase(first, head)
+    return named and _matches(rest, path[1:])
+
+
+def outside(targets: str, paths: list[str]) -> list[str]:
+    """List the paths no term of a `targets:` string reaches.
+
+    The string is quoted as for a shell and is split as one. A term
+    holding `://` is a URL lychee fetches rather than a tree it walks,
+    and `btclib-org.github.io` hands it the organization's own site.
+
+    :param targets: a `links.yml` call's `targets:` input.
+    :param paths: the paths to ask about.
+    :returns: the paths outside every term, in the order given.
+    """
+    terms = [term for term in shlex.split(targets) if "://" not in term]
+    return [path for path in paths if not any(reached(term, path) for term in terms)]
+
+
+def test_a_term_reaches_a_hidden_directory_only_by_naming_it() -> None:
+    """The walker's own rule, which decides what a `targets:` string owes.
+
+    A wildcard stops at a dot wherever the dot is -- at the root, and
+    under a directory a term has already named -- so the two files every
+    repository keeps out of sight of `**`, its pull request template and
+    its review command, are reached by a term that spells the directory
+    and by no other.
+    """
+    hidden = ".github/PULL_REQUEST_TEMPLATE.md"
+    assert not reached("**/*.md", hidden)
+    assert not reached(".git*/**/*.md", hidden)
+    assert not reached("[.]github/**/*.md", hidden)
+    assert reached(".github/**/*.md", hidden)
+    assert reached(".github/*.md", hidden)
+    assert not reached("docs/**/*.md", "docs/.draft/x.md")
+    assert reached("docs/.draft/*.md", "docs/.draft/x.md")
+    assert reached("**/*.md", "README.md")
+    assert reached("**/*.md", "profile/README.md")
+
+
+def test_outside_is_red_on_a_string_that_names_no_hidden_directory() -> None:
+    """The pair a live cell needs: the same files, two strings, two answers.
+
+    A string of visible globs passes a tree whose markdown is all
+    visible and says nothing about one whose markdown is not, so the
+    reading it disagrees with is the one to show it red on.
+    """
+    paths = [
+        "README.md",
+        "profile/README.md",
+        "tests/README.md",
+        ".github/PULL_REQUEST_TEMPLATE.md",
+        ".claude/commands/review.md",
+    ]
+    assert outside('"*.md" "profile/*.md" ".claude/commands/*.md"', paths) == [
+        "tests/README.md",
+        ".github/PULL_REQUEST_TEMPLATE.md",
+    ]
+    assert outside('"**/*.md" ".github/**/*.md" ".claude/**/*.md"', paths) == []
+    assert outside('"*.md" https://btclib.org/', paths) == paths[1:]
+
+
+def test_lychee_reads_every_markdown_file_a_tree_tracks(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """A tree's `targets:` reaches every `*.md` that tree tracks.
+
+    The string is the claim that these are the files whose links are
+    checked, so a tracked file outside it is one this workflow never
+    reads and a dead destination in it is found by whoever follows the
+    link. Markdown is what this asks about because it is what every
+    repository holds; the `rst` a tree tracks is the cell below, asked
+    separately so that a tree owing one term is not excused the others.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    call = lychee(repository, trees)
+    missed = outside(call.targets, tracked(trees[repository], "*.md"))
+    assert not missed, (
+        f"tracked markdown no term of targets reaches: {missed}; "
+        + by_hand(repository, f"lychee --dump-inputs --offline {call.targets}")
+    )
+
+
+def test_a_docs_term_reaches_the_directory_it_names_and_below_it() -> None:
+    """`**` stands for no component as well as for several.
+
+    The term section 10 gives for a tree's documentation source reaches
+    `docs/README.rst` beside `docs/source/index.rst`, which is what the
+    walker answers: `lychee --dump-inputs --offline 'docs/**/*.rst'` in
+    a tree holding both names both.
+    """
+    assert reached("docs/**/*.rst", "docs/source/index.rst")
+    assert reached("docs/**/*.rst", "docs/README.rst")
+    assert not reached("docs/**/*.rst", "README.rst")
+
+
+def test_lychee_reads_every_rst_file_a_tree_tracks(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """A tree's `targets:` reaches every `*.rst` that tree tracks.
+
+    Section 10's rejected alternative here is the documentation build's
+    own `sphinx-build -n -W`: it fails on a cross-reference that does not
+    resolve and fetches no URL, so what a term adds is the external link,
+    in a file such as `docs/README.rst` that `docs/source/` reaches
+    through no `toctree` and no `include`. A tree tracking no `rst` is
+    asked nothing, there being no file for a term to cover.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    call = lychee(repository, trees)
+    missed = outside(call.targets, tracked(trees[repository], "*.rst"))
+    assert not missed, (
+        f"tracked documentation source no term of targets reaches: {missed}; "
+        + by_hand(repository, f"lychee --dump-inputs --offline {call.targets}")
     )
 
 

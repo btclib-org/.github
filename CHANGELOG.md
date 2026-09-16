@@ -8573,3 +8573,147 @@ nothing red follows from the copies disagreeing.
 - **The built-html grep now matches `href="#./` or `href="#../`**
   (issue #35): the entry above, saying it backstops "./" alone, no
   longer holds once a repository's own hook lets "../" through too.
+
+### The tag and version checks are one workflow
+
+- **`reusable-version-check.yml` holds the checks a tree's `release.yml`
+  will call** (issue #35): its one input gates the calendar-day check,
+  and `btclib-secp256k1`'s submodule-pin step stays that tree's own.
+
+### The public API check is one workflow
+
+- **`reusable-public-api.yml` holds the griffe walk a tree's
+  `release.yml` will call** (issue #35): its one input is the package,
+  with no default, and `--exclude 'v0.1.0'` is dropped as dead.
+
+### The read the docs wait is one workflow
+
+- **`reusable-documented.yml` holds the wait a tree's `release.yml`
+  will call** (issue #35): its one input is the read the docs slug,
+  with no default, equal to the repository name in every tree today.
+
+### The local-link-prefix hook admits `../` as well as `./`
+
+- **A local destination is refused only where it is not explicitly
+  relative, neither `./` nor `../`** (issue #1095): whether it exists,
+  an escape above the root included, is the link checker's question.
+
+### An archived changelog section is a record
+
+- **Section 9 gives a released section its own `changelog/v<version>.md`,
+  where nothing already written is rewritten either** (closes #1107):
+  `names_test.py` reads past it as it reads past `CHANGELOG.md`.
+
+### A tree pins an action at one commit, and the callee at its own
+
+- **Section 10 asks a tree to name one commit per action, and says a
+  caller's pin does not reach the callee** (closes #1109):
+  `workflows_test.py` asks the first, and this tree's own workflows meet it.
+
+### `links.yml` reads every markdown file a tree tracks
+
+- **`targets:` names the hidden directories, no wildcard reaching one**
+  (issue #1104): `tests/links_test.py` asks each tree's string against
+  its own tracked markdown.
+
+### The floor sentinel is one workflow
+
+- **`reusable-deps-oldest.yml` holds the job a tree's `deps-oldest.yml`
+  will call** (issue #35): its inputs are the tree's own floor, a
+  submodule checkout and a script over the resolution.
+
+### `BACKLOG` returns to empty
+
+- **The repositories the row named now pass the cell it excused**
+  (closes #1104): the strict `xfail` no longer needs a placeholder to
+  swallow a result the cell already earns.
+
+### Section 12 says what a bill of materials names
+
+- **A vendored library is a component at the commit its submodule pins**
+  (issue #144): the exemption a wrapper's `Requires-Dist` would support is
+  refused in the section, and the pointer at trees still owing one is gone.
+
+### Section 10 asks a timeout of the job that can carry one
+
+- **A called job's `timeout-minutes` is the callee's, one for every caller**
+  (closes #1114): the keyword list a calling job is held to is a bullet of
+  its own, and `tests/workflows_test.py` asks the jobs that run steps.
+
+### Section 12's bill of materials has a reader
+
+- **Every publisher is asked whether its release attaches the bill of
+  materials and the attestation signs it** (closes #1121): the directory
+  comes off the download, so `dist/` answers as a directory of its own.
+
+### Section 10 says whose a called job's interpreter is
+
+- **A version no calling tree claims is named on the command line that runs
+  it** (closes #1112): the read the docs wait and the griffe walk carry the
+  one this repository pins, and `tests/interpreters_test.py` reads them.
+
+### The platform sweep is one workflow
+
+- **`reusable-os-suite.yml` holds the job `os-ubuntu.yml`, `os-macos.yml`
+  and `os-windows.yml` will call** (issue #35): the images and the
+  interpreters arrive as JSON arrays, and `shell: bash` is unconditional.
+
+### `README.md`'s growth rule says where a landing pays for its lines
+
+- **A rule's lines come out of what its arrival makes redundant where it
+  lands, and a pull request finding nothing to take names the place it
+  read** (closes #1115): a line found there is the payment.
+
+### Section 10 says whether `*.rst` is a link-checked source
+
+- **A tree's `targets:` covers the `*.rst` it tracks, the documentation
+  build's own `sphinx-build -n -W` fetching no URL** (issue #1117): the
+  `docs/README.rst` a build reaches through nothing is checked by a term.
+
+### The `BACKLOG` row for #1117 goes
+
+- **`btclib-node` and `btclib-secp256k1` both pass the cell the row
+  excused** (closes #1117): the strict `xfail` no longer needs a row to
+  swallow a passing result.
+
+### Section 10 says where a pin's tag comment sits
+
+- **The tag trails the pin, or sits above it where trailing would cross the
+  width `.yamllint.yaml` sets, with a command in section 15 and a test reading
+  the file's own text** (closes #1113): section 9's *Measure, don't assert*.
+
+### The changed-file decision is one workflow
+
+- **`reusable-changes.yml` holds the job a repository's `test.yml` will
+  call** (issue #35): the pattern naming a tree's own prose is the
+  caller's, and `workflow_call` declares the `code` output a caller reads.
+
+### Section 3 says why `conf.py` reads the version from `pyproject.toml`
+
+- **The rendered version must not depend on what the documentation build
+  has installed** (closes #1131): a reason that holds whether or not that
+  build installs the project.
+
+### Section 9 says no gate reads where a new entry goes
+
+- **`check-changelog` reads the seam and not the position** (issue
+  #1097): `CONTRIBUTING.md` gives the `awk` printing the open section's
+  headings in order, and `REVIEWING.md` asks a reviewer to run it.
+
+### The `EXPECTED_DRIFT` entries for #1097 go
+
+- **Every tree now carries the identical `CONTRIBUTING.md` and
+  `REVIEWING.md`** (closes #1097): the strict `xfail` no longer needs
+  either entry to swallow the copies agreeing.
+
+### `reusable-codeql.yml`'s comment names the right mechanism
+
+- **The comment cites README.md section 11's mechanism, not `capped`**
+  (closes #1134): a caller missing one of the three scopes gets a
+  `startup_failure`, not a quiet reduction.
+
+### `check-changelog` runs on every invocation of the gate
+
+- **`always_run: true`, and no `files:`** (closes #1138): the script
+  reads the open section off disk, and the rebase that eats the seam
+  stages nothing.

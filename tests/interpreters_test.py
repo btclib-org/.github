@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Section 1's interpreter window, asked across the repositories.
+"""Section 1's interpreter window, and the version a workflow here names.
 
 A library covers every interpreter still in support and an application
 takes the newest its dependencies allow, which is section 1's rule and
@@ -27,6 +27,14 @@ library is `library` below, section 1 giving the rule and the reason.
 The calendar itself is asked of nothing here. What decides it is
 python.org's, a date in it is a date this suite would have to be told,
 and what the trees can be held to without one is that they agree.
+
+The last two cells ask about this tree instead, and about section 10
+rather than section 1: a reusable workflow whose job installs nothing of
+the caller runs on a version written in the file, since no
+`requires-python` reaches a script that imports nothing. That is a
+literal in a shared workflow, which is the thing a calling tree's own
+module of this name can no longer see, so the tree hosting the file is
+where it is read.
 """
 
 from __future__ import annotations
@@ -36,7 +44,8 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import Tier, by_hand, tracked
+from . import SELF, Tier, by_hand, tracked
+from .workflows_test import steps, workflows
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -231,4 +240,113 @@ def test_the_pin_is_the_newest_interpreter_the_tree_declares(
     assert pin == newest, (
         f".python-version is {pin!r} and the newest classifier is {newest}; "
         + by_hand(repository, "cat .python-version")
+    )
+
+
+NAMED = re.compile(r"--python[= ](\d+(?:\.\d+)+t?)")
+"""An interpreter version a step names on a `uv run` command line.
+
+Whatever uv is asked for, patch level and free-threaded suffix included:
+a request narrower than the one a tree pins is a request nothing here
+declares, and reading only its first two parts would report it as the
+pin.
+"""
+
+TAKEN = re.compile(r"^\d+(?:\.\d+)+t?$")
+"""A `python-version:` given a version rather than a caller's expression."""
+
+NAMES_ONE = (
+    ".github/workflows/reusable-documented.yml",
+    ".github/workflows/reusable-public-api.yml",
+)
+"""The workflows of this repository naming an interpreter literally.
+
+Named rather than counted: a pattern that stopped matching one of them
+would leave the rest agreeing with each other and this module green.
+Section 10 is what puts a file here -- a job reading neither the
+caller's lock nor its project carries its own version -- so an entry is
+a decision taken there before it is a line here.
+"""
+
+
+def named(step: dict[str, Any]) -> set[str]:
+    """Read the interpreter versions one step names literally.
+
+    From the parsed step rather than from the file's text: a comment
+    above a step is gone by the time the parser returns, so a version
+    argued about there is not a version named. A `python-version:`
+    handed `${{ inputs.python-version }}` names none either -- that
+    version is the caller's, which is the other half of section 10's
+    rule.
+
+    :param step: the step's own mapping.
+    :returns: the versions it names, empty where it names none.
+    """
+    found = set(NAMED.findall(str(step.get("run", ""))))
+    taken = str((step.get("with") or {}).get("python-version", ""))
+    if TAKEN.match(taken):
+        found.add(taken)
+    return found
+
+
+def naming(root: Path) -> dict[str, set[str]]:
+    """Read every workflow of a tree that names an interpreter.
+
+    :param root: the root of the checkout.
+    :returns: each such file, named from the root, against the versions
+        it carries; a workflow naming none is left out.
+    """
+    carried = {
+        workflow.relative_to(root).as_posix(): {
+            version for step in steps(workflow) for version in named(step)
+        }
+        for workflow in workflows(root)
+    }
+    return {path: versions for path, versions in carried.items() if versions}
+
+
+def test_the_workflows_naming_an_interpreter_are_the_ones_recorded(
+    trees: dict[str, Path],
+) -> None:
+    """Section 10: a job names a version only where no calling tree claims it.
+
+    A rename, a rewrapped line and a deleted literal all land here
+    rather than in the cell below, which reads the versions of whatever
+    this one found: asserting that a literal is the right one says
+    nothing the day nothing matches at all.
+
+    :param trees: the checkouts, this one among them.
+    """
+    found = tuple(sorted(naming(trees[SELF])))
+    assert found == NAMES_ONE, (
+        f"an interpreter is named in {', '.join(found) or 'no workflow'}, and"
+        f" the workflows that carry one are {', '.join(NAMES_ONE)}; "
+        + by_hand(SELF, "grep -rn -- '--python \\|python-version:' .github/workflows/")
+    )
+
+
+def test_a_workflow_naming_an_interpreter_names_the_one_this_tree_pins(
+    trees: dict[str, Path],
+) -> None:
+    """Section 10: such a version is the one the tree hosting the file pins.
+
+    The version is not the calling tree's to declare -- the script runs
+    `--no-project` over the standard library, so no `requires-python`
+    bears on it -- and this is the other end of that sentence: what it
+    is instead. A tree pins one interpreter, and a shared workflow
+    naming a second would be a version nothing here declares.
+
+    :param trees: the checkouts, this one among them.
+    """
+    root = trees[SELF]
+    pin = pinned(root)
+    assert pin, ".python-version names no interpreter"
+    elsewhere = {
+        path: sorted(versions)
+        for path, versions in naming(root).items()
+        if versions != {pin}
+    }
+    assert not elsewhere, (
+        f"workflows naming an interpreter other than {pin}: {elsewhere}; "
+        + by_hand(SELF, "cat .python-version")
     )

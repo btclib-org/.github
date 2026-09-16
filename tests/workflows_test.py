@@ -10,12 +10,18 @@ a step passing `--frozen` -- each read from the document rather than
 grepped for: a comment arguing against `--frozen` is not a step passing
 it, and the grep section 15 gives reports both alike. The grep is what
 the failure message carries, because it is what a person runs.
+
+A tag comment is a YAML comment, and the parser has dropped it by the
+time it returns. `pinned` reads it off the file's text instead, counting
+what the text gives against what the document uses so that a pattern
+which stops matching is an error rather than a run over nothing.
 """
 
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any
+from collections import Counter
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import pytest
 import yaml
@@ -82,14 +88,40 @@ def triggers(workflow: Path) -> dict[str, Any]:
     return on if isinstance(on, dict) else {}
 
 
+def jobs(workflow: Path) -> dict[str, dict[str, Any]]:
+    """Read a workflow's jobs, by id.
+
+    :param workflow: the file to read.
+    :returns: the job mappings, empty where the file declares none.
+    """
+    return document(workflow).get("jobs") or {}
+
+
 def steps(workflow: Path) -> list[dict[str, Any]]:
     """List every step of every job of a workflow, in file order.
 
     :param workflow: the file to read.
     :returns: the step mappings, empty for a workflow of calls alone.
     """
-    jobs = document(workflow).get("jobs") or {}
-    return [step for job in jobs.values() for step in (job.get("steps") or [])]
+    return [
+        step for job in jobs(workflow).values() for step in (job.get("steps") or [])
+    ]
+
+
+def uses(workflow: Path) -> list[str]:
+    """List what a workflow `uses:`, its jobs' calls and its steps' actions.
+
+    Section 10's rule on what a `uses:` may name does not tell the two
+    apart: a job calling another workflow names a revision as a step
+    naming an action does.
+
+    :param workflow: the file to read.
+    :returns: the values, the jobs' after the steps'.
+    """
+    return [
+        *(step["uses"] for step in steps(workflow) if "uses" in step),
+        *(job["uses"] for job in jobs(workflow).values() if "uses" in job),
+    ]
 
 
 def gated(repository: str, trees: dict[str, Path]) -> list[Path]:
@@ -145,23 +177,239 @@ def test_every_action_is_pinned_to_a_commit(
     :param trees: the checkouts.
     """
     unpinned = [
-        f"{workflow.name}: {uses}"
+        f"{workflow.name}: {value}"
         for workflow in gated(repository, trees)
-        for uses in [
-            *(step["uses"] for step in steps(workflow) if "uses" in step),
-            *(
-                job["uses"]
-                for job in (document(workflow).get("jobs") or {}).values()
-                if "uses" in job
-            ),
-        ]
-        if not uses.startswith(LOCAL)
-        and not PINNED.search(uses)
-        and not REUSABLE.match(uses)
+        for value in uses(workflow)
+        if not value.startswith(LOCAL)
+        and not PINNED.search(value)
+        and not REUSABLE.match(value)
     ]
     assert not unpinned, f"actions not pinned to a commit: {unpinned}; " + by_hand(
         repository,
         r"grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'",
+    )
+
+
+TAG = re.compile(r"^[ \t]*#[ \t]*(\S+)[ \t]*$")
+"""A comment that is one word, which is the shape a tag comment takes.
+
+Section 10 asks a pin for the tag it sits at and for nothing else, so a
+comment of several words is prose about the step rather than the tag.
+One shape for both places the section allows: trailing the pin, or alone
+on the line above it.
+"""
+
+PIN_LINE = re.compile(
+    r"^[ \t]*(?:-[ \t]+)?uses:[ \t]*(?P<value>\S+@[0-9a-f]{40})(?P<rest>[ \t].*|)$"
+)
+"""Where a pin is written, anchored on the `uses:` key that opens it.
+
+A commented-out `uses:` carries a `#` before that anchor and does not
+match, which is the difference between reading a rule about text and
+grepping for a substring. A `uses:` written inside a `run:` block scalar
+is `pinned`'s to settle.
+"""
+
+
+class Pin(NamedTuple):
+    """A pinned `uses:` as the file writes it, with the comments beside it.
+
+    `trailing` and `above` are the tag each comment names, None where
+    that comment is absent or is prose. `width` is what the line already
+    takes, which is what decides whether the tag can trail.
+    """
+
+    value: str
+    trailing: str | None
+    above: str | None
+    width: int
+    where: str
+
+
+def pinned(workflow: Path) -> list[Pin]:
+    """Read every pin of a workflow off its text, with the comments beside it.
+
+    Off the text and not off `document`: a tag comment is a YAML comment,
+    and the parser has dropped it by the time it returns.
+
+    What the text gives is counted against what the document uses, so a
+    line this matches that the document does not use -- one written
+    inside a `run:` block scalar, say -- is an error here rather than a
+    finding against the tree, and a pattern that stops matching is an
+    error too rather than a run that classifies nothing and passes.
+
+    :param workflow: the file to read.
+    :returns: the pins, in file order.
+    :raises LookupError: where the text and the document disagree about
+        what the file pins.
+    """
+    lines = workflow.read_text(encoding="utf-8").splitlines()
+    found: list[Pin] = []
+    for number, line in enumerate(lines, start=1):
+        written = PIN_LINE.match(line)
+        if written is None:
+            continue
+        trailing = TAG.match(written["rest"])
+        above = TAG.match(lines[number - 2]) if number > 1 else None
+        found.append(
+            Pin(
+                value=written["value"],
+                trailing=trailing.group(1) if trailing else None,
+                above=above.group(1) if above else None,
+                width=len(line),
+                where=f"{workflow.name}:{number}",
+            )
+        )
+    read = Counter(pin.value for pin in found)
+    used = Counter(value for value in uses(workflow) if PINNED.search(value))
+    if read != used:
+        msg = (
+            f"{workflow.name}: {sorted((read - used).elements())} is pinned to"
+            f" the text alone and {sorted((used - read).elements())} to the"
+            " document alone"
+        )
+        raise LookupError(msg)
+    return found
+
+
+def budget(root: Path) -> int:
+    """Read the columns a tree's yamllint allows a yaml line to take.
+
+    Off that tree's own `.yamllint.yaml`, which section 14 owes every
+    repository, rather than off a number written here: the width is what
+    decides where a pin's tag comment sits, so both read it in one place.
+
+    :param root: the root of the checkout.
+    :returns: the columns a line may take.
+    """
+    configured = yaml.safe_load((root / ".yamllint.yaml").read_text(encoding="utf-8"))
+    return int(configured["rules"]["line-length"]["max"])
+
+
+def above_instead(pin: Pin, width: int) -> bool:
+    """Say whether section 10 puts a pin's tag on the line above it.
+
+    Where the pin plus the comment would take the line past the width,
+    which is a property of the columns the pin spends and not of which
+    action it names. That is what keeps this from excusing a pin whose
+    tag was simply dropped: a pin with room for the comment is owed it
+    wherever anything is written above.
+
+    :param pin: the pin, as `pinned` read it.
+    :param width: the columns the tree's yamllint allows a line.
+    :returns: whether the comment above is where section 10 wants it.
+    """
+    return pin.above is not None and pin.width + len(f" # {pin.above}") > width
+
+
+def pins(workflow: Path) -> list[tuple[str, str]]:
+    """Read every action a workflow pins, against the commit it names.
+
+    Keyed on the action's repository and not on the whole `uses:`: two
+    paths into one repository -- `github/codeql-action/init` beside
+    `.../analyze` -- name one repository at one commit, so a `uses:`
+    into a subdirectory is the same pin as one into another.
+
+    :param workflow: the file to read.
+    :returns: each pinned `owner/name` with the commit, in file order,
+        a `uses:` naming no commit left out.
+    """
+    return [
+        ("/".join(value.split("@")[0].split("/")[:2]), value.rpartition("@")[2])
+        for value in uses(workflow)
+        if PINNED.search(value)
+    ]
+
+
+def tags(workflow: Path) -> dict[str, str]:
+    """Read the tag comment written beside each pin of a workflow.
+
+    For the failure message and nothing else: what a job runs is the
+    commit, and the tag is how section 10 asks a reader to be able to
+    name it. From either place that section allows the comment, so a pin
+    at the width names its tag here as any other pin does.
+
+    :param workflow: the file to read.
+    :returns: each commit against the tag beside it, a pin with no tag
+        comment left out.
+    """
+    beside = {
+        pin.value.rpartition("@")[2]: pin.trailing or pin.above
+        for pin in pinned(workflow)
+    }
+    return {commit: tag for commit, tag in beside.items() if tag is not None}
+
+
+def test_every_pin_names_its_tag_in_a_comment(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10: the tag beside every pin, trailing it or above it.
+
+    A commit is what a job runs and is no version a reader can name, so
+    a pin carrying neither comment leaves which release a job runs
+    unreadable off the file. Which of the two places the comment takes
+    is `above_instead`'s question, and turns on the width alone.
+
+    What keeps this from passing over nothing is `pinned`, whose count
+    against the parsed document a broken pattern does not survive, and
+    the pins themselves: a tree with workflows and no pin in them is a
+    tree this cannot ask, not one that keeps the rule.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    read = [pin for workflow in gated(repository, trees) for pin in pinned(workflow)]
+    assert read, (
+        f"{repository} has workflows and no pin in them, so this classified"
+        " nothing and is asking the tree nothing"
+    )
+    width = budget(trees[repository])
+    unnamed = [
+        pin.where
+        for pin in read
+        if pin.trailing is None and not above_instead(pin, width)
+    ]
+    assert not unnamed, f"pins naming no tag: {unnamed}; " + by_hand(
+        repository,
+        "grep -nE -B1 'uses: [^ ]+@[0-9a-f]{40}[^#]*$' .github/workflows/*.yml",
+    )
+
+
+def test_a_tree_pins_an_action_at_one_commit(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10: one commit per action across a tree's own workflows.
+
+    A tree naming two commits of one action runs two versions of it at
+    once, and neither file says so. What splits a tree is a pin written
+    by hand, a new workflow taking the newest release while the tree
+    around it sits on what section 11's grouped bump last landed.
+
+    Asked within a tree and not across the organization, which is the
+    other half of section 10's rule and the half no reading of one
+    checkout decides: a caller runs the callee's pins, and the callee is
+    another repository.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    named: dict[str, dict[str, str]] = {}
+    for workflow in gated(repository, trees):
+        beside = tags(workflow)
+        for action, commit in pins(workflow):
+            named.setdefault(action, {})[commit] = beside.get(commit, commit[:7])
+    split = [
+        f"{action} at {sorted(seen.values())}"
+        for action, seen in sorted(named.items())
+        if len(seen) > 1
+    ]
+    assert not split, f"actions this tree pins two ways: {split}; " + by_hand(
+        repository,
+        "grep -hoE 'uses: [^ ]+@[0-9a-f]{40}' .github/workflows/*.yml"
+        " | sed -E 's|uses: ([^/]+/[^/@]+)[^@]*@|\\1 |'"
+        " | sort -u | cut -d' ' -f1 | uniq -d",
     )
 
 
@@ -184,6 +432,39 @@ def test_every_workflow_declares_permissions(
     ]
     assert not without, f"workflows with no permissions block: {without}; " + by_hand(
         repository, "grep -L '^permissions:' .github/workflows/*.yml"
+    )
+
+
+def test_every_job_that_runs_steps_is_bounded(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10: `timeout-minutes` on every job that runs steps.
+
+    Asked of those jobs and of no others, which is the whole of the rule
+    rather than an exemption written beside it: a job calling a reusable
+    workflow may not carry the keyword, so the bound it would have set
+    is the callee's own job's, and a cell asking every job alike would
+    be asking for a file actionlint refuses.
+
+    Nothing falls between the two and goes unasked. A job carrying both
+    `steps` and `uses` is refused the same way, and one carrying neither
+    is refused for a missing `runs-on`, so the two are a partition and
+    not merely what the trees happen to hold today.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    unbounded = [
+        f"{workflow.name}: {job}"
+        for workflow in gated(repository, trees)
+        for job, block in jobs(workflow).items()
+        if "steps" in block and "timeout-minutes" not in block
+    ]
+    assert not unbounded, f"jobs that run steps unbounded: {unbounded}; " + by_hand(
+        repository,
+        "grep -n -e '^  [a-z].*:$' -e '^    steps:'"
+        " -e '^    timeout-minutes:' .github/workflows/*.yml",
     )
 
 

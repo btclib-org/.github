@@ -1,0 +1,139 @@
+---
+name: reusable-public-api
+
+# The griffe walk a repository's release.yml runs before publishing, so
+# the previous-tag resolution, the comparison and the failure message
+# are written once. The trigger stays in the caller, whose run this job
+# joins; it runs here rather than as a merge gate on the reasoning
+# btclib-org/.github#326 already settled -- before 1.0 the public
+# surface breaks deliberately and often, and a gate reporting every such
+# break on every pull request has nothing to say about which ones are
+# allowed, where a release-time run arrives once, while RELEASE_NOTES.md
+# is being written.
+#
+# One input, the package griffe walks. No default: btclib, btclib_node
+# and bitcoin_core_rpc are each the calling repository's own name with
+# its hyphen turned to an underscore, and btclib_secp256k1 is the same
+# for btclib-secp256k1 -- a coincidence of four repositories rather than
+# a rule, and a default would make three callers correct by luck and
+# the fourth wrong by silence the day a fifth tree's name does not
+# follow it.
+#
+# -s . -s src is not an input: every tree with a release.yml has moved
+# its package from the repository root to src/ at some point in its own
+# tag history, and a search path that finds nothing in one of the two
+# is skipped in favour of the other, so one line serves every caller on
+# either side of its own move without needing to know which side a
+# given tag is on.
+
+on:
+  workflow_call:
+    inputs:
+      package:
+        description: the griffe target, e.g. "btclib" or "btclib_node"
+        required: true
+        type: string
+
+# least privilege for the GITHUB_TOKEN: everything running in a job
+# (actions, dependencies, griffe itself) can read the token, so the
+# workflow default must not be able to write to the repository. No job
+# elevates it, this job reading the tree and two tags and writing
+# nothing back
+permissions:
+  contents: read
+
+jobs:
+  public-api:
+    # the name the check context is keyed by, after the calling job's
+    # own: branch protection matches a context by name and not by the
+    # workflow that reported it
+    name: Check the public API against the last release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # the previous tag has to be reachable in this checkout for
+          # the step below to find it, and the default single-commit
+          # checkout would not carry it
+          fetch-depth: 0
+          fetch-tags: true
+      # a release tag is already on the remote by the time this job
+      # runs, so the "latest tag" griffe would resolve on its own is the
+      # release being cut, not the one before it -- comparing a tag
+      # against itself reports no break whatever changed. The previous
+      # tag is resolved explicitly instead, by walking the ref's own
+      # ancestry rather than a version sort, so a tag pushed on a branch
+      # this history never merged is not picked up as "previous". A
+      # rehearsal has no tag of its own, so it asks from HEAD directly
+      # rather than HEAD^
+      - name: Resolve the previous release
+        id: previous
+        env:
+          REF: >-
+            ${{ github.event_name == 'push' && format('{0}^', github.ref_name)
+            || 'HEAD' }}
+        run: |
+          if tag=$(git describe --tags --abbrev=0 --match 'v*' "$REF" 2>&1); then
+            echo "previous release: $tag"
+            echo "tag=$tag" >> "$GITHUB_OUTPUT"
+            echo "has-previous=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "no previous v* tag reachable from $REF: $tag"
+            echo "has-previous=false" >> "$GITHUB_OUTPUT"
+          fi
+      # caching off, as in reusable-version-check.yml and for the same
+      # reason: this job runs on the same tag-push and workflow_dispatch
+      # triggers that job's own comment gives for downloading fresh
+      # rather than trusting a cache entry written by a run this one
+      # cannot vouch for
+      - name: Setup uv
+        if: steps.previous.outputs.has-previous == 'true'
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          enable-cache: false
+      # griffe runs from PyPI through uvx rather than from a
+      # pyproject.toml dependency group: unlike pre-commit -- pinned by
+      # uv.lock because every contributor's own run has to agree with
+      # the gate's -- this runs at release time only, on one
+      # maintainer's own action, so a dependency group buys
+      # reproducibility nothing here needs. The version pin on the line
+      # below is what still keeps this comparison from answering
+      # differently on two release days for a reason that has nothing
+      # to do with either release.
+      # The interpreter is named for the reason the griffe pin is:
+      # uvx reads no .python-version, so an unnamed one is whatever uv
+      # resolves that morning, which is the second way this comparison
+      # could answer differently on two release days. Section 10 asks
+      # it of a job reading no lock, the version is the one this
+      # repository's own .python-version names, and
+      # tests/interpreters_test.py reads the two against each other.
+      # No base ref on a rehearsal: workflow_dispatch has no tag to
+      # check a public surface at, so the comparison falls back to
+      # griffe's own default, the current code
+      - name: Check the public API against the previous release
+        if: steps.previous.outputs.has-previous == 'true'
+        env:
+          PACKAGE: ${{ inputs.package }}
+          PREVIOUS_TAG: ${{ steps.previous.outputs.tag }}
+          BASE_REF: ${{ github.event_name == 'push' && github.ref_name || '' }}
+        run: |
+          base_args=()
+          if [ -n "$BASE_REF" ]; then
+            base_args=(-b "$BASE_REF")
+          fi
+          if ! uvx --python 3.14 griffe==2.2.0 check "$PACKAGE" -s . -s src \
+              -a "$PREVIOUS_TAG" "${base_args[@]}" -f github; then
+            msg="the public API changed since $PREVIOUS_TAG:"
+            echo "::error::$msg reconcile the findings above with" \
+              "RELEASE_NOTES.md's breaking-changes list;" \
+              "not every finding is a break"
+            exit 1
+          fi
+      - name: Skip the check (no previous release to compare against)
+        if: steps.previous.outputs.has-previous == 'false'
+        run: |
+          echo "::notice::no previous v* tag is reachable; nothing to" \
+            "compare this release's public API against"

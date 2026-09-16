@@ -149,11 +149,18 @@ they are applied per repository, which section 15 is how to verify.
   enter**: a rule only a reader enforces turns every landing into a
   finding. This preamble is read by the review, `REVIEWING.md`'s *This
   repository in particular*.
-- **This file does not grow.** A landing that adds lines removes at
-  least as many, and `git diff --numstat origin/main -- README.md` is
-  the read. A census, a dated measurement, a line number and the tour
-  of rejected alternatives belong to the pull request that made the
-  change, not here (btclib-org/.github#1075).
+- **This file does not grow by accretion.** What a rule costs in lines —
+  the sentence of reason this list asks of it included — comes out of
+  what its arrival makes redundant where it lands, and
+  `git diff --numstat origin/main -- README.md` is the read. Two ways of
+  meeting it are refused: paying out of a section the change was not
+  sent to, which loses standard nobody reviewed, and asserting there was
+  nothing to take, where what the pull request owes is the place it read
+  looking and a reviewer naming a line there has named the payment. The
+  file grows where that search comes back empty and nowhere else. A
+  census, a dated measurement, a line number and the tour of rejected
+  alternatives are refused outright, and belong to the pull request that
+  made the change (btclib-org/.github#1075).
 
 ## 1. Toolchain and environment
 
@@ -808,8 +815,8 @@ that a hook argument has not. Section 14 names each of those files.
     property, and nothing reads the number it lands on.
 - **The version is declared once**, in `[project]`. The package reads it
   back with `importlib.metadata`; the sphinx `conf.py` parses this file,
-  metadata not being available to an uninstalled build. Two declarations
-  are two things a release has to compare.
+  so the rendered version does not depend on what the documentation build
+  has installed. Two declarations are two things a release has to compare.
 - **The name in `[project]` is the distribution's, and the repository
   is named after it, hyphenated, never after the import package.** PEP
   503 normalizes runs of `-`, `_` and `.` in a distribution name to a
@@ -1200,10 +1207,11 @@ pre-commit.ci does not have — the lint workflow covers it. No
   prose is left to the command. A test of this suite would report one
   only after the pull request that added it had landed.
 - **`local-link-prefix`** — pygrep refusing a markdown link whose
-  destination is local and does not begin `./`, in every repository of
-  the organization, this one included: one spelling lets a check
-  downstream key on one pattern, and a standard whose own tree breaks it
-  carries a counter-example at the top.
+  destination is local and is not explicitly relative, beginning
+  neither `./` nor `../`, in every repository of the organization, this
+  one included: an explicit relative prefix is what lets a check
+  downstream key on one pattern, and a standard whose own tree breaks
+  it carries a counter-example at the top.
 
     Where documentation is built, `docs.yml` greps the built html for
     `href="#./` or `href="#../`, what MyST renders in place of a link
@@ -1214,13 +1222,18 @@ pre-commit.ci does not have — the lint workflow covers it. No
     **The prefix is the rule, and not the extension**: an extensionless
     destination, a `.txt` and a path into a subdirectory reach that
     fallback too, so an `.md`-scoped rule leaves them writable. `../`
-    reaches that fallback the same way, `RootFileLinks` *deliberately
-    declining* a target that normalizes above the repository root the
-    same way it declines a missing one, and the built-html grep now
-    backstops that spelling too, for a repository whose own hook lets
-    `../` through where this one does not (btclib-org/.github#1095
-    records which trees diverge). Refusing at source stays the primary
-    defence either way.
+    is admitted for the same reason `./` is — an explicit relative
+    prefix is what the fallback grep can key on — and not because a
+    `../` destination is known to escape the repository:
+    `RootFileLinks` declines only a target that normalizes *above* the
+    root, and `docs/source/migrating.md`'s `../../README.md`
+    normalizes *to* it, which it resolves instead. Whether a
+    destination exists at all, an escape above the root included, is
+    not a property of the line it is written on, and no regex over one
+    line decides it; that is section 10's `links` workflow's question,
+    which resolves the target itself and reports what is missing.
+    Refusing at source stays this hook's job for the one thing it can
+    see — the prefix — and nothing more.
 
     A `[` preceded by a backtick is exempt, so prose quotes the refused
     shape in a code span, pygrep being blind to a fence; a badge, whose
@@ -1280,12 +1293,12 @@ pre-commit.ci does not have — the lint workflow covers it. No
     lower fence.
 - **`check-changelog`** — a local hook, `language: system`, running
   `python3 .github/scripts/check_changelog.py` with `pass_filenames:
-  false` over `CHANGELOG.md`. It runs ahead of `markdownlint-cli2` so it
-  reads the file before that hook's `--fix` repairs the seam the
-  blank-line check names. `merge=union` stays on that file
-  (btclib-org/.github#21's ruling), and this is the gate its price
-  bought back: it refuses a repeated `###` heading, a heading left with
-  no blank line above it — the blank the driver eats at that seam
+  false` and `always_run: true` over `CHANGELOG.md`. It runs ahead of
+  `markdownlint-cli2` so it reads the file before that hook's `--fix`
+  repairs the seam the blank-line check names. `merge=union` stays on
+  that file (btclib-org/.github#21's ruling), and this is the gate its
+  price bought back: it refuses a repeated `###` heading, a heading left
+  with no blank line above it — the blank the driver eats at that seam
   (btclib-org/.github#760) — and, section 9's bound, an entry whose body
   runs past three lines. The script's own docstring carries the checks
   and what they cannot make, a network call being what a hook is the
@@ -1302,6 +1315,18 @@ pre-commit.ci does not have — the lint workflow covers it. No
     which only a hook on the branch does and a test of this suite, an
     audit after the fact, cannot; news fragments and a landed-order gate
     are declined at btclib-org/.github#305 and btclib-org/.github#516.
+
+    **The hook runs on every invocation, and carries no `files:`.** The
+    script reads the open section off disk and is handed no file list,
+    so a filter decides nothing about its input and only whether the
+    hook runs at all — keyed on a diff the script never consults, and
+    empty after the rebase that eats the seam the blank-line check
+    exists to name. `check-hooks-apply` passes over an `always_run`
+    hook, so a `files:` kept beside one is a pattern nothing refuses
+    once it stops matching, which is what *the file checking itself*
+    above is for. The rejected alternative keeps the filter and asks
+    whoever runs the gate to remember `--all-files`, which is a
+    convention held in prose where this is a hook that fires.
 
 ## 5. ruff
 
@@ -1524,7 +1549,7 @@ check the same code where no source is conditional on the version.
   collects `test_*.py` and `*_test.py` alike, and a file named outside
   both is not a red test but no test, nothing but the report's count
   moving. Between the two, one is the organization's, for
-  `local-link-prefix`'s reason — one spelling is what lets a check
+  `local-link-prefix`'s reason — one shape is what lets a check
   downstream key on one pattern — and the hook's default is which.
 - Shared test code lives in a package `__init__.py` — vector loaders,
   helpers — never in a module whose name says "test" and holds none.
@@ -2171,29 +2196,65 @@ against that, and what lengthens it without adding to it is deleted.
   both sides in landing order and sometimes eating the blank line
   between them; the forge does not run the driver, so the same pair
   reads `CONFLICTING` there until one side is rebased. `check-changelog`
-  names the seam, a repeated heading and a double close; the rebase's
-  result is read by hand, since no gate reads the order entries land in.
+  names the seam, a repeated heading and a double close, and not the
+  position, which a person reads off a command `CONTRIBUTING.md` has.
 - **Nothing already written is rewritten.** An entry speaks of its own
   day, and a count in it that has since moved stays. An entry in the
   open section is a live claim, though: a later entry that bears on it
   says so in a sentence, and the append stays an append.
+- **A released section may leave `CHANGELOG.md` for its own
+  `changelog/v<version>.md`**, that file holding one release and the
+  index in `CHANGELOG.md`'s preamble linking it. Past a size ceiling
+  GitHub's contents API answers a file with an empty `content` at HTTP
+  200, which reads as an empty file rather than as an error, and a file
+  per release is what keeps each of them under it. Nothing already
+  written in an archived file is rewritten either: what it names, it
+  names as the release named it, so a check of what the tree declares
+  reads past it as it reads past the file it came from. It takes no
+  `merge=union` driver, nothing appending to a release its own tag has
+  sealed.
 
 ## 10. Workflows
 
 ### What every workflow does
 
-- **Every action is pinned to a commit SHA**, with the tag in a trailing
-  comment. A tag is a name its owner can move, and these run in a job that can
+- **Every action is pinned to a commit SHA**, with the tag in a comment beside
+  the pin: trailing it, or above it where a trailing one would take the line
+  past the width `.yamllint.yaml` sets. A commit is not a version anybody can
+  read, so what the width decides is where the tag sits and not whether it is
+  written. A tag is a name its owner can move, and these run in a job that can
   read the workflow token. A call to a reusable workflow of `btclib-org/.github`
   names `@main` instead: that repository has no tag for Dependabot to move a SHA
   to, its `main` is held by section 11's rulesets as the caller's is, and a fix
   reaches every tree in one landing. zizmor is told so,
   `btclib-org/.github/*: ref-pin` under `unpinned-uses`.
+- **A tree pins an action at one commit throughout its own workflows**, so
+  a new workflow takes the pin the tree already carries rather than the
+  newest release: two commits of one action are two versions in effect at
+  once, with nothing in either file saying so.
+- **A calling job carries only the keywords GitHub's list allows**, which
+  actionlint enforces: `timeout-minutes`, `runs-on`, `steps` and `env` are off
+  that list, so each is the callee's to set, and an input carrying a caller's
+  value across is a copy in disguise (btclib-org/.github#35).
+- **A called job that runs Python takes its interpreter from the calling tree
+  where the version is a claim that tree makes, and from the callee where it
+  is not.** `uv run --locked` resolves what the caller's `.python-version`
+  names; where the subject is a version that pin does not give — the floor
+  `requires-python` declares, the interpreters a tree says it supports — the
+  callee takes it as a required input with no default, a default being a
+  claim this repository cannot make for a tree and one no tree's own suite
+  reads; and a job reading no lock names the version on the command line,
+  `uv run --no-project` otherwise taking the caller's pin and `uvx` whatever
+  uv resolves, neither of which anything here chose (btclib-org/.github#35).
+- **A caller's pin does not reach the callee**, whose own Dependabot moves it,
+  so a tree's workflow files do not name every version its runs use; one pin
+  for the whole organization would part again the week after.
 - **`permissions: contents: read` at the workflow level**, and one elevation per
   job where a job needs more: the job that writes a release holds no OIDC token,
   and the job that signs writes no release.
-- **`timeout-minutes` on every job**, set far above what the work needs: what it
-  bounds is a hung job holding a runner.
+- **`timeout-minutes` on every job that runs steps**, far above what the work
+  needs: it bounds a hung job holding a runner. A called job's is the callee's,
+  one number for every caller, which only a caller the bound would cut raises.
 - **`checkout` passes `persist-credentials: false`.**
 - **Concurrency groups are named literally** —
   `group: test-${{ github.head_ref || github.ref }}` — never through
@@ -2404,6 +2465,24 @@ takes transitive dependencies to their minima too and resolves environments that
 do not install; and not a step of `release.yml`, which would reach only the
 trees that publish and put an old drift's red on a release. What it finds is an
 issue against the floor.
+
+**`links.yml`'s `targets:` names every markdown file the tree tracks, and the
+`*.rst` it tracks where it tracks any**:
+`'"**/*.md" ".github/**/*.md" ".claude/**/*.md" "docs/**/*.rst"'`. The string is
+the claim that these are the files whose links are checked, and a tracked file
+outside it is one this workflow never reads. The rejected alternative for the
+`rst` term is the documentation build's own `sphinx-build -n -W`, which fails on
+a cross-reference that does not resolve: it fetches no URL, and a tracked `rst`
+no `toctree` reaches — `docs/README.rst` — is in no build at all, so such a
+file's links are checked by a term or by nothing. The rejected alternative for
+the shape of the string lists the directories a tree keeps its prose in, and
+what it costs is a file dropping out of the list with nobody deciding it should:
+lychee's walker skips a hidden directory unless a term names it, and reaches one
+by a wildcard only when asked with `--hidden`, which this job does not pass. So
+`.github/` and `.claude/` stay outside a string of `*` and `**` however it is
+spelled, where `**/*.md` matches at the root and a term naming a hidden
+directory reaches it unasked. `tests/links_test.py` asks each tree's string
+against that tree's own `git ls-files`, the two file types as two questions.
 
 `links` runs lychee with `--include-fragments`, so a link into a heading is
 checked as an anchor. The forge serves a page whose fragment resolves to nothing
@@ -3350,10 +3429,9 @@ of every version already on the index, which no later release corrects.
   is the variable the bullet above exports for it: its timestamp is
   `SOURCE_DATE_EPOCH` and its serial number derives from the distribution files'
   digests, so a rebuild of a released tag writes the same document and the
-  attestation verifies it as it does the archives. Whether the document names a
-  vendored C library rather than only the `cffi` it is reached through is
-  btclib-org/btclib#1280, an argument about the generator and not one against
-  the document. btclib-org/.github#144 carries the trees that still owe one.
+  attestation verifies it as it does the archives. An exemption for a wrapper
+  does not follow from `Requires-Dist` naming only its `cffi`: the vendored
+  library is a component too, at the commit its submodule pins.
 - **What is published is inspected first** — `twine check --strict`,
   `check-wheel-contents` and `pyroma --min 10` on the files the release will
   publish; then the wheel is installed from an empty directory and smoke-tested,
@@ -3843,6 +3921,7 @@ grep -n 'strict = true\|fail_under = 100\|branch = true\|"FIX"\|"TD"' \
 grep -n 'id: mypy' .pre-commit-config.yaml
 git ls-files 'TODO*' '**/TODO*'
 grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'
+grep -nE -B1 'uses: [^ ]+@[0-9a-f]{40}[^#]*$' .github/workflows/*.yml
 grep -L '^permissions:' .github/workflows/*.yml
 grep -rn -- '--frozen' .github/workflows/
 grep -rn 'merge=union' .gitattributes
@@ -3860,6 +3939,9 @@ cat tests/README.md
   own: the strictness is configured and nothing runs it.
 - An action not pinned to forty hex digits, a workflow with no `permissions:`
   block, and a `--frozen` anywhere are each a finding.
+- A pin with no trailing tag comment is a finding unless the line printed above
+  it carries the tag, which is what section 10 asks of a pin a trailing comment
+  would take past the width.
 - A `build-backend` other than `uv_build` in a project compiling nothing is
   section 3's finding, and decides which table declares inclusion. Section 12
   owes a `package` naming a one-package wheel, else the ignored codes and an

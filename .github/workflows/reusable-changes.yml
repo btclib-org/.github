@@ -1,0 +1,132 @@
+---
+name: reusable-changes
+
+# The changes job a repository's test.yml calls, so the event handling,
+# the file listing and the decision are written once. What a tree passes
+# is the one thing the trees rightly differ on, the pattern naming the
+# files nothing it builds or tests reads; the trigger, the concurrency
+# group, the jobs that read this job's output and the aggregate stay in
+# the caller, whose run this job joins.
+#
+# The output is declared under workflow_call below and mapped from the
+# job, which is what a caller's `needs.<job>.outputs.code` reads: a job's
+# own outputs do not cross the call. Dropping either half is quiet -- an
+# expression reading an output nothing declares is an empty string and no
+# error, so every dependent `if:` goes false and the gate skips while it
+# reports green. What refuses such a read is actionlint, and only where
+# the caller calls by path: the run itself goes green.
+#
+# The calling job declares the token this job needs, and the bound
+# refuses rather than trims: a scope a called job declares that the
+# caller's list leaves off fails the run before any job starts, as a
+# startup_failure. A job-level block replaces the workflow's map rather
+# than adding to it, so the call site names `contents: read` and
+# `pull-requests: read` both.
+#
+# No input for the subject of the messages this job prints, which in the
+# trees it comes from is that tree's own downstream jobs -- "the jobs
+# below", "the matrix", "the suite". A file with no jobs below it cannot
+# name them, and an input whose whole effect is a word in a log is a copy
+# in disguise (btclib-org/.github#35). The messages name the output
+# instead, which is what a reader of the log follows into the caller's
+# `if:`.
+#
+# The draft and closed condition is here rather than in the caller, which
+# is reusable-links.yml's and reusable-codeql.yml's shape: github.event is
+# the caller's, the event its own trigger took, and on a trigger carrying
+# no pull request both halves are true, which is what lets a push, a
+# release call and a dispatch reach the step at all.
+
+on:
+  workflow_call:
+    inputs:
+      prose-pattern:
+        description: >
+          The extended regular expression a changed path matches where
+          nothing the calling workflow's other jobs build or test reads
+          it, matched against the paths of the pull request's own files.
+          Required and with no default, a default being a claim this
+          repository cannot make for a tree: which of its files are prose
+          is that tree's own.
+        required: true
+        type: string
+    outputs:
+      code:
+        description: >
+          'true' where the jobs reading it have something to check, and
+          'false' where the pull request touched prose alone.
+        value: ${{ jobs.changes.outputs.code }}
+
+# least privilege for the GITHUB_TOKEN: everything running in a job can
+# read the token, so the workflow default must not be able to write to
+# the repository. The job below elevates for itself
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    # the cheapest job of the caller's run, and the one deciding whether
+    # the rest of it runs at all: a pull request that edits only prose
+    # changes nothing those jobs build or test, and running the whole
+    # gate to prove it is what this saves
+    name: Decide whether anything but prose changed
+    # a draft spends no runner, and a closed pull request spends none
+    # either: a caller takes the closed event only to supersede a run its
+    # group is still holding
+    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    # one paginated API call and a grep; a job past this is hung on the
+    # call. A called job's bound is one number for every caller
+    timeout-minutes: 5
+    # a job's permissions replace the workflow's rather than adding to
+    # them, so contents: read is named again here: without it this job
+    # holds contents: none, which costs nothing while it checks nothing
+    # out and would cost the first checkout added
+    permissions:
+      contents: read
+      pull-requests: read # the file list of a pull request
+    outputs:
+      code: ${{ steps.decide.outputs.code }}
+    steps:
+      - name: Ask which files the pull request touches
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          # through the environment rather than expanded into the script
+          # below, where a caller's string would be code
+          PROSE: ${{ inputs.prose-pattern }}
+        run: |
+          # a push to main, a release call and a dispatch build
+          # everything: only a pull request has a base to be a diff
+          # against. A release call's own event_name is the triggering
+          # event of the workflow that invoked it, a called workflow
+          # getting none of its own
+          if [ "$EVENT" != pull_request ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "$EVENT has no base to diff against: code is true"
+            exit 0
+          fi
+          # an empty pattern is matched by every line, so the test below
+          # would select nothing and every pull request would read as
+          # prose alone. That is the caller's gate skipping while it
+          # reports green, which is the one outcome worth a red job here
+          if [ -z "$PROSE" ]; then
+            echo "::error::the caller passed an empty prose-pattern"
+            exit 1
+          fi
+          gh api "repos/$REPO/pulls/$NUMBER/files" --paginate \
+            --jq '.[].filename' > files.txt
+          echo "files changed:"
+          cat files.txt
+          # an empty list is not a prose change, it is a question this
+          # could not answer, so the count is checked before the pattern
+          if [ ! -s files.txt ] || grep -qvE "$PROSE" files.txt; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "a file the prose pattern does not match changed: code is true"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+            echo "prose only: code is false"
+          fi

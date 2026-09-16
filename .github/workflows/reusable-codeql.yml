@@ -10,8 +10,10 @@ name: reusable-codeql
 # same build mode and the same category, and an input for a difference
 # none of them has is a copy in disguise (btclib-org/.github#35).
 #
-# The calling job declares the token the analysis needs, permissions
-# being capped by the job that calls rather than inherited from it:
+# The calling job declares the token the analysis needs. README.md
+# section 11 has the mechanism: the bound refuses rather than trims, so
+# a caller's list leaving off one of these scopes is a startup_failure
+# with no job scheduled, not a quiet reduction to what it grants --
 # security-events: write, contents: read, actions: read.
 #
 # The aggregate a caller carries -- "codeql: every job passed" -- keeps
