@@ -8729,3 +8729,9 @@ nothing red follows from the copies disagreeing.
 - **An aggregate waits on the jobs of its own file, so what moves into a
   shared workflow is a cell and not the gate** (issue #35): `test.yml`
   stays copied, its `changes` job a call.
+
+### The `EXPECTED_DRIFT` entry for #1137 goes
+
+- **`check_changelog.py` is now the identical file in all nine
+  repositories that carry it** (closes #1137): the strict `xfail` no
+  longer needs the entry to swallow copies that agree.
