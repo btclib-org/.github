@@ -8717,3 +8717,9 @@ nothing red follows from the copies disagreeing.
 - **`always_run: true`, and no `files:`** (closes #1138): the script
   reads the open section off disk, and the rebase that eats the seam
   stages nothing.
+
+### `check_changelog.py` states the rebase discipline it does not run
+
+- **The docstring names the comparison instead of citing a section no
+  tree has** (issue #1137): a reconstruction against the new base is the
+  rebase's, and `EXPECTED_DRIFT` holds the path until the ports land.
