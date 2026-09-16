@@ -8627,3 +8627,9 @@ nothing red follows from the copies disagreeing.
 - **The repositories the row named now pass the cell it excused**
   (closes #1104): the strict `xfail` no longer needs a placeholder to
   swallow a result the cell already earns.
+
+### Section 12 says what a bill of materials names
+
+- **A vendored library is a component at the commit its submodule pins**
+  (issue #144): the exemption a wrapper's `Requires-Dist` would support is
+  refused in the section, and the pointer at trees still owing one is gone.
