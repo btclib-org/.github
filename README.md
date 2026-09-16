@@ -2434,6 +2434,20 @@ do not install; and not a step of `release.yml`, which would reach only the
 trees that publish and put an old drift's red on a release. What it finds is an
 issue against the floor.
 
+**`links.yml`'s `targets:` names every markdown file the tree tracks**:
+`'"**/*.md" ".github/**/*.md" ".claude/**/*.md"'`, and a term for another file
+type is the tree's own to add beside them. Markdown is what this asks about
+because it is what every repository holds. The string is the claim that these
+are the files whose links are checked, and a tracked file outside it is one this
+workflow never reads. The rejected alternative lists the directories a tree
+keeps its prose in, and what it costs is a file dropping out of the list with
+nobody deciding it should: lychee's walker skips a hidden directory unless a
+term names it, and reaches one by a wildcard only when asked with `--hidden`,
+which this job does not pass. So `.github/` and `.claude/` stay outside a string
+of `*` and `**` however it is spelled, where `**/*.md` matches at the root and a
+term naming a hidden directory reaches it unasked. `tests/links_test.py` asks
+each tree's string against that tree's own `git ls-files`.
+
 `links` runs lychee with `--include-fragments`, so a link into a heading is
 checked as an anchor. The forge serves a page whose fragment resolves to nothing
 rather than a 404, so a renamed heading breaks the links into it with nothing
