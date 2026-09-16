@@ -8639,3 +8639,9 @@ nothing red follows from the copies disagreeing.
 - **A called job's `timeout-minutes` is the callee's, one for every caller**
   (closes #1114): the keyword list a calling job is held to is a bullet of
   its own, and `tests/workflows_test.py` asks the jobs that run steps.
+
+### Section 12's bill of materials has a reader
+
+- **Every publisher is asked whether its release attaches the bill of
+  materials and the attestation signs it** (closes #1121): the directory
+  comes off the download, so `dist/` answers as a directory of its own.
