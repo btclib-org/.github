@@ -8735,3 +8735,9 @@ nothing red follows from the copies disagreeing.
 - **`check_changelog.py` is now the identical file in all nine
   repositories that carry it** (closes #1137): the strict `xfail` no
   longer needs the entry to swallow copies that agree.
+
+### A read of a called workflow's output is checked against what it declares
+
+- **`workflows_test.py` gains a check for `needs.<job>.outputs.<name>`,
+  resolved through `uses:` so a remote call is covered too** (closes
+  #1132): undeclared, the read is silently the empty string.

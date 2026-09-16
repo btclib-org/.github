@@ -142,6 +142,142 @@ def gated(repository: str, trees: dict[str, Path]) -> list[Path]:
     return found
 
 
+NEEDS_OUTPUT = re.compile(r"\bneeds\.([\w-]+)\.outputs\.([\w-]+)")
+"""A job's read of another job's output through the `needs` context.
+
+Searched over a job's whole text and not one step's, for the reason
+`shape` gives below: the read can sit in a step's `env:`, in a shell
+`run:`, or in an `if:` at either level, and all carry the same
+substring.
+"""
+
+REMOTE_CALL = re.compile(
+    r"^(?P<owner>[\w.-]+)/(?P<repo>[\w.-]+)/\.github/workflows/"
+    r"(?P<file>[\w.-]+\.ya?ml)@"
+)
+"""A `uses:` naming a reusable workflow of some repository, owner/repo open.
+
+What `REUSABLE` narrows to this organization's own workflows at `@main`,
+this reads for any owner, any repository and any ref: the callee a
+`uses:` names can be anybody's, and resolving it against `trees` is what
+decides whether it can be checked at all.
+"""
+
+
+def callee(
+    value: str, repository: str, trees: dict[str, Path]
+) -> tuple[str, Path] | None:
+    """Resolve a job's `uses:` to its owner and the workflow file it calls.
+
+    A `./`-path resolves inside the calling tree -- the one shape
+    `actionlint` already types, and its owner is the calling repository
+    itself. A remote call resolves through `trees`, which holds a
+    checkout of every repository this suite fetched, so a caller in one
+    tree and a callee declared in another are one lookup apart -- the
+    half no single checkout can do, and the reason this cell lives in
+    this repository (btclib-org/.github#1132). Either way the owner
+    names the one checkout that holds the file, the same single-tree
+    answer `lychee` in `links_test.py` resolves its own call to.
+
+    :param value: the calling job's `uses:` value.
+    :param repository: the calling tree's own name.
+    :param trees: every checkout this suite holds, keyed by name.
+    :returns: the callee's owner and path, or None where the call
+        cannot be resolved to a file this suite holds -- outside the
+        organization, naming a repository `trees` does not hold, or a
+        file that tree does not carry.
+    """
+    if value.startswith(LOCAL):
+        owner = repository
+        target = trees[repository] / value[len(LOCAL) :]
+    else:
+        found = REMOTE_CALL.match(value)
+        if found is None or found["owner"] != ORG or found["repo"] not in trees:
+            return None
+        owner = found["repo"]
+        target = trees[owner] / ".github" / "workflows" / found["file"]
+    return (owner, target) if target.is_file() else None
+
+
+def declared_outputs(workflow: Path) -> set[str]:
+    """Read the outputs a workflow declares under `workflow_call`.
+
+    :param workflow: the file to read.
+    :returns: the names it declares, empty where it declares none.
+    """
+    call = triggers(workflow).get("workflow_call")
+    given = call.get("outputs") if isinstance(call, dict) else None
+    return set(given) if isinstance(given, dict) else set()
+
+
+def test_a_read_output_is_declared_by_its_callee(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """A `needs.<job>.outputs.<name>` read names something its callee declares.
+
+    Undeclared, it is the empty string a green run cannot tell from a
+    real one. Measured by dispatch rather than argued: a job reading
+    `needs.changes.outputs.nosuch` from a callee declaring only `code`
+    printed `undeclared: []` and the run's conclusion was `success`
+    (btclib-org/.github#1132, run 35084268912). `actionlint` already
+    refuses this for a `./`-path call; every caller in this organization
+    writes a remote one, which is the shape `callee` resolves and no
+    local checker does.
+
+    Asked only where the named job calls a workflow -- `callee` answers
+    nothing for a job that runs its own steps and maps their outputs by
+    hand, which is a different mechanism and a different question.
+
+    `callee` resolves each read to the one owner and file that declare
+    it, the same pair `links_test.py`'s `lychee` resolves a call to
+    before naming `call.owner` rather than `repository` in its own
+    `by_hand` calls -- a `./`-call's owner is `repository` itself, a
+    remote call's is whichever tree `trees` holds it in, and either way
+    it is a single checkout, so the by-hand command below names it.
+    Every `needs.<job>.outputs` read the organization writes today calls
+    a remote workflow of `.github`, so `owner` above has so far always
+    been `.github` and never `repository` itself -- the one `./`-call in
+    this tree's own `links.yml` has no job reading its outputs. The
+    per-entry form is for the mechanism `callee` resolves, not for a
+    two-owner case yet on the ground.
+
+    Section 15 carries no line for this cell, decided rather than
+    overlooked: every caller here writes a remote `uses:`, so the read
+    resolves through a second checkout and is not a question section 15's
+    own opening reserves its commands for -- "the tree in front of you" --
+    which is why `links_test.py`'s `lychee`, resolving a call the same
+    way, carries none either.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    undeclared: set[str] = set()
+    for workflow in gated(repository, trees):
+        job_map = jobs(workflow)
+        for job in job_map.values():
+            for text in scalars(job):
+                for job_id, name in NEEDS_OUTPUT.findall(text):
+                    called = job_map.get(job_id)
+                    if not isinstance(called, dict) or "uses" not in called:
+                        continue
+                    resolved = callee(called["uses"], repository, trees)
+                    if resolved is None:
+                        continue
+                    owner, target = resolved
+                    if name not in declared_outputs(target):
+                        undeclared.add(
+                            f"{workflow.name}: needs.{job_id}.outputs.{name}"
+                            f" not declared by {target.name}; "
+                            + by_hand(
+                                owner,
+                                "grep -n -A8 'outputs:' "
+                                f".github/workflows/{target.name}",
+                            )
+                        )
+    assert not undeclared, f"reads no callee declares: {sorted(undeclared)}"
+
+
 def test_no_step_passes_frozen(repository: str, trees: dict[str, Path]) -> None:
     """Section 1: `--locked`, never `--frozen`; section 10 restates it.
 
