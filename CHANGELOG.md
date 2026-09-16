@@ -8651,3 +8651,9 @@ nothing red follows from the copies disagreeing.
 - **A version no calling tree claims is named on the command line that runs
   it** (closes #1112): the read the docs wait and the griffe walk carry the
   one this repository pins, and `tests/interpreters_test.py` reads them.
+
+### The platform sweep is one workflow
+
+- **`reusable-os-suite.yml` holds the job `os-ubuntu.yml`, `os-macos.yml`
+  and `os-windows.yml` will call** (issue #35): the images and the
+  interpreters arrive as JSON arrays, and `shell: bash` is unconditional.
