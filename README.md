@@ -2351,7 +2351,10 @@ a gate charges. The converse does not hold: a sentinel runs its matrix whole,
 the cells a gate covers included, so that its shape reads without re-deriving a
 hole from the gate. A sentinel cell that runs the suite passes `--no-cov`:
 section 8's floor is a claim about one interpreter on one image, and on the
-platform a sentinel watches the number is legitimately not 100.
+platform a sentinel watches the number is legitimately not 100 — except
+where a tree has already established 100% across a sweep's every cell and
+wants `deps-latest`'s own upgrade of coverage.py held to it there too, which
+is what `reusable-deps-latest.yml`'s header argues an input for.
 
 **A sentinel's own work is not a pull request's business either, and *not
 required* is not the free half of that**: a pull request waits on every check

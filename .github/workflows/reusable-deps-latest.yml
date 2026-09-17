@@ -55,11 +55,52 @@ name: reusable-deps-latest
 # tree's 132 locked packages resolved to a version older than what 3.10
 # admitted.
 #
+# measure-coverage lets a caller trade --no-cov for a bare pytest run
+# against the coverage.py this job's own upgrade just moved. btclib's
+# CONTRIBUTING.md names the exact trade, in the paragraph after its own
+# copy of the pytest step: "deps-latest.yml does not pass the flag: it
+# runs no PyPy cell and has no coverage job of its own, so the ratchet
+# meeting an upgraded coverage.py is one of the things that workflow
+# exists to find out." Its pyproject.toml carries the other half: "--cov
+# is here so that the ratchet below is what a bare uv run pytest
+# measures ... a gate only the coverage job runs is one a change meets
+# after it is pushed." This job is the only one whose upgrade step moves
+# coverage.py and then runs the suite bare -- in btclib's own
+# deps-latest.yml, suite-bindings-latest's --upgrade-package
+# btclib-secp256k1 does not touch it, and lint-latest and dist-latest
+# run no pytest at all.
+#
+# The ground is not that this job's matrix is narrower than a platform
+# sentinel's: btclib's own deps-latest.yml sweeps ubuntu-latest,
+# macos-latest and windows-latest at "3.10" and "3.14", a subset of what
+# os-ubuntu, os-macos and os-windows sweep, and its CONTRIBUTING.md says
+# the platform is varied here in as many words -- "deps-latest moves
+# both". So measure-coverage: true asks the ratchet of every cell of
+# that sweep, macOS and Windows included, not one cell matching the
+# gate's own image and interpreter. The ground is that a tree may
+# already have established 100% across that whole sweep and wants this
+# job's own coverage.py upgrade held to it. Default false, because that
+# is not generally established: btclib-benchmarks and bitcoin-core-rpc
+# were already written with --no-cov, and btclib-node's own conversion
+# (db37555b) dropped a coverage check the tree had before that landing
+# -- its changelog records the loss, and whether it should now pass
+# measure-coverage: true is a separate decision, already filed
+# (issue btclib-org/btclib-node#975) and not this one. btclib-secp256k1
+# needs nothing here: its own deps-latest.yml gates coverage at 100% in
+# a coverage-latest job, on the same schedule.
+#
+# fetch-tags and measure-coverage are coupled, the way
+# reusable-deps-oldest.yml already states the link for --no-cov's own
+# case: a tag-comparing test skips with no tags fetched, and that skip
+# is harmless under --no-cov but is uncovered lines of tests/ against
+# measure-coverage: true's own floor. btclib's own deps-latest.yml
+# carries the number this produces without fetch-tags: true beside it
+# -- 99.93%, one file, every runner, every week.
+#
 # Everything else takes one answer. The hook command, the cache key and
-# the upgrade are one command each, the timeouts bound a hung job rather
-# than budgeting the work, and --no-cov is argued at the step that
-# carries it. An input for any of those would be a copy in disguise
-# (btclib-org/.github#35).
+# the upgrade are one command each, and the timeouts bound a hung job
+# rather than budgeting the work. An input for any of those would be a
+# copy in disguise (btclib-org/.github#35).
 #
 # No `if:` declining a draft pull request: this sentinel's callers are
 # reached from a schedule and a dispatch, where github.event carries no
@@ -103,6 +144,14 @@ on:
           resolution before the suite.
         type: string
         default: ""
+      measure-coverage:
+        description: >
+          Whether the suite step runs pytest bare instead of --no-cov,
+          for a tree whose own addopts run a coverage ratchet this job's
+          upgrade is meant to exercise. See the header for which tree
+          and why the rest do not.
+        type: boolean
+        default: false
 
 # least privilege for the GITHUB_TOKEN: everything running in a job
 # (actions, the releases these jobs upgrade to, every hook, whatever they
@@ -267,7 +316,17 @@ jobs:
       # install and the suite holds on them, and an upgraded resolution
       # taking a branch the locked one does not would otherwise report a
       # number under the ratchet and name the ratchet, with the finding in
-      # the upgrade
+      # the upgrade. Not run where measure-coverage asks the opposite
+      # question of this same upgrade -- see the header
       - name: Run pytest
+        if: ${{ !inputs.measure-coverage }}
         shell: bash
         run: uv run --locked --no-default-groups --group test pytest --no-cov
+      # The tree measure-coverage exists for: its own addopts carry --cov
+      # and a fail_under ratchet, so a bare pytest here is what lets this
+      # job's upgrade meet that ratchet -- the header names the tree and
+      # the reason
+      - name: Run pytest against the coverage ratchet
+        if: ${{ inputs.measure-coverage }}
+        shell: bash
+        run: uv run --locked --no-default-groups --group test pytest
