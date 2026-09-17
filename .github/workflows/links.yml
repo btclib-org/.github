@@ -49,8 +49,7 @@ on:
 # least privilege for the GITHUB_TOKEN, which a called workflow cannot
 # widen: lychee is handed it for github.com links only.
 # Deliberately not issues: write. An automatic "link rot" issue is the
-# usual next step, and it would make this the only workflow here that can
-# write anything, to save a maintainer from reading a failure
+# usual next step, to save a maintainer from reading a failure
 # notification they already get
 permissions:
   contents: read

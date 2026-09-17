@@ -8849,3 +8849,9 @@ nothing red follows from the copies disagreeing.
 - **`claude-review.yml` takes the `closed` type** (closes #1182): its
   workflow-level group keeps `cancel-in-progress: true`, outside section 10's
   exemption; the callee's own job-level `if:` still declines the review.
+
+### `links.yml` keeps only the reason that holds for declining `issues: write`
+
+- **The decline of `issues: write` keeps only the reason that holds**
+  (issue btclib-org/.github#1180): the deleted clause claimed uniqueness
+  that `claude-review.yml`'s own `pull-requests: write` already denies.
