@@ -8789,3 +8789,9 @@ nothing red follows from the copies disagreeing.
 - **`python-versions`' floor was argued in `btclib`'s inline workflow and
   vanished from every converted caller** (issue #35): the callee's header
   now carries why the floor matters, not just its ceiling.
+
+### `reusable-sdist-rebuild.yml` rebuilds the release tag for every caller
+
+- **`sdist-builder` is a closed choice of two commands, and `submodules`
+  a string, neither a caller's shell text or its boolean** (issue #35):
+  `recursive` matches `btclib-secp256k1`'s own build-sdist checkout.

@@ -1,0 +1,208 @@
+---
+name: reusable-sdist-rebuild
+
+# The sentinel a repository's sdist-rebuild.yml calls, so the release
+# lookup, the checkout, the two ways to build an sdist, the normalizer
+# and `gh attestation verify` are written once. The trigger, the cron
+# minute section 10's calendar gives the calling repository, the
+# workflow-level `permissions:`, the `paths:` filter naming the caller's
+# own file, and the concurrency group -- including a caller's own
+# `cancel-in-progress:` expression -- stay in the caller, whose run this
+# job joins. The calling job keeps its own `if:` and its own
+# `permissions:` block; the second is not style, and this header comes
+# back to it below.
+#
+# What the row asks: the latest release's tag, rebuilt the way a
+# caller's own RELEASING.md rebuilds it under *Rebuild a release from
+# its tag*, and `gh attestation verify` over the rebuilt sdist, which
+# passes only where its digest is one release.yml signed. What moves
+# between a release and this run is the runner image, uv, and the build
+# backend -- `uv build`'s own resolver, or `python -m build`'s for a
+# tree whose sdist comes from a compiled-extension backend -- within the
+# range the tag's pyproject.toml allows; that interval is what a weekly
+# run covers and a check inside release.yml does not. Section 10 of
+# this repository's own README.md makes the row the sdist's alone, a
+# wheel being outside the property that row states. It gates nothing,
+# and a caller's own header is where its branch rule (or the absence of
+# one) belongs.
+#
+# Three inputs.
+#
+# sdist-builder, string, default "uv": not a free-form command, on
+# purpose. A caller-supplied shell string is exactly what zizmor's
+# template-injection audit exists to catch, and the two ways a tree in
+# this organization actually builds an sdist are a closed set --
+# `uv build --sdist`, and `uv run --locked --only-group build
+# python -m build -s` for a tree whose extension a compiled backend
+# builds. Each is its own step, chosen by an `if:` on the input's value
+# rather than pasted into a shell, so the caller's string never reaches
+# a `run:` block at all.
+#
+# submodules, string, default "": a boolean everywhere else this
+# organization checks one out (reusable-deps-latest.yml,
+# reusable-os-suite.yml, reusable-lint.yml), and a string here because
+# one caller's answer is not `true` but `recursive`. Measured rather
+# than inherited: btclib-secp256k1's own build-sdist job in test.yml --
+# the job whose upload is what release.yml actually attests -- checks
+# out with `submodules: recursive` too, because the sdist a compiled
+# backend writes there carries the vendored `secp256k1` and
+# `secp256k1-zkp` trees, and hatchling's sdist target packages what the
+# checkout puts on disk. The same tree's lint.yml passes plain `true` to
+# reusable-lint.yml, and that is a right difference and not a
+# contradiction: that hook only resolves a release name in the vendored
+# clone's own refs, where this job has to build the library the clone
+# carries. An empty string reaches `actions/checkout`'s own `submodules:`
+# the same way `false` would -- the action treats an unset value as no
+# submodules -- so a caller naming neither gets exactly reusable-lint.yml's
+# default without asking for it by that name.
+#
+# python-version, string, default "": when non-empty the job adds an
+# actions/setup-python step ahead of Setup uv and pins
+# `UV_PYTHON_DOWNLOADS=never` right after it. The two belong together:
+# the pin is what stops uv from fetching an interpreter of its own
+# choosing and so silently ignoring the one setup-python just installed,
+# and it is conditioned on the same input as the step it makes binding.
+# A caller naming no version gets neither step, and uv resolves whatever
+# it resolves without them, as every caller that never asked for a
+# specific interpreter did before this file existed.
+#
+# The permissions block is the calling job's, and this is not style:
+# a called workflow's own block can only downgrade what the caller
+# granted, never restore an omitted scope, so a caller whose calling job
+# omits one this job's own block asks for fails at startup rather than
+# going red on a step -- measured twice in btclib-org/.github#912, and
+# this repository's own README.md section 11 is the sentence.
+# **A caller's calling job therefore carries `permissions: contents:
+# read, attestations: read`**, naming both scopes this job's own block
+# below asks for.
+#
+# One divergence resolved rather than carried forward: btclib-node and
+# bitcoin-core-rpc built with a bare `uv build`, which writes a wheel
+# alongside the sdist, where btclib's own `uv build --sdist` and
+# btclib-secp256k1's `python -m build -s` write the sdist alone, and
+# section 10's row is the sdist's. Nothing in either tree's own
+# sdist-rebuild.yml reads that wheel back:
+# normalize_sdist.py's own glob is `dist/*.tar.gz`, gh attestation
+# verify's argument is the same glob, and neither file uploads or
+# otherwise touches `dist/*.whl`. So this callee has one sdist-only path
+# for every caller -- `sdist-builder: uv` runs `uv build --sdist` -- and
+# a tree adopting it stops building a wheel this sentinel was already
+# discarding.
+
+on:
+  workflow_call:
+    inputs:
+      sdist-builder:
+        description: >
+          How the sdist is built: "uv" for `uv build --sdist`,
+          "build-module" for `uv run --locked --only-group build
+          python -m build -s`, a tree whose sdist a compiled-extension
+          backend builds.
+        type: string
+        default: "uv"
+      submodules:
+        description: >
+          What the release tag's checkout passes as `submodules:` --
+          "", "true" or "recursive". A string and not the boolean
+          reusable-deps-latest.yml and reusable-os-suite.yml take: a
+          caller whose sdist carries a vendored, recursively-submoduled
+          library needs "recursive", which a boolean cannot express.
+        type: string
+        default: ""
+      python-version:
+        description: >
+          The interpreter actions/setup-python installs ahead of Setup
+          uv, empty running neither step and leaving uv to resolve its
+          own.
+        type: string
+        default: ""
+
+# least privilege for the GITHUB_TOKEN at the workflow level, elevated
+# on the job below -- each grant explained at its own line there
+permissions:
+  contents: read
+
+jobs:
+  rebuild:
+    name: Rebuild the latest release's sdist and verify its attestation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # restated, a job's permissions replacing the workflow's
+      contents: read
+      # the attestations API, which gh attestation verify reads
+      attestations: read
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment:
+      # a tag, let alone a branch, is a name its owner can move, and
+      # these run in a job that can read the workflow token
+      #
+      # the release GitHub marks latest, not the newest tag: a tag whose
+      # release never published has no attestation to verify against
+      - name: Find the latest release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(gh release view --repo "$GITHUB_REPOSITORY" \
+            --json tagName --jq .tagName)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout the release's tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.release.outputs.tag }}
+          # the header argues the string this passes on, empty being no
+          # submodules the same way false is
+          submodules: ${{ inputs.submodules }}
+          persist-credentials: false
+
+      # the header's python-version paragraph: the pin right after this
+      # step is what makes it binding on Setup uv below
+      - name: Set up Python
+        if: inputs.python-version != ''
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Pin uv to the interpreter setup-python just installed
+        if: inputs.python-version != ''
+        run: echo "UV_PYTHON_DOWNLOADS=never" >> "$GITHUB_ENV"
+
+      # no cache, as test.yml's own build job when release.yml calls it:
+      # the backend is fetched afresh, as it was for the release
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          enable-cache: false
+
+      # what the build below and the normalizer after it both read:
+      # hatchling's sdist writer honours this when it is set, and
+      # uv_build falls back to a fixed constant when it is not -- see
+      # normalize_sdist.py's own docstring. The commit date, not the
+      # tag's: a lightweight tag has none of its own to prefer, and this
+      # job's checkout is the commit a release tags
+      - name: Pin the build timestamp to the commit
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
+
+      # the two commands the header's sdist-builder paragraph names, each
+      # guarded by the input's value rather than the value reaching a
+      # shell: the caller chooses which step runs, never what a step runs
+      - name: Build the sdist with uv
+        if: inputs.sdist-builder == 'uv'
+        run: uv build --sdist
+      - name: Build the sdist with python -m build
+        if: inputs.sdist-builder == 'build-module'
+        run: uv run --locked --only-group build python -m build -s
+
+      - name: Make the sdist's determinism this tree's own
+        run: |
+          uv run --no-project --python 3.14 \
+            .github/scripts/normalize_sdist.py dist/
+          sha256sum dist/*.tar.gz
+
+      - name: Verify the rebuilt sdist against the release's attestation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh attestation verify dist/*.tar.gz --repo "$GITHUB_REPOSITORY" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release.yml"
