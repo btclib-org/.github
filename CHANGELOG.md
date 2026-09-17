@@ -8783,3 +8783,9 @@ nothing red follows from the copies disagreeing.
 - **A callee with no inputs at all** (issue #35): the four trees ask the
   same question, and a caller's calling job must name every scope this
   job's own permissions block asks for.
+
+### `reusable-deps-latest.yml`'s header now argues why the floor matters
+
+- **`python-versions`' floor was argued in `btclib`'s inline workflow and
+  vanished from every converted caller** (issue #35): the callee's header
+  now carries why the floor matters, not just its ceiling.
