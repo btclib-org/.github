@@ -1,0 +1,179 @@
+---
+name: reusable-github-release
+
+# The GitHub release a repository's release.yml cuts once an index has
+# accepted its files, so the notes, the assets and the bundle's naming
+# are written once rather than in every publishing tree. `btclib`,
+# `btclib-secp256k1`, `btclib-node` and `bitcoin-core-rpc` each carry
+# these five steps. The trigger, the `concurrency:` group a release
+# never cancels, the `needs:` edges onto the tree's own publish job and
+# its attest job, and the `if:` that opens with `always()` all stay in
+# the caller, whose run this job joins.
+#
+# A release announces what users can already install, which is why it
+# comes after the upload and not before it; the install sentinel runs
+# beside this job rather than ahead of it, a release announcing files
+# that do not install being worse than a release announced a minute
+# later, and the announcement not being what makes them installable.
+#
+# reusable-attest.yml is the other half and its header argues why the
+# two are two files. What passes between them is the `attestation`
+# artifact, the run's rather than a file's, so a caller that converts
+# one and not the other still works.
+#
+# **A caller's `if:` has to open with `always()`, and the two `.result`
+# checks beside it are not a substitute for saying so.** A job with a
+# skipped job anywhere in its ancestry is force-skipped whatever its own
+# condition says, unless that condition opens with a status function,
+# and that opt-out holds for the job that writes it and not for whoever
+# needs that job in turn: a tag push skips the rehearsal's publish job,
+# reusable-attest.yml's caller opens with `always()` and runs, and a
+# caller of this file sits behind the same skipped ancestor and is
+# skipped in turn unless it opts out for itself. What that costs is a
+# version on the index with no release cut for it, which
+# btclib-org/btclib#1142 records along with the other half: a skip is
+# neither a failure nor within `gh run rerun --failed`'s blast radius,
+# so the recovery is a release created by hand from the run's own
+# artifacts, with the distribution files checked against the digests the
+# index publishes before they are attached. Asking for
+# `needs.publish-pypi.result == 'success'` is what keeps this to the tag
+# and answers a rehearsal the same way, that job's result there being
+# `skipped`.
+#
+# btclib-org/.github#35 records this job as unconvertible, on the ground
+# that a callee's jobs cannot `needs:` a caller's;
+# reusable-attest.yml's header has the three measurements that say the
+# prohibition does not reach the calling job.
+#
+# One input.
+#
+# dist-artifact, string, required: the artifact whose files are attached
+# here. reusable-attest.yml's header argues the value and the absent
+# default; the two take the same one, a release carrying what was
+# signed.
+#
+# Resisted: an input for the notes file and one for the asset list.
+# Every caller keeps a RELEASE_NOTES.md whose `## <tag>` section is what
+# the release says, and every caller attaches the same three things --
+# the distribution files, the bill of materials and the bundle. A tree
+# whose bill of materials reached the release through the `dist`
+# artifact attaches exactly what it attaches today.
+#
+# permissions: contents: read at the workflow level, elevated on the job
+# below. A called workflow's own block can only downgrade what the
+# caller granted, never restore an omitted scope, and a scope declared
+# here that the calling job's list leaves off ends the run in
+# `startup_failure` before any step runs -- btclib-org/.github#912 is
+# the measurement and section 11 of this repository's README.md the
+# sentence. **A caller's calling job therefore carries `permissions:
+# contents: write`**, which covers this file's own top-level `contents:
+# read` as well, and nothing besides: section 10's rule is that the job
+# that writes a release holds no OIDC token.
+#
+# What a caller owes besides: the `needs:` edges and the `if:` above;
+# dist-artifact; artifacts named `sbom` and `attestation` in the same
+# run, the second being reusable-attest.yml's; and a RELEASE_NOTES.md at
+# the root of its own tree, which is the one this job reads --
+# `actions/checkout` takes `github.repository` from the run it is a step
+# of rather than from where this file lives. `GITHUB_REF_NAME` is the
+# caller's ref, which is the read reusable-version-check.yml already
+# makes when it compares that variable against the version the calling
+# tree declares.
+#
+# Divergences resolved rather than carried forward. A `path:` written
+# with a trailing slash and without one, and the step that writes the
+# release under two names. And `btclib-node` downloading its bill of
+# materials into `dist/`, so that one glob attaches what two attach
+# here: the same files reach the release either way, and two
+# directories are what keeps `dist/*` the distribution files.
+
+on:
+  workflow_call:
+    inputs:
+      dist-artifact:
+        description: >
+          The artifact holding the distribution files to attach, `dist`
+          where one artifact carries the wheel and the sdist together.
+        required: true
+        type: string
+
+# least privilege for the GITHUB_TOKEN at the workflow level, elevated
+# on the job below -- each grant explained at its own line there
+permissions:
+  contents: read
+
+jobs:
+  github-release:
+    # the name the check context is keyed by, after the calling job's
+    # own: branch protection matches a context by name and not by the
+    # workflow that reported it
+    name: Attach the files to the GitHub release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # the one job of a release that writes to the repository through
+      # its token, and what it writes is a release; the statement
+      # reusable-attest.yml signs goes to the attestations API under
+      # permissions of its own
+      contents: write
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment:
+      # a tag, let alone a branch, is a name its owner can move, and
+      # these run in a job that can read the workflow token
+      #
+      # the calling tree's own, RELEASE_NOTES.md being what the step
+      # below reads
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download the distribution files
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ inputs.dist-artifact }}
+          path: dist/
+      # each into a directory of its own, so that the dist/* glob below
+      # stays the distribution files and nothing else
+      - name: Download the attestation bundle
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: attestation
+          path: attestation/
+      - name: Download the bill of materials
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: sbom
+          path: sbom/
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # the release notes are the tag's own section of
+        # RELEASE_NOTES.md; if the section is missing the release still
+        # happens, with notes generated from the merged pull requests
+        # instead. The fallback is the safety net for a tag pushed past
+        # a red version-check, not the check itself: that job refuses a
+        # tag whose RELEASE_NOTES.md heading carries anything after the
+        # version -- "(work in progress, not released yet)" matches the
+        # pattern below and is not empty, so nothing here would notice
+        run: |
+          awk -v tag="$GITHUB_REF_NAME" '
+            $0 ~ "^## " tag "( |$)" {found=1; next}
+            /^## / && found {exit}
+            found {print}
+          ' RELEASE_NOTES.md > "$RUNNER_TEMP/notes.md"
+          # named for the tag only here, where the ref is one: nothing
+          # inside the bundle says which release it belongs to, the way
+          # the distribution files' own names do
+          bundle="$GITHUB_REF_NAME.attestation.jsonl"
+          cp attestation/attestation.jsonl "$bundle"
+          # the bill of materials needs no renaming, unlike the bundle:
+          # it carries the version in its own name, the distribution
+          # files being where it took it from
+          if [ -s "$RUNNER_TEMP/notes.md" ]; then
+            gh release create "$GITHUB_REF_NAME" dist/* sbom/* "$bundle" \
+              --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md"
+          else
+            echo "::warning::RELEASE_NOTES.md has no $GITHUB_REF_NAME section"
+            gh release create "$GITHUB_REF_NAME" dist/* sbom/* "$bundle" \
+              --title "$GITHUB_REF_NAME" --generate-notes
+          fi

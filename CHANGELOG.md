@@ -8831,3 +8831,15 @@ nothing red follows from the copies disagreeing.
 - **Section 10's `closed` type, the `CLAUDE_REVIEW_ENABLED` guard on the
   callee's two jobs, and a port adapting the call and the tree's own
   prose** (closes #1174): section 14 names the call as what differs here.
+
+### Two callees carry the release tail, `attest` and `github-release`
+
+- **One input, `dist-artifact`, and no caller yet** (issue #35): what
+  this issue records as unconvertible is a `needs:` the *calling* job
+  carries, as actionlint and btclib-secp256k1's own release run agree.
+
+### `reusable-sdist-rebuild.yml` takes the signer the attestation carries
+
+- **`attest-signer`, a closed choice of two, default the caller's own
+  `release.yml`** (issue #35): an attestation generated inside a called
+  workflow is signed by that callee, and `gh` makes a verifier say so.
