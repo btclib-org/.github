@@ -2152,6 +2152,16 @@ against that, and what lengthens it without adding to it is deleted.
   reads in its own form. A citation names what the issue records, never
   what state the tracker holds it in: the first stays true when the
   issue closes, the second goes false that day.
+- **A citation of a section carries the words it is found by.** What a
+  citation carries is decided by what it names: a path keeps its name
+  and takes no revision, a line number moves under a path that keeps its
+  name and takes one, and a heading is neither — it reads as durable,
+  and it is retitled by whoever improves a sentence. So a section is
+  cited by words the document holds, a heading or a bullet's opening or
+  the number where the document numbers its sections, and where it holds
+  none the prose states the thing instead of pointing at it.
+  `tests/citations_test.py` resolves a citation against the document it
+  names, in every tree.
 - **No history in the prose.** Comments say why the code is as it is, in
   the present tense. History has two files of its own.
 - **80 columns everywhere prose lives** — markdown by MD013, tables

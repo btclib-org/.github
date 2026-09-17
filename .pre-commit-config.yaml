@@ -76,11 +76,12 @@ repos:
         exclude: |
           (?x)^(\.github/scripts/check_changelog\.py
             |tests/(__init__|conftest)\.py
-            |tests/(backlog|changelog|classifiers|conventions|copyright
-              |dependabot|grid|homepage|hooks|interpreters|issue_template
-              |layout|links|names|per_subject|pins|protection
-              |pull_request_template|pyproject|release|root_files|scope
-              |security|surface|topics|verbatim|workflows)_test\.py)$
+            |tests/(backlog|changelog|citations|classifiers|conventions
+              |copyright|dependabot|grid|homepage|hooks|interpreters
+              |issue_template|layout|links|names|per_subject|pins
+              |protection|pull_request_template|pyproject|release
+              |root_files|scope|security|surface|topics|verbatim
+              |workflows)_test\.py)$
       - id: check-yaml
       # the toml here is read by taplo every run, but a format is not a
       # parse: what taplo cannot read fails its own hook, and what it can

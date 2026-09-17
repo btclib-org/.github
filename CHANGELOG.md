@@ -8759,3 +8759,9 @@ nothing red follows from the copies disagreeing.
 - **A tree tracking `.github/workflows/mutation.yml` owes a copy**
   (issue #1152): `EXPECTED_DRIFT` holds the copies that disagree, and a
   `BACKLOG` row the trees running the sentinel without one.
+
+### Section 9 says what a citation of a section carries
+
+- **A citation of a section names words the document holds, resolved in
+  every tree by `tests/citations_test.py`** (closes #1148): a heading
+  reads as durable and is retitled by whoever improves a sentence.
