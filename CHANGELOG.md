@@ -8825,3 +8825,9 @@ nothing red follows from the copies disagreeing.
 - **`./`, not the `@main` a caller in another repository writes**
   (issue #35): the callee is this tree's own, and its verdict check
   reads the last claude[bot] review rather than the last with a verdict.
+
+### Section 11 states the `claude-review.yml` a caller actually is
+
+- **Section 10's `closed` type, the `CLAUDE_REVIEW_ENABLED` guard on the
+  callee's two jobs, and a port adapting the call and the tree's own
+  prose** (closes #1174): section 14 names the call as what differs here.
