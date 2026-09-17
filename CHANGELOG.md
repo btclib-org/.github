@@ -8819,3 +8819,9 @@ nothing red follows from the copies disagreeing.
 - **`check-changelog`'s keys are read off every gate by
   `tests/hooks_test.py`** (closes #1142): comparing the copies with each
   other is green where they agree and are wrong together.
+
+### `claude-review.yml` calls `reusable-claude-review.yml` by path
+
+- **`./`, not the `@main` a caller in another repository writes**
+  (issue #35): the callee is this tree's own, and its verdict check
+  reads the last claude[bot] review rather than the last with a verdict.

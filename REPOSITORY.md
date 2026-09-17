@@ -311,8 +311,8 @@ gh api repos/btclib-org/.github/actions/permissions/workflow
 ```
 
 `read`, which is what every workflow here needs: `lint.yml` and
-`links.yml` read the tree, and `claude-review.yml`'s jobs elevate
-themselves to `pull-requests: write` to write on a pull request and to
+`links.yml` read the tree, and `claude-review.yml`'s calling job elevates
+itself to `pull-requests: write` to write on a pull request and to
 `id-token: write` for the OIDC token the action mints at startup. Nothing
 publishes, attests or writes to the repository's contents.
 
@@ -449,9 +449,9 @@ gh api orgs/btclib-org/dependabot/secrets \
 # ["CLAUDE_CODE_OAUTH_TOKEN","all"], both
 ```
 
-**A switch this repository does not set.** `claude-review.yml` guards
-its jobs with `vars.CLAUDE_REVIEW_ENABLED`, and neither variable store
-holds it: the repository's answers with `ALIGNMENT_APP_ID` alone, above,
+**A switch this repository does not set.** The jobs `claude-review.yml`
+calls are guarded by `vars.CLAUDE_REVIEW_ENABLED`, and neither variable
+store holds it: the repository's answers with `ALIGNMENT_APP_ID` alone, above,
 and the organization's is empty.
 
 ```shell
