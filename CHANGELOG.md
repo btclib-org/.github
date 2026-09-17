@@ -8813,3 +8813,51 @@ nothing red follows from the copies disagreeing.
 - **`extra-prompt`, `extra-allowed-tools`, and a verdict check reading
   the last entry rather than the last matching one** (issue #35): the
   fix for btclib-org/btclib-secp256k1#394 arrives with each conversion.
+
+### A shared part of a repository's own file is held against section 14
+
+- **`check-changelog`'s keys are read off every gate by
+  `tests/hooks_test.py`** (closes #1142): comparing the copies with each
+  other is green where they agree and are wrong together.
+
+### `claude-review.yml` calls `reusable-claude-review.yml` by path
+
+- **`./`, not the `@main` a caller in another repository writes**
+  (issue #35): the callee is this tree's own, and its verdict check
+  reads the last claude[bot] review rather than the last with a verdict.
+
+### Section 11 states the `claude-review.yml` a caller actually is
+
+- **Section 10's `closed` type, the `CLAUDE_REVIEW_ENABLED` guard on the
+  callee's two jobs, and a port adapting the call and the tree's own
+  prose** (closes #1174): section 14 names the call as what differs here.
+
+### Two callees carry the release tail, `attest` and `github-release`
+
+- **One input, `dist-artifact`, and no caller yet** (issue #35): what
+  this issue records as unconvertible is a `needs:` the *calling* job
+  carries, as actionlint and btclib-secp256k1's own release run agree.
+
+### `reusable-sdist-rebuild.yml` takes the signer the attestation carries
+
+- **`attest-signer`, a closed choice of two, default the caller's own
+  `release.yml`** (issue #35): an attestation generated inside a called
+  workflow is signed by that callee, and `gh` makes a verifier say so.
+
+### `claude-review.yml` takes the `closed` pull request type
+
+- **`claude-review.yml` takes the `closed` type** (closes #1182): its
+  workflow-level group keeps `cancel-in-progress: true`, outside section 10's
+  exemption; the callee's own job-level `if:` still declines the review.
+
+### `links.yml` keeps only the reason that holds for declining `issues: write`
+
+- **The decline of `issues: write` keeps only the reason that holds**
+  (issue btclib-org/.github#1180): the deleted clause claimed uniqueness
+  that `claude-review.yml`'s own `pull-requests: write` already denies.
+
+### Section 8 answers for a statement only some invocations execute
+
+- **Under a floor with no slack the runner's flags decide whether the
+  gate passes** (closes #1175): the answer is a test of the statement
+  and not a pragma, which `tests/coverage_test.py` asks of the trees.

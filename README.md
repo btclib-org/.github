@@ -1931,6 +1931,15 @@ fail_under = 100.0
   covered by patching what stands in the way, or carries a
   `pragma: no cover` with its reason. Neither is a build left red.
 
+  **A statement only some invocations execute is covered only on those
+  invocations.** What reaches it is the runner rather than a test — a
+  hook pytest calls under one set of flags and not another — so under a
+  floor with no slack the flags decide whether the gate passes, and what
+  turns the build red has no relation to the change under it. That is
+  the first of the two and not the second: a test of its own covers it
+  whatever the invocation, where a pragma would exclude a statement
+  every run the project cares about does execute.
+
   **The reason goes on the pragma's own line, after ` -- `, for
   `pragma: no cover` and `pragma: no branch` alike** — the dash a comment
   writes, an em dash being this file's own; a branch a test never takes
@@ -3118,12 +3127,17 @@ nothing lands while nobody is available.
 **The ack of record is `claude-review.yml`'s**, and an author's own is
 not one: a comment from the account that opened the pull request says
 its gates were run, and is not a reading. What triggers the workflow is
-`opened`, `reopened`, `synchronize` and `ready_for_review`, and a comment
-naming `@claude` — which is how a head that moved after the review gets
-a fresh one.
+section 10's *`pull_request` types* — the exemption there is for a group
+that does not cancel in progress, and this group cancels — and a comment
+naming `@claude`, which is how a head that moved after the review gets a
+fresh one. A closed run posts no review, the review job declining that
+action: what the type buys is the group, where the run supersedes a
+review nobody is going to read.
 
-**The workflow is present and neither of its jobs runs.** Each carries
-`if: vars.CLAUDE_REVIEW_ENABLED == 'true'`, an organization variable:
+**The workflow is present and neither the review nor a `@claude` answer
+runs.** `reusable-claude-review.yml`'s two jobs each carry
+`if: vars.CLAUDE_REVIEW_ENABLED == 'true'`, an organization variable, and
+every caller reaches both:
 
 ```shell
 gh api orgs/<org>/actions/variables --jq '.variables[].name'
@@ -3212,14 +3226,16 @@ reason *Dependabot and pre-commit.ci* gives below; without the second,
 every pull request Dependabot opens gets a red review. Why the job has
 the shape it has is in the workflow's own header.
 
-**Two of the three things a port adapts** are claims about the receiving
-tree: the prompt names `REVIEWING.md` and says the gates run beside it on
-this sha, so a tree without that file or those workflows needs a prompt
-that says something true of it.
+**The prompt is `reusable-claude-review.yml`'s, and a port adapts no
+part of it.** What a port adapts is the `uses:` reference — a path where
+the callee is the calling tree's own file, `@main` from anywhere else —
+the inputs the call passes, an `extra-prompt` paragraph about what the
+receiving tree ships and the `extra-allowed-tools` its own commands
+need, and the header saying why that tree runs a review at all.
 
-**The third is a citation.** This repository's prompt cites `README.md`,
-which everywhere else is section 2's file about that repository, so a
-receiving copy cites this standard in one of these shapes:
+**A citation of this standard names it rather than a `README.md`**,
+which everywhere else is section 2's file about that repository, in one
+of these shapes:
 
 - `section 11 of the organization's standard`, where the rule cited is in
   this section and no one subsection of it holds the rule, and wherever
@@ -3232,18 +3248,16 @@ receiving copy cites this standard in one of these shapes:
 **What chooses the shape is what holds the rule, never where the
 sentence sits**: the two secret stores a Dependabot-initiated run reads
 are stated in this section's own prose and in *Dependabot and
-pre-commit.ci*, so their citation names no subsection. A copy names the
-standard in full somewhere, `section 11` alone not saying which document
-it is a section of. A finding about prose cites section 9 and one about
-a rule stated without its reason cites *How to use this file*, not
-section 11.
+pre-commit.ci*, so their citation names no subsection. A file citing it
+names the standard in full somewhere, `section 11` alone not saying
+which document it is a section of. A finding about prose cites section 9
+and one about a rule stated without its reason cites *How to use this
+file*, not section 11.
 
-**A review reads more than the sha.** The title and description are what
-the forge answered when the reviewer asked, and a correction lands
-seconds behind the push that fired the run, so the prompt has the
-reviewer ask again before a finding about them. With no `edited`
-trigger, a later correction clears such a finding only through a further
-push or a `close`/`reopen`.
+**A review reads more than the sha.** The prompt has the reviewer read
+the title and description again before a finding about either, for the
+reason it gives; with no `edited` trigger, a later correction clears
+such a finding only through a further push or a `close`/`reopen`.
 
 ### Tokens, publishing, scanning
 
@@ -3747,6 +3761,16 @@ these, its subject being a path: what holds a part equal across the
 copies is that each was written from this file, and that a command of
 section 15 greps for it, which none does for the `ci:` block.
 
+**A part is held against this file, and not against the other copies.**
+Section 4 states `check-changelog`'s keys, and `tests/hooks_test.py`
+reads them off each gate, resolving the hook by its `id` so that where a
+gate keeps the stanza is no drift in it. The rejected alternative
+compares that stanza between the trees, which is green wherever the
+copies agree and are wrong together — the state each tree's
+btclib-org/.github#1138 port is the fix for. Any other part above gets
+its check in that shape on the day it gets one: this file states the
+value, and a test asks each tree for it.
+
 Whole files are here too, and these say in themselves where the
 comparison stops:
 
@@ -3808,9 +3832,9 @@ it agrees with this one.
 `REVIEWING.md` earn a bullet because this repository's own copy of each is a
 receiver exactly like every other tree's, which is what
 `tests/verbatim_test.py`'s comparison assumes. `claude-review.yml` has no such
-copy here: this repository is the standard the workflow reviews, so its prompt
-and a receiving copy's differ by the adaptation section 11's *The workflow, and
-what a port of it has to adapt* states. A bullet here would put this
+copy here: this repository holds the callee, so its call and a receiving copy's
+differ by the adaptation section 11's *The workflow, and what a port of it has
+to adapt* states. A bullet here would put this
 repository's own copy in the comparison too, and it
 would fail forever rather than the way `EXPECTED_DRIFT` expects: that table
 records a copy a fix converges, not one that cannot by design.

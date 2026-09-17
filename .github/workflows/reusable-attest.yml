@@ -1,0 +1,216 @@
+---
+name: reusable-attest
+
+# The signature a repository's release.yml puts on what its GitHub
+# release will carry, so the statement, the bundle and the reasoning for
+# both are written once rather than in every publishing tree. `btclib`,
+# `btclib-secp256k1`, `btclib-node` and `bitcoin-core-rpc` each carry
+# these five steps. The trigger, the `concurrency:` group a release
+# never cancels, the `needs:` edges onto the tree's own publish jobs and
+# the `if:` that opens with `always()` all stay in the caller, whose run
+# this job joins.
+#
+# The files reach users by two routes and only one of them carries
+# provenance of its own: the publish action generates PEP 740
+# attestations for the copies on the index, where the copies attached to
+# a GitHub release carry nothing. This job signs those, the digests
+# being the index's own, the artifact holding them being downloaded here
+# rather than rebuilt. The bill of materials is signed with them and for
+# the same reason: it is attached to that release too, so leaving it out
+# reopens the gap this job exists to close for the one asset that says
+# what the others contain.
+#
+# A file of its own, and reusable-github-release.yml is the other half.
+# Section 10's rule is that the job that writes a release holds no OIDC
+# token and the job that signs writes no release, and a caller elevates
+# one job at a time: the two jobs in one callee would be one calling job
+# whose `permissions:` names every scope both of them ask for. What
+# passes between them is an artifact, which is the run's and not a
+# file's, so nothing is gained by holding them together either.
+#
+# btclib-org/.github#35 records these jobs as unconvertible, on the
+# ground that a callee's jobs cannot `needs:` a caller's. The
+# prohibition is real and it reaches a job written in this file, which
+# declares no `needs:` and could not. It does not reach the *calling*
+# job, which is an ordinary job of the caller's own graph and keeps the
+# `needs:` and the `if:` it carries today. Three measurements, none of
+# them an inference from the other two. actionlint's syntax check names
+# the keys a `uses:` job may carry and `needs` and `if` are among them:
+# a probe declaring `steps:` beside `uses:` exits 1 with "only following
+# keys are allowed: name, uses, with, secrets, needs, if, and
+# permissions". actionlint exits 0 on a caller whose `uses:` job carries
+# `needs: [publish-pypi, publish-testpypi]` and an `if:` reading
+# `needs.publish-pypi.result`, and exits 1 on the same file with one
+# name in that list changed to a job that is not there -- so the tool
+# that passes the shape is a tool that can see this class. And a `uses:`
+# job carrying a `needs:` onto an inline sibling, with an `if:` reading
+# that sibling's `.result`, is already running in production: each of
+# the four trees calls its own pypi-install.yml from a job written
+# `needs: publish-pypi` with `if: always() && needs.publish-pypi.result
+# == 'success'`, and on btclib-secp256k1's run 34394377013, the push of
+# v0.8.0.6, `Publish to TestPyPI` is skipped, `Publish to PyPI` is
+# success, and every job of the called workflow underneath that `uses:`
+# job is success.
+#
+# One input.
+#
+# dist-artifact, string, required: the artifact holding the files an
+# index has already accepted. `btclib`, `btclib-node` and
+# `bitcoin-core-rpc` upload a wheel and an sdist together under `dist`;
+# `btclib-secp256k1` builds its wheels one artifact per image and
+# uploads the sdist alone under `sdist`, which is what its release
+# carries, the wheels reaching users from the index with the publish
+# action's own attestations on them. So the value is a fact about the
+# calling tree's own test.yml rather than a spelling to converge, and it
+# takes no default: the trees that say `dist` say it because their
+# test.yml files descend from one ancestor, which is what
+# btclib-org/.github#35 converges rather than a rule a default could
+# rest on.
+#
+# Resisted: an input for the bill of materials' artifact and one for the
+# bundle's. Every caller writes its document under `sbom`, and
+# `attestation` is this file's contract with reusable-github-release.yml
+# rather than anything a tree chooses.
+#
+# permissions: contents: read at the workflow level, and the job below
+# declares the two writes alone: it checks nothing out, and the job each
+# caller runs here today is granted no `contents` either, on the run
+# named above among others. A called workflow's own block can only
+# downgrade what the caller granted, never restore an omitted scope, and
+# a scope declared here that the calling job's list leaves off ends the
+# run in `startup_failure` before any step runs -- btclib-org/.github#912
+# is the measurement and section 11 of this repository's README.md the
+# sentence. **A caller's calling job therefore carries `permissions:
+# contents: read, id-token: write, attestations: write`**. The first is
+# there because this file declares it at the workflow level, and what a
+# run does where a called workflow's top-level declaration falls outside
+# the caller's list is not measured.
+#
+# What a caller owes besides: the `needs:` edges onto its own publish
+# jobs and the `if:` that survives a skipped one, since a rehearsal
+# skips the tag's publish job and a tag skips the rehearsal's;
+# dist-artifact; an artifact of the name that input carries, in the same
+# run; and an artifact named `sbom` beside it.
+#
+# **Converting this job moves the attestation's signer, and a caller
+# pairs three things with its conversion.** `gh attestation verify`
+# says so: "if your attestation was generated via a reusable workflow
+# then that reusable workflow is the signer whose identity needs to be
+# validated. In this situation, you must use either the
+# `--signer-workflow` or the `--signer-repo` flag." The identity becomes
+# `btclib-org/.github/.github/workflows/reusable-attest.yml`, the
+# `job_workflow_ref` btclib-org/.github#35's OIDC probe recorded for
+# this call shape on run 34814956543; the `--repo` half does not move,
+# `repository` there naming the caller. Measured on a released artifact
+# rather than reasoned about: btclib's v2026.9.13 sdist carries
+# `buildSignerURI:
+# https://github.com/btclib-org/btclib/.github/workflows/release.yml@refs/tags/v2026.9.13`
+# beside `sourceRepositoryURI: https://github.com/btclib-org/btclib`, so
+# it is the path that changes and the repository that stays. The three:
+# `attest-signer: reusable-attest` on the calling tree's own
+# sdist-rebuild.yml, whose sentinel pins the signer; and the
+# `--signer-workflow` line each tree publishes in its SECURITY.md and
+# repeats in its RELEASING.md, which is what a user runs by hand.
+#
+# All three flip when that tree's *latest release* is one this job
+# signed, not when its release.yml converts --
+# reusable-sdist-rebuild.yml's own header has the timing. A rehearsal
+# settles the identity without a tag: this job's `if:` accepts
+# `needs.publish-testpypi.result == 'success'`, so a `workflow_dispatch`
+# in one tree mints a real attestation and burns no version number.
+#
+# Divergences resolved rather than carried forward. A `path:` written
+# with a trailing slash and without one. The same step under two names,
+# `Download the distribution files` against `Download the source
+# distribution` and `Attest the release assets` against `Sign a build
+# provenance statement for the release assets`. And `btclib-node`
+# downloading its bill of materials into `dist/`, which attests the same
+# subjects through one glob where the others use two: the two
+# directories are what keeps `dist/*` the distribution files, which is
+# what the comment beside every other tree's own download says.
+#
+# The job's name is `Attest the release assets` and not `Attest the
+# distribution files`: the bill of materials is among the subjects and
+# it is not a distribution file.
+
+on:
+  workflow_call:
+    inputs:
+      dist-artifact:
+        description: >
+          The artifact holding the distribution files this run
+          published, `dist` where one artifact carries the wheel and the
+          sdist together.
+        required: true
+        type: string
+
+# least privilege for the GITHUB_TOKEN at the workflow level, elevated
+# on the job below -- each grant explained at its own line there
+permissions:
+  contents: read
+
+jobs:
+  attest:
+    # the name the check context is keyed by, after the calling job's
+    # own: branch protection matches a context by name and not by the
+    # workflow that reported it
+    name: Attest the release assets
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # OIDC for the short-lived Sigstore signing certificate, and the
+      # write that persists the attestation against the repository.
+      # contents is not restated, a job's block replacing the
+      # workflow's: this job reads nothing of the calling tree
+      id-token: write
+      attestations: write
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment:
+      # a tag, let alone a branch, is a name its owner can move, and
+      # these run in a job that can read the workflow token
+      - name: Download the distribution files
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ inputs.dist-artifact }}
+          path: dist/
+      # into a directory of its own, as in reusable-github-release.yml
+      # and for the same reason: the dist/* glob has to stay the
+      # distribution files
+      - name: Download the bill of materials
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: sbom
+          path: sbom/
+      # actions/attest and not the attest-build-provenance wrapper
+      # around it: as of v4 the wrapper is a composite that does nothing
+      # but call this, and its own README sends new callers here. No
+      # predicate input is what selects SLSA build provenance, which is
+      # what the wrapper's name promises.
+      # One statement over every subject the globs match, so verifying
+      # the wheel, the sdist or the bill of materials against the bundle
+      # below works
+      - name: Attest the release assets
+        id: attest
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: |
+            dist/*
+            sbom/*
+      # the bundle is the signed statement itself, and
+      # reusable-github-release.yml attaches it: that is what lets `gh
+      # attestation verify --bundle` read it from disk instead of from
+      # the attestations API, for whoever mirrors the releases page
+      # rather than trusting it live.
+      # Copied into the workspace rather than uploaded where the action
+      # left it, under $RUNNER_TEMP: an upload takes its layout from the
+      # paths it matched, and one outside the workspace is one more
+      # thing to be right about than a fixed name here
+      - name: Collect the attestation bundle
+        env:
+          BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
+        run: cp "$BUNDLE_PATH" attestation.jsonl
+      - name: Upload the attestation bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: attestation
+          path: attestation.jsonl
