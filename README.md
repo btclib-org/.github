@@ -1931,6 +1931,15 @@ fail_under = 100.0
   covered by patching what stands in the way, or carries a
   `pragma: no cover` with its reason. Neither is a build left red.
 
+  **A statement only some invocations execute is covered only on those
+  invocations.** What reaches it is the runner rather than a test — a
+  hook pytest calls under one set of flags and not another — so under a
+  floor with no slack the flags decide whether the gate passes, and what
+  turns the build red has no relation to the change under it. That is
+  the first of the two and not the second: a test of its own covers it
+  whatever the invocation, where a pragma would exclude a statement
+  every run the project cares about does execute.
+
   **The reason goes on the pragma's own line, after ` -- `, for
   `pragma: no cover` and `pragma: no branch` alike** — the dash a comment
   writes, an em dash being this file's own; a branch a test never takes

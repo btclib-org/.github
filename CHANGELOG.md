@@ -8855,3 +8855,9 @@ nothing red follows from the copies disagreeing.
 - **The decline of `issues: write` keeps only the reason that holds**
   (issue btclib-org/.github#1180): the deleted clause claimed uniqueness
   that `claude-review.yml`'s own `pull-requests: write` already denies.
+
+### Section 8 answers for a statement only some invocations execute
+
+- **Under a floor with no slack the runner's flags decide whether the
+  gate passes** (closes #1175): the answer is a test of the statement
+  and not a pragma, which `tests/coverage_test.py` asks of the trees.
