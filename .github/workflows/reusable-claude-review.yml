@@ -1,0 +1,569 @@
+---
+name: reusable-claude-review
+
+# The review a repository's claude-review.yml calls, so the prompt, the
+# credential guard, the action, the verdict check and the @claude answer
+# are written once. The trigger, the concurrency group, the
+# workflow-level `permissions:`, and the header saying why this
+# repository runs a review at all stay in the caller, whose run these
+# jobs join.
+#
+# What it produces is a review of type COMMENT, an opinion for the
+# author to weigh, and it must not become a required check: a review
+# that gated a merge would make a model's judgement a branch rule.
+# Section 11's *Review* is where what CLAUDE_REVIEW_ENABLED does is
+# stated rather than here a second time; it is an organization variable,
+# and both jobs below read it.
+#
+# A calling job reaches both jobs below, and each declines the events
+# that are not its own -- the review answers a pull_request, the mention
+# a comment carrying @claude. So the calling job carries no `if:` of the
+# review's: a caller that lifts the old job's condition onto it takes
+# the mention out with it.
+#
+# Two inputs.
+#
+# extra-prompt, string, default "": a paragraph of the calling tree's
+# own, landing between the verdict paragraph and the instruction not to
+# run the gates. One fixed point, a second being an input to choose
+# where an input goes. What earns it is a claim a review cannot check
+# without knowing what the tree ships: bbt's notebooks, whose committed
+# outputs its own lint job executes and compares; portanode's
+# launchers, which no job of that tree runs; btclib-org.github.io's
+# homepage, which its homepage.yml generates from this repository's
+# profile/README.md rather than a hand editing it. A caller's value is
+# evaluated in the caller, so an expression written into it resolves
+# against that run's own event. What it takes is a paragraph added to
+# the prompt below and not a tree's own rewrite of it -- a caller whose
+# prompt says these things in its own words converges onto this one
+# first, that difference being the drift a shared file exists to
+# remove.
+#
+# extra-allowed-tools, string, default "": appended to the review step's
+# tool list, the separating comma written here rather than by the
+# caller. It exists for btclib-node, whose prompt has the reviewer fetch
+# history the shallow checkout does not carry, read a file at a sha
+# through the contents API, and read the issues a pull request says it
+# closes -- `Bash(git:*)`, `Bash(gh api:*)` and `Bash(gh issue view:*)`,
+# none of them covered by the `Bash(gh pr:*)` every caller gets. One
+# tree's prose earns no input of its own, extra-prompt above carrying
+# any tree's paragraph; one tree's capability does, the alternative
+# being every caller's reviewer holding the tools one of them asked
+# for. The two travel together: a paragraph telling a reviewer to run a
+# command it may not run buys a refusal, so a caller passing the one
+# passes the other.
+#
+# Neither value reaches a `run:` block. extra-prompt is text handed to a
+# model and extra-allowed-tools is an argument of the action's own,
+# which is why a caller's string is taken as a string here where
+# reusable-sdist-rebuild.yml's builder had to be a closed choice of two
+# steps.
+#
+# The permissions block is the calling job's, and this is not style: a
+# called workflow's own block can only downgrade what the caller
+# granted, never restore an omitted scope. A scope a called job declares
+# that the caller's list leaves off fails the run before any job starts,
+# as a `startup_failure`, rather than going red on a step -- section 11
+# of this repository's own README.md is that sentence and
+# btclib-org/.github#912 the measurement under it. **A caller's calling
+# job therefore carries `permissions: contents: read, pull-requests:
+# write, id-token: write`**, which is what both jobs below declare: the
+# second is what posting a review takes, and the third the OIDC token
+# the action mints during its own startup, whose absence ends a run
+# before authentication with "Could not fetch an OIDC token".
+#
+# The credential is the caller's to pass as well. The organization
+# secret CLAUDE_CODE_OAUTH_TOKEN is visible to every repository of
+# btclib-org, and a called workflow is still handed no secret its caller
+# did not pass it -- `secrets: inherit` on the calling job, or this one
+# named there. It is declared required, so a caller that passes nothing
+# is refused rather than reviewing with an empty credential; the guard
+# step inside each job is what still catches an emptied secret.
+#
+# Divergences resolved rather than carried forward.
+#
+# The action is pinned once here, where the callers disagree about the
+# commit and no comment of theirs argues for a version of its own. What
+# decides the value is section 10's rule that a tree pins an action at
+# one commit throughout its own workflows: this file takes the commit
+# this repository already carries in claude-review.yml, and Dependabot's
+# grouped bump moves the two together. A caller's pin does not reach a
+# callee, which is the same section's other half.
+#
+# The verdict check reads the last claude[bot] review and then asks
+# whether it is a verdict. The rejected alternative filters to the
+# entries that are verdicts and takes the last of those, which answers
+# with a stale verdict whenever the newest claude[bot] entry is a
+# reading rather than an ACK, a NACK or a CHANGES REQUESTED line --
+# btclib-org/btclib-secp256k1#394 is what records that, and
+# btclib-secp256k1 is where the fix is. A caller stops carrying the
+# defect by calling this file, so each conversion is also that fix
+# arriving.
+#
+# The prompt names the organization's standard rather than a tree's own
+# README.md, and says the gates run beside this job rather than naming a
+# caller's workflow files. Each is written per tree today and the
+# wordings differ, and neither is a sentence a shared file can carry; a
+# tree wanting either sharper writes it into extra-prompt.
+#
+# The review job declines a closed pull request, which is what section
+# 10 asks of a `pull_request` workflow's `if:`. What produces the event
+# is the trigger, and what a closed run is taken for is the concurrency
+# group: both are the caller's, and the group's own placement decides
+# whether a closed run cancels a review still in flight --
+# btclib-org/btclib-secp256k1#593 records what is measured about that
+# and what is not.
+
+on:
+  workflow_call:
+    inputs:
+      extra-prompt:
+        description: >
+          One paragraph of the calling tree's own, on what it ships and
+          how a claim about it is checked.
+        type: string
+        default: ""
+      extra-allowed-tools:
+        description: >
+          Tools the review step may use beyond the ones every caller
+          gets, comma-separated and without a leading comma.
+        type: string
+        default: ""
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN:
+        description: >
+          The Anthropic credential both jobs run under, btclib-org's
+          organization secret of that name.
+        required: true
+
+# least privilege for the GITHUB_TOKEN at the workflow level, elevated
+# on each job below -- each grant explained at its own line there
+permissions:
+  contents: read
+
+jobs:
+  review:
+    name: Claude review
+    # a draft is work its author is not asking anyone to read yet, a
+    # closed pull request has stopped taking the changes a verdict would
+    # be about, and a comment event is the other job's.
+    #
+    # The fork condition is not a policy but a fact about secrets: "with
+    # the exception of GITHUB_TOKEN, secrets are not passed to the
+    # runner when a workflow is triggered from a forked repository", so
+    # on a contributor's pull request this job would start, find the
+    # credential empty and fail -- a red job on the pull requests of
+    # exactly the people least able to tell it apart from their own
+    # mistake. Skipped, it reports nothing at all, and the mention job
+    # below is the path that still works there: issue_comment is a
+    # base-repository event, so it is handed the secret.
+    #
+    # Compared by full_name rather than by `.fork`: what withholds the
+    # secret is the head repository not being the caller's, and `.fork`
+    # asks instead whether the head repository has a parent. The two
+    # part on a repository that is itself a fork -- one the organization
+    # has taken over, say -- whose own branches are handed the secret
+    # and answer `.fork` true, so there `.fork` skips the review this
+    # condition means to run.
+    #
+    # On the job and not on a step. A step declining to run leaves
+    # `steps.review.outcome` at `skipped`, which the guard below reads
+    # as anything-but-success and reports as a review that never ran --
+    # a deliberate switch-off turned into a permanent red check,
+    # pointing at a runner line no skipped step wrote. A skipped job
+    # costs nothing and says nothing
+    if: >-
+      ${{ vars.CLAUDE_REVIEW_ENABLED == 'true'
+          && github.event_name == 'pull_request'
+          && github.event.action != 'closed'
+          && !github.event.pull_request.draft
+          && github.event.pull_request.head.repo.full_name
+             == github.repository }}
+    runs-on: ubuntu-latest
+    # the review's own budget is on its step below, and this is the
+    # ceiling for the steps around it, which read the API and post. It
+    # has to be the larger of the two: a job that hits its own limit is
+    # *cancelled*, which the pull request shows as a failed check with
+    # nothing from this file beside it -- two reviews that ran out of
+    # time read as reviews that had found something, and the jobs API
+    # was what said otherwise. The step's limit *fails* the step, with
+    # the runner's own line saying it timed out, and the guard below it
+    # then runs and says what that means for the verdict.
+    #
+    # One number for every caller, and no caller's own bound stands
+    # above it, `timeout-minutes` being off the list of keywords a
+    # calling job may carry
+    timeout-minutes: 20
+    permissions:
+      # restated, a job's permissions replacing the workflow's
+      contents: read
+      # what posting the review takes
+      pull-requests: write
+      # not for workload identity federation, which this does not use:
+      # the action mints a GitHub OIDC token during its own startup
+      # whatever the Anthropic credential is. Measured by leaving it out
+      # -- the run died before reaching authentication at all, with
+      # "Could not fetch an OIDC token. Did you remember to add
+      # `id-token: write` to your workflow permissions?"
+      id-token: write
+    steps:
+      # every action is pinned to a commit SHA with the tag in the
+      # comment: a tag, let alone a branch, is a name its owner can move
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # nothing here needs a token: the diff comes from `gh pr diff`
+          # against the forge
+          persist-credentials: false
+          # depth 1 is enough because the diff comes from `gh pr diff`,
+          # which is the base...head three-dot diff REVIEWING.md asks
+          # for, computed by the forge rather than from local history. A
+          # caller whose prompt sends the reviewer into history fetches
+          # it there, which is what extra-allowed-tools is for
+          fetch-depth: 1
+      # a missing credential is a silent pass without this, which is the
+      # worst shape a gate can take: measured on the first run after the
+      # organization secret was deleted -- the action found the token
+      # empty, reviewed nothing, and reported success. Fail loudly
+      # instead, and say which secret and where it lives
+      - name: Refuse to review without a credential
+        env:
+          TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::CLAUDE_CODE_OAUTH_TOKEN is empty. It is an" \
+                 "organization secret of btclib-org, visible to all" \
+                 "repositories; without it this workflow reviews nothing."
+            exit 1
+          fi
+      - name: Review against REVIEWING.md
+        id: review
+        uses: anthropics/claude-code-action@ef8bb1e43bf303cff727a1dd0b8837029fe982a2 # v1
+        # a diff read and a comment posted; a review past this is hung
+        # on the API or on its own reasoning, and either way it has
+        # written no verdict. On the step rather than on the job for the
+        # reason the job's ceiling gives
+        timeout-minutes: 15
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # the action refuses a run a bot initiated unless that bot is
+          # named -- "Workflow initiated by non-human actor" -- so a
+          # pull request Dependabot opens would otherwise never carry
+          # the ack of record. Named rather than `*`, which the input's
+          # own description warns against on a public repository: with
+          # it an external App could invoke this action carrying a
+          # prompt it wrote. The credential for such a run is a second
+          # fact a port has to know: a Dependabot-initiated run reads
+          # the organization's *Dependabot* secret store, not the
+          # Actions one, and section 11 of the organization's standard
+          # has both. The mention job below takes no such input,
+          # deliberately -- what triggers it is somebody writing @claude
+          allowed_bots: "dependabot[bot]"
+          # the caller's paragraph lands on the line of its own below,
+          # between the verdict paragraph and the gates instruction; a
+          # caller passing none leaves a blank line there and nothing
+          # else
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            REVIEWING.md is what a review here is written against, and
+            it is the same file in every repository of the organization
+            -- its last section is this tree's. The organization's
+            standard is what a finding cites, being where the rules
+            live; CONTRIBUTING.md's last section has the gates, and
+            CLAUDE.md the facts about this tree a review has to know.
+
+            The title and description are the forge's, `gh pr view`,
+            and are read again before a finding about either is written:
+            a correction to them lands seconds behind the push that
+            fired this run, and a finding about a title the pull request
+            no longer carries is a finding about nothing.
+
+            The summary's last line is the verdict, `ACK <sha>`,
+            `CHANGES REQUESTED <sha>` or `NACK <sha>`, naming the sha
+            because an ack belongs to a tree and not to a branch.
+            REVIEWING.md has the three lines and section 11's *Review*
+            what each concludes. For this review the line is not
+            optional: this is the ack of record, the one a landing
+            reads, and it is the only part of a review that anything
+            other than a person can read -- a review of record ending
+            without it cannot be told apart from one that never
+            finished. A person reading the same diff may say what they
+            found and deliver no verdict; REVIEWING.md has why that is
+            not a NACK.
+
+            ${{ inputs.extra-prompt }}
+
+            Do not run the gates. They are running beside you on this
+            same sha, which is the reliance REVIEWING.md provides for
+            and CONTRIBUTING.md's last section makes sound. Say in the
+            summary that no gates were run by this job and that the
+            author's own statement of what they ran is what stands --
+            and say so too when a pull request makes no such statement.
+
+            Do not file issues from here: a collateral finding goes
+            in the summary, under a line saying it is not a finding
+            against this pull request, and a person decides whether it
+            becomes one.
+
+            Post to the forge and not as a message only this job's
+            log reads. `gh pr review --comment` for the summary, which
+            is what puts the ack of record in the forge's own record of
+            reviews; never `--approve` and never `--request-changes`,
+            section 11's *Review* having why.
+            `mcp__github_inline_comment__create_inline_comment` (with
+            `confirmed: true`) for a finding a line is the subject of.
+          # folded rather than literal, and `gh pr` rather than the
+          # three subcommands spelled out: the flag has to reach the CLI
+          # as one line, and the line that spells out diff, review and
+          # view is past the 100 columns yamllint holds this file to.
+          # The fold joins its lines with a space, so the break sits
+          # inside the expression and never inside the list, whose
+          # entries a space would break
+          claude_args: >-
+            --allowedTools
+            "mcp__github_inline_comment__create_inline_comment,Bash(gh pr:*),Read,Grep,Glob${{
+            inputs.extra-allowed-tools
+            && format(',{0}', inputs.extra-allowed-tools) || '' }}"
+
+      # the action refuses to run when the calling workflow differs from
+      # the copy on the caller's default branch -- a pull request must
+      # not be able to edit the workflow that holds the credential --
+      # and it reports that refusal by *skipping*, with the job still
+      # green. Two runs were read as proof that this worked before the
+      # log said otherwise, so the skip is made loud here:
+      # `execution_file` is empty exactly when the action did not run.
+      #
+      # The consequence is deliberate: on the pull request that adds or
+      # edits a caller's own file, this job is red until the change is
+      # on `main`. It gates nothing, and a red check that says "no
+      # review happened" is the honest shape of that.
+      #
+      # Run when the step above failed too, which is what `!cancelled()`
+      # buys over the default: a review that hit its budget, or that the
+      # action refused, ended without writing a verdict, and that is
+      # the fact to report rather than leave to the step's own error. A
+      # job cancelled by the caller's concurrency group is the one case
+      # this still skips, a superseded review having nothing to say.
+      - name: Refuse to report a review that never ran
+        if: ${{ !cancelled() }}
+        env:
+          OUTCOME: ${{ steps.review.outcome }}
+          EXECUTION: ${{ steps.review.outputs.execution_file }}
+        run: |
+          # A failing review names no cause in the log: the action
+          # prints the result message with `api_error_status`, the stop
+          # reason and the error text sanitized out of it, and writes
+          # every message unsanitized to the execution file this step
+          # already names. What it drops is read from there rather than
+          # turned on with `show_full_output: true`, which prints every
+          # message including tool results and whose own description
+          # warns against that on a public repository. The debug rerun
+          # the action also suggests is no third option: it keys on
+          # ACTIONS_STEP_DEBUG in the step's environment, which
+          # `gh run rerun --debug` does not put there.
+          #
+          # An error subtype's own `errors` are not read here, the
+          # action printing those itself.
+          #
+          # `|| true` because the step runs under `bash -e`: a jq that
+          # fails on a half-written file would exit before the
+          # annotation below, losing the one line this guard exists to
+          # write.
+          if [ "$OUTCOME" != success ]; then
+            if [ -f "$EXECUTION" ]; then
+              jq -r '.[] | select(.type == "result")
+                     | "api_error_status \(.api_error_status), stop_reason \(.stop_reason)",
+                       (.result // empty)' "$EXECUTION" || true
+            fi
+            echo "::error::the review step ended in $OUTCOME, so no" \
+                 "verdict was written -- the runner's line above says" \
+                 "whether it ran out of its timeout-minutes or failed" \
+                 "another way. No verdict is no ack: that is why this" \
+                 "is red, and it is not a finding against the tree."
+            exit 1
+          fi
+          if [ -z "$EXECUTION" ]; then
+            echo "::error::the action produced no execution file, so no" \
+                 "review was written. The usual cause is workflow" \
+                 "validation: the calling workflow differs from the copy" \
+                 "on the default branch, which the action refuses to" \
+                 "run under."
+            exit 1
+          fi
+      # Green here means an ack of this tree, and nothing weaker. The
+      # guard above answers whether the action started, and a run that
+      # starts, finishes green and posts nothing at all walks through
+      # it: on btclib-org/.github#139 two runs of the same sha both
+      # concluded success, the first having written no comment and the
+      # second the review. The commands below take the tree they are
+      # run in, `gh` resolving the braces from its checkout.
+      #
+      #   gh api "repos/{owner}/{repo}/actions/runs?head_sha=<sha>" \
+      #     --jq '.workflow_runs[] | select(.name == "claude-review")
+      #           | {id, conclusion, run_started_at, updated_at}'
+      #
+      # So what is read here is what was posted rather than what the
+      # action produced: the verdict is the last line of a review body,
+      # which is where REVIEWING.md puts it, and only what claude[bot]
+      # wrote is the ack of record -- section 11's *Review* is what says
+      # an author's own is not.
+      #
+      # The reviews endpoint and not the issue comments one, those being
+      # two stores rather than two views: a review posted with `gh pr
+      # review` is in the first and in neither of the second.
+      #
+      #   gh api repos/{owner}/{repo}/pulls/<number>/reviews \
+      #     --jq '.[] | "\(.user.login) \(.body | split("\n") | last)"'
+      #
+      # The last verdict decides, rather than any verdict naming the
+      # head: a second reading of the same tree can refuse what an
+      # earlier one acked, and picking the ack wherever it sits would
+      # report that refusal as green.
+      #
+      # It is matched against the head sha and not against this run's
+      # own start time. An ack belongs to a tree, so a verdict naming
+      # this head describes the tree under review whichever run wrote
+      # it, while a push mints a sha no earlier verdict can name -- so
+      # the sha alone turns a stale ack red, with no clock to compare
+      # against and no re-run of an unchanged commit turned red for
+      # having nothing new to say. An abbreviation names the same commit
+      # as the forty characters do, so a prefix of it counts.
+      #
+      # Red, and gating nothing: this check is not required, and what
+      # the colour buys is a reader who sees a refusal in the checks
+      # instead of under the fold at the foot of a comment.
+      - name: Refuse to report anything but an ack of this head
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # --paginate because the API pages at thirty reviews and the
+          # newest sit on the last page; --slurp gathers every page into
+          # one array, and gh refuses --slurp beside --jq, so the filter
+          # runs in a jq of its own downstream of the pipe and sees the
+          # whole history in one pass rather than one page at a time.
+          # jq -r, because a quoted verdict would hand the parameter
+          # expansion below a sha wearing a closing quote.
+          #
+          # The last claude[bot] entry first, whatever it says, and only
+          # then the question whether it is a verdict. The rejected
+          # alternative filters to the entries that are verdicts and
+          # takes the last of those, which answers with a stale verdict
+          # whenever the newest claude[bot] entry is a reading rather
+          # than one of the three lines -- a busy pull request, or a
+          # comment that declines to give a verdict, arriving after an
+          # acked or changes-requested run. A later entry with no
+          # verdict is itself the answer, and empties `$verdict` the
+          # same as no entry at all.
+          #
+          # `.body // ""` is for a null body: `null | split` aborts. The
+          # API description has that field required and carries no
+          # `nullable` on it, where `commit_id` beside it in the same
+          # schema does, and
+          #
+          #   gh api repos/{owner}/{repo}/pulls/<number>/reviews \
+          #     --jq '.[].body | type'
+          #
+          # answers `string` throughout this organization. It is
+          # guarded regardless: a description is no contract.
+          #
+          # An empty summary is a different shape and wants no guard,
+          # `split("\n")` answering `[]` for it. A body of whitespace
+          # or newlines alone is what `map(select(length > 0))` is for,
+          # splitting into fields that the `sub` before it then empties.
+          verdict=$(gh api "repos/$REPO/pulls/$NUMBER/reviews" --paginate \
+            --slurp \
+            | jq -r '[ .[][] | select(.user.login == "claude[bot]") ]
+                  | last
+                  | (.body // "")
+                  | split("\n")
+                  | map(sub("\\s+$"; ""))
+                  | map(select(length > 0))
+                  | last // empty
+                  | select(test("^(ACK|NACK|CHANGES REQUESTED) [0-9a-f]{7,40}$"))')
+          if [ -z "$verdict" ]; then
+            echo "::error::the review posted no verdict on this pull" \
+                 "request, so nothing says whether $HEAD_SHA was read at" \
+                 "all. A job that finishes green having written no" \
+                 "review, or a review whose last line is not a verdict," \
+                 "is what this reports."
+            exit 1
+          fi
+          sha=${verdict##* }
+          case "$verdict" in
+            "ACK "*) ;;
+            "NACK "*)
+              echo "::error::the review nacked $sha: the change itself" \
+                   "is disagreed with, and no rewrite of it is asked" \
+                   "for. The review body has the argument."
+              exit 1
+              ;;
+            *)
+              echo "::error::the review requested changes on $sha."
+              exit 1
+              ;;
+          esac
+          case "$HEAD_SHA" in
+            "$sha"*)
+              echo "the review acked $sha"
+              ;;
+            *)
+              echo "::error::the last verdict acks $sha and the head is" \
+                   "$HEAD_SHA: an ack belongs to a tree, and this one" \
+                   "names a tree the branch has moved past."
+              exit 1
+              ;;
+          esac
+
+  mention:
+    name: Claude answers a mention
+    # no prompt on this one, deliberately: the action reads the comment
+    # that triggered it and answers what was actually asked, where a
+    # prompt of ours would answer something else. `github.event.issue.pull
+    # _request` is what tells a comment on a pull request from a comment
+    # on an issue, the issue_comment event carrying both.
+    #
+    # Behind the same switch as the review job above: this job shares
+    # that job's credential and its action, so a file that is not to run
+    # is not to run here either
+    if: >-
+      ${{ vars.CLAUDE_REVIEW_ENABLED == 'true'
+          && ((github.event_name == 'issue_comment'
+               && github.event.issue.pull_request
+               && contains(github.event.comment.body, '@claude'))
+              || (github.event_name == 'pull_request_review_comment'
+                  && contains(github.event.comment.body, '@claude'))) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      # what posting the reply takes
+      pull-requests: write
+      # the same startup OIDC token the review job above needs
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      # a missing credential is a silent pass without this, for the
+      # reason the review job above gives
+      - name: Refuse to answer without a credential
+        env:
+          TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::CLAUDE_CODE_OAUTH_TOKEN is empty. It is an" \
+                 "organization secret of btclib-org, visible to all" \
+                 "repositories; without it this workflow answers nothing."
+            exit 1
+          fi
+      - name: Answer the mention
+        uses: anthropics/claude-code-action@ef8bb1e43bf303cff727a1dd0b8837029fe982a2 # v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
