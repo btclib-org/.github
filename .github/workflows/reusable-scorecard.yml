@@ -1,0 +1,108 @@
+---
+name: reusable-scorecard
+
+# The OpenSSF Scorecard sentinel a repository's scorecard.yml calls, so
+# the analysis job -- its checkout, the scan itself, the artifact and
+# the SARIF upload -- is written once. The trigger, the cron minute
+# section 10's calendar gives the calling repository, the
+# workflow-level `permissions:` and the concurrency group stay in the
+# caller, whose run this job joins.
+#
+# No inputs at all: the four trees carrying scorecard.yml ask the same
+# question of themselves, comments and blanks stripped, differing in
+# only the caller's own cron minute and one action pin three of them
+# were a Dependabot bump behind on -- neither a right difference, so
+# neither is a parameter (btclib-org/.github#35).
+#
+# What the row asks is a third-party, external audit of the calling
+# tree's supply-chain posture, run independently rather than by
+# anything the organization asked itself. It is keyed on that tree
+# being public and not a fork -- `gh api repos/<org>/<repo> --jq
+# '.fork, .private'` answering `false` and `false` -- which
+# ossf/scorecard-action requires and which stays a fact about the
+# caller rather than a line here.
+#
+# The permissions this job's own block asks for are id-token: write,
+# which publish_results below uses to publish to the OpenSSF API, and
+# security-events: write, which the SARIF upload to code scanning
+# needs. Both are elevations over the read-only default, and GitHub
+# permissions a called job's own block can only downgrade, never
+# restore, what the caller's calling job grants
+# (https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations:
+# "The GITHUB_TOKEN permissions passed from the caller workflow can be
+# only downgraded (not elevated) by the called workflow"). So a caller
+# that calls this file with no `permissions:` block on its own calling
+# job -- or with one omitting a scope this job's block below declares
+# -- fails the run before any job starts, as a `startup_failure`
+# (README.md section 11's "the bound refuses rather than trims", and
+# btclib-org/.github#912 is where that was measured). **A caller's
+# calling job therefore carries `permissions: id-token: write,
+# security-events: write, contents: read, actions: read`**, naming
+# every scope this job's own block asks for, or the sentinel silently
+# stops publishing and stops uploading rather than turning the run red.
+
+on:
+  workflow_call:
+
+# least privilege for the GITHUB_TOKEN at the workflow level, elevated
+# on the job below -- each grant explained at its own line there
+permissions:
+  contents: read
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    # id-token is what publish_results below uses to publish to the OpenSSF
+    # transparency log; security-events is what the SARIF upload below
+    # files as code-scanning alerts; actions is what the Packaging check
+    # reads workflow-run history with, to see whether the caller's own
+    # release workflow has runs that succeeded --
+    # ossf/scorecard's checks/raw/github/packaging.go calls
+    # Client.Actions.ListWorkflowRunsByFileName for a workflow file its
+    # matcher recognizes as publishing. contents is read alone: this job
+    # writes neither a release nor anything else to the tree, granted here
+    # rather than inherited, a job's own block replacing the
+    # workflow-level one rather than adding to it, so contents omitted
+    # from this block would be none for this job.
+    # The trailing comments below are not that paragraph again for its own
+    # sake: zizmor's undocumented-permissions audit reads the line a
+    # permission is on and not the prose above the block, so one word
+    # there is what keeps --persona=auditor at zero findings for this file
+    permissions:
+      id-token: write # the OpenSSF transparency log publish
+      security-events: write # the SARIF upload
+      contents: read
+      actions: read # the Packaging check's workflow-run history read
+    # a run past this is hung rather than analysing
+    timeout-minutes: 15
+    steps:
+      # every action pinned to a commit SHA with the tag in the comment:
+      # a tag, let alone a branch, is a name its owner can move
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the analysis reads the tree and nothing pushes it back
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@2d1146689b8cda280b9bc96326124645441f03bc # v2.4.4
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          # feeds the score api.scorecard.dev/projects/... serves, which
+          # is what the caller's README.md badge and the scorecard.dev
+          # viewer read
+          publish_results: true
+
+      - name: Upload the SARIF as a workflow artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: SARIF file
+          path: results.sarif
+          retention-days: 5
+
+      - name: Upload the SARIF to code scanning
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
+        with:
+          sarif_file: results.sarif
