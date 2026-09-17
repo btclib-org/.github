@@ -8765,3 +8765,9 @@ nothing red follows from the copies disagreeing.
 - **A citation of a section names words the document holds, resolved in
   every tree by `tests/citations_test.py`** (closes #1148): a heading
   reads as durable and is retitled by whoever improves a sentence.
+
+### Both records `mutation_counts.py` left open are deleted together
+
+- **`EXPECTED_DRIFT` and the `BACKLOG` row for `mutation_counts.py` both go**
+  (closes #1152): all five trees carry the file now, one branch closing both
+  records so nothing here asserts a gap.
