@@ -8801,3 +8801,9 @@ nothing red follows from the copies disagreeing.
 - **`measure-coverage`, defaulting to `false`** (issue #35): converting
   the caller as the callee stood would have deleted the check `btclib`'s
   own `CONTRIBUTING.md` and `pyproject.toml` name this workflow for.
+
+### `reusable-wait-for-index.yml` carries the index sentinel for every caller
+
+- **`package` is an input rather than a repository-name derivation**
+  (issue #35): a distribution name and a repository name are free to
+  diverge, even though today's four callers happen to agree.
