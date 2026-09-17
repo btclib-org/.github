@@ -221,9 +221,8 @@ def test_a_read_output_is_declared_by_its_callee(
     `needs.changes.outputs.nosuch` from a callee declaring only `code`
     printed `undeclared: []` and the run's conclusion was `success`
     (btclib-org/.github#1132, run 35084268912). `actionlint` already
-    refuses this for a `./`-path call; every caller in this organization
-    writes a remote one, which is the shape `callee` resolves and no
-    local checker does.
+    refuses this for a `./`-path call, and a remote call is the shape
+    `callee` resolves and no local checker does.
 
     Asked only where the named job calls a workflow -- `callee` answers
     nothing for a job that runs its own steps and maps their outputs by
@@ -237,14 +236,14 @@ def test_a_read_output_is_declared_by_its_callee(
     it is a single checkout, so the by-hand command below names it.
     Every `needs.<job>.outputs` read the organization writes today calls
     a remote workflow of `.github`, so `owner` above has so far always
-    been `.github` and never `repository` itself -- the one `./`-call in
-    this tree's own `links.yml` has no job reading its outputs. The
+    been `.github` and never `repository` itself -- no `./`-call in this
+    tree has a job reading its outputs. The
     per-entry form is for the mechanism `callee` resolves, not for a
     two-owner case yet on the ground.
 
     Section 15 carries no line for this cell, decided rather than
-    overlooked: every caller here writes a remote `uses:`, so the read
-    resolves through a second checkout and is not a question section 15's
+    overlooked: the reads it resolves name a remote `uses:`, so such a
+    read resolves through a second checkout and is not a question section 15's
     own opening reserves its commands for -- "the tree in front of you" --
     which is why `links_test.py`'s `lychee`, resolving a call the same
     way, carries none either.
