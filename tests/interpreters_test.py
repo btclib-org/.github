@@ -258,6 +258,7 @@ TAKEN = re.compile(r"^\d+(?:\.\d+)+t?$")
 NAMES_ONE = (
     ".github/workflows/reusable-documented.yml",
     ".github/workflows/reusable-public-api.yml",
+    ".github/workflows/reusable-sdist-rebuild.yml",
 )
 """The workflows of this repository naming an interpreter literally.
 
