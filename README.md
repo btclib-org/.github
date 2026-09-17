@@ -3747,6 +3747,16 @@ these, its subject being a path: what holds a part equal across the
 copies is that each was written from this file, and that a command of
 section 15 greps for it, which none does for the `ci:` block.
 
+**A part is held against this file, and not against the other copies.**
+Section 4 states `check-changelog`'s keys, and `tests/hooks_test.py`
+reads them off each gate, resolving the hook by its `id` so that where a
+gate keeps the stanza is no drift in it. The rejected alternative
+compares that stanza between the trees, which is green wherever the
+copies agree and are wrong together — the state each tree's
+btclib-org/.github#1138 port is the fix for. Any other part above gets
+its check in that shape on the day it gets one: this file states the
+value, and a test asks each tree for it.
+
 Whole files are here too, and these say in themselves where the
 comparison stops:
 

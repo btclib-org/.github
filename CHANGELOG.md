@@ -8813,3 +8813,9 @@ nothing red follows from the copies disagreeing.
 - **`extra-prompt`, `extra-allowed-tools`, and a verdict check reading
   the last entry rather than the last matching one** (issue #35): the
   fix for btclib-org/btclib-secp256k1#394 arrives with each conversion.
+
+### A shared part of a repository's own file is held against section 14
+
+- **`check-changelog`'s keys are read off every gate by
+  `tests/hooks_test.py`** (closes #1142): comparing the copies with each
+  other is green where they agree and are wrong together.
