@@ -8795,3 +8795,9 @@ nothing red follows from the copies disagreeing.
 - **`sdist-builder` is a closed choice of two commands, and `submodules`
   a string, neither a caller's shell text or its boolean** (issue #35):
   `recursive` matches `btclib-secp256k1`'s own build-sdist checkout.
+
+### `reusable-deps-latest.yml` keeps `btclib`'s coverage ratchet, on a boolean
+
+- **`measure-coverage`, defaulting to `false`** (issue #35): converting
+  the caller as the callee stood would have deleted the check `btclib`'s
+  own `CONTRIBUTING.md` and `pyproject.toml` name this workflow for.
