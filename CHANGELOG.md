@@ -8777,3 +8777,9 @@ nothing red follows from the copies disagreeing.
 - **Two jobs in a callee of their own, not a flag on `reusable-lint.yml`
   and `reusable-os-suite.yml`** (issue #35): which releases the resolver
   picks is the sentinel's subject, and weekly does not also gate.
+
+### `reusable-scorecard.yml` carries the OpenSSF analysis for every caller
+
+- **A callee with no inputs at all** (issue #35): the four trees ask the
+  same question, and a caller's calling job must name every scope this
+  job's own permissions block asks for.
