@@ -8867,3 +8867,9 @@ nothing red follows from the copies disagreeing.
 - **`jobs()` follows a job's `uses:` into the callee it names**
   (closes #1187, closes #1188): where `attest` or `github-release`
   delegates, its steps are read off the reusable workflow it calls.
+
+### Section 14 takes `wait_for_pypi_release.py`, and `alignment.yml` its path
+
+- **`.github/scripts/wait_for_pypi_release.py` joins section 14's list and
+  `alignment.yml`'s `pull_request` paths** (closes #1160): every tree
+  section 10's `pypi-install` entry names shares the converged blob.
