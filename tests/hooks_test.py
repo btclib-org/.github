@@ -65,6 +65,52 @@ The mirror's hook id is `mypy` as well; the repository url is what tells
 the two apart, and either answers section 6.
 """
 
+CHANGELOG_HOOK = "check-changelog"
+"""The local hook whose keys section 4 states one at a time.
+
+Section 14 has a part of a repository-owned file held against the
+standard rather than against the copies of it in the other trees, and
+this is the part that decision was settled on.
+"""
+
+STATED = {
+    "entry": "python3 .github/scripts/check_changelog.py",
+    "language": "system",
+    "pass_filenames": False,
+    "always_run": True,
+}
+"""What section 4's `check-changelog` bullet says that hook is, by key.
+
+Read into a mapping rather than left to a comparison between the trees:
+copies compared with each other agree while each of them is wrong, which
+is what `REFUSED` below is an instance of.
+"""
+
+UNFILTERED = "files"
+"""The key section 4 says that hook carries none of.
+
+Read as a finding of its own rather than folded into `STATED`: a key
+absent is what the section asks for here, and a mapping is no place to
+say that. The reason a filter is refused is section 4's.
+"""
+
+REFUSED = {
+    "id": CHANGELOG_HOOK,
+    "entry": "python3 .github/scripts/check_changelog.py",
+    "language": "system",
+    "pass_filenames": False,
+    "files": r"^(CHANGELOG\.md|\.github/scripts/check_changelog\.py)$",
+}
+"""The stanza btclib-org/.github#1138 refuses, as a literal.
+
+Every gate answers section 4 today, so a check reading the trees alone
+is green however its reading behaves; this is what the reading is asked
+of instead. The keys are the ones every tree carries at the parent of
+its port of that issue, a filter standing where `always_run:` belongs,
+and `name:` is left out as a key nothing here reads. A comparison of
+the copies with each other passes on it, every copy carrying it there.
+"""
+
 
 def hooks(repository: str, trees: dict[str, Path]) -> list[dict[str, Any]]:
     """Every hook a repository's lint gate names, in file order.
@@ -208,4 +254,64 @@ def test_the_gate_runs_mypy(repository: str, trees: dict[str, Path]) -> None:
     ]
     assert runs, "no hook runs mypy; " + by_hand(
         repository, f"grep -n 'mirrors-mypy\\|id: mypy' {CONFIG}"
+    )
+
+
+def departures(hook: dict[str, Any]) -> list[str]:
+    """List where a hook mapping says something other than section 4 does.
+
+    :param hook: a hook as the gate's yaml gives it.
+    :returns: one line per key that differs, empty where none does.
+    """
+    found = [
+        f"{key}: {hook.get(key)!r} rather than {value!r}"
+        for key, value in STATED.items()
+        if hook.get(key) != value
+    ]
+    if UNFILTERED in hook:
+        found.append(f"{UNFILTERED}: {hook[UNFILTERED]!r}, where section 4 has none")
+    return found
+
+
+def test_check_changelog_says_what_section_4_says(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 4's `check-changelog` keys, read off each tree's gate.
+
+    The hook is resolved by its `id`, so where a gate keeps it is not
+    read as drift; that it runs ahead of `markdownlint-cli2` is that
+    section's separate rule. A tree whose gate names no such hook is
+    `test_the_local_hooks_run`'s finding where the tier binds it, and
+    this cell reports nothing about it: one finding to a cell.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    found = [hook for hook in hooks(repository, trees) if hook["id"] == CHANGELOG_HOOK]
+    if not found:
+        pytest.skip(f"{repository}'s gate names no {CHANGELOG_HOOK} hook")
+    drifted = [line for hook in found for line in departures(hook)]
+    assert not drifted, (
+        f"{CHANGELOG_HOOK} says what section 4 does not: {drifted}; "
+        + by_hand(repository, f"grep -n -A6 '^ *- id: {CHANGELOG_HOOK}' {CONFIG}")
+    )
+
+
+def test_a_gate_that_had_drifted_would_be_reported() -> None:
+    """The cell above is green on gates that agree, however it reads.
+
+    Asked of the literal `REFUSED` names, and of each of the two
+    findings that literal carries: a key section 4 states and the hook
+    does not, and a key the hook states and section 4 gives it none of.
+    """
+    refused = departures(REFUSED)
+    assert any("always_run" in line for line in refused), (
+        f"{REFUSED} read as carrying always_run: either a key section 4"
+        " states is no longer read, or the literal wants another"
+    )
+    assert any(line.startswith(f"{UNFILTERED}:") for line in refused), (
+        f"{REFUSED} read as carrying no {UNFILTERED}: either the key"
+        " section 4 gives this hook none of is no longer read, or the"
+        " literal wants another"
     )
