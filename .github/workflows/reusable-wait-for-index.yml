@@ -1,0 +1,144 @@
+---
+name: reusable-wait-for-index
+
+# The sentinel job four trees' own pypi-install.yml each open with, so
+# the one question a release, a schedule or a dispatch asks of the
+# index -- has it served what a tag names yet -- is written once rather
+# than four times. `btclib`, `btclib-secp256k1`, `btclib-node` and
+# `bitcoin-core-rpc` each carry the identical three steps this job
+# carries: a sparse checkout of `.github/scripts`, `astral-sh/setup-uv`,
+# and a run of `wait_for_pypi_release.py` against the tag a release
+# passes. The trigger, the schedule's cron minute, `workflow_dispatch`,
+# a `pull_request` filtered to the script and this file, the
+# `concurrency:` group that never cancels a sample, and the calling
+# job's own `if:` all stay in the caller, whose run this job joins.
+#
+# One job and nothing besides it: every caller's own `install-published`
+# and `install-published-secp256k1` jobs stay in the caller, `needs:
+# wait-for-index` naming this job by the name a caller's own `uses:` job
+# gives it. This callee carries the wait alone.
+#
+# Two inputs.
+#
+# package, string, required: an input, and not `github.repository`
+# split on its slash. `btclib`, `btclib-secp256k1`, `btclib-node` and
+# `bitcoin-core-rpc` are what the four pass today, measured off each
+# caller's own copy of this job rather than assumed, and a derivation
+# would answer the same for all four -- which is the reason to distrust
+# it. A distribution name and a repository name are free to diverge, and
+# the day one does, a derivation is wrong everywhere at once where an
+# input is merely edited in the tree that moved. Passed to the script
+# through the environment rather than interpolated into the `run:`
+# block, the way reusable-deps-latest.yml's own pre-suite-script already
+# does for a caller-supplied string: an argument to python, and never
+# text expanded into the shell that runs it.
+#
+# version, string, default "": forwarded rather than originated. Each
+# caller already takes it as its own `workflow_call` input from
+# `release.yml` and hands it on, so this job asks a caller for nothing
+# the caller was not already holding. Empty on the weekly schedule, on a
+# dispatch, and on a pull request touching the script -- nothing to wait
+# for then -- which is why this job runs on every trigger and waits on
+# almost none of them: an `if:` keyed on the tag would make a release the
+# only run that ever reaches it, and a job a release is the first to
+# exercise is a job whose defect ships with that release.
+#
+# Resisted: a third input for the runner, the interpreter, or the
+# sparse-checkout path. None of the four varies any of them --
+# `ubuntu-latest`, `--python 3.14`, `.github/scripts` -- and a knob for
+# what does not vary is one the family would only have to keep agreeing
+# about.
+#
+# permissions: contents: read at the workflow level and restated on the
+# job below -- the checkout is the only thing here that reads the
+# token, and a called workflow's own block can only downgrade what the
+# caller granted, never restore an omitted scope, so a caller whose
+# calling job omits a scope this job's own block asks for fails with
+# `startup_failure` before any step runs, measured twice in
+# btclib-org/.github#912, and this repository's own README.md section
+# 11 is the sentence. Here that costs a caller nothing extra: all four
+# callers already declare `contents: read` at their own workflow level,
+# which is every scope this job's block asks for, so no calling job
+# needs a `permissions:` block of its own naming it again -- unlike
+# reusable-sdist-rebuild.yml's own `attestations: read`, which a
+# caller's workflow-level `contents: read` alone does not cover. That
+# holds only while a calling job declares no block of its own: one added
+# for an unrelated reason replaces the workflow's grant rather than
+# adding to it, and drops the `contents: read` this job needs.
+#
+# One divergence resolved rather than carried forward. The four pin
+# astral-sh/setup-uv two ways: btclib at
+# bec219d24cd3e171d82865faccec33120bb574f4 (v10.1.0), the other three at
+# 20cfd1bf945f4377ade1205e4dbc17946fc9a30d (v10.0.1). Every callee
+# landed in this campaign carries v10.1.0, and this one does too -- a
+# tag, let alone a branch, is a name its owner can move, so the pin and
+# not a version number is what a caller inherits.
+#
+# One divergence left where it is. btclib-node and bitcoin-core-rpc
+# carry `if: ${{ !github.event.pull_request.draft }}` on their own
+# calling job; btclib and btclib-secp256k1 carry no such condition,
+# having no `pull_request` trigger to decline a draft of. A `uses:` job
+# keeps its own `if:` -- this file carries none, and a caller that wants
+# one writes it on the job that calls this workflow, not here.
+
+on:
+  workflow_call:
+    inputs:
+      package:
+        description: >
+          The distribution name `wait_for_pypi_release.py` polls PyPI
+          for.
+        required: true
+        type: string
+      version:
+        description: >
+          The tag whose version the index must serve before the matrix
+          installs anything, empty on a run with no release behind it.
+        type: string
+        default: ""
+
+# least privilege for the GITHUB_TOKEN at the workflow level, restated
+# on the job below -- the checkout is the only thing here that reads it
+permissions:
+  contents: read
+
+jobs:
+  wait-for-index:
+    name: Wait for the index to serve the released version
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # restated, a job's permissions replacing the workflow's
+      contents: read
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment:
+      # a tag, let alone a branch, is a name its owner can move
+      #
+      # sparse, and that is the whole reason this checkout is admissible
+      # in a job that installs nothing of any calling tree's own
+      # package: what lands is .github/scripts plus the repository
+      # root, cone mode being the default and root files always being
+      # in the cone, so there is no source tree for an import to
+      # resolve to. This job imports nothing of a calling tree in any
+      # case
+      - name: Check out the wait script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      # --no-project, so it runs on the interpreter uv fetches and
+      # installs nothing: the script takes the standard library alone,
+      # which is what lets it run before anything of the calling tree
+      # exists on the runner. package and version arrive through the
+      # environment and not through an expression pasted into this run
+      # block -- the header's package paragraph gives the reason
+      - name: Wait for the index to serve the released version
+        shell: bash
+        env:
+          PACKAGE: ${{ inputs.package }}
+          TAG: ${{ inputs.version }}
+        run: |
+          uv run --no-project --python 3.14 \
+            .github/scripts/wait_for_pypi_release.py "$PACKAGE" "$TAG"
