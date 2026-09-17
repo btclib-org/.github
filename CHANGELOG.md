@@ -8771,3 +8771,9 @@ nothing red follows from the copies disagreeing.
 - **`EXPECTED_DRIFT` and the `BACKLOG` row for `mutation_counts.py` both go**
   (closes #1152): all five trees carry the file now, one branch closing both
   records so nothing here asserts a gap.
+
+### `reusable-deps-latest.yml` carries the upgrade sentinel for every caller
+
+- **Two jobs in a callee of their own, not a flag on `reusable-lint.yml`
+  and `reusable-os-suite.yml`** (issue #35): which releases the resolver
+  picks is the sentinel's subject, and weekly does not also gate.
