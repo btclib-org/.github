@@ -43,6 +43,18 @@ name: reusable-deps-latest
 # refs, and the tags are the suite job's, for a test comparing released
 # sections against them.
 #
+# python-versions carries the floor as well as the ceiling, and that earns
+# its place rather than being the same interpreters-to-sweep list this input
+# already is in reusable-os-suite.yml: that job runs a locked resolution,
+# where a dependency dropping an interpreter simply fails to install; this
+# job's own upgrade re-resolves first, and a dependency dropping the floor
+# there does not fail, it resolves to an older release that still satisfies
+# it and leaves the job green while the low end of the calling tree's own
+# supported range quietly stops being exercised. Measured once, in btclib,
+# before its floor moved from 3.9 to 3.10: with 3.9 as the floor, 35 of that
+# tree's 132 locked packages resolved to a version older than what 3.10
+# admitted.
+#
 # Everything else takes one answer. The hook command, the cache key and
 # the upgrade are one command each, the timeouts bound a hung job rather
 # than budgeting the work, and --no-cov is argued at the step that
