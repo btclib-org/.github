@@ -1,0 +1,261 @@
+---
+name: reusable-deps-latest
+
+# The dependency sentinel a repository's deps-latest.yml calls, so the
+# upgrade, the lint gate run over it and the suite run over it are
+# written once. The trigger, the cron minute section 10's calendar gives
+# the calling repository, and the concurrency group stay in the caller,
+# whose run these jobs join.
+#
+# What the row asks is section 10's: everything uv resolves taken to the
+# newest release pyproject.toml admits and then put through the gates, so
+# that a Dependabot pull request arrives with its answer already known.
+# reusable-deps-oldest.yml asks the same question downward. The packaging
+# checks that clause also names are not here, and that is an open
+# question rather than a decision (btclib-org/.github#35).
+#
+# Two jobs and not two booleans, which is the decision this file is.
+# reusable-lint.yml and reusable-os-suite.yml each already hold one of
+# the jobs below minus the upgrade step, so an input on each would spare
+# the copy, and at-latest against at-locked is a right difference rather
+# than a tree being behind -- it clears this issue's test for an input on
+# its face. What refuses it is which side of the job the parameter falls
+# on. Which releases the resolver picks is the subject here and not a
+# detail of it: reusable-lint.yml answers whether the hooks pass at the
+# versions a lock pins, a caller of it blocks a merge on that answer, and
+# a red here is an issue against a release nobody in the tree made.
+# Section 10 keeps the two apart in as many words -- what runs weekly
+# does not also gate -- and the boolean would leave that file's `if:`
+# declining a draft pull request in a job no pull request reaches.
+# reusable-deps-oldest.yml is that decision already taken in the other
+# direction: reusable-os-suite.yml's job plus a lock-rewriting step, in a
+# file of its own rather than behind a resolution input.
+#
+# One call and two jobs rather than one job a caller asks for twice,
+# because a caller contributes jobs and not steps: the row is both
+# questions, and a tree with a job of its own at latest runs it beside
+# the call.
+#
+# No input here is new. The set is the union of what those two callees
+# already take, each keeping the reason its own header gives, and each
+# reaching the job whose question it is: the full history is the lint
+# job's, for a hook resolving a release name in a vendored clone's own
+# refs, and the tags are the suite job's, for a test comparing released
+# sections against them.
+#
+# Everything else takes one answer. The hook command, the cache key and
+# the upgrade are one command each, the timeouts bound a hung job rather
+# than budgeting the work, and --no-cov is argued at the step that
+# carries it. An input for any of those would be a copy in disguise
+# (btclib-org/.github#35).
+#
+# No `if:` declining a draft pull request: this sentinel's callers are
+# reached from a schedule and a dispatch, where github.event carries no
+# pull request, and a caller whose trigger takes such an event guards it
+# in its own file -- actionlint allows `if` on a calling job.
+
+on:
+  workflow_call:
+    inputs:
+      runners:
+        description: >
+          The images to sweep, JSON-encoded: '["ubuntu-latest",
+          "macos-latest"]'.
+        required: true
+        type: string
+      python-versions:
+        description: >
+          The interpreters to sweep, JSON-encoded: '["3.10", "3.14"]',
+          which is the calling tree's own claim about what it supports.
+        required: true
+        type: string
+      submodules:
+        description: >
+          Whether the checkout initializes the tree's git submodules.
+        type: boolean
+        default: false
+      fetch-depth:
+        description: >
+          How many commits of history the lint job's checkout fetches,
+          0 for all.
+        type: number
+        default: 1
+      fetch-tags:
+        description: >
+          Whether the suite job's checkout fetches the tree's tags.
+        type: boolean
+        default: false
+      pre-suite-script:
+        description: >
+          A script of the calling tree, run against the upgraded
+          resolution before the suite.
+        type: string
+        default: ""
+
+# least privilege for the GITHUB_TOKEN: everything running in a job
+# (actions, the releases these jobs upgrade to, every hook, whatever they
+# build from source) can read the token, so the workflow default must not
+# be able to write to the repository. No job elevates it, these writing a
+# lock they throw away and reporting a red no branch introduced
+permissions:
+  contents: read
+
+jobs:
+  lint-latest:
+    # the name the check context is keyed by, after the calling job's
+    # own: branch protection matches a context by name and not by the
+    # workflow that reported it
+    name: Lint and type-check, dependencies at latest
+    runs-on: ubuntu-latest
+    # far above what the hooks need; what it bounds is a hung job holding
+    # a runner. The run it has to clear is the one with no cache to
+    # restore, where pre-commit builds every hook's environment before a
+    # hook runs at all
+    timeout-minutes: 20
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment: a
+      # tag, let alone a branch, is a name its owner can move, and these
+      # run in a job that can read the workflow token
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the hooks read the tree and nothing pushes it back
+          persist-credentials: false
+          # a hook that asserts a submodule is checked out, or that reads
+          # a file inside one, needs the submodule's working tree
+          submodules: ${{ inputs.submodules }}
+          # actions/checkout passes its depth down to the submodule, and
+          # a depth-1 clone carries no tag, so a hook resolving a release
+          # name in the vendored clone's own refs is what asks for 0 here
+          fetch-depth: ${{ inputs.fetch-depth }}
+      # no python-version beside it: uv run below resolves the one the
+      # calling tree's .python-version names, so a version here would be
+      # that file's number a second time. What the upgrade reaches is
+      # what uv resolves, which is why the interpreter is not in it
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          enable-cache: true
+      # ImageOS is set by the runner image, not by this workflow, and the
+      # env context holds only what a workflow, job or step declares, so
+      # it is read here in a shell. reusable-lint.yml's step of this name
+      # carries the rest of that reasoning, and the key below is that
+      # file's deliberately: the two are meant to agree
+      - name: Identify the runner image
+        id: image
+        run: echo "os=${ImageOS:-unknown}" >> "$GITHUB_OUTPUT"
+      # the hook environments are the slow part of this job and the
+      # upgrade below does not reach them -- the hooks pinned by rev in
+      # .pre-commit-config.yaml are bumped by pre-commit.ci and not by
+      # uv -- which is why they are cached in a job whose whole subject is
+      # that something moved. It is also the job that can least afford a
+      # stale hit: a failure the cache caused reads as the release this
+      # run was watching for and is chased in the tree instead
+      - name: Cache the pre-commit hook environments
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/pre-commit
+          key: >-
+            pre-commit-${{ runner.os }}-${{ steps.image.outputs.os }}-${{
+            hashFiles('.pre-commit-config.yaml', '.python-version') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-${{ steps.image.outputs.os }}-
+      # --upgrade re-resolves every entry to the newest release that
+      # satisfies the calling tree's pyproject.toml, which nothing off a
+      # pull request does. It prints one "Updated <pkg> vA -> vB" line per
+      # package it moves, so the log names the suspects without a diff of
+      # uv.lock; the same command under --dry-run prints "Update"
+      # instead, so a reader checking this quotation the cheap way is told
+      # the line is wrong when it is right. This rewrites uv.lock,
+      # harmless on an ephemeral checkout and worth knowing before running
+      # the same command in a working tree
+      - name: Upgrade every dependency to its latest release
+        run: uv lock --upgrade
+      # mypy is what this job reaches that the pinned hooks do not: its
+      # hook is local and shells out to uv, so it is the lock that pins
+      # it, and pre-commit itself comes out of the same lock.
+      # --all-files also keeps pre-commit from stashing the rewritten
+      # lock -- it stashes unstaged changes when given neither --all-files
+      # nor --files, and a stash here would hand the mypy hook back the
+      # committed lock and type check the pinned mypy.
+      # --show-diff-on-failure changes no hook's answer; it prints what an
+      # in-place fixer changed
+      - name: Run the pre-commit hooks
+        run: >
+          uv run --locked --only-group lint
+          pre-commit run --all-files --show-diff-on-failure
+
+  suite-latest:
+    # the cell is in the name because it is what a reader of a red one
+    # needs, the context being keyed by name after the calling job's own
+    name: Run the suite on ${{ matrix.python }}, ${{ matrix.os }}, dependencies at latest
+    runs-on: ${{ matrix.os }}
+    # far above what a run of the suite needs, the resolution the upgrade
+    # performs and the source builds a new release may want included;
+    # what it bounds is a hung job holding a runner. A called job's is one
+    # number for every caller, and no caller's own bound stands above it
+    timeout-minutes: 40
+    strategy:
+      # every cell to the end: which interpreter fails on which image is
+      # the whole answer, and stopping at the first one hides the rest
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON(inputs.runners) }}
+        python: ${{ fromJSON(inputs.python-versions) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the job reads the tree and nothing pushes it back
+          persist-credentials: false
+          # a tree whose package is compiled from a vendored source needs
+          # that source checked out before the suite can import what it
+          # built
+          submodules: ${{ inputs.submodules }}
+          # one tag and no tags are different states: with none fetched a
+          # test comparing every released section against its own tag
+          # skips, which is what a tree not asking for them gets
+          fetch-tags: ${{ inputs.fetch-tags }}
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python }}
+      # `shell: bash` here and on every run below: on a Windows runner a
+      # `run:` with no `shell:` is PowerShell, where "$SCRIPT" is an unset
+      # PowerShell variable rather than the environment's, so a step goes
+      # green having done nothing (btclib-org/btclib#1148). Declared
+      # unconditionally, which is what keeps that defect from being
+      # written again a platform at a time
+      - name: Upgrade every dependency to its latest release
+        shell: bash
+        run: uv lock --upgrade
+      # what a tree asks of the resolution this job has just written, in
+      # the job that wrote it: a second job would resolve again to read
+      # the same answer. The script is the calling tree's, so its own
+      # suite is where its logic is proven. What the caller passes is a
+      # path and it arrives through the environment, so it is an argument
+      # to python rather than text expanded into this run block, which is
+      # where an expansion would be code. A tree passing no script runs no
+      # step
+      - name: Run the calling tree's own script over the upgrade
+        if: inputs.pre-suite-script != ''
+        shell: bash
+        env:
+          SCRIPT: ${{ inputs.pre-suite-script }}
+        run: >
+          uv run --locked --no-default-groups --group test
+          python "$SCRIPT"
+      # still --locked, which is not a contradiction: the upgrade wrote
+      # that lock under this job, so this asserts nothing moved between
+      # the two.
+      # --no-cov is what section 10 asks of a sentinel cell that runs the
+      # suite, section 8's floor being a claim about one interpreter on
+      # one image. What this cell asks is whether the newest releases
+      # install and the suite holds on them, and an upgraded resolution
+      # taking a branch the locked one does not would otherwise report a
+      # number under the ratchet and name the ratchet, with the finding in
+      # the upgrade
+      - name: Run pytest
+        shell: bash
+        run: uv run --locked --no-default-groups --group test pytest --no-cov
