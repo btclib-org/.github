@@ -8807,3 +8807,9 @@ nothing red follows from the copies disagreeing.
 - **`package` is an input rather than a repository-name derivation**
   (issue #35): a distribution name and a repository name are free to
   diverge, even though today's four callers happen to agree.
+
+### `reusable-claude-review.yml` carries the review for every caller
+
+- **`extra-prompt`, `extra-allowed-tools`, and a verdict check reading
+  the last entry rather than the last matching one** (issue #35): the
+  fix for btclib-org/btclib-secp256k1#394 arrives with each conversion.
