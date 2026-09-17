@@ -8843,3 +8843,9 @@ nothing red follows from the copies disagreeing.
 - **`attest-signer`, a closed choice of two, default the caller's own
   `release.yml`** (issue #35): an attestation generated inside a called
   workflow is signed by that callee, and `gh` makes a verifier say so.
+
+### `claude-review.yml` takes the `closed` pull request type
+
+- **`claude-review.yml` takes the `closed` type** (closes #1182): its
+  workflow-level group keeps `cancel-in-progress: true`, outside section 10's
+  exemption; the callee's own job-level `if:` still declines the review.
