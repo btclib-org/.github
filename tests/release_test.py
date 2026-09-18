@@ -39,8 +39,8 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import Tier, by_hand
-from .workflows_test import COMMENT, document, workflows
+from . import ORG, ROOT, SELF, Tier, by_hand
+from .workflows_test import COMMENT, REMOTE_CALL, document, workflows
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -65,6 +65,15 @@ ATTEST = "actions/attest@"
 CREATE = "gh release create"
 """The command that attaches files to the GitHub release."""
 
+SOURCE = "__source__"
+"""The key `jobs` stashes on a resolved job, naming where its steps live.
+
+No workflow key is spelled this way, so it cannot collide with anything
+YAML gave the job; `source` reads it back off a job `attesting` or
+`creating` found, to build a `by_hand` command that names the file the
+steps actually came from rather than the caller's own `release.yml`.
+"""
+
 
 def released(root: Path) -> Path:
     """Return a publisher's release workflow.
@@ -80,7 +89,25 @@ def released(root: Path) -> Path:
 
 
 def jobs(workflow: Path) -> dict[str, dict[str, Any]]:
-    """Read every job of a workflow, by id.
+    """Read every job of a workflow, by id, following a delegating one.
+
+    Section 12's caller is free to convert `attest` or `github-release`
+    into a call on one of this repository's own reusable workflows
+    (btclib-org/.github#35), and a job that delegates carries `uses:`
+    and no `steps:` of its own. Such a job is resolved: the callee is
+    read out of `ROOT` -- this working tree, which is what a `uses:`
+    pinned at `@main` (section 10) actually runs -- and its own steps
+    are put in the delegating job's place, `SOURCE` naming the file
+    they came from. A `uses:` naming a repository other than this one's
+    own, or naming this one at a ref other than `main`, is refused
+    rather than guessed at: the object such a call would run is not the
+    file `ROOT` holds.
+
+    A job with a local `./`-call (`test`, `lint`, `docs` and the like in
+    a caller's own `release.yml`) is left as it is, with no steps: it is
+    never the job `attesting` or `creating` looks for, and following it
+    would need the calling tree's own checkout, which this suite does
+    not hold in `jobs`' signature.
 
     Per job and not `workflows_test.steps`' flat list, because what is
     asked here is where a file lands within one job: a download in the
@@ -88,9 +115,57 @@ def jobs(workflow: Path) -> dict[str, dict[str, Any]]:
 
     :param workflow: the file to read.
     :returns: each job id against its own mapping.
+    :raises LookupError: where a job delegates to a `uses:` naming a ref
+        other than `main`, or a repository other than this one's own.
     """
     found = document(workflow).get("jobs") or {}
-    return {job_id: job for job_id, job in found.items() if isinstance(job, dict)}
+    out: dict[str, dict[str, Any]] = {}
+    for job_id, job in found.items():
+        if not isinstance(job, dict):
+            continue
+        if job.get("steps") or "uses" not in job:
+            out[job_id] = job
+            continue
+        value = str(job["uses"])
+        matched = REMOTE_CALL.match(value)
+        if matched is None:
+            # a local `./`-call, or some other shape: not this bug's
+            # concern, and never the job `attesting` or `creating` wants
+            out[job_id] = job
+            continue
+        if matched["owner"] != ORG or matched["repo"] != SELF:
+            msg = (
+                f"{job_id} delegates to {value!r}, naming a repository "
+                "this suite does not read"
+            )
+            raise LookupError(msg)
+        ref = value[matched.end() :]
+        if ref != "main":
+            msg = (
+                f"{job_id} delegates to {value!r} at {ref!r}, not main, "
+                "so this tree does not hold the object it runs"
+            )
+            raise LookupError(msg)
+        callee = ROOT / ".github" / "workflows" / matched["file"]
+        steps = [
+            step
+            for callee_job in (document(callee).get("jobs") or {}).values()
+            for step in (callee_job.get("steps") or [])
+        ]
+        out[job_id] = {**job, "steps": steps, SOURCE: (SELF, matched["file"])}
+    return out
+
+
+def source(job: dict[str, Any], repository: str) -> tuple[str, str]:
+    """Say which repository and file a job's steps actually came from.
+
+    :param job: a job's own mapping, as `jobs` returns it.
+    :param repository: the repository whose `release.yml` was asked.
+    :returns: the repository and the workflow file name to run a
+        by-hand command against.
+    """
+    found_repository, found_file = job.get(SOURCE, (repository, RELEASE))
+    return str(found_repository), str(found_file)
 
 
 def artifacts(job: dict[str, Any], action: str) -> dict[str, str]:
@@ -223,7 +298,10 @@ def test_the_attestation_signs_the_bill_of_materials(
     :param trees: the checkouts.
     """
     job_id, job, step = attesting(released(trees[repository]))
-    command = by_hand(repository, f"grep -n -A6 '{ATTEST}' .github/workflows/{RELEASE}")
+    found_repository, found_file = source(job, repository)
+    command = by_hand(
+        found_repository, f"grep -n -A6 '{ATTEST}' .github/workflows/{found_file}"
+    )
     landed = artifacts(job, DOWNLOAD).get(SBOM)
     assert landed, f"{job_id} takes back no {SBOM} artifact; " + command
     signed = str((step.get("with") or {}).get("subject-path", "")).split()
@@ -244,7 +322,10 @@ def test_the_release_attaches_the_bill_of_materials(
     :param trees: the checkouts.
     """
     job_id, job, attached = creating(released(trees[repository]))
-    command = by_hand(repository, f"grep -n '{CREATE}' .github/workflows/{RELEASE}")
+    found_repository, found_file = source(job, repository)
+    command = by_hand(
+        found_repository, f"grep -n '{CREATE}' .github/workflows/{found_file}"
+    )
     landed = artifacts(job, DOWNLOAD).get(SBOM)
     assert landed, f"{job_id} takes back no {SBOM} artifact; " + command
     assert any(covers(word, landed) for word in attached), (

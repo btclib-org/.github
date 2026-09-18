@@ -8861,3 +8861,9 @@ nothing red follows from the copies disagreeing.
 - **Under a floor with no slack the runner's flags decide whether the
   gate passes** (closes #1175): the answer is a test of the statement
   and not a pragma, which `tests/coverage_test.py` asks of the trees.
+
+### `tests/release_test.py` follows a caller into the callee
+
+- **`jobs()` follows a job's `uses:` into the callee it names**
+  (closes #1187, closes #1188): where `attest` or `github-release`
+  delegates, its steps are read off the reusable workflow it calls.
