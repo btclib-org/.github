@@ -3747,6 +3747,13 @@ The paths are what that test compares:
   section 10's `mutation` entry is what decides which trees carry the
   workflow. It counts a Cosmic Ray session by outcome, so a tree the
   sentinel leaves out has no session for it to read.
+- `.github/scripts/wait_for_pypi_release.py` — owed where
+  `.github/workflows/pypi-install.yml`: that workflow is what runs it,
+  and section 10's `pypi-install` entry is what decides which trees
+  carry the workflow. `reusable-wait-for-index.yml`'s own
+  `actions/checkout` declares `sparse-checkout: .github/scripts` and no
+  `repository:`, so a called workflow resolves it against the caller
+  and each tree runs its own copy.
 
 **Verbatim in part**, the file around it being the repository's own and
 so nothing a comparison by path can do: the `ci:` block of
