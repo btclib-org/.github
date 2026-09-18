@@ -8873,3 +8873,9 @@ nothing red follows from the copies disagreeing.
 - **`.github/scripts/wait_for_pypi_release.py` joins section 14's list and
   `alignment.yml`'s `pull_request` paths** (closes #1160): every tree
   section 10's `pypi-install` entry names shares the converged blob.
+
+### Section 14 takes `wait_for_readthedocs_build.py`
+
+- **`.github/scripts/wait_for_readthedocs_build.py` joins section 14's
+  list and `alignment.yml`'s paths** (closes #1186): owed where
+  `release.yml`, whose `documented` job runs it; the copies converge.

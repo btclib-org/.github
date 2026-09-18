@@ -79,6 +79,7 @@ on:
       - .github/scripts/check_changelog.py
       - .github/scripts/mutation_counts.py
       - .github/scripts/wait_for_pypi_release.py
+      - .github/scripts/wait_for_readthedocs_build.py
       - CONTRIBUTING.md
       - REVIEWING.md
       - .gitattributes
