@@ -8939,3 +8939,9 @@ nothing red follows from the copies disagreeing.
 - **A cell reads `groups:`, `interval:` and `cooldown:`, and a second
   reads the `uv` ecosystem's group, `dev-tooling`** (issue #1156):
   `btclib-node` and `bbt` are `BACKLOG` rows for the rename each owes.
+
+### Section 12's `check-sdist` bullet names what keeps `requires` equal
+
+- **`btclib-secp256k1`'s `hook_pins_test.py` keeps `check-sdist`'s copy
+  equal to `[build-system]`'s `requires`, in place of "nothing does" and
+  a citation of the closed #145** (closes #1203).
