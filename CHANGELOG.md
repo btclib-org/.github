@@ -8909,3 +8909,15 @@ nothing red follows from the copies disagreeing.
 - **`reusable-vendored-vectors.yml`'s own comment now reads "the callee
   takes it as a required input with no default," section 10's own
   words** (closes #1208): the paraphrase resolved nowhere in the standard.
+
+### `alignment.yml` declines a dependabot-actored run instead of failing it
+
+- **The job now skips a `pull_request` run actored by
+  `dependabot[bot]`** (closes #1190): that actor's own secret store
+  holds no `ALIGNMENT_APP_PRIVATE_KEY`.
+
+### `README.md` names the one exception to dual-registering a secret
+
+- **A credential too sensitive for the Dependabot store gets a
+  declining run instead** (issue #1190): `alignment.yml`'s own header
+  carries the reason.

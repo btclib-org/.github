@@ -3353,7 +3353,11 @@ nothing.
 `pull_request` run whose actor is `dependabot[bot]` gets the Dependabot
 secrets rather than the Actions secrets, so a secret a workflow needs
 there is registered in both, under the same name; failing loudly on an
-empty one is what turns the omission into a red check.
+empty one is what turns the omission into a red check. A credential too
+sensitive to hold there at all -- an organization-wide App private key
+-- is the one case this does not fit: `alignment.yml` declines the run
+for that actor instead of registering a copy to fail loudly against,
+its own header carrying the reason.
 
 An action may refuse a bot besides. The review action does, unless the
 bot is named in `allowed_bots` — name the one that opens pull requests
