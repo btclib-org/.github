@@ -8921,3 +8921,9 @@ nothing red follows from the copies disagreeing.
 - **A credential too sensitive for the Dependabot store gets a
   declining run instead** (issue #1190): `alignment.yml`'s own header
   carries the reason.
+
+### `reusable-mutation.yml` takes a fourth input, `extra-env`
+
+- **A caller whose build reads an environment variable can hand the session
+  one, exported once so no later `uv run` reuses an unflagged build** (issue
+  #1202): the default is empty.

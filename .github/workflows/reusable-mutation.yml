@@ -19,14 +19,45 @@ name: reusable-mutation
 # both, and the baseline step below fails the run where a configuration is
 # missing.
 #
-# Three inputs, the first of them the whole matrix. Which scopes a tree
+# Four inputs, the first of them the whole matrix. Which scopes a tree
 # mutates, what each is given and what the job is called are that tree's own
 # facts, where the loop around them is not, so no reader of this file could
 # write any tree's profiles value -- the mark of a right difference rather
 # than a copy in disguise (btclib-org/.github#35). The interpreter is not a
-# fourth: `uv run --locked` below resolves what the calling tree's
+# fifth: `uv run --locked` below resolves what the calling tree's
 # .python-version names, and section 10 leaves a version that tree claims to
 # that tree.
+#
+# extra-env is the same test applied to a caller whose package is compiled
+# differently under an environment variable -- btclib-org/btclib-secp256k1's
+# BTCLIB_LIBSECP256K1_ZKP, which its own extension build reads and this file
+# cannot name, being that tree's subject matter and not this loop's
+# (btclib-org/.github#35's own read of that tree's coverage jobs makes the
+# same call). No reader of this file could write the value a caller sets
+# here any more than it could write a caller's profiles, so the shape is the
+# one #35 allows and not the one it refuses; the empty default is
+# btclib-org/btclib's and every other caller's own real answer -- their
+# package builds the same way regardless of the job's environment -- rather
+# than a guess standing in for a caller that said nothing (the same reading
+# reusable-vendored-vectors.yml's own header gives python-version's empty
+# default). One caller populating it today does not make it that caller's
+# private input: `reusable-os-suite.yml`'s pre-suite-script is the standing
+# precedent for exactly this, optional and empty by default, read by
+# whichever caller has something to run.
+#
+# It lands once, in its own step ahead of the baseline, rather than on each
+# later step's own env: -- the baseline, the session loop and the report
+# steps below each call `uv run --locked`, and uv's build cache is keyed on
+# the source tree and not on the environment a step ran under, so a step
+# that did not see the variable would serve a cache entry another step's
+# build populated unflagged. Writing it once into $GITHUB_ENV is what every
+# step after it inherits without each needing its own copy of the caller's
+# value.
+#
+# The value reaches the shell through the environment and never through a
+# ${{ }} pasted into a run: script -- the shape zizmor's template-injection
+# rule asks for, and the one every other caller-supplied value in this file
+# already uses (the baseline and session steps' own SESSIONS, further down).
 #
 # No piece of the machinery is behind an input -- the address-space limit,
 # the operator filter, the restore guard and the counter run for every
@@ -56,6 +87,14 @@ on:
           Whether the checkout initializes the tree's git submodules.
         type: boolean
         default: false
+      extra-env:
+        description: >
+          Environment variables the calling tree's build reads, one
+          "NAME=value" line per variable, exported ahead of the baseline
+          step so every uv run below shares it. The empty string, the
+          default, exports nothing.
+        type: string
+        default: ""
 
 # least privilege for the GITHUB_TOKEN: everything running in a job can read
 # it, and nothing here writes. In particular no issues: write -- filing an
@@ -118,6 +157,46 @@ jobs:
           # the wheels the caller's uv.lock pins do not change between runs,
           # so the cache is the difference between a download and a copy
           enable-cache: true
+      # ahead of the baseline, so that step's own uv run is what first builds
+      # under it rather than a later one: uv's build cache is keyed on the
+      # source tree and not on the environment a step ran under, so any step
+      # that ran a build before this one populates the cache unflagged for
+      # every step after it, this one included.
+      #
+      # The value reaches the shell through the environment and never
+      # through a ${{ }} pasted into the script, the same reason the
+      # baseline and session steps below give for SESSIONS. A line is
+      # handed to $GITHUB_ENV only where the text before its first "="
+      # is a legal environment-variable name (a letter or underscore,
+      # then letters, digits or underscores) -- a bare "NAME" with no
+      # "=" fails that on the missing "=" alone, and "MY VAR=x" and
+      # "1FOO=x" fail it on the name. The same check is what keeps a
+      # line shaped "FOO<<EOF=" from reaching $GITHUB_ENV at all: "<" is
+      # not a legal name character, so the text before its "=" -- here
+      # "FOO<<EOF" -- is rejected before $GITHUB_ENV's own parser could
+      # read it as opening a heredoc and swallowing every line after it
+      # into one value
+      - name: Export the caller's extra environment
+        if: env.SELECTED == 'true' && inputs.extra-env != ''
+        env:
+          EXTRA_ENV: ${{ inputs.extra-env }}
+        run: |
+          while IFS= read -r line; do
+            case "$line" in
+              *=*) ;;
+              *) continue ;;
+            esac
+            name="${line%%=*}"
+            rest="${name#?}"
+            case "$name" in
+              [A-Za-z_]*) ;;
+              *) continue ;;
+            esac
+            case "$rest" in
+              *[!A-Za-z0-9_]*) continue ;;
+            esac
+            printf '%s\n' "$line" >> "$GITHUB_ENV"
+          done <<< "$EXTRA_ENV"
       # the test command of each configuration, run once against the
       # unmutated tree. Without this a stale path or a renamed test file
       # fails every mutant identically, and the session reports a perfect
