@@ -8861,3 +8861,27 @@ nothing red follows from the copies disagreeing.
 - **Under a floor with no slack the runner's flags decide whether the
   gate passes** (closes #1175): the answer is a test of the statement
   and not a pragma, which `tests/coverage_test.py` asks of the trees.
+
+### `tests/release_test.py` follows a caller into the callee
+
+- **`jobs()` follows a job's `uses:` into the callee it names**
+  (closes #1187, closes #1188): where `attest` or `github-release`
+  delegates, its steps are read off the reusable workflow it calls.
+
+### Section 14 takes `wait_for_pypi_release.py`, and `alignment.yml` its path
+
+- **`.github/scripts/wait_for_pypi_release.py` joins section 14's list and
+  `alignment.yml`'s `pull_request` paths** (closes #1160): every tree
+  section 10's `pypi-install` entry names shares the converged blob.
+
+### Section 14 takes `wait_for_readthedocs_build.py`
+
+- **`.github/scripts/wait_for_readthedocs_build.py` joins section 14's
+  list and `alignment.yml`'s paths** (closes #1186): owed where
+  `release.yml`, whose `documented` job runs it; the copies converge.
+
+### `zizmor`'s hook takes the auditor persona, two findings declined
+
+- **Every elevated grant takes the trailing comment the audit reads,
+  and `alignment.yml` declines `secrets-outside-env` twice** (issue
+  #1164, issue #1198): the hook then takes `--persona=auditor`, at zero.
