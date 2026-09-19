@@ -109,11 +109,30 @@ jobs:
     timeout-minutes: 15
     steps:
       # a run without the App's credentials measures nothing, so it is
-      # refused here, naming them, rather than failing inside the suite
+      # refused here, naming them, rather than failing inside the suite.
+      #
+      # secrets-outside-env asks for a deployment environment on this
+      # job, and both reads of the key -- here and at the mint below --
+      # decline it for one reason.
+      #
+      # Every environment this organization declares guards a publish:
+      # pypi and testpypi, each named by a job of a release.yml, which
+      # is the rule section 11 states. github-pages is GitHub's own,
+      # created by enabling Pages, and section 11 puts it outside that
+      # rule and outside REPOSITORY.md. This repository declares none of
+      # the three, and this token publishes nothing -- its five
+      # permissions are all read.
+      #
+      # An environment carrying no protection rule would add nothing to
+      # that. One carrying a branch restriction, the only kind that adds
+      # anything, would withhold the key from every pull_request run --
+      # runs on a branch and not on main -- whereupon the step below
+      # fires by design and reports a credential where there is no
+      # finding. The trigger is the requirement, so the audit gives way
       - name: Refuse to sweep without the App
         env:
           APP_ID: ${{ vars.ALIGNMENT_APP_ID }}
-          APP_KEY: ${{ secrets.ALIGNMENT_APP_PRIVATE_KEY }}
+          APP_KEY: ${{ secrets.ALIGNMENT_APP_PRIVATE_KEY }} # zizmor: ignore[secrets-outside-env]
         run: |
           if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
             echo "::error::ALIGNMENT_APP_ID or ALIGNMENT_APP_PRIVATE_KEY" \
@@ -129,6 +148,9 @@ jobs:
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           app-id: ${{ vars.ALIGNMENT_APP_ID }}
+          # the second read of the key the step above declines an
+          # environment for, and the same reason covers it
+          # zizmor: ignore[secrets-outside-env]
           private-key: ${{ secrets.ALIGNMENT_APP_PRIVATE_KEY }}
           # the whole installation, not a list of repositories: the suite
           # asks the API which repositories exist, and a list here would
