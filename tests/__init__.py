@@ -320,6 +320,11 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
+        1156,
+        "test_dependabot_the_uv_ecosystem_names_its_group_dev_tooling",
+        ("btclib-node", "bbt"),
+    ),
+    (
         1195,
         "test_every_build_requirement_takes_a_floor_and_a_ceiling",
         ("btclib-secp256k1",),

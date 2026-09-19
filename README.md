@@ -3357,7 +3357,9 @@ commit by hand. The local hook refuses an unpinned or moved pointer and
 says nothing about upstream.
 
 Each ecosystem groups its updates into one pull request, since every pull
-request runs the whole matrix. Weekly with a seven-day cooldown: a
+request runs the whole matrix — the one exemption is `btclib-org.github.io`'s
+`bundler` block, a single gem having nothing to group with. The `uv`
+ecosystem's group is named `dev-tooling`. Weekly with a seven-day cooldown: a
 compromised release is usually yanked within days. None declares a
 `target-branch`: one naming a missing branch fails nowhere and proposes
 nothing.

@@ -8933,3 +8933,9 @@ nothing red follows from the copies disagreeing.
 - **`tests/pyproject_test.py` reads `[build-system].requires` for a floor and
   a ceiling at the next major** (issue #1195): `btclib-secp256k1`'s other
   entries are `BACKLOG`-excused until that port lands.
+
+### A cell reads section 11's grouping, cadence and the `uv` group's name
+
+- **A cell reads `groups:`, `interval:` and `cooldown:`, and a second
+  reads the `uv` ecosystem's group, `dev-tooling`** (issue #1156):
+  `btclib-node` and `bbt` are `BACKLOG` rows for the rename each owes.
