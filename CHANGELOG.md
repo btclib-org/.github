@@ -8927,3 +8927,9 @@ nothing red follows from the copies disagreeing.
 - **A caller whose build reads an environment variable can hand the session
   one, exported once so no later `uv run` reuses an unflagged build** (issue
   #1202): the default is empty.
+
+### Section 3 bounds every build requirement, not only `uv_build`'s
+
+- **`tests/pyproject_test.py` reads `[build-system].requires` for a floor and
+  a ceiling at the next major** (issue #1195): `btclib-secp256k1`'s other
+  entries are `BACKLOG`-excused until that port lands.
