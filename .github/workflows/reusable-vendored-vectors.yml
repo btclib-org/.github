@@ -42,9 +42,9 @@ name: reusable-vendored-vectors
 # would catch one -- so a bump belongs to whichever caller's own
 # .python-version moves, same as every other input here.
 #
-# The default is the empty string rather than section 10's "a callee
-# takes such a version as a required input with no default": that rule
-# is about a claim this repository cannot make for a tree -- the floor
+# The default is the empty string rather than section 10's "the callee
+# takes it as a required input with no default": that rule is about a
+# claim this repository cannot make for a tree -- the floor
 # requires-python declares, the interpreters a tree says it supports --
 # and this input is not that. The script imports only the standard
 # library, so no caller is claiming which interpreters it runs under;
