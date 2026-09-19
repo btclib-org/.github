@@ -8903,3 +8903,9 @@ nothing red follows from the copies disagreeing.
 - **The regtest job btclib's and btclib-node's own
   `integration-bitcoind.yml` will call is written once here** (issue
   #1196): an `exclude-classname` input covers the one step that differs.
+
+### A citation quotes section 10 rather than paraphrasing it
+
+- **`reusable-vendored-vectors.yml`'s own comment now reads "the callee
+  takes it as a required input with no default," section 10's own
+  words** (closes #1208): the paraphrase resolved nowhere in the standard.
