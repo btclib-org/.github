@@ -8885,3 +8885,9 @@ nothing red follows from the copies disagreeing.
 - **Every elevated grant takes the trailing comment the audit reads,
   and `alignment.yml` declines `secrets-outside-env` twice** (issue
   #1164, issue #1198): the hook then takes `--persona=auditor`, at zero.
+
+### Section 1's `uv.lock` sentence follows the floor it lost
+
+- **"The dependency groups declare no versions" predates the floor an
+  entry may now carry** (closes #1197): section 10's own `deps-oldest`
+  bullet is where that floor and its scope are already stated.

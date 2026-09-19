@@ -323,10 +323,10 @@ twice and a test refuses the day the two disagree.
 ### `uv.lock`
 
 Committed, and the only thing that moves it is Dependabot's uv ecosystem
-and the `uv-lock` hook. The dependency groups declare no versions: the
-whole drift of ruff, mypy, pytest and sphinx lives in the lock file, so
-one pull request a week carries all of it, pre-validated by the
-`deps-latest` workflow.
+and the `uv-lock` hook. A dependency group's own entry may carry a
+lower bound, and nothing here moves one: the whole drift of ruff, mypy,
+pytest and sphinx above it lives in the lock file, so one pull request
+a week carries all of it, pre-validated by the `deps-latest` workflow.
 
 `[tool.uv] required-version` names the oldest uv that may read the
 lock. Every tree the root-files table above binds to `uv.lock` — tiers
