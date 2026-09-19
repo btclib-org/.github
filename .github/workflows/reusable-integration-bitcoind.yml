@@ -1,0 +1,208 @@
+---
+name: reusable-integration-bitcoind
+
+# The regtest job btclib's and btclib-node's own integration-bitcoind.yml
+# call, so the checkout, the node install, the test run and the report
+# upload are written once. The trigger, the schedule, the concurrency
+# group and its suffix stay in the caller, whose run this job joins --
+# the shape reusable-lint.yml and reusable-os-suite.yml already take, and
+# for the same reason: a called workflow cannot itself carry `schedule`,
+# and the caller's own trigger set is what a reader checking when this
+# runs has to open regardless.
+#
+# Four of the five inputs are the ordinary shape: which Core release and
+# which published sha256 to install -- a tree's own claim about the node
+# it tests against, raised on its own schedule and not the other tree's
+# -- and the two environment-variable names tests/integration/conftest.py
+# reads in each calling tree, which are that tree's own switches and not
+# something a file here could write. An input for any of these is not a
+# copy in disguise (btclib-org/.github#35): both callers set a value, and
+# neither is empty.
+#
+# The fifth is the one this file's own issue names as the ground on
+# which the conversion could be wrong. btclib's
+# own step excludes hwi-classname testcases before judging whether the
+# node tests ran, because that tree's tests/integration mixes in
+# HWI-classified cases that legitimately skip there; btclib-node has none
+# and filters nothing. As an optional input defaulting to empty, only
+# btclib will ever set exclude-classname, and two callers is already
+# thin. It is taken here anyway, on this ground: the difference is one
+# line inside one step of six, a filter over a list rather than a
+# different script, a different trigger set or a different job, where the
+# calibration precedent this issue measured against --
+# btclib-secp256k1's twice-per-cell os-* runs -- was a difference in the
+# shape of the job itself rather than in one step of it.
+# reusable-os-suite.yml's own pre-suite-script already carries exactly
+# this shape -- an optional string, empty by default, read by whichever
+# caller has something to run and left alone by the one that does not --
+# so this is the organization's standing convention applied rather than a
+# new one argued for. Everything else about the two callers is the same
+# job end to end: the same trigger set, the same single job, the same
+# required-check name, the same pinned release and digest, a
+# byte-identical call into ./.github/actions/install-bitcoind, and a
+# byte-identical report upload.
+#
+# A reusable workflow changes the check context a required check reports
+# under: GitHub composes it from the calling job's own id and this job's
+# `name:`, joined by " / ", so a caller cannot simply start calling this
+# file without also widening or moving its branch rule.
+# `Regtest against Bitcoin Core` is a required context in both btclib and
+# btclib-node today (the classic protection endpoint, not the ruleset
+# one, is where that is read back), and converting either without first
+# updating that rule leaves a merge waiting on a context nothing produces
+# any more. That change is each caller's own to make, outside this pull
+# request and before its own call lands.
+
+on:
+  workflow_call:
+    inputs:
+      bitcoind-version:
+        description: >
+          The Bitcoin Core release to install, "31.1" rather than
+          "v31.1" -- the calling tree's own pinned version.
+        required: true
+        type: string
+      bitcoind-sha256:
+        description: >
+          The sha256 of that release's x86_64 linux tarball, as the
+          independent guix builders attested it.
+        required: true
+        type: string
+      integration-env-var:
+        description: >
+          The name of the environment variable the calling tree's
+          tests/integration/conftest.py reads to gate itself on, set to
+          "1".
+        required: true
+        type: string
+      bitcoind-path-env-var:
+        description: >
+          The name of the environment variable the calling tree's
+          tests/integration/conftest.py reads for the installed
+          bitcoind's own path.
+        required: true
+        type: string
+      exclude-classname:
+        description: >
+          A substring excluding matching testcases from the node-ran
+          check below, before skips are judged. Empty runs the check
+          over every testcase; the header has which caller sets this and
+          why.
+        type: string
+        default: ""
+
+# least privilege for the GITHUB_TOKEN: nothing here writes, and the
+# tarball is fetched from bitcoincore.org, which does not know this token
+permissions:
+  contents: read
+
+jobs:
+  regtest:
+    # the name the check context is keyed by, after the calling job's
+    # own: branch protection matches a context by name and not by the
+    # workflow that reported it, and the header above has what changes
+    # about that context here
+    name: Regtest against Bitcoin Core
+    # a draft pull request is work in progress and spends no runner here
+    # either; a closed pull request spends none either -- the caller's
+    # own trigger takes the closed event only to supersede a run its
+    # group is still holding. github.event is the caller's, which is the
+    # event its trigger took
+    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    # the whole flow is seconds: the chain is mined locally on regtest
+    # and the node answers its first rpc call in well under a second, so
+    # this bounds the download and the failure cases rather than the work
+    timeout-minutes: 20
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment: a
+      # tag, let alone a branch, is a name its owner can move
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the job reads the tree and nothing pushes it back
+          persist-credentials: false
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          # the wheels uv.lock pins do not change between runs, so the
+          # cache is the difference between a download and a copy
+          enable-cache: true
+      # the calling tree's own composite action: the checkout above put
+      # it in the working tree, this job carrying none of its own, for
+      # the reason the header gives -- this repository's own tree has no
+      # .github/actions/ at all. This differs from links.yml's and
+      # claude-review.yml's own `zizmor: ignore[self-repository]`: those
+      # are a job-level call to a workflow of this same repository, path
+      # resolution deciding nothing since it runs at this file's own
+      # commit either way and really does call into this repository's
+      # own content; this is a step inside a *called* workflow, where
+      # `./` resolves against whatever the checkout above put in the
+      # working tree -- the calling tree's own copy, on purpose, per the
+      # header, and never this repository's, which has nothing at this
+      # path for it to be. zizmor's suggested `$/` form is not a syntax
+      # GitHub Actions has: actionlint refuses it here exactly as it
+      # does on those two other calls
+      - name: Install bitcoind
+        id: bitcoind
+        uses: ./.github/actions/install-bitcoind # zizmor: ignore[self-repository]
+        with:
+          version: ${{ inputs.bitcoind-version }}
+          sha256: ${{ inputs.bitcoind-sha256 }}
+      # exported inside this one step rather than appended to
+      # GITHUB_ENV: an input is caller-given text, and a file that
+      # becomes every later step's environment is a wider blast radius
+      # for it than a shell variable that dies with this step
+      - name: Run the integration tests
+        env:
+          INTEGRATION_VAR: ${{ inputs.integration-env-var }}
+          BITCOIND_VAR: ${{ inputs.bitcoind-path-env-var }}
+          BITCOIND_PATH: ${{ steps.bitcoind.outputs.path }}
+        run: |
+          export "$INTEGRATION_VAR=1"
+          export "$BITCOIND_VAR=$BITCOIND_PATH"
+          uv run --locked --no-default-groups --group test \
+            pytest tests/integration --junitxml=integration.xml
+      # a skip is not a failure, and that is exactly why this step is
+      # here: pytest exits 0 for a module that skipped itself, so a job
+      # whose fixture stopped finding the node would stay green while
+      # asking Core nothing -- the failure mode of an unattended run that
+      # looks like good news. exclude-classname is what lets a caller's
+      # own legitimately-skipping cases -- hwi ones in btclib's tree --
+      # out of that judgment without excusing anything else
+      - name: Fail if the node tests did not run
+        env:
+          EXCLUDE_CLASSNAME: ${{ inputs.exclude-classname }}
+        run: |
+          uv run --locked --no-default-groups --group test python - <<'PY'
+          import os
+          import sys
+          import xml.etree.ElementTree as ET
+
+          exclude = os.environ["EXCLUDE_CLASSNAME"]
+          cases = ET.parse("integration.xml").getroot().iter("testcase")
+          ran = [one for one in cases
+                 if not exclude or exclude not in one.get("classname", "")]
+          skipped = [one for one in ran if one.find("skipped") is not None]
+          for one in skipped:
+              reason = one.find("skipped").get("message", "")
+              print(f"::error::{one.get('name')} skipped: {reason}")
+          if not ran or skipped:
+              print(f"::error::{len(ran)} test(s) ran, {len(skipped)} skipped")
+              sys.exit(1)
+          print(f"{len(ran)} test(s) ran against the node")
+          PY
+      # always(), because a failure is what somebody opens this job for
+      # and the report is what says whether the node refused something or
+      # the test never reached it
+      - name: Upload the report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: integration-report
+          path: integration.xml
+          if-no-files-found: error
+          # long enough to compare a run with the one before it, short
+          # enough that a required check does not accumulate a year of
+          # xml
+          retention-days: 90

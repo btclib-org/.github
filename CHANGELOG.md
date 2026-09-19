@@ -8891,3 +8891,9 @@ nothing red follows from the copies disagreeing.
 - **"The dependency groups declare no versions" predates the floor an
   entry may now carry** (closes #1197): section 10's own `deps-oldest`
   bullet is where that floor and its scope are already stated.
+
+### `reusable-integration-bitcoind.yml` exists
+
+- **The regtest job btclib's and btclib-node's own
+  `integration-bitcoind.yml` will call is written once here** (issue
+  #1196): an `exclude-classname` input covers the one step that differs.
