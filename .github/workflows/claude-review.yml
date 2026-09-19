@@ -100,11 +100,11 @@ jobs:
     permissions:
       contents: read
       # what posting the review or the reply takes
-      pull-requests: write
+      pull-requests: write # posting the review, and the reply to a mention
       # not for workload identity federation, which this does not use:
       # the action mints a GitHub OIDC token during its own startup
       # whatever the Anthropic credential is
-      id-token: write
+      id-token: write # the OIDC token the action mints at its own startup
     with:
       # what a review of this tree has to know that a review of any other
       # tree does not, landing between the verdict paragraph and the

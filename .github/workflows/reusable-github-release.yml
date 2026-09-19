@@ -115,7 +115,7 @@ jobs:
       # its token, and what it writes is a release; the statement
       # reusable-attest.yml signs goes to the attestations API under
       # permissions of its own
-      contents: write
+      contents: write # creating the release this job exists to create
     steps:
       # every action is pinned to a commit SHA, the tag in the comment:
       # a tag, let alone a branch, is a name its owner can move, and

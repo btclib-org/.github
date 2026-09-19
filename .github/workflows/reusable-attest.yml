@@ -162,8 +162,8 @@ jobs:
       # write that persists the attestation against the repository.
       # contents is not restated, a job's block replacing the
       # workflow's: this job reads nothing of the calling tree
-      id-token: write
-      attestations: write
+      id-token: write # the short-lived Sigstore signing certificate
+      attestations: write # persisting the attestation against the repository
     steps:
       # every action is pinned to a commit SHA, the tag in the comment:
       # a tag, let alone a branch, is a name its owner can move, and

@@ -8879,3 +8879,9 @@ nothing red follows from the copies disagreeing.
 - **`.github/scripts/wait_for_readthedocs_build.py` joins section 14's
   list and `alignment.yml`'s paths** (closes #1186): owed where
   `release.yml`, whose `documented` job runs it; the copies converge.
+
+### `zizmor`'s hook takes the auditor persona, two findings declined
+
+- **Every elevated grant takes the trailing comment the audit reads,
+  and `alignment.yml` declines `secrets-outside-env` twice** (issue
+  #1164, issue #1198): the hook then takes `--persona=auditor`, at zero.
