@@ -8897,3 +8897,9 @@ nothing red follows from the copies disagreeing.
 - **Two inputs, `ledgers` and `python-version`, and no third for the
   cron, which `workflow_call` cannot take** (issue #1196): `btclib`,
   `btclib-benchmarks` and `btclib-secp256k1`'s own `check` job converge.
+
+### `reusable-integration-bitcoind.yml` exists
+
+- **The regtest job btclib's and btclib-node's own
+  `integration-bitcoind.yml` will call is written once here** (issue
+  #1196): an `exclude-classname` input covers the one step that differs.
