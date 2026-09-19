@@ -792,15 +792,28 @@ that a hook argument has not. Section 14 names each of those files.
     root and `src/<name>/__init__.py` being its first two
     file-selection heuristics.
 
-    `requires` names that backend with a floor and, under `uv_build`, a
-    **ceiling at the next minor**, where the bullet below refuses an
-    upper bound to a sibling dependency. What differs is what the bound
-    costs: on a runtime dependency it makes a published artifact refuse
-    a version somebody already has, where on a build requirement it only
-    narrows what an isolated build resolves for itself. uv bumps its
-    minor for a breaking change and releases this backend with itself,
-    so an unbounded requirement lets a published sdist build under a
-    backend nobody checked it against.
+    `requires` names every entry — the backend among them — with a
+    floor and a **ceiling at the next major**, tightened to whatever
+    release broke it where a break has been measured: the shape
+    `hatchling>=1.27,<1.32.1` already has, its ceiling naming the exact
+    release rather than the major above the floor. The bullet below
+    refuses an upper bound to a sibling dependency instead, and what
+    differs is what the bound costs: on a runtime dependency it makes a
+    published artifact refuse a version somebody already has, where on
+    a build requirement it only narrows what an isolated build resolves
+    for itself — every entry of `requires` is resolved fresh by an
+    isolated PEP 517 build, outside `uv.lock`, so an unbounded one lets
+    a published sdist build under whatever release exists on the day,
+    unchecked.
+
+    Under `uv_build` the ceiling sits tighter, at the next minor: uv
+    bumps its own minor for a breaking change and releases this backend
+    with itself, so a bound only at the next major would still admit a
+    break the next minor already carries. That is uv's own release
+    discipline and not a general boundary — neither hatchling's nor
+    cmake's breaking changes are dated by a minor the same way, which is
+    why the general ceiling stops at the major and a tighter one is
+    earned by measuring the break, as `<1.32.1` was.
 
     The floor is the boundary of the property it keeps, and the comment
     at the key gives the measurement that found it: under `uv_build` the

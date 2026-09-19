@@ -407,6 +407,71 @@ def test_the_licence_is_an_expression_with_its_files(
     assert named == {"LICENSE", "AUTHORS.md"}, f"license-files is {files!r}; " + command
 
 
+FLOOR_BOUND = re.compile(r">=\s*(?P<version>[0-9]+(?:\.[0-9]+)*)")
+"""A build requirement's lower bound, wherever it sits in the specifier."""
+
+CEILING_BOUND = re.compile(r"<(?!=)\s*(?P<version>[0-9]+(?:\.[0-9]+)*)")
+"""A build requirement's upper bound, `<=` excluded so it stays exclusive."""
+
+
+def build_requires(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> list[str]:
+    """Return `[build-system].requires`, skipping a tree with no backend.
+
+    :param repository: the repository's name.
+    :param pyprojects: the parsed files.
+    :returns: the requirement strings, in the order the file lists them.
+    """
+    document = parsed(repository, pyprojects)
+    if "build-system" not in document:
+        pytest.skip(f"{repository} names no build backend")
+    requires = document["build-system"].get("requires", [])
+    return [str(entry) for entry in requires]
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_every_build_requirement_takes_a_floor_and_a_ceiling(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 3: every `[build-system].requires` entry is bounded.
+
+    The floor and the ceiling both bind every entry, not only the
+    backend's own, and the ceiling sits at or before the next major
+    above the floor -- a tighter, measured bound such as
+    `hatchling>=1.27,<1.32.1` already satisfies that. A marker
+    (`; python_version<"3.13"`) is not the specifier and is read apart
+    from it, so a bound written only in the marker does not count as one
+    on the requirement.
+
+    :param repository: the repository asked about.
+    :param pyprojects: the parsed files.
+    """
+    unbounded: list[str] = []
+    for raw in build_requires(repository, pyprojects):
+        specifier = raw.split(";", 1)[0]
+        floor = FLOOR_BOUND.search(specifier)
+        ceiling = CEILING_BOUND.search(specifier)
+        if floor is None:
+            unbounded.append(f"{raw!r} names no floor")
+            continue
+        if ceiling is None:
+            unbounded.append(f"{raw!r} names no ceiling")
+            continue
+        floor_major = int(floor["version"].split(".")[0])
+        ceiling_major = int(ceiling["version"].split(".")[0])
+        if ceiling_major > floor_major + 1:
+            unbounded.append(
+                f"{raw!r} ceilings at major {ceiling_major}, past the next"
+                f" major above its floor ({floor_major + 1})"
+            )
+    assert not unbounded, f"{unbounded}; " + by_hand(
+        repository, "sed -n '/^\\[build-system\\]/,/^\\[/p' pyproject.toml"
+    )
+
+
 def test_authors_names_the_copyright_s_collective(
     repository: str,
     trees: dict[str, Path],
