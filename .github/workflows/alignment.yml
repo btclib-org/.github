@@ -103,8 +103,24 @@ jobs:
     name: Check the organization against README.md
     # a draft pull request is work in progress and spends no runner here.
     # A closed one spends none either -- the trigger above takes the
-    # closed event only to supersede a run still holding in this group
-    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    # closed event only to supersede a run still holding in this group.
+    #
+    # A pull_request run whose actor is dependabot[bot] is given the
+    # Dependabot secret store rather than this one, and that store holds
+    # neither ALIGNMENT_APP_ID nor ALIGNMENT_APP_PRIVATE_KEY -- adding
+    # them there was the rejected alternative (btclib-org/.github#1190),
+    # since it would put an organization-wide App private key into the
+    # context of runs built from a bot's own branch. So the job itself
+    # declines for that actor rather than letting the guard step below
+    # fail it: a job-level `if:` reads as skipped on the pull request
+    # page, where the guard's `exit 1` reads as a finding nothing there
+    # is. Nothing is lost by skipping -- the sweep is a sentinel and not
+    # a gate, and the Saturday cron measures the same tree days later
+    # regardless of who last pushed to the branch
+    if: >-
+      ${{ !github.event.pull_request.draft &&
+          github.event.action != 'closed' &&
+          github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

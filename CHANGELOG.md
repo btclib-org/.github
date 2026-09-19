@@ -8891,3 +8891,9 @@ nothing red follows from the copies disagreeing.
 - **"The dependency groups declare no versions" predates the floor an
   entry may now carry** (closes #1197): section 10's own `deps-oldest`
   bullet is where that floor and its scope are already stated.
+
+### `alignment.yml` declines a dependabot-actored run instead of failing it
+
+- **The job now skips a `pull_request` run actored by
+  `dependabot[bot]`** (closes #1190): that actor's own secret store
+  holds neither App credential.
