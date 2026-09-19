@@ -8891,3 +8891,9 @@ nothing red follows from the copies disagreeing.
 - **"The dependency groups declare no versions" predates the floor an
   entry may now carry** (closes #1197): section 10's own `deps-oldest`
   bullet is where that floor and its scope are already stated.
+
+### `reusable-vendored-vectors.yml` carries the vendored-pin check
+
+- **Two inputs, `ledgers` and `python-version`, and no third for the
+  cron, which `workflow_call` cannot take** (issue #1196): `btclib`,
+  `btclib-benchmarks` and `btclib-secp256k1`'s own `check` job converge.

@@ -1,0 +1,197 @@
+---
+name: reusable-vendored-vectors
+
+# The vendored-pin sentinel a repository's own vendored-vectors.yml
+# calls, so the checkout, the optional interpreter setup and the
+# re-check itself are written once. The trigger, the cron minute
+# section 10's calendar gives the calling repository, the concurrency
+# group and each caller's own paths: filter all stay in the caller,
+# whose run this job joins.
+#
+# What the job asks is each caller's own ledger's: whether a pin it
+# wrote down -- a vendored file's commit, a verdict's revision -- is
+# still the file upstream serves, over every entry already confirmed at
+# upstream's tip. It opens, updates or closes an issue on drift rather
+# than fixing anything, refreshing a vendored file being a decision the
+# script does not get to make.
+#
+# issues: write is what the job below takes, on the job alone and not on
+# the workflow: links.yml's own comment in every calling tree is where
+# the opposite choice is argued, an automatic issue being the usual next
+# step a scheduled workflow declines. This one takes it on purpose -- a
+# dead link is noticed the next time somebody follows it, where a
+# vendored vector is trusted without anybody looking at it again, and an
+# issue is what carries that past the one email a failed run sends.
+#
+# Two inputs, and neither is of the refused shape (btclib-org/.github#35):
+#
+# ledgers is the whole matrix, JSON-encoded, an array of {ledger, title}
+# objects -- the pin file each cell reads and the title of the issue it
+# tracks drift under. A caller sets it at cardinality 2 (btclib, one
+# ledger for its vendored vectors and one for its tf2 verdicts) or 1
+# (btclib-benchmarks, btclib-secp256k1's own check job): what a reader of
+# this file could not write for any caller, where the loop around it is
+# not.
+#
+# python-version toggles the interpreter: btclib and btclib-secp256k1
+# pin "3.14" here, and btclib-benchmarks runs the check against the
+# runner's own python3 with nothing installed. The empty string is that
+# second case; a caller naming a version is the first. Neither value is
+# a literal this file writes -- interpreters_test.py's
+# test_the_workflows_naming_an_interpreter_are_the_ones_recorded is what
+# would catch one -- so a bump belongs to whichever caller's own
+# .python-version moves, same as every other input here.
+#
+# The default is the empty string rather than section 10's "a callee
+# takes such a version as a required input with no default": that rule
+# is about a claim this repository cannot make for a tree -- the floor
+# requires-python declares, the interpreters a tree says it supports --
+# and this input is not that. The script imports only the standard
+# library, so no caller is claiming which interpreters it runs under;
+# what varies is only whether a caller bothers pinning one at all for a
+# check that behaves identically under any python3. The empty string is
+# btclib-benchmarks's own real answer to that, not a guess standing in
+# for a caller that said nothing, which is the shape the rule refuses.
+#
+# No third input for the cron: btclib, btclib-benchmarks and
+# btclib-secp256k1 each schedule this at a different minute of the
+# organization's own Monday slot, and a scheduled trigger cannot live in
+# a workflow_call callee at all -- each caller's own on: schedule stays
+# where it already is.
+#
+# btclib-secp256k1's pin and zkp-pin jobs are not here: they import
+# named maintainer GPG fingerprints and verify a submodule's own tag or
+# commit, a check with exactly one caller ever, so folding them behind
+# an input would be a parameter no second tree could ever set to
+# anything else. They stay in that tree's own vendored-vectors.yml,
+# beside the check job that does call this file.
+#
+# btclib-node's own vendored-vectors.yml job is not a caller of this
+# file at all: a different script (check_vendored_pin.py, not
+# check_vendored_vectors.py), no issues: write, no dry-run gating and a
+# different failure contract -- a red run in the Actions tab rather than
+# an issue opened, updated or closed. Its own header names the reason.
+#
+# The cancel-in-progress divergence btclib-secp256k1's own copy carries
+# against the other three is not decided here: that key is on each
+# caller's own concurrency: block, which this file does not declare at
+# all, so converging the job below settles nothing about it either way.
+#
+# The dry-run flag reaches the shell through the environment below and
+# through an args array, never through a ${{ }} pasted into the run:
+# script -- the shape zizmor's template-injection rule asks for, and the
+# one two of the three converging callers already used. The third wrote
+# the same flag inline with a zizmor ignore comment; this file carries
+# only the array form, so no caller inherits the ignore
+
+on:
+  workflow_call:
+    inputs:
+      ledgers:
+        description: >
+          The ledgers to check against upstream, JSON-encoded: an array
+          of objects, each carrying a ledger (the pin file's own path)
+          and a title (the tracking issue's own title for drift in that
+          ledger). Drives the matrix below, one cell per ledger.
+        required: true
+        type: string
+      python-version:
+        description: >
+          The interpreter to install before running the script, or the
+          empty string, which runs the check against the runner's own
+          python3 with no interpreter installed at all.
+        type: string
+        default: ""
+
+# least privilege for the GITHUB_TOKEN: everything running in a job can
+# read it, and nothing at the workflow level writes. The elevation is
+# the check job's own, below
+permissions:
+  contents: read
+
+jobs:
+  check:
+    # the ledger is in the name because a reader of a red run needs it,
+    # and because the matrix below makes it the one thing that changes
+    # between cells. btclib-benchmarks and btclib-secp256k1 today name
+    # this job statically ("Check the vendored pins against upstream",
+    # "Check vendored vectors against upstream"); converting moves what
+    # the Actions tab shows for either to this name. Neither is a
+    # required check, so nothing a branch rule matches by name breaks
+    name: Check ${{ matrix.ledger }} against upstream
+    # a draft pull request is work in progress and spends no runner
+    # here either: the same condition every caller's own trigger already
+    # filters at, restated here because a called job reads the
+    # triggering event through this same github context -- github.event
+    # is the caller's, which is the event its trigger took. A closed
+    # pull request spends none either -- each caller's own trigger takes
+    # that event only to supersede a run its group is still holding
+    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # the ledger and the title of its issue travel together, which is
+    # what the matrix is for: two run: blocks would repeat the dry-run
+    # preamble below and let the pair drift apart. fail-fast is off
+    # because two ledgers answer different questions -- one gh error
+    # against upstream is no reason to leave the other unchecked for the
+    # week, and the matrix's own default would cancel it
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.ledgers) }}
+    # the elevation, on the job that needs it and nowhere else: no other
+    # job in this workflow declares permissions, so no other job
+    # elevates. issues: write is what the script's gh issue
+    # create/edit/close calls below take, on the tracking issue this run
+    # opens, updates or closes
+    permissions:
+      contents: read
+      issues: write # gh issue create/edit/close, in the step below
+    steps:
+      # every action is pinned to a commit SHA, the tag in the comment: a
+      # tag, let alone a branch, is a name its owner can move, and these
+      # run in a job that can read the workflow token
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the job reads the tree and nothing pushes it back
+          persist-credentials: false
+
+      # skipped where the caller passes no version: the script imports
+      # only the standard library and shells out to gh, so it runs
+      # against the runner's own python3 as readily as against an
+      # installed interpreter, and a caller with nothing to pin asks for
+      # neither
+      - name: Setup Python
+        if: inputs.python-version != ''
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      # --dry-run on the pull_request trigger only: a fork's read-only
+      # token could not write the issue anyway, and a same-repository
+      # pull request testing a change to this script, to the reusable
+      # workflow or to a ledger should not close or edit whatever
+      # tracking issue is open at the time as a side effect of that
+      # test. The flag, the ledger and the title all reach the shell
+      # through the environment rather than through a ${{ }} inside the
+      # script, which would be text pasted into it -- every one of them
+      # is this run's own rather than a fork's, and the array built from
+      # the flag is what keeps an empty value from becoming an empty
+      # argument (mutation.yml's own "Check the baselines" step is the
+      # same pattern, over a value that file's own rather than a
+      # caller's)
+      - name: Re-check every pin already at upstream's tip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
+          LEDGER: ${{ matrix.ledger }}
+          ISSUE_TITLE: ${{ matrix.title }}
+          INTERPRETER: ${{ inputs.python-version != '' && 'python' || 'python3' }}
+        run: |
+          args=()
+          if [ -n "$DRY_RUN" ]; then
+            args=(--dry-run)
+          fi
+          "$INTERPRETER" .github/scripts/check_vendored_vectors.py \
+            "$LEDGER" "$ISSUE_TITLE" "${args[@]}"
