@@ -3767,9 +3767,6 @@ The paths are what that test compares:
   invocation and not a second copy of the standard, and it stays a
   file of its own rather than folding into `CLAUDE.md`, which is read by
   every session including the one that wrote the diff.
-- `.github/scripts/check_changelog.py` — owed by every repository, every
-  tree carrying a `CHANGELOG.md` and every one of them `merge=union` in
-  `.gitattributes`. Section 4's `check-changelog` hook is what runs it.
 - `.github/scripts/mutation_counts.py` — owed where
   `.github/workflows/mutation.yml`: that workflow is what runs it, and
   section 10's `mutation` entry is what decides which trees carry the
@@ -3847,6 +3844,14 @@ comparison stops:
   the `ci:` block above already gives: the file around a compared part
   is the repository's own, and a comparison by path over the whole of
   it would report drift in the part that is meant to differ.
+- `.github/scripts/check_changelog.py` — owed by every repository, every
+  tree carrying a `CHANGELOG.md` and every one of them `merge=union` in
+  `.gitattributes`, and the same file in each up to the same heading.
+  Section 4's `check-changelog` hook is what runs it; under the heading
+  is `_GRANDFATHERED_ENTRIES`, how many entries that repository's own
+  open section held above the length rule's own entry the day the fifth
+  check reached it — a fact about that repository's history, not about
+  the script every repository carries alike.
 
 `tests/verbatim_test.py` compares what precedes that heading where a file
 carries one, the whole file where it does not, and only the section a
