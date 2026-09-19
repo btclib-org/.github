@@ -167,7 +167,7 @@ jobs:
       # restated, a job's permissions replacing the workflow's
       contents: read
       # the attestations API, which gh attestation verify reads
-      attestations: read
+      attestations: read # the attestation `gh attestation verify` reads
     steps:
       # every action is pinned to a commit SHA, the tag in the comment:
       # a tag, let alone a branch, is a name its owner can move, and
