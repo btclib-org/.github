@@ -168,23 +168,32 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
 
-      # --dry-run on the pull_request trigger only: a fork's read-only
-      # token could not write the issue anyway, and a same-repository
-      # pull request testing a change to this script, to the reusable
-      # workflow or to a ledger should not close or edit whatever
-      # tracking issue is open at the time as a side effect of that
-      # test. The flag, the ledger and the title all reach the shell
-      # through the environment rather than through a ${{ }} inside the
-      # script, which would be text pasted into it -- every one of them
-      # is this run's own rather than a fork's, and the array built from
-      # the flag is what keeps an empty value from becoming an empty
+      # --dry-run on everything but the schedule trigger, so the only
+      # run that ever writes is the unattended weekly one. A fork's
+      # read-only token could not write the issue on a pull_request
+      # anyway, and a same-repository pull request testing a change to
+      # this script, to the reusable workflow or to a ledger should not
+      # close or edit whatever tracking issue is open at the time as a
+      # side effect of that test -- and neither should a
+      # workflow_dispatch run, which is what a maintainer or an agent
+      # reaches for to test exactly such a change. Nothing inside the
+      # job distinguishes a dispatch meant to verify behaviour from one
+      # meant to force a real check today, so every dispatch gets the
+      # same guarantee a pull_request already had rather than only the
+      # runs that remembered to ask for it (btclib-org/.github#1210 is
+      # the dispatch that nearly opened a real issue this way). The
+      # flag, the ledger and the title all reach the shell through the
+      # environment rather than through a ${{ }} inside the script,
+      # which would be text pasted into it -- every one of them is this
+      # run's own rather than a fork's, and the array built from the
+      # flag is what keeps an empty value from becoming an empty
       # argument (mutation.yml's own "Check the baselines" step is the
       # same pattern, over a value that file's own rather than a
       # caller's)
       - name: Re-check every pin already at upstream's tip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DRY_RUN: ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
+          DRY_RUN: ${{ github.event_name != 'schedule' && '--dry-run' || '' }}
           LEDGER: ${{ matrix.ledger }}
           ISSUE_TITLE: ${{ matrix.title }}
           INTERPRETER: ${{ inputs.python-version != '' && 'python' || 'python3' }}

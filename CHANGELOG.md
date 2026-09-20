@@ -8945,3 +8945,9 @@ nothing red follows from the copies disagreeing.
 - **`btclib-secp256k1`'s `hook_pins_test.py` keeps `check-sdist`'s copy
   equal to `[build-system]`'s `requires`, in place of "nothing does" and
   a citation of the closed #145** (closes #1203).
+
+### `reusable-vendored-vectors.yml`'s dry run covers `workflow_dispatch` too
+
+- **`DRY_RUN` now fires on anything but `schedule`, not on `pull_request`
+  alone** (closes #1210): a `workflow_dispatch` run took the weekly
+  schedule's own full-write path, risking a real tracking issue.
