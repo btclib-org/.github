@@ -3555,11 +3555,14 @@ of every version already on the index, which no later release corrects.
     **What the failure keeps is the hook environment inside `requires`**:
     `build --no-isolation` refuses an environment that does not satisfy it, so
     the backend that packs the archive is one `[build-system]` admits or there
-    is no archive. It does not keep the two specifiers equal, and nothing does —
-    a `requires` widened past the hook's line leaves that line satisfying it and
-    green, which btclib-org/.github#145 leaves open. Pinning `uv` on the hook
-    instead leaves even that first half silent, a `uv` pinned outside `requires`
-    warning where the `pip` installer refuses.
+    is no archive. That alone does not keep the two specifiers equal — a
+    `requires` widened past the hook's line still leaves that line satisfying
+    it and green. `btclib-secp256k1`'s `hook_pins_test.py` asserts the hook's
+    `additional_dependencies` and `[build-system]`'s `requires` name the same
+    requirements (btclib-org/btclib-secp256k1#945); the hook's other trees
+    carry no such test. Pinning `uv` on the hook instead leaves even that
+    first half silent, a `uv` pinned outside `requires` warning where the
+    `pip` installer refuses.
 - **A release is checked against the last one for a break in the public
   surface**, by `griffe check` in the release path, comparing the tag being cut
   against the tag before it. Section 7's census answers *is this module's
