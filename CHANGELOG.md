@@ -8969,3 +8969,9 @@ nothing red follows from the copies disagreeing.
 - **A count below a new `## This repository in particular` heading, one
   per tree, backs the fourth check's exemption against an entry landed
   above `RULE_HEADING`** (closes #1204).
+
+### Two `BACKLOG` rows answer trees that have caught up
+
+- **1156's row loses `btclib-node`, and 1195's row goes with the last
+  tree it excused** (closes #1195, issue #1156):
+  `btclib-org/btclib-node@461a083c` and `btclib-org/btclib-secp256k1@d0ad0c28`.
