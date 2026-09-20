@@ -8987,3 +8987,9 @@ nothing red follows from the copies disagreeing.
 - **The comment above `check-changelog` pointed `check_changelog.py`'s
   docstring at "the three checks"; the script had outgrown it** (issue
   #1225). The count is gone: the next check made would leave it wrong.
+
+### `EXPECTED_DRIFT`'s last entry goes with the fifth check's last port
+
+- **The entry excusing `check_changelog.py` is deleted, and the table is
+  empty** (closes #1215): every repository now carries
+  `misplaced_entries()`, and section 14 compares every copy again.
