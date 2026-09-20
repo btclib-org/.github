@@ -8981,3 +8981,9 @@ nothing red follows from the copies disagreeing.
 - **`bbt` names its `uv` group `dev-tooling` too, so the last row goes**
   (closes #1156): `btclib-org/bbt@a1890c6b`, and nothing in the
   organization is now excused from a cell this suite runs.
+
+### The `check-changelog` hook's comment names no count
+
+- **The comment above `check-changelog` pointed `check_changelog.py`'s
+  docstring at "the three checks"; the script had outgrown it** (issue
+  #1225). The count is gone: the next check made would leave it wrong.
