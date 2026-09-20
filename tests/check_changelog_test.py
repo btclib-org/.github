@@ -202,6 +202,82 @@ def test_a_long_body_before_the_rule_entry_is_not_reported(script: ModuleType) -
     assert script.problems(f"{_CLEAN}\n### Long\n\n{_LONG}\n{rule}") == []
 
 
+def test_misplaced_entries_is_clean_within_the_grandfathered_count(
+    script: ModuleType,
+) -> None:
+    """A count at or below `grandfathered` is not a misplacement."""
+    text = f"{_CLEAN}\n### {script.RULE_HEADING}\n\n- rule.\n"
+    section, base = script.open_section(text)
+    assert script.misplaced_entries(text, section, base, grandfathered=2) == []
+
+
+def test_misplaced_entries_is_caught_past_the_grandfathered_count(
+    script: ModuleType,
+) -> None:
+    """More entries above `RULE_HEADING` than `grandfathered` is refused.
+
+    This is the blind spot btclib-org/.github#1204 named: an entry
+    landed above `RULE_HEADING` by mistake reads, to `long_bodies()`, as
+    older than the rule it postdates, and passes unmeasured. This check
+    is what refuses it instead.
+    """
+    text = f"{_CLEAN}\n### {script.RULE_HEADING}\n\n- rule.\n"
+    section, base = script.open_section(text)
+    found = script.misplaced_entries(text, section, base, grandfathered=1)
+    assert len(found) == 1
+    assert "2 entries land above the rule heading" in found[0]
+    assert "more than the 1 this repository grandfathers" in found[0]
+
+
+def test_misplaced_entries_is_silent_where_the_rule_heading_is_absent(
+    script: ModuleType,
+) -> None:
+    """A released section has no `RULE_HEADING` to count entries above."""
+    section, base = script.open_section(_CLEAN)
+    assert script.misplaced_entries(_CLEAN, section, base, grandfathered=0) == []
+
+
+def test_a_misplaced_long_body_is_refused_once_grandfathered_is_exceeded(
+    script: ModuleType,
+) -> None:
+    """The demonstrated shape: a misplaced, over-long entry is refused.
+
+    `test_a_long_body_before_the_rule_entry_is_not_reported` above shows
+    `long_bodies()` alone never measures this entry; `misplaced_entries()`
+    wired into `problems()`, with the count already past what predates
+    the rule, is what stops it landing silently.
+    """
+    rule = f"### {script.RULE_HEADING}\n\n- rule.\n"
+    text = f"{_CLEAN}\n### Long\n\n{_LONG}\n{rule}"
+    section, base = script.open_section(text)
+    found = script.misplaced_entries(text, section, base, grandfathered=2)
+    assert len(found) == 1
+    assert "an entry has landed above it" in found[0]
+
+
+def test_misplaced_entries_uses_the_repository_constant_when_none_is_passed(
+    script: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """`problems()`'s own call takes no override, so this is what it reads.
+
+    `test_misplaced_entries_is_caught_past_the_grandfathered_count` above
+    exercises the override a test uses instead; this is the path
+    `misplaced_entries()` takes on a real `CHANGELOG.md`, reading
+    `_GRANDFATHERED_ENTRIES` from this repository's own trailing section
+    rather than a fixture the size of the 350 entries that constant
+    actually names.
+    """
+    rule = f"### {script.RULE_HEADING}\n\n- rule.\n"
+    text = f"{_CLEAN}\n{rule}"
+    monkeypatch.setattr(script, "_GRANDFATHERED_ENTRIES", 2)
+    assert script.problems(text) == []
+    monkeypatch.setattr(script, "_GRANDFATHERED_ENTRIES", 1)
+    found = script.problems(text)
+    assert len(found) == 1
+    assert "an entry has landed above it" in found[0]
+
+
 def test_link_definitions_are_not_lines_of_the_body(script: ModuleType) -> None:
     """btclib-benchmarks ends its file with a block of reference links."""
     links = "".join(f"[iss{n}]: https://example.invalid/{n}\n" for n in range(9))

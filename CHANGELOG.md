@@ -8963,3 +8963,9 @@ nothing red follows from the copies disagreeing.
 - **The token-minting step now reads `ALIGNMENT_APP_CLIENT_ID`, and the
   guard step names it too** (closes #1206): `app-id` is a deprecated
   input, and `REPOSITORY.md` says the numeric `ALIGNMENT_APP_ID` is unread.
+
+### `check_changelog.py` gains a fifth check, an entry misplaced above the rule
+
+- **A count below a new `## This repository in particular` heading, one
+  per tree, backs the fourth check's exemption against an entry landed
+  above `RULE_HEADING`** (closes #1204).
