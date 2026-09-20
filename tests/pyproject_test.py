@@ -439,12 +439,14 @@ def test_every_build_requirement_takes_a_floor_and_a_ceiling(
     """Section 3: every `[build-system].requires` entry is bounded.
 
     The floor and the ceiling both bind every entry, not only the
-    backend's own, and the ceiling sits at or before the next major
-    above the floor -- a tighter, measured bound such as
-    `hatchling>=1.27,<1.32.1` already satisfies that. A marker
-    (`; python_version<"3.13"`) is not the specifier and is read apart
-    from it, so a bound written only in the marker does not count as one
-    on the requirement.
+    backend's own. Where the ceiling sits -- the next major above the
+    newest release the tree has measured to work, tightened wherever a
+    break has been measured, as `hatchling>=1.27,<1.32.1` already is --
+    is section 3's own sentence to hold; this cell asks only that both
+    bounds be present, not where between them the ceiling falls. A
+    marker (`; python_version<"3.13"`) is not the specifier and is read
+    apart from it, so a bound written only in the marker does not count
+    as one on the requirement.
 
     :param repository: the repository asked about.
     :param pyprojects: the parsed files.
@@ -452,21 +454,12 @@ def test_every_build_requirement_takes_a_floor_and_a_ceiling(
     unbounded: list[str] = []
     for raw in build_requires(repository, pyprojects):
         specifier = raw.split(";", 1)[0]
-        floor = FLOOR_BOUND.search(specifier)
-        ceiling = CEILING_BOUND.search(specifier)
-        if floor is None:
+        if FLOOR_BOUND.search(specifier) is None:
             unbounded.append(f"{raw!r} names no floor")
             continue
-        if ceiling is None:
+        if CEILING_BOUND.search(specifier) is None:
             unbounded.append(f"{raw!r} names no ceiling")
             continue
-        floor_major = int(floor["version"].split(".")[0])
-        ceiling_major = int(ceiling["version"].split(".")[0])
-        if ceiling_major > floor_major + 1:
-            unbounded.append(
-                f"{raw!r} ceilings at major {ceiling_major}, past the next"
-                f" major above its floor ({floor_major + 1})"
-            )
     assert not unbounded, f"{unbounded}; " + by_hand(
         repository, "sed -n '/^\\[build-system\\]/,/^\\[/p' pyproject.toml"
     )

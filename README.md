@@ -793,18 +793,24 @@ that a hook argument has not. Section 14 names each of those files.
     file-selection heuristics.
 
     `requires` names every entry — the backend among them — with a
-    floor and a **ceiling at the next major**, tightened to whatever
-    release broke it where a break has been measured: the shape
+    floor and a **ceiling at the next major above the newest release
+    the tree has measured to work**, tightened to whatever release
+    broke it where a break has been measured: the shape
     `hatchling>=1.27,<1.32.1` already has, its ceiling naming the exact
-    release rather than the major above the floor. The bullet below
-    refuses an upper bound to a sibling dependency instead, and what
-    differs is what the bound costs: on a runtime dependency it makes a
-    published artifact refuse a version somebody already has, where on
-    a build requirement it only narrows what an isolated build resolves
-    for itself — every entry of `requires` is resolved fresh by an
-    isolated PEP 517 build, outside `uv.lock`, so an unbounded one lets
-    a published sdist build under whatever release exists on the day,
-    unchecked.
+    release rather than the major above the newest one measured. A
+    release is measured by an isolated build of this tree that resolved
+    it and ran against it, never by a version read about in another
+    project's release notes. `tests/pyproject_test.py` only asks that a
+    floor and a ceiling both be present on every entry; where the
+    ceiling sits is this sentence's to hold, not a comparison the cell
+    still makes. The bullet below refuses an upper bound to a sibling
+    dependency instead, and what differs is what the bound costs: on a
+    runtime dependency it makes a published artifact refuse a version
+    somebody already has, where on a build requirement it only narrows
+    what an isolated build resolves for itself — every entry of
+    `requires` is resolved fresh by an isolated PEP 517 build, outside
+    `uv.lock`, so an unbounded one lets a published sdist build under
+    whatever release exists on the day, unchecked.
 
     Under `uv_build` the ceiling sits tighter, at the next minor: uv
     bumps its own minor for a breaking change and releases this backend

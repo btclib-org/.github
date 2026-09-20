@@ -8951,3 +8951,9 @@ nothing red follows from the copies disagreeing.
 - **`DRY_RUN` now fires on anything but `schedule`, not on `pull_request`
   alone** (closes #1210): a `workflow_dispatch` run took the weekly
   schedule's own full-write path, risking a real tracking issue.
+
+### Section 3's ceiling anchors to the newest measured release, not the floor
+
+- **The cell drops the floor-to-ceiling comparison, asking only that
+  both exist** (closes #1216): a major already measured to work no
+  longer forces a downgrade.
