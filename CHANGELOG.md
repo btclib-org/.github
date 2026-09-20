@@ -8975,3 +8975,9 @@ nothing red follows from the copies disagreeing.
 - **1156's row loses `btclib-node`, and 1195's row goes with the last
   tree it excused** (closes #1195, issue #1156):
   `btclib-org/btclib-node@461a083c` and `btclib-org/btclib-secp256k1@d0ad0c28`.
+
+### The last `BACKLOG` row goes with `bbt`'s rename
+
+- **`bbt` names its `uv` group `dev-tooling` too, so the last row goes**
+  (closes #1156): `btclib-org/bbt@a1890c6b`, and nothing in the
+  organization is now excused from a cell this suite runs.
