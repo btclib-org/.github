@@ -8957,3 +8957,9 @@ nothing red follows from the copies disagreeing.
 - **The cell drops the floor-to-ceiling comparison, asking only that
   both exist** (closes #1216): a major already measured to work no
   longer forces a downgrade.
+
+### `alignment.yml` mints its token from `client-id`, not `app-id`
+
+- **The token-minting step now reads `ALIGNMENT_APP_CLIENT_ID`, and the
+  guard step names it too** (closes #1206): `app-id` is a deprecated
+  input, and `REPOSITORY.md` says the numeric `ALIGNMENT_APP_ID` is unread.

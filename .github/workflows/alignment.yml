@@ -24,9 +24,9 @@ name: alignment
 # that edits the calendar is checked against the calendar it proposes.
 #
 # The token is minted per run from the btclib-org-alignment GitHub App,
-# installed on every repository with read-only permissions: its id is
-# the variable ALIGNMENT_APP_ID, its private key the secret
-# ALIGNMENT_APP_PRIVATE_KEY. The settings half of the questions needs
+# installed on every repository with read-only permissions: its OAuth
+# client id is the variable ALIGNMENT_APP_CLIENT_ID, its private key the
+# secret ALIGNMENT_APP_PRIVATE_KEY. The settings half of the questions needs
 # it, since GITHUB_TOKEN answers for this repository alone. There is no
 # fallback to GITHUB_TOKEN: the first step refuses the run instead, so a
 # missing credential never reads as drift.
@@ -147,13 +147,14 @@ jobs:
       # finding. The trigger is the requirement, so the audit gives way
       - name: Refuse to sweep without the App
         env:
-          APP_ID: ${{ vars.ALIGNMENT_APP_ID }}
+          CLIENT_ID: ${{ vars.ALIGNMENT_APP_CLIENT_ID }}
           APP_KEY: ${{ secrets.ALIGNMENT_APP_PRIVATE_KEY }} # zizmor: ignore[secrets-outside-env]
         run: |
-          if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
-            echo "::error::ALIGNMENT_APP_ID or ALIGNMENT_APP_PRIVATE_KEY" \
-                 "is empty, and this run measured nothing without them:" \
-                 "the failure is the credential, not a finding."
+          if [ -z "$CLIENT_ID" ] || [ -z "$APP_KEY" ]; then
+            echo "::error::ALIGNMENT_APP_CLIENT_ID or" \
+                 "ALIGNMENT_APP_PRIVATE_KEY is empty, and this run" \
+                 "measured nothing without them: the failure is the" \
+                 "credential, not a finding."
             exit 1
           fi
 
@@ -163,7 +164,7 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ vars.ALIGNMENT_APP_ID }}
+          client-id: ${{ vars.ALIGNMENT_APP_CLIENT_ID }}
           # the second read of the key the step above declines an
           # environment for, and the same reason covers it
           # zizmor: ignore[secrets-outside-env]

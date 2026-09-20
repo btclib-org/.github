@@ -424,17 +424,24 @@ repository document, most of which is URLs, counts and derived state. The
 fields of it that are settings are the ones the sections above quote.
 
 **The App credentials this repository holds.** `alignment.yml` mints its
-token from the btclib-org-alignment GitHub App, and its id and key are
-the only entries in this repository's stores:
+token from the btclib-org-alignment GitHub App, reading its OAuth client
+id and its private key; those two plus one now-unread variable are the
+only entries in this repository's stores:
 
 ```shell
 gh api repos/btclib-org/.github/actions/secrets --jq '.secrets[].name'
 # ALIGNMENT_APP_PRIVATE_KEY
 gh api repos/btclib-org/.github/actions/variables --jq '.variables[].name'
+# ALIGNMENT_APP_CLIENT_ID
 # ALIGNMENT_APP_ID
 gh api repos/btclib-org/.github/dependabot/secrets --jq .total_count
 # 0
 ```
+
+`ALIGNMENT_APP_ID` is the App's numeric id, kept from before
+`actions/create-github-app-token` deprecated the `app-id` input in
+favor of `client-id`: `alignment.yml` reads `ALIGNMENT_APP_CLIENT_ID`
+now, and nothing in this tree reads `ALIGNMENT_APP_ID` any longer.
 
 **A credential this repository spends and does not hold.**
 `claude-review.yml` reads `secrets.CLAUDE_CODE_OAUTH_TOKEN`, an
@@ -451,7 +458,7 @@ gh api orgs/btclib-org/dependabot/secrets \
 
 **A switch this repository does not set.** The jobs `claude-review.yml`
 calls are guarded by `vars.CLAUDE_REVIEW_ENABLED`, and neither variable
-store holds it: the repository's answers with `ALIGNMENT_APP_ID` alone, above,
+store holds it: the repository's answers with the two variables above,
 and the organization's is empty.
 
 ```shell
