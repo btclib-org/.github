@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 import pytest
 import yaml
 
-from . import ORG, SELF, by_hand
+from . import ORG, ROOT, SELF, by_hand
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -626,6 +626,105 @@ def test_paths_ignore_is_only_on_push(repository: str, trees: dict[str, Path]) -
     ]
     assert not ignoring, f"paths-ignore off push: {ignoring}; " + by_hand(
         repository, "grep -n 'paths-ignore' .github/workflows/*.yml"
+    )
+
+
+CONDITIONAL = re.compile(r"^\s*`(\$\{\{ !\(.+\) \}\})`$", re.MULTILINE)
+"""A line of the standard that is one negated expression and nothing else.
+
+Section 10 writes the expression on a line of its own, the margin
+leaving it nowhere else to go, so the pattern is anchored on the line
+rather than searched for in the prose: every other `${{ ... }}` that
+file shows sits inside a sentence.
+"""
+
+COMMENTING = "claude-review.yml"
+"""The workflow section 10 exempts, whose product is a comment.
+
+Named as that section names it. What the exemption turns on is what a
+run produces, which no reading of a workflow file answers, so the one
+file the organization writes that way is the exemption's whole extent.
+"""
+
+
+def conditional(standard: Path = ROOT / "README.md") -> str:
+    """Read the expression section 10 gives at `cancel-in-progress`.
+
+    Off the standard rather than transcribed here: that file is what a
+    port is made against, and a copy in this module is a second place
+    for the expression to be edited in.
+
+    :param standard: the file to read, this tree's own `README.md`.
+    :returns: the expression, spaced as the file writes it.
+    :raises LookupError: where the file does not write it exactly once,
+        which is a pattern that has stopped matching rather than a
+        finding against any tree.
+    """
+    found: list[str] = CONDITIONAL.findall(standard.read_text(encoding="utf-8"))
+    if len(found) != 1:
+        msg = f"{standard.name} writes {len(found)} lines of that shape"
+        raise LookupError(msg)
+    return found[0]
+
+
+def closing(workflow: Path) -> bool:
+    """Say whether a workflow takes the closing event of a pull request.
+
+    :param workflow: the file to read.
+    :returns: whether its `pull_request` types name `closed`.
+    """
+    trigger = triggers(workflow).get("pull_request")
+    types = trigger.get("types") if isinstance(trigger, dict) else None
+    return "closed" in types if isinstance(types, list) else False
+
+
+def cancels(workflow: Path) -> str | bool | None:
+    """Read what a workflow's concurrency group does with the run in flight.
+
+    :param workflow: the file to read.
+    :returns: the value at `cancel-in-progress`, None where the workflow
+        declares no group or gives the group as a bare name.
+    """
+    group = document(workflow).get("concurrency")
+    return group.get("cancel-in-progress") if isinstance(group, dict) else None
+
+
+def test_a_workflow_taking_closed_without_push_writes_the_conditional(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10's third shape at `cancel-in-progress`, asked per tree.
+
+    Read as the section writes the rule, on the `push` trigger a file
+    declares rather than on the commits a trigger reaches: a `push`
+    narrowed by `paths` is a trigger the file declares, and asking which
+    commits it runs on would make a port a judgement about path filters
+    (btclib-org/.github#1238).
+
+    The population is the workflows whose `pull_request` takes `closed`,
+    that being the event the expression turns on: without the type the
+    expression is true at everything such a workflow receives, and a
+    group meaning false there is the bullet below section 10's, whose
+    shape is `false` with `closed` omitted. Keying the exemption on the
+    value found instead would excuse the value this asks for.
+
+    A tree carrying no workflow of the shape is asked nothing here.
+    Which sentinels it owes is section 10's record, and `grid_test.py`
+    reads that against each tree.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    wanted = conditional()
+    wrong: list[str] = []
+    for workflow in gated(repository, trees):
+        if workflow.name == COMMENTING or "push" in triggers(workflow):
+            continue
+        found = cancels(workflow)
+        if closing(workflow) and found != wanted:
+            wrong.append(f"{workflow.name}: {found!r}")
+    assert not wrong, f"a merge cancels the run reading it: {wrong}; " + by_hand(
+        repository, "grep -n -A2 '^concurrency:' .github/workflows/*.yml"
     )
 
 

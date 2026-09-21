@@ -2331,8 +2331,20 @@ against that, and what lengthens it without adding to it is deleted.
   `[opened, reopened, synchronize, ready_for_review, closed]`.
   `ready_for_review` because a readied pull request would otherwise wait for its
   next push; `closed` so the merge lands in the pull request's own concurrency
-  group and cancels the run still holding it. Draft and closed pull requests
-  decline the work in an `if`.
+  group. What that group does with the run still holding it is the bullet below.
+  Draft and closed pull requests decline the work in an `if`.
+- **`cancel-in-progress` is `true`, and a workflow that takes `closed` and
+  declares no `push` trigger writes
+  `${{ !(github.event.action == 'closed' && github.event.pull_request.merged) }}`
+  instead.** Nothing runs such a workflow on the commit a merge creates, so the
+  run in flight is the only reading the merged content gets before the schedule
+  comes round, and cancelling it says nothing: btclib-org/btclib-secp256k1#523
+  measured the cancelled run reading in the run list as an ordinary superseded
+  one. The closed run queues behind the one in flight instead. **A workflow
+  whose product is a comment on the pull request keeps `true`**,
+  `claude-review.yml` for the reason section 11 gives. The rejected alternative
+  is the bullet below, `false` with `closed` omitted: it spares the run in
+  flight too, at the price of a new push no longer cancelling its predecessor.
 - **A workflow whose concurrency group sets `cancel-in-progress: false` omits
   `closed`, and says beside its trigger that it does.** There a closed event
   cancels nothing and only starts a run every job declines, so such a workflow's
