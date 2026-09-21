@@ -2340,11 +2340,17 @@ against that, and what lengthens it without adding to it is deleted.
   run in flight is the only reading the merged content gets before the schedule
   comes round, and cancelling it says nothing: btclib-org/btclib-secp256k1#523
   measured the cancelled run reading in the run list as an ordinary superseded
-  one. The closed run queues behind the one in flight instead. **A workflow
-  whose product is a comment on the pull request keeps `true`**,
-  `claude-review.yml` for the reason section 11 gives. The rejected alternative
-  is the bullet below, `false` with `closed` omitted: it spares the run in
-  flight too, at the price of a new push no longer cancelling its predecessor.
+  one. The closed, merged run queues behind the one in flight instead. The
+  expression tests `merged` rather than `closed` alone because a new push and a
+  close without a merge leave nothing worth finishing. **A workflow whose
+  product is a comment on the pull request keeps `true`**, `claude-review.yml`
+  for the reason section 11 gives. **A `push` trigger carrying `paths` or
+  `paths-ignore` declares one**, so such a workflow keeps `true` even where a
+  merge whose files the filter excludes leaves it no push run: that is the run
+  the filter exists to decline (btclib-org/.github#1238). The rejected
+  alternative is the bullet below, `false` with `closed` omitted: it spares the
+  run in flight too, at the price of a new push no longer cancelling its
+  predecessor.
 - **A workflow whose concurrency group sets `cancel-in-progress: false` omits
   `closed`, and says beside its trigger that it does.** There a closed event
   cancels nothing and only starts a run every job declines, so such a workflow's
