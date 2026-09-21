@@ -24,7 +24,7 @@ import pytest
 import yaml
 
 from . import Tier, by_hand, tracked
-from .pyproject_test import FLOOR
+from .pyproject_test import FLOOR, parsed
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -284,6 +284,100 @@ def test_the_gate_runs_mypy(repository: str, trees: dict[str, Path]) -> None:
     ]
     assert runs, "no hook runs mypy; " + by_hand(
         repository, f"grep -n 'mirrors-mypy\\|id: mypy' {CONFIG}"
+    )
+
+
+PYROMA = "pyroma"
+"""Section 4's packaging hook that reads a distribution's metadata."""
+
+CHECK_SDIST = "check-sdist"
+"""Section 4's packaging hook that diffs the sdist against what git tracks."""
+
+PACKAGING = (UV_LOCK, PYROMA, CHECK_SDIST)
+"""Section 4's *packaging* bullet, each hook with a subject of its own.
+
+`uv-lock` moves `uv.lock`, so it is owed wherever that file is
+committed. `pyroma` and `check-sdist` both build the project through
+the backend `[build-system]` names -- section 12's own paragraph on the
+two hooks that do -- so the pair shares one subject: whether the tree
+declares a build backend at all, which is `pyproject_test.py`'s
+`distribution` skips on, read here as a condition rather than a second
+one.
+"""
+
+
+def owed(
+    repository: str,
+    trees: dict[str, Path],
+    pyprojects: dict[str, dict[str, Any]],
+) -> dict[str, bool]:
+    """Say, per packaging hook, whether a tree has a subject for it.
+
+    :param repository: the repository's name.
+    :param trees: the checkouts.
+    :param pyprojects: the parsed files.
+    :returns: each hook id of `PACKAGING` against whether the tree owes it.
+    """
+    distributes = "build-system" in parsed(repository, pyprojects)
+    return {
+        UV_LOCK: bool(tracked(trees[repository], "uv.lock")),
+        PYROMA: distributes,
+        CHECK_SDIST: distributes,
+    }
+
+
+def missing_packaging_hooks(running: set[str], subjects: dict[str, bool]) -> list[str]:
+    """Return the packaging hooks a tree owes and its gate does not run.
+
+    :param running: the hook ids the tree's gate names.
+    :param subjects: each hook id against whether the tree owes it,
+        `owed`'s shape.
+    :returns: the ids the tree owes and does not run, sorted.
+    """
+    return sorted(
+        hook for hook, is_owed in subjects.items() if is_owed and hook not in running
+    )
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_the_packaging_hooks_run(
+    repository: str,
+    trees: dict[str, Path],
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 4's *packaging* bullet, each hook against its own subject.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    :param pyprojects: the parsed files.
+    """
+    missing = missing_packaging_hooks(
+        set(ids(repository, trees)), owed(repository, trees, pyprojects)
+    )
+    assert not missing, f"packaging hooks the gate does not run: {missing}; " + by_hand(
+        repository, f"grep -oE 'id: ({'|'.join(PACKAGING)})' {CONFIG}"
+    )
+
+
+def test_a_missing_packaging_hook_would_be_reported() -> None:
+    """The cell above is green on a gate that runs every hook it owes.
+
+    Each hook is asked both ways a wrong reading would be green on:
+    running and owed, which a comparison blind to `running` would still
+    report missing; and owed with nothing running, which a comparison
+    blind to `subjects` would report on a hook nothing owes.
+    """
+    for hook in PACKAGING:
+        owed_only_this = {h: h == hook for h in PACKAGING}
+        assert missing_packaging_hooks({hook}, owed_only_this) == [], (
+            f"{hook} running and owed is reported missing"
+        )
+        assert missing_packaging_hooks(set(), owed_only_this) == [hook], (
+            f"{hook} owed and not running is not reported"
+        )
+    unowed = dict.fromkeys(PACKAGING, False)
+    assert missing_packaging_hooks(set(), unowed) == [], (
+        "a hook nothing owes is reported missing"
     )
 
 
