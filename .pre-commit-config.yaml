@@ -79,7 +79,7 @@ repos:
             |tests/(backlog|changelog|citations|classifiers|conventions
               |copyright|coverage|dependabot|grid|homepage|hooks|interpreters
               |issue_template|layout|links|names|per_subject|pins
-              |protection|pull_request_template|pyproject|release
+              |protection|pull_request_template|pyproject|readback|release
               |root_files|scope|security|surface|topics|verbatim
               |workflows)_test\.py)$
       - id: check-yaml
