@@ -8999,3 +8999,9 @@ nothing red follows from the copies disagreeing.
 - **`required-version` moves to `>=0.12.17`, `dependabot-core`'s pin,
   and `uv-pre-commit`'s `rev:` follows it** (issue #1229): the old floor
   admitted a `uv` older than the one the updater writes `uv.lock` with.
+
+### A recorded answer is a setting or an observation, and one is read back
+
+- **Section 11 now says which of `REPOSITORY.md`'s answers a cell
+  checks and which a reader is the only check on** (issue #1017):
+  `tests/readback_test.py` gates the first kind, here.

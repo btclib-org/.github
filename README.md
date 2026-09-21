@@ -2875,6 +2875,21 @@ recorded `404` is what makes a later silent flip to `on` visible. The
 default branch is inside by the general rule, section 16's checklist
 setting it; a copy reads both back with the commands that answer them.
 
+**A recorded answer is a setting or an observation, and which one it is
+decides whether a drift in it is a finding.** A setting is an answer the
+organization decided, and a cell of `tests/` reads it back against the
+live endpoint the command names, a changed answer being the drift
+btclib-org/.github#1017 went looking for. An observation is a fact about
+a changing world instead — a release count, a plan name, the signature
+on whatever commit is at the tip today — where a difference is news
+rather than drift, and a reader is the only check on it, taken at
+section 15's audit. **The default is a setting.** A copy takes a reading
+out of that default by marking it, in the paragraph that quotes it, with
+the words *a fact about a changing world* next to the date it was read;
+the phrase's absence is what leaves the default in force, so a line
+classified the wrong way round is a cell that goes red rather than a gap
+nothing reports, whichever way the mistake runs.
+
 ### Signatures
 
 **Every commit reaching a protected branch carries a valid signature**,
