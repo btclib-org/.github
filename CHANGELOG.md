@@ -9017,3 +9017,9 @@ nothing red follows from the copies disagreeing.
 - **Section 1 asks the hook's `rev:` to be at or above `[tool.uv]
   required-version`, and `tests/hooks_test.py` reads the pair**
   (issue #1231): under the floor the hook exits instead of locking.
+
+### Section 10 gains a `cancel-in-progress` shape for a merge
+
+- **A workflow taking `closed` and declaring no `push` trigger writes the
+  conditional rather than `true`** (issue #1226): a merge otherwise cancels the
+  only reading its content gets before the schedule, and a cell reads it.
