@@ -1094,6 +1094,13 @@ pre-commit.ci does not have — the lint workflow covers it. No
   rather than quietly stopping; and a local `pinned-rev` pygrep hook
   refusing a `rev:` that names a bare major or a prerelease, both of
   which `autoupdate` offers as readily as a release.
+
+    **A version this file holds against `autoupdate` is declared in a
+    local hook**, the one shape it does not reach: it rewrites the
+    `rev:` of every `repo:` but `local` and `meta`. The version comes
+    from the hook's own `additional_dependencies`, or from where the
+    tree pins its other tools, and `pinned-rev`, with no `rev:` to
+    judge, is left guarding the entries a bot still moves.
 - **hygiene** — `trailing-whitespace`, `end-of-file-fixer`,
   `mixed-line-ending --fix=lf`, `check-case-conflict`,
   `fix-byte-order-marker`, `check-merge-conflict`,
@@ -1133,10 +1140,9 @@ pre-commit.ci does not have — the lint workflow covers it. No
   `--all-files` it scans nothing and passes.
 - **spelling** — `codespell` and `typos`, both configured in
   `pyproject.toml`, both skipping vendored vectors: a typo inside an
-  upstream vector is part of the vector. `typos` is a `local` hook,
-  pinned through `additional_dependencies` rather than `rev:`; the
-  comment beside the entry says why, and `typos --version` answers its
-  release, an index install putting no upstream clone in the loop.
+  upstream vector is part of the vector. `typos` is a `local` hook
+  pinned through `additional_dependencies`, and `typos --version` answers
+  its release, an index install putting no upstream clone in the loop.
 
     **`codespell --version` answers `0.1.dev1+g<sha>` and not the
     release its `rev:` names**, pre-commit's shallow checkout of the
@@ -1186,6 +1192,25 @@ pre-commit.ci does not have — the lint workflow covers it. No
 - **types** — a mypy hook, below.
 - **packaging** — `uv-lock`, `pyroma`, and `check-sdist` wherever an
   sdist is built, section 12's condition rather than a second one.
+
+    **`pyroma` is declared locally as well, and run out of the `check`
+    group**: `language: system` with
+    `entry: uv run --locked --only-group check pyroma`, and upstream's
+    own `args: [-d, --min=10, .]`, `pass_filenames: false` and
+    `always_run: true` written out, a local hook inheriting nothing. Its
+    version is then the lock file's, and uv takes a prerelease only
+    where the specifier names one or the package has no release to take
+    instead, so a bound naming no prerelease holds the packaging checker
+    at a release — and that bound is the only thing saying so. Nothing
+    refuses one that does name a prerelease, `pinned-rev` reading a
+    `rev:` and no hook reading a dependency-group bound:
+    `btclib-secp256k1`'s names a beta on the interpreters a `docutils`
+    constraint forces it on, with that reason beside the specifier. What
+    the shape buys is the `rev:`'s own failure, where what `autoupdate`
+    proposes `pinned-rev` refuses and the bot's pull request cannot go
+    green while it carries a prerelease, taking every unrelated bump in
+    that commit with it (btclib-org/.github#1199). The price is the mypy
+    hook's, `skip:` in the `ci:` block.
 
 ### The local hooks
 
@@ -3394,8 +3419,9 @@ and three more where the tree has what they watch: `uv` where a
 where a submodule does — conditional by section 2's rule for a subject
 the tree does not hold. Pre-commit hook revisions have no Dependabot
 ecosystem, so pre-commit.ci updates them weekly, except a hook whose
-`repo:` is `local`, which `autoupdate` skips: a version pinned inside
-one, such as `.github`'s own `typos`, moves by hand.
+`repo:` is `local`: what moves that version is where the hook pins it,
+the `uv` ecosystem above where that is `uv.lock`, a hand edit where it
+is `additional_dependencies`.
 
 `gitsubmodule` follows upstream's *default branch*, so its pull request
 says that upstream moved and is not the bump: a release pins the tagged
@@ -3576,15 +3602,16 @@ of every version already on the index, which no later release corrects.
   a repository takes when its archive carries more than the package.
 - **A hook that builds the project builds it with the backend `[build-system]`
   admits**, and what that takes differs between the two hooks, because only one
-  of them builds through PEP 517 at all. Both build without isolation,
-  pre-commit.ci being unable to create the isolated environment.
+  of them builds through PEP 517 at all. Both build without isolation:
+  `check-sdist` runs on pre-commit.ci, which cannot create the isolated
+  environment, and `pyroma` runs from a group already holding the backend,
+  where an isolated build would resolve `requires` from an index instead.
 
     `pyroma`'s non-isolated path never reads `requires`: it returns metadata
-    once the backend's own PEP 517 hook does. So the hook carries
-    `additional_dependencies` naming the backend at `[build-system]`'s own
-    specifier, which keeps the backend importable — what that requires-blind
-    attempt needs in order not to fall back on an isolated build pre-commit.ci
-    cannot create.
+    once the backend's own PEP 517 hook does. So the backend is in the `check`
+    group beside `pyroma` itself, at `[build-system]`'s own specifier, which
+    keeps it importable — what that requires-blind attempt needs in order not
+    to fall back.
 
     `check-sdist` drives `uv build`, which is not PEP 517 for this backend:
     given `build-backend = "uv_build"` it builds with the copy bundled in the
