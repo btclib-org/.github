@@ -10,16 +10,21 @@ exactly as one never added, which is the point -- section 4 lists these
 without a condition, so where a tree declines one the finding is either
 the tree's or the section's, and a `BACKLOG` row is where that finding
 is recorded.
+
+One hook is read for its pin as well: `uv-lock` runs the uv its `rev:`
+names, so section 1's floor is what that pin answers to.
 """
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Any
 
 import pytest
 import yaml
 
 from . import Tier, by_hand, tracked
+from .pyproject_test import FLOOR
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -63,6 +68,30 @@ MYPY = ("mypy", "mirrors-mypy")
 
 The mirror's hook id is `mypy` as well; the repository url is what tells
 the two apart, and either answers section 6.
+"""
+
+UV_LOCK = "uv-lock"
+"""Section 4's packaging hook, which runs the uv its block pins.
+
+That uv is the hook's own and not the project's, so a floor above it
+leaves the hook exiting rather than locking, and the lint gate red.
+"""
+
+UV_PRE_COMMIT = "/uv-pre-commit"
+"""The end of the url of the block that carries the pin.
+
+A `rev:` is the block's key and not the hook's, so it is taken from the
+block the hook was read out of: the `rev:` nearest the id in the file
+is a neighbouring block's as readily as this one's.
+"""
+
+RELEASE = re.compile(r"^[0-9]+(?:\.[0-9]+)*$")
+"""The dotted release a pin of that block names, `0.12.17`.
+
+`uv-pre-commit` tags a release per uv version and carries a `v`-prefixed
+tag of its own as well, `v0.1.24`, so a pin outside this shape names no
+uv to compare and is this module's finding rather than a skip: the pin
+is what it reads.
 """
 
 CHANGELOG_HOOK = "check-changelog"
@@ -117,7 +146,8 @@ def hooks(repository: str, trees: dict[str, Path]) -> list[dict[str, Any]]:
 
     :param repository: the repository's name.
     :param trees: the checkouts.
-    :returns: the hook mappings, each with its repository url under `repo`.
+    :returns: the hook mappings, each with the url and the pin of the
+        block it was read out of, under `repo` and `rev`.
     :raises FileNotFoundError: where the tree has no lint gate at all,
         section 4 naming the file as every repository's.
     """
@@ -127,7 +157,7 @@ def hooks(repository: str, trees: dict[str, Path]) -> list[dict[str, Any]]:
         raise FileNotFoundError(msg)
     parsed = yaml.safe_load(path.read_text(encoding="utf-8"))
     return [
-        {**hook, "repo": entry["repo"]}
+        {**hook, "repo": entry["repo"], "rev": entry.get("rev")}
         for entry in parsed.get("repos", [])
         for hook in entry.get("hooks", [])
     ]
@@ -314,4 +344,154 @@ def test_a_gate_that_had_drifted_would_be_reported() -> None:
         f"{REFUSED} read as carrying no {UNFILTERED}: either the key"
         " section 4 gives this hook none of is no longer read, or the"
         " literal wants another"
+    )
+
+
+def version(release: str) -> tuple[int, ...]:
+    """Order a dotted release by its parts rather than by its text.
+
+    :param release: the release, as a pin or a floor spells it.
+    :returns: the parts as numbers, so that `0.12.9` sorts below
+        `0.12.17`, where their text sorts it above.
+    """
+    return tuple(int(part) for part in release.split("."))
+
+
+def admitted(rev: str, declared: str) -> bool | None:
+    """Say whether the uv a pin bundles is one a floor admits.
+
+    At least the floor, and not an equality: `autoupdate` moves the pin
+    on its own schedule while the floor waits on the ceiling section 1
+    sets it by, so a pin above the floor is the ordinary state and
+    equality here would be red at each of those moves.
+
+    :param rev: the pin of the block the hook was read out of.
+    :param declared: the tree's `[tool.uv] required-version`.
+    :returns: whether the floor admits that uv, or `None` where the
+        floor is not the bare `>=` shape section 1 asks for, which is
+        `test_the_uv_floor_is_what_dependabot_bundles`'s finding.
+    """
+    floor = FLOOR.match(declared)
+    if floor is None:
+        return None
+    return version(rev) >= version(floor["version"])
+
+
+def bundling(repository: str, trees: dict[str, Path]) -> list[dict[str, Any]]:
+    """Return the `uv-lock` hooks a gate takes from `uv-pre-commit`.
+
+    :param repository: the repository's name.
+    :param trees: the checkouts.
+    :returns: the hooks, each carrying its own block's pin under `rev`.
+    """
+    return [
+        hook
+        for hook in hooks(repository, trees)
+        if hook["id"] == UV_LOCK and str(hook["repo"]).endswith(UV_PRE_COMMIT)
+    ]
+
+
+def floor_of(repository: str, pyprojects: dict[str, dict[str, Any]]) -> str | None:
+    """Return the uv floor a tree declares.
+
+    :param repository: the repository's name.
+    :param pyprojects: the parsed files.
+    :returns: `[tool.uv] required-version`, or `None` where the tree
+        names none or has no `pyproject.toml` at all.
+    """
+    declared = (
+        pyprojects.get(repository, {})
+        .get("tool", {})
+        .get("uv", {})
+        .get("required-version")
+    )
+    return None if declared is None else str(declared)
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_the_uv_lock_hook_bundles_a_uv_the_floor_admits(
+    repository: str,
+    trees: dict[str, Path],
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 1: the `uv-lock` pin is at or above the tree's uv floor.
+
+    The hook runs the uv its pin names, so a floor above that uv makes
+    it exit rather than lock -- `Required uv version ... does not match
+    the running version ...` -- and the lint check the tree requires is
+    red until one of the two moves. A tree carrying one of the pair
+    alone is skipped: whether it owes the floor is
+    `test_the_uv_floor_is_what_dependabot_bundles`'s question, and
+    whether it owes the hook is section 4's packaging bullet.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    :param pyprojects: the parsed files.
+    """
+    pinned = bundling(repository, trees)
+    if not pinned:
+        pytest.skip(f"{repository}'s gate takes no {UV_LOCK} from uv-pre-commit")
+    declared = floor_of(repository, pyprojects)
+    if declared is None:
+        pytest.skip(f"{repository} names no [tool.uv] required-version")
+    reading = by_hand(
+        repository,
+        f"grep -n -B3 'id: {UV_LOCK}' {CONFIG};"
+        " grep -n required-version pyproject.toml",
+    )
+    for hook in pinned:
+        rev = str(hook["rev"])
+        assert RELEASE.match(rev), (
+            f"{UV_LOCK} is pinned at {rev!r}, which names no uv release; " + reading
+        )
+        verdict = admitted(rev, declared)
+        if verdict is None:
+            pytest.skip(f"{repository}'s required-version is {declared!r}")
+        assert verdict, (
+            f"{UV_LOCK} bundles uv {rev} and the floor is {declared!r}, so the"
+            f" hook exits rather than locking in {repository}'s gate; " + reading
+        )
+
+
+def test_a_pin_below_the_floor_would_be_reported(
+    trees: dict[str, Path],
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """The cell above is green in every tree today, however it reads.
+
+    Both ways it could be green having measured nothing are asked here:
+    no tree carrying the pair for it to compare, and a comparison that
+    reports nothing. The literals are the readings a wrong comparison
+    is green on -- a pin under the floor read as text, where `0.12.9`
+    sorts above `0.12.17`; a pin over the floor read as a finding,
+    which is the equality that turns an autoupdate red; the pin the
+    trees sit at, which a strict `>` would refuse; and a floor whose
+    shape this module does not read.
+
+    :param trees: the checkouts.
+    :param pyprojects: the parsed files.
+    """
+    measured = [
+        repository
+        for repository in trees
+        if bundling(repository, trees) and floor_of(repository, pyprojects) is not None
+    ]
+    assert measured, (
+        "no tree carries both the pin and the floor, so the cell above compares nothing"
+    )
+    assert admitted("0.12.9", ">=0.12.17") is False, (
+        "a pin below the floor reads as admitted: the releases are"
+        " compared as text rather than as versions"
+    )
+    assert admitted("0.12.20", ">=0.12.17") is True, (
+        "a pin above the floor reads as a finding: the comparison is an"
+        " equality, and every autoupdate is red under it"
+    )
+    assert admitted("0.12.17", ">=0.12.17") is True, (
+        "a pin at the floor reads as a finding: the comparison is"
+        " strict, and the trees sitting at the floor are red under it"
+    )
+    assert admitted("0.12.17", ">=0.12.17,<0.13") is None, (
+        "a floor this module does not read returns a verdict, where the"
+        " shape is another cell's finding"
     )

@@ -9011,3 +9011,9 @@ nothing red follows from the copies disagreeing.
 - **`reusable-vendored-vectors.yml` no longer names a caller's
   cardinality** (issue #1237): btclib's tf2 verdict ledger is gone, and
   one cell per ledger under its own title holds whoever calls it.
+
+### The `uv-lock` hook's pin is held to the `uv` floor beside it
+
+- **Section 1 asks the hook's `rev:` to be at or above `[tool.uv]
+  required-version`, and `tests/hooks_test.py` reads the pair**
+  (issue #1231): under the floor the hook exits instead of locking.

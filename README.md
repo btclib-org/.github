@@ -335,11 +335,18 @@ below it: the newest uv that Dependabot's own bundled updater still
 reads, since that updater runs `uv lock` with exactly the uv it ships
 and refuses rather than upgrading itself, so a floor above the ceiling
 would silently stop every lock update it attempts, security ones
-included. Raising the floor as the ceiling moves is always safe: the
-failure guarded against is an *older* uv rewriting the lock, and the
-ceiling only rises. Section 15 carries the command that measures it.
-`setup-uv` given no version input reads that key, so CI needs no
-second pin.
+included. Below it, an *older* uv rewrites the lock, which is the
+failure the key guards against. Section 15 carries the command that
+measures it. `setup-uv` given no version input reads that key, so CI
+needs no second pin.
+
+**The `uv-lock` hook's `rev:` is at or above that floor**: the pin
+selects the uv the hook bundles rather than the project's own, and under
+the floor the hook refuses to run inside the required lint check, so a
+floor raised without the pin reddens the gate of the tree that raised
+it. `tests/hooks_test.py` asks for at least the floor and not for
+equality: `autoupdate` moves the pin while the floor waits on the
+ceiling, so equality would redden the gate at each of those moves.
 
 ## 2. The tree
 
