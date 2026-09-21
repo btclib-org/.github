@@ -64,6 +64,16 @@ name: reusable-mutation
 # caller -- and each carries the reason it is here. Two of those reasons are
 # a calling tree's own: btclib-org/btclib#948 for the limit and the memory
 # sampler, btclib-org/btclib#392 for the interrupt a budget is cut with.
+#
+# extra-env reaching $GITHUB_ENV is not the same question as extra-env
+# reaching the build: a line the export step's own validation rejects used
+# to be dropped in silence, and a build that read the variable but built
+# unflagged anyway exited the baseline step at 0 either way, a skip not
+# being a failure. Both are btclib-org/.github#1243. The export step now
+# fails on a line it cannot export instead of dropping it, and the
+# baseline step, where extra-env is set, fails on a skip in its own
+# captured output -- the comments at each step say why there and not
+# here, since each reads a different half of the run.
 
 on:
   workflow_call:
@@ -92,7 +102,13 @@ on:
           Environment variables the calling tree's build reads, one
           "NAME=value" line per variable, exported ahead of the baseline
           step so every uv run below shares it. The empty string, the
-          default, exports nothing.
+          default, exports nothing. A line that cannot be exported fails
+          the run rather than being dropped, and once this is non-empty
+          the baseline step additionally fails on a skipped test
+          (btclib-org/.github#1243): a caller setting this is declaring
+          the build configured, and a skip during the unmutated run is
+          the one shape a passing exit code cannot tell apart from that
+          declaration having failed silently.
         type: string
         default: ""
 
@@ -175,28 +191,48 @@ jobs:
       # not a legal name character, so the text before its "=" -- here
       # "FOO<<EOF" -- is rejected before $GITHUB_ENV's own parser could
       # read it as opening a heredoc and swallowing every line after it
-      # into one value
+      # into one value.
+      #
+      # A line the validation above rejects used to be dropped in
+      # silence, which is half of btclib-org/.github#1243: a caller
+      # whose extra-env has a mistake in it got a run that never says
+      # so. A rejection is now the step's own failure, and an accepted
+      # line is echoed -- a ::notice:: rather than the ::error:: the
+      # rejection prints, since the name and the value are the caller's
+      # own configuration and not a secret, matching what the rest of
+      # this file already assumes of extra-env
       - name: Export the caller's extra environment
         if: env.SELECTED == 'true' && inputs.extra-env != ''
         env:
           EXTRA_ENV: ${{ inputs.extra-env }}
         run: |
+          status=0
+          reject() {
+            echo "::error::extra-env line's $1: $2"
+            status=1
+          }
           while IFS= read -r line; do
+            [ -z "$line" ] && continue
             case "$line" in
               *=*) ;;
-              *) continue ;;
+              *) reject "has no '='" "$line"; continue ;;
             esac
             name="${line%%=*}"
             rest="${name#?}"
             case "$name" in
               [A-Za-z_]*) ;;
-              *) continue ;;
+              *) reject "name is not a legal environment-variable name" "$line"
+                 continue ;;
             esac
             case "$rest" in
-              *[!A-Za-z0-9_]*) continue ;;
+              *[!A-Za-z0-9_]*)
+                reject "name is not a legal environment-variable name" "$line"
+                continue ;;
             esac
             printf '%s\n' "$line" >> "$GITHUB_ENV"
+            echo "::notice::extra-env exported: $line"
           done <<< "$EXTRA_ENV"
+          exit "$status"
       # the test command of each configuration, run once against the
       # unmutated tree. Without this a stale path or a renamed test file
       # fails every mutant identically, and the session reports a perfect
@@ -211,17 +247,97 @@ jobs:
       # Under the same address-space limit as the sessions below, which is
       # what makes this step that limit's own test: one too low for what the
       # test commands legitimately need fails here, against the unmutated
-      # tree, rather than reporting every mutant killed
+      # tree, rather than reporting every mutant killed.
+      #
+      # A caller whose build reads extra-env can still get an exit code of
+      # 0 here from a build that never saw it: a test marked to skip
+      # without whatever extra-env configures does not fail, it skips, and
+      # a passing exit code cannot be told apart from the same command
+      # having run the suite it claims to (btclib-org/.github#1243). So
+      # where extra-env is set, the baseline's own captured output is read
+      # back out of its session file and a skip fails the step -- the same
+      # "a skip is not a failure, and that is exactly why this step is
+      # here" read reusable-integration-bitcoind.yml already gives its own
+      # node suite, applied to the one place this file can reach it: the
+      # test command is the caller's own string inside a toml, opaque to
+      # this workflow, so nothing here can hand it a flag the way that
+      # other file hands pytest --junitxml -- the session file cosmic-ray
+      # itself writes is what is left to read.
+      #
+      # Not keyed on BTCLIB_LIBSECP256K1_ZKP or on any other caller's
+      # variable name: the condition is "extra-env is set", true of every
+      # caller alike, and a caller with a legitimate skip under extra-env
+      # gets a red baseline the same way a caller with a genuinely broken
+      # test command already does above -- loud rather than silent is the
+      # point, not a claim that every skip is this defect.
+      #
+      # `work_results.output` is read with `sqlite3` rather than through
+      # `cosmic-ray dump` or `cr-report`, the coupling `mutation_counts.py`
+      # already states for the same file: what is wanted is one column of
+      # one row, and neither tool prints it -- `cosmic-ray baseline`'s own
+      # CLI only prints the captured output when the run failed, which is
+      # the empty log this step exists to stop being empty for a run that
+      # passed while skipping.
+      #
+      # The query naming job_id = 'baseline' is cosmic-ray's own internal
+      # shape, not a documented interface, so a row it cannot find is a
+      # real possibility and not only a defensive case: reading that as an
+      # empty, skip-free output would make this step exactly the thing it
+      # exists to remove, a passing exit code indistinguishable from a
+      # check that never ran. A missing row is therefore its own failure
+      # below, separate from a skip found in one that exists
       - name: Check the baselines
         if: env.SELECTED == 'true'
         env:
           SESSIONS: ${{ matrix.sessions }}
+          EXTRA_ENV: ${{ inputs.extra-env }}
         run: |
           ulimit -v 8388608
           while read -r config _; do
             [ -n "$config" ] || continue
+            if [ -z "$EXTRA_ENV" ]; then
+              uv run --locked --no-default-groups --group test --group mutation \
+                cosmic-ray baseline ".github/mutation/$config"
+              continue
+            fi
+            session=".baseline-${config%.toml}.sqlite"
             uv run --locked --no-default-groups --group test --group mutation \
-              cosmic-ray baseline ".github/mutation/$config"
+              cosmic-ray baseline ".github/mutation/$config" \
+              --session-file "$session"
+            uv run --locked --no-default-groups python - "$session" <<'PY'
+          import re
+          import sqlite3
+          import sys
+          from pathlib import Path
+
+          session = Path(sys.argv[1])
+          uri = f"{session.resolve().as_uri()}?mode=ro"
+          with sqlite3.connect(uri, uri=True) as db:
+              row = db.execute(
+                  "SELECT output FROM work_results WHERE job_id = 'baseline'"
+              ).fetchone()
+          # a missing row is not a clean baseline: cosmic-ray's own job_id
+          # for this session is not a documented contract, and a row this
+          # query cannot find is indistinguishable from a check that never
+          # ran -- exactly what this step exists to stop being true of the
+          # baseline itself, so it is not let through as an empty output
+          if row is None:
+              print(
+                  f"::error::{session}: no work_results row for "
+                  "job_id 'baseline'; this check could not run",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+          match = re.search(r"(\d+) skipped", row[0] or "")
+          if match:
+              print(
+                  f"::error::{session}: the baseline reported "
+                  f"{match.group(1)} skipped test(s) with extra-env set; "
+                  "extra-env did not reach the build",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+          PY
           done <<< "$SESSIONS"
       # init enumerates the mutants, the filter marks as skipped whatever the
       # configuration excludes by operator -- a no-op for one that excludes
