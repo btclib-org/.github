@@ -39,8 +39,10 @@ on:
     # ready_for_review so a pull request marked ready gets the run the
     # draft condition in reusable-links.yml withheld while it was a
     # draft: the default types do not include it. closed too, though the
-    # job declines the real work on it -- the same superseding the other
-    # workflows here take it for
+    # job declines the real work on it -- and no longer for the same
+    # superseding the other workflows here take it for: cancel-in-progress
+    # below still cancels on a close that is not a merge, and queues a
+    # merged one behind the run in flight instead
     types: [opened, reopened, synchronize, ready_for_review, closed]
     paths:
       - .github/workflows/links.yml
@@ -63,7 +65,7 @@ concurrency:
   # weekly run and a dispatch of it supersede each other -- wanted,
   # since they ask the same question of the same tree
   group: links-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !(github.event.action == 'closed' && github.event.pull_request.merged) }}
 
 jobs:
   # the job, its flags and its pins are reusable-links.yml's, and what is

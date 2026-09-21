@@ -9023,3 +9023,9 @@ nothing red follows from the copies disagreeing.
 - **A workflow taking `closed` and declaring no `push` trigger writes the
   conditional rather than `true`** (issue #1226): a merge otherwise cancels the
   only reading its content gets before the schedule, and a cell reads it.
+
+### `alignment.yml` and `links.yml` take the `cancel-in-progress` shape
+
+- **`alignment.yml` and `links.yml` take section 10's `cancel-in-progress`
+  conditional** (issue btclib-org/.github#1226); the comments it falsifies
+  are rewritten, and the `BACKLOG` row loses this tree.

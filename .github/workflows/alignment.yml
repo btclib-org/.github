@@ -43,10 +43,10 @@ on:
     # draft condition below withheld while it was a draft: the default
     # types do not include it, and without it a readied pull request
     # would wait for its next push to be checked at all.
-    # closed joins them so that a run still held in this pull request's
-    # own concurrency group is superseded by it -- cancel-in-progress
-    # fires only when a new run lands in that group, and nothing
-    # otherwise does
+    # closed joins them so that the closed event's own run lands in this
+    # pull request's group at all -- nothing else puts one there, and
+    # cancel-in-progress below is what then decides between superseding
+    # the run still held there and queueing behind it
     types: [opened, reopened, synchronize, ready_for_review, closed]
     paths:
       # every workflow of this tree and not this one alone: the suite
@@ -96,14 +96,16 @@ concurrency:
   # which the schedule and a dispatch also resolve to, so grouping by it
   # alone would let a closed pull request cancel a scheduled run
   group: alignment-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !(github.event.action == 'closed' && github.event.pull_request.merged) }}
 
 jobs:
   alignment:
     name: Check the organization against README.md
     # a draft pull request is work in progress and spends no runner here.
     # A closed one spends none either -- the trigger above takes the
-    # closed event only to supersede a run still holding in this group.
+    # closed event so its run reaches this group at all, where
+    # cancel-in-progress decides between superseding a run still held
+    # there and queueing behind it.
     #
     # A pull_request run whose actor is dependabot[bot] is given the
     # Dependabot secret store rather than this one, and that store holds

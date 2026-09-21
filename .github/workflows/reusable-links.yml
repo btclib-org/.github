@@ -24,8 +24,10 @@ jobs:
   links:
     name: Check the documentation links
     # a draft spends no runner, and a closed pull request spends none
-    # either: a caller takes the closed event only to supersede a run
-    # its group is still holding
+    # either: a caller takes the closed event so its own concurrency
+    # group can act on it -- cancel-in-progress: true supersedes a run
+    # still held there, and section 10's conditional, for a caller with
+    # no push trigger, queues a closed, merged run behind it instead
     if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
     runs-on: ubuntu-latest
     # every link the tree holds, with retries; a job past this is hung on
