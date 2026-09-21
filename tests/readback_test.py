@@ -36,11 +36,13 @@ an observation*, for three reasons this module does not paper over:
   invocation among them, records nothing this module can compare
   against.
 - **The alignment sentinel's own token has to be able to answer it.**
-  `UNGRANTED` names five readings a dispatched run measured that token
-  unable to verify -- three outright refused, two answering silently
-  wrong -- and gating one of them would read a permission gap as the
-  repository's own drift on every scheduled run. btclib-org/.github#1233
-  is where that is settled.
+  `WRITE_GATED` names the readings GitHub withholds from any read-only
+  token by the endpoint's own design, and `UNGRANTED` names the
+  readings the sentinel's App grant does not reach though GitHub gates
+  each at `read` -- gating any of them would read a permission gap as
+  the repository's own drift on every scheduled run.
+  btclib-org/.github#1233 is where `UNGRANTED` is tracked; `WRITE_GATED`
+  has no open question left.
 
 **Only one tree is asked.** Marking an observation is new with this
 module, and no `REPOSITORY.md` but this repository's own carries the
@@ -235,24 +237,41 @@ def own(command: str, repository: str) -> bool:
     return asked == head or asked.startswith(head + "/")
 
 
-UNGRANTED = (
+WRITE_GATED = (
     "allow_squash_merge",
-    "/rulesets",
+    "bypass_actors",
+)
+"""A fragment naming a command whose answer GitHub withholds from any
+read-only token, by the endpoint's own design rather than by a gap in
+the sentinel's grant.
+
+`repos/{owner}/{repo}`'s merge-method fields answer only where the
+token holds `contents:write` beside `contents:read` -- GitHub's own
+words, on *Get a repository*: "To view merge-related settings, you must
+have the `contents:read` and `contents:write` permissions." A ruleset's
+`bypass_actors` is returned only to a token with write access to the
+ruleset -- GitHub's own words, on *Get a repository ruleset*: "To
+prevent leaking sensitive information, the `bypass_actors` property is
+only returned if the user making the API request has write access to
+the ruleset." A reader is the permanent check on both;
+btclib-org/.github#1233 is where that is established.
+"""
+
+UNGRANTED = (
     "/actions/secrets",
     "/actions/variables",
     "/dependabot/secrets",
 )
-"""A fragment naming a command the alignment sentinel's own token cannot
-verify, measured rather than guessed at: dispatching `alignment.yml` on
-the branch that added this module (run 35568042317) had the merge
-methods reading answer every field `null`, a ruleset's `bypass` answer
-`[]` for all three including one whose personal-token reading is
-non-empty, and the three secret/variable listings exit with `gh:
-Resource not accessible by integration (HTTP 403)` -- the sentinel's App
-grant is read-only actions/administration/contents/issues/metadata, and
-none of the five comes through it whole. btclib-org/.github#1233 is
-where that is either fixed or accepted; until it is, gating one of these
-would read the token's own reach as the repository's drift, every run.
+"""A fragment naming a command the alignment sentinel's own App
+installation does not reach, though GitHub gates each at `read`:
+`actions/secrets`, `actions/variables` and `dependabot/secrets` each
+exit `gh: Resource not accessible by integration (HTTP 403)` under the
+installation's present grant of
+actions/administration/contents/issues/metadata, all at `read` and
+nothing wider. Widening the installation to add them at `read` is an
+organization-owner action nobody has taken. btclib-org/.github#1233 is
+where that stands; gating one of these ahead of it would read the
+App's own reach as the repository's drift, every run.
 """
 
 
@@ -260,9 +279,10 @@ def granted(command: str) -> bool:
     """Say whether the alignment sentinel's own token can verify a command.
 
     :param command: the command, as `readings` extracted it.
-    :returns: whether `command` names none of `UNGRANTED`.
+    :returns: whether `command` names none of `WRITE_GATED` or
+        `UNGRANTED`.
     """
-    return not any(fragment in command for fragment in UNGRANTED)
+    return not any(fragment in command for fragment in (*WRITE_GATED, *UNGRANTED))
 
 
 def _stream(text: str) -> list[Any] | None:
