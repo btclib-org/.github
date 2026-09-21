@@ -9053,3 +9053,15 @@ nothing red follows from the copies disagreeing.
 - **`hooks_test.py`'s `test_the_packaging_hooks_run` asks `uv-lock`,
   `pyroma` and `check-sdist` of every tree the bullet binds** (closes
   #1240): every tree carries what it owes, so `BACKLOG` stays empty.
+
+### `readback_test.py`'s write-gated exclusions cite GitHub, not an issue
+
+- **`WRITE_GATED` excludes `allow_squash_merge` and `bypass_actors`,
+  GitHub's own documented reason replacing an open issue** (issue
+  #1233): a reader is the permanent check on both.
+
+### `readback_test.py`'s `/rulesets` exclusion narrows to `bypass_actors`
+
+- **The `/rulesets` exclusion narrows to `bypass_actors`** (issue
+  #1233): the ruleset's `.parameters` reading, which the sentinel's
+  token already answers, is measured again rather than excluded.
