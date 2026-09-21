@@ -9047,3 +9047,9 @@ nothing red follows from the copies disagreeing.
 - **A rejected `extra-env` line fails the export step, and where
   `extra-env` is set a skip fails the baseline** (closes #1243): a
   skip exits the baseline at 0 like a run, so nothing told them apart.
+
+### Section 4's *packaging* bullet gains a cell
+
+- **`hooks_test.py`'s `test_the_packaging_hooks_run` asks `uv-lock`,
+  `pyroma` and `check-sdist` of every tree the bullet binds** (closes
+  #1240): every tree carries what it owes, so `BACKLOG` stays empty.
