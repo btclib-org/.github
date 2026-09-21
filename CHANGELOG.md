@@ -9035,3 +9035,9 @@ nothing red follows from the copies disagreeing.
 - **`tests/__init__.py`'s `BACKLOG` is empty again** (closes #1226):
   every tree writes section 10's conditional, so the row excuses
   nothing and its strict xfail would redden the last one to arrive.
+
+### Section 10 says why the conditional tests `merged`, and what it excludes
+
+- **The `cancel-in-progress` bullet says why the expression tests
+  `merged`, and why a path-filtered `push` keeps `true`**
+  (closes #1238, closes #1244).
