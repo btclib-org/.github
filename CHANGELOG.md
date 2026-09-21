@@ -9041,3 +9041,9 @@ nothing red follows from the copies disagreeing.
 - **The `cancel-in-progress` bullet says why the expression tests
   `merged`, and why a path-filtered `push` keeps `true`**
   (closes #1238, closes #1244).
+
+### `reusable-mutation.yml`'s baseline no longer passes a build `extra-env` missed
+
+- **A rejected `extra-env` line fails the export step, and where
+  `extra-env` is set a skip fails the baseline** (closes #1243): a
+  skip exits the baseline at 0 like a run, so nothing told them apart.
