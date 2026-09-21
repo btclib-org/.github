@@ -322,16 +322,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         1226,
         "test_a_workflow_taking_closed_without_push_writes_the_conditional",
-        (
-            ".github",
-            "btclib",
-            "btclib-node",
-            "bitcoin-core-rpc",
-            "bbt",
-            "btclib-benchmarks",
-            "portanode",
-            "btclib-org.github.io",
-        ),
+        ("btclib-node",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
