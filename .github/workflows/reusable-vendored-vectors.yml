@@ -27,11 +27,11 @@ name: reusable-vendored-vectors
 #
 # ledgers is the whole matrix, JSON-encoded, an array of {ledger, title}
 # objects -- the pin file each cell reads and the title of the issue it
-# tracks drift under. A caller sets it at cardinality 2 (btclib, one
-# ledger for its vendored vectors and one for its tf2 verdicts) or 1
-# (btclib-benchmarks, btclib-secp256k1's own check job): what a reader of
-# this file could not write for any caller, where the loop around it is
-# not.
+# tracks drift under. A caller sets one cell per ledger it pins, each
+# under a title of its own, so that two ledgers going stale for
+# different reasons do not share an issue every run rewrites. Which
+# ledgers those are is what a reader of this file could not write for
+# any caller, where the loop around them is not.
 #
 # python-version toggles the interpreter: btclib and btclib-secp256k1
 # pin "3.14" here, and btclib-benchmarks runs the check against the
