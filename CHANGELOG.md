@@ -9029,3 +9029,9 @@ nothing red follows from the copies disagreeing.
 - **`alignment.yml` and `links.yml` take section 10's `cancel-in-progress`
   conditional** (issue btclib-org/.github#1226); the comments it falsifies
   are rewritten, and the `BACKLOG` row loses this tree.
+
+### The `BACKLOG` row for 1226 comes out, the last tree having converged
+
+- **`tests/__init__.py`'s `BACKLOG` is empty again** (closes #1226):
+  every tree writes section 10's conditional, so the row excuses
+  nothing and its strict xfail would redden the last one to arrive.
