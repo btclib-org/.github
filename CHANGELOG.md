@@ -8993,3 +8993,9 @@ nothing red follows from the copies disagreeing.
 - **The entry excusing `check_changelog.py` is deleted, and the table is
   empty** (closes #1215): every repository now carries
   `misplaced_entries()`, and section 14 compares every copy again.
+
+### `[tool.uv]`'s floor now equals the pin `dependabot-core` bundles
+
+- **`required-version` moves to `>=0.12.17`, `dependabot-core`'s pin,
+  and `uv-pre-commit`'s `rev:` follows it** (issue #1229): the old floor
+  admitted a `uv` older than the one the updater writes `uv.lock` with.
