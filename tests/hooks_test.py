@@ -290,6 +290,38 @@ def test_the_gate_runs_mypy(repository: str, trees: dict[str, Path]) -> None:
 PYROMA = "pyroma"
 """Section 4's packaging hook that reads a distribution's metadata."""
 
+PYROMA_STATED = {
+    "repo": "local",
+    "entry": "uv run --locked --only-group check pyroma",
+    "language": "system",
+    "args": ["-d", "--min=10", "."],
+    "pass_filenames": False,
+    "always_run": True,
+}
+"""What section 4's *packaging* bullet says that hook is, by key.
+
+`repo` is among them because the shape is the whole point: `autoupdate`
+rewrites the `rev:` of every block but `local` and `meta`, so a hook
+declared anywhere else is the one this refuses however its other keys
+read. The rest are the upstream hook's own definition, which a local
+hook states rather than inherits, with `entry` naming the group the
+version comes from.
+"""
+
+PYROMA_REFUSED = {
+    "id": PYROMA,
+    "repo": "https://github.com/regebro/pyroma",
+    "rev": "5.0.1",
+    "additional_dependencies": ["uv_build>=0.12.0,<0.13"],
+}
+"""The stanza a gate carries where the hook is still `autoupdate`'s.
+
+A literal, for the reason `REFUSED` above is one: every gate answering
+section 4 would leave a check read off the trees green however its
+reading behaved. `entry` and `language` are absent here because an
+upstream block states neither, which is two of the findings this owes.
+"""
+
 CHECK_SDIST = "check-sdist"
 """Section 4's packaging hook that diffs the sdist against what git tracks."""
 
@@ -381,17 +413,31 @@ def test_a_missing_packaging_hook_would_be_reported() -> None:
     )
 
 
+def stated_departures(hook: dict[str, Any], stated: dict[str, Any]) -> list[str]:
+    """List where a hook mapping says something other than a section does.
+
+    The mapping to hold it against is the caller's, section 4 stating
+    the keys of more than one hook and each bullet stating its own: a
+    default here would answer for whichever hook was written first.
+
+    :param hook: a hook as the gate's yaml gives it, `hooks()`'s shape.
+    :param stated: the keys that section states, against their values.
+    :returns: one line per key that differs, empty where none does.
+    """
+    return [
+        f"{key}: {hook.get(key)!r} rather than {value!r}"
+        for key, value in stated.items()
+        if hook.get(key) != value
+    ]
+
+
 def departures(hook: dict[str, Any]) -> list[str]:
     """List where a hook mapping says something other than section 4 does.
 
     :param hook: a hook as the gate's yaml gives it.
     :returns: one line per key that differs, empty where none does.
     """
-    found = [
-        f"{key}: {hook.get(key)!r} rather than {value!r}"
-        for key, value in STATED.items()
-        if hook.get(key) != value
-    ]
+    found = stated_departures(hook, STATED)
     if UNFILTERED in hook:
         found.append(f"{UNFILTERED}: {hook[UNFILTERED]!r}, where section 4 has none")
     return found
@@ -438,6 +484,59 @@ def test_a_gate_that_had_drifted_would_be_reported() -> None:
         f"{REFUSED} read as carrying no {UNFILTERED}: either the key"
         " section 4 gives this hook none of is no longer read, or the"
         " literal wants another"
+    )
+
+
+def test_pyroma_says_what_section_4_says(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 4's `pyroma` keys, read off each tree's gate.
+
+    The hook is resolved by its `id`, as the cell above resolves
+    `check-changelog`: where a gate keeps the stanza is no drift in it.
+    A tree whose gate names no such hook is
+    `test_the_packaging_hooks_run`'s finding where the tree owes one,
+    and this reports nothing about it: one finding to a cell.
+
+    What it cannot ask is the version the entry resolves to. That is
+    the `check` group's bound, which no key of this file carries and
+    which section 4 leaves to whoever writes the bound.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    found = [hook for hook in hooks(repository, trees) if hook["id"] == PYROMA]
+    if not found:
+        pytest.skip(f"{repository}'s gate names no {PYROMA} hook")
+    drifted = [
+        line for hook in found for line in stated_departures(hook, PYROMA_STATED)
+    ]
+    assert not drifted, f"{PYROMA} says what section 4 does not: {drifted}; " + by_hand(
+        repository, f"grep -n -B8 -A6 '^ *- id: {PYROMA}' {CONFIG}"
+    )
+
+
+def test_a_pyroma_hook_that_had_drifted_would_be_reported() -> None:
+    """The cell above is green on a gate that agrees, however it reads.
+
+    Asked of the literal `PYROMA_REFUSED` for the two findings that
+    stanza carries -- the block it is declared in, and the entry an
+    upstream block has none of -- and of the stated keys themselves,
+    which a comparison inverted somewhere would report as drift.
+    """
+    refused = stated_departures(PYROMA_REFUSED, PYROMA_STATED)
+    assert any(line.startswith("repo:") for line in refused), (
+        f"{PYROMA_REFUSED} read as declared locally: either the key the"
+        " shape turns on is no longer read, or the literal wants another"
+    )
+    assert any(line.startswith("entry:") for line in refused), (
+        f"{PYROMA_REFUSED} read as carrying an entry: either the key"
+        " naming the group is no longer read, or the literal wants another"
+    )
+    agreeing = {"id": PYROMA, **PYROMA_STATED}
+    assert stated_departures(agreeing, PYROMA_STATED) == [], (
+        f"{agreeing} is read as drift from the keys it is built of"
     )
 
 

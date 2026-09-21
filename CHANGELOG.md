@@ -9065,3 +9065,9 @@ nothing red follows from the copies disagreeing.
 - **The `/rulesets` exclusion narrows to `bypass_actors`** (issue
   #1233): the ruleset's `.parameters` reading, which the sentinel's
   token already answers, is measured again rather than excluded.
+
+### Section 4 declares `pyroma` locally, out of the `check` group
+
+- **The hook runs `uv run --locked --only-group check pyroma`, out of
+  `autoupdate`'s reach, and `hooks_test.py` reads that shape off each
+  gate** (issue #1199): a bound naming no prerelease is the only hold.
