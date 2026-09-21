@@ -9005,3 +9005,9 @@ nothing red follows from the copies disagreeing.
 - **Section 11 now says which of `REPOSITORY.md`'s answers a cell
   checks and which a reader is the only check on** (issue #1017):
   `tests/readback_test.py` gates the first kind, here.
+
+### The `ledgers` paragraph states the rule, not which caller sets how many
+
+- **`reusable-vendored-vectors.yml` no longer names a caller's
+  cardinality** (issue #1237): btclib's tf2 verdict ledger is gone, and
+  one cell per ledger under its own title holds whoever calls it.
