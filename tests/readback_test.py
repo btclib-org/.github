@@ -96,8 +96,18 @@ convention to a tree is what adds it here, one at a time.
 OBSERVATION = "a fact about a changing world"
 """Section 11's own words for a reading this module does not gate."""
 
-FENCE = re.compile(r"```shell\n(.*?)\n```", re.DOTALL)
-"""A fenced shell block, fence to fence."""
+FENCE = re.compile(r"^([ \t]*)```shell\n(.*?)\n\1```", re.DOTALL | re.MULTILINE)
+"""A fenced shell block, fence to fence.
+
+The opening and closing delimiters are required to carry the same
+leading whitespace, captured so `readings` can strip it back off before
+handing the body to `_fenced_pairs`: a block nested as a list
+continuation -- ordinary, valid Markdown -- indents both fences and
+every line between them alike, and neither `_fenced_pairs` nor `own`
+reads a `gh api` or a `#` line that does not open at the start of its
+own line. btclib-org/.github#1257 is where the unindented pattern
+returned one block from a section whose text held four.
+"""
 
 INLINE = re.compile(r"`(gh api [^`]+)`\s+answers\s+`([^`]*)`")
 """A command and its answer, given inline rather than fenced.
@@ -125,38 +135,52 @@ def _fenced_pairs(block: str) -> list[tuple[str, str]]:
 
     A pair is a run of lines opened by one starting `gh api`, up to but
     not including the next line that starts a new command, a blank
-    line, or a comment; the comment lines immediately after that run,
-    where there are any, are its recorded answer. A command with none
-    directly below it -- the `PUT` a heredoc closes, the topics `diff`
-    invocation -- names no pair.
+    line, or a comment. Where two or more such runs sit back to back
+    with no comment of its own between them, the comment that follows
+    the last one is read as each of theirs: btclib-org/.github#1255 is
+    a `REPOSITORY.md` pairing two `gh api` commands under one trailing
+    `# 0, both`, where the first used to be dropped -- not merely
+    unmarked, absent from `readings()`'s output. A blank line between
+    two such runs starts the next run fresh rather than reaching back
+    across it, and a command with nothing following it at all -- the
+    `PUT` a heredoc closes, the topics `diff` invocation -- names no
+    pair.
 
     :param block: one fenced block's text, fences excluded.
     :returns: each command against the answer lines that follow it,
-        joined back into one string.
+        joined back into one string; a command sharing its answer with
+        another appears once for each, both carrying the same text.
     """
     lines = block.splitlines()
     pairs: list[tuple[str, str]] = []
+    pending: list[str] = []
     i = 0
     while i < len(lines):
-        if not lines[i].startswith("gh api"):
+        line = lines[i]
+        if line.startswith("gh api"):
+            command = [line]
             i += 1
+            while (
+                i < len(lines)
+                and lines[i]
+                and not lines[i].startswith("#")
+                and not lines[i].startswith("gh api")
+            ):
+                command.append(lines[i])
+                i += 1
+            pending.append("\n".join(command))
             continue
-        command = [lines[i]]
+        if line.startswith("#"):
+            answer: list[str] = []
+            while i < len(lines) and lines[i].startswith("#"):
+                answer.append(lines[i].removeprefix("#").strip())
+                i += 1
+            joined = "\n".join(answer)
+            pairs.extend((command, joined) for command in pending)
+            pending = []
+            continue
+        pending = []
         i += 1
-        while (
-            i < len(lines)
-            and lines[i]
-            and not lines[i].startswith("#")
-            and not lines[i].startswith("gh api")
-        ):
-            command.append(lines[i])
-            i += 1
-        answer: list[str] = []
-        while i < len(lines) and lines[i].startswith("#"):
-            answer.append(lines[i].removeprefix("#").strip())
-            i += 1
-        if answer:
-            pairs.append(("\n".join(command), "\n".join(answer)))
     return pairs
 
 
@@ -184,6 +208,20 @@ def _sections(text: str) -> list[str]:
     return [text[start:end] for start, end in zip(starts, ends, strict=True)]
 
 
+def _dedent(indent: str, block: str) -> str:
+    """Strip one fence's own leading whitespace back off its body.
+
+    :param indent: the whitespace `FENCE` captured ahead of the fence,
+        possibly empty.
+    :param block: the fence's own content, that indent included.
+    :returns: `block` with `indent` removed from the start of every
+        line that carries it; a line that does not is left as it is.
+    """
+    if not indent:
+        return block
+    return re.sub(rf"(?m)^{re.escape(indent)}", "", block)
+
+
 def readings(text: str) -> list[tuple[str, str, bool]]:
     """Read every command/answer pair a copy quotes, section by section.
 
@@ -198,7 +236,8 @@ def readings(text: str) -> list[tuple[str, str, bool]]:
     out: list[tuple[str, str, bool]] = []
     for section in _sections(text):
         observed = OBSERVATION in section
-        for block in FENCE.findall(section):
+        for indent, raw in FENCE.findall(section):
+            block = _dedent(indent, raw)
             for command, answer in _fenced_pairs(block):
                 out.append((command, answer, observed))
         for command, answer in INLINE.findall(section):
@@ -489,3 +528,68 @@ def test_an_unrecognized_flag_does_not_swallow_the_endpoint() -> None:
         " swallow a flag it has not confirmed the shape of, rather than"
         " stopping the match at it"
     )
+
+
+def test_a_shared_trailing_comment_reaches_every_command_it_precedes() -> None:
+    """`_fenced_pairs` used to drop the first of two commands sharing an answer.
+
+    Shaped as btclib-org/.github#1255 measured it in `btclib-node`,
+    `bitcoin-core-rpc` and `bbt`'s own copies: a `gh api` command with no
+    comment of its own, immediately followed by a second `gh api` line
+    that does carry one. The comment is the first command's answer too,
+    not only the second's -- the first used to name no pair at all.
+    """
+    first = "gh api repos/btclib-org/x/actions/secrets --jq '.total_count'"
+    second = "gh api repos/btclib-org/x/dependabot/secrets --jq '.total_count'"
+    block = f"{first}\n{second}\n# 0, both"
+    pairs = _fenced_pairs(block)
+    assert pairs == [(first, "0, both"), (second, "0, both")], (
+        f"the leading command of a shared trailing comment is missing from"
+        f" {pairs!r}: it names no pair rather than sharing the one below it"
+    )
+
+
+def test_a_blank_line_still_starts_the_next_shared_comment_fresh() -> None:
+    """The fix above does not reach back across a blank line.
+
+    Two runs of commands, each ended by a blank line before the next
+    begins, are two separate pairings; a blank line is what
+    `_fenced_pairs`'s own docstring already stops a single command's
+    continuation at, and it stops a shared comment's reach the same way.
+    This holds identically before and after btclib-org/.github#1255's
+    fix: it guards the boundary the fix must not cross, rather than the
+    defect the fix corrects.
+    """
+    block = (
+        "gh api repos/btclib-org/x/a --jq '.n'\n"
+        "\n"
+        "gh api repos/btclib-org/x/b --jq '.n'\n"
+        "# 5"
+    )
+    pairs = _fenced_pairs(block)
+    assert pairs == [("gh api repos/btclib-org/x/b --jq '.n'", "5")], (
+        f"a command separated from a later comment by a blank line picked"
+        f" it up anyway: {pairs!r}"
+    )
+
+
+def test_fence_finds_a_block_indented_as_a_list_continuation() -> None:
+    """`FENCE` used to require both fence delimiters to open at column zero.
+
+    Shaped as btclib-org/.github#1257 measured it in `btclib-node`'s own
+    copy: a ```` ```shell ```` block nested two spaces in, as the
+    continuation of a bulleted list item -- ordinary, valid Markdown that
+    the unindented pattern silently returned nothing for.
+    """
+    section = (
+        "## Heading\n\n"
+        "- **bullet**:\n\n"
+        "  ```shell\n"
+        "  gh api repos/btclib-org/x --jq '.homepage'\n"
+        "  # https://x.example\n"
+        "  ```\n"
+    )
+    found = readings(section)
+    assert found == [
+        ("gh api repos/btclib-org/x --jq '.homepage'", "https://x.example", False)
+    ], f"the indented block named no reading: {found!r}"

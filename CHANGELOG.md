@@ -9095,3 +9095,15 @@ nothing red follows from the copies disagreeing.
 - **Every repository now writes section 4's local `pyroma` hook**
   (closes #1199): `btclib` landed as `f8f9ec4b` and `btclib-node` as
   `70ef9c44`, so the row excuses nothing and `BACKLOG` is empty again.
+
+### `_fenced_pairs` shares one trailing comment across the commands it follows
+
+- **A comment following two or more adjacent `gh api` commands with none
+  of their own is now each command's own** (closes #1255): the first
+  used to name no pair at all, not merely go unmarked.
+
+### `FENCE` reads a shell block indented as a list continuation
+
+- **A fenced ```` ```shell ```` block nested under a bullet no longer
+  reads as absent** (closes #1257): its own leading whitespace is
+  matched and stripped before the block is read.
