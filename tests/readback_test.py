@@ -187,19 +187,28 @@ def _unterminated(command: str) -> bool:
 def _fenced_pairs(block: str) -> list[tuple[str, str]]:
     r"""Split one fenced block into its command/answer pairs.
 
-    A pair is a run of lines opened by one starting `gh api`, up to but
-    not including the next line that starts a new command, a blank
-    line, or a comment. A `for` loop indents its own body, `gh api`
+    A pair is a run of lines opened by one starting `gh api`, after
+    its own indentation, and continued while `_unterminated` says the
+    text so far cannot end -- so a pipeline carried onto a second `gh
+    api` is one command and not two, which is
+    btclib-org/.github#1280. Four things end a run and only that one
+    is about the command: the block ends, a blank line, a comment, or
+    the text can end. So a run **can** end while the text cannot, and
+    a comment closing one leaves a command whose last line is a bare
+    `\\`. A shell runs that text -- a `\\` at the end of the input
+    continues nothing -- and what becomes of it is the shell's own:
+    kept as a word, the command fails on an argument the copy never
+    wrote; dropped, it can succeed and answer something else, which is
+    the worse of the two because `mismatch()` then compares an answer.
+    The block ending or a blank line discards the pending command
+    instead, so neither reaches `mismatch()`, and the self-test below
+    asserts against the shape because a count of commands does not say
+    what they ask. A `for` loop indents its own body, `gh api`
     included, by construction -- ordinary, valid shell -- so the line
     starting a command is read after stripping its own leading
     whitespace rather than at column zero: btclib-org/.github#1273 is
     where a loop's own call, indented this way, named no reading at
-    all. A run's continuation lines are read the same way `_unterminated`
-    reads them -- a trailing `\\`, or an opened quote the line does not
-    close -- rather than by "not blank, not a comment, not a new
-    command": that older rule swallowed a loop's own closing `done` into
-    the command it followed, the line carrying neither a backslash nor
-    an unbalanced quote of its own.
+    all.
 
     Where two or more such runs sit back to back with no comment of its
     own between them, the comment that follows the last one is read as
@@ -230,7 +239,6 @@ def _fenced_pairs(block: str) -> list[tuple[str, str]]:
                 i < len(lines)
                 and lines[i]
                 and not lines[i].startswith("#")
-                and not lines[i].lstrip().startswith("gh api")
                 and _unterminated("\n".join(command))
             ):
                 command.append(lines[i])
@@ -762,6 +770,47 @@ def test_an_unresolved_variable_stays_out_of_mismatch() -> None:
     assert resolvable(command) is False, (
         f"{command!r} names a variable this module never defines, and"
         " would reach mismatch() with nothing to substitute it"
+    )
+
+
+def test_a_pipeline_carried_onto_a_second_gh_api_is_one_command() -> None:
+    r"""`_fenced_pairs` used to end a run at any line opening `gh api`.
+
+    Shaped as btclib-org/.github#1280 measured it in `portanode`'s own
+    copy: a list of ids read by one call and piped into `xargs`, which
+    runs a second call per id, the continuation line beginning `gh api`
+    after its own indentation. Ending the run there hands `mismatch()`
+    a command whose last line is a bare `\\`. The shell runs it, and
+    under the `bash` `mismatch()` reaches here the `\\` survives as a
+    word, so `xargs` is handed it as the program and the cell reports
+    `exited 127` as though the recorded answer had drifted. A shell
+    that drops it instead leaves `xargs` its own default and the
+    command succeeds, answering about something nobody asked -- so the
+    shape is the defect, and the `127` only the loudest of its
+    outcomes.
+
+    The second assertion is not the first restated. A comment can
+    still end a run whose text cannot end, as `_fenced_pairs`'s own
+    docstring says, so one command is not the same claim as one
+    runnable command and the count alone would not catch it.
+    """
+    section = (
+        "## Heading\n\n"
+        "```shell\n"
+        "gh api repos/btclib-org/x/rulesets --jq '.[].id' | xargs -I{} \\\n"
+        "  gh api repos/btclib-org/x/rulesets/{} --jq '.name'\n"
+        "# one name per ruleset\n"
+        "```\n"
+    )
+    found = readings(section)
+    assert len(found) == 1, (
+        f"the pipeline was cut into {len(found)} commands: {found!r}"
+    )
+    command = found[0][0]
+    assert not command.rstrip().endswith("\\"), (
+        f"{command!r} ends in a bare backslash, so it is the first"
+        " half of a pipeline and a shell runs it, with or without that"
+        " backslash as a word"
     )
 
 
