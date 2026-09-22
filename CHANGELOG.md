@@ -9131,3 +9131,9 @@ nothing red follows from the copies disagreeing.
 - **Every reading the comparison reaches sits inside the sentinel's
   grant, or is public regardless of it** (issue #1017): each endpoint's
   own permission was checked too, not only its answer.
+
+### Section 11 splits a reading that mixes decided and plan-gated fields
+
+- **A mark classifies a whole heading's span, so one object answering
+  with both kinds is split by the command that reads it** (issue #1271):
+  what the plan decides goes where the plan's own answer is marked.
