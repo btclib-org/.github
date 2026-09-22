@@ -335,12 +335,12 @@ moved.
 ## Secret scanning and Dependabot
 
 ```shell
-gh api repos/btclib-org/.github --jq '.security_and_analysis'
+gh api repos/btclib-org/.github \
+  --jq '.security_and_analysis | {dependabot_security_updates,
+        secret_scanning, secret_scanning_push_protection}'
 # {"dependabot_security_updates":{"status":"enabled"},
 #  "secret_scanning":{"status":"enabled"},
-#  "secret_scanning_non_provider_patterns":{"status":"disabled"},
-#  "secret_scanning_push_protection":{"status":"enabled"},
-#  "secret_scanning_validity_checks":{"status":"disabled"}}
+#  "secret_scanning_push_protection":{"status":"enabled"}}
 ```
 
 [The standard asks for secret scanning, its push protection and
@@ -348,8 +348,11 @@ Dependabot security updates][s11-tokens], and the call answers `enabled`
 to each. What runs before any of them is the `detect-private-key` hook,
 on the author's own machine.
 
-What answers `disabled` is [plan-gated rather than declined][s11-tokens],
-so this call reports the setting and not the request.
+The same object answers for non-provider patterns and validity checks,
+which the `--jq` filter leaves out: those are the plan's answer rather
+than this repository's, and *Plan-gated settings* below is where they
+are read back. A field the plan comes to offer joins this filter, its
+answer being a decision for the first time.
 
 Version bumps are the other half of what Dependabot does here, and they
 are a file rather than a setting: `.github/dependabot.yml` declares
@@ -392,9 +395,24 @@ shared across every repository of the organization. `lint.yml` and
 are touched. `CONTRIBUTING.md`'s *The landing queue* is what points here
 for the figure.
 
-The two secret-scanning settings that answer `disabled` under *Secret
-scanning and Dependabot* above are the other plan-gated pair, and that
-section is where they are read back.
+Secret scanning's non-provider patterns and validity checks are the
+plan's answer too, and the reading under *Secret scanning and
+Dependabot* above is filtered past them:
+
+```shell
+gh api repos/btclib-org/.github \
+  --jq '.security_and_analysis | {secret_scanning_non_provider_patterns,
+        secret_scanning_validity_checks}'
+# {"secret_scanning_non_provider_patterns":{"status":"disabled"},
+#  "secret_scanning_validity_checks":{"status":"disabled"}}
+```
+
+They answer `disabled` because they are [plan-gated rather than
+declined][s11-tokens], so this call reports the setting and not the
+request. That answer is a fact about a changing world in the way the
+plan name is: an upgrade, or either feature becoming generally
+available, turns it `enabled` with nobody having decided anything. Read
+at 2026-09-22T22:21:50Z.
 
 ## What is not configured, and why
 
