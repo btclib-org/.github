@@ -2960,9 +2960,10 @@ not all classify alike cannot be marked where it stands: *Tokens,
 publishing, scanning* below asks for scanning settings and calls others
 of the same object plan-gated, and `.security_and_analysis` answers with
 them together. **The command is what splits it**, as it is what narrows
-— the gated reading filtered to the fields the organization decided, and
-what the plan decides read by a command of its own under *Plan-gated
-settings*, the section where the plan's own answer is marked. The day a
+— the object's own reading filtered to the fields the organization
+decided, and what the plan decides read by a command of its own under
+*Plan-gated settings*, the section where the plan's own answer is
+marked. The day a
 gated field becomes available it joins the filter, its answer being a
 decision for the first time; the rejected alternative records the object
 whole and gates it, so that the first red says the plan moved and names
