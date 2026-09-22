@@ -9143,3 +9143,9 @@ nothing red follows from the copies disagreeing.
 - **A loop's indented call names a reading, and a quoted endpoint reads
   as this repository's own** (closes #1258) (issue #1273): the first was
   absent from `readings()`, the second excluded after it by `own()`.
+
+### This repository's copy splits its `.security_and_analysis` reading
+
+- **The fields the organization decided are read where they stand, and
+  what the plan withholds under *Plan-gated settings*** (issue #1271):
+  the section-scoped mark then reaches the plan's answer alone.
