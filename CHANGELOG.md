@@ -9149,3 +9149,9 @@ nothing red follows from the copies disagreeing.
 - **The fields the organization decided are read where they stand, and
   what the plan withholds under *Plan-gated settings*** (issue #1271):
   the section-scoped mark then reaches the plan's answer alone.
+
+### A pipeline carried onto a second `gh api` is one command
+
+- **A line opening `gh api` no longer ends a run whose text cannot
+  end** (closes #1280): the guard that ended it there cut a pipeline in
+  two and handed the first half to a shell ending in a `\`.
