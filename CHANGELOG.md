@@ -9071,3 +9071,9 @@ nothing red follows from the copies disagreeing.
 - **The hook runs `uv run --locked --only-group check pyroma`, out of
   `autoupdate`'s reach, and `hooks_test.py` reads that shape off each
   gate** (issue #1199): a bound naming no prerelease is the only hold.
+
+### The `BACKLOG` row for 1199 drops `bitcoin-core-rpc`
+
+- **`bitcoin-core-rpc` no longer excuses `test_pyroma_says_what_section_4_says`**
+  (issue #1199): its `pyroma` hook now matches section 4's shape, landed
+  as `da9c4d68`.
