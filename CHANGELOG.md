@@ -9053,3 +9053,75 @@ nothing red follows from the copies disagreeing.
 - **`hooks_test.py`'s `test_the_packaging_hooks_run` asks `uv-lock`,
   `pyroma` and `check-sdist` of every tree the bullet binds** (closes
   #1240): every tree carries what it owes, so `BACKLOG` stays empty.
+
+### `readback_test.py`'s write-gated exclusions cite GitHub, not an issue
+
+- **`WRITE_GATED` excludes `allow_squash_merge` and `bypass_actors`,
+  GitHub's own documented reason replacing an open issue** (issue
+  #1233): a reader is the permanent check on both.
+
+### `readback_test.py`'s `/rulesets` exclusion narrows to `bypass_actors`
+
+- **The `/rulesets` exclusion narrows to `bypass_actors`** (issue
+  #1233): the ruleset's `.parameters` reading, which the sentinel's
+  token already answers, is measured again rather than excluded.
+
+### Section 4 declares `pyroma` locally, out of the `check` group
+
+- **The hook runs `uv run --locked --only-group check pyroma`, out of
+  `autoupdate`'s reach, and `hooks_test.py` reads that shape off each
+  gate** (issue #1199): a bound naming no prerelease is the only hold.
+
+### The `BACKLOG` row for 1199 drops `bitcoin-core-rpc`
+
+- **`bitcoin-core-rpc` no longer excuses `test_pyroma_says_what_section_4_says`**
+  (issue #1199): its `pyroma` hook now matches section 4's shape, landed
+  as `da9c4d68`.
+
+### The `BACKLOG` row for 1199 drops `btclib-benchmarks`
+
+- **`btclib-benchmarks` no longer excuses it either** (issue #1199): its
+  own port landed as `6440b42d`, leaving `btclib` and `btclib-node` as
+  the two trees the row still names.
+
+### `readback_test.py`'s `endpoint()` skips a flag ahead of the path
+
+- **A command opening `-i` or `--jq` no longer reads its own flag as
+  the endpoint** (closes #1253, closes #1256): a quoted `--jq` filter's
+  own spaces are read as one run rather than stopping short.
+
+### The `BACKLOG` row for 1199 comes out, the last two trees having converged
+
+- **Every repository now writes section 4's local `pyroma` hook**
+  (closes #1199): `btclib` landed as `f8f9ec4b` and `btclib-node` as
+  `70ef9c44`, so the row excuses nothing and `BACKLOG` is empty again.
+
+### `_fenced_pairs` shares one trailing comment across the commands it follows
+
+- **A comment following two or more adjacent `gh api` commands with none
+  of their own is now each command's own** (closes #1255): the first
+  used to name no pair at all, not merely go unmarked.
+
+### `FENCE` reads a shell block indented as a list continuation
+
+- **A fenced ```` ```shell ```` block nested under a bullet no longer
+  reads as absent** (closes #1257): its own leading whitespace is
+  matched and stripped before the block is read.
+
+### Section 11 says a recorded answer is the command's whole output
+
+- **An elision, a gloss and a line that wraps without a `\` would each
+  redden a cell with nothing drifted** (issue #1262) (issue #1263)
+  (issue #1264) (issue #1265): a shared comment will, once #1233 lands.
+
+### `CONVERGED` takes `btclib`, the first tree after this one
+
+- **Every reading the comparison reaches was run live against what the
+  copy records, and each matches** (issue #1017): the census is what
+  earns a name here, not the port that marked the observations.
+
+### `UNGRANTED` gains the two endpoints the sentinel's own token is refused
+
+- **`code-quality/setup` and `hooks` answer a maintainer and refuse the
+  App** (issue #1270): this tree's copy quotes neither, so no run had
+  asked them with the token the gate uses.
