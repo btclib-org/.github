@@ -9113,3 +9113,15 @@ nothing red follows from the copies disagreeing.
 - **An elision, a gloss and a line that wraps without a `\` would each
   redden a cell with nothing drifted** (issue #1262) (issue #1263)
   (issue #1264) (issue #1265): a shared comment will, once #1233 lands.
+
+### `CONVERGED` takes `btclib`, the first tree after this one
+
+- **Every reading the comparison reaches was run live against what the
+  copy records, and each matches** (issue #1017): the census is what
+  earns a name here, not the port that marked the observations.
+
+### `UNGRANTED` gains the two endpoints the sentinel's own token is refused
+
+- **`code-quality/setup` and `hooks` answer a maintainer and refuse the
+  App** (issue #1270): this tree's copy quotes neither, so no run had
+  asked them with the token the gate uses.

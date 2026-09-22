@@ -83,7 +83,7 @@ pytestmark = pytest.mark.integration
 SETTINGS = "REPOSITORY.md"
 """The root file section 2's table owes every tier."""
 
-CONVERGED = frozenset({SELF})
+CONVERGED = frozenset({SELF, "btclib"})
 """Which trees' copies mark their observations, and so are read back.
 
 A tree not here has not adopted section 11's marking convention, and a
@@ -91,6 +91,13 @@ row would gate whatever this module happened to find unmarked in a file
 nobody has sorted into settings and observations yet -- the exact
 fragility section 11 asks a reader to avoid forcing. Porting the
 convention to a tree is what adds it here, one at a time.
+
+One at a time is the whole of it: a tree joining turns every reading
+`own` and `granted` admit into a call against the forge, so a name added
+here is a set of cells that were nobody's until the day they were
+everybody's. What earns a name is the census -- every such reading run
+live against what the copy records -- and not the port that marked the
+observations.
 """
 
 OBSERVATION = "a fact about a changing world"
@@ -334,18 +341,29 @@ btclib-org/.github#1233 is where that is established.
 UNGRANTED = (
     "/actions/secrets",
     "/actions/variables",
+    "/code-quality/setup",
     "/dependabot/secrets",
+    "/hooks",
 )
 """A fragment naming a command the alignment sentinel's own App
-installation does not reach, though GitHub gates each at `read`:
-`actions/secrets`, `actions/variables` and `dependabot/secrets` each
-exit `gh: Resource not accessible by integration (HTTP 403)` under the
+installation does not reach, though GitHub gates each at `read`: each
+exits `gh: Resource not accessible by integration (HTTP 403)` under the
 installation's present grant of
 actions/administration/contents/issues/metadata, all at `read` and
 nothing wider. Widening the installation to add them at `read` is an
 organization-owner action nobody has taken. btclib-org/.github#1233 is
 where that stands; gating one of these ahead of it would read the
 App's own reach as the repository's drift, every run.
+
+The last two arrived by the way this list is wrong until something
+fails, which is the way every entry arrived. `CONVERGED` held this tree
+alone, and this tree's own copy quotes neither endpoint, so no run had
+ever asked them with the sentinel's token -- a maintainer's reads both,
+and a census taken with one answers a question the gate does not ask.
+`btclib` joining is what asked them, and the answer was two 403s in a
+check that had been green all along for want of looking.
+btclib-org/.github#1270 is what would find the next one before a tree
+joins rather than after.
 """
 
 
