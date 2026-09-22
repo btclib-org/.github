@@ -322,7 +322,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         1199,
         "test_pyroma_says_what_section_4_says",
-        ("btclib", "btclib-node", "btclib-benchmarks"),
+        ("btclib", "btclib-node"),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.

@@ -9077,3 +9077,9 @@ nothing red follows from the copies disagreeing.
 - **`bitcoin-core-rpc` no longer excuses `test_pyroma_says_what_section_4_says`**
   (issue #1199): its `pyroma` hook now matches section 4's shape, landed
   as `da9c4d68`.
+
+### The `BACKLOG` row for 1199 drops `btclib-benchmarks`
+
+- **`btclib-benchmarks` no longer excuses it either** (issue #1199): its
+  own port landed as `6440b42d`, leaving `btclib` and `btclib-node` as
+  the two trees the row still names.
