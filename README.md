@@ -2940,6 +2940,39 @@ the phrase's absence is what leaves the default in force, so a line
 classified the wrong way round is a cell that goes red rather than a gap
 nothing reports, whichever way the mistake runs.
 
+**A recorded answer is what the command prints, whole**, because
+`test_the_settings_file_reads_its_settings_back` compares that string
+against that output. An elision — a `...` standing for keys the
+paragraph did not want to carry — and a gloss written where the answer
+goes are each a cell that reddens with nothing drifted. One comment
+standing for two commands is the same mistake reaching no cell yet, the
+commands carrying it being excluded on other grounds until the grant
+widens. Where the whole output is more than the paragraph wants, **the
+command is what narrows**: `--jq '{state, languages}'` and a complete
+answer, rather than the filter left off and the answer trailing away —
+an unfiltered object being what a key added at the endpoint breaks next.
+What the object means is prose, and prose goes in the paragraph rather
+than in the `#` line the comparison reads.
+
+**An empty output is written as an empty comment**, which the comparison
+already reads as empty, rather than as a word for it. The cost is a
+reader's: no comment at all drops the reading out of the comparison
+silently, an empty one records an answer expected to be empty, and the
+two differ by one character. A copy that wants the difference
+legible says it in the prose beside the fence, where a reader of that
+copy will find it, since a reader of a copy does not read this file.
+
+**A reading the comparison reaches has to run as written**, the line
+going to a shell unchanged, since a bare newline ends the statement
+where it falls and the shell reads what follows as a command of its own.
+One long enough to wrap **moves into a fenced block, its wrap
+continued** rather than carrying a `\` inline, both being shell-correct
+and only one of them legible — a fence is where a `\` belongs, not what
+excuses it. A reading that reads a value set beside it — section 9's bare,
+last placeholder read back as `${name:?}`, or a plain assignment in the
+same fence — **stays out of the comparison** rather than being rewritten
+to satisfy this.
+
 ### Signatures
 
 **Every commit reaching a protected branch carries a valid signature**,
