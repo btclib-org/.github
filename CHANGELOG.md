@@ -9125,3 +9125,9 @@ nothing red follows from the copies disagreeing.
 - **`code-quality/setup` and `hooks` answer a maintainer and refuse the
   App** (issue #1270): this tree's copy quotes neither, so no run had
   asked them with the token the gate uses.
+
+### `CONVERGED` takes `portanode`
+
+- **Every reading the comparison reaches sits inside the sentinel's
+  grant, or is public regardless of it** (issue #1017): each endpoint's
+  own permission was checked too, not only its answer.
