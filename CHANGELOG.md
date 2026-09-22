@@ -9137,3 +9137,9 @@ nothing red follows from the copies disagreeing.
 - **A mark classifies a whole heading's span, so one object answering
   with both kinds is split by the command that reads it** (issue #1271):
   what the plan decides goes where the plan's own answer is marked.
+
+### A quoted endpoint, and a loop's own call, are read as they are written
+
+- **A loop's indented call names a reading, and a quoted endpoint reads
+  as this repository's own** (closes #1258) (issue #1273): the first was
+  absent from `readings()`, the second excluded after it by `own()`.

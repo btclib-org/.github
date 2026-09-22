@@ -20,7 +20,7 @@ marked the wrong way round is a red cell rather than a silent gap either
 way it errs.
 
 What is read back is narrower still than *every quoted pair not marked
-an observation*, for three reasons this module does not paper over:
+an observation*, for four reasons this module does not paper over:
 
 - **The endpoint has to be this repository's own.** A command under
   `orgs/<org>/...` answers for the organization rather than for the row
@@ -43,6 +43,13 @@ an observation*, for three reasons this module does not paper over:
   the repository's own drift on every scheduled run.
   btclib-org/.github#1233 is where `UNGRANTED` is tracked; `WRITE_GATED`
   has no open question left.
+- **A quoted endpoint's own variable has to be one this module defines.**
+  It never defines any: `${head:?}` and `$env` are both a copy's own
+  multi-step example, not this module's, and running either through
+  `mismatch()` would hand `bash` nothing to substitute it with, reporting
+  the shell's own refusal as though it were the drift this reads back
+  for. `resolvable()` is where that stays excluded; btclib-org/.github#1258
+  is where the case is measured.
 
 **Only one tree is asked.** Marking an observation is new with this
 module, and no `REPOSITORY.md` but this repository's own carries the
@@ -137,21 +144,73 @@ HTTP = re.compile(r"HTTP (\d+)")
 """How `gh`'s own stderr names the status a non-2xx answer carried."""
 
 
+def _unterminated(command: str) -> bool:
+    r"""Say whether a command's text so far still owes it a continuation line.
+
+    A command breaks across lines two ways: a trailing `\\`, ordinary shell
+    line continuation, and an opened quote a `--jq` filter or a path does
+    not close on the same line. Every multi-line example below is of the
+    first kind; the second is what the copies themselves are full of --
+    a `--jq '{...}'` filter opened on one line and closed several lines
+    down, with no backslash on the lines between.
+
+    Scanned a character at a time so that a quote of one kind sitting
+    inside the other, `"array"` inside a still-open `'...'` among them,
+    is read as the literal text the shell itself reads it as rather than
+    as a second delimiter.
+
+    :param command: the command's lines joined by `\\n`, as accumulated so
+        far.
+    :returns: whether the command is still inside a quote, or its last
+        line ends in a line-continuing `\\`.
+    """
+    quote: str | None = None
+    escaped = False
+    for char in command:
+        if quote == "'":
+            if char == "'":
+                quote = None
+        elif quote == '"':
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quote = None
+        elif char in ("'", '"'):
+            quote = char
+    if quote is not None:
+        return True
+    return command.rstrip().endswith("\\")
+
+
 def _fenced_pairs(block: str) -> list[tuple[str, str]]:
-    """Split one fenced block into its command/answer pairs.
+    r"""Split one fenced block into its command/answer pairs.
 
     A pair is a run of lines opened by one starting `gh api`, up to but
     not including the next line that starts a new command, a blank
-    line, or a comment. Where two or more such runs sit back to back
-    with no comment of its own between them, the comment that follows
-    the last one is read as each of theirs: btclib-org/.github#1255 is
-    a `REPOSITORY.md` pairing two `gh api` commands under one trailing
-    `# 0, both`, where the first used to be dropped -- not merely
-    unmarked, absent from `readings()`'s output. A blank line between
-    two such runs starts the next run fresh rather than reaching back
-    across it, and a command with nothing following it at all -- the
-    `PUT` a heredoc closes, the topics `diff` invocation -- names no
-    pair.
+    line, or a comment. A `for` loop indents its own body, `gh api`
+    included, by construction -- ordinary, valid shell -- so the line
+    starting a command is read after stripping its own leading
+    whitespace rather than at column zero: btclib-org/.github#1273 is
+    where a loop's own call, indented this way, named no reading at
+    all. A run's continuation lines are read the same way `_unterminated`
+    reads them -- a trailing `\\`, or an opened quote the line does not
+    close -- rather than by "not blank, not a comment, not a new
+    command": that older rule swallowed a loop's own closing `done` into
+    the command it followed, the line carrying neither a backslash nor
+    an unbalanced quote of its own.
+
+    Where two or more such runs sit back to back with no comment of its
+    own between them, the comment that follows the last one is read as
+    each of theirs: btclib-org/.github#1255 is a `REPOSITORY.md` pairing
+    two `gh api` commands under one trailing `# 0, both`, where the
+    first used to be dropped -- not merely unmarked, absent from
+    `readings()`'s output. A loop's own `done` sits between a run and
+    the comment naming its answer and is exactly this shape, so only a
+    blank line starts the next run fresh rather than reaching back
+    across it; a command with nothing following it at all -- the `PUT` a
+    heredoc closes, the topics `diff` invocation -- names no pair.
 
     :param block: one fenced block's text, fences excluded.
     :returns: each command against the answer lines that follow it,
@@ -164,14 +223,15 @@ def _fenced_pairs(block: str) -> list[tuple[str, str]]:
     i = 0
     while i < len(lines):
         line = lines[i]
-        if line.startswith("gh api"):
+        if line.lstrip().startswith("gh api"):
             command = [line]
             i += 1
             while (
                 i < len(lines)
                 and lines[i]
                 and not lines[i].startswith("#")
-                and not lines[i].startswith("gh api")
+                and not lines[i].lstrip().startswith("gh api")
+                and _unterminated("\n".join(command))
             ):
                 command.append(lines[i])
                 i += 1
@@ -186,7 +246,8 @@ def _fenced_pairs(block: str) -> list[tuple[str, str]]:
             pairs.extend((command, joined) for command in pending)
             pending = []
             continue
-        pending = []
+        if not line.strip():
+            pending = []
         i += 1
     return pairs
 
@@ -289,13 +350,34 @@ def endpoint(command: str) -> str | None:
     and its value rather than leaving a second space `ENDPOINT` does not
     expect between them.
 
+    A path the file itself quotes -- `"repos/.../check-runs"`, or a
+    variable reference such as `"$env"` -- keeps its quote marks on the
+    token `ENDPOINT` captures, `\S+` not treating either mark as a
+    boundary; a matching pair wrapping the whole token is stripped back
+    off, the same way a shell reading the command would remove them.
+    btclib-org/.github#1258 is where the marks, left on, answered as
+    though they were part of the path.
+
+    A command's own leading whitespace goes the same way, `ENDPOINT`
+    anchoring at the start of what it is handed: `_fenced_pairs` opens a
+    run on an indented `gh api`, so without stripping it here every such
+    reading answers ``None`` and `own` calls it another repository's --
+    a fifth narrowing where the four above are the whole list.
+
     :param command: the command, as `readings` extracted it.
     :returns: the endpoint, or ``None`` where the command does not open
         `gh api`.
     """
-    joined = re.sub(r"\s*\\\n\s*", " ", command)
+    joined = re.sub(r"\s*\\\n\s*", " ", command).lstrip()
     match = ENDPOINT.match(joined)
-    return match.group(1) if match else None
+    if match is None:
+        return None
+    token = match.group(1)
+    for mark in ("'", '"'):
+        if token.startswith(mark) and token.endswith(mark) and token != mark:
+            token = token[1:-1]
+            break
+    return token
 
 
 def own(command: str, repository: str) -> bool:
@@ -316,6 +398,33 @@ def own(command: str, repository: str) -> bool:
         return False
     head = f"repos/{ORG}/{repository}"
     return asked == head or asked.startswith(head + "/")
+
+
+UNRESOLVED = re.compile(r"\$\{?\w")
+"""A shell parameter reference no command here ever assigns.
+
+`${head:?}` and `$env` are both this shape -- the prose around a copy's
+own multi-step example defines them, this module never does, and
+`mismatch()`'s `subprocess.run` would hand either straight to `bash`
+with nothing having substituted it. That is not a comparison `own()`'s
+own endpoint check was ever meant to admit: quoting the endpoint, per
+btclib-org/.github#1258, is what first lets such a reading reach `own()`
+at all, and `resolvable()` is what keeps it out of `mismatch()` once it
+does, rather than reporting the shell's own "parameter not set" as
+though it were the drift this module exists to find.
+"""
+
+
+def resolvable(command: str) -> bool:
+    """Say whether a command's own endpoint names no unresolved variable.
+
+    :param command: the command, as `readings` extracted it.
+    :returns: whether the endpoint holds no `$name` or `${name...}`
+        reference -- ``False`` too where the command opens no `gh api`
+        at all.
+    """
+    asked = endpoint(command)
+    return asked is not None and not UNRESOLVED.search(asked)
 
 
 WRITE_GATED = (
@@ -466,7 +575,8 @@ def test_the_settings_file_reads_its_settings_back(
     """Section 11: a setting a copy quotes still answers what it quotes.
 
     A pair `readings` finds unmarked, scoped to this repository's own
-    endpoints and to what the sentinel's own token can answer, is run
+    endpoints, to what the sentinel's own token can answer, and to a
+    command naming no variable this module leaves unresolved, is run
     again; the two failure shapes `mismatch` reports -- a changed
     answer, and a command that no longer succeeds where its recorded
     answer is not itself a status -- are both drift a reader would
@@ -486,7 +596,10 @@ def test_the_settings_file_reads_its_settings_back(
     failures = [
         found
         for command, recorded, observed in readings(text)
-        if not observed and own(command, repository) and granted(command)
+        if not observed
+        and own(command, repository)
+        and granted(command)
+        and resolvable(command)
         for found in [mismatch(command, recorded)]
         if found is not None
     ]
@@ -611,3 +724,78 @@ def test_fence_finds_a_block_indented_as_a_list_continuation() -> None:
     assert found == [
         ("gh api repos/btclib-org/x --jq '.homepage'", "https://x.example", False)
     ], f"the indented block named no reading: {found!r}"
+
+
+def test_a_quoted_endpoint_would_reach_the_comparison() -> None:
+    """`own()` used to read a quoted endpoint's own quote marks as part of it.
+
+    Shaped as btclib-org/.github#1258 measured it in `btclib`'s own copy:
+    the endpoint quoted end to end, a `${head:?}` reference included.
+    `own()` has to answer `True` for the same reason as the three cells
+    above -- the quote marks are not part of the path GitHub reads.
+    """
+    command = (
+        'gh api "repos/btclib-org/btclib/commits/${head:?}/check-runs" \\\n'
+        "  --jq '.total_count'"
+    )
+    assert own(command, "btclib") is True, (
+        f"{command!r} reads as another repository's, or as no repository's"
+        " at all: the quote marks around the path are captured as part of"
+        " the endpoint"
+    )
+
+
+def test_an_unresolved_variable_stays_out_of_mismatch() -> None:
+    """The reading the cell above admits is not one `mismatch()` may run.
+
+    The same command as the cell above: `own()` and `granted()` both admit
+    it, but running it through `bash -c` would hand `${head:?}` to a shell
+    that never assigned it, reporting "parameter not set" as though it
+    were the drift this module exists to find. `resolvable()` is what
+    keeps `test_the_settings_file_reads_its_settings_back` from reaching
+    `mismatch()` with it, per btclib-org/.github#1258's own *Done when*.
+    """
+    command = (
+        'gh api "repos/btclib-org/btclib/commits/${head:?}/check-runs" \\\n'
+        "  --jq '.total_count'"
+    )
+    assert resolvable(command) is False, (
+        f"{command!r} names a variable this module never defines, and"
+        " would reach mismatch() with nothing to substitute it"
+    )
+
+
+def test_a_loops_own_call_is_a_candidate_pair_across_its_done() -> None:
+    r"""`_fenced_pairs` used to read a `gh api` line only at column zero.
+
+    Shaped as btclib-org/.github#1273 measured it in `btclib-node`'s own
+    copy: a `for` loop's own call, indented by the loop body and broken
+    across two lines by a trailing `\\`, with its answer given after the
+    loop's `done` rather than immediately after the call. Neither the
+    indentation nor the intervening `done` -- itself neither blank nor a
+    comment nor a new command -- may hide the reading, or corrupt the
+    command with `done`'s own text, the way the older "not blank, not a
+    comment, not a new command" continuation rule did.
+    """
+    section = (
+        "## Heading\n\n"
+        "```shell\n"
+        "for e in a b; do\n"
+        '  gh api "repos/btclib-org/x/$e" \\\n'
+        "    --jq 'if type==\"array\" then length else .total_count end'\n"
+        "done\n"
+        "# 0, once per endpoint\n"
+        "```\n"
+    )
+    found = readings(section)
+    command = (
+        '  gh api "repos/btclib-org/x/$e" \\\n'
+        "    --jq 'if type==\"array\" then length else .total_count end'"
+    )
+    assert found == [(command, "0, once per endpoint", False)], (
+        f"the loop's own call named no reading, or a corrupted one: {found!r}"
+    )
+    assert own(command, "x") is True, (
+        f"{command!r} reads as no repository's own: the loop's own"
+        " indentation is captured ahead of the endpoint"
+    )
