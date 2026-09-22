@@ -9089,3 +9089,9 @@ nothing red follows from the copies disagreeing.
 - **A command opening `-i` or `--jq` no longer reads its own flag as
   the endpoint** (closes #1253, closes #1256): a quoted `--jq` filter's
   own spaces are read as one run rather than stopping short.
+
+### The `BACKLOG` row for 1199 comes out, the last two trees having converged
+
+- **Every repository now writes section 4's local `pyroma` hook**
+  (closes #1199): `btclib` landed as `f8f9ec4b` and `btclib-node` as
+  `70ef9c44`, so the row excuses nothing and `BACKLOG` is empty again.
