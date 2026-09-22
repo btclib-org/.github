@@ -83,7 +83,7 @@ pytestmark = pytest.mark.integration
 SETTINGS = "REPOSITORY.md"
 """The root file section 2's table owes every tier."""
 
-CONVERGED = frozenset({SELF, "btclib"})
+CONVERGED = frozenset({SELF, "btclib", "portanode"})
 """Which trees' copies mark their observations, and so are read back.
 
 A tree not here has not adopted section 11's marking convention, and a
