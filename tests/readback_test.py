@@ -206,14 +206,49 @@ def readings(text: str) -> list[tuple[str, str, bool]]:
     return out
 
 
+_FLAG_VALUE = r"(?:'[^']*'|\"[^\"]*\"|\S+)"
+"""One flag's own argument: single- or double-quoted, or a bare token.
+
+A quoted argument may carry spaces of its own -- `--jq '{name, type}'`
+-- which a bare `\\S+` stops at, reading only the part before the first
+one.
+"""
+
+ENDPOINT = re.compile(rf"gh api (?:-i |-X {_FLAG_VALUE} |--jq {_FLAG_VALUE} )*(\S+)")
+"""The path past `gh api`, the verb and any flag ahead of it skipped.
+
+`-i` carries no value of its own; `-X` and `--jq` each take the token
+right after them. btclib-org/.github#1253 and btclib-org/.github#1256
+are where a command opening with `-i` or `--jq` first read as though the
+flag itself were the endpoint, `own()` then answering `False` for a
+reading that was this repository's own all along.
+
+A flag this pattern does not name -- `-F`, `-H`, `--verbose` -- is left
+unskipped on purpose: none of them opens a candidate pair
+`_fenced_pairs` extracts today (measured across every copy at
+btclib-org/.github#1256's own census), and skipping a flag this module
+has not confirmed the shape of risks reading its value, or the flag
+after it, as the endpoint instead.
+"""
+
+
 def endpoint(command: str) -> str | None:
-    """Read the path a `gh api` command asks, after the verb and any flag.
+    r"""Read the path a `gh api` command asks, after the verb and any flags.
+
+    A command `_fenced_pairs` joined from more than one line carries the
+    shell's own `\` line-continuation, and whatever indentation sits
+    either side of it, where the break fell; that whole run collapses to
+    one space first, so a flag's quoted argument spanning the break --
+    `--jq '...' \` then the path on the next line -- reads as one flag
+    and its value rather than leaving a second space `ENDPOINT` does not
+    expect between them.
 
     :param command: the command, as `readings` extracted it.
     :returns: the endpoint, or ``None`` where the command does not open
         `gh api`.
     """
-    match = re.match(r"gh api (?:-X \S+ )?(\S+)", command)
+    joined = re.sub(r"\s*\\\n\s*", " ", command)
+    match = ENDPOINT.match(joined)
     return match.group(1) if match else None
 
 
@@ -401,4 +436,56 @@ def test_the_settings_file_reads_its_settings_back(
     assert not failures, (
         f"{SETTINGS} quotes an answer that no longer holds: {failures}; "
         + by_hand(repository, "see REPOSITORY.md's own commands")
+    )
+
+
+def test_a_status_line_behind_dash_i_would_reach_the_comparison() -> None:
+    """The cell above is green on a `-i` reading that drifted, however it reads.
+
+    `own()` is what the cell above gates a reading on before `mismatch`
+    ever runs it; asked of a command shaped exactly as
+    btclib-org/.github#1253 measured it in `portanode`'s own copy -- `-i`
+    ahead of the path -- it has to answer `True`, or a drift behind that
+    shape would stay unread rather than reported.
+    """
+    command = "gh api -i repos/btclib-org/.github/pages 2>/dev/null | head -1"
+    assert own(command, SELF) is True, (
+        f"{command!r} reads as another repository's, or as no repository's"
+        " at all: the flag ahead of the path is captured as the endpoint"
+    )
+
+
+def test_a_filter_behind_dash_dash_jq_would_reach_the_comparison() -> None:
+    """The cell above is green on a `--jq` drift too, however it reads.
+
+    Shaped as btclib-org/.github#1256 measured it in `btclib-secp256k1`'s
+    own copy -- `--jq` and its quoted filter ahead of the path, the line
+    broken where the file itself breaks it. `own()` has to answer `True`
+    for the same reason as the cell above.
+    """
+    command = (
+        "gh api --jq '.branch_policies[] | {name, type}' \\\n"
+        "  repos/btclib-org/.github/environments/pypi/deployment-branch-policies"
+    )
+    assert own(command, SELF) is True, (
+        f"{command!r} reads as another repository's, or as no repository's"
+        " at all: the flag and its quoted value ahead of the path are"
+        " captured as the endpoint, or the match fails at the line break"
+    )
+
+
+def test_an_unrecognized_flag_does_not_swallow_the_endpoint() -> None:
+    """`endpoint()` skips a flag it names, not any token spelled like one.
+
+    `-H`, ordinary `gh api` usage for a request header, is not among the
+    flags this module recognizes, because no candidate pair carries it
+    ahead of a path today. Skipping it anyway -- or skipping its value
+    along with it -- would risk reading a future flag's argument, or the
+    flag after it, as the endpoint instead of the path.
+    """
+    command = "gh api -H 'Accept: application/vnd.github+json' repos/btclib-org/.github"
+    assert endpoint(command) == "-H", (
+        f"{command!r} reads past an unrecognized flag: this module would"
+        " swallow a flag it has not confirmed the shape of, rather than"
+        " stopping the match at it"
     )

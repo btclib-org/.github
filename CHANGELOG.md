@@ -9083,3 +9083,9 @@ nothing red follows from the copies disagreeing.
 - **`btclib-benchmarks` no longer excuses it either** (issue #1199): its
   own port landed as `6440b42d`, leaving `btclib` and `btclib-node` as
   the two trees the row still names.
+
+### `readback_test.py`'s `endpoint()` skips a flag ahead of the path
+
+- **A command opening `-i` or `--jq` no longer reads its own flag as
+  the endpoint** (closes #1253, closes #1256): a quoted `--jq` filter's
+  own spaces are read as one run rather than stopping short.
