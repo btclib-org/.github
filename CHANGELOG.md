@@ -9107,3 +9107,9 @@ nothing red follows from the copies disagreeing.
 - **A fenced ```` ```shell ```` block nested under a bullet no longer
   reads as absent** (closes #1257): its own leading whitespace is
   matched and stripped before the block is read.
+
+### Section 11 says a recorded answer is the command's whole output
+
+- **An elision, a gloss and a line that wraps without a `\` would each
+  redden a cell with nothing drifted** (issue #1262) (issue #1263)
+  (issue #1264) (issue #1265): a shared comment will, once #1233 lands.
