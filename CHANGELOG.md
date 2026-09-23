@@ -9229,3 +9229,8 @@ nothing red follows from the copies disagreeing.
 - **The module docstring drops the `portanode` citation and says
   `duplicate_closes` reads the heading-less entry too** (closes #1297): its
   fourth-check paragraph put it outside all three, wrong for the second.
+
+### The `BACKLOG` rows for 1294 come out, the last tree having converged
+
+- **Every sibling declares the shebang-tolerant `notice-rgx`**
+  (closes #1294): the cells pass on their merits, without the rows.
