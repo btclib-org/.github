@@ -213,8 +213,7 @@ own, an `N` being a defect to fix rather than to explain.
 The call above answers for whichever commit is at the tip today, so it
 is a fact about a changing world rather than a setting: the next merge
 changes what it answers without anything here having decided
-differently, and [section 11's readback][s11] is not asked of it for
-that reason. Read at 2026-09-21T06:11:42Z.
+differently. Read at 2026-09-21T06:11:42Z.
 
 ## Merge methods
 
@@ -384,8 +383,8 @@ gh api orgs/btclib-org --jq .plan.name
 ```
 
 The plan is a fact about a changing world rather than a setting this
-repository decides, an upgrade being the organization's own choice and
-not a drift this file's readback catches. Read at 2026-09-21T06:11:42Z.
+repository decides, an upgrade being the organization's own choice.
+Read at 2026-09-21T06:11:42Z.
 
 [GitHub's own table](https://docs.github.com/en/actions/reference/limits)
 turns that answer into a number, twenty concurrent jobs on the free plan,
