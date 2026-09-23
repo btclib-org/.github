@@ -9177,3 +9177,8 @@ nothing red follows from the copies disagreeing.
 - **The argument behind a rule shrinks to a sentence** (issue #1075):
   what the standard asks of a repository has not moved, and its tables,
   its commands and its headings stand as they were.
+
+### Sections 9 and 10 state each rule and its reason, and no more
+
+- **The argument behind a rule comes down to a sentence** (issue #1075):
+  what the two sections require has not moved.
