@@ -9171,3 +9171,9 @@ nothing red follows from the copies disagreeing.
 
 - **The argument behind a rule shrinks to a sentence** (issue #1075):
   what the rules are has not moved, and what reads each one still does.
+
+### The preamble and sections 1 and 2 state a rule and its one reason
+
+- **The argument behind a rule shrinks to a sentence** (issue #1075):
+  what the standard asks of a repository has not moved, and its tables,
+  its commands and its headings stand as they were.
