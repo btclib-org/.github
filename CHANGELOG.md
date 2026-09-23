@@ -9182,3 +9182,9 @@ nothing red follows from the copies disagreeing.
 
 - **The argument behind a rule comes down to a sentence** (issue #1075):
   what the two sections require has not moved.
+
+### Sections 5 to 8 say each rule and its reason, and no more
+
+- **The argument behind a rule shrinks to a sentence** (issue #1075):
+  what the four sections require has not moved, and every fenced block
+  they give is unchanged.

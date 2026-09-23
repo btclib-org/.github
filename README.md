@@ -1020,82 +1020,55 @@ feature — without turning on everything ruff is still designing. A
 preview rule then runs only where `extend-select` names it exactly.
 
 - **`select = ["ALL"]`.** Every rule family ruff ships, present ones and
-  a release's future ones alike, rather than a hand-picked list: a list
-  is a thing that rots, since nothing forces a second edit here the day
-  ruff ships a family nobody has looked at yet. `ALL` takes a new family
-  in on the pull request that bumps ruff's own pinned rev instead, which
-  is the day somebody is already looking at what changed. The rejected
-  alternative is the hand-picked list this key held before: each family
-  named and commented here, and each later addition remembered by
-  whoever next opened this file rather than arriving on its own.
+  a release's future ones alike, rather than a hand-picked list that
+  rots: `ALL` takes a new family in on the pull request that bumps
+  ruff's own pinned rev, which is the day somebody is already looking at
+  what changed.
 - **`ignore` holds three kinds of entry, told apart by what its comment
   argues.** A rule the formatter conflicts with, cited from ruff's own
-  `docs/formatter.md` and not argued here, since the list is the
-  vendor's and does not change with this tree. A rule this tree declines
-  on its own merits, argued in the comment beside it —
-  `undocumented-magic-method` and `undocumented-public-init` below are
-  two, and `TD`'s own rules further down are a third. And a finding that
-  is real and is simply not in `ignore` at all: fixed, or answered with a
-  `# noqa` and a reason at its own site, which `RUF100` retires the day
-  nothing needs it.
+  `docs/formatter.md` and not argued here, the list being the vendor's;
+  a rule this tree declines on its own merits, argued in the comment
+  beside it; and a finding that is real and is not in `ignore` at all,
+  fixed or answered with a `# noqa` and a reason at its own site, which
+  `RUF100` retires the day nothing needs it.
 - **`ignore` names rules, never codes.** The reason sits in the comment
   and the rule sits in the entry, with nothing to look up between them.
 - **`FIX` runs and `TD` is in `ignore`.** Unfinished work belongs in an
   issue, where it can be searched, assigned and closed; a marker in a
   comment is a backlog nobody queries, sitting beside code that reads as
-  finished. `FIX` refuses four of them — `TODO`, `FIXME`, `XXX` and
-  `HACK` — wherever one opens a comment, on its own line or after code.
-  `TD` disciplines the format of the first three and is not even a
-  superset of what `FIX` refuses — `HACK` draws no `TD` diagnostic at
-  all — and where the two do overlap they disagree rather than agree:
-  `TD001` steers a refused `FIXME` toward `TODO`, which `FIX002` refuses
-  just as hard. A repository that finishes what it starts keeps the
-  refusal, and `TD`'s own rules in `ignore` are where `ALL` is told so.
-  The rejected alternative is ignoring `FIX` and keeping `TD003`
-  instead, so a marker stands provided it carries a link to an issue —
-  the mainstream choice, and a real argument in an organization whose
-  mechanism is the issue tracker. Rejected because `TD003` checks that
-  the link exists and never that the issue behind it is still open, so
-  a marker outlives the issue it cites in silence, and section 15's
-  audit does not enter a comment inside a `.py` file to catch it.
-  What `FIX` does not read bounds what selecting it buys: a marker
-  inside a docstring or a string literal is invisible to it, as is a
-  mid-sentence mention that opens no comment, and a `TODO.md` at the
-  root is the same defect in a file ruff never opens.
-- **Docstrings are gated**: the `D` family with `convention = "pep257"`, every
-  public module, class, method and function carrying one. `__init__` and the
-  magic methods are the two exemptions pep257 itself does not ask for, and the
-  `ignore` entry is the whole of each: the convention leaves
-  `undocumented-public-init` and `undocumented-magic-method` enabled, so a tree
-  naming neither is asked for a docstring at every such site. A magic method is
-  documented by the data model it implements, so a docstring on `__repr__`
-  saying it returns `repr(self)` is the restatement section 9's *One fact in one
-  place* argues against. `undocumented-public-init` is declined for a different
-  reason: the rule checks that a docstring exists, never that it says anything,
-  and the cheapest line that satisfies it restates what the constructor's own
-  annotations and strict mypy already carry. PEP 257 places the constructor's
-  documentation in `__init__`'s own docstring, so declining the rule declines
-  that presence check, not the documentation — an argument's meaning, a raised
-  exception, an invariant the constructor establishes still has nowhere else to
-  go. Both entries are the default, and declining one is not drift: the rule is
-  then answered with a docstring, or with a `# noqa` that `RUF100` retires as
-  soon as one arrives. Requiring them of every tree was the alternative,
-  rejected because it asks a tree to drop a gate it passes. The convention is
-  also what settles the pairs ruff calls incompatible, so `ignore` does not name
-  the half it disables: beside a declared convention that entry changes no
-  diagnostic and silences no warning. The warning ruff prints over such a pair
-  appears only where nothing has settled it.
+  finished. `FIX` refuses `TODO`, `FIXME`, `XXX` and `HACK` wherever one
+  opens a comment, on its own line or after code, where `TD` disciplines
+  the format of the first three and disagrees with `FIX` where the two
+  meet: `TD001` steers a refused `FIXME` toward `TODO`, which `FIX002`
+  refuses just as hard. The rejected alternative keeps `TD003`, so that a
+  marker
+  stands provided it links an issue — rejected because `TD003` checks
+  that the link exists and never that the issue behind it is still open.
+  A marker inside a docstring or a string literal, and a `TODO.md` at
+  the root, are outside what `FIX` reads.
+- **Docstrings are gated**: the `D` family with `convention = "pep257"`,
+  every public module, class, method and function carrying one.
+  `undocumented-magic-method` and `undocumented-public-init` are the two
+  `ignore` entries, the convention leaving both enabled: a magic method
+  is documented by the data model it implements, so a docstring on
+  `__repr__` saying it returns `repr(self)` is the restatement section
+  9's *One fact in one place* argues against, and the second rule checks
+  that a docstring exists rather than that it says anything, PEP 257
+  putting the constructor's documentation in `__init__`'s own docstring
+  either way. Both entries are the default, and declining one is not
+  drift: the rule is then answered with a docstring, or with a `# noqa`
+  that `RUF100` retires as soon as one arrives. The convention also
+  settles the pairs ruff calls incompatible, so `ignore` does not name
+  the half it disables.
 - **Code and prose have separate widths, and both are enforced**:
   `ruff-format` reflows code to 88, and `[tool.ruff.lint.pycodestyle]
-  max-doc-length = 80` holds the docstrings and whole-line comments — prose
-  the formatter never reflows — to the width markdown is already held to. A
-  comment ending in a URL is exempt where everything ahead of the URL fits
-  the width, and one following code on its line is outside the key — *a
-  Python comment following code on its line is outside the number*, section
-  9; a tree keeping `line-too-long` reports such a line at `line-length`,
-  88. `W505` is the rule that reads the
-  key and is inert without it, ruff having no default doc length: a tree
-  naming no `max-doc-length` states a width and enforces none, `select` aside.
+  max-doc-length = 80` holds the docstrings and whole-line comments —
+  prose the formatter never reflows — to the width markdown is already
+  held to. A comment ending in a URL is exempt where everything ahead of
+  the URL fits the width, and one following code on its line is outside
+  the key — *a Python comment following code on its line is outside the
+  number*, section 9. `W505` is the rule that reads the key and is inert
+  without it, ruff having no default doc length.
 - **`max-complexity = 10`**, ruff's default, with a `# noqa` and a reason
   at each site over it rather than a global bound at the tree's worst.
   `RUF100` then fails the noqa as unused the moment a refactor brings the
@@ -1109,13 +1082,11 @@ preview rule then runs only where `extend-select` names it exactly.
   so checks nothing under `--all-files`.
 
     **ruff reads the regex and never the file**, so the transcription is
-    a copy that can drift from its source with every gate green: `CPY`
-    checks the headers against the regex, and nothing in the tree checks
-    the regex against `COPYRIGHT`. `tests/copyright_test.py` of this
-    repository does, deriving the regex from each tree's `COPYRIGHT` and
-    refusing one that is not it byte for byte — one spelling rather than
-    any regex that matches, so that the copies are comparable and a
-    drifted one names its own difference.
+    a copy that can drift from its source with every gate green.
+    `tests/copyright_test.py` of this repository derives the regex from
+    each tree's `COPYRIGHT` and refuses one that is not it byte for byte,
+    so that the copies are comparable and a drifted one names its own
+    difference.
 - **`per-file-ignores`** covers `__init__.py` re-exports and the test
   tree's `assert`, non-cryptographic `random` and the pytest-style rules
   a test legitimately trips. The `D` rules are **not** among them: a
@@ -1127,9 +1098,8 @@ preview rule then runs only where `extend-select` names it exactly.
 returns**, and `strict = true` is what refuses one that does not. The
 obligation and the setting are one rule and not two: without it an
 unannotated `def` is not the absence of a claim but the widest one —
-mypy takes every parameter and the return as `Any`, leaves the body
-unchecked, and hands each caller back `Any` — so a bare signature
-loosens the code around it and not only itself.
+mypy takes every parameter and the return as `Any` — so a bare
+signature loosens the code around it and not only itself.
 
 ```toml
 [tool.mypy]
@@ -1154,48 +1124,36 @@ enable_error_code = [
 ```
 
 **The setting is not narrowed.** Not a lower one while the annotations
-are caught up on, and not an override switching a strict flag off for
-the directory that fails it: either leaves `[tool.mypy]` stating a
-strictness the tree does not have, which is the one thing a reader of
-that table takes from it. Nor is the same bundle enumerated flag by
-flag in its place: that table is honest — it states exactly the severity
-the tree has, rather than overstating it — and it is still not this
-rule, because what is required is the strictness and a trajectory
-toward it is not the strictness. `strict = true` tells a reader that
-every function in the tree declares its types; a subset of the flags
-tells them which checks it passes, and leaves what is annotated to be
-read tree by tree. Where a single line genuinely cannot be typed the
-answer is at that line and never in this table, the
-`# type: ignore[code]` below being it.
+are caught up on, not an override switching a strict flag off for the
+directory that fails it, and not the same bundle enumerated flag by
+flag: the first two leave `[tool.mypy]` stating a strictness the tree
+does not have, and the third states which checks it passes where what is
+required is that every function in it declares its types. Where a single
+line genuinely cannot be typed the answer is at that line and never in
+this table: its own `# type: ignore[code]`, relaxing a check and never
+the annotation itself, rather than a second global exemption.
 
-**Configured is not enforced, and this section asks for both.** The
-rule is met where the lint gate runs mypy over the tree, so a
-`[tool.mypy]` no hook reads sets a severity rather than applying one —
-a repository can hold every line above and have nothing that has ever
-type checked it. Which hook runs it, and the shapes it comes in, is
-section 4's, and this points there rather than restating them.
+**Configured is not enforced, and this section asks for both.** The rule
+is met where the lint gate runs mypy over the tree, so a `[tool.mypy]`
+no hook reads sets a severity rather than applying one. Which hook runs
+it, and the shapes it comes in, is section 4's.
 
 `strict = true` is the floor, not the ceiling, and the codes above are
-the ceiling: **the same list in every tree**, not a survey each one
-runs for itself, because a code that finds nothing today is a ratchet —
-what it catches is the line written after the survey, and a tree that
-skipped it finds out later than the others. Among them
-`ignore-without-code`, so a `type: ignore` names the rule it silences and
-a blanket one cannot creep in; `deprecated`, which is the early warning
-`filterwarnings = ["error"]` buys at runtime; and `redundant-expr`,
-`possibly-undefined` and `warn_unreachable`, each of which finds the
-runtime guard whose static type promises more than an untrusted source
-can. A code mypy enables on its own under the version the lock pins is
-not in the list, and a key already at the value the block would give it
-is not in the block: naming either states a check it does not buy.
-`mypy --help` writes the flag that changes a default and gives the
-default direction as its inverse, so a setting reachable only as an
-inverse — `--show-error-codes`, under `--hide-error-codes` — is one
-mypy has already.
-
-A site that needs any of this relaxed — a check, never the annotation
-itself — carries its own `# type: ignore[code]`, never a second global
-exemption.
+the ceiling: **the same list in every tree**, not a survey each one runs
+for itself, because a code that finds nothing today is a ratchet — what
+it catches is the line written after the survey. Among them
+`ignore-without-code`, so a `type: ignore` names the rule it silences;
+`deprecated`, the early warning `filterwarnings = ["error"]` buys at
+runtime; and `redundant-expr`, `possibly-undefined` and
+`warn_unreachable`, which find the runtime guard whose static type
+promises more than an untrusted source can. A code mypy enables on its
+own under the version the lock pins is not in the list, and a key
+already at the value the block would give it is not in the block:
+naming either states a check it does not buy — `mypy --help` writes the
+flag that changes a default and gives the default direction as its
+inverse, so a setting reachable only as an inverse
+(`--show-error-codes`, under `--hide-error-codes`) is one mypy has
+already.
 
 **Scope is the package, the tests and `.github/scripts`.** A test whose
 subject is a script under `.github/scripts` loads it by path, that
@@ -1204,14 +1162,11 @@ before it runs whether or not one was written for it.
 
 **`docs/source/conf.py` is outside it.** Sphinx is the `docs` group's
 and no shape of section 4's mypy hook installs it, so what that file
-imports is unresolved in the hook's environment, which strict mode
-reports rather than reading as `Any`; and `python_version` is one value
-for the whole table — mypy takes no per-module version — so the file
-would be checked at the floor the library declares and never runs on.
-Every documentation build executes `conf.py`, so a defect in it reaches
-the published site with the gate green: a repository that brings the
-file into scope answers the version question first, and that answer is
-its own.
+imports is unresolved in the hook's environment; and `python_version` is
+one value for the whole table, so the file would be checked at the floor
+the library declares and never runs on. Every documentation build
+executes `conf.py`, so a repository that brings the file into scope
+answers the version question first, and that answer is its own.
 
 One run, at the floor. A second pass at the newest interpreter would
 check the same code where no source is conditional on the version.
@@ -1223,13 +1178,11 @@ check the same code where no source is conditional on the version.
 - `tests/` mirrors the package, directory for directory — or
   `tests/unit/` does, where the suite splits by kind under *Functional
   tests* below.
-- **`*_test.py`**, enforced by `name-tests-test` at its default. What
-  the hook is for is the file named neither way: pytest's `python_files`
-  collects `test_*.py` and `*_test.py` alike, and a file named outside
-  both is not a red test but no test, nothing but the report's count
-  moving. Between the two, one is the organization's, for
-  `local-link-prefix`'s reason — one shape is what lets a check
-  downstream key on one pattern — and the hook's default is which.
+- **`*_test.py`**, enforced by `name-tests-test` at its default.
+  pytest's `python_files` collects `test_*.py` and `*_test.py` alike, so
+  a file named outside both is not a red test but no test; one shape is
+  what lets a check downstream key on one pattern, for
+  `local-link-prefix`'s reason, and the hook's default is which.
 - Shared test code lives in a package `__init__.py` — vector loaders,
   helpers — never in a module whose name says "test" and holds none.
 - `tests/_data/` holds the data the suite reads, under the rule below.
@@ -1248,51 +1201,36 @@ markers = [...]
 ```
 
 - **`--strict-config` and `--strict-markers`**: a typo in this table, or
-  a marker nobody registered, is an error. That is what turns a
-  misspelled `skipif` into a failure instead of a test that silently
-  stops skipping.
+  a marker nobody registered, is an error rather than a misspelled
+  `skipif` that silently stops skipping.
 - **`filterwarnings = ["error"]`, with no blanket ignore.** A deprecation
-  warning is the early form of a break; on a spread from the floor to the
-  newest interpreter there is time to act on it only if it is not silent.
-  An ignore added here names the warning and says what would let it go.
+  warning is the early form of a break, and an ignore added here names
+  the warning and says what would let it go.
 - **`xfail_strict`**: a test expected to fail that passes is a fixed bug
   still marked broken.
 - **`--cov` in addopts, and never as the last token.** `--cov` takes an
   optional value, so last it swallows the first path the command line
-  gives — a whole-suite run measuring nothing, reporting zero, against a
-  threshold of 100.
+  gives — a run measuring nothing against a threshold of 100.
 - **`-n auto --dist worksteal`** where the suite is long enough for the
   pool to pay, measured on CI rather than on a laptop; `worksteal` where
-  the cost is lopsided, since `load` hands the queue out in chunks and a
-  worker that draws several slow cases finishes long after the others. A
-  short suite removes the flag, and the criterion is the length of a CI
-  cell rather than the count of its tests.
+  the cost is lopsided, `load` handing the queue out in chunks.
 - **`pytest-randomly` is installed and needs no flag.** It shuffles and
   prints the seed, which guards the one thing a green suite cannot tell
   you about itself: whether a test passes because of what ran before it.
   `-p no:randomly` puts the file order back when a failure has to be
-  reproduced. A suite that declines the shuffle declares it in
-  `tests/README.md`, with the reason, weighed against what the plugin
-  catches rather than against what it costs — and an ordering plugin is
-  not that reason by itself: a sequence two tests need can live inside
-  one test, where a plugin-imposed order makes the dependence invisible
-  at the call site.
+  reproduced, and a suite declining the shuffle declares it in
+  `tests/README.md`, with a reason weighed against what the plugin
+  catches — an order two tests need is not one, since the sequence can
+  live inside one test.
 - **A suite that waits on anything outside its own process carries a
   measured per-test timeout.** A hang is the one failure a suite cannot
-  report on itself: the run stops rather than fails, and what a reader
-  gets is a cancelled job at the workflow's `timeout-minutes`, naming
-  the job rather than the test — that bound is a wedged runner's, and a
-  per-test bound is what names a wedged test. So a suite that starts a
-  process, opens a socket or waits on a deadline sets pytest-timeout's
-  `timeout`, the bound measured against its own slowest test on a loaded
-  machine and the measurement written beside the number, the number
-  itself never being portable: what travels is the rule and the way it
-  was measured. A suite of pure functions does not owe one — a limit
-  nothing approaches costs a plugin and a number to keep true, and buys
-  nothing.
+  report on itself: the run stops rather than fails, and the workflow's
+  `timeout-minutes` names the job rather than the test. Such a suite
+  sets pytest-timeout's `timeout`, measured against its own slowest test
+  on a loaded machine and the measurement written beside the number; a
+  suite of pure functions does not owe one.
 - **No `slow` marker unless a measurement earns one.** A plain run is the
-  run that has looked at everything, and the file a `-m "not slow"` loop
-  would skip is usually the one worth keeping.
+  run that has looked at everything.
 - **The suite writes nothing**, and runs from a read-only checkout and
   from an unpacked sdist.
 
@@ -1307,47 +1245,33 @@ Regeneration is opt-in and the failure message names the command:
 BTCLIB_REGENERATE_GOLDEN=1 uv run pytest
 ```
 
-Where the comparison is a test, this is a golden file: a module compares
-`to_dict()` against the json committed beside it. Where it is a page or
-a document, it is a hook with a `--check` flag instead — and that hook is
-worth writing `language: python`, stdlib-only and `always_run: true`, so
-it runs on pre-commit.ci as well, where `uv` is absent. `always_run`
-rather than a `files:` pattern, because an artifact goes stale from an
-edit to any of its inputs, and a pattern narrow enough to name them all
-is a pattern that stops matching one day.
+Where the comparison is a test, this is a golden file. Where it is a
+page or a document, it is a hook with a `--check` flag instead, written
+`language: python`, stdlib-only and `always_run: true`, so it runs on
+pre-commit.ci as well, where `uv` is absent — `always_run` rather than a
+`files:` pattern, an artifact going stale from an edit to any input.
 
 ### Test data is vendored, never fetched
 
-Every file a test reads is committed beside it. A suite that fetches its
-input has a verdict that depends on somebody else's uptime, and one that
-cannot run offline cannot run in a sandbox either — so the data is in the
-tree.
+Every file a test reads is committed beside it, a suite that fetches its
+input having a verdict that depends on somebody else's uptime.
 
 **Two kinds of file, and only one of them can be pinned.** A *vendored
-upstream file* is a copy of a file that exists in somebody else's
-repository: a commit and a git blob SHA-1 identify the original, so
-whether the copy still matches it is a question with an answer.
-*Recorded or constructed data* is written from a project's source rather
-than copied from it — a reply built the way the code that sends it builds
-one, values transcribed from a specification that publishes no file — so
-there is no upstream blob and nothing for a pin to name, and the entry
+upstream file* is a copy of a file in somebody else's repository, and a
+commit and a git blob SHA-1 identify the original. *Recorded or
+constructed data* is written from a project's source rather than copied
+from it, so there is no upstream blob for a pin to name and the entry
 says instead which source it was written from and how a reader
-reproduces it. A rule conflating the two asks a repository for a pin that
-cannot exist, or lets a copy go unchecked among files that cannot be.
-What the tree derives from its own code is neither, and the subsection
-above has it.
+reproduces it. What the tree derives from its own code is neither, and
+the subsection above has it.
 
-**A data directory beside whatever reads it**, which is `tests/_data/`
-where the suite is the only reader and a directory beside the package or
-the script where it is not. The underscore is `tests/_data/`'s alone. It
-says the directory is not a package — it holds no `__init__.py`, nothing
-imports it, and the way in is a path built from `__file__`, the mark the
-language already puts on a private module, applied where it is literally
-true — and that reason does its work inside `tests/`, where a sibling of
-`tests/__init__.py` would otherwise read as importable. At the repository
-root nothing is a package, so the mark buys nothing there and the
-directory takes the name that says what it holds, the way in built from
-`__file__` either way.
+**A data directory beside whatever reads it**, which is `tests/_data/` where the
+suite is the only reader and a directory beside the package or the script where
+it is not. The underscore is `tests/_data/`'s alone, saying the directory is not
+a package where a sibling of `tests/__init__.py` would otherwise read as
+importable; at the root nothing is a package, so the directory takes the name
+that says what it holds, and the way in is a path built from `__file__` either
+way.
 
 **The pins are one `README.md` in that directory**, covering every
 `_data` directory the suite reads rather than one file per directory,
@@ -1362,19 +1286,15 @@ pulled  <the date this content entered this tree>
 behind  <revisions of that path since the pin>
 ```
 
-`blob` is the git blob SHA-1 rather than a digest of the bytes, because
-it is what a tree entry already carries: nothing has to be downloaded to
-compare against, `git hash-object` reproduces it locally, and a digest
-answers whether the copy changed here and never whether upstream moved.
-`pulled` is the date the current content entered this tree, which
-`git log --follow --diff-filter=A` answers and nobody's memory does;
-`behind` counts upstream revisions of the path since the pin, which is
-staleness rather than a defect, taking a newer revision being a decision.
-Under the block a verdict says how the copy stands to that blob —
-identical, identical but for what a fixer in the gate rewrote, or
-transcribed where the upstream is prose and there is no blob to compare
-at all. A fixer that would rewrite those bytes for nothing is excluded
-from the directory, a reformat voiding the pin and the verdict together.
+`blob` is the git blob SHA-1 a tree entry already carries and
+`git hash-object` reproduces locally, where a digest of the bytes says
+whether the copy changed here and never whether upstream moved; `pulled`
+is what `git log --follow --diff-filter=A` answers, and `behind` is
+staleness rather than a defect. Under the
+block a verdict says how the copy stands to that blob — identical,
+identical but for what a fixer in the gate rewrote, or transcribed where
+the upstream is prose. A fixer that would rewrite those bytes for
+nothing is excluded from the directory.
 
 **A repository with vendored upstream files runs `vendored-vectors`**,
 which re-checks every pin on section 10's schedule and opens an issue on
@@ -1385,78 +1305,55 @@ as an omission.
 A vector the tree fails is vendored anyway and marked `xfail`, never left
 out — an absent vector hides the defect it would have shown, and
 `xfail_strict` turns the marker red the day the defect is fixed. A
-licence travels with what it covers: where upstream ships one beside the
-file, the copy takes it too, under a name that cannot be read as
+licence travels with what it covers, under a name that cannot be read as
 licensing the directory around it.
 
 ### A capability the platform may refuse is asked for inside a guard
 
 The call that asks for it sits in a `try`, and the refusal becomes a
 `pytest.skip` naming what refused, which this section's `-ra` reports.
-Creating a symlink is the case the family carries: on Windows an account
-without `SeCreateSymbolicLinkPrivilege` gets an `OSError` from
-`os.symlink` rather than a link, which CPython records in
-`Lib/tarfile.py` where it names the exceptions that call may raise. What
-the guard is for is a contributor's own machine and not a runner — a
-runner holding the privilege runs the case either way, so its green cell
-answers for the gate rather than for that machine. The case's `def`
-carries section 8's `pragma: no cover`, with the inline half that
-section asks for and the fuller reason in the comment over that line.
-The `except` is not the site: it and the `pytest.skip` under it are the
-lines that do not run wherever the capability is granted, so an
-exclusion there answers for the machine granting it and for no other —
-where the capability is refused, the skip ends the case where it
-stands, so the assertions below it do not run and the floor that
-machine measures counts them missed. What the exclusion costs is that
-dead code inside the case stops being flagged, weighed against a floor
-the refusing machine could not otherwise reach. Leaving the call bare is
-the rejected alternative, on the ground that no runner has refused it;
-what it costs is a red suite on the one machine that cannot run the case
-at all, naming a privilege where the case is about something else.
+Creating a symlink is the case the family carries, an account without
+`SeCreateSymbolicLinkPrivilege` getting an `OSError` rather than a link:
+what the guard is for is a contributor's own machine rather than a
+runner, which holds the privilege and runs the case either way. The
+case's `def` carries section 8's `pragma: no cover`; the `except` and
+the `pytest.skip` under it are not the site, being the lines that do not
+run wherever the capability is granted. Leaving the call bare is the
+rejected alternative, and what it costs is a red suite on the one
+machine that cannot run the case.
 
 ### Integration tests
 
 `tests/integration/` is whatever needs something the repository does not
 ship — a node, a device, an emulator. Each test skips itself without the
 environment switch that asks for it, the switch is named in the skip
-message, and the directory is omitted from the coverage ratchet: a body
-that skips itself would be an uncovered line at every commit rather than
-a defect. What covers them is an unattended job, and that job fails if
-its tests skipped rather than ran.
+message, and the directory is omitted from the coverage ratchet, a body
+that skips itself otherwise being an uncovered line at every commit.
+What covers them is an unattended job, and that job fails if its tests
+skipped rather than ran.
 
 ### Functional tests
 
 `tests/functional/` sits beside `integration/` where a suite's subject
-is a running process rather than a module: a test that starts what the
-repository ships and drives it over a port has no module to sit beside,
-so the mirror has no place for it. The terms keep the concession from
-becoming a place to put anything. `tests/unit/` then carries the mirror,
-and nothing moves out of it to escape a rule; every directory is in
+is a running process rather than a module, a test that drives what the
+repository ships over a port having no module to sit beside.
+`tests/unit/` then carries the mirror; every directory is in
 `testpaths`, so a bare run is still the whole suite; and the split is
 declared in `tests/README.md` with its reason, this section's own rule
-for a convention only prose states. The two directories are told apart
-by what they need rather than by how long they take: `integration/`
-needs something the repository does not ship, `functional/` needs
-nothing it does not — it starts the thing itself. The rejected
-alternative is flattening, which moves the record of which tests hold a
-port into a marker or a naming convention, the same fact kept where a
-`testpaths` entry cannot see it.
+for a convention only prose states. The two are told apart by what they
+need rather than by how long they take: `integration/` needs something
+the repository does not ship, `functional/` needs nothing it does not.
+Flattening is the rejected alternative, moving the record of which tests
+hold a port where a `testpaths` entry cannot see it.
 
 ### Property tests
 
 A tree that has the property section 10's `fuzz` entry keys on owes a
 property layer, whether or not that section's record gives it the
-sentinel. The rejected alternative keys the layer on the record instead,
-and what it costs is a tree getting the cheap half only by being given
-the expensive one: a property layer is code in the suite that runs with
-everything else, where a fuzzer is a scheduled runner with a harness and
-a corpus. The two answer different questions and neither substitutes for
-the other: a property test answers *does this hold over the domain I
-described*, a fuzzer answers *what is in the domain I did not describe*
-— and the second presupposes the first, a fuzzer extending no described
-domain having nothing to contradict. hypothesis is the named shape, its
-profiles registered once in `tests/conftest.py` rather than repeated on
-every `@given`:
+sentinel: a property test answers *does this hold over the domain I
+described*, where a fuzzer answers *what is in the domain I did not
+describe*. hypothesis is the named shape, its profiles registered once
+in `tests/conftest.py` rather than repeated on every `@given`:
 
 ```python
 settings.register_profile("default", deadline=None, max_examples=500)
@@ -1464,17 +1361,14 @@ settings.register_profile("thorough", deadline=None, max_examples=2_000)
 settings.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "default"))
 ```
 
-`deadline=None`, because a per-example time limit is a timing flake on
-whichever cell of the matrix is slowest; the default example count set
-where a measurement of its cost on the whole suite says it is
-affordable; and the deep profile opt-in, because the search that finds a
-latent defect is not a search to run at every commit — and what it finds
-graduates into a vector test rather than staying in a search that may
-not repeat it. A tree that answers the property with hand-rolled
-properties over the same domain declares that in `tests/README.md`,
-where the reader meets it. A suite whose subject is a measurement rather
-than a parser does not owe the layer: generated inputs to a timing are
-the shape the tool is worst at.
+`deadline=None`, because a per-example time limit is a timing flake on whichever
+cell of the matrix is slowest; the default example count set where its cost on
+the whole suite is affordable; and the deep profile opt-in, the search that
+finds a latent defect not being one to run at every commit, and what it finds
+graduating into a vector test rather than staying in a search that may not
+repeat it. A tree that answers the property with hand-rolled properties over the
+same domain declares that in `tests/README.md`, and a suite whose subject is a
+measurement rather than a parser does not owe the layer at all.
 
 ### Convention tests
 
@@ -1486,13 +1380,10 @@ of them carries an exemption list that is allowed to grow:
 - **the public surface** — `__all__` is declared by every module and
   package at every depth, a module under a private name excepted as no
   part of that surface, and a census walks the tree rather than listing
-  it, so a new public name fails until it is exported or recorded. A
-  module declaring none answers `import *` with every name it does not
-  underscore, the ones it imported included, so what a caller may rely
-  on is settled by an import list. Where the package is published this
-  is not a bullet the clause below excuses: `py.typed` says the types
-  are supported, and which names are public is the other half of that
-  sentence;
+  it, so a new public name fails until it is exported or recorded. Where
+  the package is published this is not a bullet the clause below
+  excuses: `py.typed` says the types are supported, and which names are
+  public is the other half of that sentence;
 - **the copyright header** — `LICENSE`, `__copyright__` and the project
   metadata checked *together*, each having drifted alone before;
 - **the documentation** — every shipped module appears in the sphinx
@@ -1513,8 +1404,7 @@ of them carries an exemption list that is allowed to grow:
 - **the suite opens no socket** — every construction that could reach the
   network carries the argument that keeps it hermetic, driven by a walk
   over the call sites rather than a fixed list of them, so a
-  construction that forgot the argument is what turns red instead of a
-  test that passes offline and fails the day it is not.
+  construction that forgot the argument is what turns red.
 
 A new repository does not need all of these. It needs the ones its own
 conventions state in prose, and the rule that a convention worth stating
@@ -1524,48 +1414,35 @@ publishing an importable package has whether its prose states it or not.
 **Which of them a repository implements is declared, not inferred.**
 `tests/README.md` names each bullet above that this repository tests and
 the module that tests it, and a test in the same suite asserts that
-declaration is true — the rule one paragraph up, applied to this section
-itself, and it is forced rather than chosen. The suites do not agree on
-names and are right not to: a package of many modules wants a module per
-bullet, where a package that is one module folds several of these checks
-into the one file that is about it, which is the honest shape for it.
-And this section's own escape clause, wherever it reaches, makes an
-*absent* convention test indistinguishable from a convention the
-repository does not have. A declaration is what tells those two apart; a
-`grep` over `tests/` cannot, which is why the audit below reads the
-declarations.
+declaration is true. The suites do not agree on names and are right not
+to: a package of one module folds several of these checks into the one
+file that is about it. The escape clause above makes an *absent*
+convention test indistinguishable from a convention the repository does
+not have, and the declaration is what tells those two apart.
 
-**A convention test moves with the code it walks.** These tests walk a
-package: a module carved out into a repository of its own stops being
-walked the moment it leaves, and the receiving tree either takes the
-test or drops the convention with nothing red anywhere. So when code
-moves between repositories, the convention tests that covered it are
-part of what moves, and both `tests/README.md` files change in the same
-pair of pull requests. What must *not* be aligned is where those tests
-live or what they are called — only which conventions are tested, and
-that each tree says which.
+**A convention test moves with the code it walks.** A module carved out
+into a repository of its own stops being walked the moment it leaves,
+so the convention tests that covered moving code are part of what moves
+and both `tests/README.md` files change in the same pair of pull
+requests. What must *not* be aligned is where those tests live or what
+they are called — only which conventions are tested, and that each tree
+says which.
 
 ## 8. Coverage at 100%
 
 **A tree gates the code it holds against the failure that code has**, and
 the coverage floor below is one such gate rather than the whole rule. A
 package that installs is measured by that floor. Course material is
-measured by whether it still runs on the dependencies pinned today: what
-breaks a demonstration script is a release underneath it renaming what it
-imports, and a floor over code nothing executes measures nothing. A suite
-whose subject is outside its own tree is itself the gate rather than
-something with one — `.github`'s suite runs against the other
-repositories, so a floor here would be the instrument measuring itself.
+measured by whether it still runs on the dependencies pinned today, a
+floor over code nothing executes measuring nothing. A suite whose
+subject is outside its own tree is itself the gate rather than something
+with one — `.github`'s suite runs against the other repositories, so a
+floor here would be the instrument measuring itself.
 
 Which of them applies is read off what the tree installs. A tree that
-installs no package owes no floor, that rule having no subject there,
-which is section 2's sentence for a rule whose subject a tree does not
-hold; what it owes instead is the gate its own material's failure asks
-for, in the workflow a reader already goes to for what runs that
-material. That is a different axis from section 2's rule that the
-package directory, `tests/` and `docs/source/` name a package as their
-subject: that one says which directories a tree owes, this one what
-gates the code it does hold.
+installs no package owes no floor, that rule having no subject there;
+what it owes instead is the gate its own material's failure asks for, in
+the workflow a reader already goes to for what runs that material.
 
 ```toml
 [tool.coverage.run]
@@ -1583,70 +1460,49 @@ fail_under = 100.0
 
 - **The tests are measured too.** A test nothing runs is dead code with
   the authority of a test.
-- **`branch = true`.** The interesting miss is a wrapper's guard clause,
-  and statement coverage alone calls a half-tested `if` fully covered:
-  the line ran, one of its two ways out never did. The gate is 100% of
-  statements *and* branches, and the second half is where a refusal
-  nobody exercised shows up.
+- **`branch = true`.** Statement coverage alone calls a half-tested `if`
+  fully covered: the line ran, one of its two ways out never did. The
+  gate is 100% of statements *and* branches.
 - **`exclude_also` where the unreachable thing is one shape repeated.**
   A failure no input can provoke — a `raise RuntimeError` behind a call
   that cannot fail — is excluded once, by pattern, rather than carrying
-  a `pragma: no cover` at every site. What is left is a number only
-  untested code can lower. A pattern that would also exclude something a
-  test can reach is not one of these: for a one-off, the pragma is still
-  the answer, in the shape *What it costs is paid at the site* below
-  gives it.
+  a `pragma: no cover` at every site. A pattern that would also exclude
+  something a test can reach is not one of these: for a one-off, the
+  pragma is still the answer.
 - **`source` is named, never left to `--cov` alone.** Unnamed, it measures
   every file the run imports, which reaches a script a test imports by
   path — uncovered, because nothing runs its `main()` but a subprocess.
-  A local gate stricter than the CI one it exists to reproduce is the
-  worse of the two directions.
 - **100 is not the same rule with the bar raised.** coverage special-cases
   the value: nothing short of an exact 100.00% passes, where 99.99 passed
   everything above 99.985%. It also makes the report agree with the exit
-  code, which a threshold inside the rounding step does not — a run can
-  print `FAIL` and exit zero.
+  code, which a threshold inside the rounding step does not.
 - **What it costs is paid at the site**: a line no ordinary run reaches is
   covered by patching what stands in the way, or carries a
   `pragma: no cover` with its reason. Neither is a build left red.
 
   **A statement only some invocations execute is covered only on those
-  invocations.** What reaches it is the runner rather than a test — a
-  hook pytest calls under one set of flags and not another — so under a
-  floor with no slack the flags decide whether the gate passes, and what
-  turns the build red has no relation to the change under it. That is
-  the first of the two and not the second: a test of its own covers it
-  whatever the invocation, where a pragma would exclude a statement
-  every run the project cares about does execute.
+  invocations**, so it takes a test of its own rather than a pragma: a
+  pragma there would exclude a statement every run the project cares
+  about does execute.
 
   **The reason goes on the pragma's own line, after ` -- `, for
-  `pragma: no cover` and `pragma: no branch` alike** — the dash a comment
-  writes, an em dash being this file's own; a branch a test never takes
-  is silenced for the same kind of reason a statement is, and the rule
-  does not stop at the one spelling. Section 8 could instead leave
-  `no branch` with no inline rule of its own, its reason written in the
-  comment above the line — which is what every `no branch` site in
-  `btclib` already does — and that is the rejected alternative: one form
-  for both spellings costs the port rewriting each of those into the
-  inline shape, and what it buys is a reader and the hook having one
-  thing to check rather than two. What the position buys is that
+  `pragma: no cover` and `pragma: no branch` alike** — the dash a
+  comment writes, an em dash being this file's own. What the position
+  buys is that
 
   ```shell
   git grep -nE 'pragma: no (cover|branch)$' -- '*.py'
   ```
 
   answers empty in a tree that keeps the rule, so every line it names is
-  a defect under this rule: a site short of the inline half — whether or
-  not a reason for it is written somewhere else — or a pragma inside a
-  string, which the paragraph below says is not a site at all. Section
-  4's `reasonless-coverage-pragma` hook refuses a `#`-comment pragma with
-  no ` -- ` reason at the gate, narrower than the command above: its
-  pattern wants the `#` immediately before `pragma`, so a bare mention of
-  the phrase in a comment's own prose, or in a string that carries none,
-  is left to a reader running the command rather than refused. ` - ` is
-  the rejected alternative, and what it costs is a hyphen where a dash
-  was meant, and a check written for one spelling answering a confident
-  zero for a tree that writes the other, which is what
+  a defect under it. Section 4's `reasonless-coverage-pragma` hook
+  refuses a `#`-comment pragma with no ` -- ` reason at the gate,
+  narrower than the command above: its pattern wants the `#` immediately
+  before `pragma`, so a bare mention of the phrase in a comment's own
+  prose is left to a reader running the command. ` - ` is the rejected
+  alternative, and what it costs is a check written for one spelling
+  answering a confident zero for a tree that writes the other, which is
+  what
 
   ```shell
   git grep -nE 'pragma: no (cover|branch) - [^-]' -- '*.py'
@@ -1654,16 +1510,13 @@ fail_under = 100.0
 
   is for.
 
-  **Where a no-argument signature leaves `ruff format` nothing to reflow but
-  itself, the inline half moves to the decorator's line where one exists.**
-  Adding the reason after ` -- ` pushes such a `def` line past what the
-  formatter will leave on one line, and the formatter reflows the signature
-  rather than the pragma; on a decorated function the pragma goes on the
-  decorator's own line instead, and coverage excludes the whole node from a
-  pragma there exactly as it does from one on the unreflowed `def` line.
-
-  Where there is no decorator, the reflow happens anyway and the reason stays
-  on the signature's own last line:
+  **Where a no-argument signature leaves `ruff format` nothing to reflow
+  but itself, the inline half moves to the decorator's line where one
+  exists.** Adding the reason after ` -- ` pushes such a `def` line past
+  what the formatter will leave on one line, and coverage excludes the
+  whole node from a pragma on the decorator exactly as it does from one
+  on the unreflowed `def` line. Where there is no decorator, the reflow
+  happens anyway and the reason stays on the signature's own last line:
 
   ```python
   def f() -> (
@@ -1671,129 +1524,61 @@ fail_under = 100.0
   ):  # pragma: no cover -- reason
   ```
 
-  coverage excludes the function in full from a pragma there too: every
-  physical line of one multi-line statement maps back to its first, so the
-  closing line answers for the same range the unreflowed `def` line did. A
-  whole-line comment written above the `def` instead is not this and excludes
-  nothing: coverage's decorator range starts at an undecorated `def`'s own
-  first line, and a comment one line above it sits outside that range.
+  every physical line of one multi-line statement mapping back to its
+  first. A whole-line comment written above the `def` instead excludes
+  nothing, coverage's decorator range starting at an undecorated `def`'s
+  own first line.
 
   **A reason too long for the line goes above it as well, the inline
-  half naming the case.** `btclib-node`'s `[tool.coverage.report]`
-  comment is where the family already writes this, and it is what keeps
-  the grep above a gate rather than a census. The fuller reason is the
-  comment over the line, or the docstring the file or the function
-  already opens with where one reason covers every pragma under it —
-  written once there rather than copied per line, while each line goes
-  on carrying the case it is.
-
-  Letting the fuller reason **replace** the inline half is the rejected
-  alternative, and what it costs is the gate: a conforming tree would
-  then answer the grep non-empty, so the command would name its
-  conforming sites and its reasonless ones together and telling them
-  apart would be a reading. Section 14's *decided per repository* list
-  was the other alternative, and it is declined: that list takes a
-  reason true of the repository, and how much a reason has to say is a
-  property of the line being excluded rather than of the tree holding
-  it.
+  half naming the case.** The fuller reason is the comment over the
+  line, or the docstring the file or the function already opens with
+  where one reason covers every pragma under it. Letting it **replace**
+  the inline half is the rejected alternative, and what it costs is the
+  gate: a conforming tree would then answer the grep non-empty.
 
   **A pragma is a comment, and one inside a string is not a site.**
   coverage matches its exclusion patterns against the raw source a line
   at a time rather than tokenizing it first, so what leaves `statements`
-  is the statement the matched line belongs to, and the suite under it
-  where that statement is a clause header. Where the string is a value —
-  a right-hand side, an argument, the subject of an `if` or a `with` —
-  that is the statement holding it, which a string spanning several
-  lines puts above the match rather than on it, so what the exclusion
-  takes out is a statement nobody wrote the pragma for, and no
-  percentage reports the loss: what has left is out of the set the
-  percentage is of. Where the string is a module, class or function
-  docstring, nothing leaves `statements` at all, a docstring being no
-  statement coverage measures — the match is recorded and excludes
-  nothing. So prose in a Python file writes the pragma in backticks and
-  without its `#`, which is what keeps it out of that pattern and out of
-  both commands above. What the prose is doing does not narrow it: the
-  pattern matches characters and not what they are for, so a line naming
-  the pragma is matched exactly as one quoting this rule. The file is
-  what decides instead — coverage matches that pattern against Python
-  source alone, and both commands above are restricted to `*.py` — so
-  the `#` in a `.toml` comment, in a workflow's, or in a `CHANGELOG.md`
-  entry is outside the rule rather than short of it. Holding all prose
-  to that spelling is the rejected alternative, and what it costs is a
-  rule reaching where neither mechanism does: what it condemns is what
-  no command here can name, and in an append-only file what section 9's
-  *Nothing already written is rewritten* leaves standing.
-
-  Which of the two a line named by the commands above is, the output
-  does not say, showing a string-borne pragma exactly as it shows a
-  site. What answers it is a parser rather than a pattern: `tokenize`
-  tells a `COMMENT` token from a `STRING` one, and the rules above leave
-  the `#` form nowhere to be right inside the second. Section 15 runs
-  one.
+  is the statement the matched line belongs to — one nobody wrote the
+  pragma for, and no percentage reports the loss. So prose in a Python
+  file writes the pragma in backticks and without its `#`, which is what
+  keeps it out of both commands above; the `#` in a `.toml` comment, in
+  a workflow's, or in a `CHANGELOG.md` entry is outside the rule rather
+  than short of it, coverage reading Python source alone. Which of the
+  two a line named above is, the output does not say: what answers it is
+  a parser rather than a pattern, and section 15 runs one.
 - **Measured on one interpreter**, the one `.python-version` pins, which
-  is enough at 100 only because no source branches on the version — a
-  percentage below 100 could not promise that, the statement count moving
-  between versions.
+  is enough at 100 only because no source branches on the version.
 - **The flags live in `pyproject.toml`, and a job types `pytest` with
-  nothing after it.** `addopts` carries the coverage flags,
-  `[tool.coverage.report]` the floor and the report options, and a copy
-  typed into a workflow is a copy a maintainer never runs, so the local
-  gate and the CI gate stop being the same measurement with nothing
-  turning red. What a job may still type is an argument about that job
-  rather than a second copy of a tree-wide setting, and what tells the
-  two apart is whether the run does anything differently without it: a
-  job whose own construction puts it outside what the configuration
-  describes types the argument that says so, where a job typing what
-  `pyproject.toml` already states leaves two lines to keep equal, and a
-  reason written beside the second does not make it the first. An
-  explicit `--cov-fail-under` is an argument of the first kind wherever
-  the job's construction asks for it, and *A selective run is reported
-  and not gated* below is the local hook leaving that same caller
-  unoverruled. Enumerating the arguments that qualify is the rejected
-  alternative, and what it costs is the argument nobody has typed yet: a
-  job whose case the list does not hold either drops a flag its
-  construction asks for or stands in breach of a standard it keeps.
+  nothing after it.** `addopts` carries the coverage flags and
+  `[tool.coverage.report]` the floor, so a copy typed into a workflow is
+  a copy a maintainer never runs. What a job may still type is an
+  argument about that job rather than a second copy of a tree-wide
+  setting, and what tells the two apart is whether the run does anything
+  differently without it: an explicit `--cov-fail-under` qualifies
+  wherever the job's construction asks for it.
 - **The configuration is read from wherever the run starts.** coverage
   looks for its configuration in the directory the process started in,
   so a suite run from `tests/` finds no `source`, no `branch = true`
   and no `fail_under`: it measures a different set of files and exits 0
   whatever the number is. A tree with a local floor either points the
   run at its configuration from wherever it starts, or makes such a run
-  say it is ungated rather than letting it pass as the gate — and
-  which of the two a tree does is measured on that tree, the pair of
-  runs from the root and from `tests/` being the measurement.
+  say it is ungated rather than letting it pass as the gate.
 - **A selective run is reported and not gated.** `fail_under` applies to
   every report coverage writes, so `pytest tests/foo` would fail on the
   tree's coverage rather than its own. A `conftest.py` hook drops the
   threshold when the invocation asks for something other than the whole
   suite — paths, `-k`, `-m`, `--deselect`, `--ignore`, `--ignore-glob`,
   `--lf` — and never overrules an explicit `--cov-fail-under`. A path is
-  a selection only where it leaves a `testpaths` entry out, rather than
-  wherever one is named: `pytest tests` is what a bare run already
-  collects, so a hook reading any path as a subset switches the floor
-  off for the run that is the suite. The paths are
+  a selection only where it leaves a `testpaths` entry out, `pytest
+  tests` being what a bare run already collects. The paths are
   `config.option.file_or_dir`, which is `None` and not `[]` under
-  `--help` — the parse being abandoned before the positional is
-  consumed — so a containment test that iterates it ends `--help` in a
-  traceback. Setting the threshold means writing to
-  `config.known_args_namespace`: pytest-cov reads that copy and never
-  `config.option`, so the obvious spelling fails silently.
-
-  A run that leaves tests out measures the same source with fewer tests,
-  so what its report is short of is the tests it did not run: a
-  shortfall it reports cannot be told apart from one the tree has, and a
-  gate whose red cannot be read is what teaches whoever runs it to reach
-  for `--no-cov`.
-  The narrower reading — paths, `-k` and `-m` alone — is rejected: it
-  holds the rest to be the flags of an iteration whose next run is the
-  whole suite, and reading intent off all of them to make the hook a
-  second definition of what a real run is. What the wider set costs is
-  the occasion where such a run would have cleared 100 anyway — a `--lf`
-  that finds nothing to rerun and so is the whole suite, a `--deselect`
-  of one arm of a parametrization the others cover — and the next bare
-  run measures the tree again. An early `-x` is outside the set either
-  way: what cuts that run short is a failure and not what the invocation
-  asked for.
+  `--help`, so a containment test that iterates it ends `--help` in a
+  traceback; and setting the threshold means writing to
+  `config.known_args_namespace`, pytest-cov reading that copy and never
+  `config.option`. An early `-x` is outside the set either way: what
+  cuts that run short is a failure and not what the invocation asked
+  for.
 - **Where an optional native dependency splits the code**, coverage is
   measured twice — with it and without — and the *union* is gated at 100
   beside the delegated run's own gate, not instead of it, so a line
