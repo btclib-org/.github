@@ -110,9 +110,9 @@ STATED = {
 }
 """What section 4's `check-changelog` bullet says that hook is, by key.
 
-These are the manifest's own keys, so they read the same in the tree
-that serves the hook and in the tree that takes it. `SERVED`, `PIN` and
-`COUNT` below are the three the two shapes differ on.
+These are the manifest's keys, declared once in `MANIFEST` and restated
+in `.github`'s own `local` stanza; a tree taking the hook restates none
+of them, its stanza being `SERVED`, `PIN` and `COUNT` below.
 
 Read into a mapping rather than left to a comparison between the trees:
 copies compared with each other agree while each of them is wrong, which
@@ -126,6 +126,9 @@ Read as a finding of its own rather than folded into `STATED`: a key
 absent is what the section asks for here, and a mapping is no place to
 say that. The reason a filter is refused is section 4's.
 """
+
+MANIFEST = ".pre-commit-hooks.yaml"
+"""The file section 4 says serves the hook, at the root of `SELF`."""
 
 SERVED = f"https://github.com/{ORG}/{SELF}"
 """The repository section 4 says the hook is taken from.
@@ -499,13 +502,37 @@ def departures(hook: dict[str, Any], repository: str) -> list[str]:
         whether the stanza is read for the repository it is served from.
     :returns: one line per key that differs, empty where none does.
     """
-    found = stated_departures(hook, STATED)
+    found = (
+        stated_departures(hook, STATED)
+        if repository == SELF
+        else served_departures(hook)
+    )
     if UNFILTERED in hook:
         found.append(f"{UNFILTERED}: {hook[UNFILTERED]!r}, where section 4 has none")
     found.extend(counted_departures(hook))
-    if repository != SELF:
-        found.extend(served_departures(hook))
     return found
+
+
+def test_the_manifest_declares_what_section_4_says(trees: dict[str, Path]) -> None:
+    """`MANIFEST`'s `check-changelog` carries the keys every taker relies on.
+
+    A taker's stanza restates none of them, so this is the one place
+    they are read for the trees that take the hook.
+
+    :param trees: the checkouts.
+    """
+    path = trees[SELF] / MANIFEST
+    parsed = yaml.safe_load(path.read_text(encoding="utf-8"))
+    found = [hook for hook in parsed if hook.get("id") == CHANGELOG_HOOK]
+    assert len(found) == 1, (
+        f"{SELF}'s {MANIFEST} names {CHANGELOG_HOOK} {len(found)} times"
+    )
+    drifted = stated_departures(found[0], STATED)
+    if UNFILTERED in found[0]:
+        drifted.append(
+            f"{UNFILTERED}: {found[0][UNFILTERED]!r}, where section 4 has none"
+        )
+    assert not drifted, f"{MANIFEST} says what section 4 does not: {drifted}"
 
 
 def test_check_changelog_says_what_section_4_says(
@@ -537,16 +564,17 @@ def test_a_gate_that_had_drifted_would_be_reported() -> None:
     """The cell above is green on gates that agree, however it reads.
 
     Asked of the literal `REFUSED` names, once for each finding it
-    carries: a key section 4 states and the hook does not, a key the
-    hook states and section 4 gives it none of, a stanza declared where
-    the hook is not served from, a `rev:` that is no commit, and an
-    `args:` naming no count. `SELF` is asked separately, that tree
-    being the one the last two are not read of.
+    carries: a key the hook states and section 4 gives it none of, a
+    stanza declared where the hook is not served from, a `rev:` that is
+    no commit, and an `args:` naming no count. `SELF` is asked
+    separately: it is the one tree read for the manifest's keys and not
+    for a pin.
     """
     refused = departures(REFUSED, "btclib")
-    assert any("always_run" in line for line in refused), (
-        f"{REFUSED} read as carrying always_run: either a key section 4"
-        " states is no longer read, or the literal wants another"
+    assert any("always_run" in line for line in departures(REFUSED, SELF)), (
+        f"{REFUSED} read as carrying always_run in {SELF}: either a key"
+        " section 4 states is no longer read there, or the literal wants"
+        " another"
     )
     assert any(line.startswith(f"{UNFILTERED}:") for line in refused), (
         f"{REFUSED} read as carrying no {UNFILTERED}: either the key"
@@ -569,15 +597,24 @@ def test_a_gate_that_had_drifted_would_be_reported() -> None:
     assert not any(
         line.startswith(("repo:", "rev:")) for line in departures(REFUSED, SELF)
     ), f"{SELF} is read for a repository it serves the hook from"
-    agreeing = {
+    taking = {
         "id": CHANGELOG_HOOK,
         "repo": SERVED,
         "rev": "0" * 40,
         "args": [COUNT, "7"],
+    }
+    assert departures(taking, "btclib") == [], (
+        f"{taking} is read as drift from the keys it is built of"
+    )
+    serving = {
+        "id": CHANGELOG_HOOK,
+        "repo": "local",
+        "rev": None,
+        "args": [COUNT, "7"],
         **STATED,
     }
-    assert departures(agreeing, "btclib") == [], (
-        f"{agreeing} is read as drift from the keys it is built of"
+    assert departures(serving, SELF) == [], (
+        f"{serving} is read as drift from the keys it is built of"
     )
 
 
