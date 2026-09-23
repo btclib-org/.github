@@ -44,8 +44,10 @@ def transcribed(source: Path) -> str:
     r"""Derive the `notice-rgx` a `COPYRIGHT` file asks for.
 
     Each line with its metacharacters escaped, the lines joined by a
-    literal `\n`, the whole anchored with `^`: the header is the file's
-    text and it opens the source file, which is what the anchor says.
+    literal `\n`, anchored with `^` and preceded by one optional `#!`
+    line -- `(#![^\n]*\n)?` -- so that the header is either the file's
+    first bytes or the first bytes after a shebang a `language: script`
+    hook needs, and never a notice sitting anywhere else.
 
     :param source: the `COPYRIGHT` file to transcribe.
     :returns: the regex, as `pyproject.toml` holds it once parsed.
@@ -55,7 +57,7 @@ def transcribed(source: Path) -> str:
         "".join(f"\\{char}" if char in METACHARACTERS else char for char in line)
         for line in lines
     )
-    return "^" + r"\n".join(escaped)
+    return r"^(#![^\n]*\n)?" + r"\n".join(escaped)
 
 
 def collective(source: Path) -> str:

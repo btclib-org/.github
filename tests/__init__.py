@@ -318,7 +318,20 @@ def names() -> list[str]:
     )
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    (
+        1294,
+        "test_every_notice_rgx_is_its_copyright_transcribed",
+        (
+            "bbt",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-benchmarks",
+            "btclib-node",
+            "btclib-secp256k1",
+        ),
+    ),
+)
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what
@@ -329,6 +342,12 @@ same range, so the citation names a real issue about something else.
 A row is an exemption, and nothing here is a place a new failure
 belongs -- a red cell is answered in the tree that is red, and a row is
 what says the answer is already written down and waiting.
+
+The row here is section 5's shebang-tolerant `notice-rgx` transcription:
+a sibling's own declared regex answers the pre-shebang form until its
+port lands, and the strict expected failure is what turns that landing
+into a red cell and the row into one to delete. `.github` is not in it,
+`COPYRIGHT` and `notice-rgx` here already being section 5's form.
 """
 
 

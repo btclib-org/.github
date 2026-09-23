@@ -165,13 +165,6 @@ ignore = [
 # reason read the other way: what each one prints is its whole report,
 # to a failing developer's terminal or to a job's log
 ".github/scripts/*.py" = ["INP001", "T20"]
-# `.pre-commit-hooks.yaml` serves this one as a `language: script` hook,
-# which execs the file, so a shebang is the first line and the notice is
-# the three below it. `notice-rgx` anchors at the file's first byte and
-# is `COPYRIGHT` transcribed, which tests/copyright_test.py holds every
-# tree to, so the anchor is not this file's to move: the notice is
-# carried and the rule is what cannot read it there
-".github/scripts/check_changelog.py" = ["CPY001"]
 
 [tool.ruff.lint.mccabe]
 # ruff's default, as everywhere in the organization
@@ -200,13 +193,14 @@ convention = "pep257"
 [tool.ruff.lint.flake8-copyright]
 # COPYRIGHT transcribed, the way section 5 spells the transcription:
 # each line with its regex metacharacters escaped, the lines joined by a
-# literal \n, the whole anchored with ^ so that the notice opens the
-# file rather than sitting anywhere in its first 4096 bytes. ruff reads
-# this string and never the file, so tests/copyright_test.py is what
-# compares the two, here as in every tree that declares one; its
-# `transcribed` is what wrote this value, byte for byte the one the
-# sibling repositories declare
-notice-rgx = "^# Copyright \\(c\\) The btclib developers\\n# Distributed under the MIT software license, see the accompanying\\n# LICENSE file or https://opensource\\.org/license/mit for the full text\\."
+# literal \n, anchored with ^ and preceded by an optional #! line so
+# that the notice opens the file or follows the shebang a
+# `language: script` hook needs, rather than sitting anywhere in its
+# first 4096 bytes. ruff reads this string and never the file, so
+# tests/copyright_test.py is what compares the two, here as in every
+# tree that declares one; its `transcribed` is what wrote this value --
+# the one every sibling repository is owed to declare
+notice-rgx = "^(#![^\\n]*\\n)?# Copyright \\(c\\) The btclib developers\\n# Distributed under the MIT software license, see the accompanying\\n# LICENSE file or https://opensource\\.org/license/mit for the full text\\."
 
 # typos' configuration, where section 4 says both spell checkers are
 # configured and where every sibling keeps this one. What is *not* here
