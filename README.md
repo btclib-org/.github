@@ -784,262 +784,147 @@ where it would fail `-W` for belonging to no toctree.
 ## 3. `pyproject.toml` is the configuration
 
 One file holds the project metadata and every tool that can be
-configured in it. Where a tool the lint gate runs looks for its
-configuration by name from the working directory and `pyproject.toml` is
-not among the names, it keeps a file of its own: the tool finds that
-file, so the hook passes no path, and a file has the room for reasoning
-that a hook argument has not. Section 14 names each of those files.
+configured in it. A tool the lint gate runs that looks for its
+configuration by name and not there keeps a file of its own, which the
+hook then passes no path to; section 14 names each of those files.
 
 - **The build backend is `uv_build` where the project is pure Python.**
   The sdist's inclusion is then declared as glob patterns in
-  `[tool.uv.build-backend]`, beside the rest of the configuration rather
-  than in a file with an include and exclude language of its own, and
-  one backend across the ordinary case is one such language to learn.
-  What makes a project the exception is what it compiles:
+  `[tool.uv.build-backend]` rather than in a file with a language of its
+  own. What makes a project the exception is what it compiles:
   `btclib-secp256k1` builds a vendored C library through cffi and cmake,
-  which hatchling answers with a build hook and a pure-Python backend
-  does not answer at all.
+  which hatchling answers with a build hook and `uv_build` does not.
 
     Section 2's `src/` rule matches each backend's own default, so
     neither needs a key that states it: `uv_build` looks under `src/`
-    unless `[tool.uv.build-backend] module-root` overrides it, and
-    hatchling names no directory at all, `<name>/__init__.py` at the
-    root and `src/<name>/__init__.py` being its first two
-    file-selection heuristics.
+    unless `[tool.uv.build-backend] module-root` overrides it.
 
     `requires` names every entry — the backend among them — with a
     floor and a **ceiling at the next major above the newest release
-    the tree has measured to work**, tightened to whatever release
-    broke it where a break has been measured: the shape
-    `hatchling>=1.27,<1.32.1` already has, its ceiling naming the exact
-    release rather than the major above the newest one measured. A
-    release is measured by an isolated build of this tree that resolved
-    it and ran against it, never by a version read about in another
-    project's release notes. `tests/pyproject_test.py` only asks that a
-    floor and a ceiling both be present on every entry; where the
-    ceiling sits is this sentence's to hold, not a comparison the cell
-    still makes. The bullet below refuses an upper bound to a sibling
-    dependency instead, and what differs is what the bound costs: on a
-    runtime dependency it makes a published artifact refuse a version
-    somebody already has, where on a build requirement it only narrows
-    what an isolated build resolves for itself — every entry of
-    `requires` is resolved fresh by an isolated PEP 517 build, outside
-    `uv.lock`, so an unbounded one lets a published sdist build under
-    whatever release exists on the day, unchecked.
+    the tree has measured to work**, tightened to whatever release broke
+    it where a break has been measured, as `hatchling>=1.27,<1.32.1` is:
+    an isolated PEP 517 build resolves every entry fresh, outside
+    `uv.lock`, so an unbounded one builds under whatever release exists
+    on the day. A release is measured by a build of this tree that
+    resolved it and ran against it. `tests/pyproject_test.py` asks only
+    that both bounds be present.
 
-    Under `uv_build` the ceiling sits tighter, at the next minor: uv
-    bumps its own minor for a breaking change and releases this backend
-    with itself, so a bound only at the next major would still admit a
-    break the next minor already carries. That is uv's own release
-    discipline and not a general boundary — neither hatchling's nor
-    cmake's breaking changes are dated by a minor the same way, which is
-    why the general ceiling stops at the major and a tighter one is
-    earned by measuring the break, as `<1.32.1` was.
+    Under `uv_build` the ceiling sits tighter, at the next minor, uv
+    bumping its own minor for a breaking change and releasing this
+    backend with itself; that is uv's discipline, not a general rule.
 
-    The floor is the boundary of the property it keeps, and the comment
-    at the key gives the measurement that found it: under `uv_build` the
-    sdist's own `pyproject.toml` is a normalized copy of the file with
-    the verbatim one kept beside it as `pyproject.toml.orig` from
-    `0.12.0`, and below that the sdist carries the verbatim file and no
-    `.orig`. The boundary is found by calling the backend's own sdist
-    hook at each version, and not through `uv build` under a pinned
-    `requires`, which falls back to the backend it bundles and only
-    warns. A floor above that boundary — the `uv` the gate pins, or the
-    sibling the number was copied from — excludes backends that keep the
-    property, and nothing reads the number it lands on.
+    The floor is the boundary of the property it keeps — under
+    `uv_build`, the sdist carrying `pyproject.toml.orig` beside its
+    normalized copy — and the comment at the key gives the measurement.
+    That boundary is found by calling the backend's own sdist hook at
+    each version, not through `uv build` under a pinned `requires`. A
+    floor above it excludes backends that keep the property.
 - **The version is declared once**, in `[project]`. The package reads it
-  back with `importlib.metadata`; the sphinx `conf.py` parses this file,
-  so the rendered version does not depend on what the documentation build
-  has installed. Two declarations are two things a release has to compare.
+  back with `importlib.metadata` and the sphinx `conf.py` parses this
+  file; two declarations are two things a release has to compare.
 - **The name in `[project]` is the distribution's, and the repository
   is named after it, hyphenated, never after the import package.** PEP
   503 normalizes runs of `-`, `_` and `.` in a distribution name to a
-  single `-`, so the hyphen is the canonical spelling; an import package
-  is a Python identifier, whose grammar admits `_` and never `-`, so the
-  two are spelled differently on purpose. `bitcoin-core-rpc` declares
-  `name = "bitcoin-core-rpc"` and imports as `bitcoin_core_rpc`, and the
-  repository takes the first spelling. PEP 427's escaping rule folds
-  either to `bitcoin_core_rpc-<version>` for the wheel filename and the
-  `.dist-info` directory, so the built artifact does not tell them
-  apart.
+  single `-`, so the hyphen is the canonical spelling, where an import
+  package is a Python identifier whose grammar admits `_` and never `-`.
 
-    **`name` itself takes that same canonical spelling.** The rule above
-    folds the family together to ask whether a distribution and its
-    repository agree; this says which member of the family the
-    `[project]` table picks for itself.
+    **`name` itself takes that same canonical spelling**, the rule above
+    asking only that a distribution and its repository agree.
 
     **Wherever the distribution is named for somebody to read or copy,
-    it takes that spelling**: a table a resolver parses, a command in a
-    document, a block somebody is meant to copy, a flag's value, an
-    install target, a deployment environment's `url:`, the message on a
-    release tag. The normalization above is what hides the other
-    spelling — it resolves and installs the same distribution, and no
-    gate reports it — so what the written form decides is what a reader
-    copies out and types. `tests/names_test.py` asks it of every tree,
-    reading the position rather than the spelling: a name is a
-    requirement where a table declares it as one, or where a version
-    specifier or an extras bracket follows it, and an import package is
-    written in neither place. The sites that carry no position are a
-    reader's catch.
+    it takes that spelling**: the normalization installs the same
+    distribution either way and no gate reports it, so the written form
+    decides what a reader copies. `tests/names_test.py` reads the
+    position rather than the spelling, and the rest is a reader's catch.
 
     **A PyPI page is linked as `https://pypi.org/project/<name>/`**, the
-    form `https://pypi.org/p/<name>` redirects to, and it spells the
-    name canonically like any other written form: the site serves
-    `/project/btclib_secp256k1/` and `/project/btclib-secp256k1/` alike
-    and redirects neither, so which spelling a reader is shown is the
-    writer's, and the short form costs whoever follows it the redirect.
-    A URL that settles its own spelling is outside the rule rather than
-    an exception to it: `/simple/` redirects to the hyphen PEP 503 folds
-    the name to.
+    form `https://pypi.org/p/<name>` redirects to: the site serves
+    either spelling and redirects neither, so which one a reader is
+    shown is the writer's.
 
-    **The bullet has no subject where a tree builds no distribution.**
-    `bbt` and `.github` both declare `package = false` and a
-    `[project].name` of their own, and neither key names a distribution;
-    `.github` could not take the repository-naming half in any case, PEP
-    503 normalizing `.github` to `-github`, which is not a distribution
-    name. A `package = false` tree's `name`, where it declares one, is
-    its own choice.
+    **The bullet has no subject where a tree builds no distribution**: a
+    `package = false` tree's `[project].name` names none and is its own
+    choice, PEP 503 folding `.github` to `-github` in any case.
 - **PEP 639 licensing**: `license = "MIT"` as an SPDX string and
   `license-files`, not the deprecated table and not a `License ::`
-  classifier. The floor that carries them is the backend's own:
-  `btclib-secp256k1` writes `hatchling>=1.27` because an older hatchling
-  rejects both halves outright, where `uv_build`'s floor is set by what
-  its sdist carries and says that instead. A constant copied from
+  classifier. The floor that carries them is the backend's own, an
+  older hatchling rejecting both halves outright; a constant copied from
   another project is a requirement the build does not use.
 
     **`license-files` names `LICENSE` and `AUTHORS.md`, and nothing
     else**, in a file that declares a build backend: where nothing is
-    built the key would name files into an archive that does not exist.
-    The MIT notice names a collective, and `AUTHORS.md` is where the
-    archive says its members are listed — section 14 has what the file
-    is, the vendored attribution it carries included, and why
-    `COPYRIGHT` is not named beside it. `LICENSE` alone leaves an
-    archive that names the collective and never says where its members
-    are listed.
+    built the key names files into an archive that does not exist, and
+    `AUTHORS.md` is where the archive says the collective is listed.
 
-    **Nothing local refuses the classifier beside the expression**,
-    which is why this is a rule rather than something a build catches.
-    A file carrying both leaves `uv_build` warning, hatchling saying
-    nothing at all, and both archives carrying `License-Expression: MIT`
-    and the deprecated `Classifier:` line together; `twine check` passes
-    them, and so does the `trove-classifiers` comparison the
-    `classifiers` bullet names. Whether PyPI's upload endpoint refuses
-    the pair is unmeasured, asking it meaning publishing a version.
+    **Nothing local refuses the classifier beside the expression**, a
+    file carrying both passing `twine check` and the
+    `trove-classifiers` comparison alike, which is why this is a rule.
 - **`authors` names what the MIT notice names**, in every file that
   declares a `[project]` table, whether or not that file builds
-  anything. The collective is already fixed by `COPYRIGHT`, by `LICENSE`
-  and by the header ruff's `CPY` holds every source file to, so a
-  per-tree literal here is one more statement of one fact, and the one a
-  package index prints as the package's author. Scoping the key to a
-  file that declares a build backend, as `license-files` above is,
-  leaves it unread in a tree that builds nothing, which is where a tree
-  drifts until somebody gives it a backend.
+  anything: `COPYRIGHT`, `LICENSE` and ruff's `CPY` header already fix
+  the collective. Scoping the key to a file that declares a build
+  backend leaves it unread in a tree that builds nothing.
 
     **The address is fixed by the trees agreeing, not by a literal
-    here.** `COPYRIGHT` carries the name and nothing carries the
-    address, so spelling the address out in this file would put the one
-    copy no command checks in the one document a tree cannot re-derive
-    it from. What section 15's suite asks instead is that the name be
-    `COPYRIGHT`'s, transcribed the way `notice-rgx` already is, and that
-    every declaring tree answer the same address as every other, an
-    address none of them declares failing the same as two that disagree.
+    here**: section 15's suite asks that the name be `COPYRIGHT`'s and
+    that every declaring tree answer the same address as every other.
 - **`keywords` are the GitHub topics**, the same names in the same
   lowercase spelling. The keywords carry an order and the topics do not:
-  PyPI shows keywords as given, so they are ordered by relevance, while
-  `gh api repos/<org>/<repo> --jq '.topics'` answers alphabetically
-  whatever was set. What the order decides is which name is left out
-  when GitHub's twenty are full — past twenty the topics are the first
-  twenty keywords, which is the one place the two may differ at all.
+  PyPI shows keywords as given, while
+  `gh api repos/<org>/<repo> --jq '.topics'` answers alphabetically. The
+  order decides which name is left out when GitHub's twenty are full.
 
-    Both name what the tree holds. A keyword nothing in the tree answers
-    to is a claim made to whoever searched and not kept; something the
-    tree holds that no keyword names is why somebody did not find it.
-    Neither is visible from inside the file, so both are read against
-    the tree rather than against the list they were copied from.
+    Both name what the tree holds, so both are read against the tree
+    rather than against the list they were copied from.
 
     **The rule turns on the `[project]` table and not on the index.** A
-    tree that uploads nothing declares the list all the same, so that
-    the topics github.com shows have something in the tree to be read
-    against; keying the rule on publishing instead leaves such a tree's
-    topics answering to no list. A repository with no `pyproject.toml`
-    has no table and so no key to write, and section 16's checklist is
-    where its topics are recorded instead.
+    tree that uploads nothing declares the list all the same, so the
+    topics github.com shows have something to be read against; a
+    repository with no `pyproject.toml` has section 16's checklist.
 - **`classifiers` are present**, and each is a claim about this tree
   rather than a line taken from a sibling's: `Typing :: Typed` and
-  `py.typed` ship together or neither ships, the marker being PEP 561's
-  promise to a downstream consumer that the installed package carries
-  types and the classifier that same promise on the index page; an
+  `py.typed` ship together or neither ships, both being PEP 561's
+  promise that the installed package carries types; an
   `Operating System` only where the package is built for it and
   `OS Independent` only where nothing is compiled; and one
   `Programming Language :: Python :: X.Y` per interpreter the matrix
-  runs. A `t` suffix in the matrix names that same `X.Y`,
-  free-threading being a build of one version and not a version of its
-  own — unlike a `pypy` prefix, a different implementation with a
-  classifier of its own under `Implementation`.
+  runs. A `t` suffix in the matrix names that same `X.Y`, unlike a
+  `pypy` prefix, which has a classifier of its own under
+  `Implementation`.
 
     PyPI's own `Free Threading` classifiers are a maturity level an
-    author claims for the code, and one is declared where the merge gate
-    exercises the free-threaded build: a gate refuses the landing that
-    breaks that build, where a sweep runs beside a landing and blocks
-    nothing. The gate is the jobs the required check waits on — the
-    aggregate's own `needs` closure — and not every file CI holds, nor
-    every cell the gating workflow declares, section 10 keeping a job
-    outside that closure for as long as it cannot make the claim it is
-    named for.
+    author claims, and one is declared where the merge gate — the jobs
+    the required check waits on — exercises the free-threaded build.
 
-    These are conventions this section states, so section 7's closing
-    rule makes them tests rather than hopes: a tree that publishes
-    carries `interpreters_test.py`, which reads the floor, the
-    classifiers and the matrix and refuses a disagreement, section 15
-    saying why publishing is what decides that and not section 1's
-    library. That comparison is over a classifier naming one version,
-    which `Free Threading` is not, so the free-threading convention is
-    gated as the `Implementation` classifier beside it is: by a
-    biconditional, the classifier present exactly where what it claims
-    is run. Nothing local refuses a classifier that is not a classifier
-    at all — a build accepts whatever the file says, and `twine check`
-    reads the long description and not this list — so a tree compares
-    against `trove-classifiers`, the same list as a package, rather than
-    waiting for the upload endpoint to reject one where a version is
-    already being consumed.
+    Section 7's closing rule makes these tests rather than hopes: a tree
+    that publishes — section 15 saying why publishing decides that and
+    not section 1's library — carries `interpreters_test.py`, which
+    reads the floor, the classifiers and the matrix and refuses a
+    disagreement, `Free Threading`, naming no one version, being gated
+    by a biconditional instead. Nothing local refuses a classifier that
+    is not one at all, so a tree compares against `trove-classifiers`.
 
-    Both halves of that pairing, and section 2's own `py.typed` bullet
-    before it, are a promise about an installed package, and `.github`'s
-    own suite reads a tracked one instead: `surface_test.py` and
-    `classifiers_test.py` ask `git ls-files`, holding no checkout of the
-    trees it audits to build an archive from. What verifies the promise
-    where a tree publishes is section 12's `check-sdist` and
-    `check-wheel-contents`: the wheel's half is the second of the two,
-    `check-sdist` driving no wheel at all, once
-    `[tool.check-wheel-contents]` names the package. A tree short of
-    tier 1 owes the marker with no gate over whether a build carries it,
-    this suite included.
+    `.github`'s own suite reads a tracked `py.typed` rather than an
+    installed one, `surface_test.py` and `classifiers_test.py` asking
+    `git ls-files`; where a tree publishes, section 12's
+    `check-wheel-contents` verifies it once the package is named there.
+    A tree short of tier 1 owes the marker with no gate over it.
 - **`[project.urls]`** carries homepage, documentation, download,
   changelog, repository, issues and pull requests.
 
     **The names above are a publisher's, and a tree that declares the
     table and releases nothing carries the ones with a referent.**
     `documentation` and `changelog` are the two such a tree has none
-    for: no documentation site stands behind it, and `changelog` is the
-    name each publisher here gives `RELEASE_NOTES.md`, which section 2
-    gives a tier-1 tree alone. A table short of those two is a name with
-    nowhere to point rather than a correction nobody made, which the
-    file cannot say for itself, an absent key carrying no comment. This
-    paragraph is where it is said, and a tree
-    with a further reason of its own writes that at a key it does carry,
-    as `btclib-benchmarks` does at `homepage`. Pointing `changelog` at
-    the `CHANGELOG.md` every tier carries is the rejected alternative,
-    and it costs one name serving two documents across the organization.
+    for: no site stands behind it, and `changelog` is the name each
+    publisher here gives `RELEASE_NOTES.md`, which section 2 gives a
+    tier-1 tree alone. Pointing it at the `CHANGELOG.md` every tier
+    carries is the rejected alternative, one name serving two documents.
 
     **A releasing tree's `homepage` is its own documentation site, in
     both surfaces that carry the name**: this field, which an index
-    serves with the package, and the repository's `.homepage`, which is
-    the *About* link on its page. A project's home is what documents it
-    and not a project page, a sibling's or its own, and section 2's rule
-    that a releasing tree provides documentation is what says there is
-    one to name. A tree that releases nothing publishes no URL that
-    outlives a correction, so this asks it nothing. The two are read
-    apart, half of the pair being a setting no file in the tree holds:
+    serves with the package, and the repository's `.homepage`, the
+    *About* link on its page. A project's home is what documents it and
+    not a project page. The two are read apart:
 
     ```shell
     gh api repos/<org>/<repo> --jq '.homepage'
@@ -1047,19 +932,13 @@ that a hook argument has not. Section 14 names each of those files.
     ```
 
     Where they disagree, moving the setting to whatever `pyproject.toml`
-    declares is the cheaper edit and consecrates the state rather than
-    correcting it: a tree whose declared home is another project's page
-    keeps it, where the rule sends both surfaces to the documentation
-    the tree itself provides.
-
-    **`documentation` names that same URL, and stays.** What it costs is
-    an index page showing two links to one page; what it buys is the
-    field indexes and tools read for documentation specifically, which
-    `homepage` does not stand in for.
+    declares consecrates the state rather than correcting it: the rule
+    sends both surfaces to the documentation the tree itself provides.
+    **`documentation` names that same URL, and stays**, being the field
+    indexes and tools read for documentation specifically.
 - **No upper bound on a sibling dependency.** Two projects developed
-  together coordinate a break at release time, where a ceiling costs a
-  release per upstream minor and makes a published artifact refuse a
-  version it works with.
+  together coordinate a break at release time, where a ceiling makes a
+  published artifact refuse a version it works with.
 - **Every comment carries the reason and the negative result**, held to
   section 9's 80 columns by the `toml-comment-width` hook, which reads
   them as bytes.
@@ -1071,13 +950,9 @@ of the same tools in a workflow: what CI enforces is exactly what a
 local run of it enforces, and a hook cannot be gated by pre-commit.ci
 alone.
 
-**Every hook that has a fix mode runs with it turned on.** A check-only
-hook spends a human round on a finding a flag would have applied, where
-a fixer leaves it in the tree for whoever committed to read — a
-pre-commit hook that fixes a file fails the run rather than applying
-itself unseen. A hook stays check-only where it has none: a validator
-has nothing to rewrite, and neither does a rule with no mechanical
-repair.
+**Every hook that has a fix mode runs with it turned on**, a check-only
+hook spending a human round on a finding a flag would have applied. A
+hook stays check-only where it has none.
 
 ### The `ci:` block
 
@@ -1104,99 +979,67 @@ pre-commit.ci does not have — the lint workflow covers it. No
   which `autoupdate` offers as readily as a release.
 
     **A version this file holds against `autoupdate` is declared in a
-    local hook**, the one shape it does not reach: it rewrites the
-    `rev:` of every `repo:` but `local` and `meta`. The version comes
-    from the hook's own `additional_dependencies`, or from where the
-    tree pins its other tools, and `pinned-rev`, with no `rev:` to
-    judge, is left guarding the entries a bot still moves.
+    local hook**, the one shape it does not reach, `autoupdate`
+    rewriting the `rev:` of every `repo:` but `local` and `meta`.
 - **hygiene** — `trailing-whitespace`, `end-of-file-fixer`,
   `mixed-line-ending --fix=lf`, `check-case-conflict`,
-  `fix-byte-order-marker`, `check-merge-conflict`,
-  `check-vcs-permalinks`, `check-added-large-files`, and
-  `check-shebang-scripts-are-executable` wherever the repository has
-  scripts.
-- **submodules** — the rule is *pinned*, not *forbidden*.
-  `forbid-submodules` where there are none, a submodule being the one
-  dependency in neither the lock file nor an sdist; where one is
-  legitimate, a local hook refusing an unpinned or moved submodule takes
-  its place, and section 11's `gitsubmodule` ecosystem says when
-  upstream moved.
+  `fix-byte-order-marker`, `check-merge-conflict`, `check-vcs-permalinks`,
+  `check-added-large-files`, and `check-shebang-scripts-are-executable`
+  wherever the repository has scripts.
+- **submodules** — the rule is *pinned*, not *forbidden*, a submodule
+  being the one dependency in neither the lock file nor an sdist.
+  `forbid-submodules` where there are none; where one is legitimate, a
+  local hook refusing an unpinned or moved submodule takes its place,
+  and section 11's `gitsubmodule` ecosystem says when upstream moved.
 - **syntax** — `check-yaml`, `check-json`, `check-toml`,
   `pretty-format-json`.
 - **Python shape** — `debug-statements`, `check-docstring-first`, and
   `name-tests-test` at its default, the spelling section 7 states.
 
     **`check-docstring-first` takes an exclusion naming the modules that
-    carry a PEP 258 attribute docstring.** Sphinx renders such a literal
-    beside the name on a built api page where an ordinary `#` comment
-    renders nowhere, and the hook reads it as a second module docstring.
-    `.github/scripts/check_changelog.py` carries one, and section 14
-    owes that file to every repository byte for byte, so the exclusion
-    is the one place a tree acting alone can answer it; the `#:` doc
-    comment sphinx reads instead leaves the api page unchanged and the
-    hook silent, and what defers it is the port it would take. The
-    exclusion names paths and not the directory holding them:
-    `check-hooks-apply` fails a hook left with no file to read, and a
-    tree whose Python is one test package has nothing left once that
-    package is named.
+    carry a PEP 258 attribute docstring**, which sphinx renders on a
+    built api page and the hook reads as a second module docstring; it
+    names paths and not the directory holding them, a hook with no file
+    to read failing `check-hooks-apply`.
 - **secrets** — `detect-private-key` and `detect-secrets` against a
   committed `.secrets.baseline`. A baseline, not an exclusion: an
   excluded file is unwatched, where a baseline entry is a finding
   somebody has read. The two entropy plugins stay off where the vectors
-  are hex strings, a new one being what a legitimate addition looks
-  like. Not gitleaks: its hook ids all pass `--staged`, so under
-  `--all-files` it scans nothing and passes.
+  are hex strings; not gitleaks, whose hook ids all pass `--staged`.
 - **spelling** — `codespell` and `typos`, both configured in
   `pyproject.toml`, both skipping vendored vectors: a typo inside an
   upstream vector is part of the vector. `typos` is a `local` hook
-  pinned through `additional_dependencies`, and `typos --version` answers
-  its release, an index install putting no upstream clone in the loop.
+  pinned through `additional_dependencies`.
 
     **`codespell --version` answers `0.1.dev1+g<sha>` and not the
-    release its `rev:` names**, pre-commit's shallow checkout of the
-    pinned ref leaving `setuptools_scm` a clone with no tag to describe.
-    What follows the `g` is the commit the `rev:` resolved to, and this
-    names it in full, `<rev>` last for the reason section 9 gives:
+    release its `rev:` names**, what follows the `g` being the commit:
 
     ```shell
     gh api --jq .sha repos/codespell-project/codespell/commits/<rev>
     ```
 
-    The commits endpoint and not `git/ref/tags`, so the command holds
-    whichever way the pinned repository tags.
+    The commits endpoint, so the command holds however the repository tags.
 - **prose and markup** — `markdownlint-cli2`, `prettier` (yaml and
   jsonc), `taplo-format`, `yamllint`.
 - **schemas** — `check-dependabot`, `check-readthedocs`,
   `check-github-issue-config` and `check-github-issue-forms`, because a
   typo in one of them is not an error to the service that reads it: it
   silently does nothing. The issue pair selects narrowly, both carrying
-  `types: [yaml]`: `config.yml` under that spelling for the first, the
-  directory's yaml that is neither `config.yml` nor `config.yaml` for
-  the second, a markdown template for neither. Each goes where
-  `ISSUE_TEMPLATE/` holds what it selects, `check-hooks-apply` failing a
-  hook that matches no file.
+  `types: [yaml]`, and each goes where `ISSUE_TEMPLATE/` holds it.
 - **workflows** — `actionlint` and `zizmor`, both at zero findings, both
   required to stay there. actionlint via its Python packaging, the
   upstream hook's only non-docker id needing a go toolchain.
 - **Python** — `ruff-check --fix` and `ruff-format`.
 - **docstrings against signatures** — `pydoclint` over the package: the
   `D` family checks that a docstring *exists*, this that it describes
-  the parameters and the return the signature declares — the half that
-  goes wrong silently when a signature changes.
+  the parameters and the return the signature declares.
   `skip-checking-short-docstrings` is **each repository's to set, and
   what decides it is the form a docstring's contract takes there**: at
   its default a docstring carrying sections is held against the
-  signature and one carrying none taken at its word; set `false`, every
-  docstring owes an `Args` and a `Returns` for what the signature
-  declares. Section 9 asks for the contract and not for a section, so
-  `false` where a section is how that tree's docstrings state it and the
-  default where they state it in prose, pydoclint reading a section and
-  not a sentence so that `false` over prose asks for the same fact twice
-  — section 9's *One fact in one place*. Prose leaving a parameter
-  unmentioned states no contract, and no value of the key finds it. The
-  answer goes in `[tool.pydoclint]`, section 3's rule and not a new one;
-  `false` for the public API and the default elsewhere is not offered,
-  pydoclint having no such split.
+  signature and one carrying none taken at its word. So `false` where a
+  section is how that tree's docstrings state it, the default where they
+  state it in prose, the answer going in `[tool.pydoclint]`, section 3's
+  rule and not a new one.
 - **types** — a mypy hook, below.
 - **packaging** — `uv-lock`, `pyroma`, and `check-sdist` wherever an
   sdist is built, section 12's condition rather than a second one.
@@ -1205,120 +1048,63 @@ pre-commit.ci does not have — the lint workflow covers it. No
     group**: `language: system` with
     `entry: uv run --locked --only-group check pyroma`, and upstream's
     own `args: [-d, --min=10, .]`, `pass_filenames: false` and
-    `always_run: true` written out, a local hook inheriting nothing. Its
-    version is then the lock file's, and uv takes a prerelease only
-    where the specifier names one or the package has no release to take
-    instead, so a bound naming no prerelease holds the packaging checker
-    at a release — and that bound is the only thing saying so. Nothing
-    refuses one that does name a prerelease, `pinned-rev` reading a
-    `rev:` and no hook reading a dependency-group bound:
-    `btclib-secp256k1`'s names a beta on the interpreters a `docutils`
-    constraint forces it on, with that reason beside the specifier. What
-    the shape buys is the `rev:`'s own failure, where what `autoupdate`
-    proposes `pinned-rev` refuses and the bot's pull request cannot go
-    green while it carries a prerelease, taking every unrelated bump in
-    that commit with it (btclib-org/.github#1199). The price is the mypy
-    hook's, `skip:` in the `ci:` block.
+    `always_run: true` written out. Its version is then the lock file's,
+    and a bound naming no prerelease is the only thing holding the
+    packaging checker at a release; what the shape buys is the bot's
+    pull request going red while it carries one (btclib-org/.github#1199).
 
 ### The local hooks
 
 - **mypy** — a trade-off with two right answers rather than a rule.
   Either way `--ignore-missing-imports` is off: it turns an unresolved
-  or misspelled import into `Any`, which is the opposite of strict, and
-  `mirrors-mypy` supplies it by default.
+  or misspelled import into `Any`, which is the opposite of strict.
 
     - **A local hook**, `language: system`, running `uv run --locked
       --no-default-groups --group lint --group test mypy <package> tests
-      .github/scripts` with `pass_filenames: false`. The gate then
-      checks against the project's own locked environment: one
-      declaration of the dependencies, and the real ones behind the
-      types. Its price is `skip: [mypy]` in the `ci:` block, `uv` being
-      absent on pre-commit.ci.
-    - **`mirrors-mypy` with pinned `additional_dependencies`**, where
-      the type check needs a small, stable set pinnable by hand and kept
-      in step with `uv.lock`. Its price is that second declaration; what
-      it buys is the type gate running on pre-commit.ci too.
-
-    The criterion is which price is smaller: types resting on the
-    project's own package want the first, types resting on a handful of
-    stubs can afford the second. Under the local hook pre-commit.ci is
-    kept for the pull request bumping this file's pinned revisions, a
-    local hook having none and `uv.lock` moving its mypy instead.
-
-    **Under the mirror, two declarations have to stay equal**, and
-    nothing makes them: the hook's `rev` against the mypy `uv.lock`
-    resolves, and each `additional_dependencies` pin against the same
-    package there.
+      .github/scripts` with `pass_filenames: false`, checking against the
+      project's own locked environment. Its price is `skip: [mypy]` in
+      the `ci:` block, `uv` being absent on pre-commit.ci.
+    - **`mirrors-mypy` with pinned `additional_dependencies`**, where the
+      type check needs a small, stable set pinnable by hand. Its price is
+      that second declaration, which nothing keeps equal to `uv.lock`;
+      what it buys is the type gate running on pre-commit.ci too, and
+      what decides between the two is which price is smaller.
 - **`toml-comment-width`** — pygrep, 80 bytes on a toml comment, columns
-  where the comment is ASCII. `.{80}\S*[ \t]` reports a line only when
-  whitespace is left past byte 80: a comment whose overflow is one
-  unbroken token is exempt.
+  where the comment is ASCII: `.{80}\S*[ \t]` reports a line only when
+  whitespace is left past byte 80, so a one-token overflow is exempt.
 - **`decoded-subprocess-encoding`** — pygrep refusing `text=True` and
   `universal_newlines=True`: a decoded child process takes the locale's
-  encoding, the same defect ruff's `unspecified-encoding` catches one
-  layer in, and no linter here has an opinion on the keyword.
+  encoding, the defect ruff's `unspecified-encoding` catches one layer
+  in.
 - **`reasonless-coverage-pragma`** — pygrep refusing a `#`-comment
   `pragma: no cover` or `pragma: no branch` with nothing after it on its
   own line, narrower than section 8's own acceptance command: the match
-  wants a `#` immediately before `pragma`, which a comment always opens
-  with and a backticked reference in prose never carries, so a docstring
-  quoting the rule is not refused and a bare mention in a comment's
-  prose is left to the command. A test of this suite would report one
-  only after the pull request that added it had landed.
+  wants a `#` immediately before `pragma`, so a docstring quoting the
+  rule is not refused.
 - **`local-link-prefix`** — pygrep refusing a markdown link whose
   destination is local and is not explicitly relative, beginning
   neither `./` nor `../`, in every repository of the organization, this
   one included: an explicit relative prefix is what lets a check
-  downstream key on one pattern, and a standard whose own tree breaks
-  it carries a counter-example at the top.
+  downstream key on one pattern.
 
     Where documentation is built, `docs.yml` greps the built html for
     `href="#./` or `href="#../`, what MyST renders in place of a link
-    the `RootFileLinks` transform in `docs/source/conf.py` cannot
-    resolve — an anchor to an id no page has, and a dead link `-W` sees
-    nothing wrong with once a suppression is added back.
+    `docs/source/conf.py`'s `RootFileLinks` transform cannot resolve.
 
-    **The prefix is the rule, and not the extension**: an extensionless
-    destination, a `.txt` and a path into a subdirectory reach that
-    fallback too, so an `.md`-scoped rule leaves them writable. `../`
-    is admitted for the same reason `./` is — an explicit relative
-    prefix is what the fallback grep can key on — and not because a
-    `../` destination is known to escape the repository:
-    `RootFileLinks` declines only a target that normalizes *above* the
-    root, and `docs/source/migrating.md`'s `../../README.md`
-    normalizes *to* it, which it resolves instead. Whether a
-    destination exists at all, an escape above the root included, is
-    not a property of the line it is written on, and no regex over one
-    line decides it; that is section 10's `links` workflow's question,
-    which resolves the target itself and reports what is missing.
-    Refusing at source stays this hook's job for the one thing it can
-    see — the prefix — and nothing more.
-
-    A `[` preceded by a backtick is exempt, so prose quotes the refused
-    shape in a code span, pygrep being blind to a fence; a badge, whose
-    image is its link text, and a link reference definition at the
-    line's start are reached too.
+    **The prefix is the rule, and not the extension**, an extensionless
+    destination and a path into a subdirectory reaching that fallback
+    too; whether a destination exists at all is section 10's `links`
+    workflow's question. A `[` preceded by a backtick is exempt.
 - **`no-hyphen-at-end-of-line`** — pygrep refusing a line that ends
   inside a word, at that word's own hyphen, in the file types whose
   prose a build renders: markdown, reStructuredText and Python. Markdown
   joins two source lines with a space, so a word wrapped there renders
-  with the hyphen *and then a space* inside it. The source looks
-  correct, so reading a diff does not find one, and no other tool here
-  covers it.
+  with the hyphen *and then a space* inside it, which a diff does not show.
 
     **A docstring reaches that rendering by another route**, which is
-    what puts Python in the list rather than leaving the hook to
-    markdown: docutils leaves the break in the paragraph it builds and
-    html collapses it to a space. Section 9's width holds a docstring to
-    80 columns and has no opinion on where a line ends, so the break
-    this hook refuses is one that width asks for.
-
-    Over Python it refuses more than a build renders — a `#` comment, a
-    test's docstring — which is the price of reading a line at a time;
-    the repair is the same reflow wherever the refused line sits. It
-    cannot see a code span breaking at a `/` or a `.`, which renders the
-    same intruding space with no hyphen to match, nor a file type the
-    list does not name.
+    what puts Python in the list: docutils leaves the break in the
+    paragraph it builds and html collapses it to a space. Over Python
+    the hook refuses more than a build renders.
 - **`unquoted-placeholder`** — pygrep refusing a placeholder that stands
   as a whole argument and carries quotes, in every repository of the
   organization, this one included. Section 9 is the rule and what the
@@ -1328,64 +1114,39 @@ pre-commit.ci does not have — the lint workflow covers it. No
 
     **`CHANGELOG.md` and `RELEASE_NOTES.md` are outside it**, by
     `exclude: ^(CHANGELOG|RELEASE_NOTES)\.md$`: section 9 makes both
-    append-only, so a refused shape in a landed entry has no repair and
-    the tree no green state to reach, and what holds the rule there is
-    somebody reading the entry first. `RELEASE_NOTES.md` is named in a
-    tree carrying none because `check-useless-excludes` asks an
-    exclusion to match some file the hook selects, not each name in it.
+    append-only, so a refused shape in a landed entry has no repair.
 
     **What separates an exempt quote from a refused one is a property of
-    the line, not of the fence around it**: a pattern that read the file
-    whole in order to see a fence would report only its own first line.
-    So both of section 9's exemptions are read off the line: no shell
-    puts a space around an assignment's `=`, so a spaced one is another
-    language's and its value that language's to quote; and a quote
-    nested inside a quote of the other kind is a nested program's.
-
-    Reading one line at a time over-reports an array written one element
-    to a line and a program split over two, the exempting assignment or
-    quote sitting on another line, and misses a placeholder sharing its
-    line with an earlier quote of its kind. A reader meeting one
-    rewrites the line rather than waiving the hook: the value goes into
-    an assignment block above the fence and the program carries
-    `${name:?}`, as section 9's placeholder bullet already asks of the
-    lower fence.
+    the line, not of the fence around it**: no shell puts a space around
+    an assignment's `=`, and a quote nested inside a quote of the other
+    kind is a nested program's. A reader meeting an over-report rewrites
+    the line rather than waiving the hook.
 - **`check-changelog`** — a local hook, `language: system`, running
   `python3 .github/scripts/check_changelog.py` with `pass_filenames:
-  false` and `always_run: true` over `CHANGELOG.md`. It runs ahead of
+  false` and `always_run: true` over `CHANGELOG.md`, ahead of
   `markdownlint-cli2` so it reads the file before that hook's `--fix`
   repairs the seam the blank-line check names. `merge=union` stays on
-  that file (btclib-org/.github#21's ruling), and this is the gate its
-  price bought back: it refuses a repeated `###` heading, a heading left
-  with no blank line above it — the blank the driver eats at that seam
-  (btclib-org/.github#760) — and, section 9's bound, an entry whose body
-  runs past three lines. The script's own docstring carries the checks
-  and what they cannot make, a network call being what a hook is the
-  wrong place for.
+  that file (btclib-org/.github#21's ruling) and this is the gate its
+  price bought back: a repeated `###` heading, a heading with no blank
+  line above it (btclib-org/.github#760) and an entry past section 9's
+  three-line bound are all refused.
 
-    Two branches adding the same new heading at the section's one shared
-    anchor is not a repeat: the driver folds them into one entry, which
-    can hide two entries closing one issue. A heading is repeated only
-    where the matching text does not end up adjacent once the merge is
-    done, or where a new heading repeats one already in the section at
-    the shared base.
+    A heading is repeated only where the matching text does not end up
+    adjacent once the merge is done, two branches adding the same new
+    heading at the one shared anchor being folded into one entry, or
+    where a new heading repeats one already in the section at the
+    shared base.
 
     The check has to fire before the merge that creates the duplicate,
-    which only a hook on the branch does and a test of this suite, an
-    audit after the fact, cannot; news fragments and a landed-order gate
-    are declined at btclib-org/.github#305 and btclib-org/.github#516.
+    which only a hook on the branch does; news fragments and a
+    landed-order gate are declined at btclib-org/.github#305 and
+    btclib-org/.github#516.
 
-    **The hook runs on every invocation, and carries no `files:`.** The
-    script reads the open section off disk and is handed no file list,
-    so a filter decides nothing about its input and only whether the
-    hook runs at all — keyed on a diff the script never consults, and
-    empty after the rebase that eats the seam the blank-line check
-    exists to name. `check-hooks-apply` passes over an `always_run`
-    hook, so a `files:` kept beside one is a pattern nothing refuses
-    once it stops matching, which is what *the file checking itself*
-    above is for. The rejected alternative keeps the filter and asks
-    whoever runs the gate to remember `--all-files`, which is a
-    convention held in prose where this is a hook that fires.
+    **The hook runs on every invocation, and carries no `files:`**, the
+    script being handed no file list for a filter to decide anything
+    about, and `check-hooks-apply` passing over an `always_run` hook;
+    a filter kept and `--all-files` remembered by hand is a convention
+    held in prose where this is a hook that fires.
 
 ## 5. ruff
 

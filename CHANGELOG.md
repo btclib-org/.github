@@ -9166,3 +9166,8 @@ nothing red follows from the copies disagreeing.
 
 - **The tree carries a ClusterFuzzLite entry over its unsized parsers**
   (closes #342): the last of the three the issue named.
+
+### Sections 3 and 4 say each rule and its reason, and no more
+
+- **The argument behind a rule shrinks to a sentence** (issue #1075):
+  what the rules are has not moved, and what reads each one still does.
