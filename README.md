@@ -99,6 +99,12 @@ against something that no longer exists; and the copies cannot see each
 other, which is how the same defect was filed twice ninety minutes apart
 by two passes over one file, neither noticing the other.
 
+**An issue names a user, a build, a release or a setting affected.** A
+shape a test cannot read is that test's defect, fixed there or the
+reading dropped, and never an issue per copy that carries the shape; a
+session filing more than one issue reads the tracker first, and one
+worker files for all.
+
 The shape is one issue naming the repositories it is about, with a
 checkbox per repository and the command that re-derives the finding, and
 it closes when the last box is ticked. A per-repository issue is for
@@ -147,8 +153,10 @@ they are applied per repository, which section 15 is how to verify.
 - **A numbered section's rule enters this file together with what reads
   it — a hook of section 4 or a test of `tests/` — or it does not
   enter**: a rule only a reader enforces turns every landing into a
-  finding. This preamble is read by the review, `REVIEWING.md`'s *This
-  repository in particular*.
+  finding. **What reads it reads configuration** — a file a tool parses,
+  a workflow, the API — and not prose: a test over prose is a parser of
+  prose, and what it finds is about the parser. This preamble is read by
+  the review, `REVIEWING.md`'s *This repository in particular*.
 - **This file does not grow by accretion.** What a rule costs in lines —
   the sentence of reason this list asks of it included — comes out of
   what its arrival makes redundant where it lands, and
@@ -2457,14 +2465,14 @@ gh run list --repo <owner>/<repo> --workflow <name>.yml \
 ```
 
 Run it for the gate's workflow too, counting only completed runs: `skipped` and
-`cancelled` did none of the work. This repository's `alignment.yml` is the
-seconds case, its list naming `README.md` so that nearly every branch selects
-it. `workflow_call` and `push: branches: [main]` are outside the question. An
-unfiltered `pull_request` needs a reason of its own, stated in the header, and
-the organization has two such reasons: `integration-bitcoind`, whose regtest job
-is a required check and where a required check that never runs blocks a merge,
-and `codeql`, whose result the OpenSSF Scorecard reads off a merged pull
-request's own commits.
+`cancelled` did none of the work. `workflow_call` and
+`push: branches: [main]` are outside the question. An unfiltered
+`pull_request` needs a reason of its own, stated in the header, and the
+organization has three such reasons: this repository's `alignment`, whose
+run is seconds and whose subject is nearly every file of the tree;
+`integration-bitcoind`, whose regtest job is a required check and where a
+required check that never runs blocks a merge; and `codeql`, whose result
+the OpenSSF Scorecard reads off a merged pull request's own commits.
 
 **A rewrite owes a dispatch.** A schedule-only workflow keeps the previous
 file's verdict as its newest run until its cron comes round, so a landing that
@@ -2925,68 +2933,13 @@ recorded `404` is what makes a later silent flip to `on` visible. The
 default branch is inside by the general rule, section 16's checklist
 setting it; a copy reads both back with the commands that answer them.
 
-**A recorded answer is a setting or an observation, and which one it is
-decides whether a drift in it is a finding.** A setting is an answer the
-organization decided, and a cell of `tests/` reads it back against the
-live endpoint the command names, a changed answer being the drift
-btclib-org/.github#1017 went looking for. An observation is a fact about
-a changing world instead — a release count, a plan name, the signature
-on whatever commit is at the tip today — where a difference is news
-rather than drift, and a reader is the only check on it, taken at
-section 15's audit. **The default is a setting.** A copy takes a reading
-out of that default by marking it with the words *a fact about a
-changing world* next to the date it was read; the phrase's absence is
-what leaves the default in force, so a line classified the wrong way
-round is a cell that goes red rather than a gap nothing reports,
-whichever way the mistake runs.
-
-**A recorded answer is what the command prints, whole**, because
-`test_the_settings_file_reads_its_settings_back` compares that string
-against that output. An elision — a `...` standing for keys the
-paragraph did not want to carry — and a gloss written where the answer
-goes are each a cell that reddens with nothing drifted. One comment
-standing for two commands is the same mistake reaching no cell yet, the
-commands carrying it being excluded on other grounds until the grant
-widens. Where the whole output is more than the paragraph wants, **the
-command is what narrows**: `--jq '{state, languages}'` and a complete
-answer, rather than the filter left off and the answer trailing away —
-an unfiltered object being what a key added at the endpoint breaks next.
-What the object means is prose, and prose goes in the paragraph rather
-than in the `#` line the comparison reads.
-
-**A mark reaches every reading its heading opens**, the `##` or `###`
-span being the unit and not the paragraph, so an answer whose fields do
-not all classify alike cannot be marked where it stands: *Tokens,
-publishing, scanning* below asks for scanning settings and calls others
-of the same object plan-gated, and `.security_and_analysis` answers with
-them together. **The command is what splits it**, as it is what narrows
-— the object's own reading filtered to the fields the organization
-decided, and what the plan decides read by a command of its own under
-*Plan-gated settings*, the section where the plan's own answer is
-marked. The day a
-gated field becomes available it joins the filter, its answer being a
-decision for the first time; the rejected alternative records the object
-whole and gates it, so that the first red says the plan moved and names
-nothing anybody chose.
-
-**An empty output is written as an empty comment**, which the comparison
-already reads as empty, rather than as a word for it. The cost is a
-reader's: no comment at all drops the reading out of the comparison
-silently, an empty one records an answer expected to be empty, and the
-two differ by one character. A copy that wants the difference
-legible says it in the prose beside the fence, where a reader of that
-copy will find it, since a reader of a copy does not read this file.
-
-**A reading the comparison reaches has to run as written**, the line
-going to a shell unchanged, since a bare newline ends the statement
-where it falls and the shell reads what follows as a command of its own.
-One long enough to wrap **moves into a fenced block, its wrap
-continued** rather than carrying a `\` inline, both being shell-correct
-and only one of them legible — a fence is where a `\` belongs, not what
-excuses it. A reading that reads a value set beside it — section 9's bare,
-last placeholder read back as `${name:?}`, or a plain assignment in the
-same fence — **stays out of the comparison** rather than being rewritten
-to satisfy this.
+**A recorded answer is documentation, and a reader is its check.**
+What `tests/` gates is the live endpoint against the rule this file
+states — the merge method, the signatures, the token, the wiki and the
+projects board, the topics, the homepage, private vulnerability
+reporting — and never a copy's prose against the endpoint. The rejected
+alternative reads each quoted answer back, and its parser of prose cost
+more issues than the drift it caught (btclib-org/.github#1017).
 
 ### Signatures
 

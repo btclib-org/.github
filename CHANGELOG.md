@@ -9155,3 +9155,9 @@ nothing red follows from the copies disagreeing.
 - **A line opening `gh api` no longer ends a run whose text cannot
   end** (closes #1280): the guard that ended it there cut a pipeline in
   two and handed the first half to a shell ending in a `\`.
+
+### `REPOSITORY.md`'s recorded answers are a reader's check
+
+- **`readback_test.py` goes; `alignment.yml` runs on every PR** (closes #1017)
+  (closes #1262) (closes #1263) (closes #1264) (closes #1265) (closes #1270)
+  (closes #1273) (closes #1274) (closes #1275) (closes #1277) (closes #1281)

@@ -18,10 +18,12 @@ name: alignment
 # days ago, in a repository nobody is currently working in. It gates
 # nothing, so a red run here is a backlog rather than a block.
 #
-# It runs on a pull request that touches the suite itself, which is how a
-# change to a question gets asked before it is merged, and reads this
-# working tree for `.github` rather than cloning it -- so a pull request
-# that edits the calendar is checked against the calendar it proposes.
+# It runs on every pull request, and reads this working tree for
+# `.github` rather than cloning it -- so a pull request that edits the
+# calendar, a verbatim file or a recorded setting is checked against
+# what it proposes. A run is seconds, and nearly every file here is one
+# the suite reads, so a paths filter would spare nothing and would be a
+# list to keep in step with what the suite reads.
 #
 # The token is minted per run from the btclib-org-alignment GitHub App,
 # installed on every repository with read-only permissions: its OAuth
@@ -48,42 +50,6 @@ on:
     # cancel-in-progress below is what then decides between superseding
     # the run still held there and queueing behind it
     types: [opened, reopened, synchronize, ready_for_review, closed]
-    paths:
-      # every workflow of this tree and not this one alone: the suite
-      # reads the `cron:` of each of them, so a schedule edited here is
-      # a change to what it is being asked about
-      - .github/workflows/**
-      - tests/**
-      - pyproject.toml
-      - uv.lock
-      # the two sections the suite reads as data: a row added to the
-      # calendar, or a file added to the verbatim list, is checked by
-      # the run on the commit that adds it. Naming this tree's product
-      # selects nearly every branch here, which section 10 settles on
-      # the clock rather than on the count: what this sweep adds to the
-      # wait a pull request already has is seconds, so a list narrow
-      # enough to spare a prose branch would buy that branch seconds
-      # and leave the drift it introduces to wait for Saturday
-      - README.md
-      # section 14's verbatim files themselves, so a pull request that
-      # edits one is checked against the copies it would leave behind
-      # rather than waiting for the Saturday cron --
-      # tests/verbatim_test.py::test_alignment_triggers_on_every_verbatim_file
-      # is what keeps this list and section 14's in step
-      - .markdownlint.jsonc
-      - .yamllint.yaml
-      - .taplo.toml
-      - COPYRIGHT
-      - LICENSE
-      - .claude/commands/review.md
-      - .github/scripts/check_changelog.py
-      - .github/scripts/mutation_counts.py
-      - .github/scripts/wait_for_pypi_release.py
-      - .github/scripts/wait_for_readthedocs_build.py
-      - CONTRIBUTING.md
-      - REVIEWING.md
-      - .gitattributes
-      - CLAUDE.md
 
 # least privilege: this reads the organization's repositories and writes
 # nothing, files nothing and publishes nothing
