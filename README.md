@@ -3382,8 +3382,7 @@ failures as strict expected failures naming the issue, so a tree that catches up
 is reported until its row goes.
 
 The commands below ask the same of the tree in front of you, and what the suite
-does not ask yet or cannot, such as reading `tests/README.md` against section 7
-or the workflow comments. A repository answers for itself where it can:
+does not ask yet or cannot. A repository answers for itself where it can:
 `interpreters_test.py`, `conventions_test.py`, the hook-pin tests. Section 3's
 rule that the classifiers name a tree's interpreters is `interpreters_test.py`
 where a tree publishes and the window sweep below where it does not: publishing
@@ -3759,12 +3758,12 @@ done
 ```
 
 **`RELEASING.md`'s by-hand recovery paths are exercised by incident, and that is
-accepted rather than overlooked**: a scratch repository would join every sweep,
-an extracted script tests a mock. A walk is written down above `github-release`
-or in the broken release's `CHANGELOG.md` entry, naming the release and what
-skipped the job. A column above zero is where to look; with `0` in both, a
-skipped `github-release` beside a present release is a walk. The raw media type
-and emptiness test catch a `200` with empty `content` past the limit:
+accepted rather than overlooked**: a scratch repository would join every sweep.
+A walk is written down above `github-release` or in the broken release's
+`CHANGELOG.md` entry, naming the release and what skipped the job. A column
+above zero is where to look; with `0` in both, a skipped `github-release` beside
+a present release is a walk. The raw media type and emptiness test catch a `200`
+with empty `content` past the limit:
 
 ```shell
 for r in <every publisher>; do
@@ -3783,8 +3782,7 @@ done
 
 ### Reading the workflow comments
 
-No tool checks them: a comment saying a job "calls three reusable workflows"
-sits unchallenged beside a file that calls six.
+No tool checks them.
 
 1. **Read every comment, end to end**: stale ones read like true ones.
 1. **Check each claim against this repository's tree**, never another comment or
@@ -3810,9 +3808,8 @@ sits unchallenged beside a file that calls six.
 
 1. Its tier, measured as section 2 measures it, and its row in section
    2's table, in the pull request that creates the repository. The tier
-   is which of the steps below the tree owes, and a step for a section
-   the tier does not bind is not a gap skipped but a step that does not
-   exist for that tree.
+   is which of the steps below the tree owes: a step for a section the
+   tier does not bind does not exist for that tree.
 1. `git init`, MIT `LICENSE`, `COPYRIGHT`, `AUTHORS.md`.
 1. `pyproject.toml`: section 3's build backend, metadata, PEP 639
    licence, keywords matching the topics, urls, dependency groups, and
@@ -3820,9 +3817,7 @@ sits unchallenged beside a file that calls six.
 1. Copy the files section 14 names for the tools whose configuration is
    not in `pyproject.toml`, and `.gitattributes` (with the two
    `merge=union` entries). `.python-version` and `.gitignore` are
-   written rather than copied, section 14 deciding both per repository:
-   the interpreter this repository pins, and what its own build and
-   tools write.
+   written rather than copied, section 14 deciding both per repository.
 1. `.pre-commit-config.yaml`, including the mypy hook section 4's
    criterion chooses and the `pinned-rev` guard; `uv run pre-commit run
    --all-files` until clean; generate `.secrets.baseline`.
@@ -3870,23 +3865,19 @@ sits unchallenged beside a file that calls six.
 Ordered by what the gap costs — an unsigned commit or a token that can
 write to the repository outranks a formatter — wherever dependency
 leaves that order free, because a step whose prerequisite has not landed
-cannot be performed, and one that cannot be performed has no cost to
-weigh. Dependency is a partial order and fixes only the steps below that
-say what they wait for: it has nothing to say about mypy against ruff
-against pytest, so ordering the whole list by it would settle those by
-nothing at all. Cost settles them, and cost is what makes any prefix of
-this list the right prefix — a normalization lands over many pull
-requests and stops wherever it stops. The tier comes before the list,
-section 2's table: it says which of these steps the tree owes at all.
+cannot be performed. Dependency is a partial order and fixes only the
+steps below that say what they wait for; cost settles the rest, and it
+is what makes any prefix of this list the right prefix, a normalization
+landing over many pull requests and stopping wherever it stops. The tier
+comes before the list, section 2's table: it says which of these steps
+the tree owes at all.
 
-Not every constraint is an order between two steps, and the ones that
-are not hold over all of them. **A rule arrives with its subject**: a
-hook lands with the files it reads, and configuration copied from a
-sibling comes minus any rule whose subject this tree does not have yet,
-each such rule arriving with its file. **A gate's first run is over a
-tree it has never seen**, so it runs over the whole tree rather than
-over what its own step added — everything the steps before it wrote was
-written before the gate that judges it.
+A constraint that is not an order between two steps holds over all of
+them. **A rule arrives with its subject**: a hook lands with the files
+it reads, and configuration copied from a sibling comes minus any rule
+whose subject this tree does not have yet, each such rule arriving with
+its file. **A gate's first run is over a tree it has never seen**, so it
+runs over the whole tree rather than over what its own step added.
 
 1. **`REVIEWING.md` and `claude-review.yml` first**, before anything is
    proposed: section 11 is where the ack of record is that workflow's,
@@ -3894,13 +3885,13 @@ written before the gate that judges it.
    repository holding neither has no ack available to it.
    `.claude/commands/review.md` lands with them, section 14 owing it
    wherever `REVIEWING.md` is.
-   This is not the costliest gap, it is the one every step that lands as
-   a pull request waits on, which is every step below that changes the
-   tree. The settings applied straight to the repository — section 11's,
-   and the branch rules of the step under this one — are not proposed
-   and not reviewed, so they do not wait for it. The credential is an
-   organization secret with `visibility=all`, so a repository configures
-   nothing for it: `gh api orgs/<org>/actions/secrets` is the reading.
+   It is not the costliest gap but the one every step that lands as a
+   pull request waits on. The settings applied straight to the
+   repository — section 11's, and the branch rules of the step under
+   this one — are not proposed and not reviewed, so they do not wait for
+   it. The credential is an organization secret with `visibility=all`,
+   so a repository configures nothing for it:
+   `gh api orgs/<org>/actions/secrets` is the reading.
 1. **Signatures and branch rules** — `required_signatures`, no direct
    push, linear history, one review, squash-only. An unsigned commit that
    already landed is history; the rule stops the next one.
@@ -3914,9 +3905,7 @@ written before the gate that judges it.
    owing it at every tier: it is what makes the route a `SECURITY.md`
    links exist, and it waits for nothing.
    **Dependabot's updates wait** for the lock below — turned on over the
-   outgoing resolution, they propose bumps to a file that step deletes,
-   and one landed there is a conflict on the migration rather than a
-   fix.
+   outgoing resolution, they propose bumps to a file that step deletes.
 1. **Actions pinned to commit SHAs**, then `actionlint` and `zizmor` to
    zero.
 1. **`uv` and a committed lock**, `--locked` in every job, and one
@@ -3927,13 +3916,10 @@ written before the gate that judges it.
    `[tool.check-wheel-contents]` naming the package where the wheel is
    one package tree, the page, the script and the test where it is not,
    and `check-sdist` against the archive wherever an sdist is built. A
-   backend move is checked by the archive
-   it produces and not by the file it edits — an sdist built each way,
-   with the member lists compared — since what the outgoing include
-   language expressed and the incoming one cannot shows up there and
-   nowhere else.
-   Everything else the `dist` job runs reads a distribution's account
-   of itself, which a `py.typed` lost to a `package-data` typo passes.
+   backend move is checked by the archive it produces and not by the
+   file it edits — an sdist built each way, with the member lists
+   compared — since what the outgoing include language expressed and the
+   incoming one cannot shows up there and nowhere else.
 1. **`.pre-commit-config.yaml` as the single lint gate**, and the lint
    workflow reduced to running it. Delete any second list of the same
    tools from the workflows. The shared configuration its hooks read
@@ -3954,8 +3940,7 @@ written before the gate that judges it.
    empty backlog: it arrives once the markers it refuses, and any
    `TODO.md`, are issues.
 1. **pytest strictness** — `--strict-config`, `--strict-markers`,
-   `filterwarnings = ["error"]`, `xfail_strict`. Expect this one to be
-   the loudest.
+   `filterwarnings = ["error"]`, `xfail_strict`.
 1. **Coverage to 100** — this is the long one, and the ratchet is the
    wrong tool for the climb: measure, cover the reachable, `pragma: no
    cover` with a reason where the line is unreachable, and set
@@ -3963,10 +3948,9 @@ written before the gate that judges it.
    `source` from the start.
 1. **The convention tests**, which section 7's terms decide, and
    `tests/README.md` declaring which of that section's bullets those
-   are. An older repository is where the declaration earns most: it is
-   the step that says which conventions this tree has decided it does
-   not have, which is otherwise indistinguishable from having forgotten
-   them.
+   are. The declaration says which conventions this tree has decided it
+   does not have, which is otherwise indistinguishable from having
+   forgotten them.
 1. **The missing root files**, `REPOSITORY.md` first: it is the only
    record of what the settings are.
 1. **Dependabot's own configuration, the sentinel workflow, and the
