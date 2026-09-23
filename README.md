@@ -2230,8 +2230,7 @@ is silent about reads as a decision rather than as an omission.
 
 **A copy carries all three limbs in the standard's own words** rather
 than wording them for itself: `README.md` written into the second limb
-names a sibling's own file, and a bare `it` there reaches for section
-16's checklist.
+names a sibling's own file.
 
 The claim rejected is `this file is the whole of them`, which no command
 checks: telling the fields a repository decides from the rest of the
@@ -2239,9 +2238,7 @@ endpoint's answer is a reading, where the perimeter above is one this
 file fixes and a copy can be held to.
 
 **The section headed `## What this file passes over` is where a copy
-says what falls outside that scope.** Whether the section is there is
-what a command asks; whether it is honest about the perimeter is a
-reading.
+says what falls outside that scope.**
 
 **A copy does not claim that nothing it records has another form in the
 tree.** The topics are section 3's `keywords`, a releasing tree's
@@ -2259,10 +2256,9 @@ board a per-user view of the same issues.
 and section 16's `ISSUE_TEMPLATE/` both rest on each repository's tracker.
 
 **Section 10's `scorecard` bar splits on that same test.** The sentinel
-reads a public repository only, so a copy reads `.visibility` back and a
-flip to private is one command from being seen. Nothing sets `.fork`: a
-repository arrives as a fork or it does not, so no limb reaches it and
-section 10 states that half of the bar.
+reads a public repository only, so a copy reads `.visibility` back.
+Nothing sets `.fork`: a repository arrives as a fork or it does not, so
+no limb reaches it and section 10 states that half of the bar.
 
 **Whether GitHub Pages is configured is inside the perimeter too, on
 every tree and not only the one that serves a site from its own root.**
@@ -2294,7 +2290,7 @@ link in a fully signed chain.
 ### Branch protection and rulesets
 
 `main` is the only branch. Everything reaches it through a pull request,
-the bots' included, none of which names a target branch.
+the bots' included.
 
 Classic protection carries the required checks with `strict`, one
 approving review, `dismiss_stale_reviews`, linear history, no force
@@ -2353,10 +2349,6 @@ deliberately removed, since it replays a branch's review steps onto
 merge settings. Off, every landing waits on somebody pressing *Squash
 and merge* when the last check goes green, and nothing turns red.
 
-One method is also one entry in a dropdown that GitHub preselects from
-whatever was used last — and the dialog that switches auto-merge on
-carries the same dropdown, hours before anything merges.
-
 `squash_merge_commit_title` and `squash_merge_commit_message` are set so
 that a single-commit branch lands under its own subject and a longer one
 under the pull request's title, with the branch's commit messages as the
@@ -2379,8 +2371,7 @@ git show -s --format=%B <sha> | head -1
 parentheses**: `Say when github-release runs instead of relying on no if
 (closes #1142)`. Which of the title and the branch's own commit subject
 lands is *Merge method*'s rule, so the parentheses belong on whichever
-one that is, and a subject that wraps takes its citation off the subject
-with it. Either way the number reaches `git log` and stays reachable
+one that is. Either way the number reaches `git log` and stays reachable
 from a checkout with no forge in front of it.
 
 **A pull request that advances an issue it does not close names it the
@@ -2430,10 +2421,6 @@ nothing against the push:
 gh api repos/<org>/<repo>/issues/<n>/timeline --paginate \
   --jq '.[] | select(.commit_id != null) | {event, commit_id}'
 ```
-
-A gap on one line, a verb and a number with only text between them, is
-not measured, and is no licence to put a verb before a number it must
-not close.
 
 **So the keyword and its reference share a physical line, and a block of
 several is written one keyword per line**, which no wrapper can split
@@ -2532,11 +2519,9 @@ gh api repos/<org>/<repo>/pulls/<n>/reviews --jq '.[].user.login'
 The first answers `false`, closing the route a `GITHUB_TOKEN` would
 take. The second answers `claude[bot]`, a GitHub App's identity, which
 that setting does not govern: what forbids `--approve` is the prompt,
-`Bash(gh pr:*)` in `claude_args` permitting it otherwise. The
-self-approval refusal is not the reason either, the workflow not running
-as the author. `--request-changes` goes unused, so that the body's last
-line, which the job's verification step reads, is the one place the
-verdict lives.
+`Bash(gh pr:*)` in `claude_args` permitting it otherwise.
+`--request-changes` goes unused, so that the body's last line, which the
+job's verification step reads, is the one place the verdict lives.
 
 **What the forge then holds is a record of the review and not an
 approval**, and it does not buy the OpenSSF Scorecard's `Code-Review`
@@ -2544,8 +2529,7 @@ check, which does not count a review by a bot as code review.
 
 **btclib-org/.github#341 holds the removal of the ruleset's
 `bypass_actors`**, which would put a person's approval on the critical
-path of every merge: the rule enforced by the forge, at the cost that
-nothing lands while nobody is available.
+path of every merge.
 
 **The ack of record is `claude-review.yml`'s**, and an author's own is
 not one: a comment from the account that opened the pull request says
@@ -2586,20 +2570,16 @@ colour.
 It is **not a required check**, its own header saying why: it is what a
 person landing the pull request reads before pressing.
 
-`REVIEWING.md` is the standard: a diff is acked when it leaves the tree
-better than it found it, a matter of taste is not a finding, and work
-the diff never set out to do becomes an issue rather than a comment.
-Every finding is labelled blocking, non-blocking, nit or question.
+`REVIEWING.md` is the standard a review measures a diff against.
 
 **A review pass runs locally against the branch before it is pushed**:
 `.claude/commands/review.md` with no argument reads the diff against
 `origin/main` and `REVIEWING.md`, posts nothing and is not the ack of
 record, so that the forge's round is the last rather than the first. It
 reaches what the gates do not — a count nothing re-derives, a bare
-cross-repository reference, a paragraph a change elsewhere falsified —
-and the count is not reachable by a pattern either, a number being a
-defect for what it counts. A pass run from the session that wrote the
-diff re-performs the author's reading.
+cross-repository reference, a paragraph a change elsewhere falsified. A
+pass run from the session that wrote the diff re-performs the author's
+reading.
 
 **A gate already run on this sha is relied on, and the run is named**;
 where none is on the record the review runs the gates, a failing one
@@ -2645,9 +2625,8 @@ The first answers with the name or nothing, `--silent` for the reason
 section 15's publishing sweep gives. The token is an
 **organization** secret at `visibility=all`, so a repository adopting
 the workflow configures nothing for it. It is in both stores for the
-reason *Dependabot and pre-commit.ci* gives below; without the second,
-every pull request Dependabot opens gets a red review. Why the job has
-the shape it has is in the workflow's own header.
+reason *Dependabot and pre-commit.ci* gives below. Why the job has the
+shape it has is in the workflow's own header.
 
 **The prompt is `reusable-claude-review.yml`'s, and a port adapts no
 part of it.** What a port adapts is the `uses:` reference — a path where

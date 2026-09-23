@@ -9188,3 +9188,9 @@ nothing red follows from the copies disagreeing.
 - **The argument behind a rule shrinks to a sentence** (issue #1075):
   what the four sections require has not moved, and every fenced block
   they give is unchanged.
+
+### Section 11 states each rule and its reason, and no more
+
+- **The argument behind a rule shrinks to a sentence** (issue #1075):
+  every rule the section states stays, and what reads each one still
+  does.
