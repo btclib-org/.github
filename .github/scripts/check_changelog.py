@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright (c) The btclib developers
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
@@ -131,25 +132,11 @@ name which entry above the line is the new one, and it does not see a
 grandfathered entry rewritten in place without the count changing --
 neither is the shape #1204 measured.
 
-**The count is a fact about a repository's history, not about this
-script, and this script is verbatim.** `.github`'s own open section
-held 350 entries above `RULE_HEADING` the day this check was added;
-btclib's held 23 (btclib-org/.github#1215). A constant defined up here,
-where every check above it lives, would have to be both at once for the
-file every repository carries byte for byte to stay byte for byte,
-which it cannot. Two things this file is not free to do about that:
-`CHANGELOG.md` cannot hold it either -- `tests/changelog_test.py`
-refuses this file a stated count of its own entries for the same
-`merge=union` reason section 14 gives this script's own `.gitattributes`
-line, and a frozen count is exactly that shape -- and asking a `git`
-history for it is the gap this file's own module docstring already
-names as out of reach of a `pre-commit` hook with one file at one
-revision. So the count lives in this file after all, below a
-`## This repository in particular` heading at the very end -- the
-marker `tests/verbatim_test.py`'s `shared()` already cuts `CONTRIBUTING.md`
-and `REVIEWING.md` at, nothing in it being markdown-specific. Everything
-above that heading is what section 14 compares; `_GRANDFATHERED_ENTRIES`
-below it is this repository's own.
+**The count is a fact about a repository's history rather than about
+this script, so it arrives as `--grandfathered`** and the gate that
+runs the hook is where each tree writes its own. The default is zero,
+which is the answer for an open section holding no entry above
+`RULE_HEADING` at all.
 
 A tree with no release carries one open section for the whole file, this
 repository's own `CHANGELOG.md` among them; a tree that releases keeps
@@ -157,17 +144,26 @@ everything from the first `## ` heading to the line before the second as
 open, and does not ask this script about anything a release has already
 closed over.
 
-    python3 .github/scripts/check_changelog.py
+    check_changelog.py --grandfathered N
 """
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-_ROOT = Path(__file__).resolve().parents[2]
-_CHANGELOG = _ROOT / "CHANGELOG.md"
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+# relative to the working directory, which `pre-commit` sets to the
+# root of the repository being checked: this file is served from
+# btclib-org/.github, so a path built from `__file__` would name the
+# hook repository's own clone in the cache rather than the tree the
+# hook was invoked over
+_CHANGELOG = Path("CHANGELOG.md")
 
 _RELEASE_HEADING = re.compile(r"^## .*$", re.MULTILINE)
 _ENTRY_HEADING = re.compile(r"^### (?P<title>.*)$", re.MULTILINE)
@@ -374,7 +370,7 @@ def misplaced_entries(
     text: str,
     section: str,
     base: int,
-    grandfathered: int | None = None,
+    grandfathered: int = 0,
 ) -> list[str]:
     """Report more entries above `RULE_HEADING` than were grandfathered.
 
@@ -383,22 +379,19 @@ def misplaced_entries(
     a new entry goes at the end of the open section -- which nothing
     else here checks. A branch that only ever appends below
     `RULE_HEADING` never grows the count of entries above it; where the
-    open section holds more than `_GRANDFATHERED_ENTRIES` names, one has
-    landed above it instead, out of section 9's order, and is refused
-    here rather than silently read as predating a rule it postdates.
+    open section holds more than `grandfathered` names, one has landed
+    above it instead, out of section 9's order, and is refused here
+    rather than silently read as predating a rule it postdates.
 
     :param text: the whole file, for the line number reported.
     :param section: the open section's own text.
     :param base: the offset `section` starts at within `text`.
-    :param grandfathered: overrides `_GRANDFATHERED_ENTRIES`, the
-        constant this repository's own trailing section below sets; a
-        test's shortcut, never `problems()`'s own call, which always
-        takes that constant as it stands.
+    :param grandfathered: how many entries the open section held above
+        `RULE_HEADING` when this check reached the repository, which
+        `main()` takes on the command line.
     :returns: one message, naming `RULE_HEADING`'s own line, where the
         section holds more entries above it than were grandfathered.
     """
-    if grandfathered is None:
-        grandfathered = _GRANDFATHERED_ENTRIES
     before = 0
     rule_offset = None
     for title, _, offset in entries(section):
@@ -452,10 +445,11 @@ def long_bodies(text: str, section: str, base: int) -> list[str]:
     return problems
 
 
-def problems(text: str) -> list[str]:
+def problems(text: str, grandfathered: int = 0) -> list[str]:
     """Return every way the open section fails the five checks.
 
     :param text: the whole file.
+    :param grandfathered: what `misplaced_entries()` measures against.
     :returns: one message per finding, in the order the checks run.
     """
     section, base = open_section(text)
@@ -463,17 +457,37 @@ def problems(text: str) -> list[str]:
         *repeated_headings(text, section, base),
         *duplicate_closes(text, section, base),
         *unblanked_headings(text, section, base),
-        *misplaced_entries(text, section, base),
+        *misplaced_entries(text, section, base, grandfathered),
         *long_bodies(text, section, base),
     ]
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     """Report every problem the open section of `CHANGELOG.md` has.
 
+    :param argv: the arguments, `sys.argv[1:]` where none is given.
     :returns: 1 where a problem was found, 0 where the section is clean.
     """
-    found = problems(_CHANGELOG.read_text(encoding="utf-8"))
+    parser = argparse.ArgumentParser(
+        description="Refuse an open CHANGELOG.md section a"
+        " merge=union rebase can break.",
+    )
+    parser.add_argument(
+        "--grandfathered",
+        type=int,
+        default=0,
+        metavar="N",
+        help=(
+            "how many entries this repository's open section held above"
+            " the rule heading when the fifth check reached it; an entry"
+            " past that count has landed out of section 9's order"
+        ),
+    )
+    arguments = parser.parse_args(argv)
+    found = problems(
+        _CHANGELOG.read_text(encoding="utf-8"),
+        arguments.grandfathered,
+    )
     for problem in found:
         print(f"{_CHANGELOG}: {problem}")
     if not found:
@@ -485,29 +499,6 @@ def main() -> int:
         )
     return 1 if found else 0
 
-
-## This repository in particular
-
-# Section 14 of README.md makes this file verbatim, but how many entries
-# the open section held above `RULE_HEADING` the day the fifth check was
-# added is a fact about this repository's own history rather than about
-# the script every repository carries -- `.github`'s own count and
-# btclib's are not the same number (btclib-org/.github#1215). `shared()`
-# in tests/verbatim_test.py cuts at the marker heading just above and
-# compares only what comes before it, the way it already does for
-# CONTRIBUTING.md and REVIEWING.md; nothing there is markdown-specific,
-# and this is the first `.py` file in the organization to use it.
-#
-# It sits ahead of the trailer below rather than at the file's true end
-# the way the markdown copies keep their own section: a function's
-# default parameter value is bound once, when the `def` runs, so
-# `misplaced_entries()` above reads this name from inside its own body
-# instead, at call time -- and that read needs the name already bound,
-# which the trailer's `sys.exit(main())` forces immediately. The two
-# lines below the marker are the one part of this file the comparison
-# above does not reach; a script has a boilerplate the markdown copies
-# do not.
-_GRANDFATHERED_ENTRIES = 350
 
 if __name__ == "__main__":
     sys.exit(main())

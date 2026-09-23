@@ -15,14 +15,16 @@ name: reusable-documented
 # forge, or the other way round, would otherwise fail silently against a
 # slug nothing here declares.
 #
-# The checkout is sparse, landing `.github/scripts` and the repository
-# root alone, and the script it runs is the *caller's* own: a job inside
-# a workflow hosted in btclib-org/.github still checks out the calling
+# The checkout is sparse, landing this repository's `.github/scripts`
+# and its root alone, and the script it runs is served from here: a job
+# inside a workflow hosted in btclib-org/.github checks out the calling
 # repository's tree by default, `actions/checkout` reading
 # `github.repository` from the run it is a step of rather than from
-# where the workflow file lives. So this job builds nothing and installs
-# nothing of its own, and a change to wait_for_readthedocs_build.py is a
-# change in the calling tree, not here.
+# where the workflow file lives, so `repository:` and `ref:` are what
+# name this one instead. `main` is the same trust a caller already
+# extends by naming this workflow `@main`. So this job builds nothing
+# and installs nothing of the calling tree, and a caller owes no copy of
+# wait_for_readthedocs_build.py.
 
 on:
   workflow_call:
@@ -49,13 +51,15 @@ jobs:
     timeout-minutes: 20
     steps:
       # sparse, for the reason given above: what lands is
-      # .github/scripts plus the repository root, cone mode being the
+      # .github/scripts plus this repository's root, cone mode being the
       # default and root files always being in the cone. This job builds
       # nothing and installs nothing, and the root's pyproject.toml is
       # inert besides, --no-project ignoring it
       - name: Check out the wait script
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          repository: btclib-org/.github
+          ref: main
           persist-credentials: false
           sparse-checkout: .github/scripts
       # caching off, as in reusable-version-check.yml and for the same
@@ -70,12 +74,11 @@ jobs:
       # --no-project, so it runs on the interpreter uv fetches and
       # installs nothing: the script takes the standard library alone.
       # The version is named rather than left to uv: the sparse
-      # checkout above lands the calling tree's .python-version with
+      # checkout above lands this repository's own .python-version with
       # the rest of the root, and uv run --no-project reads it, so an
-      # unnamed interpreter here would be that tree's pin -- a version
-      # it declares about its own package, for a script that imports
-      # nothing of it. Section 10 is the rule, the version is the one
-      # this repository's own .python-version names, and
+      # unnamed interpreter here would be whatever that file happens to
+      # say rather than what this job asks for. Section 10 is the rule,
+      # the version is the one that file names, and
       # tests/interpreters_test.py reads the two against each other
       - name: Wait for the tag's documentation to be served
         env:

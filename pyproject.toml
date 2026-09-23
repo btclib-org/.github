@@ -158,15 +158,20 @@ ignore = [
     "S603",
     "S607",
 ]
-# flake8-no-pep420: a pre-commit hook's own entry point, `python3
-# .github/scripts/check_changelog.py`, is never an import, and the
-# directory carries no `__init__.py` because it is not a package --
-# adding one to satisfy this rule would make it look like one
-".github/scripts/*.py" = ["INP001"]
-# the pre-commit hook that runs this reads a failing developer's
-# terminal, not a return value: what it prints is the line and the
-# reason, which is the whole of its report
-".github/scripts/check_changelog.py" = ["T20"]
+# flake8-no-pep420: each script here is an entry point a hook or a
+# workflow step invokes by path, never an import, and the directory
+# carries no `__init__.py` because it is not a package -- adding one to
+# satisfy this rule would make it look like one. T20 for the same
+# reason read the other way: what each one prints is its whole report,
+# to a failing developer's terminal or to a job's log
+".github/scripts/*.py" = ["INP001", "T20"]
+# `.pre-commit-hooks.yaml` serves this one as a `language: script` hook,
+# which execs the file, so a shebang is the first line and the notice is
+# the three below it. `notice-rgx` anchors at the file's first byte and
+# is `COPYRIGHT` transcribed, which tests/copyright_test.py holds every
+# tree to, so the anchor is not this file's to move: the notice is
+# carried and the rule is what cannot read it there
+".github/scripts/check_changelog.py" = ["CPY001"]
 
 [tool.ruff.lint.mccabe]
 # ruff's default, as everywhere in the organization

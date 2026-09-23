@@ -318,7 +318,22 @@ def names() -> list[str]:
     )
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    (
+        1293,
+        "test_check_changelog_says_what_section_4_says",
+        (
+            "bbt",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-benchmarks",
+            "btclib-node",
+            "btclib-org.github.io",
+            "btclib-secp256k1",
+            "portanode",
+        ),
+    ),
+)
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what
@@ -326,12 +341,17 @@ The number is an issue of this repository's own tracker, which is what
 tree this suite measures is not caught: those trackers number in the
 same range, so the citation names a real issue about something else.
 
-Empty is where this returns rather than where it always is: a row is an
-exemption, and the rows are strict expected failures so that a
-repository catching up is *reported* rather than quietly excused.
-Nothing here is a place a new failure belongs -- a red cell is answered
-in the tree that is red, and a row is what says the answer is already
-written down and waiting.
+The row here is section 4's `check-changelog` stanza, which this
+repository serves and each tree takes at a pin of its own: a tree still
+carrying its copy answers the old shape until its port lands, and the
+strict expected failure is what turns the landing into a red cell and
+the row into one to delete. `.github` is not in it, that tree's own gate
+being the shape the section states for a repository that serves the
+hook.
+
+A row is an exemption, and nothing here is a place a new failure
+belongs -- a red cell is answered in the tree that is red, and a row is
+what says the answer is already written down and waiting.
 """
 
 

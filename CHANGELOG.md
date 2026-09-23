@@ -9206,3 +9206,9 @@ nothing red follows from the copies disagreeing.
 - **The argument behind a rule shrinks to a sentence** (issue #1075):
   what each rule says has not moved, and neither has any command or
   citation in the three.
+
+### The shared scripts are served from this repository, and no tree copies them
+
+- **`.pre-commit-hooks.yaml` declares `check-changelog`, `--grandfathered`
+  carrying the count a caller's gate passes** (issue #1293).
+- **The three reusable workflows check their script out of here.**

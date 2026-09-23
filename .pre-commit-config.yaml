@@ -59,13 +59,11 @@ repos:
       # docstring, having been written for a docstring below the
       # imports. The two are indistinguishable to it, so the modules
       # carrying one are named below and the rest are read.
-      # .github/scripts/check_changelog.py is among them, and section 14
-      # of README.md owes that file to every repository byte for byte,
-      # so an exclusion is where a tree answers its finding -- which is
-      # what every sibling running this hook does
-      # (btclib-org/.github#995). Section 4 prices the `#:` doc comment
-      # that satisfies sphinx and this hook at once: what rejects it is
-      # the port rather than the page.
+      # .github/scripts/check_changelog.py is among them, and this
+      # repository is where that file lives: `.pre-commit-hooks.yaml`
+      # serves it to the organization, so a sibling's exclusion goes
+      # with its copy (btclib-org/.github#995). Section 4 prices the `#:`
+      # doc comment that satisfies sphinx and this hook at once.
       # By name and not by directory: `^tests/` with the script beside
       # it leaves the hook no file to read at all, and check-hooks-apply
       # above fails on that, "check-docstring-first does not apply to
@@ -135,6 +133,14 @@ repos:
   # very seam the third check exists to name, so a hook reading the
   # file after it would find nothing left to report.
   #
+  # `repo: local` where every sibling names this repository at a sha:
+  # `.pre-commit-hooks.yaml` here serves that hook, and a pin is a
+  # revision other than the working tree, so a tree pinning itself would
+  # gate its own branch on the script as `main` has it rather than as
+  # the branch proposes it. The keys below are otherwise the manifest's,
+  # and `--grandfathered` is what this repository's open section held
+  # above the rule heading when the fifth check reached it.
+  #
   # `always_run: true`, and no `files:`: the rebase that eats the seam
   # stages nothing, so a hook keyed on the diff is unreachable after the
   # event the blank-line check exists to name. Section 4 carries the
@@ -143,8 +149,9 @@ repos:
     hooks:
       - id: check-changelog
         name: the open CHANGELOG.md repeats no heading, closes no issue twice
-        entry: python3 .github/scripts/check_changelog.py
-        language: system
+        entry: .github/scripts/check_changelog.py
+        language: script
+        args: [--grandfathered, "350"]
         pass_filenames: false
         always_run: true
   # MD013 at 80 columns, tables included, and the shared configuration is

@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 import yaml
 
-from . import Tier, by_hand, tracked
+from . import ORG, SELF, Tier, by_hand, tracked
 from .pyproject_test import FLOOR, parsed
 
 if TYPE_CHECKING:
@@ -103,12 +103,16 @@ this is the part that decision was settled on.
 """
 
 STATED = {
-    "entry": "python3 .github/scripts/check_changelog.py",
-    "language": "system",
+    "entry": ".github/scripts/check_changelog.py",
+    "language": "script",
     "pass_filenames": False,
     "always_run": True,
 }
 """What section 4's `check-changelog` bullet says that hook is, by key.
+
+These are the manifest's own keys, so they read the same in the tree
+that serves the hook and in the tree that takes it. `SERVED`, `PIN` and
+`COUNT` below are the three the two shapes differ on.
 
 Read into a mapping rather than left to a comparison between the trees:
 copies compared with each other agree while each of them is wrong, which
@@ -123,21 +127,48 @@ absent is what the section asks for here, and a mapping is no place to
 say that. The reason a filter is refused is section 4's.
 """
 
+SERVED = f"https://github.com/{ORG}/{SELF}"
+"""The repository section 4 says the hook is taken from.
+
+Asked of every tree but that one: a hook repository pinning itself
+would gate a branch on the revision the pin names rather than on the
+branch, which is why section 4 leaves `.github`'s own copy `local`.
+"""
+
+PIN = re.compile(r"^[0-9a-f]{40}$")
+"""The `rev:` shape section 4 asks of a tree taking that hook.
+
+A commit and not a tag, this repository cutting none, and forty hex
+characters is what `pinned-rev` accepts and what `autoupdate` moves by
+`git rev-parse FETCH_HEAD`.
+"""
+
+COUNT = "--grandfathered"
+"""The flag section 4 says the stanza's `args:` opens with.
+
+The number behind it is that repository's own history and is not read
+against anything here: what this asks is that the flag is passed and
+carries a number, a stanza without one measuring against the script's
+default instead.
+"""
+
 REFUSED = {
     "id": CHANGELOG_HOOK,
+    "repo": "local",
+    "rev": None,
     "entry": "python3 .github/scripts/check_changelog.py",
     "language": "system",
     "pass_filenames": False,
     "files": r"^(CHANGELOG\.md|\.github/scripts/check_changelog\.py)$",
 }
-"""The stanza btclib-org/.github#1138 refuses, as a literal.
+"""A stanza carrying every finding this module reads, as a literal.
 
-Every gate answers section 4 today, so a check reading the trees alone
-is green however its reading behaves; this is what the reading is asked
-of instead. The keys are the ones every tree carries at the parent of
-its port of that issue, a filter standing where `always_run:` belongs,
-and `name:` is left out as a key nothing here reads. A comparison of
-the copies with each other passes on it, every copy carrying it there.
+A check reading the trees alone is green wherever the gates agree and
+are wrong together, which is what this is asked of instead. `repo` and
+`rev` are what `hooks()` gives a hook read out of a `local` block, the
+entry and the language are the shape a copy in the tree wants, the
+filter stands where `always_run:` belongs -- btclib-org/.github#1138 --
+and there is no `args:`. `name:` is left out as a key nothing here reads.
 """
 
 
@@ -431,15 +462,49 @@ def stated_departures(hook: dict[str, Any], stated: dict[str, Any]) -> list[str]
     ]
 
 
-def departures(hook: dict[str, Any]) -> list[str]:
+def served_departures(hook: dict[str, Any]) -> list[str]:
+    """List where a hook is not taken from the repository that serves it.
+
+    :param hook: a hook as the gate's yaml gives it, `hooks()`'s shape.
+    :returns: one line per finding, empty where the stanza agrees.
+    """
+    found = []
+    if hook.get("repo") != SERVED:
+        found.append(f"repo: {hook.get('repo')!r} rather than {SERVED!r}")
+    rev = hook.get("rev")
+    if not isinstance(rev, str) or PIN.match(rev) is None:
+        found.append(f"rev: {rev!r}, where section 4 asks for a commit sha")
+    return found
+
+
+def counted_departures(hook: dict[str, Any]) -> list[str]:
+    """List where a stanza's `args:` is not the count section 4 asks for.
+
+    :param hook: a hook as the gate's yaml gives it.
+    :returns: one line per finding, empty where the flag carries a number.
+    """
+    args = [str(argument) for argument in hook.get("args", [])]
+    # the flag and its number, which is what `args:` holds and all it
+    # holds -- a length read as a magic value is the shape of the list
+    if args[:1] != [COUNT] or len(args) != 2 or not args[1].isdigit():  # noqa: PLR2004
+        return [f"args: {args!r} rather than {COUNT} and a number"]
+    return []
+
+
+def departures(hook: dict[str, Any], repository: str) -> list[str]:
     """List where a hook mapping says something other than section 4 does.
 
     :param hook: a hook as the gate's yaml gives it.
+    :param repository: the repository the gate belongs to, which decides
+        whether the stanza is read for the repository it is served from.
     :returns: one line per key that differs, empty where none does.
     """
     found = stated_departures(hook, STATED)
     if UNFILTERED in hook:
         found.append(f"{UNFILTERED}: {hook[UNFILTERED]!r}, where section 4 has none")
+    found.extend(counted_departures(hook))
+    if repository != SELF:
+        found.extend(served_departures(hook))
     return found
 
 
@@ -461,7 +526,7 @@ def test_check_changelog_says_what_section_4_says(
     found = [hook for hook in hooks(repository, trees) if hook["id"] == CHANGELOG_HOOK]
     if not found:
         pytest.skip(f"{repository}'s gate names no {CHANGELOG_HOOK} hook")
-    drifted = [line for hook in found for line in departures(hook)]
+    drifted = [line for hook in found for line in departures(hook, repository)]
     assert not drifted, (
         f"{CHANGELOG_HOOK} says what section 4 does not: {drifted}; "
         + by_hand(repository, f"grep -n -A6 '^ *- id: {CHANGELOG_HOOK}' {CONFIG}")
@@ -471,11 +536,14 @@ def test_check_changelog_says_what_section_4_says(
 def test_a_gate_that_had_drifted_would_be_reported() -> None:
     """The cell above is green on gates that agree, however it reads.
 
-    Asked of the literal `REFUSED` names, and of each of the two
-    findings that literal carries: a key section 4 states and the hook
-    does not, and a key the hook states and section 4 gives it none of.
+    Asked of the literal `REFUSED` names, once for each finding it
+    carries: a key section 4 states and the hook does not, a key the
+    hook states and section 4 gives it none of, a stanza declared where
+    the hook is not served from, a `rev:` that is no commit, and an
+    `args:` naming no count. `SELF` is asked separately, that tree
+    being the one the last two are not read of.
     """
-    refused = departures(REFUSED)
+    refused = departures(REFUSED, "btclib")
     assert any("always_run" in line for line in refused), (
         f"{REFUSED} read as carrying always_run: either a key section 4"
         " states is no longer read, or the literal wants another"
@@ -484,6 +552,32 @@ def test_a_gate_that_had_drifted_would_be_reported() -> None:
         f"{REFUSED} read as carrying no {UNFILTERED}: either the key"
         " section 4 gives this hook none of is no longer read, or the"
         " literal wants another"
+    )
+    assert any(line.startswith("repo:") for line in refused), (
+        f"{REFUSED} read as taken from {SERVED}: either the key that"
+        " says where the hook comes from is no longer read, or the"
+        " literal wants another"
+    )
+    assert any(line.startswith("rev:") for line in refused), (
+        f"{REFUSED} read as pinned at a commit: either the pin is no"
+        " longer read, or the literal wants another"
+    )
+    assert any(line.startswith("args:") for line in refused), (
+        f"{REFUSED} read as naming a count: either the flag is no"
+        " longer read, or the literal wants another"
+    )
+    assert not any(
+        line.startswith(("repo:", "rev:")) for line in departures(REFUSED, SELF)
+    ), f"{SELF} is read for a repository it serves the hook from"
+    agreeing = {
+        "id": CHANGELOG_HOOK,
+        "repo": SERVED,
+        "rev": "0" * 40,
+        "args": [COUNT, "7"],
+        **STATED,
+    }
+    assert departures(agreeing, "btclib") == [], (
+        f"{agreeing} is read as drift from the keys it is built of"
     )
 
 

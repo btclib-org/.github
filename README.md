@@ -980,15 +980,29 @@ pre-commit.ci does not have — the lint workflow covers it. No
     an assignment's `=`, and a quote nested inside a quote of the other
     kind is a nested program's. A reader meeting an over-report rewrites
     the line rather than waiving the hook.
-- **`check-changelog`** — a local hook, `language: system`, running
-  `python3 .github/scripts/check_changelog.py` with `pass_filenames:
-  false` and `always_run: true` over `CHANGELOG.md`, ahead of
-  `markdownlint-cli2` so it reads the file before that hook's `--fix`
-  repairs the seam the blank-line check names. `merge=union` stays on
-  that file (btclib-org/.github#21's ruling) and this is the gate its
-  price bought back: a repeated `###` heading, a heading with no blank
-  line above it (btclib-org/.github#760) and an entry past section 9's
-  three-line bound are all refused.
+- **`check-changelog`** — `btclib-org/.github`'s hook, that repository
+  serving `.github/scripts/check_changelog.py` through its own
+  `.pre-commit-hooks.yaml` rather than every tree carrying a copy. The
+  stanza names that repository under `repo:`, a 40-hex commit under
+  `rev:`, and `args: [--grandfathered, N]`, where N is the number of
+  entries the open section held above the length rule's own entry on the
+  day this check reached the tree. The `rev:` is a sha because this
+  repository cuts no tag, and `autoupdate` moves a sha by `git rev-parse
+  FETCH_HEAD` where `git describe --tags` answers nothing; `pinned-rev`
+  accepts forty hex characters for that reason. The hook repository
+  declares `language: script`, `pass_filenames: false` and `always_run:
+  true`, and the gate orders it ahead of `markdownlint-cli2` so it reads
+  the file before that hook's `--fix` repairs the seam the blank-line
+  check names. `merge=union` stays on that file
+  (btclib-org/.github#21's ruling) and this is the gate its price bought
+  back: a repeated `###` heading, a heading with no blank line above it
+  (btclib-org/.github#760) and an entry past section 9's three-line
+  bound are all refused.
+
+    **`btclib-org/.github` itself keeps the hook `local`**, a pin being
+    a revision other than the working tree: a tree pinning itself would
+    gate a branch on the script as `main` has it rather than as the
+    branch proposes it.
 
     A heading is repeated only where the matching text does not end up
     adjacent once the merge is done, two branches adding the same new
@@ -1778,6 +1792,12 @@ without adding to it is deleted.
   for the verdict it reaches when the wait runs out, which only a test reaches
   (btclib-org/btclib#1165). The wait counts against a deadline rather than
   against attempts, and its test substitutes the transport and the clock.
+- **A reusable workflow runs a script out of `btclib-org/.github` at
+  `main`, and a caller owes no copy of it.** `actions/checkout` reads
+  `github.repository` from the run it is a step of rather than from
+  where the workflow file lives, so `repository:` and `ref:` are what
+  name the tree a script is served from; a workflow that needs the
+  caller's tree as well takes the second checkout under a `path:`.
 
 ### The set, and its cadence
 
@@ -3102,26 +3122,6 @@ The paths are what that test compares:
   invocation and not a second copy of the standard, and it stays a
   file of its own rather than folding into `CLAUDE.md`, which is read by
   every session including the one that wrote the diff.
-- `.github/scripts/mutation_counts.py` — owed where
-  `.github/workflows/mutation.yml`: that workflow is what runs it, and
-  section 10's `mutation` entry is what decides which trees carry the
-  workflow. It counts a Cosmic Ray session by outcome, so a tree the
-  sentinel leaves out has no session for it to read.
-- `.github/scripts/wait_for_pypi_release.py` — owed where
-  `.github/workflows/pypi-install.yml`: that workflow is what runs it,
-  and section 10's `pypi-install` entry is what decides which trees
-  carry the workflow. `reusable-wait-for-index.yml`'s own
-  `actions/checkout` declares `sparse-checkout: .github/scripts` and no
-  `repository:`, so a called workflow resolves it against the caller
-  and each tree runs its own copy.
-- `.github/scripts/wait_for_readthedocs_build.py` — owed where
-  `.github/workflows/release.yml`: its `documented` job is what runs it, and
-  holding that workflow is the whole of the condition. The bullet above names a
-  decider and this one cannot, section 2 reading a tier off `release.yml`'s
-  presence — *measured rather than declared* — so that a tier cannot in turn
-  decide it. `reusable-documented.yml`'s own `actions/checkout` declares the
-  same `sparse-checkout` and no `repository:`, so each tree runs its own copy
-  here too.
 
 **Verbatim in part**, the file around it being the repository's own and so
 nothing a comparison by path can do: the `ci:` block of
@@ -3170,12 +3170,6 @@ comparison stops:
   it states the same rule in every tree; the rest of the file is that
   repository's own. The rejected alternative compares the whole file, which
   would report drift in the part that is meant to differ.
-- `.github/scripts/check_changelog.py` — owed by every repository, every tree
-  carrying a `CHANGELOG.md` and every one of them `merge=union` in
-  `.gitattributes`, and the same file in each up to the same heading. Section
-  4's `check-changelog` hook is what runs it; under the heading is
-  `_GRANDFATHERED_ENTRIES`, a fact about that repository's history rather than
-  about the script every repository carries alike.
 
 `tests/verbatim_test.py` compares what precedes that heading where a file
 carries one, the whole file where it does not, and only the section a bullet
