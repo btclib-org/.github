@@ -9212,3 +9212,8 @@ nothing red follows from the copies disagreeing.
 - **`.pre-commit-hooks.yaml` declares `check-changelog`, `--grandfathered`
   carrying the count a caller's gate passes** (issue #1293).
 - **The three reusable workflows check their script out of here.**
+
+### The `BACKLOG` rows for 1293 come out, the last tree having converged
+
+- **Every tree takes `check-changelog` from this repository at a pin of
+  its own** (closes #1293): the cells pass without the rows.
