@@ -2825,9 +2825,8 @@ of every version already on the index, which no later release corrects.
   dots. The one exemption is a wrapper whose version names the upstream it
   wraps, its own `README.md` stating the scheme and a fourth component there
   meaning a rewrap: `btclib-secp256k1` releases `M.N.P` for the libsecp256k1
-  `vM.N.P` inside it, a wrapper dated by its own calendar making a caller read a
-  changelog to answer *which upstream is this*. The exemption is stated here
-  rather than on section 14's *decided per repository* list.
+  `vM.N.P` inside it, so that no caller reads a changelog to answer *which
+  upstream is this*.
 - **A rehearsal on TestPyPI** uses `.dev<run number>`, patched in by the
   workflow rather than typed, so it is unique per run and sorts below the
   release it rehearses.
@@ -2838,34 +2837,27 @@ of every version already on the index, which no later release corrects.
   `RELEASE_NOTES.md` to the version being tagged and opens an empty
   work-in-progress section above them, in the same pull request, so the topmost
   `##` heading of either file on the default branch is a work-in-progress
-  heading at every commit and a branch landing across a release day has an open
-  section to append to. Opening the next cycle in a pull request of its own
-  leaves a window to sequence merges around. The next generic version does not
-  travel with the retitle: the tag says what `pyproject.toml` says, so the bump
-  stays in the pull request that sets it. A release publishes the section just
-  retitled, whose heading is the tag's own, and not the empty one above it.
+  heading at every commit. The next generic version does not travel with the
+  retitle: the tag says what `pyproject.toml` says, so the bump stays in the
+  pull request that sets it. A release publishes the section just retitled,
+  whose heading is the tag's own, and not the empty one above it.
 - **A published sdist reproduces from its tag.** The attestation every publisher
   attaches vouches for bytes, so a release rebuilt from the commit its tag names
-  — by running what the release ran — gives those bytes back, or the attestation
-  vouches for something no rebuild can check. What the release ran is
-  `RELEASING.md`'s to name: the steps between the tag and the archive, with the
-  reason beside each. Every publisher runs a normalization step after the build,
-  replacing the member metadata the backend wrote, whatever section 3's backend
-  fixes on its own: the digest the attestation signs is the pipeline's output,
-  and a publisher left to judge the step redundant moves what the attestation
-  vouches for. `SOURCE_DATE_EPOCH` is exported from the tagged commit for what
-  reads it — the normalizer, and the bill of materials below.
-  `sdist-rebuild.yml` re-derives the property weekly, rebuilding the latest
-  release's sdist from its tag and running `gh attestation verify` over it;
-  section 10's record names the trees that carry it.
+  — by running what the release ran — gives those bytes back. What the release
+  ran is `RELEASING.md`'s to name: the steps between the tag and the archive,
+  with the reason beside each. Every publisher runs a normalization step after
+  the build, replacing the member metadata the backend wrote, the digest the
+  attestation signs being the pipeline's output.
+  `SOURCE_DATE_EPOCH` is exported from the tagged commit for what reads it — the
+  normalizer, and the bill of materials below. `sdist-rebuild.yml` re-derives
+  the property weekly, rebuilding the latest release's sdist from its tag and
+  running `gh attestation verify` over it; section 10's record names the trees
+  that carry it.
 - **The compiled wheels are outside that property**, and are named rather than
   passed over, the index attesting every one beside the sdist under PEP 740: a
   verifier who rebuilds one and gets other bytes would otherwise not know
-  whether that is a defect. No one tool rebuilds both families
-  `btclib-secp256k1` publishes, cibuildwheel building the `cp3XX` and `pp3XX`
-  wheels against a compiler and a toolchain nothing pins where the `py3-none-*`
-  wheels are cffi ABI-mode builds `python -m build` writes on the runner, and
-  what is measured is narrower still: `wheel-reproducibility.yml` builds one
+  whether that is a defect. What is measured is narrower than what
+  `btclib-secp256k1` publishes: `wheel-reproducibility.yml` builds one
   interpreter's wheel twice in one image and diffs the archives, and whether a
   wheel of another ABI tag reproduces is measured on no trigger, the published
   `py3-none-*` ones being btclib-org/btclib-secp256k1#540. Pinning the
@@ -2876,84 +2868,69 @@ of every version already on the index, which no later release corrects.
   declined — btclib-org/btclib-secp256k1#554.
 - **A bill of materials is published beside the distribution files**, by every
   publisher, and the attestation signs it with them: one answer rather than an
-  answer and its exemptions, so that a consumer need not learn which of the
-  organization's releases describes itself and why. What makes it reproducible
-  is the variable the bullet above exports for it: its timestamp is
-  `SOURCE_DATE_EPOCH` and its serial number derives from the distribution files'
-  digests, so a rebuild of a released tag writes the same document and the
-  attestation verifies it as it does the archives. An exemption for a wrapper
-  does not follow from `Requires-Dist` naming only its `cffi`: the vendored
-  library is a component too, at the commit its submodule pins.
+  answer and its exemptions. Its timestamp is `SOURCE_DATE_EPOCH` and its serial
+  number derives from the distribution files' digests, so a rebuild of a
+  released tag writes the same document and the attestation verifies it as it
+  does the archives. An exemption for a wrapper does not follow from
+  `Requires-Dist` naming only its `cffi`: the vendored library is a component
+  too, at the commit its submodule pins.
 - **What is published is inspected first** — `twine check --strict`,
   `check-wheel-contents` and `pyroma --min 10` on the files the release will
   publish; then the wheel is installed from an empty directory and smoke-tested,
   so the import finds the wheel and not the source tree. Those read a
   distribution's *metadata*, and an unconfigured `check-wheel-contents` reads
   the wheel's own `RECORD`: none of them asks what the tree the wheel was built
-  from has. A `py.typed` dropped by a `package-data` typo gives a wheel that
-  installs, imports and type checks as `Any`, and passes all of them.
+  from has, so a `py.typed` dropped by a `package-data` typo passes all of them.
 - **So the wheel is diffed against the package tree it claims to carry**, in
   both directions, and where that tree is the whole of the wheel's library the
-  diff is `[tool.check-wheel-contents]` naming it — a line of configuration
+  diff is `[tool.check-wheel-contents]` naming it, a line of configuration
   rather than a check to maintain. Where the wheel is *not* one package tree,
-  that flag has no wording for it: a compiled artifact at the wheel's own root
-  is reported as a file outside the package whether or not it is the one the
-  build intends, and the repository owes a script saying what the flag cannot,
-  its allowlist stated in prose and compared against the script's constants by a
-  test, in both directions, so neither is free to drift. Another check implying
-  the same diff does not stand in for the flag where the flag applies.
+  that flag has no wording for it, and the repository owes a script saying what
+  the flag cannot, its allowlist stated in prose and compared against the
+  script's constants by a test, in both directions, so neither is free to drift.
+  Another check implying the same diff does not stand in for the flag where the
+  flag applies.
 - **The sdist is diffed against what git tracks**, in both directions, by
   `check-sdist` in the gate of every repository that builds one. It builds the
   archive and compares it against the index, and its exit code says which way
   the two differ: a tracked file the archive dropped, or a member git does not
-  track. Neither direction is loud otherwise, the metadata checks above each
-  reading a distribution's account of itself, so the check is not conditional on
+  track. Neither direction is loud otherwise, so the check is not conditional on
   the inclusion being an include list, and what it costs an exclude-list tree is
   a `[tool.check-sdist]` table naming the tracked files its archive leaves out
   on purpose. Which table declares the inclusion is the backend's — `uv_build`
   reads `[tool.uv.build-backend]`, hatchling `[tool.hatch.build.targets.sdist]`
   — so `check-sdist` keys a plugin on `[build-system]` and reads that backend's
   own exclusions, leaving `[tool.check-sdist]` holding only what no pattern of
-  the backend's accounts for. Past that, an allowlist for the sdist — which
-  members may sit at the archive's root, what kind of member the tar holds,
-  whether a directory holds another distribution's metadata — is the escalation
-  a repository takes when its archive carries more than the package.
+  the backend's accounts for. Past that, an allowlist for the sdist is the
+  escalation a repository takes when its archive carries more than the package.
 - **A hook that builds the project builds it with the backend `[build-system]`
-  admits**, and what that takes differs between the two hooks, because only one
-  of them builds through PEP 517 at all. Both build without isolation:
+  admits**, and only one of the two hooks builds through PEP 517 at all. Both
+  build without isolation:
   `check-sdist` runs on pre-commit.ci, which cannot create the isolated
   environment, and `pyroma` runs from a group already holding the backend,
   where an isolated build would resolve `requires` from an index instead.
 
-    `pyroma`'s non-isolated path never reads `requires`: it returns metadata
-    once the backend's own PEP 517 hook does. So the backend is in the `check`
-    group beside `pyroma` itself, at `[build-system]`'s own specifier, which
-    keeps it importable — what that requires-blind attempt needs in order not
-    to fall back.
+    `pyroma`'s non-isolated path never reads `requires`, so the backend is in
+    the `check` group beside `pyroma` itself, at `[build-system]`'s own
+    specifier, which keeps it importable.
 
     `check-sdist` drives `uv build`, which is not PEP 517 for this backend:
     given `build-backend = "uv_build"` it builds with the copy bundled in the
-    running uv, warning where `requires` excludes that uv with a ceiling below
-    it, and failing where the exclusion is a floor above it, uv looking past its
-    own copy for a `uv_build` that meets the floor. Naming the backend there
-    decides nothing either way, so the hook takes
-    `args: [--inject-junk, --installer=pip]`: check-sdist then builds through
-    `build --no-isolation`, which does read the environment, so the backend
-    `additional_dependencies` names is the one that packs the archive.
+    running uv, so naming the backend there decides nothing. The hook takes
+    `args: [--inject-junk, --installer=pip]` instead, which builds through
+    `build --no-isolation`: that reads the environment, so the backend
+    `additional_dependencies` names is the one that packs the archive, and it
+    refuses an environment `[build-system]`'s `requires` does not admit.
     `--inject-junk` is repeated because `args:` replaces the manifest's list
     rather than adding to it.
 
-    **What the failure keeps is the hook environment inside `requires`**:
-    `build --no-isolation` refuses an environment that does not satisfy it, so
-    the backend that packs the archive is one `[build-system]` admits or there
-    is no archive. That alone does not keep the two specifiers equal — a
-    `requires` widened past the hook's line still leaves that line satisfying
-    it and green. `btclib-secp256k1`'s `hook_pins_test.py` asserts the hook's
+    **That alone does not keep the two specifiers equal** — a `requires` widened
+    past the hook's line still leaves that line satisfying it and green.
+    `btclib-secp256k1`'s `hook_pins_test.py` asserts the hook's
     `additional_dependencies` and `[build-system]`'s `requires` name the same
-    requirements (btclib-org/btclib-secp256k1#945); the hook's other trees
-    carry no such test. Pinning `uv` on the hook instead leaves even that
-    first half silent, a `uv` pinned outside `requires` warning where the
-    `pip` installer refuses.
+    requirements (btclib-org/btclib-secp256k1#945); the hook's other trees carry
+    no such test. Pinning `uv` on the hook instead leaves even that first half
+    silent.
 - **A release is checked against the last one for a break in the public
   surface**, by `griffe check` in the release path, comparing the tag being cut
   against the tag before it. Section 7's census answers *is this module's
@@ -2970,31 +2947,28 @@ of every version already on the index, which no later release corrects.
     becomes a gate the day btclib-org/btclib#651 settles a deprecation policy,
     the question then being *did the surface change without the release of
     warning the policy owes*, which a command can answer on its own; so the
-    invocation takes a second reference pair rather than being replaced by one.
+    invocation takes a second reference pair rather than being replaced by
+    one.
 
 - **A job named in `needs:` that is not a gate takes `always()` in the
   dependent's own guard**, beside an explicit `needs.<job>.result == 'success'`
-  for each listed job that is one. The public-surface check above is such a job:
-  it exits non-zero on any break, which a cycle before 1.0 is expected to
-  produce, and `needs:` alone refuses to start a job whose listed dependency
-  failed or was skipped. Listing it orders the reading before the upload, and
+  for each listed job that is one. The public-surface check above is such a
+  job, and `needs:` alone refuses to start a job whose listed dependency failed
+  or was skipped. Listing it orders the reading before the upload, and
   the guard is what says the reading's result decides nothing. `always()` here
-  and not section 10's `!cancelled()`: what that section weighs `always()`
-  against is a superseded run turning a required check red, and a release
-  workflow produces no required check.
+  and not section 10's `!cancelled()`, a release workflow producing no required
+  check for a superseded run to turn red.
 - **The widening does not propagate, so each dependent states it for itself.** A
   bare `needs:` reads back through the listed job's own `needs:` chain, so a job
   two hops from the non-gating one is skipped although the dependency it names
   succeeded. Putting `always()` on the non-gating job itself moves nothing, a
   job that ran and failed stopping a dependent exactly as a skipped one does;
-  dropping it from `needs:` costs the ordering, the surface then being read
-  beside the upload rather than before it.
+  dropping it from `needs:` costs the ordering.
 - **A release run is audited job by job for `skipped`, not for red.** A failed
   job is loud; a skipped one carries no step, so a release whose post-publish
-  check never ran reads as a release that finished, and an audit for red says
-  nothing about what a failure took with it. What answers is the run's own job
-  listing, its run id in a block of its own for the reason section 9's bullet
-  gives:
+  check never ran reads as a release that finished. What answers is the run's
+  own job listing, its run id in a block of its own for the reason section 9's
+  bullet gives:
 
     ```shell
     run=<id>
@@ -3017,20 +2991,18 @@ of every version already on the index, which no later release corrects.
 - **That workflow is where the post-publish check lives, called by the release
   as a job of its own, and never a step appended to a publish job.** A publish
   job downloads the distribution files and hands them to
-  `pypa/gh-action-pypi-publish`, so nothing in it provisions a toolchain: no
-  `uv`, and an interpreter at the runner image's version rather than at the one
-  `requires-python` asks for. A step appended there fails on the command's name
-  or on the interpreter's version, or passes on an interpreter the tree did not
-  choose where `requires-python` admits the image's; neither failure names the
-  runner as its cause. The reusable workflow provisions its own toolchain, so
-  nobody placing the check there has to know any of this.
-- **Placement also decides whether the failure is legible.** Both placements run
-  after the upload, so either can only report an act already irreversible. A job
-  that fails is a row of its own in the listing above, red beside a publish job
-  that stayed green; a step that fails turns the publish job itself red, and
-  every job guarded on that job's `success` skips with it — the attestation and
-  the GitHub release among them — leaving a release published, unattested and
-  unannounced behind one red job that names none of it.
+  `pypa/gh-action-pypi-publish`, so nothing in it provisions a toolchain: a step
+  appended there fails on the command's name or on the interpreter's version,
+  and neither failure names the runner as its cause. The reusable workflow
+  provisions its own toolchain, so nobody placing the check there has to know
+  any of this.
+- **Placement also decides whether the failure is legible**, both placements
+  running after an upload neither can undo. A job that fails is a row of its own
+  in the listing above, red beside a publish job that stayed green; a step that
+  fails turns the publish job itself red, and every job guarded on that job's
+  `success` skips with it — the attestation and the GitHub release among them —
+  leaving a release published, unattested and unannounced behind one red job
+  that names none of it.
 - **The check reads the index for the version the tag names**, so a first
   release is no different from any other: the call passes the tag, the wait
   holds until the index serves that version, and it fails on its deadline rather
@@ -3050,25 +3022,19 @@ it is a second opinion nothing enforces, and the reflex installs that
 would fight a hook are listed as `unwantedRecommendations`. Anything
 machine-local belongs in the editor's own user settings.
 
-**`mypy-type-checker.importStrategy` follows section 4's branch**, and
-getting it wrong is silent both ways. With the local hook it is
-`fromEnvironment`: the mypy the extension bundles is a different version
-from the locked one, and an `enable_error_code` name it does not know is
-dropped with a warning no extension surfaces. With the mirror it is
-`useBundled`, there being no project mypy to point at — `fromEnvironment`
-against a `.venv` without one reports nothing at all rather than failing.
-That branch leaves the editor reading a different mypy from the hook's:
-the bundled one is not the version the `rev` pins either, and it has none
-of the stub packages `additional_dependencies` installs, so an import the
-hook resolves is unresolved there.
+**`mypy-type-checker.importStrategy` follows section 4's branch**, and getting
+it wrong is silent both ways. With the local hook it is `fromEnvironment`: the
+mypy the extension bundles is a different version from the locked one, and an
+`enable_error_code` name it does not know is dropped with a warning no extension
+surfaces. With the mirror it is `useBundled`, there being no project mypy to
+point at — `fromEnvironment` against a `.venv` without one reports nothing at
+all rather than failing.
 
-The exception is a package that is a **compiled extension**, and it goes
-the other way: the mirror's isolated environment has no built extension,
-so the import does not resolve there and the editor cannot use that
-environment whatever the hook does. It reads the project's instead, which
-`uv sync` built the extension into — so `fromEnvironment` under the
-mirror, and the version equality section 4 asks for is what makes the two
-the same mypy rather than merely both present.
+The exception is a package that is a **compiled extension**, and it goes the
+other way: the mirror's isolated environment has no built extension, so the
+editor cannot use it whatever the hook does. It reads the project's instead,
+which `uv sync` built the extension into — so `fromEnvironment` under the
+mirror.
 
 `CLAUDE.md` carries what an agent cannot read off the tree — the
 non-obvious failure modes, and the rule that a session never works in the
@@ -3090,32 +3056,22 @@ same call. A file this section keeps out of the list because its subject
 is its own tree's is not compared and is owed all the same, so its own
 paragraph says who owes a copy in these same spellings.
 
-A clause's opening ends at a comma, a semicolon, a colon or a full stop,
-or at the end of the clause, and the rest of its prose goes after it. So
-a clause narrows by its condition and never by a qualifier written into
-`owed by every repository`, which owes the copy of every tree: that test
-refuses such a qualifier rather than reading past it, where a match on
-the phrase alone answers that every repository owes the file. It is a
-rule about a clause, and `claude-review.yml`'s paragraph below writes
-the same phrase where neither reading takes one: that paragraph is no
-bullet of the list, and it is not one naming a file this section keeps
-out by its subject, which is what the other reading selects on. The
-rejected alternative enumerates the continuations admitted after the
-phrase, which is a second list to keep in step with this one where the
-punctuation is read off the clause itself.
+A clause's opening ends at a comma, a semicolon, a colon or a full stop, or at
+the end of the clause, and the rest of its prose goes after it. So a clause
+narrows by its condition and never by a qualifier written into `owed by every
+repository`, which owes the copy of every tree: that test refuses such a
+qualifier rather than reading past it. The rejected alternative enumerates the
+continuations admitted after the phrase, which is a second list to keep in step
+with this one.
 
-A clause that test reads, it reads both ways: a tree short of a copy it
-is owed is a finding rather than a tree the comparison passes over, and
-so is a copy in a tree whose observable is absent, that copy being one
-the standard gives that tree no clause for. Every condition this section
-writes is read that way, `.taplo.toml`'s file type included, and a
-clause in neither spelling raises rather than taking its tree out of
-both readings. The rejected alternative leaves a condition naming a file
-type as prose, on the ground that *the tree holds one of these* is a
-weaker claim to hang an obligation on than *the tree holds this file*: a
-reader checks the second by opening a file and the first by running a
-command. What it costs is an obligation nothing asks any tree about,
-which is what both readings above are for.
+A clause that test reads, it reads both ways: a tree short of a copy it is owed
+is a finding rather than a tree the comparison passes over, and so is a copy in
+a tree whose observable is absent, that copy being one the standard gives that
+tree no clause for. Every condition this section writes is read that way,
+`.taplo.toml`'s file type included, and a clause in neither spelling raises
+rather than taking its tree out of both readings. The rejected alternative
+leaves a condition naming a file type as prose, and what it costs is an
+obligation nothing asks any tree about.
 
 The paths are what that test compares:
 
@@ -3123,31 +3079,25 @@ The paths are what that test compares:
   What it names is a style where markdownlint's default is "consistent",
   which asks each file to agree with itself and therefore lets two files
   disagree.
-- `.yamllint.yaml` — owed by every repository; the default set, extended
-  rather than listed, with `line-length` raised to 100 and two rules
-  disabled, and `document-start` raised from the default's warning to an
-  error because the hook runs no `--strict` and a warning exits 0.
-  Extending is what makes it a rule set at all: yamllint enables
-  no rule a configuration does not name, so a file that lists rules and
-  extends nothing runs those alone and leaves indentation, trailing
-  whitespace and duplicate keys off under a gate that still passes. The two
-  disabled rules carry the reason beside them, `comments` because dependabot
+- `.yamllint.yaml` — owed by every repository; the default set, extended rather
+  than listed, with `line-length` raised to 100 and two rules disabled, and
+  `document-start` raised from the default's warning to an error because the
+  hook runs no `--strict` and a warning exits 0. Extending is what makes it a
+  rule set at all, yamllint enabling no rule a configuration does not name. The
+  two disabled rules carry the reason beside them, `comments` because dependabot
   writes the spacing it objects to and `truthy` because the `on:` a workflow
   opens with is the spelling GitHub Actions requires.
 - `.taplo.toml` — owed where `*.toml`; four-space indent, `reorder_keys`
   left false because the order of a table is an argument,
   `array_auto_collapse` false so that adding an entry is a one-line diff.
-- `COPYRIGHT` — owed by every repository: the notice every source file
-  opens with, three lines naming the holder and pointing at `LICENSE`,
-  and the source the `notice-rgx` of section 5 is transcribed from. A
-  repository file and not a distributed one, so it is not in
-  `license-files`: `LICENSE` carries the holder for whoever has the
-  archive, and a header's source text is read by the gate and by nobody
-  who installs the package.
+- `COPYRIGHT` — owed by every repository: the notice every source file opens
+  with, three lines naming the holder and pointing at `LICENSE`, and the source
+  the `notice-rgx` of section 5 is transcribed from. A repository file and not a
+  distributed one, so it is not in `license-files`: `LICENSE` carries the holder
+  for whoever has the archive.
 - `LICENSE` — owed by every repository: MIT, the holder named and no year
   range. A range is a line nobody updates, and `COPYRIGHT` states the
-  holder without one, so the two would disagree the first January nobody
-  remembered.
+  holder without one.
 - `.claude/commands/review.md` — owed where `REVIEWING.md`: it is the
   invocation and not a second copy of the standard, and it stays a
   file of its own rather than folding into `CLAUDE.md`, which is read by
@@ -3165,30 +3115,25 @@ The paths are what that test compares:
   `repository:`, so a called workflow resolves it against the caller
   and each tree runs its own copy.
 - `.github/scripts/wait_for_readthedocs_build.py` — owed where
-  `.github/workflows/release.yml`: its `documented` job is what runs
-  it, and holding that workflow is the whole of the condition. The
-  bullet above names a decider and this one cannot, the asymmetry being
-  real rather than an omission: `pypi-install` has a section 10 entry,
-  which is prior to what a tree holds and so can say a tree short of it
-  has a gap, where section 2 reads a tier off `release.yml`'s presence
-  — *measured rather than declared* — so a tier cannot in turn decide
-  that presence. `reusable-documented.yml`'s own `actions/checkout`
-  declares `sparse-checkout: .github/scripts` and no `repository:`, so
-  a called workflow resolves it against the caller and each tree runs
-  its own copy.
+  `.github/workflows/release.yml`: its `documented` job is what runs it, and
+  holding that workflow is the whole of the condition. The bullet above names a
+  decider and this one cannot, section 2 reading a tier off `release.yml`'s
+  presence — *measured rather than declared* — so that a tier cannot in turn
+  decide it. `reusable-documented.yml`'s own `actions/checkout` declares the
+  same `sparse-checkout` and no `repository:`, so each tree runs its own copy
+  here too.
 
-**Verbatim in part**, the file around it being the repository's own and
-so nothing a comparison by path can do: the `ci:` block of
+**Verbatim in part**, the file around it being the repository's own and so
+nothing a comparison by path can do: the `ci:` block of
 `.pre-commit-config.yaml`, the mypy strictness block, the ruff width and
-complexity settings, the pytest strictness flags, and `fail_under = 100`.
-Of the `ci:` block, `autofix_prs`, `autoupdate_commit_msg` and
-`autoupdate_schedule` are the shared part, with the values section 4
-gives; `skip:` is the repository's own, because it names hooks of that
-file that pre-commit.ci cannot run, and a hook the repository does not
-define has no place in it. `tests/verbatim_test.py` compares none of
-these, its subject being a path: what holds a part equal across the
-copies is that each was written from this file, and that a command of
-section 15 greps for it, which none does for the `ci:` block.
+complexity settings, the pytest strictness flags, and `fail_under = 100`. Of the
+`ci:` block, `autofix_prs`, `autoupdate_commit_msg` and `autoupdate_schedule`
+are the shared part, with the values section 4 gives; `skip:` is the
+repository's own, because it names hooks of that file that pre-commit.ci cannot
+run. `tests/verbatim_test.py` compares none of these, its subject being a path:
+what holds a part equal across the copies is that each was written from this
+file, and that a command of section 15 greps for it, which none does for the
+`ci:` block.
 
 **A part is held against this file, and not against the other copies.**
 Section 4 states `check-changelog`'s keys, and `tests/hooks_test.py`
@@ -3219,67 +3164,50 @@ comparison stops:
   which is a comment to git and the marker to the comparison, so that a
   rule for one repository's paths is not a copy for every other to drift
   from.
-- `CLAUDE.md` — owed by every repository, and compared byte for byte
-  in each from `## The primary checkout is the maintainer's` to the
-  next heading at the same level. The section is what every session
-  reads before its first edit, and it states the same rule in every
-  tree; the rest of the file is that repository's own, by
-  section 13's own description of what it carries. The rejected
-  alternative, comparing the whole file, is rejected on the same ground
-  the `ci:` block above already gives: the file around a compared part
-  is the repository's own, and a comparison by path over the whole of
-  it would report drift in the part that is meant to differ.
-- `.github/scripts/check_changelog.py` — owed by every repository, every
-  tree carrying a `CHANGELOG.md` and every one of them `merge=union` in
-  `.gitattributes`, and the same file in each up to the same heading.
-  Section 4's `check-changelog` hook is what runs it; under the heading
-  is `_GRANDFATHERED_ENTRIES`, how many entries that repository's own
-  open section held above the length rule's own entry the day the fifth
-  check reached it — a fact about that repository's history, not about
-  the script every repository carries alike.
+- `CLAUDE.md` — owed by every repository, and compared byte for byte in each
+  from `## The primary checkout is the maintainer's` to the next heading at the
+  same level. The section is what every session reads before its first edit, and
+  it states the same rule in every tree; the rest of the file is that
+  repository's own. The rejected alternative compares the whole file, which
+  would report drift in the part that is meant to differ.
+- `.github/scripts/check_changelog.py` — owed by every repository, every tree
+  carrying a `CHANGELOG.md` and every one of them `merge=union` in
+  `.gitattributes`, and the same file in each up to the same heading. Section
+  4's `check-changelog` hook is what runs it; under the heading is
+  `_GRANDFATHERED_ENTRIES`, a fact about that repository's history rather than
+  about the script every repository carries alike.
 
 `tests/verbatim_test.py` compares what precedes that heading where a file
-carries one, the whole file where it does not, and only the section a
-bullet names where the bullet itself quotes one — each ending at a
-single newline, so the marker is the declaration, the blank line a copy
-puts before it is a spelling rather than content, and there is no second
-list of exceptions to keep in step.
+carries one, the whole file where it does not, and only the section a bullet
+names where the bullet itself quotes one — each ending at a single newline, so
+the marker is the declaration and the blank line a copy puts before it is a
+spelling rather than content.
 
-`AUTHORS.md` is owed by every repository and differs in two ways that
-are the repository's own. It points at **that repository's** contributor
-graph: a single shared pointer would be accurate only while one graph
-stays a superset of the others, and would leave the first person to
-contribute somewhere else uncredited in silence. And a tree that vendors
-somebody else's work attributes it here, which is what the file is for —
-`btclib-secp256k1` says that the vendored libsecp256k1 is not its work,
-carries its own licence and its own authors, and is only ever read from.
+`AUTHORS.md` is owed by every repository and differs in two ways that are the
+repository's own. It points at **that repository's** contributor graph: a single
+shared pointer would leave the first person to contribute somewhere else
+uncredited in silence. And a tree that vendors somebody else's work attributes
+it here, which is what the file is for — `btclib-secp256k1` says that the
+vendored libsecp256k1 is not its work, carries its own licence and its own
+authors, and is only ever read from. It is named in prose and not as a bullet
+deliberately: a file meant to differ per repository can never satisfy a byte
+comparison.
 
-It is named in prose and not as a bullet deliberately: a file meant to
-differ per repository can never satisfy a byte comparison, so listing it
-above would buy an assert with no state in which it closes.
-
-`CODE_OF_CONDUCT.md` is out of the list for the opposite reason: there is
-one copy of it, in this repository, and a comparison needs two. What the
-bullet was for is had another way — the organization advertises a single
-policy because there is a single file, rather than because every copy of
-it agrees with this one.
+`CODE_OF_CONDUCT.md` is out of the list for the opposite reason: there is one
+copy of it, in this repository, and a comparison needs two. The organization
+advertises a single policy because there is a single file, rather than because
+every copy of it agrees with this one.
 
 `claude-review.yml` is owed by every repository section 11 governs, and section
-15's existence loop is what checks that — not this list. `CONTRIBUTING.md` and
-`REVIEWING.md` earn a bullet because this repository's own copy of each is a
-receiver exactly like every other tree's, which is what
-`tests/verbatim_test.py`'s comparison assumes. `claude-review.yml` has no such
-copy here: this repository holds the callee, so its call and a receiving copy's
-differ by the adaptation section 11's *The workflow, and what a port of it has
-to adapt* states. A bullet here would put this
-repository's own copy in the comparison too, and it
-would fail forever rather than the way `EXPECTED_DRIFT` expects: that table
-records a copy a fix converges, not one that cannot by design.
+15's existence loop is what checks that — not this list. A bullet would assume
+this repository's own copy is a receiver like every other tree's, which
+`CONTRIBUTING.md`'s and `REVIEWING.md`'s are: this repository holds the callee,
+so its call and a receiving copy's differ by the adaptation section 11's *The
+workflow, and what a port of it has to adapt* states, and the comparison would
+fail forever rather than the way `EXPECTED_DRIFT` expects.
 
 Whether the receiving copies must otherwise read alike is open, not decided
-here: `btclib-org/.github#267` raised it, with a drift that has no named
-adaptation behind it — a boilerplate cross-reference worded three ways, and one
-tree missing the qualifier section 9 requires — and `btclib-org/.github#35`'s
+here: `btclib-org/.github#267` raised it, and `btclib-org/.github#35`'s
 reusable-workflow consolidation could make the question moot by removing the
 copies rather than by comparing them. No command in this repository checks it
 either way.
@@ -3295,37 +3223,30 @@ this repository's issue tracker, by *What this repository is*'s shape
 for a cross-repository finding, and which answer is right is decided
 once, here, and ported.
 
-**Getting onto the per-repository list below takes a reason of one
-kind**: something true of that repository that makes the shared answer
-wrong — its Python floor, the shape of its distribution, what it ships,
-what its tests are about. Every entry on the list carries one. *This
-tree already does it differently* is not such a reason: precedent by
-accretion is exactly how a standard stops being one, and it is how the
-`CHANGELOG.md` citation forms section 9 now settles came to diverge in
-the first place.
+**Getting onto the per-repository list below takes a reason of one kind**:
+something true of that repository that makes the shared answer wrong — its
+Python floor, the shape of its distribution, what it ships, what its tests are
+about. Every entry on the list carries one. *This tree already does it
+differently* is not such a reason: precedent by accretion is how a standard
+stops being one.
 
-**Decided per repository**: `requires-python` and `.python-version`; the
-matrix breadth; which optional workflows exist past those section 10
-keys on a property of the tree; the ruff `ignore` list's
-entries a tree declines on its own merits and its `per-file-ignores`; what
-a publishing repository checks about its package contents past section
-12's floor —
-the sdist allowlist, and the script a wheel that is not one package tree
-needs — which follows the shape of that project's own distribution and
-is settled by measuring it, not by copying what a sibling does; the
-convention tests, which each project chooses on section 7's terms; and
-the `[tool.uv.sources]` table, which exists only while a dependency is
-not on the index and goes the day it is.
+**Decided per repository**: `requires-python` and `.python-version`; the matrix
+breadth; which optional workflows exist past those section 10 keys on a property
+of the tree; the ruff `ignore` list's entries a tree declines on its own merits
+and its `per-file-ignores`; what a publishing repository checks about its
+package contents past section 12's floor — the sdist allowlist, and the script a
+wheel that is not one package tree needs — which is settled by measuring that
+project's own distribution rather than by copying what a sibling does; the
+convention tests, which each project chooses on section 7's terms; and the
+`[tool.uv.sources]` table, which exists only while a dependency is not on the
+index and goes the day it is.
 
-`.gitignore` is decided per repository and so outside the compared list
-above: what a tree ignores is what its own build and tools write. A
-package that compiles an extension ignores the object files and the
-shared library it links; a tree whose `dist` job writes a bill of
-materials ignores the directory it lands in; a tree that installs
-nothing has no build output to name at all. The rejected alternative is
-one file copied into every tree, holding the union of what any of them
-writes: it grows with every repository added, and a reader of one tree
-cannot tell from it which entries that tree needs.
+`.gitignore` is decided per repository and so outside the compared list above:
+what a tree ignores is what its own build and tools write. A package that
+compiles an extension ignores the object files and the shared library it links.
+The rejected alternative is one file copied into every tree, holding the union
+of what any of them writes: it grows with every repository added, and a reader
+of one tree cannot tell from it which entries that tree needs.
 
 `.github/scripts/check_vendored_vectors.py` is per repository by subject, owed
 where `.github/workflows/vendored-vectors.yml`, and deliberately outside the
@@ -3334,41 +3255,34 @@ bytes differ wherever the subjects do, which no comparison by path can read as
 anything but drift. That workflow is what runs the script weekly, and a tree
 vendoring nothing keeps no pin file for it to parse. `btclib-node` keeps its
 copy at `.github/scripts/check_vendored_pin.py`, a different name and not only
-different bytes, and the departure is a decided one: the job is the same job, a
-vendored pin re-checked against upstream on that cadence, and that copy's own
-header says where it departs — it opens no tracking issue on drift, where
-`btclib`'s does. What every copy owes instead is a header sentence naming what
-it parses and where it departs from the siblings doing the same job —
-`btclib-node`'s workflow already carries one — so a reader holding two copies
-knows which difference was decided. Its failure mode is why the sentence is
-owed: an entry shape the script does not match is skipped, the run is green,
-and the issue it would have opened never opens — so a fix that is not about one
-tree's entry shape, a `gh` call or a field spelling, is carried to every copy
-in the same campaign, the header being what says which parts those are.
+different bytes, and the departure is a decided one: the job is the same job,
+and that copy's own header says where it departs — it opens no tracking issue on
+drift, where `btclib`'s does. What every copy owes instead is a header sentence
+naming what it parses and where it departs from the siblings doing the same job,
+so a reader holding two copies knows which difference was decided. Its failure
+mode is why the sentence is owed: an entry shape the script does not match is
+skipped and the run is green, so a fix that is not about one tree's entry shape
+is carried to every copy in the same campaign, the header being what says which
+parts those are.
 
 `tests/conventions_test.py` is per repository by subject, owed where
 `tests/README.md`, and outside the compared list for the same reason: each copy
-reads the declaration its own tree keeps, so its rows are that tree's, and so
-is the `tests/` root it resolves a declared module against — `btclib-node`
-keeps its copy at `tests/unit/conventions_test.py`, a different path and not
-only different bytes. That file is where section 7 asks a suite to declare
-which of its conventions it tests, forcing a test of that declaration rather
-than leaving it chosen, so a tree that declares nothing has nothing for this
-module to read. What the copies hold in common is a job rather than a text:
-read the declaration section 7 asks for and assert that every convention it
-names has a module holding a test for it. The header sentence a copy owes is
-about this module and not about how its tree names convention tests: what it
-reads, and which of its departures are decided rather than accidental. This
-repository's copy reads section 7's list of conventions off `README.md` rather
-than transcribing it — which a sibling cannot, the standard being in another
-repository — and says so. The failure mode is why the sentence is owed: a
-defect in the parsing that shared job needs sits in every copy carrying it and
-turns nothing red anywhere, so a fix that is not about one tree's rows or its
-root is carried to every copy in the same campaign, which is what
-`btclib-org/.github#651` records. A bullet in the compared list above is the
-rejected alternative: no two copies are byte-equal and that comparison is by
-path, so the bullet would report the copies as drift on the day it landed and
-could not reach `btclib-node`'s at all.
+reads the declaration its own tree keeps, so its rows are that tree's, and so is
+the `tests/` root it resolves a declared module against — `btclib-node` keeps
+its copy at `tests/unit/conventions_test.py`, a different path and not only
+different bytes. That file is where section 7 asks a suite to declare which of
+its conventions it tests, so a tree that declares nothing has nothing for this
+module to read. What the copies hold in common is a job rather than a text: read
+the declaration section 7 asks for and assert that every convention it names has
+a module holding a test for it. The header sentence a copy owes is about this
+module: what it reads, and which of its departures are decided rather than
+accidental. This repository's copy reads section 7's list of conventions off
+`README.md` rather than transcribing it — which a sibling cannot, the standard
+being in another repository — and says so. Its failure mode is why the sentence
+is owed: a defect in the parsing that shared job needs sits in every copy
+carrying it and turns nothing red anywhere, so a fix that is not about one
+tree's rows or its root is carried to every copy in the same campaign, which is
+what `btclib-org/.github#651` records.
 
 ## 15. Auditing a repository against this file
 
