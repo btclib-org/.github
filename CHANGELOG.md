@@ -9161,3 +9161,8 @@ nothing red follows from the copies disagreeing.
 - **`readback_test.py` goes; `alignment.yml` runs on every PR** (closes #1017)
   (closes #1262) (closes #1263) (closes #1264) (closes #1265) (closes #1270)
   (closes #1273) (closes #1274) (closes #1275) (closes #1277) (closes #1281)
+
+### Section 10's `fuzz` entry names `btclib-secp256k1`
+
+- **The tree carries a ClusterFuzzLite entry over its unsized parsers**
+  (closes #342): the last of the three the issue named.

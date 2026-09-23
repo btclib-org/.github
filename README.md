@@ -2645,7 +2645,7 @@ by that row.
 - `bootstrap-dns` — `btclib-node`;
 - `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`;
-- `fuzz` — `btclib`, `btclib-node`;
+- `fuzz` — `btclib`, `btclib-secp256k1`, `btclib-node`;
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`;
 - `zkp-oracle` — `btclib`;
 - `integration-hwi` — `btclib`;
@@ -2727,12 +2727,13 @@ and the badge land together.
   `btclib-secp256k1` read transactions, scripts, PSBTs, signatures and extended
   keys off the wire, and `btclib-node` speaks the peer-to-peer protocol;
   `bitcoin-core-rpc` reads an instance its own operator runs, which the property
-  does not reach. `btclib-secp256k1` has the property and no entry until
-  btclib-org/.github#342 answers whether a target may reach the vendored C
-  library. Section 7's *Property tests* has how a fuzzer and the property layer
-  stand to each other. A crash the sentinel finds is an issue against the
-  parser, never a suppression, and its regression is an ordinary test naming the
-  input and what the parser now does with it. It does not go in `fuzz/corpus/`,
+  does not reach. `btclib-secp256k1`'s targets reach the vendored C on
+  purpose: what they exercise is this tree's own length checks in front of it
+  (btclib-org/.github#342). Section 7's *Property tests* has how a fuzzer and
+  the property layer stand to each other. A crash the sentinel finds is an
+  issue against the parser, never a suppression, and its regression is an
+  ordinary test naming the input and what the parser now does with it. It
+  does not go in `fuzz/corpus/`,
   a *seed* corpus that `btclib`'s `tests/fuzz_corpus_test.py` requires to stay
   valid input, so the fix would redden it. What fills the workflow is the tree's
   — which entry points are targets and which harness runs them, `atheris` under
