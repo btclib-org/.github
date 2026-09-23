@@ -12,8 +12,9 @@ is the same question `pre-commit` asks on every commit -- and this
 repository's own open section is its whole history, there being no
 release to bound it, so a false positive here is not a corner case but
 the first thing a coder would hit. The other tests build a small file of
-their own instead, for the three checks and the shapes each must not
-answer to, or drive one function of the script on a fragment.
+their own instead, for the shapes a check must and must not answer to --
+or, where a check reads a count or a placement rather than the section's
+own text, drive that function directly on a fragment.
 
 The arguments are read off `.pre-commit-config.yaml` rather than written
 here: `--grandfathered` is a fact about this repository's history, and a
@@ -132,6 +133,25 @@ def test_two_entries_closing_one_issue_is_caught(script: ModuleType) -> None:
     found = script.problems(text)
     assert len(found) == 1
     assert "closes #1, already closed by" in found[0]
+
+
+def test_a_heading_less_entry_closing_the_same_issue_is_caught(
+    script: ModuleType,
+) -> None:
+    """The second check reads the heading-less entry too, not only headed ones.
+
+    `duplicate_closes` compares the heading-less entry's citations
+    against a headed entry's, exactly as it compares two headed entries
+    against each other, where the first and third checks read only the
+    `### ` headings.
+    """
+    text = _CLEAN.replace(
+        "### First entry\n\n- **first thing** (closes #1): one.\n\n",
+        "- a heading-less entry (closes #1).\n\n",
+    ).replace("(closes #2)", "(closes #1)")
+    found = script.problems(text)
+    assert len(found) == 1
+    assert "closes #1, already closed by the heading-less entry" in found[0]
 
 
 def test_a_heading_glued_to_the_line_above_is_caught(script: ModuleType) -> None:

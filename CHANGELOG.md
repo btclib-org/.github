@@ -9223,3 +9223,9 @@ nothing red follows from the copies disagreeing.
 - **`notice-rgx` gains an optional shebang line ahead of `COPYRIGHT`
   transcribed** (issue #1294): the per-file `CPY001` ignore comes out,
   and a `BACKLOG` row excuses each sibling until its own port lands.
+
+### `check_changelog.py`'s docstring stops citing a tree that has moved
+
+- **The module docstring drops the `portanode` citation and says
+  `duplicate_closes` reads the heading-less entry too** (closes #1297): its
+  fourth-check paragraph put it outside all three, wrong for the second.

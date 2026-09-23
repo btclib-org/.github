@@ -95,11 +95,11 @@ until this file's own review found them:
   way: two different branches each closing the same issue under the one
   heading their merge united is indistinguishable, to this script, from
   one author citing an issue twice in one entry;
-- a section with no `### ` heading at all -- portanode's open section
-  is one, prose bullets straight under the release heading with nothing
-  this file's `_ENTRY_HEADING` matches -- leaves every check here
-  vacuous rather than failing: nothing to repeat, nothing to split into
-  entries, nothing to find a blank line above;
+- a section with no `### ` heading at all -- prose bullets straight
+  under the release heading with nothing this file's `_ENTRY_HEADING`
+  matches -- leaves every check here vacuous rather than failing:
+  nothing to repeat, nothing to split into entries, nothing to find a
+  blank line above;
 - two bullets from different entries that a rebase's seam leaves
   touching, with no blank line between them and no heading in sight.
   Valid CommonMark reads them as one list either way, so neither
@@ -111,8 +111,10 @@ entry to its `### ` title and three lines of body, from the entry that
 brought the rule in. Entries above the heading `RULE_HEADING` names
 predate the rule and stay as written; where the open section no longer
 holds that heading -- a release closed over it -- every entry is
-measured. A heading-less entry is outside it, as it is outside the
-three above.
+measured. A heading-less entry is outside it, and outside the first
+and third checks above, but not the second: `duplicate_closes` reads
+the heading-less entry too, comparing its own citations against a
+headed entry's.
 
 That exemption is a trust, not a check: an entry above `RULE_HEADING`
 is read as older than the rule because section 9 puts a new entry at
