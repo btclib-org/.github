@@ -5,13 +5,15 @@ name: reusable-wait-for-index
 # the one question a release, a schedule or a dispatch asks of the
 # index -- has it served what a tag names yet -- is written once rather
 # than four times. `btclib`, `btclib-secp256k1`, `btclib-node` and
-# `bitcoin-core-rpc` each carry the identical three steps this job
-# carries: a sparse checkout of `.github/scripts`, `astral-sh/setup-uv`,
-# and a run of `wait_for_pypi_release.py` against the tag a release
-# passes. The trigger, the schedule's cron minute, `workflow_dispatch`,
-# a `pull_request` filtered to the script and this file, the
-# `concurrency:` group that never cancels a sample, and the calling
-# job's own `if:` all stay in the caller, whose run this job joins.
+# `bitcoin-core-rpc` are the callers, and the three steps are this
+# job's: a sparse checkout of this repository's `.github/scripts`,
+# `astral-sh/setup-uv`, and a run of `wait_for_pypi_release.py` against
+# the tag a release passes. The script is served from here, so a caller
+# owes no copy of it. The trigger, the schedule's cron minute,
+# `workflow_dispatch`, a `pull_request` filter where a caller carries
+# one, the `concurrency:` group that never cancels a sample, and the
+# calling job's own `if:` all stay in the caller, whose run this job
+# joins.
 #
 # One job and nothing besides it: every caller's own `install-published`
 # and `install-published-secp256k1` jobs stay in the caller, `needs:
@@ -114,9 +116,16 @@ jobs:
       # every action is pinned to a commit SHA, the tag in the comment:
       # a tag, let alone a branch, is a name its owner can move
       #
+      # this repository and not the caller's, `actions/checkout`
+      # defaulting to the tree the run belongs to rather than to the one
+      # the workflow file lives in: the script is the organization's and
+      # is served from here. `ref: main` is the same trust the caller
+      # already extends by naming this workflow `@main`, section 11's
+      # rulesets holding that branch.
+      #
       # sparse, and that is the whole reason this checkout is admissible
       # in a job that installs nothing of any calling tree's own
-      # package: what lands is .github/scripts plus the repository
+      # package: what lands is .github/scripts plus this repository's
       # root, cone mode being the default and root files always being
       # in the cone, so there is no source tree for an import to
       # resolve to. This job imports nothing of a calling tree in any
@@ -124,6 +133,8 @@ jobs:
       - name: Check out the wait script
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          repository: btclib-org/.github
+          ref: main
           persist-credentials: false
           sparse-checkout: .github/scripts
       - name: Setup uv

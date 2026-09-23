@@ -1,0 +1,24 @@
+---
+# the manifest that makes this repository a pre-commit hook repository,
+# so that the organization's shared hook is served from here rather than
+# copied into every tree. A sibling names this repository under `repo:`
+# with a 40-hex `rev:`; section 4 of README.md is the stanza and why the
+# pin is a sha.
+#
+# `language: script` runs the file itself, which is why
+# .github/scripts/check_changelog.py carries a shebang and the
+# executable bit. `always_run: true` and no `files:`, for the reason
+# section 4 gives: the rebase that eats the seam stages nothing, so a
+# hook keyed on the diff is unreachable after the event the blank-line
+# check exists to name.
+#
+# No `args:` here. The count of grandfathered entries is a fact about
+# the repository being checked, so the caller's own
+# .pre-commit-config.yaml is where it is written, and the default the
+# script declares is what a caller that names none gets.
+- id: check-changelog
+  name: the open CHANGELOG.md repeats no heading, closes no issue twice
+  entry: .github/scripts/check_changelog.py
+  language: script
+  pass_filenames: false
+  always_run: true

@@ -6,14 +6,18 @@
 
 The script's own module docstring is the argument for what it checks and
 why; this exercises both readings of it.
-`test_this_trees_own_open_section_is_clean` runs it unmodified, against
-this tree's own file, which is the same question the `pre-commit` hook
-asks on every commit -- and this repository's own open section is its
-whole history, there being no release to bound it, so a false positive
-here is not a corner case but the first thing a coder would hit. The
-other tests build a small file of their own instead, for the three
-checks and the shapes each must not answer to, or drive one function of
-the script on a fragment.
+`test_this_trees_own_open_section_is_clean` runs it against this tree's
+own file with the arguments this tree's own gate gives the hook, which
+is the same question `pre-commit` asks on every commit -- and this
+repository's own open section is its whole history, there being no
+release to bound it, so a false positive here is not a corner case but
+the first thing a coder would hit. The other tests build a small file of
+their own instead, for the three checks and the shapes each must not
+answer to, or drive one function of the script on a fragment.
+
+The arguments are read off `.pre-commit-config.yaml` rather than written
+here: `--grandfathered` is a fact about this repository's history, and a
+second copy of the number is the one that goes stale.
 
 The script is loaded by path, `.github/scripts` being no package.
 """
@@ -25,6 +29,7 @@ import sys
 from typing import TYPE_CHECKING
 
 import pytest
+import yaml
 
 from . import ROOT
 
@@ -33,6 +38,9 @@ if TYPE_CHECKING:
     from types import ModuleType
 
 _SCRIPT = ROOT / ".github" / "scripts" / "check_changelog.py"
+_GATE = ROOT / ".pre-commit-config.yaml"
+_HOOK = "check-changelog"
+_CHANGELOG = ROOT / "CHANGELOG.md"
 
 _CLEAN = """\
 # Changelog
@@ -61,9 +69,48 @@ def script(monkeypatch: pytest.MonkeyPatch) -> ModuleType:
     return module
 
 
-def test_this_trees_own_open_section_is_clean(script: ModuleType) -> None:
-    """This repository's own `CHANGELOG.md`, read unmodified, passes."""
-    assert script.main() == 0
+def arguments() -> list[str]:
+    """Return the arguments this tree's own gate gives the hook.
+
+    :returns: the `args:` of the `check-changelog` hook, in file order.
+    """
+    parsed = yaml.safe_load(_GATE.read_text(encoding="utf-8"))
+    return [
+        argument
+        for entry in parsed["repos"]
+        for hook in entry["hooks"]
+        if hook["id"] == _HOOK
+        for argument in hook.get("args", [])
+    ]
+
+
+def test_the_gate_names_the_count(script: ModuleType) -> None:
+    """The gate passes `--grandfathered`, which the test below leans on.
+
+    Without it the run below would measure the default instead, and pass
+    for a reason that says nothing about this repository.
+    """
+    assert "--grandfathered" in arguments(), (
+        f"{_GATE.name} gives {_HOOK} no --grandfathered"
+    )
+    assert script.problems(_CHANGELOG.read_text(encoding="utf-8")), (
+        "this repository's open section passes at the default count, so"
+        " the argument the gate passes decides nothing"
+    )
+
+
+def test_this_trees_own_open_section_is_clean(
+    script: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """This repository's own `CHANGELOG.md`, read as the hook reads it.
+
+    `_CHANGELOG` is the bare name the script resolves against the
+    working directory `pre-commit` sets, so the file is named here
+    rather than left to wherever pytest was started.
+    """
+    monkeypatch.setattr(script, "_CHANGELOG", _CHANGELOG)
+    assert script.main(arguments()) == 0
 
 
 def test_a_clean_fixture_is_a_positive_control(script: ModuleType) -> None:
@@ -188,18 +235,27 @@ _LONG = "- one\n- two\n- three\n- four\n"
 
 
 def test_a_long_body_after_the_rule_entry_is_caught(script: ModuleType) -> None:
-    """The fourth check reads from the entry the rule entered with."""
+    """The fourth check reads from the entry the rule entered with.
+
+    The count passed is what the fixture holds above the rule heading,
+    so the fifth check has nothing to say and the finding this asks
+    about is the only one left.
+    """
     rule = f"### {script.RULE_HEADING}\n\n- rule.\n"
-    found = script.problems(f"{_CLEAN}\n{rule}\n### Long\n\n{_LONG}")
+    found = script.problems(f"{_CLEAN}\n{rule}\n### Long\n\n{_LONG}", 2)
     assert len(found) == 1
     assert "'Long'" in found[0]
     assert "4 lines" in found[0]
 
 
 def test_a_long_body_before_the_rule_entry_is_not_reported(script: ModuleType) -> None:
-    """An entry above the rule entry predates the rule and stays."""
+    """An entry above the rule entry predates the rule and stays.
+
+    The long entry is above the heading here, so the count passed is one
+    higher than the test above's, for the same reason.
+    """
     rule = f"### {script.RULE_HEADING}\n\n- rule.\n"
-    assert script.problems(f"{_CLEAN}\n### Long\n\n{_LONG}\n{rule}") == []
+    assert script.problems(f"{_CLEAN}\n### Long\n\n{_LONG}\n{rule}", 3) == []
 
 
 def test_misplaced_entries_is_clean_within_the_grandfathered_count(
@@ -255,27 +311,24 @@ def test_a_misplaced_long_body_is_refused_once_grandfathered_is_exceeded(
     assert "an entry has landed above it" in found[0]
 
 
-def test_misplaced_entries_uses_the_repository_constant_when_none_is_passed(
+def test_problems_carries_the_count_to_the_check_that_reads_it(
     script: ModuleType,
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """`problems()`'s own call takes no override, so this is what it reads.
+    """`problems()` hands `--grandfathered` on, and defaults to zero.
 
-    `test_misplaced_entries_is_caught_past_the_grandfathered_count` above
-    exercises the override a test uses instead; this is the path
-    `misplaced_entries()` takes on a real `CHANGELOG.md`, reading
-    `_GRANDFATHERED_ENTRIES` from this repository's own trailing section
-    rather than a fixture the size of the 350 entries that constant
-    actually names.
+    `test_misplaced_entries_is_caught_past_the_grandfathered_count`
+    above drives the check directly; this is the path from the command
+    line, which is the one a run takes. The default is asked for too:
+    it is what a caller naming no count gets, and a fixture with two
+    entries above the rule heading is past it.
     """
     rule = f"### {script.RULE_HEADING}\n\n- rule.\n"
     text = f"{_CLEAN}\n{rule}"
-    monkeypatch.setattr(script, "_GRANDFATHERED_ENTRIES", 2)
-    assert script.problems(text) == []
-    monkeypatch.setattr(script, "_GRANDFATHERED_ENTRIES", 1)
-    found = script.problems(text)
+    assert script.problems(text, 2) == []
+    found = script.problems(text, 1)
     assert len(found) == 1
     assert "an entry has landed above it" in found[0]
+    assert len(script.problems(text)) == 1
 
 
 def test_link_definitions_are_not_lines_of_the_body(script: ModuleType) -> None:
@@ -303,7 +356,7 @@ def test_main_reports_a_problem_and_returns_1(
     broken = tmp_path / "CHANGELOG.md"
     broken.write_text(_CLEAN.replace("Second entry", "First entry"), encoding="utf-8")
     monkeypatch.setattr(script, "_CHANGELOG", broken)
-    assert script.main() == 1
+    assert script.main([]) == 1
     out = capsys.readouterr().out
     assert "repeats the heading" in out
 
@@ -318,7 +371,7 @@ def test_main_reports_nothing_wrong_and_returns_0(
     clean = tmp_path / "CHANGELOG.md"
     clean.write_text(_CLEAN, encoding="utf-8")
     monkeypatch.setattr(script, "_CHANGELOG", clean)
-    assert script.main() == 0
+    assert script.main([]) == 0
     out = capsys.readouterr().out
     assert "repeats no heading" in out
 

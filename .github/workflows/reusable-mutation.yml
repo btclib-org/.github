@@ -14,10 +14,11 @@ name: reusable-mutation
 # would block whoever next touched the file for a hole somebody else left.
 #
 # What runs is what the calling tree's .github/mutation/*.toml says, one list
-# of scopes and test commands rather than a second copy of them here, and the
-# counts are that tree's own .github/scripts/mutation_counts.py: a caller owes
-# both, and the baseline step below fails the run where a configuration is
-# missing.
+# of scopes and test commands rather than a second copy of them here, and that
+# configuration is the whole of what a caller owes -- the baseline step below
+# fails the run where it is missing. The counts are this repository's own
+# .github/scripts/mutation_counts.py, checked out beside the caller's tree by
+# the second checkout below rather than copied into every caller.
 #
 # Four inputs, the first of them the whole matrix. Which scopes a tree
 # mutates, what each is given and what the job is called are that tree's own
@@ -166,6 +167,23 @@ jobs:
           # that source checked out before its suite can import what it
           # built, and a mutant is judged by that suite
           submodules: ${{ inputs.submodules }}
+      # the counts script, served from here rather than owed by every
+      # caller: `actions/checkout` defaults to the tree the run belongs
+      # to, so `repository:` and `ref:` are what name this one, and
+      # `path:` puts it beside the caller's checkout instead of over it.
+      # `main` is the same trust the caller already extends by naming
+      # this workflow `@main`. Sparse, so what lands is .github/scripts
+      # and this repository's root files, nothing of which any step here
+      # reads besides the script itself
+      - name: Check out the counts script
+        if: env.SELECTED == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: btclib-org/.github
+          ref: main
+          path: standard
+          persist-credentials: false
+          sparse-checkout: .github/scripts
       - name: Setup uv
         if: env.SELECTED == 'true'
         uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
@@ -466,9 +484,9 @@ jobs:
             # `test_outcome != SURVIVED`, so a mutant the filter skipped
             # counts as a kill and the rate divides by every result, which on
             # a session nothing has run yet reads a perfect 0.00%.
-            # `cr-report`'s summary line is wrong the same way, and the
-            # calling tree's mutation_counts.py says why it reads the session
-            # file rather than `cosmic-ray dump`.
+            # `cr-report`'s summary line is wrong the same way, and
+            # mutation_counts.py says why it reads the session file rather
+            # than `cosmic-ray dump`.
             #
             # No threshold on the rate: a survivor is a test nobody has
             # written yet, and this workflow is not allowed to be red about
@@ -480,7 +498,7 @@ jobs:
             # `pipefail`, so piping would discard exactly the status it
             # reports
             uv run --locked --no-default-groups \
-              python .github/scripts/mutation_counts.py \
+              python standard/.github/scripts/mutation_counts.py \
               "$session.sqlite" "$session" || counted=$?
           done <<< "$SESSIONS"
           exit "$counted"
