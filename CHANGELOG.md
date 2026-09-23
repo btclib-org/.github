@@ -9200,3 +9200,9 @@ nothing red follows from the copies disagreeing.
 - **A checklist step keeps its step and drops the argument around it**
   (issue #1075): every command, every finding and every item stays, and
   section 15's fenced blocks are byte for byte what they were.
+
+### Sections 12 to 14 say each rule and its reason, and no more
+
+- **The argument behind a rule shrinks to a sentence** (issue #1075):
+  what each rule says has not moved, and neither has any command or
+  citation in the three.
