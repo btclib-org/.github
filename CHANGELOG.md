@@ -9194,3 +9194,9 @@ nothing red follows from the copies disagreeing.
 - **The argument behind a rule shrinks to a sentence** (issue #1075):
   every rule the section states stays, and what reads each one still
   does.
+
+### Sections 15 and 16 shed argument, keeping every command and step
+
+- **A checklist step keeps its step and drops the argument around it**
+  (issue #1075): every command, every finding and every item stays, and
+  section 15's fenced blocks are byte for byte what they were.
