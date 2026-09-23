@@ -9217,3 +9217,9 @@ nothing red follows from the copies disagreeing.
 
 - **Every tree takes `check-changelog` from this repository at a pin of
   its own** (closes #1293): the cells pass without the rows.
+
+### Section 5 lets notice-rgx read the notice under a shebang line
+
+- **`notice-rgx` gains an optional shebang line ahead of `COPYRIGHT`
+  transcribed** (issue #1294): the per-file `CPY001` ignore comes out,
+  and a `BACKLOG` row excuses each sibling until its own port lands.

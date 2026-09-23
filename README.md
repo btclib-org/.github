@@ -1089,9 +1089,10 @@ preview rule then runs only where `extend-select` names it exactly.
   function under the line, so the list can only shrink.
 - **The copyright notice is a ruff rule**, `CPY` with a `notice-rgx`
   that is `COPYRIGHT` transcribed: each line with its regex
-  metacharacters escaped, the lines joined by `\n`, the whole anchored
-  with `^`, so that a source file opens with the file's text and not
-  with a line resembling it. The rule rather than the copyright-notice
+  metacharacters escaped, the lines joined by `\n`, `^(#![^\n]*\n)?`
+  ahead of the notice for the shebang a script run by path opens with,
+  so the notice opens the file or opens it right after that line, and
+  never sits anywhere else. The rule rather than the copyright-notice
   hook, which checks only staged files unless given `--enforce-all` and
   so checks nothing under `--all-files`.
 
