@@ -2186,9 +2186,39 @@ request and the rule follows.
   nothing in the tree to explain why.
 - **The job carries an `if:` of its own: a job with `needs` and no `if:` is
   skipped when one of those needs fails**, and `skipped` is silence about the
-  failure it exists to report. The condition is `!cancelled()`, beside the draft
-  and closed conditions; `always()` would fail the job on a run its concurrency
-  group superseded.
+  failure it exists to report. The condition is
+
+  `${{ !cancelled() && github.event.action != 'closed' }}`
+
+  and `always()` stays refused for the same reason as before: it would fail
+  the job on a run its concurrency group superseded, and this job must not
+  report that as a failure.
+- **The draft flag is not part of that `if:`, because GitHub answers a
+  `skipped` required check the same as a passing one, and the aggregate's
+  own check run does not exist until every job it `needs` has settled**
+  (btclib-org/.github#1327). Declining the aggregate itself while draft, the
+  way its own `needs` jobs decline, leaves a check of that name on the sha
+  reading as passed; a pull request marked ready without a push then starts
+  a new run whose aggregate is not created until its jobs finish, and for
+  the length of that build the draft's own skipped check is the only one
+  there — on a head nothing has actually built yet. The closed condition
+  stays where it was: a closed pull request has nothing left to become
+  ready, so its skip is the end of the matter rather than a window onto
+  anything.
+- **So the draft flag is read inside the job instead, and answered with a
+  failure rather than a skip.** Neither draft nor closed merges through
+  GitHub's own UI regardless of what the check reports, so failing while
+  draft costs nothing there, and it is what keeps `ready_for_review` from
+  leaving a passing-looking record behind. The step that reads
+  `needs.*.result`, or the run's job listing, opens by failing outright on
+  `github.event.pull_request.draft`, ahead of either allowlist below.
+- **A run the concurrency group cancels outright still keeps its skip, and
+  that gap stays open rather than closed.** Closing it is what `always()`
+  above is refused for, so what remains is narrower than the draft case:
+  the skip sits on a sha that only a further run on that same sha ever
+  supersedes, so reading it as passing wrongly needs a merge attempted
+  inside the window the cancellation itself opens, before anything later
+  completes there.
 - **What the aggregate of a workflow that is only ever a run's own reads is that
   run's job listing, asked of the API rather than of `needs`** —
   `repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs`, each finished

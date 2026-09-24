@@ -9307,3 +9307,9 @@ nothing red follows from the copies disagreeing.
 - **How decisions are made, who holds which role, and what the
   organization intends and declines** are one document each, here and
   inherited by no repository (issue #1321).
+
+### Section 10's aggregate no longer skips while a pull request is a draft
+
+- **A skipped required check satisfies branch protection like a passing
+  one, so a draft's own decline left `ready_for_review` a stale pass to
+  read** (closes #1327): the aggregate's `if:` now drops the draft flag.
