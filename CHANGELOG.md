@@ -9284,3 +9284,8 @@ nothing red follows from the copies disagreeing.
 
 - **`attest-signer` is read by nothing**, and stays declared only while a
   caller still passes it (issue #1315).
+
+### `reusable-sdist-rebuild.yml` drops `attest-signer`
+
+- **A caller passing it is refused**, GitHub rejecting an input the
+  called workflow does not declare (closes #1315).

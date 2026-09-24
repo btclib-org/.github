@@ -67,13 +67,6 @@ name: reusable-sdist-rebuild
 # it resolves without them, as every caller that never asked for a
 # specific interpreter did before this file existed.
 #
-# attest-signer, string: declared and read by nothing. GitHub refuses
-# a call passing an input the called workflow does not declare -- "If a
-# caller workflow passes an input that is not specified in the called
-# workflow, this results in an error", its workflow syntax reference
-# under `on.workflow_call.inputs` -- so the declaration stays while a
-# caller still passes it, and goes once none does.
-#
 # **The signer is reusable-attest.yml.** `gh attestation verify`
 # requires the signer to be named once an attestation is generated
 # inside a called workflow, and the identity is then the callee's:
@@ -138,12 +131,6 @@ on:
           own.
         type: string
         default: ""
-      attest-signer:
-        description: >
-          Read by nothing: the signer is always btclib-org/.github's
-          reusable-attest.yml, and the input is declared only so that a
-          caller still passing it is not refused.
-        type: string
 
 # least privilege for the GITHUB_TOKEN at the workflow level, elevated
 # on the job below -- each grant explained at its own line there
@@ -228,8 +215,7 @@ jobs:
             .github/scripts/normalize_sdist.py dist/
           sha256sum dist/*.tar.gz
 
-      # the signer the header names, whatever attest-signer a caller
-      # passes
+      # the signer the header names
       - name: Verify the rebuilt sdist against reusable-attest.yml
         env:
           GH_TOKEN: ${{ github.token }}
