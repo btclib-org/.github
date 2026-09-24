@@ -19,7 +19,7 @@ release such a version, and PEP 440 reads a digits-and-dots version as a
 sequence of integers, trailing zeros insignificant, which is the whole
 of the ordering this script applies.
 
-    uv run --no-project --python 3.14 \
+    uv run --no-project --python 3.15 \
         .github/scripts/check_version_order.py "$version"
 
 run from the root of the checkout whose tags it reads.

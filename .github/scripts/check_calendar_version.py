@@ -29,7 +29,7 @@ local midnight in Rome is still the previous day in UTC. UTC+14,
 date there is the latest date anybody can be looking at; a day after it
 has begun nowhere.
 
-    uv run --no-project --python 3.14 \
+    uv run --no-project --python 3.15 \
         .github/scripts/check_calendar_version.py "$version"
 """
 

@@ -166,23 +166,23 @@ alone is the rejected proxy, and `btclib-node` is what it reads wrong, a
 full node being a program its users run. No command refuses a library
 that declines the classifier, the two being one shape on disk.
 
-A **library covers every interpreter still in support**: what it
-publishes to PyPI supports every Python release that has not reached end
-of life in the
+A **library covers every interpreter still in support**: what it publishes to
+PyPI supports every Python release that has not reached end of life in the
 [Python release cycle](https://devguide.python.org/versions/),
-`.python-version` is the newest released, and the classifiers name every
-version from `requires-python` to it while the platform sweeps run each.
-The libraries name one window between them, and section 15's command is
-what reads it.
+`.python-version` is the newest with a release candidate out, a beta not
+counting, so that the final needs a re-resolution and no port, and the
+classifiers name every version from `requires-python` to it while the platform
+sweeps run each. The libraries name one window between them, and section 15's
+command is what reads it.
 
-An **application takes the newest interpreter its dependencies allow**,
-not being there to be imported: `.python-version` is the newest version
-every dependency publishes for, and `requires-python` the oldest the
-tree itself means to run on, which is that same version where it means
-to run on one interpreter alone. Where a dependency holds
-`.python-version` below the newest release, that file's comment names
-the dependency and the condition for raising it, a ceiling with no
-reason beside it reading as a preference.
+An **application takes the newest interpreter its dependencies allow**, not
+being there to be imported: `.python-version` is the newest version every
+dependency installs on, a release candidate counting here too, and
+`requires-python` the oldest the tree itself means to run on, which is that
+same version where it means to run on one interpreter alone. Where a dependency
+holds `.python-version` below the newest with a candidate out, that file's
+comment names the dependency and the condition for raising it, a ceiling with
+no reason beside it reading as a preference.
 
 ### Dependency groups
 
@@ -1824,9 +1824,9 @@ unnumbered.
 **An interpreter axis is a gate cell rather than a sentinel row exactly where
 the extra cell runs in parallel with the cells already gating the review, and
 where it is the pinned interpreter run a second time rather than a version the
-package newly claims to support.** `btclib-node`'s `test.yml` carries `3.14t` on
-this ground, in a `free-threaded` job beside the `coverage` job at `3.14`. Where
-either condition fails, the row belongs in the weekly calendar.
+package newly claims to support.** `btclib-node`'s `test.yml` carries its pin's
+`t` build on this ground, in a `free-threaded` job beside the `coverage` job.
+Where either condition fails, the row belongs in the weekly calendar.
 
 **What runs weekly does not also gate**, so nothing is asked twice at the price
 a gate charges. The converse does not hold: a sentinel runs its matrix whole,

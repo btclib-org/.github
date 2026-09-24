@@ -72,7 +72,7 @@ name: reusable-deps-latest
 #
 # The ground is not that this job's matrix is narrower than a platform
 # sentinel's: btclib's own deps-latest.yml sweeps ubuntu-latest,
-# macos-latest and windows-latest at "3.10" and "3.14", a subset of what
+# macos-latest and windows-latest at its floor and its pin, a subset of what
 # os-ubuntu, os-macos and os-windows sweep, and its CONTRIBUTING.md says
 # the platform is varied here in as many words -- "deps-latest moves
 # both". So measure-coverage: true asks the ratchet of every cell of

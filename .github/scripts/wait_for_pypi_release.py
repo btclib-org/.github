@@ -39,7 +39,7 @@ nothing to wait for rather than an error -- which is what makes this
 runnable on a schedule and a dispatch, where a step only a release runs
 is a step whose defect ships with a release.
 
-    uv run --no-project --python 3.14 \
+    uv run --no-project --python 3.15 \
         .github/scripts/wait_for_pypi_release.py "$PACKAGE" "$TAG"
 """
 

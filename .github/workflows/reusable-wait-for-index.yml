@@ -46,7 +46,7 @@ name: reusable-wait-for-index
 #
 # Resisted: a third input for the runner, the interpreter, or the
 # sparse-checkout path. None of the copies this job replaced varies any
-# of them -- `ubuntu-latest`, `--python 3.14`, `.github/scripts` -- and a
+# of them -- `ubuntu-latest`, `--python 3.15`, `.github/scripts` -- and a
 # knob for what does not vary is one the family would only have to keep
 # agreeing about.
 #
@@ -151,5 +151,5 @@ jobs:
           PACKAGE: ${{ inputs.package }}
           TAG: ${{ inputs.version }}
         run: |
-          uv run --no-project --python 3.14 \
+          uv run --no-project --python 3.15 \
             .github/scripts/wait_for_pypi_release.py "$PACKAGE" "$TAG"

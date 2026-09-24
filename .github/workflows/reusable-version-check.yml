@@ -209,7 +209,7 @@ jobs:
       - name: Check that the version is not dated in the future (release only)
         if: github.event_name == 'push' && inputs.tag-requires-day
         run: |
-          uv run --no-project --python 3.14 \
+          uv run --no-project --python 3.15 \
             standard/.github/scripts/check_calendar_version.py "$(uv version --short)"
       # on every tree, tag-requires-day or not, a version of digits and
       # dots being all the script orders. The tags it reads are the
@@ -217,7 +217,7 @@ jobs:
       - name: Check that the version sorts above every release tagged (release only)
         if: github.event_name == 'push'
         run: |
-          uv run --no-project --python 3.14 \
+          uv run --no-project --python 3.15 \
             standard/.github/scripts/check_version_order.py "$(uv version --short)"
       # the release notes are RELEASE_NOTES.md's section for the tag,
       # lifted by the caller's own github-release job, and its fallback
