@@ -9289,3 +9289,9 @@ nothing red follows from the copies disagreeing.
 
 - **A caller passing it is refused**, GitHub rejecting an input the
   called workflow does not declare (closes #1315).
+
+### `reusable-version-check.yml` refuses a version sorting below a release
+
+- **A release that does not sort above every release already tagged fails
+  before the upload** (closes #1318), a `tag-requires-day: false` caller
+  included.
