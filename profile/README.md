@@ -29,6 +29,10 @@ they say that too.
   addresses, scripts, transactions, PSBT and output descriptors. Not
   limited to secp256k1: the curve arithmetic serves SEC, NIST, Brainpool
   and low-cardinality test curves alike.
+- **[btclib-wallet](https://github.com/btclib-org/btclib-wallet)** — the
+  wallet built on btclib: BIP32 keys, BIP39 and SLIP39 mnemonics, output
+  descriptors, PSBT and the signers for it, transaction building and coin
+  selection, and a wallet that reads a Bitcoin Core node or an explorer.
 - **[btclib-secp256k1](https://github.com/btclib-org/btclib-secp256k1)**
   — cffi bindings to
   [libsecp256k1](https://github.com/bitcoin-core/secp256k1), Bitcoin
