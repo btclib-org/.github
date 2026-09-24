@@ -42,9 +42,10 @@ not deadlines.
   issue holds the steps, in that order, and what each is done when.
 - **tf2, one conformance suite for any bitcoin node**
   (btclib-org/btclib#2220): Bitcoin Core's functional tests rewritten on
-  `btclib`, in a repository of its own, reaching a node only through a
-  process it starts and the node's RPC and p2p sockets, with `bitcoind`
-  as the reference and `btclib-node` the first target.
+  `btclib`, in a repository of its own, `bitcoin-node-tests`, reaching a
+  node only through a process it starts and the node's RPC and p2p
+  sockets, with `bitcoind` as the reference and `btclib-node` the first
+  target.
 - **FROST key generation in `ecc/`**, a trusted-dealer split and then
   ChillDKG, once BIP445 and the ChillDKG draft settle
   (btclib-org/btclib#2200).
