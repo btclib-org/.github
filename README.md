@@ -2023,7 +2023,7 @@ by that row.
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`,
   `btclib-wallet`;
 - `zkp-oracle` — `btclib`;
-- `integration-hwi` — `btclib`, `btclib-wallet`;
+- `integration-hwi` — `btclib-wallet`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
 - `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
@@ -2092,17 +2092,16 @@ and the badge land together.
     and what gates a change, so a change to any of them owes a pass over it.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
   between the parser and an adversary choosing the bytes. `btclib` and
-  `btclib-secp256k1` read transactions, scripts, PSBTs, signatures and extended
-  keys off the wire, `btclib-node` speaks the peer-to-peer protocol, and
-  `btclib-wallet` parses PSBTs, output descriptors and BIP32/BIP322 data a
-  counterparty hands it; `bitcoin-core-rpc` reads an instance its own operator
-  runs, which the property does not reach. `btclib-secp256k1`'s targets reach
-  the vendored C on purpose: what they exercise is this tree's own length
-  checks in front of it (btclib-org/.github#342). Section 7's *Property tests*
-  has how a fuzzer and the property layer stand to each other. A crash the
-  sentinel finds is an issue against the parser, never a suppression, and its
-  regression is an ordinary test naming the input and what the parser now does
-  with it; it does not go in
+  `btclib-secp256k1` read transactions, scripts and signatures off the wire,
+  `btclib-node` speaks the peer-to-peer protocol, and `btclib-wallet` parses
+  PSBTs, output descriptors and BIP32/BIP322 data a counterparty hands it;
+  `bitcoin-core-rpc` reads an instance its own operator runs, which the property
+  does not reach. `btclib-secp256k1`'s targets reach the vendored C on purpose:
+  what they exercise is this tree's own length checks in front of it
+  (btclib-org/.github#342). Section 7's *Property tests* has how a fuzzer and
+  the property layer stand to each other. A crash the sentinel finds is an issue
+  against the parser, never a suppression, and its regression is an ordinary
+  test naming the input and what the parser now does with it; it does not go in
   `fuzz/corpus/`, a *seed* corpus that `btclib`'s `tests/fuzz_corpus_test.py`
   requires to stay valid input. What fills the workflow is the tree's — which
   entry points are targets and which harness runs them, `atheris` under

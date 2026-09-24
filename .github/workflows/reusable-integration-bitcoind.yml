@@ -1,57 +1,46 @@
 ---
 name: reusable-integration-bitcoind
 
-# The regtest job btclib's and btclib-node's own integration-bitcoind.yml
-# call, so the checkout, the node install, the test run and the report
-# upload are written once. The trigger, the schedule, the concurrency
-# group and its suffix stay in the caller, whose run this job joins --
-# the shape reusable-lint.yml and reusable-os-suite.yml already take, and
-# for the same reason: a called workflow cannot itself carry `schedule`,
-# and the caller's own trigger set is what a reader checking when this
-# runs has to open regardless.
+# The regtest job a tree's own integration-bitcoind.yml calls, so the
+# checkout, the node install, the test run and the report upload are
+# written once. The trigger, the schedule, the concurrency group and its
+# suffix stay in the caller, whose run this job joins -- the shape
+# reusable-lint.yml and reusable-os-suite.yml already take, and for the
+# same reason: a called workflow cannot itself carry `schedule`, and the
+# caller's own trigger set is what a reader checking when this runs has
+# to open regardless.
 #
 # Four of the five inputs are the ordinary shape: which Core release and
 # which published sha256 to install -- a tree's own claim about the node
-# it tests against, raised on its own schedule and not the other tree's
-# -- and the two environment-variable names tests/integration/conftest.py
+# it tests against, raised on its own schedule and not another tree's --
+# and the two environment-variable names tests/integration/conftest.py
 # reads in each calling tree, which are that tree's own switches and not
 # something a file here could write. An input for any of these is not a
-# copy in disguise (btclib-org/.github#35): both callers set a value, and
-# neither is empty.
+# copy in disguise (btclib-org/.github#35): each is required, so every
+# caller states its own value.
 #
-# The fifth is the one this file's own issue names as the ground on
-# which the conversion could be wrong. btclib's
-# own step excludes hwi-classname testcases before judging whether the
-# node tests ran, because that tree's tests/integration mixes in
-# HWI-classified cases that legitimately skip there; btclib-node has none
-# and filters nothing. As an optional input defaulting to empty, only
-# btclib will ever set exclude-classname, and two callers is already
-# thin. It is taken here anyway, on this ground: the difference is one
-# line inside one step of six, a filter over a list rather than a
-# different script, a different trigger set or a different job, where the
-# calibration precedent this issue measured against --
-# btclib-secp256k1's twice-per-cell os-* runs -- was a difference in the
-# shape of the job itself rather than in one step of it.
-# reusable-os-suite.yml's own pre-suite-script already carries exactly
-# this shape -- an optional string, empty by default, read by whichever
-# caller has something to run and left alone by the one that does not --
-# so this is the organization's standing convention applied rather than a
-# new one argued for. Everything else about the two callers is the same
-# job end to end: the same trigger set, the same single job, the same
-# required-check name, the same pinned release and digest, a
-# byte-identical call into ./.github/actions/install-bitcoind, and a
-# byte-identical report upload.
+# The fifth, exclude-classname, is optional and empty by default. A
+# caller whose tests/integration mixes in cases that legitimately skip
+# under this job sets it to their classname substring; a caller with
+# none leaves it unset and filters nothing. An input only some callers
+# set is the weak point of sharing one file, and it is taken here
+# anyway, on this ground: what differs between callers is one line
+# inside one step, a filter over a list rather than a different script,
+# a different trigger set or a different job, where btclib-secp256k1's
+# twice-per-cell os-* runs differ in the shape of the job itself rather
+# than in one step of it. reusable-os-suite.yml's own pre-suite-script
+# already carries exactly this shape -- an optional string, empty by
+# default, read by whichever caller has something to run and left alone
+# by one that does not -- so this is the organization's standing
+# convention applied rather than a new one argued for.
 #
 # A reusable workflow changes the check context a required check reports
 # under: GitHub composes it from the calling job's own id and this job's
-# `name:`, joined by " / ", so a caller cannot simply start calling this
-# file without also widening or moving its branch rule.
-# `Regtest against Bitcoin Core` is a required context in both btclib and
-# btclib-node today (the classic protection endpoint, not the ruleset
-# one, is where that is read back), and converting either without first
-# updating that rule leaves a merge waiting on a context nothing produces
-# any more. That change is each caller's own to make, outside this pull
-# request and before its own call lands.
+# `name:`, joined by " / ", so a caller's required check is
+# `<calling job id> / Regtest against Bitcoin Core`. A tree that starts
+# calling this file moves its branch rule onto that context before its
+# call lands; a rule still naming the context its own job reported
+# under leaves a merge waiting on a context nothing produces.
 
 on:
   workflow_call:
@@ -86,7 +75,7 @@ on:
         description: >
           A substring excluding matching testcases from the node-ran
           check below, before skips are judged. Empty runs the check
-          over every testcase; the header has which caller sets this and
+          over every testcase; the header has when a caller sets this and
           why.
         type: string
         default: ""
@@ -129,18 +118,18 @@ jobs:
           # cache is the difference between a download and a copy
           enable-cache: true
       # the calling tree's own composite action: the checkout above put
-      # it in the working tree, this job carrying none of its own, for
-      # the reason the header gives -- this repository's own tree has no
-      # .github/actions/ at all. This differs from links.yml's and
+      # it in the working tree, this job carrying none of its own, as
+      # this repository's own tree has no .github/actions/ at all. This
+      # differs from links.yml's and
       # claude-review.yml's own `zizmor: ignore[self-repository]`: those
       # are a job-level call to a workflow of this same repository, path
       # resolution deciding nothing since it runs at this file's own
       # commit either way and really does call into this repository's
       # own content; this is a step inside a *called* workflow, where
       # `./` resolves against whatever the checkout above put in the
-      # working tree -- the calling tree's own copy, on purpose, per the
-      # header, and never this repository's, which has nothing at this
-      # path for it to be. zizmor's suggested `$/` form is not a syntax
+      # working tree -- the calling tree's own copy, on purpose, and
+      # never this repository's, which has nothing at this path for it
+      # to be. zizmor's suggested `$/` form is not a syntax
       # GitHub Actions has: actionlint refuses it here exactly as it
       # does on those two other calls
       - name: Install bitcoind
@@ -168,8 +157,8 @@ jobs:
       # whose fixture stopped finding the node would stay green while
       # asking Core nothing -- the failure mode of an unattended run that
       # looks like good news. exclude-classname is what lets a caller's
-      # own legitimately-skipping cases -- hwi ones in btclib's tree --
-      # out of that judgment without excusing anything else
+      # own legitimately-skipping cases out of that judgment without
+      # excusing anything else
       - name: Fail if the node tests did not run
         env:
           EXCLUDE_CLASSNAME: ${{ inputs.exclude-classname }}
