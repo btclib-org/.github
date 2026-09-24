@@ -1856,11 +1856,14 @@ Run it for the gate's workflow too, counting only completed runs: `skipped` and
 `cancelled` did none of the work. `workflow_call` and
 `push: branches: [main]` are outside the question. An unfiltered
 `pull_request` needs a reason of its own, stated in the header, and the
-organization has three such reasons: this repository's `alignment`, whose
-run is seconds and whose subject is nearly every file of the tree;
+organization grants one for such reasons: this repository's `alignment`,
+whose run is seconds and whose subject is nearly every file of the tree;
 `integration-bitcoind`, whose regtest job is a required check and where a
-required check that never runs blocks a merge; and `codeql`, whose result
-the OpenSSF Scorecard reads off a merged pull request's own commits.
+required check that never runs blocks a merge; `wheel-reproducibility`,
+whose aggregate is a required check in `btclib-secp256k1` for the same
+reason, a job reading the pull request's files deciding which builds run;
+and `codeql`, whose result the OpenSSF Scorecard reads off a merged pull
+request's own commits.
 
 **A rewrite owes a dispatch.** A schedule-only workflow keeps the previous
 file's verdict as its newest run until its cron comes round, so a landing that
