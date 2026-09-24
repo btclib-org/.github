@@ -9,9 +9,9 @@ than carrying a copy.
 ## The model
 
 **btclib-org has a single maintainer, who takes the decisions the written
-rules leave open.** The maintainer administers the organization, is the
-only account the branch rules let merge without another person's approval,
-and is where a review that does not converge goes.
+rules leave open.** The maintainer is one of the organization's owners, is
+the only account the branch rules let merge without another person's
+approval, and is where a review that does not converge goes.
 
 The written rules come first. The
 [organization's standard](https://github.com/btclib-org/.github) binds
@@ -25,11 +25,9 @@ repository. A rule changes by a pull request like any other change.
   standard, is filed in this repository's tracker, and one about a single
   repository in that repository's tracker: `CONTRIBUTING.md`'s *The issue
   tracker* says which.
-- **A decision is recorded on the issue it answers**, as a comment the
-  maintainer writes, and the issue is the record.
-  **TODO (maintainer):** confirm this sentence. It describes practice seen
-  on the trackers; `CONTRIBUTING.md`'s *The landing queue* states it for
-  one kind of decision only, a bounded exception to that queue.
+- **A decision is recorded on the issue it answers**, as a comment,
+  whoever writes it. A decision taken outside the tracker is written into
+  the issue it answers, and the issue is the record.
 - **A change is accepted through a pull request**, and section 11's
   *Branch protection and rulesets* is the rule: every change reaches
   `main` through one, squashed, carrying a valid signature, and with an
@@ -55,19 +53,25 @@ repository. A rule changes by a pull request like any other change.
 Each entry says who holds the role and names the file that says what it
 owes, rather than restating it.
 
-- **The maintainer** holds the organization's administration and the
-  bypass above, and takes the decisions *How a decision is made* gives
-  the role; a repository's `RELEASING.md` names the maintainer as the
-  reviewer of its publishing environments. The role is held by
-  [`fametrano`](https://github.com/fametrano), Ferdinando Ametrano, and
-  the organization's administrators are read back with:
+- **The maintainer** holds the bypass above, and takes the decisions *How
+  a decision is made* gives the role; a repository's `RELEASING.md` names
+  the maintainer as the reviewer of its publishing environments. The role
+  is held by [`fametrano`](https://github.com/fametrano), Ferdinando
+  Ametrano.
+- **An owner** holds the organization role `admin`, which makes the
+  holder an administrator of every repository of the organization. An
+  administrator can change a repository's rules, so the role is a grant
+  of trust and not only of access; the bypass stays the maintainer's
+  alone. The owners are [`fametrano`](https://github.com/fametrano),
+  [`giacomocaironi`](https://github.com/giacomocaironi) and
+  [`pmazzocchi`](https://github.com/pmazzocchi), read back with:
 
   ```shell
   gh api "orgs/btclib-org/members?role=admin" --jq '.[].login'
   ```
 
-  **TODO (maintainer):** who reads the address `SECURITY.md` gives beside
-  the Security tab. No file of the organization says.
+  The owners read the address `SECURITY.md` gives beside the Security
+  tab, and it reaches every one of them.
 - **A repository administrator or collaborator** holds access to one
   repository, granted in that repository's settings and not by the
   organization, so it differs from repository to repository. The
@@ -84,8 +88,9 @@ owes, rather than restating it.
     --jq '.[] | "\(.login) \(.role_name)"'
   ```
 
-  **TODO (maintainer):** whether the grants that command lists stay, and
-  what holding one obliges. No file of the organization says.
+  A direct grant is a deliberate mechanism, and holding one obliges its
+  holder to `CONTRIBUTING.md` and `REVIEWING.md` like any contributor. A
+  grant whose purpose nobody can state is revoked when it is found.
 - **A contributor** is anybody opening an issue or a pull request, and
   owes what `CONTRIBUTING.md` says.
 - **A reviewer** is anybody reading a pull request they did not write,
@@ -106,6 +111,6 @@ owes, rather than restating it.
 
 ## Continuity
 
-Whether the organization can go on without its maintainer is not answered
-here: btclib-org/.github#1321 records that it needs a second person with
-organization administrative rights.
+The organization's administration does not rest on one account: every
+owner is an administrator of every repository, its rules and its
+publishing environments included.

@@ -6,12 +6,27 @@ records the intention or the decision; the issue, and not this file, holds
 how far the work has gone. How a decision is taken is
 [`GOVERNANCE.md`](./GOVERNANCE.md).
 
-**TODO (maintainer):** the period this roadmap covers. bestpractices.dev
-asks for at least the next year, and no issue below states a date.
+This roadmap covers the period until 2027-09-30 and is reviewed every
+September. Its entries carry no dates, because they state intentions and
+not deadlines.
 
-**TODO (maintainer):** what a repository not named below intends. Its
-tracker records no intention, and whether it is maintained as it is, or
-something else, is not written anywhere.
+## Maintained as it is
+
+- **`bbt`** is maintained as it is: fixes, dependency updates and the
+  organization's standards, with no new features planned, a default under
+  review in btclib-org/.github#1330.
+- **`bitcoin-core-rpc`** is maintained as it is: fixes, dependency
+  updates and the organization's standards, with no new features planned,
+  a default under review in btclib-org/.github#1330.
+- **`btclib-benchmarks`** is maintained as it is: fixes, dependency
+  updates and the organization's standards, with no new features planned,
+  a default under review in btclib-org/.github#1330.
+- **`btclib-org.github.io`** is maintained as it is: fixes, dependency
+  updates and the organization's standards, with no new features planned,
+  a default under review in btclib-org/.github#1330.
+- **`portanode`** is maintained as it is: fixes, dependency updates and
+  the organization's standards, with no new features planned, a default
+  under review in btclib-org/.github#1330.
 
 ## Intended
 
@@ -36,8 +51,7 @@ something else, is not written anywhere.
   `claude-review.yml`, at the end of the campaign that switched it off
   (btclib-org/.github#452).
 - **Silver at bestpractices.dev** for the repositories section 10's
-  `scorecard` entry names (btclib-org/.github#1321), which waits on a
-  second person with organization administrative rights.
+  `scorecard` entry names (btclib-org/.github#1321).
 
 ## Not intended
 
