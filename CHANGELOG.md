@@ -9251,3 +9251,9 @@ nothing red follows from the copies disagreeing.
 
 - **Every sibling's `ignore` names `TD` by its seven rule names**
   (closes #1304): the cells pass on their merits, without the rows.
+
+### Section 1 states a library's window as a requirement only
+
+- **What a library publishes to PyPI supports every Python release not
+  yet at end of life**: neither the rule nor `interpreters_test.py`'s
+  docstring says any more when a tree moves its floor.

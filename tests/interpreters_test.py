@@ -15,10 +15,9 @@ what section 15 means by a repository answering for itself. It is a
 published tree's, which section 3 states where it states the convention
 and section 15 gives the reason for.
 
-Two questions are left here. The one no tree can ask: the window a
-library covers is python.org's release cycle rather than that library's
-choice, so the libraries name one window and a tree that disagrees with
-the others is out of step with the cycle. And the ends of that window,
+Two questions are left here. The one no tree can ask: the libraries
+name one window, so a tree that disagrees with the others is out of step
+with them. And the ends of that window,
 where the tree that would compare them holds no module of its own: they
 are declared in `pyproject.toml` and in `.python-version` whatever the
 tree is, and this reads them against one another. Which tree is a
