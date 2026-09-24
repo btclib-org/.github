@@ -9313,3 +9313,9 @@ nothing red follows from the copies disagreeing.
 - **A skipped required check satisfies branch protection like a passing
   one, so a draft's own decline left `ready_for_review` a stale pass to
   read** (closes #1327): the aggregate's `if:` now drops the draft flag.
+
+### Section 10 grants `wheel-reproducibility` an unfiltered pull request
+
+- **`btclib-secp256k1`'s `wheel-reproducibility` joins the census of
+  calendar workflows running on every pull request** (closes #1333): its
+  aggregate is a required check, which a path filter would leave `Pending`.
