@@ -9319,3 +9319,9 @@ nothing red follows from the copies disagreeing.
 - **`btclib-secp256k1`'s `wheel-reproducibility` joins the census of
   calendar workflows running on every pull request** (closes #1333): its
   aggregate is a required check, which a path filter would leave `Pending`.
+
+### `reusable-sdist-rebuild.yml` builds a tag on the tag's own interpreter
+
+- **`setup-python: true` installs what the rebuilt tag's `.python-version`
+  names** (closes #1331); `python-version` is read only as that flag, while
+  a caller still passes it.
