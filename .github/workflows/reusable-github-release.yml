@@ -3,12 +3,11 @@ name: reusable-github-release
 
 # The GitHub release a repository's release.yml cuts once an index has
 # accepted its files, so the notes, the assets and the bundle's naming
-# are written once rather than in every publishing tree. `btclib`,
-# `btclib-secp256k1`, `btclib-node` and `bitcoin-core-rpc` each carry
-# these five steps. The trigger, the `concurrency:` group a release
-# never cancels, the `needs:` edges onto the tree's own publish job and
-# its attest job, and the `if:` that opens with `always()` all stay in
-# the caller, whose run this job joins.
+# are written once rather than in every publishing tree. The trigger,
+# the `concurrency:` group a release never cancels, the `needs:` edges
+# onto the tree's own publish job and its attest job, and the `if:` that
+# opens with `always()` all stay in the caller, whose run this job
+# joins.
 #
 # A release announces what users can already install, which is why it
 # comes after the upload and not before it; the install sentinel runs

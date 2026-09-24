@@ -9262,3 +9262,9 @@ nothing red follows from the copies disagreeing.
 
 - **`btclib-wallet`, the wallet package `btclib`'s decomposition creates,
   registers as a tier-1 library at minute 40** (issue btclib-org/btclib#2129).
+
+### Four reusable-workflow headers stop naming their callers
+
+- **Their callers are the rule rather than a list**, and
+  `reusable-sdist-rebuild.yml` names both signers `attest-signer` picks
+  from (closes #1312) (closes #1313).

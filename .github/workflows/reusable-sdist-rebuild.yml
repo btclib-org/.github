@@ -15,16 +15,17 @@ name: reusable-sdist-rebuild
 # What the row asks: the latest release's tag, rebuilt the way a
 # caller's own RELEASING.md rebuilds it under *Rebuild a release from
 # its tag*, and `gh attestation verify` over the rebuilt sdist, which
-# passes only where its digest is one release.yml signed. What moves
-# between a release and this run is the runner image, uv, and the build
-# backend -- `uv build`'s own resolver, or `python -m build`'s for a
-# tree whose sdist comes from a compiled-extension backend -- within the
-# range the tag's pyproject.toml allows; that interval is what a weekly
-# run covers and a check inside release.yml does not. Section 10 of
-# this repository's own README.md makes the row the sdist's alone, a
-# wheel being outside the property that row states. It gates nothing,
-# and a caller's own header is where its branch rule (or the absence of
-# one) belongs.
+# passes only where its digest is one the workflow attest-signer below
+# names signed -- the calling tree's release.yml or reusable-attest.yml.
+# What moves between a release and this run is the runner image, uv,
+# and the build backend -- `uv build`'s own resolver, or
+# `python -m build`'s for a tree whose sdist comes from a
+# compiled-extension backend -- within the range the tag's
+# pyproject.toml allows; that interval is what a weekly run covers and
+# a check inside release.yml does not. Section 10 of this repository's
+# own README.md makes the row the sdist's alone, a wheel being outside
+# the property that row states. It gates nothing, and a caller's own
+# header is where its branch rule (or the absence of one) belongs.
 #
 # Four inputs.
 #
