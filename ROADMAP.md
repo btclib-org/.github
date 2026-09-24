@@ -30,6 +30,10 @@ not deadlines.
 
 ## Intended
 
+- **`.github`, the organization's standard, changes as its own tracker
+  decides**: an issue there proposes a rule and every repository the rule
+  reaches takes it up. The entries below that cite btclib-org/.github are
+  its intentions beyond that.
 - **`btclib` splits along Bitcoin Core's line between consensus and
   wallet** (btclib-org/btclib#2129). `btclib-wallet` takes the wallet
   side, `mnemonic-codes` the mnemonic schemes up to the seed, and
