@@ -9257,3 +9257,8 @@ nothing red follows from the copies disagreeing.
 - **What a library publishes to PyPI supports every Python release not
   yet at end of life**: neither the rule nor `interpreters_test.py`'s
   docstring says any more when a tree moves its floor.
+
+### `btclib-wallet` gains its row in section 2 and section 10
+
+- **`btclib-wallet`, the wallet package `btclib`'s decomposition creates,
+  registers as a tier-1 library at minute 40** (issue btclib-org/btclib#2129).

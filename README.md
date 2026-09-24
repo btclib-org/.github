@@ -301,6 +301,7 @@ rule and gives no reason is still a gap.
 | `btclib-secp256k1` | 1 |
 | `bitcoin-core-rpc` | 1 |
 | `btclib-node` | 1 |
+| `btclib-wallet` | 1 |
 | `btclib-benchmarks` | 2 |
 | `.github` | 2 |
 | `bbt` | 2 |
@@ -1915,6 +1916,7 @@ day and an hour, the repository owns the minute:
 | `portanode` | 28 |
 | `bbt` | 32 |
 | `btclib-org.github.io` | 36 |
+| `btclib-wallet` | 40 |
 
 **The rows are in the order of what they ask about**, family by family. A new
 sentinel takes the slot its family already holds rather than the end of the
@@ -2012,37 +2014,39 @@ A tree an entry names runs the workflow and shows its badge, section 2's row
 reading its sentinels from here; a tree an entry does not name is asked nothing
 by that row.
 
-- `vendored-vectors` — `btclib`, `btclib-secp256k1`,
-  `btclib-benchmarks`, `btclib-node`;
+- `vendored-vectors` — `btclib`, `btclib-secp256k1`, `btclib-benchmarks`,
+  `btclib-node`, `btclib-wallet`;
 - `bootstrap-dns` — `btclib-node`;
 - `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`;
-- `fuzz` — `btclib`, `btclib-secp256k1`, `btclib-node`;
-- `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
+- `fuzz` — `btclib`, `btclib-secp256k1`, `btclib-node`, `btclib-wallet`;
+- `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`,
+  `btclib-wallet`;
 - `zkp-oracle` — `btclib`;
-- `integration-hwi` — `btclib`;
+- `integration-hwi` — `btclib`, `btclib-wallet`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
 - `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-node`;
+  `btclib-node`, `btclib-wallet`;
 - `deps-oldest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
 - `py-arm-authority` — `btclib`;
 - `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
 - `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`;
-- `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
+- `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `btclib-wallet`;
 - `homepage` — `btclib-org.github.io`;
 - `links` — every repository;
 - `alignment` — `.github`;
 - `wheel-reproducibility` — `btclib-secp256k1`;
 - `sdist-rebuild` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-node`;
+  `btclib-node`, `btclib-wallet`;
 - `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`;
-- `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-node`.
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
+- `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `btclib-node`,
+  `btclib-wallet`.
 
 **An entry is what was decided, not what a tree happens to hold**, where section
 2's tier is read off the tree. A tree short of what its entry names is a gap in
@@ -2089,14 +2093,16 @@ and the badge land together.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
   between the parser and an adversary choosing the bytes. `btclib` and
   `btclib-secp256k1` read transactions, scripts, PSBTs, signatures and extended
-  keys off the wire, and `btclib-node` speaks the peer-to-peer protocol;
-  `bitcoin-core-rpc` reads an instance its own operator runs, which the property
-  does not reach. `btclib-secp256k1`'s targets reach the vendored C on purpose:
-  what they exercise is this tree's own length checks in front of it
-  (btclib-org/.github#342). Section 7's *Property tests* has how a fuzzer and
-  the property layer stand to each other. A crash the sentinel finds is an issue
-  against the parser, never a suppression, and its regression is an ordinary
-  test naming the input and what the parser now does with it; it does not go in
+  keys off the wire, `btclib-node` speaks the peer-to-peer protocol, and
+  `btclib-wallet` parses PSBTs, output descriptors and BIP32/BIP322 data a
+  counterparty hands it; `bitcoin-core-rpc` reads an instance its own operator
+  runs, which the property does not reach. `btclib-secp256k1`'s targets reach
+  the vendored C on purpose: what they exercise is this tree's own length
+  checks in front of it (btclib-org/.github#342). Section 7's *Property tests*
+  has how a fuzzer and the property layer stand to each other. A crash the
+  sentinel finds is an issue against the parser, never a suppression, and its
+  regression is an ordinary test naming the input and what the parser now does
+  with it; it does not go in
   `fuzz/corpus/`, a *seed* corpus that `btclib`'s `tests/fuzz_corpus_test.py`
   requires to stay valid input. What fills the workflow is the tree's — which
   entry points are targets and which harness runs them, `atheris` under
