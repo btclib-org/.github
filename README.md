@@ -3485,8 +3485,8 @@ done
 
 Where a line carries classifiers, the floor is the lowest, the pin the highest,
 and the matrix, which only this compares, runs every one, the pin running where
-it is empty. `library` lines share python.org's window; an `application` line is
-read against the comment in its `.python-version`.
+it is empty. `library` lines share one window; an `application` line is read
+against the comment in its `.python-version`.
 
 Section 1's uv floor, and the ceiling Dependabot's bundled updater ships, above
 which it refuses to re-lock:
