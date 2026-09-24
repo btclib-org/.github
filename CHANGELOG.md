@@ -9234,3 +9234,9 @@ nothing red follows from the copies disagreeing.
 
 - **Every sibling declares the shebang-tolerant `notice-rgx`**
   (closes #1294): the cells pass on their merits, without the rows.
+
+### Section 15's tree audit names `TD`'s rule names, not the code
+
+- **The `pyproject.toml` grep drops `"FIX"` and `"TD"` for a line
+  matching `-todo-`** (closes #1302): the new line matches a tree
+  naming `TD` by rule, and matches nothing naming it by code.

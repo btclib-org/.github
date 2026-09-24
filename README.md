@@ -3319,8 +3319,8 @@ gh api repos/$R/branches/main/protection \
 The tree, reading exit codes and not filtered output:
 
 ```shell
-grep -n 'strict = true\|fail_under = 100\|branch = true\|"FIX"\|"TD"' \
-    pyproject.toml
+grep -n 'strict = true\|fail_under = 100\|branch = true' pyproject.toml
+grep -n -- '-todo-' pyproject.toml
 grep -n 'id: mypy' .pre-commit-config.yaml
 git ls-files 'TODO*' '**/TODO*'
 grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'
