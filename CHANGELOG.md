@@ -9268,6 +9268,7 @@ nothing red follows from the copies disagreeing.
 - **Their callers are the rule rather than a list**, and
   `reusable-sdist-rebuild.yml` names both signers `attest-signer` picks
   from (closes #1312) (closes #1313).
+
 ### `btclib` leaves the `integration-hwi` entry, and parses no PSBT
 
 - **Section 10 and the organization page give `btclib` no wallet side**
