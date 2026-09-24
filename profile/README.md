@@ -54,6 +54,10 @@ they say that too.
 - **[btclib-node](https://github.com/btclib-org/btclib-node)** — a
   bitcoin node, consensus and network code in Python, built on btclib.
   Its author reports it downloading and validating the whole chain.
+- **[bitcoin-node-tests](https://github.com/btclib-org/bitcoin-node-tests)**
+  — a conformance suite for any bitcoin node: Bitcoin Core's functional
+  tests rewritten on btclib, bitcoind the oracle and btclib-node the
+  first target.
 - **[bbt](https://github.com/btclib-org/bbt)** — the course the library
   came out of: spreadsheets illustrating finite fields and elliptic
   curves, notebooks, scripts, and a regtest lab.

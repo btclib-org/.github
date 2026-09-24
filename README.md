@@ -305,6 +305,7 @@ rule and gives no reason is still a gap.
 | `btclib-benchmarks` | 2 |
 | `.github` | 2 |
 | `bbt` | 2 |
+| `bitcoin-node-tests` | 2 |
 | `portanode` | 3 |
 | `btclib-org.github.io` | 3 |
 
@@ -1920,6 +1921,7 @@ day and an hour, the repository owns the minute:
 | `bbt` | 32 |
 | `btclib-org.github.io` | 36 |
 | `btclib-wallet` | 40 |
+| `bitcoin-node-tests` | 44 |
 
 **The rows are in the order of what they ask about**, family by family. A new
 sentinel takes the slot its family already holds rather than the end of the
@@ -2018,7 +2020,7 @@ reading its sentinels from here; a tree an entry does not name is asked nothing
 by that row.
 
 - `vendored-vectors` — `btclib`, `btclib-secp256k1`, `btclib-benchmarks`,
-  `btclib-node`, `btclib-wallet`;
+  `btclib-node`, `btclib-wallet`, `bitcoin-node-tests`;
 - `bootstrap-dns` — `btclib-node`;
 - `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;

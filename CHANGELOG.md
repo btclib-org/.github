@@ -9325,3 +9325,9 @@ nothing red follows from the copies disagreeing.
 - **`setup-python: true` installs what the rebuilt tag's `.python-version`
   names** (closes #1331); `python-version` is read only as that flag, while
   a caller still passes it.
+
+### `bitcoin-node-tests` gains its rows in section 2 and section 10
+
+- **`bitcoin-node-tests`, tf2's own repository, registers as a tier-2
+  application at minute 44 and joins the `vendored-vectors` roster**
+  (issue btclib-org/btclib#2220).
