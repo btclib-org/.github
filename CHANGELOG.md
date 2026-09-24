@@ -9301,6 +9301,7 @@ nothing red follows from the copies disagreeing.
 - **`.python-version` is the newest CPython with a release candidate out**
   (issue #1324): this tree moves to 3.15, and `reusable-sdist-rebuild.yml`
   holds a caller's build, not its own normalizer, to `UV_PYTHON_DOWNLOADS`.
+
 ### `GOVERNANCE.md` and `ROADMAP.md` are the organization's
 
 - **How decisions are made, who holds which role, and what the
