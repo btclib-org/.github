@@ -9246,3 +9246,8 @@ nothing red follows from the copies disagreeing.
 - **The audit tests for all seven `TD` names by exit code, and a line
   refuses `FIX` by any code or rule name** (closes #1306):
   `pyproject_test.py` asks the same of every tree (issue #1304).
+
+### The `BACKLOG` rows for 1304 come out, the last tree having converged
+
+- **Every sibling's `ignore` names `TD` by its seven rule names**
+  (closes #1304): the cells pass on their merits, without the rows.

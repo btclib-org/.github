@@ -318,31 +318,13 @@ def names() -> list[str]:
     )
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
-    (
-        1304,
-        "test_td_is_ignored_by_all_seven_rule_names",
-        (
-            "bbt",
-            "btclib-benchmarks",
-            "btclib-node",
-            "btclib-secp256k1",
-        ),
-    ),
-)
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what
 `conftest.py`'s `cited()` spells it as. A row keyed on a number from a
 tree this suite measures is not caught: those trackers number in the
 same range, so the citation names a real issue about something else.
-
-The row here is section 5's seven `TD` rule names: a sibling still
-naming the family by its bare code, or naming no `TD` exemption at all,
-answers the old shape until its port lands, and the strict expected
-failure is what turns the landing into a red cell and the row into one
-to delete. `.github` is not in it, `ignore` here already carrying all
-seven.
 
 A row is an exemption, and nothing here is a place a new failure
 belongs -- a red cell is answered in the tree that is red, and a row is
