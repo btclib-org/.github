@@ -124,7 +124,7 @@ jobs:
           if [ -n "$BASE_REF" ]; then
             base_args=(-b "$BASE_REF")
           fi
-          if ! uvx --python 3.14 griffe==2.2.0 check "$PACKAGE" -s . -s src \
+          if ! uvx --python 3.15 griffe==2.2.0 check "$PACKAGE" -s . -s src \
               -a "$PREVIOUS_TAG" "${base_args[@]}" -f github; then
             msg="the public API changed since $PREVIOUS_TAG:"
             echo "::error::$msg reconcile the findings above with" \

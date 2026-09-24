@@ -85,5 +85,5 @@ jobs:
           TAG: ${{ github.ref_name }}
           SLUG: ${{ inputs.readthedocs-slug }}
         run: |
-          uv run --no-project --python 3.14 \
+          uv run --no-project --python 3.15 \
             .github/scripts/wait_for_readthedocs_build.py "$SLUG" "$TAG"

@@ -37,7 +37,7 @@ that drives the retry, the deadline and the error path: it substitutes
 the transport and the clock, and advances the clock past the deadline
 itself.
 
-    uv run --no-project --python 3.14 \
+    uv run --no-project --python 3.15 \
         .github/scripts/wait_for_readthedocs_build.py "$SLUG" "$TAG"
 """
 
@@ -56,7 +56,7 @@ SITE = "https://{project}.readthedocs.io/en/{tag}/"
 BUILDS = "https://app.readthedocs.org/projects/{project}/builds/"
 
 # the Cloudflare zone in front of read the docs bans the interpreter's own
-# default (`Python-urllib/3.14`) outright -- a 403 on a tag this project
+# default (`Python-urllib/X.Y`) outright -- a 403 on a tag this project
 # does serve, which the same request carrying the agent below is served
 # 200 for -- so a request sent without one never reaches the "build not
 # finished yet" question this exists to ask; `curl`'s default is not

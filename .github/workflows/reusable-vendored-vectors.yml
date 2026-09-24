@@ -33,11 +33,12 @@ name: reusable-vendored-vectors
 # ledgers those are is what a reader of this file could not write for
 # any caller, where the loop around them is not.
 #
-# python-version toggles the interpreter: btclib and btclib-secp256k1
-# pin "3.14" here, and btclib-benchmarks runs the check against the
-# runner's own python3 with nothing installed. The empty string is that
-# second case; a caller naming a version is the first. Neither value is
-# a literal this file writes -- interpreters_test.py's
+# python-version toggles the interpreter: a caller either passes the
+# version its .python-version pins, or, as btclib-benchmarks does, runs
+# the check against the runner's own python3 with nothing installed.
+# The empty string is that second case; a caller naming a version is the
+# first. Neither value is a literal this file writes --
+# interpreters_test.py's
 # test_the_workflows_naming_an_interpreter_are_the_ones_recorded is what
 # would catch one -- so a bump belongs to whichever caller's own
 # .python-version moves, same as every other input here.
@@ -167,6 +168,10 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ inputs.python-version }}
+          # section 1 counts a release candidate as released, and
+          # setup-python matches one only under this flag, which leaves
+          # a version with a final release on that final
+          allow-prereleases: true
 
       # --dry-run on everything but the schedule trigger, so the only
       # run that ever writes is the unattended weekly one. A fork's
