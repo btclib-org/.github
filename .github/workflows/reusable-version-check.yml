@@ -9,9 +9,11 @@ name: reusable-version-check
 #
 # One input: a release of this organization's calendar-versioned trees
 # is YYYY.M.D, optionally YYYY.M.D.N for a patch, and the day is checked
-# as well as the year and the month. btclib-secp256k1 is not calendar-
-# versioned -- 0.8.0.7 tracks libsecp256k1's own release -- so it passes
-# tag-requires-day: false and keeps the rest of the check, the
+# as well as the year and the month: it has to be there, and it has to
+# be a date that has begun somewhere by the time the run publishes.
+# btclib-secp256k1 is not calendar-versioned -- 0.8.0.7 tracks
+# libsecp256k1's own release -- so it passes tag-requires-day: false,
+# which skips both, and keeps the rest of the check, the
 # digits-and-dots comparison against the declared version. An input for
 # the rest of this job would be a copy in disguise (btclib-org/.github#35):
 # every tree with a release.yml runs the same checkout, the same lock
@@ -42,7 +44,8 @@ on:
         description: >
           Whether a release version is required to carry a day
           (YYYY.M.D, optionally YYYY.M.D.N for a patch) rather than
-          only a year and a month.
+          only a year and a month, dated on a day that has begun
+          somewhere when the release runs.
         type: boolean
         default: true
     outputs:
@@ -91,9 +94,9 @@ jobs:
       # or from a commit squashed away on its way into the default
       # branch, would publish code no review ever approved and no
       # branch contains. `git merge-base --is-ancestor` is the whole of
-      # the question. Release-only, like the two checks below and for
-      # the same reason: a rehearsal is dispatched from a branch on
-      # purpose, that being what it is for
+      # the question. Release-only, like the version comparison and the
+      # retitling check below and for the same reason: a rehearsal is
+      # dispatched from a branch on purpose, that being what it is for
       - name: Check that the tag is merged into the default branch (release only)
         if: github.event_name == 'push'
         env:
@@ -172,6 +175,38 @@ jobs:
             echo "::error::$version has no day; $msg"
             exit 1
           fi
+      # the check above asks that there is a day and not which one, so a
+      # day filled into the next month's placeholder would pass it and
+      # publish a version sorting above every release until that date
+      # (btclib-org/.github#1310). Which day is the script's question,
+      # served from this repository the way reusable-wait-for-index.yml
+      # serves its own: its docstring says what it compares the day with
+      # and why, and tests/check_calendar_version_test.py drives it.
+      # `ref: main` is the same trust the caller already extends by
+      # naming this workflow `@main`; `path:` puts it beside the caller's
+      # checkout instead of over it; sparse, so what lands is
+      # .github/scripts and this repository's root files. Skipped with
+      # the check above on a tree that is not calendar-versioned, and on
+      # a rehearsal, whose upload goes to TestPyPI under a .dev suffix
+      # rather than to the index an installer resolves from
+      - name: Check out the calendar check (release only)
+        if: github.event_name == 'push' && inputs.tag-requires-day
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: btclib-org/.github
+          ref: main
+          path: standard
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+      # --no-project, so it installs nothing, the script taking the
+      # standard library alone; and the interpreter named, the script
+      # being this repository's and not the caller's, whose
+      # .python-version --no-project would otherwise take (section 10)
+      - name: Check that the version is not dated in the future (release only)
+        if: github.event_name == 'push' && inputs.tag-requires-day
+        run: |
+          uv run --no-project --python 3.14 \
+            standard/.github/scripts/check_calendar_version.py "$(uv version --short)"
       # the release notes are RELEASE_NOTES.md's section for the tag,
       # lifted by the caller's own github-release job, and its fallback
       # fires only on an *empty* section: "## v2026.8 (work in progress,
