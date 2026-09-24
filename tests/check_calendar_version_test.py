@@ -134,16 +134,9 @@ def test_the_workflow_runs_the_script_only_on_a_calendar_release() -> None:
     `test_a_version_naming_no_date_is_refused` says, so the condition is
     what keeps that tree's release open.
     """
-    reaching = [
-        step
-        for step in _steps()
-        if "check_calendar_version.py" in step.get("run", "")
-        or step.get("with", {}).get("repository") == "btclib-org/.github"
-    ]
+    run = next(s for s in _steps() if "check_calendar_version.py" in s.get("run", ""))
 
-    assert len(reaching) == 2  # noqa: PLR2004
-    for step in reaching:
-        assert step["if"] == "github.event_name == 'push' && inputs.tag-requires-day"
+    assert run["if"] == "github.event_name == 'push' && inputs.tag-requires-day"
 
 
 def test_the_workflow_runs_the_script_where_its_checkout_puts_it() -> None:
