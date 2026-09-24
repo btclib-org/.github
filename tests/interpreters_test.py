@@ -139,11 +139,11 @@ def test_the_libraries_name_one_interpreter_window(
     pyprojects: dict[str, dict[str, Any]],
     tiers: dict[str, Tier],
 ) -> None:
-    """Section 1: the window is python.org's, so it is one for all of them.
+    """Section 1: the libraries name one window between them.
 
     A floor or a classifier list only one of them declares is that tree
-    left behind by a cycle that moved, and which of them is wrong is the
-    cycle's answer rather than this suite's. A tree that publishes a
+    out of step with the others, and which of them is wrong is section
+    1's answer rather than this suite's. A tree that publishes a
     program rather than a library is out of the comparison instead of
     wrong in it, its own window being its dependencies'.
 
