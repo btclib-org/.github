@@ -57,21 +57,29 @@ name: reusable-sdist-rebuild
 # submodules -- so a caller naming neither gets exactly reusable-lint.yml's
 # default without asking for it by that name.
 #
-# python-version, string, default "": when non-empty the job adds an
+# setup-python, boolean, default false: when true the job adds an
 # actions/setup-python step ahead of Setup uv, and the two build steps
 # run under `UV_PYTHON_DOWNLOADS=never`. The two belong together: the
 # setting is what stops uv from fetching an interpreter of its own
 # choosing and so silently ignoring the one setup-python just installed,
-# and it is conditioned on the same input as the step it makes binding.
-# A caller naming no version gets neither, and uv resolves whatever it
+# and it is conditioned on the same inputs as the step it makes binding.
+# A caller asking for neither gets neither, and uv resolves whatever it
 # resolves.
+#
+# The version is the one the tag's own .python-version names, read
+# through setup-python's python-version-file, and not one the caller
+# passes: the build steps' uv reads that same file, so under `never` any
+# other version is one they cannot find. A caller's version is its
+# branch's pin, which differs from the latest tag's from the day the
+# tree moves `.python-version` until its next release.
+# python-version is still declared while a caller passes it, a
+# non-empty value asking what setup-python: true asks, and its value
+# read by nothing.
 #
 # The setting is the build steps' own and not the job's, because the
 # normalizer after them runs on the version this file names, which
-# follows this repository's .python-version and not the caller's: under
-# `never` it finds only what setup-python installed, and fails wherever
-# a caller passes a version other than this file's, as one does from the
-# day either of the two moves until the other follows.
+# follows this repository's .python-version and not the tag's: under
+# `never` it would find only what setup-python installed.
 #
 # **The signer is reusable-attest.yml.** `gh attestation verify`
 # requires the signer to be named once an attestation is generated
@@ -130,11 +138,17 @@ on:
           library needs "recursive", which a boolean cannot express.
         type: string
         default: ""
+      setup-python:
+        description: >
+          Whether actions/setup-python installs the interpreter the
+          tag's .python-version names ahead of Setup uv, false leaving
+          uv to resolve its own.
+        type: boolean
+        default: false
       python-version:
         description: >
-          The interpreter actions/setup-python installs ahead of Setup
-          uv, empty running neither step and leaving uv to resolve its
-          own.
+          Read as setup-python: true where non-empty, its value unread;
+          declared only while a caller still passes it.
         type: string
         default: ""
 
@@ -178,13 +192,15 @@ jobs:
           submodules: ${{ inputs.submodules }}
           persist-credentials: false
 
-      # the header's python-version paragraph: the two build steps'
-      # UV_PYTHON_DOWNLOADS is what makes it binding on them
+      # the header's setup-python paragraphs: the version is the tag's,
+      # and the two build steps' UV_PYTHON_DOWNLOADS is what makes it
+      # binding on them. The file is read from the checkout above, whose
+      # comment lines setup-python skips
       - name: Set up Python
-        if: inputs.python-version != ''
+        if: inputs.setup-python || inputs.python-version != ''
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: ${{ inputs.python-version }}
+          python-version-file: .python-version
           # section 1 counts a release candidate as released, and
           # setup-python matches one only under this flag, which leaves
           # a version with a final release on that final
@@ -210,17 +226,21 @@ jobs:
       # guarded by the input's value rather than the value reaching a
       # shell: the caller chooses which step runs, never what a step runs
       # automatic fetches an interpreter where none is found, as uv does
-      # with the variable unset, so a caller naming no version builds as
-      # it would without it
+      # with the variable unset, so a caller asking for no setup-python
+      # builds as it would without it
       - name: Build the sdist with uv
         if: inputs.sdist-builder == 'uv'
         env:
-          UV_PYTHON_DOWNLOADS: ${{ inputs.python-version != '' && 'never' || 'automatic' }}
+          UV_PYTHON_DOWNLOADS: >-
+            ${{ (inputs.setup-python || inputs.python-version != '')
+            && 'never' || 'automatic' }}
         run: uv build --sdist
       - name: Build the sdist with python -m build
         if: inputs.sdist-builder == 'build-module'
         env:
-          UV_PYTHON_DOWNLOADS: ${{ inputs.python-version != '' && 'never' || 'automatic' }}
+          UV_PYTHON_DOWNLOADS: >-
+            ${{ (inputs.setup-python || inputs.python-version != '')
+            && 'never' || 'automatic' }}
         run: uv run --locked --only-group build python -m build -s
 
       - name: Make the sdist's determinism this tree's own
