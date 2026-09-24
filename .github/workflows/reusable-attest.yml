@@ -91,8 +91,8 @@ name: reusable-attest
 # dist-artifact; an artifact of the name that input carries, in the same
 # run; and an artifact named `sbom` beside it.
 #
-# **Converting this job moves the attestation's signer, and a caller
-# pairs three things with its conversion.** `gh attestation verify`
+# **Converting this job moves the attestation's signer, and with it the
+# `--signer-workflow` line a caller publishes.** `gh attestation verify`
 # says so: "if your attestation was generated via a reusable workflow
 # then that reusable workflow is the signer whose identity needs to be
 # validated. In this situation, you must use either the
@@ -105,18 +105,18 @@ name: reusable-attest
 # `buildSignerURI:
 # https://github.com/btclib-org/btclib/.github/workflows/release.yml@refs/tags/v2026.9.13`
 # beside `sourceRepositoryURI: https://github.com/btclib-org/btclib`, so
-# it is the path that changes and the repository that stays. The three:
-# `attest-signer: reusable-attest` on the calling tree's own
-# sdist-rebuild.yml, whose sentinel pins the signer; and the
-# `--signer-workflow` line each tree publishes in its SECURITY.md and
-# repeats in its RELEASING.md, which is what a user runs by hand.
+# it is the path that changes and the repository that stays. The line
+# sits in each tree's SECURITY.md and again in its RELEASING.md, which
+# is what a user runs by hand, and it flips when that tree's *latest
+# release* is one this job signed, not when its release.yml converts.
+# reusable-sdist-rebuild.yml accepts this job as the only signer, so
+# its run goes red for a caller whose latest release predates the
+# conversion.
 #
-# All three flip when that tree's *latest release* is one this job
-# signed, not when its release.yml converts --
-# reusable-sdist-rebuild.yml's own header has the timing. A rehearsal
-# settles the identity without a tag: this job's `if:` accepts
-# `needs.publish-testpypi.result == 'success'`, so a `workflow_dispatch`
-# in one tree mints a real attestation and burns no version number.
+# A rehearsal settles the identity without a tag: this job's `if:`
+# accepts `needs.publish-testpypi.result == 'success'`, so a
+# `workflow_dispatch` in one tree mints a real attestation and burns no
+# version number.
 #
 # Divergences resolved rather than carried forward. A `path:` written
 # with a trailing slash and without one. The same step under two names,

@@ -15,8 +15,8 @@ name: reusable-sdist-rebuild
 # What the row asks: the latest release's tag, rebuilt the way a
 # caller's own RELEASING.md rebuilds it under *Rebuild a release from
 # its tag*, and `gh attestation verify` over the rebuilt sdist, which
-# passes only where its digest is one the workflow attest-signer below
-# names signed -- the calling tree's release.yml or reusable-attest.yml.
+# passes only where its digest is one btclib-org/.github's
+# reusable-attest.yml signed.
 # What moves between a release and this run is the runner image, uv,
 # and the build backend -- `uv build`'s own resolver, or
 # `python -m build`'s for a tree whose sdist comes from a
@@ -27,7 +27,7 @@ name: reusable-sdist-rebuild
 # the property that row states. It gates nothing, and a caller's own
 # header is where its branch rule (or the absence of one) belongs.
 #
-# Four inputs.
+# The inputs.
 #
 # sdist-builder, string, default "uv": not a free-form command, on
 # purpose. A caller-supplied shell string is exactly what zizmor's
@@ -67,34 +67,26 @@ name: reusable-sdist-rebuild
 # it resolves without them, as every caller that never asked for a
 # specific interpreter did before this file existed.
 #
-# attest-signer, string, default "release": which workflow signed the
-# attestation this job verifies, a closed choice of two for
-# sdist-builder's reason -- "release" for the calling tree's own
-# release.yml, "reusable-attest" for
-# btclib-org/.github's reusable-attest.yml. `gh attestation verify`
+# attest-signer, string: declared and read by nothing. GitHub refuses
+# a call passing an input the called workflow does not declare -- "If a
+# caller workflow passes an input that is not specified in the called
+# workflow, this results in an error", its workflow syntax reference
+# under `on.workflow_call.inputs` -- so the declaration stays while a
+# caller still passes it, and goes once none does.
+#
+# **The signer is reusable-attest.yml.** `gh attestation verify`
 # requires the signer to be named once an attestation is generated
 # inside a called workflow, and the identity is then the callee's:
 # btclib-org/.github#35's OIDC probe recorded `job_workflow_ref` naming
 # btclib-org/.github on run 34814956543, while `repository` kept naming
-# the caller. So the `--repo` argument below does not move and the
-# `--signer-workflow` path does, which btclib's v2026.9.13 sdist shows
-# from the other end: `buildSignerURI` names that tree's release.yml and
-# `sourceRepositoryURI` names the tree.
-#
-# **A caller flips it when its latest release is one reusable-attest.yml
-# signed, not when its release.yml converts.** This job verifies the
-# release GitHub marks latest, so the signer it must name is the one
-# that ran for *that* tag: between a tree's conversion and its next
-# release the value is still "release". Passing the wrong one fails the
-# job rather than passing it: `gh attestation verify` exits 1. What it
-# does not do is say which signer it found or which was asked for --
-# the whole of its output is `Error: verifying with issuer
-# "sigstore.dev"`, with `--format json` and off a TTY alike -- so a red
-# step here is read off the step name, not off the error text.
-#
-# The input goes when every caller passes "reusable-attest" and the path
-# can be a literal again, which is btclib-org/.github#35's own business
-# to close rather than a knob to keep.
+# the caller. So the `--repo` argument below names the calling tree and
+# the `--signer-workflow` path names this repository. A caller whose
+# latest release another workflow signed fails the job rather than
+# passing it: `gh attestation verify` exits 1. What it does not do is
+# say which signer it found or which was asked for -- the whole of its
+# output is `Error: verifying with issuer "sigstore.dev"`, with
+# `--format json` and off a TTY alike -- so a red step here is read off
+# the step name, not off the error text.
 #
 # The permissions block is the calling job's, and this is not style:
 # a called workflow's own block can only downgrade what the caller
@@ -148,11 +140,10 @@ on:
         default: ""
       attest-signer:
         description: >
-          Which workflow signed the latest release's attestation:
-          "release" for the calling tree's own release.yml,
-          "reusable-attest" for btclib-org/.github's reusable-attest.yml.
+          Read by nothing: the signer is always btclib-org/.github's
+          reusable-attest.yml, and the input is declared only so that a
+          caller still passing it is not refused.
         type: string
-        default: "release"
 
 # least privilege for the GITHUB_TOKEN at the workflow level, elevated
 # on the job below -- each grant explained at its own line there
@@ -237,31 +228,11 @@ jobs:
             .github/scripts/normalize_sdist.py dist/
           sha256sum dist/*.tar.gz
 
-      # two steps guarded by the input's value rather than the value
-      # reaching a shell, as the two builders above are, and a third
-      # that refuses anything else. That third step is what sdist-builder
-      # does not need: a value matching neither builder leaves no sdist
-      # and the next step says so, where a value matching neither signer
-      # here would leave this job green having verified nothing, which is
-      # the one outcome a provenance sentinel must not have
-      - name: Verify the rebuilt sdist against the release's attestation
-        if: inputs.attest-signer == 'release'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh attestation verify dist/*.tar.gz --repo "$GITHUB_REPOSITORY" \
-            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release.yml"
+      # the signer the header names, whatever attest-signer a caller
+      # passes
       - name: Verify the rebuilt sdist against reusable-attest.yml
-        if: inputs.attest-signer == 'reusable-attest'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh attestation verify dist/*.tar.gz --repo "$GITHUB_REPOSITORY" \
             --signer-workflow btclib-org/.github/.github/workflows/reusable-attest.yml
-      - name: Refuse an attest-signer that names neither
-        if: >-
-          inputs.attest-signer != 'release' &&
-          inputs.attest-signer != 'reusable-attest'
-        run: |
-          echo "::error::attest-signer must be release or reusable-attest"
-          exit 1

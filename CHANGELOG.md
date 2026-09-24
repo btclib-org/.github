@@ -9279,3 +9279,8 @@ nothing red follows from the copies disagreeing.
 
 - **A release dated on a day not yet begun at UTC+14 fails before the
   upload** (closes #1310); a `tag-requires-day: false` caller skips it.
+
+### `reusable-sdist-rebuild.yml` verifies against `reusable-attest.yml` alone
+
+- **`attest-signer` is read by nothing**, and stays declared only while a
+  caller still passes it (issue #1315).
