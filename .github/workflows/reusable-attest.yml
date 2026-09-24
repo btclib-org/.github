@@ -3,12 +3,11 @@ name: reusable-attest
 
 # The signature a repository's release.yml puts on what its GitHub
 # release will carry, so the statement, the bundle and the reasoning for
-# both are written once rather than in every publishing tree. `btclib`,
-# `btclib-secp256k1`, `btclib-node` and `bitcoin-core-rpc` each carry
-# these five steps. The trigger, the `concurrency:` group a release
-# never cancels, the `needs:` edges onto the tree's own publish jobs and
-# the `if:` that opens with `always()` all stay in the caller, whose run
-# this job joins.
+# both are written once rather than in every publishing tree. The
+# trigger, the `concurrency:` group a release never cancels, the
+# `needs:` edges onto the tree's own publish jobs and the `if:` that
+# opens with `always()` all stay in the caller, whose run this job
+# joins.
 #
 # The files reach users by two routes and only one of them carries
 # provenance of its own: the publish action generates PEP 740
@@ -44,26 +43,26 @@ name: reusable-attest
 # name in that list changed to a job that is not there -- so the tool
 # that passes the shape is a tool that can see this class. And a `uses:`
 # job carrying a `needs:` onto an inline sibling, with an `if:` reading
-# that sibling's `.result`, is already running in production: each of
-# the four trees calls its own pypi-install.yml from a job written
-# `needs: publish-pypi` with `if: always() && needs.publish-pypi.result
-# == 'success'`, and on btclib-secp256k1's run 34394377013, the push of
-# v0.8.0.6, `Publish to TestPyPI` is skipped, `Publish to PyPI` is
-# success, and every job of the called workflow underneath that `uses:`
-# job is success.
+# that sibling's `.result`, is already running in production:
+# btclib-secp256k1's release.yml calls its own pypi-install.yml from a
+# job written `needs: publish-pypi` with `if: always() &&
+# needs.publish-pypi.result == 'success'`, and on that tree's run
+# 34394377013, the push of v0.8.0.6, `Publish to TestPyPI` is skipped,
+# `Publish to PyPI` is success, and every job of the called workflow
+# underneath that `uses:` job is success.
 #
 # One input.
 #
 # dist-artifact, string, required: the artifact holding the files an
-# index has already accepted. `btclib`, `btclib-node` and
-# `bitcoin-core-rpc` upload a wheel and an sdist together under `dist`;
-# `btclib-secp256k1` builds its wheels one artifact per image and
-# uploads the sdist alone under `sdist`, which is what its release
-# carries, the wheels reaching users from the index with the publish
-# action's own attestations on them. So the value is a fact about the
-# calling tree's own test.yml rather than a spelling to converge, and it
-# takes no default: the trees that say `dist` say it because their
-# test.yml files descend from one ancestor, which is what
+# index has already accepted. Where a tree's test.yml uploads a wheel
+# and an sdist together, the value is that artifact's name, which those
+# trees write `dist`; `btclib-secp256k1` builds its wheels one artifact
+# per image and uploads the sdist alone under `sdist`, which is what its
+# release carries, the wheels reaching users from the index with the
+# publish action's own attestations on them. So the value is a fact
+# about the calling tree's own test.yml rather than a spelling to
+# converge, and it takes no default: the trees that say `dist` say it
+# because their test.yml files descend from one ancestor, which is what
 # btclib-org/.github#35 converges rather than a rule a default could
 # rest on.
 #
