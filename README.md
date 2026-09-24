@@ -166,12 +166,12 @@ alone is the rejected proxy, and `btclib-node` is what it reads wrong, a
 full node being a program its users run. No command refuses a library
 that declines the classifier, the two being one shape on disk.
 
-A **library covers every interpreter still in support**: the floor is
-the oldest Python that has not reached end of life, `.python-version` is
-the newest released, and the classifiers name every version between them
-while the platform sweeps run each. Neither end is a choice, the
-[Python release cycle](https://devguide.python.org/versions/) moving
-both, so a library's window changes on a date rather than on a decision.
+A **library covers every interpreter still in support**: what it
+publishes to PyPI supports every Python release that has not reached end
+of life in the
+[Python release cycle](https://devguide.python.org/versions/),
+`.python-version` is the newest released, and the classifiers name every
+version from `requires-python` to it while the platform sweeps run each.
 The libraries name one window between them, and section 15's command is
 what reads it.
 
@@ -3485,8 +3485,8 @@ done
 
 Where a line carries classifiers, the floor is the lowest, the pin the highest,
 and the matrix, which only this compares, runs every one, the pin running where
-it is empty. `library` lines share python.org's window; an `application` line is
-read against the comment in its `.python-version`.
+it is empty. `library` lines share one window; an `application` line is read
+against the comment in its `.python-version`.
 
 Section 1's uv floor, and the ceiling Dependabot's bundled updater ships, above
 which it refuses to re-lock:
