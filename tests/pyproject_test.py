@@ -56,6 +56,30 @@ The section's reason for this number rather than the 88 the formatter
 reflows code to is that it is the width markdown is already held to.
 """
 
+TD_NAMES = (
+    "invalid-todo-tag",
+    "missing-todo-author",
+    "missing-todo-link",
+    "missing-todo-colon",
+    "missing-todo-description",
+    "invalid-todo-capitalization",
+    "missing-space-after-todo-colon",
+)
+"""TD001 through TD007, spelled the way section 5 asks `ignore` to name them.
+
+Section 5 keeps all seven, `missing-todo-link` (TD003) among them, over
+the rejected alternative that would leave it selected; section 5's own
+bullet gives the reason.
+"""
+
+FIX_NAMES = (
+    "line-contains-todo",
+    "line-contains-fixme",
+    "line-contains-xxx",
+    "line-contains-hack",
+)
+"""FIX001 through FIX004, the family section 5 says runs unexempted."""
+
 UV_DOCKERFILE = "repos/dependabot/dependabot-core/contents/uv/Dockerfile"
 """Where the updater's own bundled uv is pinned, read the way section 1's
 `required-version` line points at it: not this organization's API, but
@@ -222,6 +246,23 @@ def ruff_selects(lint: dict[str, Any], family: str) -> bool:
     """
     select = lint.get("select", [])
     return family in select or "ALL" in select
+
+
+def per_file_ignores(lint: dict[str, Any]) -> set[str]:
+    """Return every code a `[tool.ruff.lint.per-file-ignores]` table exempts.
+
+    :param lint: the table `ruff_lint` returns.
+    :returns: the codes named across every glob's own list, pooled: which
+        glob carries which is not this suite's question, only whether a
+        code is exempted anywhere in the file.
+    """
+    table = lint.get("per-file-ignores", {})
+    return {
+        str(code)
+        for codes in table.values()
+        if isinstance(codes, list)
+        for code in codes
+    }
 
 
 @pytest.mark.tier(Tier.PYTHON)
@@ -609,6 +650,57 @@ def test_d_is_selected_with_the_pep257_convention(
     assert ruff_selects(lint, "D"), "D is not selected; " + command
     convention = lint.get("pydocstyle", {}).get("convention")
     assert convention == "pep257", f"convention is {convention!r}; " + command
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_td_is_ignored_by_all_seven_rule_names(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 5: `TD` is in `ignore`, and by every one of its rule names.
+
+    `ignore` names rules, never codes, so the bare `"TD"` a tree has not
+    yet ported off answers this the same as an `ignore` that never
+    mentioned the family at all: neither names a rule this test can find.
+
+    :param repository: the repository asked about.
+    :param pyprojects: the parsed files.
+    """
+    lint = ruff_lint(repository, pyprojects)
+    command = by_hand(
+        repository, "test \"$(grep -c -- '-todo-' pyproject.toml)\" -eq 7"
+    )
+    ignored = {str(code) for code in lint.get("ignore", [])}
+    missing = sorted(set(TD_NAMES) - ignored)
+    assert not missing, f"TD rule names missing from ignore: {missing}; " + command
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_fix_is_exempted_nowhere(
+    repository: str,
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 5: `FIX` runs, refused by no code and by no rule name.
+
+    Checked in `ignore` and in `per-file-ignores` both: a family
+    excluded tree-wide and one excluded for a single glob are the same
+    finding, unfinished work losing its gate either way. A member code
+    such as `FIX002` exempts what its own rule name would, so `ignore`
+    is read for anything spelled `FIX` -- the family, a member code, or
+    the name -- rather than for the bare code alone.
+
+    :param repository: the repository asked about.
+    :param pyprojects: the parsed files.
+    """
+    lint = ruff_lint(repository, pyprojects)
+    command = by_hand(
+        repository,
+        "grep -n -e '\"FIX' -e line-contains-todo -e line-contains-fixme "
+        "-e line-contains-xxx -e line-contains-hack pyproject.toml",
+    )
+    exempted = {str(code) for code in lint.get("ignore", [])} | per_file_ignores(lint)
+    found = sorted(e for e in exempted if e in FIX_NAMES or e.startswith("FIX"))
+    assert not found, f"FIX exempted: {found}; " + command
 
 
 def enabled() -> list[str]:

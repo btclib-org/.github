@@ -9240,3 +9240,9 @@ nothing red follows from the copies disagreeing.
 - **The `pyproject.toml` grep drops `"FIX"` and `"TD"` for a line
   matching `-todo-`** (closes #1302): the new line matches a tree
   naming `TD` by rule, and matches nothing naming it by code.
+
+### Section 15's audit reads both `TD` and `FIX` by exit code
+
+- **The audit tests for all seven `TD` names by exit code, and a line
+  refuses `FIX` by any code or rule name** (closes #1306):
+  `pyproject_test.py` asks the same of every tree (issue #1304).

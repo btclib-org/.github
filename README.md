@@ -3320,7 +3320,9 @@ The tree, reading exit codes and not filtered output:
 
 ```shell
 grep -n 'strict = true\|fail_under = 100\|branch = true' pyproject.toml
-grep -n -- '-todo-' pyproject.toml
+test "$(grep -c -- '-todo-' pyproject.toml)" -eq 7
+grep -n -e '"FIX' -e line-contains-todo -e line-contains-fixme \
+    -e line-contains-xxx -e line-contains-hack pyproject.toml
 grep -n 'id: mypy' .pre-commit-config.yaml
 git ls-files 'TODO*' '**/TODO*'
 grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'
@@ -3340,6 +3342,12 @@ cat tests/README.md
 
 - `strict = true` with no `id: mypy` is section 6's finding and a finding on its
   own: the strictness is configured and nothing runs it.
+- `test ... -eq 7` exits 0 where all seven `TD` rule names are in
+  `ignore`; nonzero is a finding, whether a tree names the bare `"TD"`
+  code, a partial family, or no TD exemption at all. The `FIX` line
+  answers nothing: a match -- the bare code, a member code such as
+  `FIX002`, or a rule name, in `ignore` or `per-file-ignores` -- is the
+  finding.
 - An action not pinned to forty hex digits, a workflow with no `permissions:`
   block, and a `--frozen` anywhere are each a finding.
 - A pin with no trailing tag comment is a finding unless the line printed above
