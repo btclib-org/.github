@@ -9274,3 +9274,8 @@ nothing red follows from the copies disagreeing.
 - **Section 10 and the organization page give `btclib` no wallet side**
   (closes #1316): `integration-hwi`, PSBTs, descriptors, BIP32 keys and
   mnemonics are `btclib-wallet`'s (btclib-org/btclib#2129).
+
+### `reusable-version-check.yml` refuses a calendar version dated ahead
+
+- **A release dated on a day not yet begun at UTC+14 fails before the
+  upload** (closes #1310); a `tag-requires-day: false` caller skips it.

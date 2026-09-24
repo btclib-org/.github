@@ -258,6 +258,7 @@ NAMES_ONE = (
     ".github/workflows/reusable-documented.yml",
     ".github/workflows/reusable-public-api.yml",
     ".github/workflows/reusable-sdist-rebuild.yml",
+    ".github/workflows/reusable-version-check.yml",
     ".github/workflows/reusable-wait-for-index.yml",
 )
 """The workflows of this repository naming an interpreter literally.
