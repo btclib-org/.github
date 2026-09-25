@@ -9379,3 +9379,9 @@ nothing red follows from the copies disagreeing.
 - **The default branch is set explicitly, and the rulesets wait for the
   first push to `main`** (issue btclib-org/btclib#2220): item 12 named
   the order and not why, for both.
+
+### Section 10 says a cancelled run leaves its aggregate cancelled
+
+- **A run cancelled by hand or by its concurrency group leaves no skip for a
+  workflow-runs query to tell apart** (closes #1336): the aggregate is
+  cancelled with the run, which a required check does not accept.

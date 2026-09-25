@@ -2218,13 +2218,13 @@ request and the rule follows.
   leaving a passing-looking record behind. The step that reads
   `needs.*.result`, or the run's job listing, opens by failing outright on
   `github.event.pull_request.draft`, ahead of either allowlist below.
-- **A run the concurrency group cancels outright still keeps its skip, and
-  that gap stays open rather than closed.** Closing it is what `always()`
-  above is refused for, so what remains is narrower than the draft case:
-  the skip sits on a sha that only a further run on that same sha ever
-  supersedes, so reading it as passing wrongly needs a merge attempted
-  inside the window the cancellation itself opens, before anything later
-  completes there.
+- **A run cancelled by hand or by its concurrency group leaves no skip: its
+  aggregate is cancelled with it, a conclusion a required check does not
+  accept.** Asking the workflow-runs API for a newer run on the same
+  `head_sha`, to tell the two cancellations apart, so closes no gap, at the
+  price of a call behind every required check and of `actions: read` where
+  the aggregate reads `needs`; a re-run writes the check again, and a
+  superseding run writes its own on the head it builds.
 - **What the aggregate of a workflow that is only ever a run's own reads is that
   run's job listing, asked of the API rather than of `needs`** —
   `repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs`, each finished
@@ -2264,10 +2264,9 @@ request and the rule follows.
   reasons.** The listing under `workflow_call` answers for the caller's
   unfinished jobs; `needs` on a workflow nothing calls gives up the listing's
   protection against the `#1001` shape for nothing.
-- `skipped` is legitimate on purpose: when the run was superseded by its
-  concurrency group, and when a `changes` job decided the diff touches nothing
-  those jobs read. A filter naming only `success` fails the job on every run a
-  `changes` job empties.
+- `skipped` is legitimate on purpose: when a `changes` job decided the diff
+  touches nothing those jobs read. A filter naming only `success` fails the job
+  on every run a `changes` job empties.
 - **A `changes` job** is the cheapest job in the workflow and decides whether
   the rest runs. It answers `true` on every trigger that has no base to diff
   against, and the files it counts as prose are narrower than they look: the
