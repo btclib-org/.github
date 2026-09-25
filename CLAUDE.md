@@ -310,6 +310,35 @@ Do not use Fable unless explicitly instructed.
   sentence answering the wrong question: what decides is what the tool
   reads, not which of its inputs moved. Skipping the docs gate on that
   reasoning was caught by a reviewer, not by a run.
+- **The alignment suite is what validates a new repository, and a local
+  review is not a substitute for running it.** `tests/conftest.py`'s
+  `trees` fixture clones every repository shallow and tagless, its own
+  docstring giving the reason: "every question here is about the tip of
+  the default branch" — so nothing here can be pointed at a tree still
+  living on a build branch, and the suite has to wait for that tree's
+  root to land on `main` before it can answer anything about it. Two
+  local review rounds cleared `bitcoin-node-tests`' root tree against
+  section 16's checklist; the suite, run once that tree had a `main`,
+  still failed `[bitcoin-node-tests]` cells the review had read and
+  passed, each failing for its own stated reason (`#1334`, closed once a
+  following pull request answered them). And for as long as a sibling
+  repository exists and is empty, `alignment.yml` is red here on every
+  branch of this tree — a cost every session working here pays for the
+  gap between `gh repo create` and that sibling's first landed `main`.
+- **A new repository's rulesets go on only after its first push to
+  `main`, never before — section 16 states the reason.** Verify it
+  against a landed repository rather than trusting the order alone:
+  `gh api repos/<owner>/<repo>/rulesets/<id> --jq .created_at` against
+  the root commit's own `commits/<sha>` date. `bitcoin-node-tests` and
+  `btclib-wallet` both agree, their rulesets created after their own root
+  commit had already landed.
+- **The first branch ever pushed to an empty repository becomes its
+  `default_branch`, whatever it is named — section 16 states the reason
+  the setting is made explicit.** The corollary is what makes a tree
+  buildable before it has a `main` at all: a workflow's trigger has only
+  to exist on whichever branch is currently default, so
+  `gh workflow run <file>.yml --ref <branch>` dispatches it against a
+  build branch well before anything has landed.
 
 ## Conventions to match
 
