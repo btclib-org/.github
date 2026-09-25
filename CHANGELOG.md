@@ -9349,3 +9349,9 @@ nothing red follows from the copies disagreeing.
 - **The normalizer's `uv run --no-project` names no `--python`**, reading
   the rebuilt tag's `.python-version` as the build does, and runs under the
   build's `UV_PYTHON_DOWNLOADS` (closes #1345).
+
+### `REVIEWING.md` links Conventional Comments at its GitLab Pages address
+
+- **`REVIEWING.md` links `https://conventionalcomments.gitlab.io/`**, a name the
+  `*.gitlab.io` certificate covers, which `conventionalcomments.org` can present
+  and fail the TLS check (closes #1341).
