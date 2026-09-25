@@ -9391,3 +9391,9 @@ nothing red follows from the copies disagreeing.
 - **A publishing environment's required reviewers are the three owners, not
   the maintainer alone** (issue #1355): the fact moves to *An owner*, since
   it now holds of the role rather than of one account.
+
+### `CONTRIBUTING.md` and `README.md` link `GOVERNANCE.md` and `ROADMAP.md`
+
+- **Both point a contributor at `GOVERNANCE.md` and `ROADMAP.md`**
+  (issue #1359): `CONTRIBUTING.md` in the part section 14 compares, and
+  `README.md` beside the organization's other files.

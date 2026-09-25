@@ -62,6 +62,11 @@ file is the third of:
 - **The issue tracker** is the maintenance, an alignment finding staying
   open until every repository it names has answered, which is the thing
   an issue filed on a single repository cannot do.
+- **`GOVERNANCE.md` and `ROADMAP.md`** are the organization's, one copy
+  each: how it decides, and who holds which role, is its
+  [`GOVERNANCE.md`](https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md);
+  what it intends to do, and what it deliberately does not, is its
+  [`ROADMAP.md`](https://github.com/btclib-org/.github/blob/main/ROADMAP.md).
 
 Nothing here is released: this repository ships by being read, and
 `CONTRIBUTING.md`'s *A version, and no release* is what the placeholder
