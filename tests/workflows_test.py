@@ -634,8 +634,8 @@ CONDITIONAL = re.compile(r"^\s*`(\$\{\{ !\(.+\) \}\})`$", re.MULTILINE)
 
 Section 10 writes the expression on a line of its own, the margin
 leaving it nowhere else to go, so the pattern is anchored on the line
-rather than searched for in the prose: every other `${{ ... }}` that
-file shows sits inside a sentence.
+rather than searched for in the prose, and on the `!(` opening it: the
+aggregate's condition, `GUARD`'s, stands on a line of its own too.
 """
 
 COMMENTING = "claude-review.yml"
@@ -647,20 +647,24 @@ file the organization writes that way is the exemption's whole extent.
 """
 
 
-def conditional(standard: Path = ROOT / "README.md") -> str:
-    """Read the expression section 10 gives at `cancel-in-progress`.
+def conditional(
+    pattern: re.Pattern[str] = CONDITIONAL, standard: Path = ROOT / "README.md"
+) -> str:
+    """Read an expression section 10 writes on a line of its own.
 
     Off the standard rather than transcribed here: that file is what a
     port is made against, and a copy in this module is a second place
     for the expression to be edited in.
 
+    :param pattern: the line's shape, by default the one given at
+        `cancel-in-progress`.
     :param standard: the file to read, this tree's own `README.md`.
     :returns: the expression, spaced as the file writes it.
     :raises LookupError: where the file does not write it exactly once,
         which is a pattern that has stopped matching rather than a
         finding against any tree.
     """
-    found: list[str] = CONDITIONAL.findall(standard.read_text(encoding="utf-8"))
+    found: list[str] = pattern.findall(standard.read_text(encoding="utf-8"))
     if len(found) != 1:
         msg = f"{standard.name} writes {len(found)} lines of that shape"
         raise LookupError(msg)
@@ -904,4 +908,39 @@ def test_a_listing_aggregate_accepts_success_and_skipped(
                 wrong.append(f"{workflow.name}:{job_id} does not name {missing}")
     assert not wrong, f"{wrong}; " + by_hand(
         repository, "grep -n 'success' .github/workflows/*.yml"
+    )
+
+
+GUARD = re.compile(r"^\s*`(\$\{\{ !cancelled\(\) && .+ \}\})`$", re.MULTILINE)
+"""The line of the standard giving an aggregate job's own `if:`.
+
+Anchored on `!cancelled()` opening it, which `CONDITIONAL`'s line does
+not.
+"""
+
+
+def test_an_aggregate_carries_the_condition_section_10_gives(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10's `if:` on the aggregate job, asked of every aggregate.
+
+    Compared as a string, spacing included, the way the conditional at
+    `cancel-in-progress` is: a port copies the line, and an expression
+    that means the same but reads differently is one this cannot tell
+    from a stale one. The draft flag the job's own step reads is not
+    asked here, having no one line to compare against.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    wanted = conditional(GUARD)
+    wrong = [
+        f"{workflow.name}:{job_id}: {job.get('if')!r}"
+        for workflow in gated(repository, trees)
+        for job_id, job in aggregates(workflow).items()
+        if job.get("if") != wanted
+    ]
+    assert not wrong, f"an aggregate's if: is not section 10's: {wrong}; " + by_hand(
+        repository, "grep -n -B1 -A1 'every job passed' .github/workflows/*.yml"
     )

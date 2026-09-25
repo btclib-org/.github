@@ -9349,3 +9349,9 @@ nothing red follows from the copies disagreeing.
 - **The normalizer's `uv run --no-project` names no `--python`**, reading
   the rebuilt tag's `.python-version` as the build does, and runs under the
   build's `UV_PYTHON_DOWNLOADS` (closes #1345).
+
+### The alignment suite reads an aggregate's own `if:`
+
+- **Every aggregate job's `if:` is compared with the line section 10 gives
+  for it**, read off `README.md` as the `cancel-in-progress` conditional is
+  (closes #1332). The draft flag the job's step reads is not asked.
