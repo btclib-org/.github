@@ -62,7 +62,7 @@ name: reusable-sdist-rebuild
 # run under `UV_PYTHON_DOWNLOADS=never`. The two belong together: the
 # setting is what stops uv from fetching an interpreter of its own
 # choosing and so silently ignoring the one setup-python just installed,
-# and it is conditioned on the same inputs as the step it makes binding.
+# and it is conditioned on the same input as the step it makes binding.
 # A caller asking for neither gets neither, and uv resolves whatever it
 # resolves.
 #
@@ -72,9 +72,6 @@ name: reusable-sdist-rebuild
 # other version is one they cannot find. A caller's version is its
 # branch's pin, which differs from the latest tag's from the day the
 # tree moves `.python-version` until its next release.
-# python-version is still declared while a caller passes it, a
-# non-empty value asking what setup-python: true asks, and its value
-# read by nothing.
 #
 # The setting is the build steps' own and not the job's, because the
 # normalizer after them runs on the version this file names, which
@@ -145,12 +142,6 @@ on:
           uv to resolve its own.
         type: boolean
         default: false
-      python-version:
-        description: >
-          Read as setup-python: true where non-empty, its value unread;
-          declared only while a caller still passes it.
-        type: string
-        default: ""
 
 # least privilege for the GITHUB_TOKEN at the workflow level, elevated
 # on the job below -- each grant explained at its own line there
@@ -197,7 +188,7 @@ jobs:
       # binding on them. The file is read from the checkout above, whose
       # comment lines setup-python skips
       - name: Set up Python
-        if: inputs.setup-python || inputs.python-version != ''
+        if: inputs.setup-python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version-file: .python-version
@@ -231,16 +222,12 @@ jobs:
       - name: Build the sdist with uv
         if: inputs.sdist-builder == 'uv'
         env:
-          UV_PYTHON_DOWNLOADS: >-
-            ${{ (inputs.setup-python || inputs.python-version != '')
-            && 'never' || 'automatic' }}
+          UV_PYTHON_DOWNLOADS: ${{ inputs.setup-python && 'never' || 'automatic' }}
         run: uv build --sdist
       - name: Build the sdist with python -m build
         if: inputs.sdist-builder == 'build-module'
         env:
-          UV_PYTHON_DOWNLOADS: >-
-            ${{ (inputs.setup-python || inputs.python-version != '')
-            && 'never' || 'automatic' }}
+          UV_PYTHON_DOWNLOADS: ${{ inputs.setup-python && 'never' || 'automatic' }}
         run: uv run --locked --only-group build python -m build -s
 
       - name: Make the sdist's determinism this tree's own
