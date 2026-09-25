@@ -9421,3 +9421,9 @@ nothing red follows from the copies disagreeing.
 - **`ellipticcurves` runs `vendored-vectors`, `mutation`, `fuzz`, `zkp-oracle`
   and `py-arm-authority`** (issue #1364): the workflows and their badges are
   in its tree, and the `fuzz` paragraph names the decoders a sender reaches.
+
+### `REVIEWING.md` lets a filed issue carry its fix
+
+- **An issue filed from a review may say the fix where one is known**
+  (issue #1378): *What is filed, and what is not* dropped its "no fix",
+  the filing bar standing as it was.
