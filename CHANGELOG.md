@@ -9397,3 +9397,9 @@ nothing red follows from the copies disagreeing.
 - **Both point a contributor at `GOVERNANCE.md` and `ROADMAP.md`**
   (issue #1359): `CONTRIBUTING.md` in the part section 14 compares, and
   `README.md` beside the organization's other files.
+
+### Section 10's aggregate keeps its closed and draft rules on new reasons
+
+- **A reopened or readied pull request was measured waiting for its new
+  run's aggregate** (closes #1358): the closed condition's reason, the draft
+  failure being kept as explicit and harmless.
