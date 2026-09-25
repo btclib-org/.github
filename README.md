@@ -2204,25 +2204,20 @@ request and the rule follows.
   and `always()` stays refused for the same reason as before: it would fail
   the job on a run its concurrency group superseded, and this job must not
   report that as a failure.
-- **The draft flag is not part of that `if:`, because GitHub answers a
-  `skipped` required check the same as a passing one, and the aggregate's
-  own check run does not exist until every job it `needs` has settled**
-  (btclib-org/.github#1327). Declining the aggregate itself while draft, the
-  way its own `needs` jobs decline, leaves a check of that name on the sha
-  reading as passed; a pull request marked ready without a push then starts
-  a new run whose aggregate is not created until its jobs finish, and for
-  the length of that build the draft's own skipped check is the only one
-  there — on a head nothing has actually built yet. The closed condition
-  stays where it was: a closed pull request has nothing left to become
-  ready, so its skip is the end of the matter rather than a window onto
-  anything.
-- **So the draft flag is read inside the job instead, and answered with a
-  failure rather than a skip.** Neither draft nor closed merges through
-  GitHub's own UI regardless of what the check reports, so failing while
-  draft costs nothing there, and it is what keeps `ready_for_review` from
-  leaving a passing-looking record behind. The step that reads
-  `needs.*.result`, or the run's job listing, opens by failing outright on
-  `github.event.pull_request.draft`, ahead of either allowlist below.
+- **The closed condition's skip is not what a reopened pull request merges
+  on: once a `reopened` or `ready_for_review` run starts on a head, GitHub
+  holds the aggregate's required check as expected until that run reports
+  it**, disregarding the earlier check runs of that name on the sha: the
+  `success` and `skipped` a reopened pull request carried, and the `failure` a
+  readied draft did (btclib-org/.github#1358).
+- **The draft flag is not part of the aggregate's `if:`: it is read inside the
+  job and answered with a failure rather than a skip.** Neither draft nor closed
+  merges through GitHub's own UI whatever the check reports, so the failure
+  costs nothing there, and it says draft where a skip would report as passing,
+  GitHub answering a `skipped` required check the same as a passing one. The
+  step that reads `needs.*.result`, or the run's job listing, opens by failing
+  outright on `github.event.pull_request.draft`, ahead of either allowlist
+  below.
 - **A run cancelled by hand or by its concurrency group leaves no skip: its
   aggregate is cancelled with it, a conclusion a required check does not
   accept.** Asking the workflow-runs API for a newer run on the same
