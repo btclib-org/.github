@@ -9343,3 +9343,9 @@ nothing red follows from the copies disagreeing.
 - **`ci: skip:` names it beside `mypy`**, pre-commit.ci having neither the
   interpreter `.python-version` names nor the network to download it
   (issue #1348); `lint.yml` runs it.
+
+### `reusable-sdist-rebuild.yml` normalizes a tag on the tag's own interpreter
+
+- **The normalizer's `uv run --no-project` names no `--python`**, reading
+  the rebuilt tag's `.python-version` as the build does, and runs under the
+  build's `UV_PYTHON_DOWNLOADS` (closes #1345).
