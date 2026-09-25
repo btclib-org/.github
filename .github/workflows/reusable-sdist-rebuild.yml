@@ -58,8 +58,8 @@ name: reusable-sdist-rebuild
 # default without asking for it by that name.
 #
 # setup-python, boolean, default false: when true the job adds an
-# actions/setup-python step ahead of Setup uv, and the two build steps
-# run under `UV_PYTHON_DOWNLOADS=never`. The two belong together: the
+# actions/setup-python step ahead of Setup uv, and the job runs uv under
+# `UV_PYTHON_DOWNLOADS=never`. The two belong together: the
 # setting is what stops uv from fetching an interpreter of its own
 # choosing and so silently ignoring the one setup-python just installed,
 # and it is conditioned on the same input as the step it makes binding.
@@ -68,15 +68,16 @@ name: reusable-sdist-rebuild
 #
 # The version is the one the tag's own .python-version names, read
 # through setup-python's python-version-file, and not one the caller
-# passes: the build steps' uv reads that same file, so under `never` any
-# other version is one they cannot find. A caller's version is its
+# passes: every uv command below reads that same file, so under `never`
+# any other version is one they cannot find. A caller's version is its
 # branch's pin, which differs from the latest tag's from the day the
 # tree moves `.python-version` until its next release.
 #
-# The setting is the build steps' own and not the job's, because the
-# normalizer after them runs on the version this file names, which
-# follows this repository's .python-version and not the tag's: under
-# `never` it would find only what setup-python installed.
+# The normalizer's `uv run --no-project` names no `--python`: it reads
+# the same file from the checkout, its comment lines skipped, so
+# normalize_sdist.py recompresses through the gzip of the tag's
+# interpreter rather than of the one this repository pins, and that
+# interpreter is part of what decides the rebuilt digest.
 #
 # **The signer is reusable-attest.yml.** `gh attestation verify`
 # requires the signer to be named once an attestation is generated
@@ -158,6 +159,12 @@ jobs:
       contents: read
       # the attestations API, which gh attestation verify reads
       attestations: read # the attestation `gh attestation verify` reads
+    # the header's setup-python paragraphs: automatic fetches an
+    # interpreter where none is found, as uv does with the variable
+    # unset, so a caller asking for no setup-python builds and
+    # normalizes as it would without it
+    env:
+      UV_PYTHON_DOWNLOADS: ${{ inputs.setup-python && 'never' || 'automatic' }}
     steps:
       # every action is pinned to a commit SHA, the tag in the comment:
       # a tag, let alone a branch, is a name its owner can move, and
@@ -184,8 +191,8 @@ jobs:
           persist-credentials: false
 
       # the header's setup-python paragraphs: the version is the tag's,
-      # and the two build steps' UV_PYTHON_DOWNLOADS is what makes it
-      # binding on them. The file is read from the checkout above, whose
+      # and the job's UV_PYTHON_DOWNLOADS is what makes it binding on
+      # uv. The file is read from the checkout above, whose
       # comment lines setup-python skips
       - name: Set up Python
         if: inputs.setup-python
@@ -216,24 +223,16 @@ jobs:
       # the two commands the header's sdist-builder paragraph names, each
       # guarded by the input's value rather than the value reaching a
       # shell: the caller chooses which step runs, never what a step runs
-      # automatic fetches an interpreter where none is found, as uv does
-      # with the variable unset, so a caller asking for no setup-python
-      # builds as it would without it
       - name: Build the sdist with uv
         if: inputs.sdist-builder == 'uv'
-        env:
-          UV_PYTHON_DOWNLOADS: ${{ inputs.setup-python && 'never' || 'automatic' }}
         run: uv build --sdist
       - name: Build the sdist with python -m build
         if: inputs.sdist-builder == 'build-module'
-        env:
-          UV_PYTHON_DOWNLOADS: ${{ inputs.setup-python && 'never' || 'automatic' }}
         run: uv run --locked --only-group build python -m build -s
 
       - name: Make the sdist's determinism this tree's own
         run: |
-          uv run --no-project --python 3.15 \
-            .github/scripts/normalize_sdist.py dist/
+          uv run --no-project .github/scripts/normalize_sdist.py dist/
           sha256sum dist/*.tar.gz
 
       # the signer the header names

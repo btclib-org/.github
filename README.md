@@ -1736,8 +1736,9 @@ without adding to it is deleted.
   names; where the subject is a version that pin does not give, the callee
   takes it as a required input with no default, a default being a claim this
   repository cannot make for a tree; and a job reading no lock names the
-  version on the command line, `uv run --no-project` otherwise taking the
-  caller's pin and `uvx` whatever uv resolves (btclib-org/.github#35).
+  version on the command line where the version is the callee's,
+  `uv run --no-project` otherwise taking the caller's pin and `uvx` whatever
+  uv resolves (btclib-org/.github#35).
 - **A caller's pin does not reach the callee**, whose own Dependabot moves it,
   so a tree's workflow files do not name every version its runs use.
 - **`permissions: contents: read` at the workflow level**, and one elevation per
