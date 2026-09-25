@@ -307,6 +307,7 @@ rule and gives no reason is still a gap.
 | `bitcoin-core-rpc` | 1 |
 | `btclib-node` | 1 |
 | `btclib-wallet` | 1 |
+| `ellipticcurves` | 1 |
 | `btclib-benchmarks` | 2 |
 | `.github` | 2 |
 | `bbt` | 2 |
@@ -1928,6 +1929,7 @@ day and an hour, the repository owns the minute:
 | `btclib-org.github.io` | 36 |
 | `btclib-wallet` | 40 |
 | `bitcoin-node-tests` | 44 |
+| `ellipticcurves` | 48 |
 
 **The rows are in the order of what they ask about**, family by family. A new
 sentinel takes the slot its family already holds rather than the end of the
@@ -2036,28 +2038,28 @@ by that row.
 - `zkp-oracle` — `btclib`;
 - `integration-hwi` — `btclib-wallet`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
 - `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-node`, `btclib-wallet`;
+  `btclib-node`, `btclib-wallet`, `ellipticcurves`;
 - `deps-oldest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
 - `py-arm-authority` — `btclib`;
 - `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
 - `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
 - `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-wallet`;
+  `btclib-wallet`, `ellipticcurves`;
 - `homepage` — `btclib-org.github.io`;
 - `links` — every repository;
 - `alignment` — `.github`;
 - `wheel-reproducibility` — `btclib-secp256k1`;
 - `sdist-rebuild` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-node`, `btclib-wallet`;
+  `btclib-node`, `btclib-wallet`, `ellipticcurves`;
 - `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
 - `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `btclib-node`,
-  `btclib-wallet`.
+  `btclib-wallet`, `ellipticcurves`.
 
 **An entry is what was decided, not what a tree happens to hold**, where section
 2's tier is read off the tree. A tree short of what its entry names is a gap in

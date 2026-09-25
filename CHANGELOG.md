@@ -9403,3 +9403,9 @@ nothing red follows from the copies disagreeing.
 - **A reopened or readied pull request was measured waiting for its new
   run's aggregate** (closes #1358): the closed condition's reason, the draft
   failure being kept as explicit and harmless.
+
+### `ellipticcurves` gains its rows in section 2 and section 10
+
+- **`ellipticcurves`, the arithmetic `btclib`'s decomposition moves out,
+  registers as a tier-1 library at minute 48** (issue btclib-org/btclib#2282):
+  a sentinel's roster names it where the tree carries that workflow.
