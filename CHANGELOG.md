@@ -9355,3 +9355,21 @@ nothing red follows from the copies disagreeing.
 - **Every aggregate job's `if:` is compared with the line section 10 gives
   for it**, read off `README.md` as the `cancel-in-progress` conditional is
   (closes #1332). The draft flag the job's step reads is not asked.
+
+### The alignment suite cannot validate a tree still on a build branch
+
+- **`tests/conftest.py` clones every repository off its default branch
+  alone, so nothing here can be pointed at a build branch instead**
+  (issue btclib-org/btclib#2220).
+
+### A new repository's rulesets go on only after its first push to `main`
+
+- **`main-self-merge`'s bypass is `pull_request`-only, so a direct push
+  is refused once it is active, and the root commit is necessarily one**
+  (issue btclib-org/btclib#2220).
+
+### The first branch pushed to an empty repository is its default one
+
+- **A repository with no `main` yet answers `default_branch` with
+  whichever branch landed first, so a workflow on it is dispatchable
+  before anything has landed** (issue btclib-org/btclib#2220).
