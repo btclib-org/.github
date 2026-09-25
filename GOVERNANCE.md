@@ -54,15 +54,15 @@ Each entry says who holds the role and names the file that says what it
 owes, rather than restating it.
 
 - **The maintainer** holds the bypass above, and takes the decisions *How
-  a decision is made* gives the role; a repository's `RELEASING.md` names
-  the maintainer as the reviewer of its publishing environments. The role
-  is held by [`fametrano`](https://github.com/fametrano), Ferdinando
-  Ametrano.
+  a decision is made* gives the role. The role is held by
+  [`fametrano`](https://github.com/fametrano), Ferdinando Ametrano.
 - **An owner** holds the organization role `admin`, which makes the
   holder an administrator of every repository of the organization. An
   administrator can change a repository's rules, so the role is a grant
   of trust and not only of access; the bypass stays the maintainer's
-  alone. The owners are [`fametrano`](https://github.com/fametrano),
+  alone, and a repository's `RELEASING.md` names the three owners as the
+  reviewers of its publishing environments. The owners are
+  [`fametrano`](https://github.com/fametrano),
   [`giacomocaironi`](https://github.com/giacomocaironi) and
   [`pmazzocchi`](https://github.com/pmazzocchi), read back with:
 

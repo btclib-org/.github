@@ -9385,3 +9385,9 @@ nothing red follows from the copies disagreeing.
 - **A run cancelled by hand or by its concurrency group leaves no skip for a
   workflow-runs query to tell apart** (closes #1336): the aggregate is
   cancelled with the run, which a required check does not accept.
+
+### GOVERNANCE.md's *Roles* names the three owners as the reviewers
+
+- **A publishing environment's required reviewers are the three owners, not
+  the maintainer alone** (issue #1355): the fact moves to *An owner*, since
+  it now holds of the role rather than of one account.
