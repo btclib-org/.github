@@ -9373,3 +9373,9 @@ nothing red follows from the copies disagreeing.
 - **A repository with no `main` yet answers `default_branch` with
   whichever branch landed first, so a workflow on it is dispatchable
   before anything has landed** (issue btclib-org/btclib#2220).
+
+### Section 16 names the reason for its own two ordering constraints
+
+- **The default branch is set explicitly, and the rulesets wait for the
+  first push to `main`** (issue btclib-org/btclib#2220): item 12 named
+  the order and not why, for both.

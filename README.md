@@ -3804,16 +3804,20 @@ No tool checks them.
    `CHANGELOG.md`, `CLAUDE.md`; and `SECURITY.md`, `RELEASING.md` and
    `RELEASE_NOTES.md` where the repository publishes, the rows section
    2's table marks for tier 1 alone.
-1. GitHub, in this order: default branch `main`; squash-only, with
-   auto-merge; `delete_branch_on_merge`; the three rulesets; classic
-   protection with the required checks bound to the Actions app; the
-   publishing environments; the read-only default token; secret scanning,
-   its push protection and Dependabot security updates; private
-   vulnerability reporting. Then the topics, which are the `keywords` of the
-   `pyproject.toml` step above, and which nothing in the tree holds where
-   there is no such file to declare them in; and, where the tree
-   releases, the `homepage`, the same URL section 3's field of that name
-   carries.
+1. GitHub, in this order: default branch `main` — set explicitly, since
+   an empty repository's first pushed branch becomes the default
+   whatever it is named, and this tree was built on one of its own;
+   squash-only, with auto-merge; `delete_branch_on_merge`; the three
+   rulesets — only after that push, since section 11's bypass mode
+   refuses a direct one once `main-self-merge` is active, and the root
+   commit is necessarily one; classic protection with the required
+   checks bound to the Actions app; the publishing environments; the
+   read-only default token; secret scanning, its push protection and
+   Dependabot security updates; private vulnerability reporting. Then the
+   topics, which are the `keywords` of the `pyproject.toml` step above,
+   and which nothing in the tree holds where there is no such file to
+   declare them in; and, where the tree releases, the `homepage`, the
+   same URL section 3's field of that name carries.
 1. Read each setting back with the commands `REPOSITORY.md` records, and
    write the answers into it — the topics included, that being the one
    of them a tree with no `pyproject.toml` records nowhere else.
