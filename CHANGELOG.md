@@ -9409,3 +9409,9 @@ nothing red follows from the copies disagreeing.
 - **`ellipticcurves`, the arithmetic `btclib`'s decomposition moves out,
   registers as a tier-1 library at minute 48** (issue btclib-org/btclib#2282):
   a sentinel's roster names it where the tree carries that workflow.
+
+### `CONTRIBUTING.md` points a newcomer at `good first issue`
+
+- **An issue carrying the label is small and self-contained** (issue
+  #1362): *The issue tracker* says so, and links the organization-wide
+  search for the open ones.
