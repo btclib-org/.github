@@ -12,11 +12,14 @@ ci:
   autofix_prs: false
   autoupdate_commit_msg: "Update the pinned pre-commit hook revisions"
   autoupdate_schedule: weekly
-  # the one hook pre-commit.ci cannot run: it shells out to uv, which is
-  # not installed there. What the skip costs is nothing that decides a
-  # merge -- lint.yml runs this file whole, with the command a developer
-  # runs, on every commit and every pull request
-  skip: [mypy]
+  # the hooks pre-commit.ci cannot run. mypy shells out to uv, which is
+  # not installed there. uv-lock asks for the interpreter .python-version
+  # names, which the image does not carry, and pre-commit.ci has no
+  # network to download it (btclib-org/.github#1348). What the skip costs
+  # is nothing that decides a merge -- lint.yml runs this file whole,
+  # with the command a developer runs, on every commit and every pull
+  # request
+  skip: [mypy, uv-lock]
 
 repos:
   # this file checking itself, and the only two hooks with no environment

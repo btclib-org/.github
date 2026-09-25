@@ -9337,3 +9337,9 @@ nothing red follows from the copies disagreeing.
 - **A caller passing it is refused**, GitHub rejecting an input the
   called workflow does not declare; `setup-python: true` is what asks
   for the tag's interpreter (closes #1335).
+
+### pre-commit.ci skips `uv-lock`
+
+- **`ci: skip:` names it beside `mypy`**, pre-commit.ci having neither the
+  interpreter `.python-version` names nor the network to download it
+  (issue #1348); `lint.yml` runs it.
