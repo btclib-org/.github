@@ -9331,3 +9331,9 @@ nothing red follows from the copies disagreeing.
 - **`bitcoin-node-tests`, tf2's own repository, registers as a tier-2
   application at minute 44 and joins the `vendored-vectors` roster**
   (issue btclib-org/btclib#2220).
+
+### `reusable-sdist-rebuild.yml` drops `python-version`
+
+- **A caller passing it is refused**, GitHub rejecting an input the
+  called workflow does not declare; `setup-python: true` is what asks
+  for the tag's interpreter (closes #1335).
