@@ -3806,7 +3806,8 @@ No tool checks them.
    2's table marks for tier 1 alone.
 1. GitHub, in this order: default branch `main` — set explicitly, since
    an empty repository's first pushed branch becomes the default
-   whatever it is named, and this tree was built on one of its own;
+   whatever it is named, and a tree built on a branch of its own pushes
+   that branch first;
    squash-only, with auto-merge; `delete_branch_on_merge`; the three
    rulesets — only after that push, since section 11's bypass mode
    refuses a direct one once `main-self-merge` is active, and the root
