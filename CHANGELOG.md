@@ -9427,3 +9427,9 @@ nothing red follows from the copies disagreeing.
 - **The `pypy3.11, windows-11-arm` cell can build a Rust sdist** (closes
   #1363): no `pp73` wheel matches PyPy 8.0's `pp80`, and the x86_64 PyPy
   uv runs there needs an x86_64 toolchain to build natively.
+
+### `zkp-oracle`'s entry names `ellipticcurves` alone
+
+- **`btclib` does not run `zkp-oracle`, the implementation it compared being
+  `ellipticcurves`', which it re-exports** (closes #1364): its entries in
+  `vendored-vectors`, `mutation`, `fuzz` and `py-arm-authority` stay.
