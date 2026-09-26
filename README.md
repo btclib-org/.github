@@ -2036,7 +2036,7 @@ by that row.
   `ellipticcurves`;
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`,
   `btclib-wallet`;
-- `zkp-oracle` — `btclib`, `ellipticcurves`;
+- `zkp-oracle` — `ellipticcurves`;
 - `integration-hwi` — `btclib-wallet`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
