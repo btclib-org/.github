@@ -130,6 +130,29 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ matrix.python }}
+      # PyPy publishes no Windows build for arm64, so on this image uv
+      # installs the x86_64 one and runs it emulated, and a Rust sdist in
+      # the lock is then compiled for x86_64-pc-windows-msvc. With the
+      # image's own aarch64 toolchain that is a cross-compile: cargo stops
+      # at E0463 without the target's standard library, and PyO3 refuses
+      # it with that library and no PYO3_CROSS_* settings. An x86_64
+      # toolchain, emulated like the interpreter, makes the build native,
+      # as it is on the windows-latest cell. A PyPy cell builds from source
+      # whenever PyPy's ABI tag is ahead of a dependency's wheels, as PyPy
+      # 8.0's pp80 is ahead of hypothesis 6.168.1's pp73 wheels where
+      # btclib-org/.github#1363 measured it. The step has to go once the
+      # first `uv run` below downloads a `pypy-*-windows-aarch64-none`
+      # build, which this x86_64 toolchain would cross-compile for, rather
+      # than the x86_64 one
+      - name: Install the Rust toolchain an emulated x86_64 PyPy builds with
+        if: >
+          runner.os == 'Windows' && runner.arch == 'ARM64'
+          && startsWith(matrix.python, 'pypy')
+        shell: bash
+        run: |
+          rustup toolchain install stable-x86_64-pc-windows-msvc \
+            --profile minimal --force-non-host
+          echo "RUSTUP_TOOLCHAIN=stable-x86_64-pc-windows-msvc" >> "$GITHUB_ENV"
       # what a tree asks of the environment this cell installed, in the
       # job that has it. The script is the calling tree's, so its own
       # suite is where its logic is proven. What the caller passes is a

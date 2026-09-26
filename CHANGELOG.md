@@ -9421,3 +9421,9 @@ nothing red follows from the copies disagreeing.
 - **`ellipticcurves` runs `vendored-vectors`, `mutation`, `fuzz`, `zkp-oracle`
   and `py-arm-authority`** (issue #1364): the workflows and their badges are
   in its tree, and the `fuzz` paragraph names the decoders a sender reaches.
+
+### `reusable-os-suite.yml` gives an emulated PyPy an x86_64 Rust toolchain
+
+- **The `pypy3.11, windows-11-arm` cell can build a Rust sdist** (closes
+  #1363): no `pp73` wheel matches PyPy 8.0's `pp80`, and the x86_64 PyPy
+  uv runs there needs an x86_64 toolchain to build natively.
