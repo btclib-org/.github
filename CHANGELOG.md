@@ -9415,3 +9415,9 @@ nothing red follows from the copies disagreeing.
 - **An issue carrying the label is small and self-contained** (issue
   #1362): *The issue tracker* says so, and links the organization-wide
   search for the open ones.
+
+### `ellipticcurves` joins the rosters of the sentinels ported from `btclib`
+
+- **`ellipticcurves` runs `vendored-vectors`, `mutation`, `fuzz`, `zkp-oracle`
+  and `py-arm-authority`** (issue #1364): the workflows and their badges are
+  in its tree, and the `fuzz` paragraph names the decoders a sender reaches.

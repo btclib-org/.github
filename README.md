@@ -2028,14 +2028,15 @@ reading its sentinels from here; a tree an entry does not name is asked nothing
 by that row.
 
 - `vendored-vectors` — `btclib`, `btclib-secp256k1`, `btclib-benchmarks`,
-  `btclib-node`, `btclib-wallet`, `bitcoin-node-tests`;
+  `btclib-node`, `btclib-wallet`, `bitcoin-node-tests`, `ellipticcurves`;
 - `bootstrap-dns` — `btclib-node`;
 - `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`;
-- `fuzz` — `btclib`, `btclib-secp256k1`, `btclib-node`, `btclib-wallet`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
+- `fuzz` — `btclib`, `btclib-secp256k1`, `btclib-node`, `btclib-wallet`,
+  `ellipticcurves`;
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`,
   `btclib-wallet`;
-- `zkp-oracle` — `btclib`;
+- `zkp-oracle` — `btclib`, `ellipticcurves`;
 - `integration-hwi` — `btclib-wallet`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
@@ -2043,7 +2044,7 @@ by that row.
   `btclib-node`, `btclib-wallet`, `ellipticcurves`;
 - `deps-oldest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
-- `py-arm-authority` — `btclib`;
+- `py-arm-authority` — `btclib`, `ellipticcurves`;
 - `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
 - `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
@@ -2106,8 +2107,10 @@ and the badge land together.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
   between the parser and an adversary choosing the bytes. `btclib` and
   `btclib-secp256k1` read transactions, scripts and signatures off the wire,
-  `btclib-node` speaks the peer-to-peer protocol, and `btclib-wallet` parses
-  PSBTs, output descriptors and BIP32/BIP322 data a counterparty hands it;
+  `btclib-node` speaks the peer-to-peer protocol, `btclib-wallet` parses
+  PSBTs, output descriptors and BIP32/BIP322 data a counterparty hands it, and
+  `ellipticcurves` decodes the DER and BIP340 signatures and the ECIES envelopes
+  a sender writes;
   `bitcoin-core-rpc` reads an instance its own operator runs, which the property
   does not reach. `btclib-secp256k1`'s targets reach the vendored C on purpose:
   what they exercise is this tree's own length checks in front of it
