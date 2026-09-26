@@ -9421,3 +9421,9 @@ nothing red follows from the copies disagreeing.
 - **`ellipticcurves` runs `vendored-vectors`, `mutation`, `fuzz`, `zkp-oracle`
   and `py-arm-authority`** (issue #1364): the workflows and their badges are
   in its tree, and the `fuzz` paragraph names the decoders a sender reaches.
+
+### `zkp-oracle`'s entry names `ellipticcurves` alone
+
+- **`btclib` does not run `zkp-oracle`, the implementation it compared being
+  `ellipticcurves`', which it re-exports** (closes #1364): its entries in
+  `vendored-vectors`, `mutation`, `fuzz` and `py-arm-authority` stay.
