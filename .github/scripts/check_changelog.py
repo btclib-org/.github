@@ -12,7 +12,11 @@ added, and btclib-org/.github#760 is the second way the driver pays for
 it. This is that gate, run once over the file's own open section -- the
 first `## ` heading's, up to the line before the second, or to the end
 of the file where there is no second, section 9 of README.md giving the
-boundary the same way.
+boundary the same way. A `## ` or `### ` line inside a fenced code block
+is a markdown example rather than a heading of the file's own, and is
+blanked out before either is matched (btclib-org/.github#1372) --
+character for character, unlike `_CODE_SPAN` below, which removes what
+it strips outright rather than preserving its length.
 
 Three checks, all of them shapes a `merge=union` rebase produces and a
 `git rebase` exit code does not report -- a fourth, below them, that is
@@ -169,6 +173,23 @@ _CHANGELOG = Path("CHANGELOG.md")
 
 _RELEASE_HEADING = re.compile(r"^## .*$", re.MULTILINE)
 _ENTRY_HEADING = re.compile(r"^### (?P<title>.*)$", re.MULTILINE)
+# a fenced code block, opened by a line of three or more backticks --
+# tildes are not read: CommonMark allows them too, but `.markdownlint.jsonc`
+# fixes this house style at MD048's default, backtick fences only -- with
+# no backtick in the info string that follows them on the opening line,
+# a backtick there being ambiguous with an inline code span, and closed
+# by a line of at least as many backticks as the opening, which need not
+# match its indentation. A `## ` or `### ` line inside one is a markdown
+# example, not a heading of this file's own, and is blanked out before
+# either pattern above ever runs (btclib-org/.github#1372). The closing
+# fence is `\1` and not a second capture of the run's own length: a
+# fence closes on a line with *at least* as many backticks as it opened
+# with, not exactly as many, so a longer closing fence still closes the
+# block and a shorter one is not mistaken for a close at all
+_FENCED_BLOCK = re.compile(
+    r"^ {0,3}(`{3,})[^`\n]*\n(?:.*\n)*?^ {0,3}\1`*[ \t]*$\n?",
+    re.MULTILINE,
+)
 # a parenthetical naming an issue is not always spelled the same way
 # twice in one entry -- "closes #593, issue #571", "issues #327, #339
 # and #342" -- so this reads the whole group once either keyword is
@@ -200,6 +221,26 @@ _MAX_BODY_LINES = 3
 _LINK_DEFINITION = re.compile(r"^\[[^\]]+\]:\s")
 
 
+def _blank_fenced_blocks(text: str) -> str:
+    """Return `text` with each fenced code block's own characters blanked.
+
+    Every newline stays where it was and every other character of a
+    fenced block becomes a space, so the result is the same length as
+    `text` and `line_at()` reports the same line for the same offset in
+    either -- unlike `_CODE_SPAN.sub("", body)` below, which shortens
+    what it strips because nothing downstream of it depends on an
+    offset into the original file.
+
+    :param text: the whole file, or one of its sections.
+    :returns: `text`, with each fenced block's own characters replaced.
+    """
+
+    def _blank(match: re.Match[str]) -> str:
+        return "".join(char if char == "\n" else " " for char in match.group(0))
+
+    return _FENCED_BLOCK.sub(_blank, text)
+
+
 def open_section(text: str) -> tuple[str, int]:
     """Return the file's open section, and the offset it starts at.
 
@@ -208,7 +249,7 @@ def open_section(text: str) -> tuple[str, int]:
         before the second, or to the end where there is no second; and
         the offset into `text` that text begins at.
     """
-    headings = list(_RELEASE_HEADING.finditer(text))
+    headings = list(_RELEASE_HEADING.finditer(_blank_fenced_blocks(text)))
     if not headings:
         return text, 0
     start = headings[0].end()
@@ -272,7 +313,7 @@ def entries(section: str) -> list[tuple[str | None, str, int]]:
         own span -- heading line included, where it has one -- and the
         offset that span starts at within `section`.
     """
-    headings = list(_ENTRY_HEADING.finditer(section))
+    headings = list(_ENTRY_HEADING.finditer(_blank_fenced_blocks(section)))
     out: list[tuple[str | None, str, int]] = []
     preamble_end = headings[0].start() if headings else len(section)
     preamble = section[:preamble_end]
@@ -300,7 +341,7 @@ def repeated_headings(text: str, section: str, base: int) -> list[str]:
     """
     seen: dict[str, int] = {}
     problems = []
-    for heading in _ENTRY_HEADING.finditer(section):
+    for heading in _ENTRY_HEADING.finditer(_blank_fenced_blocks(section)):
         title = heading.group("title").strip()
         line = line_at(text, base + heading.start())
         if title in seen:
@@ -355,7 +396,7 @@ def unblanked_headings(text: str, section: str, base: int) -> list[str]:
     :returns: one message per heading found glued to the line above it.
     """
     problems = []
-    for heading in _ENTRY_HEADING.finditer(section):
+    for heading in _ENTRY_HEADING.finditer(_blank_fenced_blocks(section)):
         pos = heading.start()
         above = section[max(pos - len(_BLANK_LINE), 0) : pos]
         if above != _BLANK_LINE:

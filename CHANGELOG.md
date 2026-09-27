@@ -9520,3 +9520,15 @@ nothing red follows from the copies disagreeing.
 - **`allowed_actions: all` and `sha_pinning_required: true`, the
   decided pair** (closes #1382): `REPOSITORY.md` and `settings_test.py`
   read the same answer back.
+
+### `check_changelog.py` no longer reads a fenced heading as its own
+
+- **A `##`/`###` line inside a fenced code block no longer opens, ends,
+  or repeats a section** (closes #1372): it is blanked character for
+  character, offsets kept so line numbers still match.
+
+### `check_changelog.py` and `mutation_counts.py` gate their own floor
+
+- **`[tool.ruff.per-file-target-version]` targets the two of them, and
+  not the rest of `.github/scripts`, at 3.10** (closes #1374):
+  pre-commit's own floor; a second mypy hook checks the same two at it.

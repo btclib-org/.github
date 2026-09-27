@@ -12,14 +12,14 @@ ci:
   autofix_prs: false
   autoupdate_commit_msg: "Update the pinned pre-commit hook revisions"
   autoupdate_schedule: weekly
-  # the hooks pre-commit.ci cannot run. mypy shells out to uv, which is
-  # not installed there. uv-lock asks for the interpreter .python-version
-  # names, which the image does not carry, and pre-commit.ci has no
-  # network to download it (btclib-org/.github#1348). What the skip costs
-  # is nothing that decides a merge -- lint.yml runs this file whole,
-  # with the command a developer runs, on every commit and every pull
-  # request
-  skip: [mypy, uv-lock]
+  # the hooks pre-commit.ci cannot run. Both mypy hooks shell out to uv,
+  # which is not installed there. uv-lock asks for the interpreter
+  # .python-version names, which the image does not carry, and
+  # pre-commit.ci has no network to download it (btclib-org/.github#1348).
+  # What the skip costs is nothing that decides a merge -- lint.yml runs
+  # this file whole, with the command a developer runs, on every commit
+  # and every pull request
+  skip: [mypy, mypy-scripts-floor, uv-lock]
 
 repos:
   # this file checking itself, and the only two hooks with no environment
@@ -390,6 +390,39 @@ repos:
           mypy tests .github/scripts
         language: system
         types: [python]
+        pass_filenames: false
+        require_serial: true
+      # `python_version` is one value for [tool.mypy]'s own table and has
+      # no per-module override (`python_version` names none of the keys a
+      # `[[tool.mypy.overrides]]` module section may set), so the hook
+      # above alone leaves `check_changelog.py` and `mutation_counts.py`
+      # checked at this repository's own 3.14 -- newer than either script
+      # actually runs on where it is served to another repository:
+      # `check_changelog.py` on whatever python3 a caller's own
+      # pre-commit run supplies, `mutation_counts.py` on that caller's
+      # own `uv run --locked` (issue btclib-org/.github#1374). A CLI
+      # `--python-version` overrides the config for this run alone,
+      # rather than for the table.
+      #
+      # The other four scripts under .github/scripts are not named here:
+      # each runs pinned at `uv run --no-project --python 3.15`, its own
+      # module docstring giving the command, never on a caller's own
+      # floor -- `check_calendar_version.py`'s `datetime.UTC` (3.11+) is
+      # what a run over the whole directory at this floor would refuse
+      # for a script that never runs below 3.15.
+      #
+      # 3.10 is pre-commit's own floor (`Requires-Python: >=3.10`, its
+      # METADATA), at or below every caller this issue measured --
+      # `[tool.ruff.per-file-target-version]` gives the same figure and
+      # the same reason.
+      - id: mypy-scripts-floor
+        name: mypy (strict, at the shared scripts' own callers' floor)
+        entry: >
+          uv run --locked --no-default-groups --group lint --group test
+          mypy --python-version 3.10
+          .github/scripts/check_changelog.py .github/scripts/mutation_counts.py
+        language: system
+        files: ^\.github/scripts/(check_changelog|mutation_counts)\.py$
         pass_filenames: false
         require_serial: true
   - repo: https://github.com/astral-sh/uv-pre-commit

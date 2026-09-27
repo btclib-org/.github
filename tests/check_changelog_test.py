@@ -396,6 +396,66 @@ def test_main_reports_nothing_wrong_and_returns_0(
     assert "repeats no heading" in out
 
 
+def test_a_fenced_heading_is_not_read_as_a_repeat(script: ModuleType) -> None:
+    """A `### ` line inside a fenced code block is a markdown example.
+
+    btclib-org/.github#1372: the same title, fenced under the real entry
+    that carries it, used to be read as a second heading repeating the
+    first.
+    """
+    text = _CLEAN.replace(
+        "- **first thing** (closes #1): one.",
+        "```markdown\n### First entry\n```",
+    )
+    assert script.problems(text) == []
+
+
+def test_a_fenced_release_heading_does_not_end_the_section_early(
+    script: ModuleType,
+) -> None:
+    """A fenced `## ` line is not read as the next release's heading.
+
+    btclib-org/.github#1372: placed under an entry, it used to make
+    `open_section()` stop there, leaving every real entry below it
+    unmeasured.
+    """
+    text = _CLEAN.replace(
+        "- **first thing** (closes #1): one.",
+        "- **first thing** (closes #1): one.\n\n```\n## 2020.1.1\n```",
+    )
+    section, _base = script.open_section(text)
+    assert "### Second entry" in section
+
+
+def test_a_longer_closing_fence_still_closes_the_block(script: ModuleType) -> None:
+    """A closing fence with more backticks than the opening one still closes.
+
+    CommonMark closes a fence on a line with *at least* as many backticks
+    as it opened with, not exactly as many.
+    """
+    text = _CLEAN.replace(
+        "- **first thing** (closes #1): one.",
+        "- **first thing** (closes #1): one.\n\n```\n## 2020.1.1\n````",
+    )
+    section, _base = script.open_section(text)
+    assert "### Second entry" in section
+
+
+def test_a_shorter_candidate_does_not_close_a_longer_fence(script: ModuleType) -> None:
+    """A line with fewer backticks than the opening one is not a close.
+
+    Placed between a fence's real open and its real close, it is content
+    rather than a boundary of its own, so a `## ` line past it stays
+    blanked along with the rest of the still-open fence.
+    """
+    text = _CLEAN.replace(
+        "- **first thing** (closes #1): one.",
+        "- **first thing** (closes #1): one.\n\n````\n```\n## 2020.1.1\n````",
+    )
+    section, _base = script.open_section(text)
+    assert "### Second entry" in section
+
+
 def test_a_bare_keyword_outside_a_parenthetical_names_no_token(
     script: ModuleType,
 ) -> None:
