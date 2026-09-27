@@ -1723,7 +1723,9 @@ without adding to it is deleted.
   these run in a job that can read the workflow token. A call to a reusable
   workflow of `btclib-org/.github` names `@main` instead, its `main` being held
   by section 11's rulesets as the caller's is; zizmor is told so,
-  `btclib-org/.github/*: ref-pin` under `unpinned-uses`.
+  `btclib-org/.github/*: ref-pin` under `unpinned-uses`. **OpenSSF Scorecard's
+  Pinned-Dependencies check flags every one of these calls regardless** — the
+  `scorecard` entry further down disposes of the alert.
 - **A tree pins an action at one commit throughout its own workflows**, so
   a new workflow takes the pin the tree already carries rather than the
   newest release: two commits of one action are two versions in effect at
@@ -2090,7 +2092,26 @@ and the badge land together.
   and `ossf/scorecard-action`'s README does not support a fork, which
   `gh api repos/<org>/<repo> --jq .fork` answers. The badge is what the row is
   kept for. **A check scoring below its maximum is an issue against what it
-  found**, never a sentence in section 14 explaining the score.
+  found**, never a sentence in section 14 explaining the score — with three
+  named exceptions, each dismissed with reason `won't fix` instead of filed,
+  because the standard has already decided them:
+
+    - **Pinned-Dependencies against a reusable-workflow call naming `@main`.**
+      **Every action is pinned to a commit SHA** above requires that name for
+      every call into `btclib-org/.github`, so the alert is that bullet's own
+      consequence rather than an oversight; the dismissal cites it.
+    - **Pinned-Dependencies against an index install a job makes with no pin,
+      on purpose, to reproduce what a user's own install does.** The
+      dismissal cites the comment the workflow gives for it.
+    - **A check the organization keeps below its maximum on a decision this
+      file records**: Branch-Protection, held down by the `pull_request`-mode
+      bypass section 11's *Branch protection and rulesets* gives a
+      maintainer's own merge; Code-Review, held down by that merge landing
+      with no second person's approval, a bot's review not counting, as
+      section 11's *Review* says; and Fuzzing on `bitcoin-core-rpc`, which
+      the `fuzz` entry below already answers.
+
+    A sub-maximum score outside these three classes is still an issue.
 
     The badge and the published score want `publish_results: true`, and the job
     wants `id-token: write` for the transparency-log entry,

@@ -9502,3 +9502,9 @@ nothing red follows from the copies disagreeing.
 - **`conftest.py` skips only a test carrying the `integration` marker
   without the switch** (closes #1367): `.github/scripts/`'s own tests,
   none of which reaches the network, now run in the required check.
+
+### Section 10 names the Scorecard alerts the organization already accepts
+
+- **The `@main` bullet and the `scorecard` entry name the classes of
+  Scorecard alert dismissed with reason `won't fix` instead of filed**
+  (issue #1380, #1383, #1386).
