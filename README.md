@@ -2835,8 +2835,11 @@ such a finding only through a further push or a `close`/`reopen`.
 and three more where the tree has what they watch: `uv` where a
 `uv.lock` exists, `bundler` where a site Gemfile does, `gitsubmodule`
 where a submodule does — conditional by section 2's rule for a subject
-the tree does not hold. Pre-commit hook revisions have no Dependabot
-ecosystem, so pre-commit.ci updates them weekly, except a hook whose
+the tree does not hold. Dependabot has a `pre-commit` ecosystem too, and
+the maintainer decided to keep pre-commit.ci for hook `rev:` bumps
+instead (issue #1391): its weekly autoupdate already rewrites `rev:`
+for every `repo:` but `local` and `meta`, so a second bot bumping the
+same pin would only open a competing pull request, except a hook whose
 `repo:` is `local`: what moves that version is where the hook pins it,
 the `uv` ecosystem above where that is `uv.lock`, a hand edit where it
 is `additional_dependencies`.

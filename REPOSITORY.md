@@ -377,9 +377,11 @@ Version bumps are the other half of what Dependabot does here, and they
 are a file rather than a setting: `.github/dependabot.yml` declares
 `github-actions`, which [the standard gives every tree][s11-bots], and
 `uv`, which it gives a tree holding what that ecosystem reads — this one
-holds `uv.lock`. The pre-commit hook revisions have no Dependabot
-ecosystem, and are pre-commit.ci's weekly autoupdate instead, per the
-`ci:` block of `.pre-commit-config.yaml`.
+holds `uv.lock`. Dependabot has a `pre-commit` ecosystem too, and the
+maintainer decided to keep pre-commit.ci for hook `rev:` bumps instead
+(issue #1391): the `ci:` block of `.pre-commit-config.yaml` already has
+its weekly autoupdate rewriting `rev:` for every `repo:` but `local`
+and `meta`, so a second bot on the same pin would only compete with it.
 
 ## Private vulnerability reporting
 
