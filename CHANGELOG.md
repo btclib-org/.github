@@ -9472,3 +9472,8 @@ nothing red follows from the copies disagreeing.
 - **The `git grep` naming every module that reads the API missed
   `pyproject_test.py`, which calls `gh` directly** (closes #1371): the
   pattern now carries `"gh"` too.
+
+### `EXPECTED_DRIFT` no longer excuses `REVIEWING.md`
+
+- **Every tree's copy now carries the fix clause** (closes #1378):
+  ellipticcurves was the twelfth, so its entry is deleted.
