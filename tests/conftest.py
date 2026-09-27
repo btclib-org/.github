@@ -22,7 +22,8 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
 SWITCH = "BTCLIB_INTEGRATION"
-"""The environment variable without which this suite skips itself."""
+"""The environment variable without which the suite's `integration` tests
+skip themselves."""
 
 REPOSITORY = "repository"
 """The argument a test takes to be asked once per repository.
@@ -37,7 +38,7 @@ session fixtures instead and run once.
 def opted_in() -> bool:
     """Say whether the switch is set.
 
-    :returns: whether the run may reach GitHub.
+    :returns: whether the run may reach the network.
     """
     return bool(os.environ.get(SWITCH))
 
@@ -57,23 +58,30 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     rather than passing for the wrong reason, and one that skips before
     it is failed by `pytest_runtest_makereport`.
 
-    Without the switch the parameter is one placeholder, which
-    `pytest_collection_modifyitems` then skips with everything else: the
-    list is fetched from the API, and a run that may not reach it has no
-    names to parametrize on.
+    Without the switch the parameter is one placeholder, marked
+    `integration` here so `pytest_collection_modifyitems` skips it
+    regardless of what the module itself declares: the list is fetched
+    from the API, and a run that may not reach it has no names to
+    parametrize on. Every real parameter below carries the same mark for
+    the same reason -- a per-repository test reaches the network by
+    definition, and the mark is put on it by this function rather than
+    left to a module's own `pytestmark` to remember.
 
     :param metafunc: the test function being collected.
     """
     if REPOSITORY not in metafunc.fixturenames:
         return
     if not opted_in():
-        metafunc.parametrize(REPOSITORY, [pytest.param("", id="unset")])
+        metafunc.parametrize(
+            REPOSITORY,
+            [pytest.param("", id="unset", marks=pytest.mark.integration)],
+        )
         return
     test = metafunc.definition.originalname
     params = []
     for name in names():
         issues = filed(test, name)
-        marks = []
+        marks = [pytest.mark.integration]
         if issues:
             marks.append(pytest.mark.backlog(*issues))
             marks.append(
@@ -86,14 +94,17 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
-    """Skip the run without the switch, and refuse an orphaned backlog row.
+    """Skip an integration-marked item without the switch; refuse an orphan row.
 
     The switch is read here and not in a fixture because a skip marked
     at collection is decided before any fixture is set up, where a
     fixture that skips runs after every session fixture the test asked
     for: the rulesets fetched and the trees cloned, and then the test
-    skipped. This whole suite being integration, a run without the
-    switch reaches nothing.
+    skipped. Only an item carrying the `integration` marker reaches
+    GitHub, so that is the marker read here rather than the whole of
+    `items`: a module that reaches nothing runs whether or not the
+    switch is set, which is what lets `lint.yml`'s required job execute
+    it directly.
 
     A backlog row keyed on a test that was renamed, or on a repository
     that was, would match nothing and excuse nothing, and the strict
@@ -113,9 +124,10 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     """
     if not opted_in():
         for item in items:
-            item.add_marker(
-                pytest.mark.skip(reason=f"set {SWITCH}=1 to run the alignment tests")
-            )
+            if item.get_closest_marker("integration") is not None:
+                item.add_marker(
+                    pytest.mark.skip(reason=f"set {SWITCH}=1 to run this test")
+                )
         return
     defined = {
         attribute

@@ -157,13 +157,13 @@ jobs:
         with:
           enable-cache: true
 
-      # BTCLIB_INTEGRATION is what the suite skips itself without, this
-      # being the one suite in the organization that reaches the network
-      # on purpose. --locked so a stale lock fails here rather than
-      # resolving something nobody chose. --no-default-groups --group
-      # test installs the suite's own group and nothing beside it: the
-      # job runs pytest and not the linters, and what it installs does
-      # not move with what `dev` includes
+      # BTCLIB_INTEGRATION is what the suite's `integration` tests skip
+      # themselves without, this being the one suite in the organization
+      # that reaches the network on purpose. --locked so a stale lock
+      # fails here rather than resolving something nobody chose.
+      # --no-default-groups --group test installs the suite's own group
+      # and nothing beside it: the job runs pytest and not the linters,
+      # and what it installs does not move with what `dev` includes
       - name: Check what no single repository can
         env:
           BTCLIB_INTEGRATION: "1"

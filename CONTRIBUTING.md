@@ -272,29 +272,23 @@ both are on every GitHub-hosted runner already, and the suite shells out
 to them rather than importing a client.
 
 ```shell
-uvx pre-commit run --all-files
-uvx pre-commit run --all-files markdownlint-cli2
-uvx pre-commit validate-config .pre-commit-config.yaml
+uv run --locked --only-group lint pre-commit run --all-files
+uv run --locked --only-group lint pre-commit run --all-files markdownlint-cli2
+uv run --locked --only-group lint pre-commit validate-config .pre-commit-config.yaml
 ```
 
-`uvx`, and not the `uv run` section 1 describes and a sibling's lint job
-runs; `lint.yml` runs this same command for the reason its own header
-gives. Restating that reason here is the rejected alternative, and what
-it costs is section 9's *One fact in one place*: nothing keeps a copy in
-this file equal to the header, and this file is what a session reads
-before running the gate. Without `--all-files` a `pre-commit run` reads
-the staged files, and from a clean tree it reports
-`(no files to check)Skipped` and exits 0. So the single-hook line carries
-the flag as well, and hook scope is the whole of what separates it from
-the first. The last one is worth running before pushing a change to the
-hook config: it catches what a wrong `types_or` tag or a malformed entry
-would otherwise turn into a red lint job.
-
-**`uv python install` before the first of these, and again after
-`.python-version` moves.** Without it pre-commit builds its Python hook
-environments against whatever interpreter `uvx` resolves, which need not
-be the one `.python-version` names; `lint.yml` runs the same command as
-a step of its own, and its comment there carries the rest.
+`uv run`, section 1's rule that every documented command is one, and the
+command `lint.yml` runs for the reason its own header gives. Restating
+that reason here is the rejected alternative, and what it costs is
+section 9's *One fact in one place*: nothing keeps a copy in this file
+equal to the header, and this file is what a session reads before
+running the gate. Without `--all-files` a `pre-commit run` reads the
+staged files, and from a clean tree it reports `(no files to check)Skipped`
+and exits 0. So the single-hook line carries the flag as well, and hook
+scope is the whole of what separates it from the first. The last one is
+worth running before pushing a change to the hook config: it catches what
+a wrong `types_or` tag or a malformed entry would otherwise turn into a
+red lint job.
 
 **Check exit codes, not filtered output.** `pre-commit run ... | grep -v
 Passed` hides a failure, and `grep` finding nothing exits 1, which is not
@@ -306,11 +300,19 @@ shares: `git -C <worktree> rev-parse --git-path hooks` answers with the
 maintainer's checkout. So one session installing it installs it for every
 other. Run the gate by hand before committing.
 
-The suite is a second thing and not a gate. It asks every repository of
-the organization whether it still agrees with `README.md`, it reaches
-GitHub to do so, and it skips itself unless `BTCLIB_INTEGRATION` is set.
-`alignment.yml` carries the command it runs; a copy of that command here
-would be the line that goes stale first.
+```shell
+uv run --locked --no-default-groups --group test pytest
+```
+
+`lint.yml`'s own second command, and a gate rather than a rehearsal of it:
+run with `BTCLIB_INTEGRATION` unset, it collects the whole suite and
+skips only what carries the `integration` marker, running everything
+else -- `.github/scripts/`'s own tests among them, none of which reaches
+the network. What it skips is mostly a second thing and not a gate: it
+asks every repository of the organization whether it still agrees with
+`README.md`, it reaches GitHub to do so, and `alignment.yml` sets the
+switch and carries that command; a copy of it here would be the line
+that goes stale first.
 
 ### What gates a merge, and what only reports
 

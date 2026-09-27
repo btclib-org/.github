@@ -1,9 +1,10 @@
 ---
 name: lint
 
-# what this workflow runs is .pre-commit-config.yaml itself, never a
-# second list of the same tools: a commit and CI then enforce one thing,
-# and a hook added to that file needs no edit here.
+# The pre-commit hooks are what this workflow runs from
+# .pre-commit-config.yaml itself, never a second list of the same tools:
+# a commit and CI then enforce one thing, and a hook added to that file
+# needs no edit here.
 #
 # Here because README.md section 4 states that rule and this repository
 # was the one not keeping it: the hook config and the markdownlint,
@@ -12,6 +13,14 @@ name: lint
 # suggestion an author could forget. The `ci:` block names pre-commit.ci
 # as a runner, and pre-commit.ci reports rather than blocks -- what makes
 # a hook a gate is this job's name in the branch rule.
+#
+# The job also runs the suite with `BTCLIB_INTEGRATION` unset, which is
+# not a second copy of `alignment.yml`'s question: what runs here is
+# only the tests that carry no `integration` marker, `.github/scripts/`'s
+# own among them, and none of those reaches the network.
+# btclib-org/.github#1367 is what settled it: `alignment.yml` is not a
+# required check, so this is what puts those tests in the one job every
+# merge already waits on.
 
 on:
   push:
@@ -88,23 +97,13 @@ jobs:
 
       # uv is the only prerequisite here as everywhere, and this is the
       # step that supplies it. No cache asked of it, where alignment.yml
-      # asks for one: what uv resolves in this job is the mypy hook's
-      # environment, and whether that is worth a cache is a question for
-      # a measured job time rather than for this comment. The
-      # environments that cost the minutes today are cached below
+      # asks for one: what uv resolves in this job is the lint and test
+      # groups, the mypy hook's own `uv run` already asking for both, and
+      # whether that is worth a cache is a question for a measured job
+      # time rather than for this comment. The environments that cost the
+      # minutes today are cached below
       - name: Install uv
         uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
-
-      # the interpreter pre-commit runs under, and so the one every
-      # `language: python` hook environment is built against. `uvx`
-      # resolves an interpreter without reading `.python-version`, so
-      # without this step the runner image's own `python3` decides what
-      # syntax a hook that parses this tree's Python will accept, and
-      # `debug-statements` is such a hook. No version is written here:
-      # `uv python install` with no argument installs the one
-      # `.python-version` names, which is where section 1 keeps it
-      - name: Install the interpreter .python-version names
-        run: uv python install
 
       # the cache key needs the runner image, not only the OS: a
       # pre-commit environment built on one image is not always usable on
@@ -118,28 +117,46 @@ jobs:
         with:
           path: ~/.cache/pre-commit
           # the interpreter beside the hook config: a `language: python`
-          # hook's environment is built against the Python the step
-          # above installs and is cached under a name carrying that
-          # version, so a key naming the config alone stands for the
-          # environments of two interpreters at once and restores ones
-          # pre-commit rebuilds rather than runs
+          # hook's environment is built against the Python `uv run`
+          # resolves below, the one `.python-version` names, and is
+          # cached under a name carrying that version, so a key naming
+          # the config alone stands for the environments of two
+          # interpreters at once and restores ones pre-commit rebuilds
+          # rather than runs
           key: >-
             pre-commit-${{ runner.os }}-${{ steps.image.outputs.os }}-${{
             hashFiles('.pre-commit-config.yaml', '.python-version') }}
           restore-keys: |
             pre-commit-${{ runner.os }}-${{ steps.image.outputs.os }}-
 
-      # uvx, and not the "uv run --locked --only-group lint pre-commit"
-      # of the sibling repositories, which the project in this tree would
-      # now make available: this is the command CONTRIBUTING.md's last
-      # section gives an author to run before pushing, and running the
-      # same one is the point -- a
-      # workflow invoking pre-commit some other way is the second
-      # declaration section 4 refuses, one version behind the author's or
-      # ahead of it. So taking the sibling form is a change to that file
-      # in the same commit, and not to this one alone.
+      # uv run --locked --only-group lint, the sibling repositories'
+      # form, and the one CONTRIBUTING.md's last section now gives an
+      # author to run before pushing: pre-commit comes out of the lint
+      # group pinned by uv.lock rather than out of uvx, which fetches
+      # whatever the index holds that morning, and running the same
+      # command is the point -- a workflow invoking pre-commit some
+      # other way is the second declaration section 4 refuses, one
+      # version behind the author's or ahead of it. btclib-org/.github#1375
+      # is what settled it: nothing ran the pinned copy `uv.lock` and the
+      # lint group carried.
+      # --only-group omits the project, so this step installs nothing a
+      # hook does not ask for itself; the mypy hook is a `language:
+      # system` entry whose own `uv run` installs what it type checks
+      # against, and resolves the interpreter .python-version names
+      # itself where the runner lacks it.
       # --show-diff-on-failure changes no hook's answer: it prints what
       # an in-place fixer changed, so a red job says what to apply rather
       # than only that something is unclean
       - name: Run every hook
-        run: uvx pre-commit run --all-files --show-diff-on-failure
+        run: >
+          uv run --locked --only-group lint
+          pre-commit run --all-files --show-diff-on-failure
+
+      # BTCLIB_INTEGRATION is deliberately unset: what this runs is only
+      # the tests carrying no `integration` marker, conftest.py skipping
+      # the rest at collection -- `.github/scripts/`'s own tests among
+      # them, none of which reaches the network. This is not a narrower
+      # rehearsal of `alignment.yml`'s question, it is the whole of a
+      # different, network-free one.
+      - name: Run the offline tests
+        run: uv run --locked --no-default-groups --group test pytest

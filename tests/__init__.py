@@ -21,10 +21,10 @@ tracker already records. A test that takes the session fixtures instead
 asks what no single tree can answer -- the calendar, the verbatim
 copies -- and runs once.
 
-Each test that reaches GitHub is marked `integration`, which is how a
-run selects or deselects them by name; what skips the suite without
-`BTCLIB_INTEGRATION` in the environment is `conftest.py` at collection,
-a marker being a label rather than a condition::
+Each test that reaches the network is marked `integration`, which is how a
+run selects or deselects them by name, and how `conftest.py` skips it at
+collection without `BTCLIB_INTEGRATION` in the environment -- a test
+carrying no marker runs either way::
 
     BTCLIB_INTEGRATION=1 uv run --locked --group test pytest
 

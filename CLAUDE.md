@@ -188,15 +188,18 @@ Do not use Fable unless explicitly instructed.
   claim in this file or in `README.md` that no command re-derives — a
   reader catches or nothing does. That fact's operational half:
   `tests/conftest.py` sets `SWITCH = "BTCLIB_INTEGRATION"`, its own
-  docstring calling it "the environment variable without which this
-  suite skips itself." A bare `uv run pytest` syncs `dev` — uv's default
-  group, which `[tool.uv]` overrides nowhere and which reaches `test` —
-  collects the suite, skips every test for want of the switch and exits
-  0, with nothing measured. *Verifying*, further down this file, says to
-  trust the exit code over the filtered output — here the exit code is
-  the half that lies, and `BTCLIB_INTEGRATION=1` is what a run needs
-  before that trust is earned. `alignment.yml` carries the whole
-  command, with the reason for its `--no-default-groups` beside it.
+  docstring calling it "the environment variable without which the
+  suite's `integration` tests skip themselves." A bare `uv run pytest`
+  syncs `dev` — uv's default group, which `[tool.uv]` overrides nowhere
+  and which reaches `test` — collects the suite, skips every test that
+  carries the marker for want of the switch, and runs the rest: what
+  reaches no network, `.github/scripts/`'s own tests among them. The
+  alignment question itself is what that run still answers nothing
+  about, every test asking it carrying the marker; *Verifying*, further
+  down this file, still says to trust the exit code over the filtered
+  output there, and `BTCLIB_INTEGRATION=1` is what earns it.
+  `alignment.yml` carries the whole command, with the reason for its
+  `--no-default-groups` beside it.
 - **A `BACKLOG` row's red is often a sibling's success.** Its rows in
   `tests/__init__.py` are `xfail(strict=True)` and keyed on this
   tracker's issue numbers, while the trees they name move underneath

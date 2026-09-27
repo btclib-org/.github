@@ -41,7 +41,7 @@ the package, which is what `surface_test.py`'s docstring says.
 being a file this tree keeps rather than a package it ships.
 
 **The suite opens no socket** is the bullet this suite does not keep,
-rather than one it leaves untested: every test that reaches GitHub
+rather than one it leaves untested: every test that reaches the network
 carries the `integration` marker, and `__init__.py`'s docstring is where
 the reason is.
 
@@ -66,11 +66,12 @@ table and the *Not tested here* line account for each of them once.
 - **The suite is integration but for the tests that reach nothing
   outside this tree**, and it sits in `tests/` rather than under
   `tests/integration/` because there is nothing beside it to keep apart.
-  Every test that reaches GitHub carries the `integration` marker;
-  `BTCLIB_INTEGRATION` is the switch, and `conftest.py` skips the run
-  without it at collection, naming the switch in the skip.
+  Every test that reaches the network carries the `integration` marker;
+  `BTCLIB_INTEGRATION` is the switch, and `conftest.py` skips only the
+  marked tests without it at collection, naming the switch in the skip,
+  so a test carrying no marker runs whether or not the switch is set.
   `alignment.yml` sets it, and refuses the run before the checkout where
-  the token it needs is absent rather than letting the suite skip.
+  the token it needs is absent rather than letting those tests skip.
 - **No functional layer**: `tests/functional/` is for a suite that
   starts what the repository ships, and this tree ships nothing to start.
 - **No property layer**: section 7 keys it on a parser between the tree
