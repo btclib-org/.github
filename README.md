@@ -859,7 +859,10 @@ pre-commit.ci does not have — the lint workflow covers it. No
   local hook refusing an unpinned or moved submodule takes its place,
   and section 11's `gitsubmodule` ecosystem says when upstream moved.
 - **syntax** — `check-yaml`, `check-json`, `check-toml`,
-  `pretty-format-json`.
+  `pretty-format-json`. `.vscode/settings.json` and `.vscode/extensions.json`
+  are jsonc, not json, so `check-json` and `pretty-format-json` carry an
+  exclusion covering `^\.vscode/` wherever the tree tracks `.vscode/`,
+  and a tree owes neither hook where that is the only json it tracks.
 - **Python shape** — `debug-statements`, `check-docstring-first`, and
   `name-tests-test` at its default, the spelling section 7 states.
 

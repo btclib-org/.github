@@ -232,8 +232,12 @@ repos:
       - id: prettier
         name: prettier (yaml and jsonc, in place fixes)
         # named by path rather than by type: `jsonc` is not a tag identify
-        # knows, so a types_or entry for it fails the config outright
-        files: ^(.*\.ya?ml|\.markdownlint\.jsonc)$
+        # knows, so a types_or entry for it fails the config outright.
+        # `.vscode` joins `.markdownlint.jsonc` for the same reason: both
+        # carry a comment, and this is what parses and formats them --
+        # no `check-json`/`pretty-format-json` reach `.vscode` here, this
+        # tree tracking no other json for either to have kept
+        files: ^(.*\.ya?ml|\.vscode/.*\.json|\.markdownlint\.jsonc)$
   # the toml here is configuration and nothing else: .taplo.toml, which
   # carries the formatting choices and the reasoning, and pyproject.toml.
   # One indent for every toml in the organization is the point of having

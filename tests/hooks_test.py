@@ -45,7 +45,26 @@ The pathspecs are `identify`'s tags as git sees them -- a notebook is
 tagged `json` and a `.jsonc` is tagged nothing -- because the bullet is
 conditional on the tree through section 4's *file checking itself*:
 `check-hooks-apply` refuses a hook that matches nothing, so a syntax
-hook is owed exactly where the tree tracks its file type.
+hook is owed exactly where the tree tracks its file type. `VSCODE`
+below is the same conditioning applied to a `.json`-named path that is
+not JSON.
+"""
+
+VSCODE = re.compile(r"^\.vscode/")
+"""The `.vscode/` prefix, named once and checked against all four of
+`SYNTAX`'s patterns rather than kept as a per-repository list of
+exemptions. Every tree that tracks `.vscode/` excludes this prefix from
+`check-json` and `pretty-format-json` -- alone in some, inside a larger
+alternation with a tree's own other exclusions in others -- and a tree
+that tracks no `.vscode/` carries no such exclusion because it has
+nothing to exclude.
+
+`.vscode/settings.json` and `.vscode/extensions.json` are jsonc: VSCode
+reads a comment in its own configuration, and a json parser rejects the
+file at the first one. A `.vscode/`-named path `tracked()` answers is
+therefore not a file any syntax hook is asked to read, in a tree that
+runs the hook or in one that does not, and does not decide whether the
+hook is owed.
 """
 
 LOCAL = (
@@ -217,7 +236,10 @@ def test_the_syntax_hooks_run(repository: str, trees: dict[str, Path]) -> None:
     missing = sorted(
         hook
         for hook, patterns in SYNTAX.items()
-        if hook not in running and tracked(trees[repository], *patterns)
+        if hook not in running
+        and any(
+            not VSCODE.match(path) for path in tracked(trees[repository], *patterns)
+        )
     )
     assert not missing, (
         f"syntax hooks the gate does not run over files it tracks: {missing}; "

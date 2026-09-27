@@ -9478,3 +9478,15 @@ nothing red follows from the copies disagreeing.
 - **Every copy's shared half carries the clause letting a filed issue
   carry its fix** (closes #1378) (closes #1403): a row naming copies
   that agree is what the strict comparison reports as red.
+
+### `.vscode/` carries section 13's two tracked files
+
+- **`settings.json` and `extensions.json` were untracked** (issue #1389):
+  both now mirror `.pre-commit-config.yaml`, with the local mypy hook's
+  `mypy-type-checker.importStrategy` at `fromEnvironment`.
+
+### Section 4's syntax bullet stops counting `.vscode/`'s jsonc as json
+
+- **`check-json` and `pretty-format-json` are owed only where a tree
+  tracks json besides `.vscode/`'s two files** (closes #1399): the
+  `SYNTAX` check reads the `^\.vscode/` exclusion every such tree carries.
