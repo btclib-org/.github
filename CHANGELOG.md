@@ -9433,3 +9433,9 @@ nothing red follows from the copies disagreeing.
 - **`btclib` does not run `zkp-oracle`, the implementation it compared being
   `ellipticcurves`', which it re-exports** (closes #1364): its entries in
   `vendored-vectors`, `mutation`, `fuzz` and `py-arm-authority` stay.
+
+### `REVIEWING.md` lets a filed issue carry its fix
+
+- **An issue filed from a review may say the fix where one is known**
+  (issue #1378): *What is filed, and what is not* dropped its "no fix",
+  the filing bar standing as it was.
