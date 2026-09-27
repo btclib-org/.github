@@ -9561,3 +9561,9 @@ nothing red follows from the copies disagreeing.
 
 - **Every sibling's listing aggregate reads its own `needs` row's result**
   (closes #1395): the cells pass on their merits, without the row.
+
+### `ROADMAP.md` states an intention for every repository
+
+- **`btclib-node` is intended, and `bitcoin-core-rpc` and
+  `btclib-secp256k1` follow what they wrap** (closes #1330), under
+  *Maintained* with the repositories that keep the default as decided.
