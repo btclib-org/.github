@@ -16,7 +16,7 @@ name: reusable-integration-bitcoind
 # already serves wait_for_pypi_release.py: a caller owes no copy of it
 # (section 10 of README.md).
 #
-# Four of the six inputs are the ordinary shape: which Core release and
+# The required inputs are the ordinary shape: which Core release and
 # which published sha256 to install -- a tree's own claim about the node
 # it tests against, raised on its own schedule and not another tree's --
 # and the two environment-variable names tests/integration/conftest.py
@@ -25,15 +25,12 @@ name: reusable-integration-bitcoind
 # copy in disguise (btclib-org/.github#35): each is required, so every
 # caller states its own value.
 #
-# The fifth, exclude-classname, removes a matching testcase from
-# judgment altogether -- not counted whether it ran, failed or skipped
-# -- and exempts only one family, a classname having no way to name a
-# second. The sixth, skip-reason-prefix, exempts a single skipped
-# testcase whose own JUnit message starts with the declared prefix,
-# leaving whether it counts as having run unaffected either way; several
-# families can share one reason prefix where a classname can only ever
-# name one (btclib-org/.github#1377). Both are optional and empty by
-# default, and a caller sets whichever shape fits its own suite.
+# skip-reason-prefix is optional and empty by default. It exempts a
+# single skipped testcase whose own JUnit message starts with the
+# declared prefix, so a caller's several legitimately-skipping families
+# share one reason prefix (btclib-org/.github#1377); a testcase that ran
+# or failed is unaffected by it, and an exempt skip is not counted as a
+# testcase that ran.
 #
 # A reusable workflow changes the check context a required check reports
 # under: GitHub composes it from the calling job's own id and this job's
@@ -72,20 +69,11 @@ on:
           bitcoind's own path.
         required: true
         type: string
-      exclude-classname:
-        description: >
-          A substring excluding matching testcases from the node-ran
-          check below, before skips are judged. Empty runs the check
-          over every testcase; the header has how this differs from
-          skip-reason-prefix below.
-        type: string
-        default: ""
       skip-reason-prefix:
         description: >
           A prefix exempting a skipped testcase from failing the node-ran
           check below, where its own JUnit skip message starts with it.
-          Empty exempts nothing; the header has how this differs from
-          exclude-classname.
+          Empty exempts nothing.
         type: string
         default: ""
 
@@ -185,20 +173,17 @@ jobs:
       # here: pytest exits 0 for a module that skipped itself, so a job
       # whose fixture stopped finding the node would stay green while
       # asking Core nothing -- the failure mode of an unattended run that
-      # looks like good news. exclude-classname and skip-reason-prefix
-      # are what let a caller's own legitimately-skipping cases out of
-      # that judgment without excusing anything else; the header has how
-      # the two differ. --no-project --python 3.15 for the reason the
-      # install step above gives: the script reads the standard library
-      # alone
+      # looks like good news. skip-reason-prefix is what lets a caller's
+      # own legitimately-skipping cases out of that judgment without
+      # excusing anything else. --no-project --python 3.15 for the reason
+      # the install step above gives: the script reads the standard
+      # library alone
       - name: Fail if the node tests did not run
         env:
-          EXCLUDE_CLASSNAME: ${{ inputs.exclude-classname }}
           SKIP_REASON_PREFIX: ${{ inputs.skip-reason-prefix }}
         run: |
           uv run --no-project --python 3.15 \
             standard/.github/scripts/check_node_ran.py integration.xml \
-            --exclude-classname "$EXCLUDE_CLASSNAME" \
             --skip-reason-prefix "$SKIP_REASON_PREFIX"
       # always(), because a failure is what somebody opens this job for
       # and the report is what says whether the node refused something or
