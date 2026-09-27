@@ -13,8 +13,9 @@ pin with room on the line for a trailing comment, prose above a pin
 without it, a `uses:` a comment or a `run:` block holds -- and the
 column the width turns on, where one character decides.
 
-Nothing here reaches GitHub, so no `integration` marker; the switch
-`conftest.py` reads skips these with the rest of the suite all the same.
+Nothing here reaches the network, so no `integration` marker: `conftest.py`
+skips only the marked tests without the switch, and these run regardless
+of it.
 """
 
 from __future__ import annotations

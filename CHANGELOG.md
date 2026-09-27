@@ -9490,3 +9490,15 @@ nothing red follows from the copies disagreeing.
 - **`check-json` and `pretty-format-json` are owed only where a tree
   tracks json besides `.vscode/`'s two files** (closes #1399): the
   `SYNTAX` check reads the `^\.vscode/` exclusion every such tree carries.
+
+### The `Lint` job runs `pre-commit` out of the lint group `uv.lock` pins
+
+- **`uv run --locked --only-group lint` replaces `uvx` in `lint.yml` and
+  in `CONTRIBUTING.md`'s last section** (closes #1375): the pre-commit
+  running in CI is the one the lock pins.
+
+### The `Lint` job also runs the suite with `BTCLIB_INTEGRATION` unset
+
+- **`conftest.py` skips only a test carrying the `integration` marker
+  without the switch** (closes #1367): `.github/scripts/`'s own tests,
+  none of which reaches the network, now run in the required check.

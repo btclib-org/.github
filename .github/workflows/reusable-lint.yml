@@ -17,12 +17,14 @@ name: reusable-lint
 # disguise (btclib-org/.github#35).
 #
 # What calls this is a tree whose pyproject.toml carries that lint
-# group. The trees that run `uvx pre-commit` under a job named `Lint`,
-# this repository among them, keep a lint.yml of their own:
-# `uvx pre-commit run --all-files` is what each of their
-# CONTRIBUTING.md files gives an author, and this repository's own
-# lint.yml carries why its gate runs the author's command rather than
-# this one.
+# group. A tree that still runs `uvx pre-commit` under a job named
+# `Lint` keeps a lint.yml of its own instead: `uvx pre-commit run
+# --all-files` is what its own CONTRIBUTING.md gives an author. This
+# repository runs the same command this workflow does, `uv run --locked
+# --only-group lint pre-commit`, and still keeps its own lint.yml rather
+# than calling this one, being the file this workflow lives in, and
+# because its job also runs the offline share of its own suite in the
+# one job the branch rule names.
 
 on:
   workflow_call:
