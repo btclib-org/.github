@@ -9538,3 +9538,15 @@ nothing red follows from the copies disagreeing.
 - **Dependabot has a `pre-commit` ecosystem; section 11 said hook
   `rev:` bumps had none** (issue #1391): pre-commit.ci is kept for
   them regardless, and this repository's own copies match again.
+
+### `reusable-integration-bitcoind.yml` installs bitcoind from its own script
+
+- **The regtest job installs bitcoind from a script under
+  `.github/scripts`, and a caller owes no copy of it** (issue #1373):
+  `bitcoind-version` and `bitcoind-sha256` keep their names unchanged.
+
+### `reusable-integration-bitcoind.yml` reads a caller-declared skip reason
+
+- **`skip-reason-prefix` exempts a skip by the reason its caller
+  declared, and `exclude-classname` stays for a caller not yet moved onto
+  it** (issue #1377): several skipping families now share one prefix.
