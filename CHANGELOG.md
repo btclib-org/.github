@@ -9445,3 +9445,18 @@ nothing red follows from the copies disagreeing.
 - **A renamed file's old path lives in `previous_filename`, which the
   listing dropped** (closes #1369): a code file renamed to a
   prose-matching path read as prose-only, skipping every `code` job.
+
+### `test_the_uv_floor_is_what_dependabot_bundles` fails, rather than skips
+
+- **A `dependabot-core` `uv/Dockerfile` holding no `astral-sh/uv:` pin
+  now fails the cell instead of skipping it** (closes #1368).
+
+### `test_security_md_gives_the_one_address_spelled_out` reads case-insensitively
+
+- **The test reads `SECURITY.md` the same way, case-insensitively, as
+  the by-hand command it prints** (closes #1376).
+
+### `protection_test.py`'s `protections` fixture tells apart a missing `main`
+
+- **A repository with no `main` branch reds only its own cell, rather
+  than every repository's, on `Branch not found`** (closes #1385).

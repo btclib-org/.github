@@ -330,8 +330,11 @@ def test_the_uv_floor_is_what_dependabot_bundles(
     if text is None:
         pytest.skip(f"could not read {UV_DOCKERFILE}")
     bundled = bundled_uv()
-    if bundled is None:
-        pytest.skip(f"{UV_DOCKERFILE} holds no astral-sh/uv: pin to read")
+    assert bundled is not None, (
+        f"{UV_DOCKERFILE} holds no astral-sh/uv: pin the "
+        "astral-sh/uv:(?P<version>...) regex reads; gh api -H"
+        " 'Accept: application/vnd.github.raw' " + UV_DOCKERFILE
+    )
     match = FLOOR.match(declared)
     assert match, (
         f"required-version is {declared!r}, not a bare >=X.Y.Z floor; "

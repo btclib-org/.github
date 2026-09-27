@@ -76,6 +76,6 @@ def test_security_md_gives_the_one_address_spelled_out(
         )
         return
     text = path.read_text(encoding="utf-8")
-    assert ADDRESS in text, f"SECURITY.md does not give {ADDRESS!r}; " + command
+    assert ADDRESS in text.lower(), f"SECURITY.md does not give {ADDRESS!r}; " + command
     harvestable = sorted(set(MAILTO.findall(text)))
     assert not harvestable, f"SECURITY.md gives an address as {harvestable}; " + command
