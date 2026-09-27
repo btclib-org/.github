@@ -82,7 +82,34 @@ package = false
 required-version = ">=0.12.17"
 
 [tool.ruff]
-# target-version is inferred from project.requires-python
+# target-version is inferred from project.requires-python. Not for
+# check_changelog.py and mutation_counts.py: those two are served to
+# every repository of the organization, run there on whatever interpreter
+# that caller's own pre-commit supplies rather than on this repository's
+# own 3.14, and [tool.ruff.per-file-target-version] below overrides it
+# for those two files alone (issue btclib-org/.github#1374) -- not for
+# the whole of .github/scripts: the other four scripts there run pinned
+# at this repository's own 3.15 regardless of the caller, the
+# `mypy-scripts-floor` hook's own comment in .pre-commit-config.yaml
+# giving the reason those two are named and the other four are not.
+# Section 3 gives this file, and not a nested `.github/scripts/ruff.toml`,
+# the setting: "One file holds the project metadata and every tool that
+# can be configured in it."
+
+[tool.ruff.per-file-target-version]
+# pre-commit's own floor (`Requires-Python: >=3.10`, its METADATA), which
+# is at or below every caller's own interpreter this issue measured:
+# `uv run --locked`'s project venv where a caller has one, or whatever
+# ambient python3 a caller with none reaches the hook through. At any
+# target above this, `ruff-check --fix`'s own UP017 rewrites
+# `datetime.timezone.utc` to `datetime.UTC` -- valid from 3.11, an
+# `AttributeError` on 3.10, and so the gate would write the very hazard
+# this key exists to refuse. Named by file and not by directory: the two
+# below are what a caller's own floor actually reaches, and the glob is
+# proved to reach only them -- `ruff format --diff` on a copy of each
+# with the same hazard appended left `mutation_counts.py` untouched and
+# rewrote `wait_for_pypi_release.py`.
+".github/scripts/{check_changelog,mutation_counts}.py" = "py310"
 
 [tool.ruff.lint]
 # preview and explicit-preview-rules only make sense as a pair, and this
@@ -233,7 +260,25 @@ enable_error_code = [
 ]
 warn_unreachable = true
 # what requires-python says, for the reason a sibling's own comment
-# gives at this key: without it mypy targets whatever runs it
+# gives at this key: without it mypy targets whatever runs it.
+#
+# .github/scripts is served to every repository of the organization at
+# whatever interpreter each caller's own pre-commit run supplies, older
+# than 3.14 among them (issue btclib-org/.github#1374). Not lowered here:
+# `python_version` is one value for the whole table and mypy has no
+# per-module override for it -- `python_version` names none of the keys a
+# `[[tool.mypy.overrides]]` module section may set -- so lowering it here
+# would check tests/ at that same floor too, and measured rather than
+# assumed: it errors there, on the 3.14-only syntax `ruff format` has
+# already written into a test at this repository's own floor.
+#
+# ruff's target refuses syntax, not a stdlib name newer than the floor,
+# so it does not close this by itself. The `mypy-scripts-floor` hook in
+# .pre-commit-config.yaml is the second run this gap needs, a
+# `--python-version` CLI flag overriding this table for `check_changelog.py`
+# and `mutation_counts.py` alone -- the two scripts actually served to a
+# caller's own floor, its own comment giving the reason the other four
+# under .github/scripts are not in it.
 python_version = "3.14"
 
 [tool.pytest.ini_options]
