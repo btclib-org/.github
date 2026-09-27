@@ -9579,3 +9579,15 @@ nothing red follows from the copies disagreeing.
 - **`notebooks` holds what executes and reads a tree's notebooks, and
   `lint` includes it** (closes #1417): mypy type-checks the script that
   runs them against `lint`.
+
+### `reusable-integration-bitcoind.yml` drops `exclude-classname`
+
+- **`exclude-classname` is no longer an input, and `skip-reason-prefix`
+  is the one way to exempt a caller's skips** (closes #1419): no caller
+  of the workflow sets it.
+
+### The node-ran check counts an exempt skip as not having run
+
+- **`check_node_ran.py` counts only the testcases that did not skip, and
+  a report of exempt skips alone fails** (closes #1422): the line it
+  prints on success says how many exempt skips that count leaves out.

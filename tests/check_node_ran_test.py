@@ -5,12 +5,11 @@
 """Tests for the node-ran check of `.github/scripts`.
 
 No run of `reusable-integration-bitcoind.yml` can show every shape this
-guards against at once: a caller either sets `exclude-classname`, or
-`skip-reason-prefix`, or neither, or both together, and its own report
-holds whatever its own suite produced that day. So every combination of
-the two inputs, and the guards this step exists for -- an empty report,
-and a skip nothing exempts -- are exercised here against a JUnit report
-this module builds itself.
+guards against at once: a caller either sets `skip-reason-prefix` or
+does not, and its own report holds whatever its own suite produced that
+day. So both, and the guards this step exists for -- an empty report, a
+report of exempt skips alone, and a skip nothing exempts -- are
+exercised here against a JUnit report this module builds itself.
 
 The script is loaded by path, `.github/scripts` being no package, as the
 other scripts under it are tested.
@@ -91,51 +90,15 @@ def test_an_unexempted_skip_fails_the_job(
                 "classname": "tests.integration.test_a",
                 "name": "test_one",
                 "skipped": "node does not answer",
-            }
+            },
+            {"classname": "tests.integration.test_a", "name": "test_two"},
         ],
     )
 
     assert script.main([str(report)]) == 1
     out = capsys.readouterr().out
     assert "::error::test_one skipped: node does not answer" in out
-
-
-def test_exclude_classname_removes_the_case_from_judgment_entirely(
-    script: ModuleType, tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    """A matching classname is not counted, skipped or not."""
-    report = _report(
-        tmp_path,
-        [
-            {
-                "classname": "tests.integration.test_btclib_node",
-                "name": "test_one",
-                "skipped": "no btclib-node in this job",
-            },
-            {"classname": "tests.integration.test_a", "name": "test_two"},
-        ],
-    )
-
-    assert script.main([str(report), "--exclude-classname", "btclib_node"]) == 0
-    assert "1 test(s) ran against the node" in capsys.readouterr().out
-
-
-def test_exclude_classname_does_not_rescue_an_unmatched_skip(
-    script: ModuleType, tmp_path: Path
-) -> None:
-    """The substring is compared, not merely present somewhere in the report."""
-    report = _report(
-        tmp_path,
-        [
-            {
-                "classname": "tests.integration.test_a",
-                "name": "test_one",
-                "skipped": "node does not answer",
-            }
-        ],
-    )
-
-    assert script.main([str(report), "--exclude-classname", "btclib_node"]) == 1
+    assert "::error::1 test(s) ran, 1 of 1 skip(s) unexempted" in out
 
 
 def test_skip_reason_prefix_exempts_a_matching_skip(
@@ -149,7 +112,8 @@ def test_skip_reason_prefix_exempts_a_matching_skip(
                 "classname": "tests.integration.test_a",
                 "name": "test_one",
                 "skipped": "node does not declare bip324",
-            }
+            },
+            {"classname": "tests.integration.test_a", "name": "test_two"},
         ],
     )
 
@@ -173,7 +137,8 @@ def test_skip_reason_prefix_does_not_exempt_a_different_reason(
                 "classname": "tests.integration.test_a",
                 "name": "test_one",
                 "skipped": "no bitcoind reachable at all",
-            }
+            },
+            {"classname": "tests.integration.test_a", "name": "test_two"},
         ],
     )
 
@@ -181,75 +146,70 @@ def test_skip_reason_prefix_does_not_exempt_a_different_reason(
         script.main([str(report), "--skip-reason-prefix", "node does not declare "])
         == 1
     )
-    assert "::error::test_one skipped" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "::error::test_one skipped" in out
+    assert "::error::1 test(s) ran, 1 of 1 skip(s) unexempted" in out
 
 
-def test_the_case_a_reason_prefix_exempts_still_counts_as_ran(
+def test_a_report_of_exempt_skips_alone_fails(
     script: ModuleType, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """Unlike exclude-classname, an exempt skip still counts as one that ran."""
+    """An exempt skip does not count as a test that ran, so none ran here."""
     report = _report(
         tmp_path,
         [
             {
-                "classname": "tests.integration.test_a",
-                "name": "test_one",
-                "skipped": "node does not declare bip324",
+                "classname": "tests.integration.hwi_device_test",
+                "name": f"test_{i}",
+                "skipped": "set BTCLIB_HWI to run against a device",
             }
+            for i in range(2)
         ],
     )
 
-    script.main([str(report), "--skip-reason-prefix", "node does not declare "])
+    assert script.main([str(report), "--skip-reason-prefix", "set BTCLIB_HWI"]) == 1
+    out = capsys.readouterr().out
+    assert "::error::0 test(s) ran, 0 of 2 skip(s) unexempted" in out
 
-    assert "1 test(s) ran against the node" in capsys.readouterr().out
 
-
-def test_both_exemptions_apply_independently(
-    script: ModuleType, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+@pytest.mark.parametrize(
+    ("passed", "exempt"),
+    [
+        pytest.param(3, 3, id="as-many-exempt-as-ran"),
+        pytest.param(176, 151, id="more-ran-than-exempt"),
+    ],
+)
+def test_only_the_cases_that_ran_are_counted(
+    script: ModuleType,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    passed: int,
+    exempt: int,
 ) -> None:
-    """A caller mid-migration can carry both at once, each doing its own job."""
-    report = _report(
-        tmp_path,
-        [
-            {
-                "classname": "tests.integration.test_btclib_node",
-                "name": "test_one",
-                "skipped": "no btclib-node in this job",
-            },
-            {
-                "classname": "tests.integration.test_a",
-                "name": "test_two",
-                "skipped": "node does not declare bip324",
-            },
-            {"classname": "tests.integration.test_a", "name": "test_three"},
-        ],
-    )
+    """A report mixing ran and exempt cases passes, counting only what ran."""
+    ran = [
+        {"classname": "tests.integration.node_test", "name": f"test_ran_{i}"}
+        for i in range(passed)
+    ]
+    skipped = [
+        {
+            "classname": "tests.integration.node_test",
+            "name": f"test_skipped_{i}",
+            "skipped": "node does not declare bip324",
+        }
+        for i in range(exempt)
+    ]
+    report = _report(tmp_path, ran + skipped)
 
     assert (
-        script.main(
-            [
-                str(report),
-                "--exclude-classname",
-                "btclib_node",
-                "--skip-reason-prefix",
-                "node does not declare ",
-            ]
-        )
+        script.main([str(report), "--skip-reason-prefix", "node does not declare "])
         == 0
     )
-    assert "2 test(s) ran against the node" in capsys.readouterr().out
-
-
-def test_considered_reads_every_case_with_no_exclusion(script: ModuleType) -> None:
-    """An empty exclude-classname filters nothing out."""
-    root = ET.Element("testsuite")
-    ET.SubElement(root, "testcase", classname="a", name="one")
-    ET.SubElement(root, "testcase", classname="b", name="two")
-
-    assert [case.get("name") for case in script.considered(root, "")] == [
-        "one",
-        "two",
-    ]
+    out = capsys.readouterr().out
+    assert (
+        f"{passed} test(s) ran against the node, "
+        f"{exempt} exempt skip(s) not counted among them"
+    ) in out
 
 
 def test_skip_reason_is_none_for_a_case_that_ran(script: ModuleType) -> None:
