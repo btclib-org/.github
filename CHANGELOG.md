@@ -9609,3 +9609,9 @@ nothing red follows from the copies disagreeing.
 - **Every sibling's listing aggregate rereads a lagging `needs` row and
   fails on a failed `needs` result** (closes #1416) (closes #1424): the
   cells pass on their merits, without the rows.
+
+### `reusable-deps-latest.yml`'s lint job skips `uv-export`
+
+- **`lint-latest`'s pre-commit step sets `SKIP: uv-export`** (closes
+  #1420): its hook's rewrite of a `uv.lock`-derived file is the upgrade
+  already named, not a finding (btclib-org/btclib#2362).
