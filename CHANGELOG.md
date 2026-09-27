@@ -9615,3 +9615,9 @@ nothing red follows from the copies disagreeing.
 - **`lint-latest`'s pre-commit step sets `SKIP: uv-export`** (closes
   #1420): its hook's rewrite of a `uv.lock`-derived file is the upgrade
   already named, not a finding (btclib-org/btclib#2362).
+
+### Section 1's dependency groups name `excel`
+
+- **`excel` holds what writes a tree's workbooks and reads them back,
+  and `lint` includes it** (closes #1429): mypy type-checks the
+  generator and its gate against `lint`.
