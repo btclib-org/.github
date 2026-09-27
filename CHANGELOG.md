@@ -9567,3 +9567,15 @@ nothing red follows from the copies disagreeing.
 - **`btclib-node` is intended, and `bitcoin-core-rpc` and
   `btclib-secp256k1` follow what they wrap** (closes #1330), under
   *Maintained* with the repositories that keep the default as decided.
+
+### Section 11 names `docker`, where a workflow builds a pinned Dockerfile
+
+- **A `docker` block sits in the Dockerfile's own directory, grouped,
+  with the cooldown every other ecosystem has** (issue #1405): a `FROM`
+  pinned by digest is one nothing else moves forward.
+
+### Section 1's dependency groups name `notebooks`
+
+- **`notebooks` holds what executes and reads a tree's notebooks, and
+  `lint` includes it** (closes #1417): mypy type-checks the script that
+  runs them against `lint`.

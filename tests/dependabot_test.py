@@ -5,13 +5,13 @@
 """Section 11's Dependabot ecosystems, read off each `dependabot.yml`.
 
 The section gives `github-actions` to every tree, workflows for it to
-read being every tier's, and makes the other three conditional on what
-the tree holds: a lock file, a site Gemfile, a submodule. So an ecosystem
-is owed exactly where its subject is there to be read, which is section
-2's rule for a subject a tree does not hold. Dependabot has a
-`pre-commit` ecosystem too, and section 11 says the maintainer keeps
-pre-commit.ci for hook `rev:` bumps instead; section 2 lists the file
-among what `.github/` holds.
+read being every tier's, and makes the others conditional on what the
+tree holds: a lock file, a site Gemfile, a submodule, a Dockerfile whose
+base images are pinned by digest. So an ecosystem is owed exactly where
+its subject is there to be read, which is section 2's rule for a subject
+a tree does not hold. Dependabot has a `pre-commit` ecosystem too, and
+section 11 says the maintainer keeps pre-commit.ci for hook `rev:` bumps
+instead; section 2 lists the file among what `.github/` holds.
 
 The section also states how a declared ecosystem is configured -- grouped,
 weekly, a seven-day cooldown, no `target-branch` -- and, for `uv`, what its
@@ -21,6 +21,7 @@ states it.
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -58,7 +59,44 @@ PATHSPECS = " ".join(
 )
 """The pathspecs above, as a reader passes them to `git ls-files`."""
 
-NAMED = EVERY_TREE | set(WATCHED)
+DOCKER = "docker"
+"""Section 11's ecosystem for a base image a digest pins."""
+
+DOCKERFILES = (":(icase)*dockerfile*", ":(icase)*containerfile*")
+"""Where a tree keeps a Dockerfile, as `git ls-files` pathspecs.
+
+The section asks for a Dockerfile a workflow builds, and a workflow
+names none in a form this suite reads: ClusterFuzzLite's
+`build_fuzzers` action finds `.clusterfuzzlite/Dockerfile` by
+convention, so a tracked Dockerfile is taken as built. A pathspec
+matches a directory's name too, so `DOCKERFILE` then keeps the files
+whose own name is one.
+"""
+
+DOCKERFILE = re.compile("dockerfile|containerfile", re.IGNORECASE)
+"""The file names dependabot-core's `docker` fetcher takes from a
+directory: `DOCKER_REGEXP` in its `docker/lib/dependabot/docker/
+file_fetcher.rb`.
+"""
+
+LISTED = " ".join(f"'{pattern}'" for pattern in DOCKERFILES)
+"""The pathspecs above, as a reader passes them to `git ls-files`."""
+
+HEREDOC = re.compile(r"<<-?([\"']?)(\w+)\1")
+"""A heredoc an instruction opens: its quote, and the word that ends it."""
+
+FROM = re.compile(r"FROM\s+(?:--\S+\s+)*(\S+)(?:\s+AS\s+(\S+))?", re.IGNORECASE)
+"""A `FROM` instruction: its image, and the stage name it gives, if any."""
+
+RESERVED = "scratch"
+"""Docker's reserved empty image, which no digest pins nor needs to."""
+
+DOCKER_DIRECTORIES = (
+    f"awk '/package-ecosystem:/ {{d = /docker/}} d && /director/' {CONFIG}"
+)
+"""How a reader takes the `docker` blocks' directories out of the file."""
+
+NAMED = EVERY_TREE | set(WATCHED) | {DOCKER}
 """Every ecosystem section 11 names, conditional or not."""
 
 UNGROUPED = frozenset({("btclib-org.github.io", "bundler")})
@@ -106,6 +144,70 @@ def ecosystems(repository: str, trees: dict[str, Path]) -> set[str]:
         section 2 listing it among what `.github/` holds.
     """
     return {entry["package-ecosystem"] for entry in updates(repository, trees)}
+
+
+def instructions(text: str) -> list[str]:
+    """Return a Dockerfile's instructions, one string each.
+
+    A line ending in a backslash continues onto the next, and a line
+    opening a heredoc is followed by its body up to the word ending it:
+    neither the continuation nor the body is an instruction of its own,
+    so a `from` a `RUN` script holds is no `FROM`. Comment lines are
+    none either. A file changing its escape character with a parser
+    directive is read as though it had not.
+
+    :param text: the file's content.
+    :returns: each instruction, its continuation lines joined to it.
+    """
+    out: list[str] = []
+    lines = iter(text.splitlines())
+    for line in lines:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        instruction = line.rstrip()
+        while instruction.endswith("\\"):
+            following = next(lines, "")
+            if not following.lstrip().startswith("#"):
+                instruction = instruction[:-1] + " " + following.rstrip()
+        for heredoc in HEREDOC.finditer(instruction):
+            for body in lines:
+                if body.lstrip("\t") == heredoc.group(2):
+                    break
+        out.append(instruction.strip())
+    return out
+
+
+def pinned(dockerfile: Path) -> bool:
+    """Say whether every base image a Dockerfile names is pinned by digest.
+
+    A `FROM` naming an earlier stage of the same file names no image, and
+    `scratch` names the empty one: neither is asked for a digest.
+
+    :param dockerfile: the file to read.
+    :returns: whether it has a base image, and each one carries `@sha256:`.
+    """
+    stages = {RESERVED}
+    images = []
+    for instruction in instructions(dockerfile.read_text(encoding="utf-8")):
+        match = FROM.fullmatch(instruction)
+        if match is None:
+            continue
+        image, stage = match.groups()
+        if image.lower() not in stages:
+            images.append(image)
+        if stage:
+            stages.add(stage.lower())
+    return bool(images) and all("@sha256:" in image for image in images)
+
+
+def directory(path: str) -> str:
+    """Return the `directory:` Dependabot is given for a tracked file.
+
+    :param path: the file, relative to the root of the tree.
+    :returns: its directory, absolute from the root, as the key spells it.
+    """
+    parent = path.rpartition("/")[0]
+    return f"/{parent}"
 
 
 def test_dependabot_watches_only_the_ecosystems_section_11_names(
@@ -159,6 +261,42 @@ def test_dependabot_watches_a_conditional_ecosystem_where_its_subject_is_there(
         f"conditional ecosystems declared {sorted(declared)}, and the tree holds"
         f" what {sorted(owed)} watch; "
         + by_hand(repository, f"{DECLARED}; git ls-files {PATHSPECS}")
+    )
+
+
+def test_dependabot_watches_docker_where_a_dockerfile_is_pinned_by_digest(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """A `docker` block where a pinned Dockerfile is, and nowhere else.
+
+    Both directions, as for the other conditional ecosystems, and keyed
+    on `directory:` rather than on the ecosystem alone: section 11 puts
+    the block where the Dockerfile is, dependabot-core reading that
+    directory and none below it.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    root = trees[repository]
+    declared = {
+        path.rstrip("/") or "/"
+        for entry in updates(repository, trees)
+        if entry["package-ecosystem"] == DOCKER
+        for path in entry.get("directories") or [entry.get("directory", "")]
+    }
+    owed = {
+        directory(path)
+        for path in tracked(root, *DOCKERFILES)
+        if DOCKERFILE.search(path.rpartition("/")[2]) and pinned(root / path)
+    }
+    assert declared == owed, (
+        f"docker declared for {sorted(declared)}, and Dockerfiles pinned by"
+        f" digest are in {sorted(owed)}; "
+        + by_hand(
+            repository,
+            f"{DOCKER_DIRECTORIES}; git ls-files {LISTED} | xargs grep -Hi '^ *FROM'",
+        )
     )
 
 
