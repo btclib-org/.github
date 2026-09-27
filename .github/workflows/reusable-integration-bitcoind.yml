@@ -10,7 +10,13 @@ name: reusable-integration-bitcoind
 # caller's own trigger set is what a reader checking when this runs has
 # to open regardless.
 #
-# Four of the five inputs are the ordinary shape: which Core release and
+# The node is installed by .github/scripts/install_bitcoind.py, served
+# from this repository at main and sparse-checked-out into the job
+# alongside the caller's own tree, exactly as reusable-wait-for-index.yml
+# already serves wait_for_pypi_release.py: a caller owes no copy of it
+# (section 10 of README.md).
+#
+# Four of the six inputs are the ordinary shape: which Core release and
 # which published sha256 to install -- a tree's own claim about the node
 # it tests against, raised on its own schedule and not another tree's --
 # and the two environment-variable names tests/integration/conftest.py
@@ -19,20 +25,15 @@ name: reusable-integration-bitcoind
 # copy in disguise (btclib-org/.github#35): each is required, so every
 # caller states its own value.
 #
-# The fifth, exclude-classname, is optional and empty by default. A
-# caller whose tests/integration mixes in cases that legitimately skip
-# under this job sets it to their classname substring; a caller with
-# none leaves it unset and filters nothing. An input only some callers
-# set is the weak point of sharing one file, and it is taken here
-# anyway, on this ground: what differs between callers is one line
-# inside one step, a filter over a list rather than a different script,
-# a different trigger set or a different job, where btclib-secp256k1's
-# twice-per-cell os-* runs differ in the shape of the job itself rather
-# than in one step of it. reusable-os-suite.yml's own pre-suite-script
-# already carries exactly this shape -- an optional string, empty by
-# default, read by whichever caller has something to run and left alone
-# by one that does not -- so this is the organization's standing
-# convention applied rather than a new one argued for.
+# The fifth, exclude-classname, removes a matching testcase from
+# judgment altogether -- not counted whether it ran, failed or skipped
+# -- and exempts only one family, a classname having no way to name a
+# second. The sixth, skip-reason-prefix, exempts a single skipped
+# testcase whose own JUnit message starts with the declared prefix,
+# leaving whether it counts as having run unaffected either way; several
+# families can share one reason prefix where a classname can only ever
+# name one (btclib-org/.github#1377). Both are optional and empty by
+# default, and a caller sets whichever shape fits its own suite.
 #
 # A reusable workflow changes the check context a required check reports
 # under: GitHub composes it from the calling job's own id and this job's
@@ -75,13 +76,21 @@ on:
         description: >
           A substring excluding matching testcases from the node-ran
           check below, before skips are judged. Empty runs the check
-          over every testcase; the header has when a caller sets this and
-          why.
+          over every testcase; the header has how this differs from
+          skip-reason-prefix below.
+        type: string
+        default: ""
+      skip-reason-prefix:
+        description: >
+          A prefix exempting a skipped testcase from failing the node-ran
+          check below, where its own JUnit skip message starts with it.
+          Empty exempts nothing; the header has how this differs from
+          exclude-classname.
         type: string
         default: ""
 
-# least privilege for the GITHUB_TOKEN: nothing here writes, and the
-# tarball is fetched from bitcoincore.org, which does not know this token
+# least privilege for the GITHUB_TOKEN: nothing here writes. The tarball
+# is fetched from bitcoincore.org, which never sees this token
 permissions:
   contents: read
 
@@ -111,33 +120,53 @@ jobs:
         with:
           # the job reads the tree and nothing pushes it back
           persist-credentials: false
+      # this repository's own scripts, checked out beside the caller's
+      # tree above rather than over it: `actions/checkout` defaults to
+      # the tree the run belongs to, so `repository:` and `ref:` are what
+      # name this one, and `path:` is what keeps the two checkouts apart.
+      # `main` is the same trust the caller already extends by naming
+      # this workflow `@main`. Sparse, so what lands is .github/scripts
+      # and this repository's root files, nothing of which either script
+      # below reads besides itself
+      - name: Check out this repository's scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: btclib-org/.github
+          ref: main
+          path: standard
+          persist-credentials: false
+          sparse-checkout: .github/scripts
       - name: Setup uv
         uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           # the wheels uv.lock pins do not change between runs, so the
           # cache is the difference between a download and a copy
           enable-cache: true
-      # the calling tree's own composite action: the checkout above put
-      # it in the working tree, this job carrying none of its own, as
-      # this repository's own tree has no .github/actions/ at all. This
-      # differs from links.yml's and
-      # claude-review.yml's own `zizmor: ignore[self-repository]`: those
-      # are a job-level call to a workflow of this same repository, path
-      # resolution deciding nothing since it runs at this file's own
-      # commit either way and really does call into this repository's
-      # own content; this is a step inside a *called* workflow, where
-      # `./` resolves against whatever the checkout above put in the
-      # working tree -- the calling tree's own copy, on purpose, and
-      # never this repository's, which has nothing at this path for it
-      # to be. zizmor's suggested `$/` form is not a syntax
-      # GitHub Actions has: actionlint refuses it here exactly as it
-      # does on those two other calls
+      # --no-project --python 3.15: the script takes the standard library
+      # alone, so it runs on the interpreter uv fetches rather than on
+      # whatever the caller's own uv.lock resolves, which is what lets it
+      # run before anything of the calling tree's own environment exists
+      # on the runner -- the same reason reusable-wait-for-index.yml pins
+      # its own script this way. version and sha256 arrive through the
+      # environment and not through an expression pasted into this run
+      # block, an input being caller-given text and this being the
+      # convention reusable-mutation.yml's own header gives for exactly
+      # this shape
       - name: Install bitcoind
         id: bitcoind
-        uses: ./.github/actions/install-bitcoind # zizmor: ignore[self-repository]
-        with:
-          version: ${{ inputs.bitcoind-version }}
-          sha256: ${{ inputs.bitcoind-sha256 }}
+        env:
+          BITCOIND_VERSION: ${{ inputs.bitcoind-version }}
+          BITCOIND_SHA256: ${{ inputs.bitcoind-sha256 }}
+        run: |
+          daemon=$(uv run --no-project --python 3.15 \
+            standard/.github/scripts/install_bitcoind.py \
+            "$BITCOIND_VERSION" "$BITCOIND_SHA256")
+          echo "path=$daemon" >> "$GITHUB_OUTPUT"
+          # what answered, in the log of the run that used it: a green
+          # run whose node version is only in a workflow file is one
+          # nobody can date, and the version string carries the build
+          # the sha256 pinned
+          "$daemon" -version | head -n 1
       # exported inside this one step rather than appended to
       # GITHUB_ENV: an input is caller-given text, and a file that
       # becomes every later step's environment is a wider blast radius
@@ -156,31 +185,21 @@ jobs:
       # here: pytest exits 0 for a module that skipped itself, so a job
       # whose fixture stopped finding the node would stay green while
       # asking Core nothing -- the failure mode of an unattended run that
-      # looks like good news. exclude-classname is what lets a caller's
-      # own legitimately-skipping cases out of that judgment without
-      # excusing anything else
+      # looks like good news. exclude-classname and skip-reason-prefix
+      # are what let a caller's own legitimately-skipping cases out of
+      # that judgment without excusing anything else; the header has how
+      # the two differ. --no-project --python 3.15 for the reason the
+      # install step above gives: the script reads the standard library
+      # alone
       - name: Fail if the node tests did not run
         env:
           EXCLUDE_CLASSNAME: ${{ inputs.exclude-classname }}
+          SKIP_REASON_PREFIX: ${{ inputs.skip-reason-prefix }}
         run: |
-          uv run --locked --no-default-groups --group test python - <<'PY'
-          import os
-          import sys
-          import xml.etree.ElementTree as ET
-
-          exclude = os.environ["EXCLUDE_CLASSNAME"]
-          cases = ET.parse("integration.xml").getroot().iter("testcase")
-          ran = [one for one in cases
-                 if not exclude or exclude not in one.get("classname", "")]
-          skipped = [one for one in ran if one.find("skipped") is not None]
-          for one in skipped:
-              reason = one.find("skipped").get("message", "")
-              print(f"::error::{one.get('name')} skipped: {reason}")
-          if not ran or skipped:
-              print(f"::error::{len(ran)} test(s) ran, {len(skipped)} skipped")
-              sys.exit(1)
-          print(f"{len(ran)} test(s) ran against the node")
-          PY
+          uv run --no-project --python 3.15 \
+            standard/.github/scripts/check_node_ran.py integration.xml \
+            --exclude-classname "$EXCLUDE_CLASSNAME" \
+            --skip-reason-prefix "$SKIP_REASON_PREFIX"
       # always(), because a failure is what somebody opens this job for
       # and the report is what says whether the node refused something or
       # the test never reached it
