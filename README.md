@@ -2274,10 +2274,39 @@ request and the rule follows.
   `case ",$results," in *,,*)` catches an empty field anywhere, `join` writing
   one separator between every pair.
 - **What answers that vacuity where the aggregate reads its own run's job
-  listing is a count of the run's unfinished jobs, and the count is the
-  aggregate itself alone** — a count, because a name is what a rename moves. The
-  aggregate's own row has a `null` conclusion while the step reads, and this
-  count judges it.
+  listing is a count of the run's unfinished jobs, and the count accepts
+  itself and any row that is unambiguously one of the aggregate's own
+  `needs` jobs and whose own result, read from `needs`, is `success` or
+  `skipped`.** A job in `needs` cannot let this one start before it
+  concludes, so its result is fixed by the time the step runs; the
+  listing lagging behind that is the read being stale, not the run, and
+  failing on it turns a green run red for no defect
+  (btclib-org/.github#1395). A job outside `needs`, unfinished, is
+  refused, and so is a `needs` job whose own result is neither `success`
+  nor `skipped` — btclib-org/btclib-benchmarks#57's own point, which
+  this does not loosen: a lagging row excuses the read, never the
+  result.
+- **Which row is which of the aggregate's own `needs` jobs is a match
+  anchored at the separator GitHub renders it with, not a bare
+  equality.** A plain job's row is its own declared `name:` — its own
+  job id where it declares none — matched exactly; a matrix job's row
+  carries the values GitHub expanded it with, matched exactly against
+  that expansion; a job named through `uses:` lists under `<caller
+  job's name> / <callee job's name>`, and what the calling tree can name
+  is only the caller's half, so the match there is that name — again its
+  own job id where it declares none — followed by a space, a slash and
+  a space, in words rather than in a code span a renderer or a fixer
+  would trim a marking space from either end of. A `needs` job named
+  `test` still cannot pass as the aggregate's own row, `test: every job
+  passed`: `test /` is not a prefix of it. Each id's own result is read
+  through `needs.<id>.result`, one reference per id in `needs:` —
+  `needs.*.result` is an unlabelled list of every result `needs:`
+  carries, with no way to pair one entry back to the job it answers for,
+  so it cannot tell this aggregate's own tolerated row from another
+  job's failure. Which of these three cases a tree's own `needs` job is,
+  and how its row is built from that, is each port's own question,
+  measured against that tree's own dispatched run before it lands rather
+  than prescribed here.
 - **The listing's unit is the run and not the workflow, which is why the count
   above is the own-run shape's alone.** Under `workflow_call` the caller's jobs
   and the called workflow's are one run, and the publishing jobs are unfinished

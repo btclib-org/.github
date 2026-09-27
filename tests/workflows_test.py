@@ -911,6 +911,81 @@ def test_a_listing_aggregate_accepts_success_and_skipped(
     )
 
 
+EXPRESSION = re.compile(r"\$\{\{([^}]*)\}\}")
+"""The inside of a `${{ }}` expression, which is what GitHub evaluates.
+
+A plain-text mention outside the delimiters -- a comment quoting the
+reference for a reader, or the reference sitting unevaluated in prose --
+is not a read of anything, so only what sits inside these is searched
+for a `needs` id's own result.
+"""
+
+NEEDS_RESULT = re.compile(r"\bneeds\.([\w-]+)\.result\b")
+"""A `needs` id's own `result`, read inside a `${{ }}` expression.
+
+Section 10 names this reference and not `needs.*.result`: that one is an
+unlabelled list of every result `needs:` carries, with no way to pair
+one entry back to the job it answers for, so it cannot tell this
+aggregate's own tolerated row from another job's failure. `[\\w-]` so a
+hyphenated id, which a bare `\\w` would cut short, still matches whole.
+"""
+
+
+def excluding(job: dict[str, Any], *keys: str) -> list[str]:
+    """List a job's scalars, with the mapping's own named keys left out.
+
+    :param job: the aggregate job's own mapping.
+    :param keys: the top-level keys to leave out.
+    :returns: the strings `scalars` finds under everything else.
+    """
+    return scalars({key: value for key, value in job.items() if key not in keys})
+
+
+def unread(job: dict[str, Any]) -> list[str]:
+    """List a listing aggregate's own `needs` ids never read for their result.
+
+    :param job: the aggregate job's own mapping.
+    :returns: the `needs` ids with no `${{ }}` expression, outside the
+        job's own `if:` and `needs:`, reading `needs.<id>.result`.
+    """
+    declared = job.get("needs") or []
+    ids = [declared] if isinstance(declared, str) else declared
+    read = {
+        result
+        for text in excluding(job, "if", "needs")
+        for expression in EXPRESSION.findall(text)
+        for result in NEEDS_RESULT.findall(expression)
+    }
+    return [job_id for job_id in ids if job_id not in read]
+
+
+def test_a_listing_aggregate_that_tolerates_a_needs_row_reads_its_result(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10's result requirement, asked of every listing aggregate.
+
+    The tolerated row's own result has to come from `needs`, for every
+    id the aggregate's own `needs:` names -- not only for one of them,
+    and not through an output or any other reference that is not this
+    one.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    wrong: list[str] = []
+    for workflow in gated(repository, trees):
+        for job_id, job in aggregates(workflow).items():
+            if shape(job) != "listing":
+                continue
+            ids = unread(job)
+            if ids:
+                wrong.append(f"{workflow.name}:{job_id} does not read {ids}")
+    assert not wrong, f"{wrong}; " + by_hand(
+        repository, "grep -n -A40 'every job passed' .github/workflows/*.yml"
+    )
+
+
 GUARD = re.compile(r"^\s*`(\$\{\{ !cancelled\(\) && .+ \}\})`$", re.MULTILINE)
 """The line of the standard giving an aggregate job's own `if:`.
 

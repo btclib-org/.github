@@ -9550,3 +9550,9 @@ nothing red follows from the copies disagreeing.
 - **`skip-reason-prefix` exempts a skip by the reason its caller
   declared, and `exclude-classname` stays for a caller not yet moved onto
   it** (issue #1377): several skipping families now share one prefix.
+
+### Section 10 accepts an aggregate's own `needs` row unfinished
+
+- **A listing aggregate accepts an unfinished row only for its own
+  `needs` job whose result is `success` or `skipped`** (issue #1395): a
+  job outside `needs`, or a failed one inside it, is still refused.
