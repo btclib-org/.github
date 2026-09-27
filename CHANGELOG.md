@@ -9532,3 +9532,9 @@ nothing red follows from the copies disagreeing.
 - **`[tool.ruff.per-file-target-version]` targets the two of them, and
   not the rest of `.github/scripts`, at 3.10** (closes #1374):
   pre-commit's own floor; a second mypy hook checks the same two at it.
+
+### Section 11 names Dependabot's `pre-commit` ecosystem instead of denying it
+
+- **Dependabot has a `pre-commit` ecosystem; section 11 said hook
+  `rev:` bumps had none** (issue #1391): pre-commit.ci is kept for
+  them regardless, and this repository's own copies match again.

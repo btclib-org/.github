@@ -8,9 +8,10 @@ The section gives `github-actions` to every tree, workflows for it to
 read being every tier's, and makes the other three conditional on what
 the tree holds: a lock file, a site Gemfile, a submodule. So an ecosystem
 is owed exactly where its subject is there to be read, which is section
-2's rule for a subject a tree does not hold. Pre-commit hook revisions
-have no ecosystem at all, pre-commit.ci updating them; section 2 lists
-the file among what `.github/` holds.
+2's rule for a subject a tree does not hold. Dependabot has a
+`pre-commit` ecosystem too, and section 11 says the maintainer keeps
+pre-commit.ci for hook `rev:` bumps instead; section 2 lists the file
+among what `.github/` holds.
 
 The section also states how a declared ecosystem is configured -- grouped,
 weekly, a seven-day cooldown, no `target-branch` -- and, for `uv`, what its

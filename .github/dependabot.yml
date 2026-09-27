@@ -1,10 +1,12 @@
 ---
 # What Dependabot moves in this repository is the ecosystems named
 # below. The pre-commit hook revisions are somebody else's job instead:
-# they have no Dependabot ecosystem, and the `ci:` block of
-# .pre-commit-config.yaml has pre-commit.ci bumping them weekly --
-# except `typos`, whose `repo: local` hook `autoupdate` skips on purpose
-# (see the comment beside it), so the version pinned in its
+# Dependabot has a pre-commit ecosystem too, and the maintainer decided
+# to keep pre-commit.ci for them instead (btclib-org/.github#1391), its
+# weekly autoupdate already rewriting rev: for every repo: but local
+# and meta, so a second bot on the same pin would only compete with it
+# -- except `typos`, whose `repo: local` hook `autoupdate` skips on
+# purpose (see the comment beside it), so the version pinned in its
 # `additional_dependencies` moves by nobody until a hand edit does.
 #
 # Section 2's layout lists this file for a repository that ships a
