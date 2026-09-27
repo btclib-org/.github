@@ -10,23 +10,25 @@ This roadmap covers the period until 2027-09-30 and is reviewed every
 September. Its entries carry no dates, because they state intentions and
 not deadlines.
 
-## Maintained as it is
+## Maintained
 
 - **`bbt`** is maintained as it is: fixes, dependency updates and the
-  organization's standards, with no new features planned, a default under
-  review in btclib-org/.github#1330.
-- **`bitcoin-core-rpc`** is maintained as it is: fixes, dependency
-  updates and the organization's standards, with no new features planned,
-  a default under review in btclib-org/.github#1330.
+  organization's standards, with no new features planned
+  (btclib-org/.github#1330).
+- **`bitcoin-core-rpc`** follows the RPCs of each Bitcoin Core release
+  (btclib-org/.github#1330).
 - **`btclib-benchmarks`** is maintained as it is: fixes, dependency
-  updates and the organization's standards, with no new features planned,
-  a default under review in btclib-org/.github#1330.
+  updates and the organization's standards, with no new features planned
+  (btclib-org/.github#1330).
 - **`btclib-org.github.io`** is maintained as it is: fixes, dependency
-  updates and the organization's standards, with no new features planned,
-  a default under review in btclib-org/.github#1330.
+  updates and the organization's standards, with no new features planned
+  (btclib-org/.github#1330).
+- **`btclib-secp256k1`** follows libsecp256k1's releases, and
+  secp256k1-zkp, which cuts none, for the modules it exposes
+  (btclib-org/.github#1330).
 - **`portanode`** is maintained as it is: fixes, dependency updates and
-  the organization's standards, with no new features planned, a default
-  under review in btclib-org/.github#1330.
+  the organization's standards, with no new features planned
+  (btclib-org/.github#1330).
 
 ## Intended
 
@@ -46,6 +48,9 @@ not deadlines.
   node only through a process it starts and the node's RPC and p2p
   sockets, with `bitcoind` as the reference and `btclib-node` the first
   target.
+- **`btclib-node` reaches conformance with tf2**
+  (btclib-org/btclib#2220), BIP324's encrypted v2 transport included, with
+  v1 off by default (btclib-org/btclib-node#1190).
 - **FROST key generation in `ecc/`**, a trusted-dealer split and then
   ChillDKG, once BIP445 and the ChillDKG draft settle
   (btclib-org/btclib#2200).
