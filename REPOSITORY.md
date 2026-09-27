@@ -215,6 +215,15 @@ is a fact about a changing world rather than a setting: the next merge
 changes what it answers without anything here having decided
 differently. Read at 2026-09-21T06:11:42Z.
 
+```shell
+gh api repos/btclib-org/.github/branches/main/protection \
+  --jq '.required_signatures.enabled'
+# false
+```
+
+Classic protection's own copy of the rule is off: [the standard states
+that value for every repository][s11-branch].
+
 ## Merge methods
 
 ```shell
@@ -330,6 +339,17 @@ answers][s11-tokens]. Nobody has recorded an override here, which is
 weaker than knowing there is none — so whoever moves the organization
 default reads this repository back afterwards rather than assuming it
 moved.
+
+## Allowed actions and SHA pinning
+
+```shell
+gh api repos/btclib-org/.github/actions/permissions \
+  --jq '{allowed_actions, sha_pinning_required}'
+# {"allowed_actions":"all","sha_pinning_required":true}
+```
+
+`sha_pinning_required` is set at the organization level: [section 11
+has the reasons for both fields][s11-tokens].
 
 ## Secret scanning and Dependabot
 

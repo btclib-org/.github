@@ -2385,7 +2385,9 @@ the bots' included.
 Classic protection carries the required checks with `strict`, one
 approving review, `dismiss_stale_reviews`, linear history, no force
 pushes, no deletions, `required_conversation_resolution`, and
-`enforce_admins` **off**.
+`enforce_admins` **off**. `required_signatures` is **off** there too:
+`main-integrity` already enforces it with no bypass actor, so classic's
+own copy of the rule would only duplicate it.
 
 Three rulesets sit beside it, additive — rules aggregate across rulesets
 and classic protection, taking the most restrictive combination:
@@ -2424,8 +2426,7 @@ When patching required checks, use the `checks` array and a JSON body on
 stdin: `contexts` has no field for an app, so sending it silently
 replaces a bound list with an unbound one, and `-f` sends `app_id` as a
 string, which the endpoint refuses. `PATCH` the sub-endpoint; a partial
-`PUT` of the whole protection object drops the reviews and the
-signatures.
+`PUT` of the whole protection object drops the reviews.
 
 ### Merge method
 
@@ -2774,6 +2775,15 @@ such a finding only through a further push or a `close`/`reopen`.
     and none reports which repositories override. So a repository that
     pins its own is recorded in its `REPOSITORY.md`, and whoever moves
     the organization default moves those with it.
+- **`sha_pinning_required` is on, set at the organization level**: an
+  action reference that is not a commit SHA fails the workflow run,
+  which is what section 10's own pinning rule already asks a workflow
+  file to avoid. GitHub's documentation says only that "reusable
+  workflows can still be referenced by tag."
+- **`allowed_actions` stays `all`.** The alternative, `local_only`,
+  blocks all access to actions authored by GitHub, which this
+  repository's own workflows use throughout — narrowing to an owner
+  allowlist is not what the pinning rule above asks for.
 - **A caller's `permissions:` block bounds the workflow it calls rather
   than standing in for what that workflow declares.** A called job with
   no block of its own gets what the called workflow declares at its top
@@ -3369,14 +3379,17 @@ distribution. A workflow's interpreters against the window stay a reading: one
 outside it is correct where the reason is beside it.
 
 The settings: squash the only method, signatures required with an **empty**
-bypass list, the self-merge bypass in `pull_request` mode and never `always`,
-and a token that is `read`:
+bypass list, classic's own `required_signatures` **off**, the self-merge
+bypass in `pull_request` mode and never `always`, a token that is `read`,
+and `allowed_actions: all` with `sha_pinning_required: true`:
 
 ```shell
 R=<org>/<repo>
 gh api repos/$R --jq '{allow_squash_merge, allow_merge_commit,
   allow_rebase_merge, delete_branch_on_merge, security_and_analysis}'
 gh api repos/$R/actions/permissions/workflow
+gh api repos/$R/actions/permissions \
+  --jq '{allowed_actions, sha_pinning_required}'
 gh api repos/$R/rulesets --jq '.[].id' | xargs -I{} \
   gh api repos/$R/rulesets/{} --jq '{name, target,
     rules: [.rules[].type], bypass: [.bypass_actors[]?.bypass_mode]}'
