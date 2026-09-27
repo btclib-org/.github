@@ -9472,3 +9472,9 @@ nothing red follows from the copies disagreeing.
 - **The `git grep` naming every module that reads the API missed
   `pyproject_test.py`, which calls `gh` directly** (closes #1371): the
   pattern now carries `"gh"` too.
+
+### `EXPECTED_DRIFT` no longer names `REVIEWING.md`
+
+- **Every copy's shared half carries the clause letting a filed issue
+  carry its fix** (closes #1378) (closes #1403): a row naming copies
+  that agree is what the strict comparison reports as red.
