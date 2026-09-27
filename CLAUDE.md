@@ -262,12 +262,15 @@ Do not use Fable unless explicitly instructed.
   tip, so it removes no network dependency, and its object store is borrowed
   from a checkout that a `git gc` there can break — for a saving the issue's
   own numbers call not worth the hazard. `git grep -lE
-  'gh_json|still_open|settings: dict' tests/*_test.py` names what asks
-  the API for state with no on-disk representation. `still_open` is in
-  the pattern because it is the read rather than a caller of one: it
+  'gh_json|still_open|settings: dict|"gh"' tests/*_test.py` names what
+  asks the API for state with no on-disk representation. `still_open` is
+  in the pattern because it is the read rather than a caller of one: it
   lives in `tests/__init__.py`, so a file reaching the API through it
   names neither `gh_json` nor a settings dict, and a pattern without it
-  answers a confident zero for that file. `tiers` is not among what the
+  answers a confident zero for that file. `"gh"` is in the pattern
+  because `pyproject_test.py`'s `dockerfile()` calls `gh` directly
+  rather than through `gh_json`, and a pattern without it answers a
+  confident zero for that file too. `tiers` is not among what the
   command names: `tests/__init__.py`'s `tier()` reads `pyproject.toml`
   and `release.yml` off the checkout, which `tiers_test.py` asks through
   the `tiers` fixture — `conftest.py`'s one-liner over `trees` — rather
@@ -314,17 +317,17 @@ Do not use Fable unless explicitly instructed.
   review is not a substitute for running it.** `tests/conftest.py`'s
   `trees` fixture clones every repository shallow and tagless, its own
   docstring giving the reason: "every question here is about the tip of
-  the default branch" — so nothing here can be pointed at a tree still
-  living on a build branch, and the suite has to wait for that tree's
-  root to land on `main` before it can answer anything about it. Two
-  local review rounds cleared `bitcoin-node-tests`' root tree against
-  section 16's checklist; the suite, run once that tree had a `main`,
-  still failed `[bitcoin-node-tests]` cells the review had read and
-  passed, each failing for its own stated reason (`#1334`, closed once a
-  following pull request answered them). And for as long as a sibling
-  repository exists and is empty, `alignment.yml` is red here on every
-  branch of this tree — a cost every session working here pays for the
-  gap between `gh repo create` and that sibling's first landed `main`.
+  the default branch" — the clone names no `--branch`, so it reads
+  whatever branch is currently default: a tree still living on a build
+  branch is measured on that branch rather than waiting for a `main` to
+  exist. Two local review rounds cleared `bitcoin-node-tests`' root tree
+  against section 16's checklist; the suite, run once that tree had a
+  `main`, still failed `[bitcoin-node-tests]` cells the review had read
+  and passed, each failing for its own stated reason (`#1334`, closed
+  once a following pull request answered them). And for as long as a
+  sibling repository exists and is empty, `alignment.yml` is red here on
+  every branch of this tree — a cost every session working here pays
+  for the gap between `gh repo create` and that sibling's first push.
 - **A new repository's rulesets go on only after its first push to
   `main`, never before — section 16 states the reason.** Verify it
   against a landed repository rather than trusting the order alone:

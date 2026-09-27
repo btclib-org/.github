@@ -9460,3 +9460,15 @@ nothing red follows from the copies disagreeing.
 
 - **A repository with no `main` branch reds only its own cell, rather
   than every repository's, on `Branch not found`** (closes #1385).
+
+### `CLAUDE.md` says the suite reads whatever branch is default
+
+- **A tree still living on a build branch was said to be unmeasurable
+  until its root landed on `main`** (closes #1370): the `trees` fixture
+  clones with no `--branch`, so it reads whatever branch is default.
+
+### `CLAUDE.md`'s API-reader pattern gains `"gh"`, for `pyproject_test.py`
+
+- **The `git grep` naming every module that reads the API missed
+  `pyproject_test.py`, which calls `gh` directly** (closes #1371): the
+  pattern now carries `"gh"` too.
