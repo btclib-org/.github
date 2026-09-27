@@ -9439,3 +9439,9 @@ nothing red follows from the copies disagreeing.
 - **An issue filed from a review may say the fix where one is known**
   (issue #1378): *What is filed, and what is not* dropped its "no fix",
   the filing bar standing as it was.
+
+### `reusable-changes.yml` follows a renamed file to its old path too
+
+- **A renamed file's old path lives in `previous_filename`, which the
+  listing dropped** (closes #1369): a code file renamed to a
+  prose-matching path read as prose-only, skipping every `code` job.

@@ -117,8 +117,16 @@ jobs:
             echo "::error::the caller passed an empty prose-pattern"
             exit 1
           fi
+          # a renamed file's old path lives in .previous_filename, not in
+          # .filename, so a rename alone drops it here: a code file
+          # renamed to a path the prose pattern matches would otherwise
+          # read as a prose-only pull request, and every job the caller
+          # gates on code would skip a change that touched code under its
+          # former name. A deleted file keeps its path in .filename, so
+          # it needs nothing added
           gh api "repos/$REPO/pulls/$NUMBER/files" --paginate \
-            --jq '.[].filename' > files.txt
+            --jq '.[] | .filename, (.previous_filename // empty)' \
+            > files.txt
           echo "files changed:"
           cat files.txt
           # an empty list is not a prose change, it is a question this
