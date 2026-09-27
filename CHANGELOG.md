@@ -9603,3 +9603,9 @@ nothing red follows from the copies disagreeing.
 - **A `needs` result other than `success` or `skipped` fails the step
   whatever the listing shows** (issue #1424): a failed job whose rows are
   listed as passing, or not listed at all, no longer passes.
+
+### The `BACKLOG` rows for 1416 and 1424 come out, the last tree having converged
+
+- **Every sibling's listing aggregate rereads a lagging `needs` row and
+  fails on a failed `needs` result** (closes #1416) (closes #1424): the
+  cells pass on their merits, without the rows.
