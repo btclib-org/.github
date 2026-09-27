@@ -20,8 +20,10 @@ it strips outright rather than preserving its length.
 
 Three checks, all of them shapes a `merge=union` rebase produces and a
 `git rebase` exit code does not report -- a fourth, below them, that is
-section 9's own bound on an entry -- and a fifth that backs the fourth's
-own exemption, which trusts a placement rule nothing else here checks:
+section 9's own bound on an entry -- a fifth that backs the fourth's own
+exemption, which trusts a placement rule nothing else here checks -- and
+a sixth, unrelated to the rebase driver, that catches a citation number
+`markdownlint-cli2`'s own `--fix` mangles once it opens a line:
 
 - a `### ` heading repeated within the section -- measured against real
   rebases under `merge=union`, not assumed from the driver's name. Two
@@ -144,6 +146,25 @@ runs the hook is where each tree writes its own. The default is zero,
 which is the answer for an open section holding no entry above
 `RULE_HEADING` at all.
 
+The sixth check is a citation number that opens a line at column zero:
+`#<digits>`, the shape `markdownlint-cli2`'s MD018
+(no-missing-space-atx) reads as an ATX heading missing its space.
+`--fix` turns it into `# <digits>`, which is refused too: the citation
+no longer matches `_CITATION_TOKEN` once the space is inserted, and the
+now heading-shaped line goes on to trip MD022, MD025, MD026 and MD001 on
+whatever heading follows -- none of which names the actual cause
+(btclib-org/.github#1398). Measured directly against `markdownlint-cli2`
+rather than assumed from MD018's name: a line indented by even one space
+is not read as a heading at all and trips nothing, so the continuation a
+list-item entry wraps to is outside this, and so is a bare paragraph's
+wrap once it is indented to stay part of the paragraph above it -- only
+a wrap that lands at the line's own first column is the shape that
+mangles. A `### ` or `## ` heading opens with two or three hashes, not
+one, so it is not this shape either; a fenced block is blanked out
+before this ever runs, the same as for the checks above; and a qualified
+citation, `owner/repo#N`, does not open the line with `#` at all, so
+MD018 does not read it as a heading and this does not refuse it.
+
 A tree with no release carries one open section for the whole file, this
 repository's own `CHANGELOG.md` among them; a tree that releases keeps
 everything from the first `## ` heading to the line before the second as
@@ -208,6 +229,15 @@ _CITATION_TOKEN = re.compile(r"(?:[\w.-]+/[\w.-]+)?#\d+")
 # Single backticks, not crossing a blank line: this house style's own
 # code spans do not
 _CODE_SPAN = re.compile(r"`[^`\n]*`")
+# a citation's own number, wrapped so it opens a line at column zero --
+# `#\d+`, or `# \d+` where markdownlint-cli2's MD018 has already turned
+# the missing space into one. A `##`/`###` heading never matches: its
+# second character is itself a `#`, where `[ \t]?\d+` wants a space, a
+# tab or a digit there instead; the leading `^` with no `\s*` ahead of
+# it excludes an indented line, measured against `markdownlint-cli2` to
+# trip nothing at all, which is every wrap a list-item entry or an
+# indented paragraph continuation produces
+_WRAPPED_CITATION = re.compile(r"^#[ \t]?\d+\b", re.MULTILINE)
 
 _BLANK_LINE = "\n\n"
 """Two newlines: the empty line above a heading, read as a literal pair."""
@@ -488,8 +518,38 @@ def long_bodies(text: str, section: str, base: int) -> list[str]:
     return problems
 
 
+def wrapped_citations(text: str, section: str, base: int) -> list[str]:
+    """Report a citation number that has wrapped to the start of a line.
+
+    `(closes #N)` / `(issue #N)` wraps at 80 columns like any other
+    prose, and where the wrap lands the number at a line's own first
+    column, `markdownlint-cli2`'s MD018 reads the bare `#N` as an ATX
+    heading missing its space and `--fix` inserts one, so `#2291).`
+    becomes `# 2291).` -- still refused here, since the citation is
+    unrecognisable to `_CITATION_TOKEN` either way and the now
+    heading-shaped line goes on to trip MD022, MD025, MD026 and MD001 on
+    the next real heading, none of them naming the actual cause
+    (btclib-org/.github#1398).
+
+    :param text: the whole file, for the line numbers reported.
+    :param section: the open section's own text.
+    :param base: the offset `section` starts at within `text`.
+    :returns: one message per line found opening with a citation number.
+    """
+    problems = []
+    for match in _WRAPPED_CITATION.finditer(_blank_fenced_blocks(section)):
+        line = line_at(text, base + match.start())
+        problems.append(
+            f"line {line}: {match.group(0)!r} opens the line -- a citation"
+            " number wrapped to a line's start, which markdownlint-cli2's"
+            " MD018 reads as a heading missing its space and mangles;"
+            " rejoin it to the line above",
+        )
+    return problems
+
+
 def problems(text: str, grandfathered: int = 0) -> list[str]:
-    """Return every way the open section fails the five checks.
+    """Return every way the open section fails the six checks.
 
     :param text: the whole file.
     :param grandfathered: what `misplaced_entries()` measures against.
@@ -502,6 +562,7 @@ def problems(text: str, grandfathered: int = 0) -> list[str]:
         *unblanked_headings(text, section, base),
         *misplaced_entries(text, section, base, grandfathered),
         *long_bodies(text, section, base),
+        *wrapped_citations(text, section, base),
     ]
 
 
@@ -513,7 +574,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     """
     parser = argparse.ArgumentParser(
         description="Refuse an open CHANGELOG.md section a"
-        " merge=union rebase can break.",
+        " merge=union rebase can break, or a citation number"
+        " markdownlint-cli2's own fixer mangles.",
     )
     parser.add_argument(
         "--grandfathered",
@@ -537,8 +599,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(
             f"{_CHANGELOG}: the open section repeats no heading, no two"
             " entries close the same issue, no heading has lost its blank"
-            " line, no entry lands above the rule out of place, and no"
-            " entry runs past three lines.",
+            " line, no entry lands above the rule out of place, no entry"
+            " runs past three lines, and no citation number opens a line.",
         )
     return 1 if found else 0
 

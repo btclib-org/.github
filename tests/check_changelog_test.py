@@ -473,3 +473,102 @@ def test_a_bare_keyword_outside_a_parenthetical_names_no_token(
     parenthesised = bare.replace("closes #1", "(closes #1)")
     assert script.closing_tokens(bare) == set()
     assert script.closing_tokens(parenthesised) == {"#1"}
+
+
+def test_a_bare_wrapped_citation_is_caught(script: ModuleType) -> None:
+    """`#N` opening a line, unfixed, is the sixth check.
+
+    btclib-org/.github#1398's own reproduction: a citation wraps at 80
+    columns so its number opens the next line, which markdownlint-cli2's
+    MD018 reads as a heading missing its space.
+    """
+    text = _CLEAN.replace(
+        "- **second thing** (closes #2): two.",
+        "- **second thing** ending before a citation (closes\n#2): two.",
+    )
+    found = script.problems(text)
+    assert len(found) == 1
+    assert "'#2'" in found[0]
+    assert "opens the line" in found[0]
+
+
+def test_an_already_fixed_wrapped_citation_is_still_caught(
+    script: ModuleType,
+) -> None:
+    """`# N`, the shape MD018's own `--fix` has already produced, is caught too.
+
+    A second `--fix` run does not repair this: there is no longer a bare
+    `#N` for the fixer to notice, so the mangled shape has to be refused
+    directly rather than relying on a later run undoing it.
+    """
+    text = _CLEAN.replace(
+        "- **second thing** (closes #2): two.",
+        "- **second thing** ending before a citation (closes\n# 2): two.",
+    )
+    found = script.problems(text)
+    assert len(found) == 1
+    assert "'# 2'" in found[0]
+
+
+def test_a_real_heading_is_not_read_as_a_wrapped_citation(
+    script: ModuleType,
+) -> None:
+    """A `### ` heading is two or three hashes, never this check's shape.
+
+    A numeral in the title -- as a version or an issue count might use --
+    stays two or three hashes ahead of the digits: the second character
+    is itself a `#`, where the pattern wants a space, a tab or a digit.
+    """
+    text = _CLEAN.replace("### Second entry", "### 42 things changed")
+    assert script.problems(text) == []
+
+
+def test_a_wrapped_citation_inside_a_fenced_block_is_not_caught(
+    script: ModuleType,
+) -> None:
+    """A fenced code block quoting the mangled shape is an example, not one."""
+    text = _CLEAN.replace(
+        "- **second thing** (closes #2): two.",
+        "```\n#9).\n```",
+    )
+    assert script.problems(text) == []
+
+
+def test_a_qualified_citation_opening_a_line_is_not_this_shape(
+    script: ModuleType,
+) -> None:
+    """`owner/repo#N` opening a line does not open it with `#` at all.
+
+    Measured against markdownlint-cli2 directly: MD018 does not read it
+    as a heading, `owner/repo` sitting ahead of the `#`, so this does not
+    refuse it either.
+    """
+    text = _CLEAN.replace(
+        "- **second thing** (closes #2): two.",
+        "- **second thing** ending before a citation (closes\n"
+        "btclib-org/btclib#2): two.",
+    )
+    assert script.problems(text) == []
+
+
+def test_an_indented_wrapped_citation_is_not_caught(script: ModuleType) -> None:
+    """A wrap indented to stay part of the list item above it is not this shape.
+
+    Measured against markdownlint-cli2 directly: a citation number
+    indented by even one space is never read as a heading, which is the
+    shape every list-item entry's own wrap takes, so this check -- keyed
+    on column zero -- does not flag it.
+    """
+    text = _CLEAN.replace(
+        "- **second thing** (closes #2): two.",
+        "- **second thing** ending before a citation (closes\n  #2): two.",
+    )
+    assert script.problems(text) == []
+
+
+def test_a_wrapped_citation_in_a_released_section_is_not_reported(
+    script: ModuleType,
+) -> None:
+    """A wrapped citation under a second `## ` is outside the open section."""
+    text = _CLEAN + "\n## v1.0\n\nprose before a citation (closes\n#9).\n"
+    assert script.problems(text) == []

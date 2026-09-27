@@ -1013,9 +1013,13 @@ pre-commit.ci does not have — the lint workflow covers it. No
   the file before that hook's `--fix` repairs the seam the blank-line
   check names. `merge=union` stays on that file
   (btclib-org/.github#21's ruling) and this is the gate its price bought
-  back: a repeated `###` heading, a heading with no blank line above it
-  (btclib-org/.github#760) and an entry past section 9's three-line
-  bound are all refused.
+  back: a repeated `###` heading, two entries closing the same issue, a
+  heading with no blank line above it (btclib-org/.github#760), an entry
+  landed above the length rule's own entry out of section 9's order, an
+  entry past that rule's three-line bound, and a citation number wrapped
+  to a line's start, which markdownlint-cli2's own `--fix` would
+  otherwise mangle into a heading (btclib-org/.github#1398), are all
+  refused.
 
     **`btclib-org/.github` itself keeps the hook `local`**, a pin being
     a revision other than the working tree: a tree pinning itself would
