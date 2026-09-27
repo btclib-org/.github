@@ -10,15 +10,22 @@ dismissal of stale reviews, conversation resolution and `enforce_admins`
 live in classic protection alone, which is the half that had drifted
 while nothing read it -- btclib-org/.github#88 has the measurement.
 
-The endpoint answers 404 twice over, and the two are not one case. A
-branch with no classic protection at all is `Branch not protected`,
-which is the drift btclib-org/.github#88 exists to catch and where a
-repository moved to rulesets alone would end up: that one is every
-field of the list off, and the test says so. A repository the token
-cannot see is `Not Found`, and that one is skipped with the reason, the
-run having nothing to say about a document it could not read. The two
-are told apart on what `gh` wrote to stderr; anything else the endpoint
-answers is raised, a throttled or failing API being neither.
+The endpoint answers 404 three times over, and none of the three is one
+case. A branch with no classic protection at all is `Branch not
+protected`, which is the drift btclib-org/.github#88 exists to catch and
+where a repository moved to rulesets alone would end up: that one is
+every field of the list off, and the test says so. A repository the
+token cannot see is `Not Found`, and that one is skipped with the
+reason, the run having nothing to say about a document it could not
+read. A repository with no `main` branch at all -- GitHub defaults a new
+repository to whatever branch it pushes first, and section 16 sets
+`main` explicitly only as a later checklist step -- is `Branch not
+found`, and that one fails, naming the repository and the missing
+branch: no other test in this suite asks whether `main` exists, so a
+skip here would leave the question unanswered rather than merely
+deferred. The three are told apart on what `gh` wrote to stderr; anything
+else the endpoint answers is raised, a throttled or failing API being
+none of them.
 """
 
 from __future__ import annotations
@@ -40,19 +47,22 @@ UNPROTECTED = "Branch not protected"
 UNREADABLE = "Not Found"
 """What `gh api` reports for a repository or document the token cannot see."""
 
+NO_MAIN = "Branch not found"
+"""What `gh api` reports for a repository with no `main` branch yet."""
+
 
 @pytest.fixture(scope="session")
-def protections(repositories: list[str]) -> dict[str, dict[str, Any] | None]:
+def protections(repositories: list[str]) -> dict[str, dict[str, Any] | str | None]:
     """Fetch the classic protection document of every repository.
 
     :param repositories: the names to ask about.
     :returns: each name against its document -- empty where `main` has
-        no classic protection -- or `None` where the token could not
-        read it.
+        no classic protection -- `None` where the token could not read
+        it, or a failure reason where there is no `main` to hold one.
     :raises subprocess.CalledProcessError: where the endpoint answered
-        something other than a document or one of the two 404s.
+        something other than a document or one of the three 404s.
     """
-    out: dict[str, dict[str, Any] | None] = {}
+    out: dict[str, dict[str, Any] | str | None] = {}
     for repository in repositories:
         try:
             out[repository] = gh_json(f"repos/{ORG}/{repository}/{ENDPOINT}")
@@ -61,6 +71,11 @@ def protections(repositories: list[str]) -> dict[str, dict[str, Any] | None]:
                 out[repository] = {}
             elif UNREADABLE in error.stderr:
                 out[repository] = None
+            elif NO_MAIN in error.stderr:
+                out[repository] = (
+                    f"{repository} has no main branch to protect: "
+                    f"gh api repos/{ORG}/{repository}/{ENDPOINT} answered {NO_MAIN}"
+                )
             else:
                 raise
     return out
@@ -83,7 +98,7 @@ def holds(document: dict[str, Any], field: str, *, off: bool = False) -> bool:
 
 def test_main_requires_a_check_and_the_rest_of_classic_protection(
     repository: str,
-    protections: dict[str, dict[str, Any] | None],
+    protections: dict[str, dict[str, Any] | str | None],
 ) -> None:
     """Section 11's classic list, field by field.
 
@@ -105,6 +120,8 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
             f"this run's token cannot read {ENDPOINT} on {repository}: "
             f"gh api repos/{ORG}/{repository}/{ENDPOINT} answered {UNREADABLE}"
         )
+    if isinstance(document, str):
+        pytest.fail(document)
     checks = document.get("required_status_checks") or {}
     reviews = document.get("required_pull_request_reviews") or {}
     wanted = {
