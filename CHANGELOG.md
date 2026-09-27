@@ -9556,3 +9556,8 @@ nothing red follows from the copies disagreeing.
 - **A listing aggregate accepts an unfinished row only for its own
   `needs` job whose result is `success` or `skipped`** (issue #1395): a
   job outside `needs`, or a failed one inside it, is still refused.
+
+### The `BACKLOG` row for 1395 comes out, the last tree having converged
+
+- **Every sibling's listing aggregate reads its own `needs` row's result**
+  (closes #1395): the cells pass on their merits, without the row.
