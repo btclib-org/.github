@@ -199,6 +199,7 @@ alone would leave `uv sync` resolving a project without it.
 | `harness` | the test runner and its plugins, nothing else |
 | `test` | `harness` plus whatever the suite delegates to |
 | `lint` | mypy, pre-commit, ruff |
+| `notebooks` | what executes and reads the tree's notebooks |
 | `bindings` | an optional native dependency that is also an extra |
 | `build` | what builds a distribution, cibuildwheel included |
 | `check` | what inspects a distribution before it is published |
@@ -212,6 +213,10 @@ the optional native dependency, since uv's `--no-group` suppresses a
 group that was selected and not one another group includes; a project
 with no such dependency keeps the two names or not as its own workflows
 ask.
+
+`notebooks` is owed where the tree has notebooks, and `lint` includes
+it: the script a gate runs them with imports what the group holds, and
+mypy type-checks that script against `lint`.
 
 `build` and `check` are two names because one tree holds both and they
 mean different things there: `--only-group build` compiles wheels,
@@ -2861,22 +2866,32 @@ such a finding only through a further push or a `close`/`reopen`.
 ### Dependabot and pre-commit.ci
 
 `github-actions` everywhere, every tree having workflows for it to read,
-and three more where the tree has what they watch: `uv` where a
+and the others where the tree has what they watch: `uv` where a
 `uv.lock` exists, `bundler` where a site Gemfile does, `gitsubmodule`
-where a submodule does — conditional by section 2's rule for a subject
-the tree does not hold. Dependabot has a `pre-commit` ecosystem too, and
-the maintainer decided to keep pre-commit.ci for hook `rev:` bumps
-instead (issue #1391): its weekly autoupdate already rewrites `rev:`
-for every `repo:` but `local` and `meta`, so a second bot bumping the
-same pin would only open a competing pull request, except a hook whose
-`repo:` is `local`: what moves that version is where the hook pins it,
-the `uv` ecosystem above where that is `uv.lock`, a hand edit where it
-is `additional_dependencies`.
+where a submodule does, `docker` where a workflow builds a Dockerfile
+whose `FROM` lines are pinned by digest — conditional by section 2's
+rule for a subject the tree does not hold. Dependabot has a `pre-commit`
+ecosystem too, and the maintainer decided to keep pre-commit.ci for hook
+`rev:` bumps instead (issue #1391): its weekly autoupdate already
+rewrites `rev:` for every `repo:` but `local` and `meta`, so a second
+bot bumping the same pin would only open a competing pull request,
+except a hook whose `repo:` is `local`: what moves that version is where
+the hook pins it, the `uv` ecosystem above where that is `uv.lock`, a
+hand edit where it is `additional_dependencies`.
 
 `gitsubmodule` follows upstream's *default branch*, so its pull request
 says that upstream moved and is not the bump: a release pins the tagged
 commit by hand. The local hook refuses an unpinned or moved pointer and
 says nothing about upstream.
+
+`docker` follows the digest because a pinned `FROM` is one nothing else
+moves forward, where a bare tag is whatever the registry holds when the
+build runs. Its `directory:` is the Dockerfile's own, dependabot-core
+reading the files of that directory and none below it. It takes the
+cooldown below like every other ecosystem, though dependabot-core dates
+a tag only on Docker Hub and applies none elsewhere: an inert cooldown
+costs nothing, and takes effect unasked wherever dependabot-core comes
+to date the tag.
 
 Each ecosystem groups its updates into one pull request, since every pull
 request runs the whole matrix — the one exemption is `btclib-org.github.io`'s
