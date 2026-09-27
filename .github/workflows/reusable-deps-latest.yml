@@ -240,8 +240,17 @@ jobs:
       # nor --files, and a stash here would hand the mypy hook back the
       # committed lock and type check the pinned mypy.
       # --show-diff-on-failure changes no hook's answer; it prints what an
-      # in-place fixer changed
+      # in-place fixer changed.
+      # btclib's uv-export hook writes a file uv.lock derives, so under
+      # the upgrade above it rewrites that file by construction: its
+      # "files were modified" is the upgrade the "Updated" lines already
+      # named, not a finding. SKIP reports it as Skipped rather than
+      # dropping it silently, and a tree with no hook of that id is
+      # unaffected -- pre-commit matches SKIP against the hook ids and
+      # aliases it has, nothing else (btclib-org/btclib#2362)
       - name: Run the pre-commit hooks
+        env:
+          SKIP: uv-export
         run: >
           uv run --locked --only-group lint
           pre-commit run --all-files --show-diff-on-failure
