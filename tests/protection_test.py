@@ -8,7 +8,10 @@ Rulesets carry the integrity rules and the review requirement, and
 `settings_test.py` reads them; the required checks with `strict`, the
 dismissal of stale reviews, conversation resolution and `enforce_admins`
 live in classic protection alone, which is the half that had drifted
-while nothing read it -- btclib-org/.github#88 has the measurement.
+while nothing read it -- btclib-org/.github#88 has the measurement. That
+issue closed without deciding classic's own `required_signatures`;
+btclib-org/.github#1381 settled it off, `main-integrity` already
+carrying the rule, and this test reads that field back too.
 
 The endpoint answers 404 three times over, and none of the three is one
 case. A branch with no classic protection at all is `Branch not
@@ -136,6 +139,7 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
             document, "required_conversation_resolution"
         ),
         "enforce_admins off": holds(document, "enforce_admins", off=True),
+        "required_signatures off": holds(document, "required_signatures", off=True),
     }
     off = sorted(field for field, held in wanted.items() if not held)
     assert not off, f"classic protection does not hold: {off}; " + by_hand(

@@ -9508,3 +9508,15 @@ nothing red follows from the copies disagreeing.
 - **The `@main` bullet and the `scorecard` entry name the classes of
   Scorecard alert dismissed with reason `won't fix` instead of filed**
   (issue #1380, #1383, #1386).
+
+### Classic protection's own `required_signatures` is off, every repository
+
+- **Section 11 states a value for the flag `main-integrity` already
+  enforces, off** (closes #1381): `REPOSITORY.md`, section 15's command
+  and `protection_test.py` all read that answer back.
+
+### Section 11 states `allowed_actions` and `sha_pinning_required`
+
+- **`allowed_actions: all` and `sha_pinning_required: true`, the
+  decided pair** (closes #1382): `REPOSITORY.md` and `settings_test.py`
+  read the same answer back.

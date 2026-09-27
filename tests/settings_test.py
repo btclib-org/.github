@@ -284,6 +284,27 @@ def test_the_workflow_token_is_read(repository: str) -> None:
     )
 
 
+def test_actions_are_pinned_and_every_owner_is_allowed(repository: str) -> None:
+    """Section 15: `sha_pinning_required: true` and `allowed_actions: all`.
+
+    btclib-org/.github#1382 decided the pair at the organization level,
+    so every repository's own endpoint reads the same answer back.
+
+    :param repository: the repository asked about.
+    """
+    endpoint = f"repos/{ORG}/{repository}/actions/permissions"
+    document = gh_json(endpoint)
+    wanted = {"allowed_actions": "all", "sha_pinning_required": True}
+    wrong = {
+        key: document.get(key)
+        for key, want in wanted.items()
+        if document.get(key) != want
+    }
+    assert not wrong, f"{wrong} does not hold; " + by_hand(
+        repository, f"gh api {endpoint}"
+    )
+
+
 def test_the_wiki_and_the_projects_board_are_off(
     repository: str,
     settings: dict[str, dict[str, Any]],
