@@ -9621,3 +9621,9 @@ nothing red follows from the copies disagreeing.
 - **`excel` holds what writes a tree's workbooks and reads them back,
   and `lint` includes it** (closes #1429): mypy type-checks the
   generator and its gate against `lint`.
+
+### `check-changelog` refuses a citation markdownlint-cli2 mangles
+
+- **A citation number wrapped to a line's own start is refused**:
+  markdownlint-cli2's MD018 reads it as a heading missing its space, and
+  `--fix` cannot repair the mangled shape on a second run (closes #1398).
