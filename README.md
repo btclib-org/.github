@@ -200,6 +200,7 @@ alone would leave `uv sync` resolving a project without it.
 | `test` | `harness` plus whatever the suite delegates to |
 | `lint` | mypy, pre-commit, ruff |
 | `notebooks` | what executes and reads the tree's notebooks |
+| `excel` | what writes the tree's workbooks and reads them back |
 | `bindings` | an optional native dependency that is also an extra |
 | `build` | what builds a distribution, cibuildwheel included |
 | `check` | what inspects a distribution before it is published |
@@ -214,9 +215,10 @@ group that was selected and not one another group includes; a project
 with no such dependency keeps the two names or not as its own workflows
 ask.
 
-`notebooks` is owed where the tree has notebooks, and `lint` includes
-it: the script a gate runs them with imports what the group holds, and
-mypy type-checks that script against `lint`.
+`notebooks` is owed where the tree has notebooks and `excel` where a script
+generates its workbooks, and `lint` includes both: the script a gate runs
+the notebooks with and the scripts writing the workbooks and reading them
+back import what the groups hold, and mypy type-checks them against `lint`.
 
 `build` and `check` are two names because one tree holds both and they
 mean different things there: `--only-group build` compiles wheels,
