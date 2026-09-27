@@ -9591,3 +9591,15 @@ nothing red follows from the copies disagreeing.
 - **`check_node_ran.py` counts only the testcases that did not skip, and
   a report of exempt skips alone fails** (closes #1422): the line it
   prints on success says how many exempt skips that count leaves out.
+
+### Section 10 reads a lagging `needs` row again before accepting it
+
+- **A listing aggregate accepts its own `needs` job's unfinished row only
+  once three more reads, ten seconds apart, still show it** (issue #1416):
+  a row concluding meanwhile is judged on its conclusion.
+
+### A listing aggregate fails on its own `needs` job's failed result
+
+- **A `needs` result other than `success` or `skipped` fails the step
+  whatever the listing shows** (issue #1424): a failed job whose rows are
+  listed as passing, or not listed at all, no longer passes.

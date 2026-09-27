@@ -2287,10 +2287,22 @@ request and the rule follows.
   listing lagging behind that is the read being stale, not the run, and
   failing on it turns a green run red for no defect
   (btclib-org/.github#1395). A job outside `needs`, unfinished, is
-  refused, and so is a `needs` job whose own result is neither `success`
-  nor `skipped` — btclib-org/btclib-benchmarks#57's own point, which
-  this does not loosen: a lagging row excuses the read, never the
-  result.
+  refused — btclib-org/btclib-benchmarks#57's own point, which this does
+  not loosen.
+- **Such a row is accepted only once the listing, read again up to three
+  times ten seconds apart, still shows it unfinished.** The result is
+  not the listing's equal: btclib-org/btclib#1001's `needs` did not
+  report `failure` for a matrix whose cells had died in *Set up job*,
+  and such a cell, still listed unfinished, would pass on that result
+  alone. A row that concludes between reads is judged on its
+  conclusion, and a listing showing no such row is read once.
+- **Each `needs` job's own result is judged beside the listing and not
+  only through it: one neither `success` nor `skipped` fails the step
+  whatever the listing shows of that job's rows.** A `failure` over rows
+  listed as passing, or over rows the listing does not show at all, is
+  btclib-org/btclib#1001 the other way round, the listing reading better
+  than `needs` (btclib-org/.github#1424). Reading both costs nothing
+  where they agree, and turns a pass into a fail and never the reverse.
 - **Which row is which of the aggregate's own `needs` jobs is a match
   anchored at the separator GitHub renders it with, not a bare
   equality.** A plain job's row is its own declared `name:` — its own
