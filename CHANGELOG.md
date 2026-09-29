@@ -9627,3 +9627,9 @@ nothing red follows from the copies disagreeing.
 - **A citation number wrapped to a line's own start is refused**:
   markdownlint-cli2's MD018 reads it as a heading missing its space, and
   `--fix` cannot repair the mangled shape on a second run (closes #1398).
+
+### `profile/README.md` names btclib-ecc and lists the bindings first
+
+- **The page shortens to what a first-time reader needs and lists
+  btclib-secp256k1, then btclib-ecc, then btclib on top of it**
+  (issue #1434): the standard, not the front page, holds the reasoning.
