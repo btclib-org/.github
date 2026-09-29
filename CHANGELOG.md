@@ -9657,3 +9657,9 @@ nothing red follows from the copies disagreeing.
 - **A `griffe check` finding fails the job only where the release's section
   of `RELEASE_NOTES.md` does not name its object** (closes #1441): the
   error names each object missing.
+
+### `profile/README.md` draws how the packages depend on each other
+
+- **A graph rendered from `profile/dependencies.dot`**, which a hook
+  re-renders against the SVG and a test compares with every tree's
+  `pyproject.toml` (closes #1437).

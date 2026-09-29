@@ -53,6 +53,14 @@ whenever that makes them clearer.
 - **[btclib-org.github.io](https://github.com/btclib-org/btclib-org.github.io)**
   — the site serving this page at btclib.org.
 
+## How they depend on each other
+
+![How the organization's packages depend on each other](./dependencies.svg)
+
+An arrow points at what a package depends on, and a dashed one at what
+only the extra it is labelled with installs. An extra in brackets is one
+the package asks of what the arrow points at.
+
 ## Tested against other people's vectors
 
 The suites answer to vectors published by others (BIPs and SLIPs,

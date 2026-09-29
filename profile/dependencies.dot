@@ -1,0 +1,57 @@
+// How the organization's packages depend on each other: the source of
+// dependencies.svg beside it, which profile/README.md shows.
+//
+// A node is the `[project]` name of every tree of the organization that
+// builds a distribution, `[build-system]` being what says it does, and of
+// every tree an arrow names. An arrow points from a project to what it
+// depends on: solid where `dependencies` in its pyproject.toml names the
+// target, and dashed, labelled with the extra, where only an
+// `optional-dependencies` extra does -- an extra's requirement of a target
+// `dependencies` already names draws nothing. The extras a requirement
+// asks of its target are on the arrow's label, in brackets. Dependency
+// groups are left out, being what a checkout of the tree installs rather
+// than what a user of the package does. tests/dependencies_test.py
+// compares this file with every tree's pyproject.toml.
+//
+// The colours are for a transparent background under both of GitHub's
+// themes: text sits on the fill of its box, and the grey of the arrows
+// reads on the light theme's white and the dark theme's near-black.
+digraph dependencies {
+    graph [bgcolor="transparent", nodesep=0.3, ranksep=0.55, ordering=out];
+    node [
+        shape=box,
+        style="rounded,filled",
+        color="#1f6feb",
+        fillcolor="#1f6feb",
+        fontcolor="#ffffff",
+        fontname="Helvetica",
+        fontsize=12,
+    ];
+    edge [
+        color="#7d8590",
+        fontcolor="#7d8590",
+        fontname="Helvetica",
+        fontsize=10,
+        arrowsize=0.7,
+    ];
+
+    "btclib-mnemonics";
+
+    "bbt" -> "btclib";
+    "bbt" -> "btclib-ecc";
+    "bbt" -> "btclib-wallet";
+    "bitcoin-node-tests" -> "bitcoin-core-rpc";
+    "bitcoin-node-tests" -> "btclib";
+    "btclib" -> "bitcoin-core-rpc";
+    "btclib" -> "btclib-ecc";
+    "btclib" -> "btclib-secp256k1" [style=dashed, label="secp256k1"];
+    "btclib-benchmarks" -> "btclib";
+    "btclib-benchmarks" -> "btclib-secp256k1";
+    "btclib-ecc" -> "btclib-secp256k1" [style=dashed, label="secp256k1"];
+    "btclib-node" -> "bitcoin-core-rpc";
+    "btclib-node" -> "btclib" [label="[secp256k1]"];
+    "btclib-wallet" -> "bitcoin-core-rpc";
+    "btclib-wallet" -> "btclib";
+    "btclib-wallet" -> "btclib-ecc";
+    "btclib-wallet" -> "btclib-secp256k1" [style=dashed, label="secp256k1"];
+}

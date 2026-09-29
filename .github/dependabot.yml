@@ -5,9 +5,9 @@
 # to keep pre-commit.ci for them instead (btclib-org/.github#1391), its
 # weekly autoupdate already rewriting rev: for every repo: but local
 # and meta, so a second bot on the same pin would only compete with it
-# -- except `typos`, whose `repo: local` hook `autoupdate` skips on
-# purpose (see the comment beside it), so the version pinned in its
-# `additional_dependencies` moves by nobody until a hand edit does.
+# -- except a `repo: local` hook, which `autoupdate` skips, so a version
+# pinned in its `additional_dependencies` moves by nobody until a hand
+# edit does.
 #
 # Section 2's layout lists this file for a repository that ships a
 # package, and this tree publishes nothing and is mostly prose. But
