@@ -9645,3 +9645,9 @@ nothing red follows from the copies disagreeing.
 - **`required-version` reads `>=0.12.19`, the pin in `dependabot-core`'s
   `uv/Dockerfile`** (issue #1438): the old floor admitted a `uv` older than
   the one the updater writes `uv.lock` with.
+
+### `btclib-mnemonics` gains its rows in section 2 and section 10
+
+- **`btclib-mnemonics`, the mnemonic schemes `btclib-wallet` moves out,
+  registers as a tier-1 library at minute 52** (issue
+  btclib-org/btclib-wallet#30): `fuzz` names the SLIP39 shares it decodes.

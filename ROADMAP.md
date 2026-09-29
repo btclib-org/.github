@@ -38,7 +38,7 @@ not deadlines.
   its intentions beyond that.
 - **`btclib` splits along Bitcoin Core's line between consensus and
   wallet** (btclib-org/btclib#2129). `btclib-wallet` takes the wallet
-  side, `mnemonic-codes` the mnemonic schemes up to the seed, and
+  side, `btclib-mnemonics` the mnemonic schemes up to the seed, and
   `btclib-ecc` `curves/` and the parts of `ecc/` the issue does not
   keep in `btclib`, which stays the protocol package a node consumes. The
   issue holds the steps, in that order, and what each is done when.
