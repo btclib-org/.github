@@ -315,6 +315,7 @@ rule and gives no reason is still a gap.
 | `btclib-node` | 1 |
 | `btclib-wallet` | 1 |
 | `btclib-ecc` | 1 |
+| `btclib-mnemonics` | 1 |
 | `btclib-benchmarks` | 2 |
 | `.github` | 2 |
 | `bbt` | 2 |
@@ -1946,6 +1947,7 @@ day and an hour, the repository owns the minute:
 | `btclib-wallet` | 40 |
 | `bitcoin-node-tests` | 44 |
 | `btclib-ecc` | 48 |
+| `btclib-mnemonics` | 52 |
 
 **The rows are in the order of what they ask about**, family by family. A new
 sentinel takes the slot its family already holds rather than the end of the
@@ -2044,39 +2046,46 @@ reading its sentinels from here; a tree an entry does not name is asked nothing
 by that row.
 
 - `vendored-vectors` — `btclib`, `btclib-secp256k1`, `btclib-benchmarks`,
-  `btclib-node`, `btclib-wallet`, `bitcoin-node-tests`, `btclib-ecc`;
+  `btclib-node`, `btclib-wallet`, `bitcoin-node-tests`, `btclib-ecc`,
+  `btclib-mnemonics`;
 - `bootstrap-dns` — `btclib-node`;
 - `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
+  `btclib-mnemonics`;
 - `fuzz` — `btclib`, `btclib-secp256k1`, `btclib-node`, `btclib-wallet`,
-  `btclib-ecc`;
+  `btclib-ecc`, `btclib-mnemonics`;
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`,
   `btclib-wallet`;
 - `zkp-oracle` — `btclib-ecc`;
 - `integration-hwi` — `btclib-wallet`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
+  `btclib-mnemonics`;
 - `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-node`, `btclib-wallet`, `btclib-ecc`;
+  `btclib-node`, `btclib-wallet`, `btclib-ecc`, `btclib-mnemonics`;
 - `deps-oldest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
+  `btclib-mnemonics`;
 - `py-arm-authority` — `btclib`, `btclib-ecc`;
 - `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
+  `btclib-mnemonics`;
 - `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
+  `btclib-mnemonics`;
 - `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-wallet`, `btclib-ecc`;
+  `btclib-wallet`, `btclib-ecc`, `btclib-mnemonics`;
 - `homepage` — `btclib-org.github.io`;
 - `links` — every repository;
 - `alignment` — `.github`;
 - `wheel-reproducibility` — `btclib-secp256k1`;
 - `sdist-rebuild` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-node`, `btclib-wallet`, `btclib-ecc`;
+  `btclib-node`, `btclib-wallet`, `btclib-ecc`, `btclib-mnemonics`;
 - `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
+  `btclib-mnemonics`;
 - `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `btclib-node`,
-  `btclib-wallet`, `btclib-ecc`.
+  `btclib-wallet`, `btclib-ecc`, `btclib-mnemonics`.
 
 **An entry is what was decided, not what a tree happens to hold**, where section
 2's tier is read off the tree. A tree short of what its entry names is a gap in
@@ -2143,9 +2152,10 @@ and the badge land together.
   between the parser and an adversary choosing the bytes. `btclib` and
   `btclib-secp256k1` read transactions, scripts and signatures off the wire,
   `btclib-node` speaks the peer-to-peer protocol, `btclib-wallet` parses
-  PSBTs, output descriptors and BIP32/BIP322 data a counterparty hands it, and
+  PSBTs, output descriptors and BIP32/BIP322 data a counterparty hands it,
   `btclib-ecc` decodes the DER and BIP340 signatures and the ECIES envelopes
-  a sender writes;
+  a sender writes, and `btclib-mnemonics` decodes the SLIP39 shares their
+  holders hand back, a few of whom SLIP39 allows to be compromised;
   `bitcoin-core-rpc` reads an instance its own operator runs, which the property
   does not reach. `btclib-secp256k1`'s targets reach the vendored C on purpose:
   what they exercise is this tree's own length checks in front of it

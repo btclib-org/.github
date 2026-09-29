@@ -24,6 +24,9 @@ whenever that makes them clearer.
 - **[btclib](https://github.com/btclib-org/btclib)** — bitcoin's
   protocol on top of btclib-ecc: addresses, scripts, transactions and
   blocks.
+- **[btclib-mnemonics](https://github.com/btclib-org/btclib-mnemonics)** —
+  BIP39, SLIP39 and Electrum mnemonics, from the entropy up to the seed,
+  and nothing of bitcoin above it.
 - **[btclib-wallet](https://github.com/btclib-org/btclib-wallet)** —
   from a seed to a signed, broadcast transaction: BIP32 keys, BIP39 and
   SLIP39 mnemonics, descriptors, PSBT, coin selection.
