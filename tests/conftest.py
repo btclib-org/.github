@@ -264,8 +264,9 @@ def trees(
     """Check out every repository, and use this working tree for `.github`.
 
     Shallow and tagless: every question here is about the tip of the
-    default branch. Submodules are left unfetched -- the one repository
-    that has any vendors a C library, which nothing here reads.
+    default branch. Submodules are left unfetched: `.gitmodules`, which
+    `dependencies_test.py` reads for the C libraries a package bundles, is
+    in the clone without them, and nothing here reads their sources.
 
     :param repositories: the names to fetch.
     :param tmp_path_factory: pytest's per-session temporary directory.
