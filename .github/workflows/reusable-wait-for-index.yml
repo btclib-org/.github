@@ -67,14 +67,6 @@ name: reusable-wait-for-index
 # for an unrelated reason replaces the workflow's grant rather than
 # adding to it, and drops the `contents: read` this job needs.
 #
-# One divergence resolved rather than carried forward. The copies this
-# job replaced pin astral-sh/setup-uv two ways: btclib at
-# bec219d24cd3e171d82865faccec33120bb574f4 (v10.1.0), the other three at
-# 20cfd1bf945f4377ade1205e4dbc17946fc9a30d (v10.0.1). Every callee
-# landed in this campaign carries v10.1.0, and this one does too -- a
-# tag, let alone a branch, is a name its owner can move, so the pin and
-# not a version number is what a caller inherits.
-#
 # One divergence left where it is. A caller whose pypi-install.yml has a
 # `pull_request` trigger carries
 # `if: ${{ !github.event.pull_request.draft }}` on its own calling job,
