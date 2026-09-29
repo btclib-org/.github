@@ -345,6 +345,15 @@ Do not use Fable unless explicitly instructed.
   to exist on whichever branch is currently default, so
   `gh workflow run <file>.yml --ref <branch>` dispatches it against a
   build branch well before anything has landed.
+- **A Dependency Graph job runs only on a push that changes the manifest
+  it reads.** Its runs are the `event=dynamic` ones whose title
+  carries `Graph Update:`, and in `btclib` the `uv in /.` job follows
+  `pyproject.toml` and `uv.lock` while the `pip in /.clusterfuzzlite` job
+  follows that directory's `requirements.txt`. So a fix to how the graph
+  reads a directory that leaves the manifest alone starts no run at
+  landing, the newest run shown is still the failure it fixes, and nothing
+  before the next change to that manifest can verify it —
+  [the command for the pip job](https://github.com/btclib-org/.github/issues/1436#issuecomment-5899176660).
 
 ## Conventions to match
 

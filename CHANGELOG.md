@@ -9669,3 +9669,9 @@ nothing red follows from the copies disagreeing.
 - **`profile/dependencies.svg` draws an arrow only where the dependent
   does not already install its target through the arrows drawn**
   (closes #1449): the test compares them with the trees, extras included.
+
+### `CLAUDE.md` says what starts a Dependency Graph run
+
+- **A job of GitHub's Dependency Graph runs only on a push that changes
+  the manifest it reads** (issue #1436), so a fix leaving the manifest
+  alone cannot be verified before the next change to it.
