@@ -191,6 +191,102 @@ def test_a_module_is_not_named_by_its_package(
     )
 
 
+# lines `griffe check -f oneline` printed for btclib-wallet between its
+# v2026.9.24 and v2026.9.30, and a sentence naming each object the way
+# its notes do, qualified by the module a caller imports it from
+_WALLET_FINDINGS = (
+    "src/btclib_wallet/tx_builder.py:241: "
+    "build_psbt(change_script_pub_key): Parameter is now required\n"
+    "src/btclib_wallet/fetch/electrum.py:132: ElectrumFetcher.timeout: "
+    "Attribute value was changed: timeout -> valid_timeout(timeout)\n"
+)
+_WALLET_NOTES = """\
+# Release notes
+
+## v2026.9.30
+
+`tx_builder.build_psbt` requires `change_script_pub_key`, and
+`fetch.ElectrumFetcher` refuses a `timeout` past the bound.
+"""
+
+
+def _run_wallet(script: ModuleType, tmp_path: Path, findings: str, notes: str) -> int:
+    """Run `main` for btclib-wallet's package on the `v2026.9.30` section."""
+    (tmp_path / "findings.txt").write_text(findings, encoding="utf-8")
+    (tmp_path / "RELEASE_NOTES.md").write_text(notes, encoding="utf-8")
+    code: int = script.main(
+        [
+            "btclib_wallet",
+            str(tmp_path / "findings.txt"),
+            str(tmp_path / "RELEASE_NOTES.md"),
+            "--tag",
+            "v2026.9.30",
+        ]
+    )
+    return code
+
+
+def test_a_name_qualified_by_its_modules_is_named(
+    script: ModuleType, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`fetch.ElectrumFetcher` names it, re-exported from `fetch.electrum`."""
+    code = _run_wallet(script, tmp_path, _WALLET_FINDINGS, _WALLET_NOTES)
+
+    printed = capsys.readouterr().out
+    assert code == 0, printed
+    assert printed.count("covered   ") == len(_WALLET_FINDINGS.splitlines())
+
+
+@pytest.mark.parametrize(
+    ("span", "finding"),
+    [
+        # a qualifier the finding's module does not have
+        (
+            "`coin_selection.build_psbt`",
+            "src/btclib_wallet/tx_builder.py:241: build_psbt(x): Parameter was removed",
+        ),
+        # another package's object of the same name
+        (
+            "`threading.TIMEOUT_MAX`",
+            (
+                "src/btclib_wallet/fetch/transport.py:0: TIMEOUT_MAX: "
+                "Public object was removed"
+            ),
+        ),
+        # the finding's modules, in the other order
+        (
+            "`electrum.fetch.ElectrumFetcher`",
+            (
+                "src/btclib_wallet/fetch/electrum.py:132: ElectrumFetcher.timeout: "
+                "Attribute value was changed"
+            ),
+        ),
+        # a module is named by its dotted path alone
+        (
+            "`mnemonic.dispatch`",
+            (
+                "src/btclib_wallet/mnemonic/dispatch.py:0: <module>: "
+                "Public object was removed"
+            ),
+        ),
+    ],
+)
+def test_a_qualified_name_names_only_an_object_of_those_modules(
+    script: ModuleType,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    span: str,
+    finding: str,
+) -> None:
+    """The last component alone is no name: its qualifiers have to fit."""
+    notes = f"# Release notes\n\n## v2026.9.30\n\n{span} changed.\n"
+
+    code = _run_wallet(script, tmp_path, finding + "\n", notes)
+
+    assert code == 1
+    assert capsys.readouterr().out.startswith("uncovered ")
+
+
 def test_a_name_is_read_from_the_section_and_not_from_elsewhere(
     script: ModuleType, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
