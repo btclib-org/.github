@@ -9633,3 +9633,9 @@ nothing red follows from the copies disagreeing.
 - **The page shortens to what a first-time reader needs and lists
   btclib-secp256k1, then btclib-ecc, then btclib on top of it**
   (issue #1434): the standard, not the front page, holds the reasoning.
+
+### Section 2 and section 10 name `btclib-ecc`
+
+- **The tier row, the calendar's minute, the sentinel record and
+  `ROADMAP.md` name the repository as the forge does** (closes #1392):
+  section 3's name rule holds of it, and its crons are on the calendar.
