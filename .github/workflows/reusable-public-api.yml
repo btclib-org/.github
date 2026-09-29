@@ -11,13 +11,16 @@ name: reusable-public-api
 # allowed, where a release-time run arrives once, while RELEASE_NOTES.md
 # is being written.
 #
-# One input, the package griffe walks. No default: btclib, btclib_node
-# and bitcoin_core_rpc are each the calling repository's own name with
-# its hyphen turned to an underscore, and btclib_secp256k1 is the same
-# for btclib-secp256k1 -- a coincidence of four repositories rather than
-# a rule, and a default would make three callers correct by luck and
-# the fourth wrong by silence the day a fifth tree's name does not
-# follow it.
+# One input, the package griffe walks. No default: the package is the
+# calling repository's name only by a convention, and a default would be
+# right where the convention holds and wrong in silence where it does not.
+#
+# A finding is refused only where the release's own section of
+# RELEASE_NOTES.md does not name its object, so the job is red on a
+# break nobody wrote down and green on one the notes list. The section
+# is the tag's on a release and the first one under the file's title on a
+# rehearsal, which is the one open for the release to come; the script
+# says how a name is read.
 #
 # -s . -s src is not an input: every tree with a release.yml has moved
 # its package from the repository root to src/ at some point in its own
@@ -94,6 +97,20 @@ jobs:
         uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           enable-cache: false
+      # the notes are read by a script served from this repository the way
+      # reusable-version-check.yml serves its own, `ref: main` being the
+      # same trust the caller already extends by naming this workflow
+      # `@main`. The script takes the standard library alone, which is
+      # why the run below is --no-project
+      - name: Check out the notes script
+        if: steps.previous.outputs.has-previous == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: btclib-org/.github
+          ref: main
+          path: standard
+          persist-credentials: false
+          sparse-checkout: .github/scripts
       # griffe runs from PyPI through uvx rather than from a
       # pyproject.toml dependency group: unlike pre-commit -- pinned by
       # uv.lock because every contributor's own run has to agree with
@@ -110,9 +127,15 @@ jobs:
       # it of a job reading no lock, the version is the one this
       # repository's own .python-version names, and
       # tests/interpreters_test.py reads the two against each other.
-      # No base ref on a rehearsal: workflow_dispatch has no tag to
-      # check a public surface at, so the comparison falls back to
-      # griffe's own default, the current code
+      # No base ref and no tag on a rehearsal: workflow_dispatch has no
+      # tag to check a public surface at, so the comparison falls back to
+      # griffe's own default, the current code, and the notes' first
+      # section. griffe prints its findings on standard error, and
+      # oneline is the format that puts the object and the file on one
+      # line for the script to read. --quiet keeps uv's own progress
+      # lines out of that file, the script refusing a line it cannot
+      # read. The exit code is 1 with findings, so any other non-zero
+      # code is griffe failing rather than finding
       - name: Check the public API against the previous release
         if: steps.previous.outputs.has-previous == 'true'
         env:
@@ -121,16 +144,26 @@ jobs:
           BASE_REF: ${{ github.event_name == 'push' && github.ref_name || '' }}
         run: |
           base_args=()
+          tag_args=()
           if [ -n "$BASE_REF" ]; then
             base_args=(-b "$BASE_REF")
+            tag_args=(--tag "$BASE_REF")
           fi
-          if ! uvx --python 3.15 griffe==2.2.0 check "$PACKAGE" -s . -s src \
-              -a "$PREVIOUS_TAG" "${base_args[@]}" -f github; then
-            msg="the public API changed since $PREVIOUS_TAG:"
-            echo "::error::$msg reconcile the findings above with" \
-              "RELEASE_NOTES.md's breaking-changes list;" \
-              "not every finding is a break"
+          findings="$RUNNER_TEMP/griffe-findings.txt"
+          status=0
+          uvx --quiet --python 3.15 griffe==2.2.0 check "$PACKAGE" -s . -s src \
+            -a "$PREVIOUS_TAG" "${base_args[@]}" -f oneline \
+            > "$findings" 2>&1 || status=$?
+          if [ "$status" -gt 1 ]; then
+            cat "$findings"
+            echo "::error::griffe exited $status"
             exit 1
+          fi
+          if [ "$status" -eq 1 ]; then
+            echo "the public API changed since $PREVIOUS_TAG:"
+            uv run --no-project --python 3.15 \
+              standard/.github/scripts/check_public_api.py \
+              "$PACKAGE" "$findings" RELEASE_NOTES.md "${tag_args[@]}"
           fi
       - name: Skip the check (no previous release to compare against)
         if: steps.previous.outputs.has-previous == 'false'
