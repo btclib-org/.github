@@ -39,7 +39,7 @@ not deadlines.
 - **`btclib` splits along Bitcoin Core's line between consensus and
   wallet** (btclib-org/btclib#2129). `btclib-wallet` takes the wallet
   side, `mnemonic-codes` the mnemonic schemes up to the seed, and
-  `ellipticcurves` `curves/` and the parts of `ecc/` the issue does not
+  `btclib-ecc` `curves/` and the parts of `ecc/` the issue does not
   keep in `btclib`, which stays the protocol package a node consumes. The
   issue holds the steps, in that order, and what each is done when.
 - **tf2, one conformance suite for any bitcoin node**
@@ -71,7 +71,7 @@ not deadlines.
 - **A binding to `sipa/miniscript`** (btclib-org/btclib#508), and **an
   in-process HWI adapter** beside the subprocess one
   (btclib-org/btclib#469).
-- **A further split of `btclib`** once `ellipticcurves` has left it, and a
+- **A further split of `btclib`** once `btclib-ecc` has left it, and a
   package of their own for the codecs, the hashes, `p2p` or the shared
   substrate (btclib-org/btclib#2129).
 - **A cipher of `btclib`'s own, and code in `btclib` or `btclib-node`

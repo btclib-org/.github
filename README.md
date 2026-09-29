@@ -314,7 +314,7 @@ rule and gives no reason is still a gap.
 | `bitcoin-core-rpc` | 1 |
 | `btclib-node` | 1 |
 | `btclib-wallet` | 1 |
-| `ellipticcurves` | 1 |
+| `btclib-ecc` | 1 |
 | `btclib-benchmarks` | 2 |
 | `.github` | 2 |
 | `bbt` | 2 |
@@ -1945,7 +1945,7 @@ day and an hour, the repository owns the minute:
 | `btclib-org.github.io` | 36 |
 | `btclib-wallet` | 40 |
 | `bitcoin-node-tests` | 44 |
-| `ellipticcurves` | 48 |
+| `btclib-ecc` | 48 |
 
 **The rows are in the order of what they ask about**, family by family. A new
 sentinel takes the slot its family already holds rather than the end of the
@@ -2044,39 +2044,39 @@ reading its sentinels from here; a tree an entry does not name is asked nothing
 by that row.
 
 - `vendored-vectors` — `btclib`, `btclib-secp256k1`, `btclib-benchmarks`,
-  `btclib-node`, `btclib-wallet`, `bitcoin-node-tests`, `ellipticcurves`;
+  `btclib-node`, `btclib-wallet`, `bitcoin-node-tests`, `btclib-ecc`;
 - `bootstrap-dns` — `btclib-node`;
 - `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`;
 - `fuzz` — `btclib`, `btclib-secp256k1`, `btclib-node`, `btclib-wallet`,
-  `ellipticcurves`;
+  `btclib-ecc`;
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`,
   `btclib-wallet`;
-- `zkp-oracle` — `ellipticcurves`;
+- `zkp-oracle` — `btclib-ecc`;
 - `integration-hwi` — `btclib-wallet`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`;
 - `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-node`, `btclib-wallet`, `ellipticcurves`;
+  `btclib-node`, `btclib-wallet`, `btclib-ecc`;
 - `deps-oldest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
-- `py-arm-authority` — `btclib`, `ellipticcurves`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`;
+- `py-arm-authority` — `btclib`, `btclib-ecc`;
 - `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`;
 - `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`;
 - `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-wallet`, `ellipticcurves`;
+  `btclib-wallet`, `btclib-ecc`;
 - `homepage` — `btclib-org.github.io`;
 - `links` — every repository;
 - `alignment` — `.github`;
 - `wheel-reproducibility` — `btclib-secp256k1`;
 - `sdist-rebuild` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-node`, `btclib-wallet`, `ellipticcurves`;
+  `btclib-node`, `btclib-wallet`, `btclib-ecc`;
 - `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ellipticcurves`;
+  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`;
 - `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `btclib-node`,
-  `btclib-wallet`, `ellipticcurves`.
+  `btclib-wallet`, `btclib-ecc`.
 
 **An entry is what was decided, not what a tree happens to hold**, where section
 2's tier is read off the tree. A tree short of what its entry names is a gap in
@@ -2144,7 +2144,7 @@ and the badge land together.
   `btclib-secp256k1` read transactions, scripts and signatures off the wire,
   `btclib-node` speaks the peer-to-peer protocol, `btclib-wallet` parses
   PSBTs, output descriptors and BIP32/BIP322 data a counterparty hands it, and
-  `ellipticcurves` decodes the DER and BIP340 signatures and the ECIES envelopes
+  `btclib-ecc` decodes the DER and BIP340 signatures and the ECIES envelopes
   a sender writes;
   `bitcoin-core-rpc` reads an instance its own operator runs, which the property
   does not reach. `btclib-secp256k1`'s targets reach the vendored C on purpose:
