@@ -78,7 +78,7 @@ repos:
           (?x)^(\.github/scripts/check_changelog\.py
             |tests/(__init__|conftest)\.py
             |tests/(backlog|changelog|citations|classifiers|conventions
-              |copyright|coverage|dependabot|dockerfile|grid|homepage|hooks
+              |copyright|coverage|dependabot|dependencies|dockerfile|grid|homepage|hooks
               |interpreters|issue_template|layout|links|names|per_subject|pins
               |protection|pull_request_template|pyproject|release
               |rereads|root_files|scope|security|surface|topics|verbatim
@@ -157,6 +157,33 @@ repos:
         args: [--grandfathered, "350"]
         pass_filenames: false
         always_run: true
+  # profile/dependencies.svg against the profile/dependencies.dot it is
+  # rendered from, which is section 7's "Anything generated is checked
+  # against its source", in the section's pinned-`additional_dependencies`
+  # form: what renders a .dot is Graphviz, and the build of it pinned here
+  # is the WebAssembly one the script's own header gives the reason for.
+  # pre-commit builds the node environment itself, so uv stays the only
+  # prerequisite, and pre-commit.ci runs the hook, `ci: skip` above not
+  # naming it. The manual-stage hook is the same script writing the SVG
+  # instead, and the command the check's failure names; the anchor is
+  # what keeps the two on one pin
+  - repo: local
+    hooks:
+      - id: check-dependencies
+        name: profile/dependencies.svg is what its .dot renders to
+        entry: node .github/scripts/render_dependencies.mjs --check
+        language: node
+        additional_dependencies: &graphviz ["@hpcc-js/wasm-graphviz@1.29.2"]
+        pass_filenames: false
+        always_run: true
+      - id: render-dependencies
+        name: render profile/dependencies.svg from its .dot
+        entry: node .github/scripts/render_dependencies.mjs
+        language: node
+        additional_dependencies: *graphviz
+        pass_filenames: false
+        always_run: true
+        stages: [manual]
   # MD013 at 80 columns, tables included, and the shared configuration is
   # the one every repository of the organization carries: prose moves
   # between them, and a paragraph that lints in one has to lint here

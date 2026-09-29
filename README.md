@@ -1283,11 +1283,11 @@ Regeneration is opt-in and the failure message names the command:
 BTCLIB_REGENERATE_GOLDEN=1 uv run pytest
 ```
 
-Where the comparison is a test, this is a golden file. Where it is a
-page or a document, it is a hook with a `--check` flag instead, written
-`language: python`, stdlib-only and `always_run: true`, so it runs on
-pre-commit.ci as well, where `uv` is absent — `always_run` rather than a
-`files:` pattern, an artifact going stale from an edit to any input.
+Where the comparison is a test, this is a golden file. Where it is a page or a
+document, it is a hook with a `--check` flag instead, `always_run: true` and
+not a `files:` pattern, an edit to any input staling it, in an environment
+pre-commit builds from pins alone — `language: python` stdlib-only, or pinned
+`additional_dependencies` — so it runs on pre-commit.ci, where `uv` is absent.
 
 ### Test data is vendored, never fetched
 
