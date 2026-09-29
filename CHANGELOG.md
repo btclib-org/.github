@@ -9639,3 +9639,9 @@ nothing red follows from the copies disagreeing.
 - **The tier row, the calendar's minute, the sentinel record and
   `ROADMAP.md` name the repository as the forge does** (closes #1392):
   section 3's name rule holds of it, and its crons are on the calendar.
+
+### `[tool.uv]`'s floor rises to the `uv` `dependabot-core` bundles
+
+- **`required-version` reads `>=0.12.19`, the pin in `dependabot-core`'s
+  `uv/Dockerfile`** (issue #1438): the old floor admitted a `uv` older than
+  the one the updater writes `uv.lock` with.
