@@ -14,6 +14,10 @@
 // source out differently, so a byte comparison would hold only on the
 // machine that rendered the file.
 //
+// The layout is `neato` with `nop: 2`: the source places every node and
+// every edge, and the engine draws them where they are written rather
+// than laying anything out.
+//
 // The package is found through NODE_PATH, which pre-commit sets to the
 // hook environment's modules: `import` does not read that variable and
 // `require.resolve` does. Run from the repository root, as pre-commit
@@ -35,7 +39,7 @@ const { Graphviz } = await import(
 );
 
 const graphviz = await Graphviz.load();
-const rendered = graphviz.dot(readFileSync(SOURCE, "utf8"));
+const rendered = graphviz.neato(readFileSync(SOURCE, "utf8"), "svg", { nop: 2 });
 
 if (process.argv.includes("--check")) {
     let committed = null;

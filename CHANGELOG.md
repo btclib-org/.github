@@ -9663,3 +9663,9 @@ nothing red follows from the copies disagreeing.
 - **A graph rendered from `profile/dependencies.dot`**, which a hook
   re-renders against the SVG and a test compares with every tree's
   `pyproject.toml` (closes #1437).
+
+### The dependency graph draws the transitive reduction on a grid
+
+- **`profile/dependencies.svg` draws an arrow only where the dependent
+  does not already install its target through the arrows drawn**
+  (closes #1449): the test compares them with the trees, extras included.

@@ -2,56 +2,79 @@
 // dependencies.svg beside it, which profile/README.md shows.
 //
 // A node is the `[project]` name of every tree of the organization that
-// builds a distribution, `[build-system]` being what says it does, and of
-// every tree an arrow names. An arrow points from a project to what it
-// depends on: solid where `dependencies` in its pyproject.toml names the
-// target, and dashed, labelled with the extra, where only an
-// `optional-dependencies` extra does -- an extra's requirement of a target
-// `dependencies` already names draws nothing. The extras a requirement
-// asks of its target are on the arrow's label, in brackets. Dependency
-// groups are left out, being what a checkout of the tree installs rather
-// than what a user of the package does. tests/dependencies_test.py
-// compares this file with every tree's pyproject.toml.
+// builds a distribution, `[build-system]` being what says it does. A tree
+// that builds none is not drawn, and neither is an arrow into or out of
+// one. A grey dashed outline is not a package of the organization but a C
+// library one of them bundles: the submodule `X` of such a tree is the
+// node `libX`.
+//
+// An arrow points from a project up to what it depends on: solid where
+// `dependencies` in its pyproject.toml names the target, and dashed where
+// only an `optional-dependencies` extra does. An arrow is drawn only
+// where the dependent does not already install its target through the
+// arrows that are drawn, an extra of the dependent asking the extras it
+// needs of what it depends on being followed: `btclib[secp256k1]` asks
+// `btclib-ecc[secp256k1]`, so `btclib`'s own requirement of
+// `btclib-secp256k1` draws nothing. The extras are written nowhere, and
+// dependency groups are left out, being what a checkout of the tree
+// installs rather than what a user of the package does. A dotted line
+// with no arrowhead, labelled `bundled`, joins a package to a C library
+// that is a submodule of its tree, built into the package rather than
+// installed beside it.
+// tests/dependencies_test.py compares this file with every tree's
+// pyproject.toml and .gitmodules.
+//
+// Every position is set by hand and rendered as it stands, by neato with
+// `nop: 2` in .github/scripts/render_dependencies.mjs, which takes the
+// nodes and the edges where they are written. A node's `pos` is its
+// centre in points, y growing upward, and a row is a level: what a
+// package depends on sits above it, in four columns 145 apart. An edge's
+// `pos` is its route as the control points of a spline whose segments
+// are straight, `e,` giving where the arrowhead's tip lands, and a
+// label's `lp` is where it is written. The arrows into `btclib` from
+// the row below meet on one horizontal run under it, and `btclib-node`'s
+// goes straight up through it.
 //
 // The colours are for a transparent background under both of GitHub's
 // themes: text sits on the fill of its box, and the grey of the arrows
-// reads on the light theme's white and the dark theme's near-black.
+// and of the outlined C libraries reads on the light theme's white and
+// the dark theme's near-black.
 digraph dependencies {
-    graph [bgcolor="transparent", nodesep=0.3, ranksep=0.55, ordering=out];
-    node [
-        shape=box,
-        style="rounded,filled",
-        color="#1f6feb",
-        fillcolor="#1f6feb",
-        fontcolor="#ffffff",
-        fontname="Helvetica",
-        fontsize=12,
-    ];
-    edge [
-        color="#7d8590",
-        fontcolor="#7d8590",
-        fontname="Helvetica",
-        fontsize=10,
-        arrowsize=0.7,
-    ];
+    graph [bgcolor="transparent", outputorder=edgesfirst, pad=0.2];
+    node [shape=box, style="rounded,filled", color="#1f6feb", fillcolor="#1f6feb",
+          fontcolor="#ffffff", fontname="Helvetica", fontsize=12, width=1.7, height=0.5, fixedsize=true];
+    edge [color="#7d8590", fontcolor="#7d8590", fontname="Helvetica", fontsize=10, arrowsize=0.7];
 
-    "btclib-mnemonics";
+    "libsecp256k1"     [pos="290,560", style="rounded,dashed", color="#7d8590", fontcolor="#7d8590"];
+    "libsecp256k1-zkp" [pos="435,560", style="rounded,dashed", color="#7d8590", fontcolor="#7d8590"];
+    "btclib-mnemonics" [pos="0,460"];
+    "bitcoin-core-rpc" [pos="145,460"];
+    "btclib-secp256k1" [pos="290,460"];
+    "btclib-ecc"       [pos="290,360"];
+    "btclib"           [pos="290,260"];
+    "btclib-wallet"      [pos="0,160"];
+    "bitcoin-node-tests" [pos="145,160"];
+    "btclib-node"        [pos="290,160"];
+    "btclib-benchmarks"  [pos="435,160"];
 
-    "bbt" -> "btclib";
-    "bbt" -> "btclib-ecc";
-    "bbt" -> "btclib-wallet";
-    "bitcoin-node-tests" -> "bitcoin-core-rpc";
-    "bitcoin-node-tests" -> "btclib";
-    "btclib" -> "bitcoin-core-rpc";
-    "btclib" -> "btclib-ecc";
-    "btclib" -> "btclib-secp256k1" [style=dashed, label="secp256k1"];
-    "btclib-benchmarks" -> "btclib";
-    "btclib-benchmarks" -> "btclib-secp256k1";
-    "btclib-ecc" -> "btclib-secp256k1" [style=dashed, label="secp256k1"];
-    "btclib-node" -> "bitcoin-core-rpc";
-    "btclib-node" -> "btclib" [label="[secp256k1]"];
-    "btclib-wallet" -> "bitcoin-core-rpc";
-    "btclib-wallet" -> "btclib";
-    "btclib-wallet" -> "btclib-ecc";
-    "btclib-wallet" -> "btclib-secp256k1" [style=dashed, label="secp256k1"];
+    "btclib-secp256k1" -> "libsecp256k1" [style=dotted, arrowhead=none, label="bundled", lp="262,510",
+        pos="290,478 290,478 290,542 290,542"];
+    "btclib-secp256k1" -> "libsecp256k1-zkp" [style=dotted, arrowhead=none, label="bundled", lp="463,526",
+        pos="320,478 320,478 320,510 320,510 320,510 435,510 435,510 435,510 435,542 435,542"];
+    "btclib-ecc" -> "btclib-secp256k1" [style=dashed,
+        pos="e,290,442 290,378 290,378 290,435 290,435"];
+    "btclib" -> "btclib-ecc" [pos="e,290,342 290,278 290,278 290,335 290,335"];
+    "btclib" -> "bitcoin-core-rpc"
+        [pos="e,145,442 229,260 229,260 145,260 145,260 145,260 145,435 145,435"];
+    "btclib-wallet" -> "btclib"
+        [pos="e,290,242 20,178 20,178 20,210 20,210 20,210 290,210 290,210 290,210 290,235 290,235"];
+    "bitcoin-node-tests" -> "btclib"
+        [pos="e,290,242 145,178 145,178 145,210 145,210 145,210 290,210 290,210 290,210 290,235 290,235"];
+    "btclib-node" -> "btclib" [
+        pos="e,290,242 290,178 290,178 290,235 290,235"];
+    "btclib-benchmarks" -> "btclib"
+        [pos="e,290,242 415,178 415,178 415,210 415,210 415,210 290,210 290,210 290,210 290,235 290,235"];
+    "btclib-benchmarks" -> "btclib-secp256k1"
+        [pos="e,351,460 455,178 455,178 455,460 455,460 455,460 358,460 358,460"];
+    "btclib-wallet" -> "btclib-mnemonics" [pos="e,-20,442 -20,178 -20,178 -20,435 -20,435"];
 }
