@@ -9651,3 +9651,9 @@ nothing red follows from the copies disagreeing.
 - **`btclib-mnemonics`, the mnemonic schemes `btclib-wallet` moves out,
   registers as a tier-1 library at minute 52** (issue
   btclib-org/btclib-wallet#30): `fuzz` names the SLIP39 shares it decodes.
+
+### `reusable-public-api.yml` refuses only the findings the notes do not name
+
+- **A `griffe check` finding fails the job only where the release's section
+  of `RELEASE_NOTES.md` does not name its object** (closes #1441): the
+  error names each object missing.
