@@ -9675,3 +9675,9 @@ nothing red follows from the copies disagreeing.
 - **A job of GitHub's Dependency Graph runs only on a push that changes
   the manifest it reads** (issue #1436), so a fix leaving the manifest
   alone cannot be verified before the next change to it.
+
+### `check_public_api.py` reads a name qualified by its modules
+
+- **A span such as `fetch.ElectrumFetcher` names that object's finding**
+  where its qualifiers are the finding's modules, in order (closes
+  #1448), so `threading.TIMEOUT_MAX` names none of the package's.

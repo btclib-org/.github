@@ -18,6 +18,16 @@ the name of its object up to the first `(` or `.`, so
 well, and the whole of what precedes its first `(` besides, so
 `btclib.hwi` names the module and `ScriptError` names the class.
 
+A span may qualify an object by the modules it is imported from, the way
+a caller spells it: `tx_builder.build_psbt`, `fetch.ElectrumFetcher`. A
+component of such a span names the finding with that key when every
+component before it is a component of the finding's module, in the same
+order, so `fetch.ElectrumFetcher` names `ElectrumFetcher.timeout` of
+`btclib_wallet.fetch.electrum`, which `btclib_wallet.fetch` re-exports.
+What qualifies an object of another package, `threading.TIMEOUT_MAX`,
+names nothing of this one's, and neither does a module finding, which
+the span naming its dotted path alone covers.
+
 Nothing is asked of where in the section a name stands: not every tree
 keeps a breaking-changes subsection. A finding that is no break, a
 widening, stays refused until the section names its object all the same.
@@ -50,6 +60,7 @@ class Finding:
     path: str = ""
     line: str = ""
     why: str = ""
+    module: str = ""
 
 
 def _head(name: str) -> str:
@@ -79,11 +90,14 @@ def findings(output: str, package: str) -> list[Finding]:
             found.append(Finding(text=text, name=text, key=text))
             continue
         path, obj = match["path"], match["obj"]
+        module = ""
         if obj == _MODULE:
             name = key = _dotted(path, package)
         else:
-            name, key = obj, _head(obj)
-        found.append(Finding(text, name, key, path, match["line"], match["why"]))
+            name, key, module = obj, _head(obj), _dotted(path, package)
+        found.append(
+            Finding(text, name, key, path, match["line"], match["why"], module)
+        )
     return found
 
 
@@ -110,17 +124,45 @@ def section(notes: str, tag: str | None) -> str | None:
     return "\n".join(body)
 
 
-def named(text: str) -> set[str]:
-    """Return the keys of the backticked spans of a section.
+def _spans(text: str) -> list[str]:
+    """Return the backticked spans of a section, each on one line.
 
     Fenced blocks are dropped first, their fences being no span, and a
     span may wrap across a line of the notes.
     """
+    return [" ".join(span.split()) for span in _SPAN.findall(_FENCE.sub("", text))]
+
+
+def named(text: str) -> set[str]:
+    """Return the keys of the backticked spans of a section."""
     keys: set[str] = set()
-    for span in _SPAN.findall(_FENCE.sub("", text)):
-        name = " ".join(span.split())
+    for name in _spans(text):
         keys.update({_head(name), name.split("(")[0]})
     return keys
+
+
+def qualified(text: str) -> set[tuple[tuple[str, ...], str]]:
+    """Return each name a span qualifies, with the components before it."""
+    pairs: set[tuple[tuple[str, ...], str]] = set()
+    for name in _spans(text):
+        parts = name.split("(")[0].split(".")
+        pairs.update((tuple(parts[:n]), parts[n]) for n in range(1, len(parts)))
+    return pairs
+
+
+def covered(
+    finding: Finding, keys: set[str], pairs: set[tuple[tuple[str, ...], str]]
+) -> bool:
+    """Return whether a span of the section names the finding's object."""
+    if finding.key in keys:
+        return True
+    if not finding.module:
+        return False
+    for qualifiers, name in pairs:
+        components = iter(finding.module.split("."))
+        if name == finding.key and all(q in components for q in qualifiers):
+            return True
+    return False
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -145,10 +187,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"::error::{args.notes} has no section {where}")
         return 1
 
-    keys = named(body)
+    keys, pairs = named(body), qualified(body)
     missing = []
     for finding in found:
-        if finding.key in keys:
+        if covered(finding, keys, pairs):
             print(f"covered   {finding.text}")
             continue
         print(f"uncovered {finding.text}")
