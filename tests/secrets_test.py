@@ -113,10 +113,9 @@ def test_the_organization_stores_hold_only_what_is_recorded(
         if not skippable(endpoint, refused):
             raise
         pytest.skip(
-            "the organization's Dependabot store needs a permission the token "
-            "action cannot request; the yearly secrets review, "
-            f"{ORG}/{SELF}#1474, reads it by name, and a run with an admin "
-            "token reads it here"
+            "the organization's Dependabot store answers 403: it needs a "
+            "permission the token action has no input to request, and a run "
+            "with an admin token reads it here"
         )
     extra = unrecorded(found, ORGANIZATION_EXCEPTIONS, trees[SELF])
     assert not extra, f"{sorted(extra)} outside an environment; " + by_hand(
