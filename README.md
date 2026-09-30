@@ -3111,8 +3111,9 @@ of every version already on the index, which no later release corrects.
   publisher, and the attestation signs it with them: one answer rather than an
   answer and its exemptions. Its timestamp is `SOURCE_DATE_EPOCH` and its serial
   number derives from the distribution files' digests, so a rebuild of a
-  released tag writes the same document and the attestation verifies it as it
-  does the archives. An exemption for a wrapper does not follow from
+  released tag writes the same document until `main` changes what
+  `generate_sbom.py` writes, and the attestation verifies it as it does the
+  archives. An exemption for a wrapper does not follow from
   `Requires-Dist` naming only its `cffi`: the vendored library is a component
   too, at the commit its submodule pins. `generate_sbom.py` of this
   repository writes it for every tree, served from `main` as section 10 says.
