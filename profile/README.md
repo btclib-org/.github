@@ -61,9 +61,12 @@ An arrow points at what a package depends on, which is on a row above
 it, and a dashed one at what only an extra of the package installs. An
 arrow is drawn only where the package does not already install its
 target through the arrows that are drawn, so `btclib-wallet` has none to
-`btclib-ecc`, which `btclib` brings. A grey dashed box is a C library and
-not a package of the organization: the dotted line to it says
-`btclib-secp256k1` bundles it, built in rather than installed beside it.
+`btclib-ecc`, which `btclib` brings. `btclib-node` keeps its own to
+`btclib` all the same, asking it for the `secp256k1` extra, which
+`btclib-wallet` installs `btclib` without. A grey dashed box is a C
+library and not a package of the organization: the dotted line to it
+says `btclib-secp256k1` bundles it, built in rather than installed beside
+it.
 
 ## Tested against other people's vectors
 
