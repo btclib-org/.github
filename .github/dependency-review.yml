@@ -1,0 +1,96 @@
+---
+# What `actions/dependency-review-action` holds a pull request's added
+# dependencies to, in every repository of the organization: one file read
+# through `config-file: btclib-org/.github/.github/dependency-review.yml@main`
+# by `reusable-lint.yml`'s `Dependency review` job, and by the `lint.yml` of a
+# tree that keeps its own. README.md section 11 states the rule; what is
+# here is the numbers it leaves to a file, and the reason beside each.
+#
+# Not here, and on purpose: `allow-ghsas`. An advisory this check let
+# through would be a judgement that a release is not affected by it, and
+# section 12 states that in the release's own document, `.github/vex.toml`.
+#
+# The action's own keys, spelled as it reads them. A key it does not know
+# is not an error there, so a misspelt one is a setting silently not made.
+
+# the lowest severity that fails the check. A runtime set this small makes a
+# false alarm cheap, and `low` would stop a pull request on advisories that
+# almost never apply
+fail-on-severity: moderate
+
+# the action's default, spelled out so that the file says which scopes fail.
+# The graph reports a dependency of `btclib`'s `dev` group as `runtime`, so
+# the scope keeps nothing out of what a pull request adds
+fail-on-scopes:
+  - runtime
+
+# a summary table drawn from a call to the OpenSSF Scorecard API for each
+# added package, which no gate reads
+show-openssf-scorecard: false
+
+# a licence an added dependency may carry, as the graph concludes it: one
+# SPDX identifier per entry, the action dropping any entry with `AND` or `OR`
+# in it. A candidate expression passes where every `AND` term is listed and
+# at least one `OR` term is, so a package whose conclusion carries a
+# licence not listed here fails the check, and the list is what makes a new
+# one a decision instead of a pass.
+#
+# Permissive only, and MPL-2.0 with them: `hypothesis` and `pathspec` are
+# under it, among others, and its copyleft reaches the modified file rather
+# than the work that links it.
+allow-licenses:
+  - 0BSD
+  - Apache-2.0
+  - BSD-2-Clause
+  - BSD-2-Clause-Views
+  - BSD-3-Clause
+  - CC0-1.0
+  - HPND-Markus-Kuhn
+  - ISC
+  - MIT
+  - MIT-0
+  - MIT-CMU
+  - MPL-2.0
+  - PSF-2.0
+  - Python-2.0
+  - Python-2.0.1
+  - Ruby
+  - Unlicense
+  - Zlib
+
+# a package the licence check does not read at all, by purl: the match is on
+# the name at any version, so an entry is a decision about the package and not
+# about the release it was measured at. What earns one is a concluded licence
+# carrying a copyleft or a `LicenseRef` term, each with its reason beside it,
+# and a new such dependency is that decision made in a pull request on this
+# file.
+#
+# The graph's conclusion is a scan of every file a package ships, which is why
+# most entries below are not what the package declares: each comment names
+# the declared licence where PyPI's metadata gives one.
+allow-dependencies-licenses:
+  # declared GPLv3+, required by `cibuildwheel` in `btclib-secp256k1`'s lock.
+  # `btclib-secp256k1`'s wheel names only `cffi`
+  - pkg:pypi/bashlex
+  # declared LGPLv3+, a comparand in `btclib-benchmarks`'s dependencies
+  - pkg:pypi/python-bitcoinlib
+  # declared LGPL, required by the mutation-testing tool `cosmic-ray`
+  - pkg:pypi/yattag
+  # declares BSD, GPL and public domain for the parts it ships; required by
+  # `sphinx`, `myst-parser`, `pyroma` and `readme-renderer`
+  - pkg:pypi/docutils
+  # declared PSF-2.0; the conclusion adds GPL-1.0-or-later
+  - pkg:pypi/aiohappyeyeballs
+  - pkg:pypi/typing-extensions
+  # declared BSD-2-Clause; the conclusion for 9.0.4 adds LGPL-3.0-only, where
+  # 9.1.0's adds only BSD-2-Clause-Views
+  - pkg:pypi/sphinx
+  # declared MIT; the conclusion adds a public-domain `LicenseRef`
+  - pkg:pypi/ecdsa
+  # declared public domain, which has no SPDX identifier
+  - pkg:pypi/pyelftools
+  # declares a licence agreement of its own, which the conclusion spells as a
+  # `LicenseRef`
+  - pkg:pypi/matplotlib
+  # declared MIT; the conclusion adds OFL-1.1
+  - pkg:pypi/fonttools

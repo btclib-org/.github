@@ -79,7 +79,8 @@ repos:
           (?x)^(\.github/scripts/check_changelog\.py
             |tests/(__init__|conftest)\.py
             |tests/(backlog|changelog|citations|classifiers|conventions
-              |copyright|coverage|dependabot|dependencies|dockerfile|grid|homepage|hooks
+              |copyright|coverage|dependabot|dependencies|dependency_review
+              |dockerfile|grid|homepage|hooks
               |interpreters|issue_template|layout|links|names|per_subject|pins
               |protection|pull_request_template|pyproject|release
               |root_files|scope|security|surface|topics|verbatim

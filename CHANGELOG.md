@@ -9788,3 +9788,9 @@ nothing red follows from the copies disagreeing.
 - **A checkout is brought forward, then read; a sha read is for a
   measurement that must hold** (issue #1494): the fast-forward names its
   directory, the role is `writer`; `EXPECTED_DRIFT` carries it.
+
+### A pull request is reviewed for the dependencies it adds
+
+- **`reusable-lint.yml` runs `dependency-review-action`** (issue #1465),
+  failing on advisories of `moderate` severity or above and on a licence
+  outside `.github/dependency-review.yml`; an allowed advisory owes VEX.
