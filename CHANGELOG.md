@@ -9693,3 +9693,9 @@ nothing red follows from the copies disagreeing.
 - **The copies of `CONTRIBUTING.md` agree in the shared half, byte for
   byte** (issue #1362), so the table describes copies that agree. The
   table itself stays, empty, for the next drift a branch cannot converge.
+
+### `install_published_release.py` retries a cell's pinned install
+
+- **A script retries a cell's install of the released version while the
+  installer says the pin is not resolvable** (issue #1458), up to a
+  deadline, with a test; any other failure ends it at once.

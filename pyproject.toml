@@ -83,15 +83,17 @@ required-version = ">=0.12.19"
 
 [tool.ruff]
 # target-version is inferred from project.requires-python. Not for
-# check_changelog.py and mutation_counts.py: those two are served to
-# every repository of the organization, run there on whatever interpreter
-# that caller's own pre-commit supplies rather than on this repository's
-# own 3.14, and [tool.ruff.per-file-target-version] below overrides it
-# for those two files alone (issue btclib-org/.github#1374) -- not for
-# the whole of .github/scripts: the other four scripts there run pinned
-# at this repository's own 3.15 regardless of the caller, the
-# `mypy-scripts-floor` hook's own comment in .pre-commit-config.yaml
-# giving the reason those two are named and the other four are not.
+# check_changelog.py and mutation_counts.py, which are served to every
+# repository of the organization and run there on whatever interpreter
+# that caller's own pre-commit supplies, nor for
+# install_published_release.py, which runs on the interpreter of the cell
+# that calls it: none of them runs on this repository's own 3.14, and
+# [tool.ruff.per-file-target-version] below overrides it for those
+# (issue btclib-org/.github#1374) -- not for the whole of
+# .github/scripts: the rest run pinned at this repository's own 3.15
+# regardless of the caller, the `mypy-scripts-floor` hook's own comment
+# in .pre-commit-config.yaml giving the reason those are named and the
+# rest are not.
 # Section 3 gives this file, and not a nested `.github/scripts/ruff.toml`,
 # the setting: "One file holds the project metadata and every tool that
 # can be configured in it."
@@ -104,12 +106,14 @@ required-version = ">=0.12.19"
 # target above this, `ruff-check --fix`'s own UP017 rewrites
 # `datetime.timezone.utc` to `datetime.UTC` -- valid from 3.11, an
 # `AttributeError` on 3.10, and so the gate would write the very hazard
-# this key exists to refuse. Named by file and not by directory: the two
+# this key exists to refuse. Named by file and not by directory: the files
 # below are what a caller's own floor actually reaches, and the glob is
 # proved to reach only them -- `ruff format --diff` on a copy of each
 # with the same hazard appended left `mutation_counts.py` untouched and
-# rewrote `wait_for_pypi_release.py`.
-".github/scripts/{check_changelog,mutation_counts}.py" = "py310"
+# rewrote `wait_for_pypi_release.py`. install_published_release.py runs
+# on a cell's own interpreter, `setup-python`'s at the matrix floor, which
+# is above this one.
+".github/scripts/{check_changelog,install_published_release,mutation_counts}.py" = "py310"
 
 [tool.ruff.lint]
 # preview and explicit-preview-rules only make sense as a pair, and this
@@ -275,10 +279,9 @@ warn_unreachable = true
 # ruff's target refuses syntax, not a stdlib name newer than the floor,
 # so it does not close this by itself. The `mypy-scripts-floor` hook in
 # .pre-commit-config.yaml is the second run this gap needs, a
-# `--python-version` CLI flag overriding this table for `check_changelog.py`
-# and `mutation_counts.py` alone -- the two scripts actually served to a
-# caller's own floor, its own comment giving the reason the other four
-# under .github/scripts are not in it.
+# `--python-version` CLI flag overriding this table for the scripts
+# actually served to a caller's own floor, its own comment giving the
+# reason the others under .github/scripts are not in it.
 python_version = "3.14"
 
 [tool.pytest.ini_options]
