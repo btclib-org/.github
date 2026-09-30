@@ -9681,3 +9681,9 @@ nothing red follows from the copies disagreeing.
 - **A span such as `fetch.ElectrumFetcher` names that object's finding**
   where its qualifiers are the finding's modules, in order (closes
   #1448), so `threading.TIMEOUT_MAX` names none of the package's.
+
+### `wait_for_pypi_release.py` reads the page `pip` reads
+
+- **The wait ends when the simple index's page lists a file of the
+  version** (issue #1458), not when the JSON API answers its document;
+  another runner can still be served an older page.
