@@ -260,7 +260,8 @@ the uv it ships and refuses rather than upgrading itself, so a floor
 above the ceiling would silently stop every lock update it attempts.
 Below it, an *older* uv rewrites the lock. Section 15 carries the
 command that measures the floor, and `setup-uv` given no version input
-reads that key, so CI needs no second pin.
+reads that key, so CI needs no second pin except `reusable-audit.yml`'s, which
+section 12 gives.
 
 **The `uv-lock` hook's `rev:` is at or above that floor**: the pin
 selects the uv the hook bundles rather than the project's own, and under
@@ -3116,6 +3117,25 @@ of every version already on the index, which no later release corrects.
   dismissal for any other reason leaves the release affected, and one on a
   distribution the wheel does not declare names no component of the document,
   so either way its reason stays on the alert.
+- **The lock is audited for what the release publishes, before it publishes.**
+  `reusable-audit.yml` runs `uv audit --locked` over the tree's `uv.lock`, which
+  checks it against OSV, and a release that finds an advisory (exit 1) or cannot
+  reach the service (exit 2) does not reach an index. What is audited is what the
+  wheel declares: `[project] dependencies` and the extras, every key of
+  `[dependency-groups]` being passed as `--no-group`. The development tools a
+  release does not publish are left to Dependabot's alerts, which read the whole
+  lock; btclib-org/.github#1465 is the pull request check owed for what a change
+  adds.
+  The only ignore is an `id` of the tree's `.github/vex.toml`, passed as
+  `--ignore`, so a release is exempted only from what its own signed document
+  says it is not affected by. `check_audit.py` refuses a tree that keeps an
+  ignore in `[tool.uv.audit]` or in `uv.toml`'s `[audit]`, and the log says each
+  ignore it passes, uv printing none. `--ignore` matches an advisory's id and its
+  aliases in every package audited, where an entry names one component, so an
+  entry for one component exempts the same advisory in another. The uv version
+  is pinned in `reusable-audit.yml` alone, `uv audit` being a preview feature,
+  and stays at or above every tree's floor, moving with Dependabot's ceiling as
+  the floors do.
 - **What is published is inspected first** — `twine check --strict`,
   `check-wheel-contents` and `pyroma --min 10` on the files the release will
   publish; then the wheel is installed from an empty directory and smoke-tested,
