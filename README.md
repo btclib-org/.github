@@ -2880,6 +2880,24 @@ such a finding only through a further push or a `close`/`reopen`.
   are on.** All three are free on a public repository and off by
   default; push protection is the one that refuses the push rather than
   reporting it afterwards.
+- **Every pull request is reviewed for the dependencies it adds**, by
+  `actions/dependency-review-action` in a `Dependency review` job:
+  `reusable-lint.yml`'s, or the same job in a tree that keeps its own
+  `lint.yml`. It fails on an added dependency with an advisory of `moderate`
+  severity or above, or with a licence outside the allow-list, both read off
+  the dependency graph, which is therefore on in every tree. Its settings are
+  one file, this repository's `.github/dependency-review.yml`, read at `main`
+  so that a change reaches every tree in one landing. `allow-licenses` holds
+  permissive single SPDX identifiers, and a package whose concluded licence
+  carries a copyleft or a `LicenseRef` term is named by its purl in
+  `allow-dependencies-licenses`, with its reason, so that a new one is a
+  decision taken in a pull request. Only what a pull request adds or changes
+  is compared: an advisory published later against a package already locked
+  stops no pull request, Dependabot's alerts reading the whole lock and
+  section 12's audit what a release publishes.
+  **`allow-ghsas` is not used**: an advisory allowed there owes a
+  `.github/vex.toml` entry, section 12 stating a judgement of not affected in
+  the release's own document.
 - **Publishing waits for an approval**: `pypi` and `testpypi` are
   environments requiring a review, and `pypi` is restricted to `v*` tags.
   Trusted publishing via OIDC, so no long-lived token exists.
@@ -3124,8 +3142,7 @@ of every version already on the index, which no later release corrects.
   wheel declares: `[project] dependencies` and the extras, every key of
   `[dependency-groups]` being passed as `--no-group`. The development tools a
   release does not publish are left to Dependabot's alerts, which read the whole
-  lock; btclib-org/.github#1465 is the pull request check owed for what a change
-  adds.
+  lock, and what a change adds to section 11's dependency review.
   The only ignore is an `id` of the tree's `.github/vex.toml`, passed as
   `--ignore`, so a release is exempted only from what its own signed document
   says it is not affected by. `check_audit.py` refuses a tree that keeps an

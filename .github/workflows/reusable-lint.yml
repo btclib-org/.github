@@ -25,6 +25,15 @@ name: reusable-lint
 # than calling this one, being the file this workflow lives in, and
 # because its job also runs the offline share of its own suite in the
 # one job the branch rule names.
+#
+# The second job reviews the dependencies a pull request adds, which asks a
+# different question of a different input: the forge's dependency graph
+# rather than the checkout, so it takes no checkout and no hook
+# environment, and runs beside the hooks rather than after them. It compares
+# what the pull request adds or changes and reads no package it leaves
+# alone, so an advisory published later against one stops no pull request.
+# README.md section 11 states the rule, and .github/dependency-review.yml
+# is what the job holds a pull request to.
 
 on:
   workflow_call:
@@ -158,3 +167,43 @@ jobs:
         run: >
           uv run --locked --only-group lint
           pre-commit run --all-files --show-diff-on-failure
+
+  dependency-review:
+    # the name a check context is keyed by, after the calling job's own, as
+    # for the job above: `lint / Dependency review` for a caller named `lint`
+    name: Dependency review
+    # the action compares a pull request's base and head, and reads both off
+    # the pull_request event: on a push, a dispatch or a release's call it
+    # has no pair to compare and fails. github.event_name is the caller's,
+    # as github.event is, so a release run skips the job rather than failing
+    # it. A draft and a closed pull request decline as the job above does
+    if: >-
+      ${{ github.event_name == 'pull_request'
+      && !github.event.pull_request.draft
+      && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    # the action makes a few API calls and installs nothing, so a job past
+    # this is waiting on the forge
+    timeout-minutes: 10
+    # the compare endpoint needs contents: read, and the action posts
+    # nothing: comment-summary-in-pr stays at its default, never, the option
+    # that would want pull-requests: write
+    permissions:
+      contents: read
+    steps:
+      # no checkout: the action reads the graph through the API and the
+      # config file through the input below, and nothing in the tree
+      - name: Review the dependencies this pull request changes
+        # every action is pinned to a commit SHA, the tag in the comment
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          # the organization's one file, at main like a call of this
+          # repository's reusable workflows: a change to the threshold
+          # reaches every tree in one landing
+          config-file: btclib-org/.github/.github/dependency-review.yml@main
+          # a remote config file is read without credentials unless this
+          # input carries one, and GitHub limits an unauthenticated request
+          # by the address it comes from, which a runner shares. The file is
+          # in a public repository, so nothing beyond read access is asked
+          # of the token
+          external-repo-token: ${{ github.token }}

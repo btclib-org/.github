@@ -373,6 +373,14 @@ than this repository's, and *Plan-gated settings* below is where they
 are read back. A field the plan comes to offer joins this filter, its
 answer being a decision for the first time.
 
+The dependency graph is a setting too, and [the standard's review of the
+dependencies a pull request adds][s11-tokens] reads it:
+
+```shell
+gh api repos/btclib-org/.github/dependency-graph/compare/HEAD...HEAD
+# []
+```
+
 Version bumps are the other half of what Dependabot does here, and they
 are a file rather than a setting: `.github/dependabot.yml` declares
 `github-actions`, which [the standard gives every tree][s11-bots], and
