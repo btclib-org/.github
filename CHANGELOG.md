@@ -9747,3 +9747,9 @@ nothing red follows from the copies disagreeing.
 - **`license-files` may add the `COPYING` at a submodule's root**
   (closes #1483), as `secp256k1/COPYING`: MIT wants it in every copy, and a
   wheel carrying the library's compiled code is one. Any other addition fails.
+
+### The bill of materials carries a tree's not-affected findings
+
+- **A tree lists what its release is not affected by** (issue #1469), in
+  `.github/vex.toml`, and `generate_sbom.py` writes it as CycloneDX
+  `vulnerabilities`; each tree's own copy of the script still owes it.

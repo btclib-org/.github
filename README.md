@@ -3087,6 +3087,27 @@ of every version already on the index, which no later release corrects.
   does the archives. An exemption for a wrapper does not follow from
   `Requires-Dist` naming only its `cffi`: the vendored library is a component
   too, at the commit its submodule pins.
+- **What a release is not affected by is stated in the same document**, which
+  is what `OSPS-VM-04.02` asks of a project: a reader of the release learns
+  that a known vulnerability does not affect it from the release itself. The
+  rejected alternative is the dismissal's reason left on a Dependabot alert,
+  which only a maintainer can see. `.github/vex.toml` lists, one
+  `[[not_affected]]` table each, what the tree has judged not to affect its
+  release, and `generate_sbom.py` carries them into the document's
+  `vulnerabilities` array. Every value in a table is a string. `id` is the
+  vulnerability's `id`, and `source`, the advisory database's name, is its
+  `source.name`. `component` names a component the document carries, and the
+  entry's `affects[].ref` is that component's `bom-ref`: a distribution, in
+  any spelling PEP 503 treats as one, or a vendored submodule by the
+  repository name of its upstream url, which is the name the document gives
+  it. `justification`, one of CycloneDX 1.6's own, and `detail`, the reason,
+  are `analysis.justification` and `analysis.detail`, beside `analysis.state`
+  `not_affected`.
+
+  The judgement is about one tree's code, so the list is the tree's. A tree
+  with no entries has no file, and the document has no `vulnerabilities` key:
+  an empty array would claim a search the script cannot check. An entry
+  naming a component the document does not carry fails the script.
 - **What is published is inspected first** — `twine check --strict`,
   `check-wheel-contents` and `pyroma --min 10` on the files the release will
   publish; then the wheel is installed from an empty directory and smoke-tested,
