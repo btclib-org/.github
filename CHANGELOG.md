@@ -9717,3 +9717,9 @@ nothing red follows from the copies disagreeing.
 - **`btclib-node` sits a row below `btclib-wallet`, which it depends on**
   (closes #1475), and keeps its arrow to `btclib`: `btclib-wallet`'s
   `dependencies` name `btclib` without the `secp256k1` extra `btclib-node` asks.
+
+### The release's attestation bundle is attached as `*.intoto.jsonl`
+
+- **`reusable-github-release.yml` attaches the bundle as
+  `<tag>.intoto.jsonl`** (issue #1468), the suffix Scorecard's
+  `Signed-Releases` check reads as provenance.

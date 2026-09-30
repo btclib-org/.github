@@ -162,8 +162,10 @@ jobs:
           ' RELEASE_NOTES.md > "$RUNNER_TEMP/notes.md"
           # named for the tag only here, where the ref is one: nothing
           # inside the bundle says which release it belongs to, the way
-          # the distribution files' own names do
-          bundle="$GITHUB_REF_NAME.attestation.jsonl"
+          # the distribution files' own names do. The suffix is
+          # Scorecard's: its Signed-Releases check counts an asset whose
+          # name ends in `.intoto.jsonl` as the release's provenance
+          bundle="$GITHUB_REF_NAME.intoto.jsonl"
           cp attestation/attestation.jsonl "$bundle"
           # the bill of materials needs no renaming, unlike the bundle:
           # it carries the version in its own name, the distribution
