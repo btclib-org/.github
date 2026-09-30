@@ -9729,3 +9729,9 @@ nothing red follows from the copies disagreeing.
 - **A call gives each `needs` job's id and result, and a job's rows are
   matched by a prefix or by exact names** (issue #1470), so an aggregate
   of several `needs` jobs, or of unprefixed rows, runs the script too.
+
+### Section 10 admits a served script's checkout in a tree's own workflow
+
+- **A tree's own job runs a script of this repository from a sparse
+  checkout under a `path:`** (issue #1463), admitted where the job takes
+  none of its own tree, and an aggregate's lagging row waits to a deadline.
