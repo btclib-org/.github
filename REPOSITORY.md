@@ -59,14 +59,14 @@ protection needs the whole object rather than the answer above.
 
 | Check | Produced by |
 | --- | --- |
-| `Lint` | `lint.yml`'s only job |
+| `Lint` | `lint.yml` |
 
-`lint.yml` has one job, so that job is the context and there is no
-[aggregate job][s10-check] here to name. The name is not the sibling
-repositories' `Lint and type-check`, though the hook config it runs
-carries a mypy hook as theirs do: a context is keyed by name alone and
-bound outside the tree, so changing one is not something a pull request
-can do. The direction that would matter is the other one, a name
+`lint.yml`'s second job, `Dependency review`, is not in the rule yet: requiring
+it is the maintainer's step once a pull request has produced its context
+(#1465). The name `Lint` is not the sibling repositories' `Lint and type-check`,
+though the hook config it runs carries a mypy hook as theirs do: a context is
+keyed by name alone and bound outside the tree, so changing one is not something
+a pull request can do. The direction that would matter is the other one, a name
 promising a check nobody runs.
 
 **`links.yml` is not a required check and must not become one.** It asks
@@ -549,7 +549,6 @@ running a command.
 [s2-root]: ./README.md#root-files
 [s3]: ./README.md#3-pyprojecttoml-is-the-configuration
 [s8]: ./README.md#8-coverage-at-100
-[s10-check]: ./README.md#the-aggregate-job-and-the-required-check
 [s10-carries]: ./README.md#which-trees-carry-which-sentinel
 [s10-set]: ./README.md#the-set-and-its-cadence
 [s11-bots]: ./README.md#dependabot-and-pre-commitci
