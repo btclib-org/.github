@@ -104,8 +104,8 @@ jobs:
       # is the rule section 11 states. github-pages is GitHub's own,
       # created by enabling Pages, and section 11 puts it outside that
       # rule and outside REPOSITORY.md. This repository declares none of
-      # the three, and this token publishes nothing -- its five
-      # permissions are all read.
+      # the three, and this token publishes nothing -- its permissions
+      # are all read.
       #
       # An environment carrying no protection rule would add nothing to
       # that. One carrying a branch restriction, the only kind that adds
@@ -146,6 +146,13 @@ jobs:
           permission-contents: read
           permission-issues: read
           permission-metadata: read
+          # the secret stores above an environment, which secrets_test.py
+          # lists: the endpoints answer names and never values, so a
+          # read grant discloses no secret. The action has no input that
+          # names the organization's Dependabot store
+          permission-dependabot-secrets: read
+          permission-organization-secrets: read
+          permission-secrets: read
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

@@ -41,6 +41,9 @@ repository. A rule changes by a pull request like any other change.
   into a third round, as `CONTRIBUTING.md`'s *The review* says. A `NACK`
   is a disagreement with the change itself, in the sense section 11's
   *Review* gives it.
+- **A grant of write or admin is an issue in this repository**, whichever
+  repository it is for. The issue states the reason, and an owner other
+  than the one asking approves it there.
 - **A release is cut the way the repository's `RELEASING.md` says**,
   with a signed tag, and its upload to an index waits for a person's
   approval of the publishing environment: section 11's *Signatures* and

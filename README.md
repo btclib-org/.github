@@ -2880,6 +2880,31 @@ such a finding only through a further push or a `close`/`reopen`.
 - **Publishing waits for an approval**: `pypi` and `testpypi` are
   environments requiring a review, and `pypi` is restricted to `v*` tags.
   Trusted publishing via OIDC, so no long-lived token exists.
+- **A secret is an environment secret, and only the owners have access to
+  it.** The stores above an environment are the organization's Actions
+  and Dependabot stores and each repository's two, and one holds an
+  exception only where the `REPOSITORY.md` of the repository that spends
+  it records it. `tests/secrets_test.py` reads all four and refuses any
+  other entry, bar a store the token cannot read, whose skip says why;
+  these commands read the same names:
+
+    ```shell
+    gh api orgs/<org>/actions/secrets --jq '.secrets[].name'
+    gh api orgs/<org>/dependabot/secrets --jq '.secrets[].name'
+    gh api repos/<org>/<repo>/actions/secrets --jq '.secrets[].name'
+    gh api repos/<org>/<repo>/dependabot/secrets --jq '.secrets[].name'
+    ```
+
+    **A secret is rotated when an owner changes and when an exposure is
+    suspected.** No calendar rotates one, bar the two that live outside
+    an environment, `CLAUDE_CODE_OAUTH_TOKEN` and
+    `ALIGNMENT_APP_PRIVATE_KEY`, which are rotated at each yearly review.
+    Publishing needs none, the long-lived PyPI token it would rotate not
+    existing.
+
+    **The list is reviewed once a year**, as an issue in this tracker
+    titled `Secrets review <year>`, opened by the maintainer and closed
+    with the four calls' answers.
 - **A repository declares `pypi` and `testpypi` where it publishes, and
   no environment besides.** Each is named by a job of the release
   workflow and carries the review above; an environment nothing names
