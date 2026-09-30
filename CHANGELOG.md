@@ -9711,3 +9711,9 @@ nothing red follows from the copies disagreeing.
 - **A script judges the run's own jobs listing for an aggregate job**
   (issue #1463), reading it again up to a deadline while a row of the
   `needs` job is unfinished; its test substitutes the listing and the clock.
+
+### The dependency graph draws `btclib-node`'s arrow to `btclib-wallet`
+
+- **`btclib-node` sits a row below `btclib-wallet`, which it depends on**
+  (closes #1475), and keeps its arrow to `btclib`: `btclib-wallet`'s
+  `dependencies` name `btclib` without the `secp256k1` extra `btclib-node` asks.
