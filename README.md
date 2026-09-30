@@ -3108,6 +3108,14 @@ of every version already on the index, which no later release corrects.
   with no entries has no file, and the document has no `vulnerabilities` key:
   an empty array would claim a search the script cannot check. An entry
   naming a component the document does not carry fails the script.
+
+  A Dependabot alert dismissed as `not_used` or `inaccurate`, on a
+  distribution the wheel's `Requires-Dist` names, owes an entry whose
+  `component` is that distribution and whose `id` is one of the alert's
+  advisory identifiers: those two reasons say the release is not affected. A
+  dismissal for any other reason leaves the release affected, and one on a
+  distribution the wheel does not declare names no component of the document,
+  so either way its reason stays on the alert.
 - **What is published is inspected first** — `twine check --strict`,
   `check-wheel-contents` and `pyroma --min 10` on the files the release will
   publish; then the wheel is installed from an empty directory and smoke-tested,
