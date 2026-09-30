@@ -9800,3 +9800,9 @@ nothing red follows from the copies disagreeing.
 - **`generate_sbom.py` is one script, served from `main`** (issue #1478): the
   tree is its working directory, every property starts `btclib:`, and the
   copies the ports have not yet replaced are recorded as drift.
+
+### `lint.yml` reviews the dependencies a pull request adds
+
+- **`lint.yml` carries `reusable-lint.yml`'s `Dependency review` job**
+  (issue #1465): it fails on an added advisory of `moderate` severity or
+  above, or a licence off the organization's list.
