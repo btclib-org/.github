@@ -3,9 +3,10 @@ name: reusable-wait-for-index
 
 # The sentinel job a tree's own pypi-install.yml opens with, so the one
 # question a release, a schedule or a dispatch asks of the index -- has
-# it served what a tag names yet -- is written once rather than in every
-# tree. The callers are the trees section 10's *Which trees carry which
-# sentinel* names under `pypi-install`, and the three steps are this
+# it served what a tag names yet, meaning does its simple page list a
+# file of that version, the page `pip` reads -- is written once rather
+# than in every tree. The callers are the trees section 10's *Which trees
+# carry which sentinel* names under `pypi-install`, and the three steps are this
 # job's: a sparse checkout of this repository's `.github/scripts`,
 # `astral-sh/setup-uv`, and a run of `wait_for_pypi_release.py` against
 # the tag a release passes. The script is served from here, so a caller

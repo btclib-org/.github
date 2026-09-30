@@ -25,12 +25,15 @@ other scripts under it are tested.
 from __future__ import annotations
 
 import importlib.util
+import io
+import json
 import sys
 from contextlib import closing, contextmanager
 from email.message import Message
 from http import HTTPStatus
+from http.client import IncompleteRead
 from pathlib import Path
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING
 from urllib.error import HTTPError
 
 import pytest
@@ -41,7 +44,7 @@ if TYPE_CHECKING:
     from types import ModuleType
 
 _SCRIPT = Path(__file__).parents[1] / ".github" / "scripts" / "wait_for_pypi_release.py"
-_URL = "https://pypi.org/pypi/btclib/2026.9.1/json"
+_URL = "https://pypi.org/simple/btclib/"
 # a 300 s deadline at the shipped interval: the script asks once
 # before each sleep, and the last sleep is cut to what is left
 _ASKED_IN_300_S = 20
@@ -71,22 +74,34 @@ class _Transport:
         self.answers = answers
         self.asked: list[tuple[str, float]] = []
 
-    def __call__(self, url: str, timeout: float) -> bool:
+    def __call__(self, url: str, version: str, timeout: float) -> bool:
         """Answer the next verdict in the script, and record the question."""
+        assert version == "2026.9.1"
         self.asked.append((url, timeout))
         return self.answers.pop(0) if self.answers else False
 
 
-class _Answer(NamedTuple):
-    """What `served` reads of a response, which is its status alone."""
+class _Answer(io.BytesIO):
+    """What `served` reads of a response: its status and its body."""
 
-    status: int
+    status: int = HTTPStatus.OK
 
 
 @contextmanager
-def _answering(status: int) -> Iterator[_Answer]:
+def _answering(body: object = None, status: int = HTTPStatus.OK) -> Iterator[_Answer]:
     """Hand out a response the way `urlopen` hands one to a `with`."""
-    yield _Answer(status)
+    answer = _Answer(body if isinstance(body, bytes) else json.dumps(body).encode())
+    answer.status = status
+    yield answer
+
+
+def _page(*filenames: str) -> dict[str, object]:
+    """Return a simple-index page listing these files, as PEP 691 has it."""
+    return {
+        "meta": {"api-version": "1.4"},
+        "name": "btclib",
+        "files": [{"filename": name, "yanked": False} for name in filenames],
+    }
 
 
 @pytest.fixture
@@ -221,7 +236,7 @@ def test_a_request_outlasting_the_deadline_leaves_no_negative_sleep(
     """
     asked: list[tuple[str, float]] = []
 
-    def slow(url: str, timeout: float) -> bool:
+    def slow(url: str, _version: str, timeout: float) -> bool:
         """Answer no, having spent longer than the whole budget."""
         asked.append((url, timeout))
         clock.now += 40.0
@@ -258,45 +273,128 @@ def test_the_defaults_are_the_budget_a_release_actually_gets(
     assert [timeout for _, timeout in index.asked] == [10.0] * 20
 
 
-def test_the_index_answering_the_document_is_it_serving_the_version(
-    script: ModuleType, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """The transport reads the status, not merely that something answered."""
-    asked: list[tuple[str, float]] = []
+def _urlopen(
+    monkeypatch: pytest.MonkeyPatch, script: ModuleType, page: object
+) -> list[tuple[str, dict[str, str], float]]:
+    """Serve this page, and record what urlopen was asked, header included."""
+    asked: list[tuple[str, dict[str, str], float]] = []
 
     def urlopen(request: object, *, timeout: float) -> AbstractContextManager[_Answer]:
-        """Answer as the index does once the file it names is there."""
-        asked.append((request.full_url, timeout))  # type: ignore[attr-defined]
-        return _answering(HTTPStatus.OK)
+        """Answer as the index does with the page it holds."""
+        asked.append(
+            (
+                request.full_url,  # type: ignore[attr-defined]
+                dict(request.header_items()),  # type: ignore[attr-defined]
+                timeout,
+            )
+        )
+        return _answering(page)
 
     monkeypatch.setattr(script, "urlopen", urlopen)
+    return asked
 
-    assert script.served(_URL, 10.0)
-    assert asked == [(_URL, 10.0)]
+
+def test_the_page_is_asked_for_in_its_json_form(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The header is pip's, whole: the index varies its answer on it."""
+    asked = _urlopen(monkeypatch, script, _page("btclib-2026.9.1.tar.gz"))
+
+    assert script.served(_URL, "2026.9.1", 10.0)
+    assert asked == [
+        (
+            _URL,
+            {
+                "Accept": "application/vnd.pypi.simple.v1+json, "
+                "application/vnd.pypi.simple.v1+html; q=0.1, text/html; q=0.01"
+            },
+            10.0,
+        )
+    ]
+
+
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "btclib-2026.9.1.tar.gz",
+        "btclib-2026.9.1-py3-none-any.whl",
+        "btclib_ecc-2026.9.1-cp311-cp311-manylinux_2_28_x86_64.whl",
+        "btclib-2026.9.1.zip",
+    ],
+)
+def test_a_file_of_the_version_is_the_version_served(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch, filename: str
+) -> None:
+    """Any distribution of the version lists it, wheel or sdist."""
+    _urlopen(monkeypatch, script, _page("btclib-2026.9.0.tar.gz", filename))
+
+    assert script.served(_URL, "2026.9.1", 10.0)
+
+
+@pytest.mark.parametrize(
+    "filenames",
+    [
+        [],
+        ["btclib-2026.9.0.tar.gz", "btclib-2026.9.0-py3-none-any.whl"],
+        ["btclib-2026.9.10.tar.gz", "btclib-12026.9.1.tar.gz"],
+        ["btclib-2026.9.1.tar.gz.asc", "notes.txt", "btclib.whl"],
+    ],
+)
+def test_a_page_without_a_file_of_the_version_is_not_serving_it(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch, filenames: list[str]
+) -> None:
+    """The project's page answering 200 is not the version being on it.
+
+    The older versions, and the one whose text merely begins with this
+    one's, are what a page holds in the interval this waits out.
+    """
+    _urlopen(monkeypatch, script, _page(*filenames))
+
+    assert not script.served(_URL, "2026.9.1", 10.0)
+
+
+@pytest.mark.parametrize("page", [[], {"files": None}, {"files": [1, "x"]}, {}])
+def test_a_document_of_another_shape_is_not_serving_the_version(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch, page: object
+) -> None:
+    """Whatever the index answers that is not a page is one more wait."""
+    _urlopen(monkeypatch, script, page)
+
+    assert not script.served(_URL, "2026.9.1", 10.0)
+
+
+def test_a_body_that_is_not_json_is_not_serving_the_version(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An index that ignores the header answers HTML, and that is a wait."""
+    monkeypatch.setattr(
+        script,
+        "urlopen",
+        lambda *_args, **_kwargs: _answering(b"<!DOCTYPE html><html>"),
+    )
+
+    assert not script.served(_URL, "2026.9.1", 10.0)
 
 
 def test_a_2xx_that_is_not_ok_is_not_the_index_serving_it(
     script: ModuleType, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """`served` compares the status rather than that a status arrived.
-
-    The test above hands it `OK` alone, so it holds just as well against
-    a `served` that returns `True` for whatever answers -- which is a
-    mutation that survived it. This is the case that kills that one.
-    """
+    """`served` compares the status rather than that a status arrived."""
     monkeypatch.setattr(
         script,
         "urlopen",
-        lambda *_args, **_kwargs: _answering(HTTPStatus.NO_CONTENT),
+        lambda *_args, **_kwargs: _answering(
+            _page("btclib-2026.9.1.tar.gz"), HTTPStatus.NO_CONTENT
+        ),
     )
 
-    assert not script.served(_URL, 10.0)
+    assert not script.served(_URL, "2026.9.1", 10.0)
 
 
 def test_a_404_is_not_the_index_serving_the_version(
     script: ModuleType, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """A 404 while the upload is still landing is one more reason to wait.
+    """A 404 for a project the index does not hold is one more wait.
 
     `closing` is what keeps the failure from ending the run somewhere
     else: `HTTPError` is a response as well as an exception, and inherits
@@ -308,13 +406,13 @@ def test_a_404_is_not_the_index_serving_the_version(
     failure = HTTPError(_URL, HTTPStatus.NOT_FOUND, "Not Found", Message(), None)
 
     def urlopen(*_args: object, **_kwargs: object) -> AbstractContextManager[_Answer]:
-        """Fail the way the index fails while the upload is still landing."""
+        """Fail the way the index fails for a project it does not hold."""
         raise failure
 
     monkeypatch.setattr(script, "urlopen", urlopen)
 
     with closing(failure):
-        assert not script.served(_URL, 10.0)
+        assert not script.served(_URL, "2026.9.1", 10.0)
 
 
 @pytest.mark.parametrize(
@@ -322,6 +420,7 @@ def test_a_404_is_not_the_index_serving_the_version(
     [
         TimeoutError("timed out"),
         ConnectionResetError("reset by peer"),
+        IncompleteRead(b"{"),
     ],
 )
 def test_an_index_that_does_not_answer_is_not_serving_the_version(
@@ -335,4 +434,30 @@ def test_an_index_that_does_not_answer_is_not_serving_the_version(
 
     monkeypatch.setattr(script, "urlopen", urlopen)
 
-    assert not script.served(_URL, 10.0)
+    assert not script.served(_URL, "2026.9.1", 10.0)
+
+
+@pytest.mark.parametrize(
+    ("package", "url"),
+    [
+        ("btclib", "https://pypi.org/simple/btclib/"),
+        ("btclib-ecc", "https://pypi.org/simple/btclib-ecc/"),
+        ("Btclib_Ecc", "https://pypi.org/simple/btclib-ecc/"),
+        ("btclib.ecc", "https://pypi.org/simple/btclib-ecc/"),
+        ("btclib-.-_ecc", "https://pypi.org/simple/btclib-ecc/"),
+    ],
+)
+def test_the_package_is_keyed_the_way_the_index_keys_it(
+    script: ModuleType,
+    clock: _Clock,
+    monkeypatch: pytest.MonkeyPatch,
+    package: str,
+    url: str,
+) -> None:
+    """PEP 503's normalization, so the request needs no redirect."""
+    index = _index(script, monkeypatch, [True])
+
+    assert script.main([package, "v2026.9.1"]) == 0
+
+    assert index.asked == [(url, 10.0)]
+    assert clock.slept == []
