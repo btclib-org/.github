@@ -9705,3 +9705,9 @@ nothing red follows from the copies disagreeing.
 - **The Baseline badge is admitted beside the Best Practices badge, on
   the same property** (issue #1460), and the OpenSSF line orders it
   Scorecard, Best Practices, Baseline.
+
+### `check_run_jobs.py` reads a run's jobs listing up to a deadline
+
+- **A script judges the run's own jobs listing for an aggregate job**
+  (issue #1463), reading it again up to a deadline while a row of the
+  `needs` job is unfinished; its test substitutes the listing and the clock.

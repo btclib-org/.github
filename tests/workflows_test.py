@@ -775,6 +775,25 @@ LISTING = "actions/runs"
 NEEDS = "needs.*.result"
 """What an aggregate reading `needs` decides over, in either shape."""
 
+CHECK_SCRIPT = "check_run_jobs.py"
+"""The script that reads the listing for an aggregate that calls it.
+
+Such an aggregate has neither `LISTING` nor `NEEDS` in its own text, the
+read and the decision being the script's, so `shape` names it by this.
+"""
+
+
+def scripted(job: dict[str, Any]) -> bool:
+    """Say whether an aggregate hands the listing to `CHECK_SCRIPT`.
+
+    :param job: the aggregate job's own mapping.
+    :returns: whether some step runs the script.
+    """
+    return any(
+        isinstance(step, dict) and CHECK_SCRIPT in str(step.get("run", ""))
+        for step in job.get("steps") or []
+    )
+
 
 def shape(job: dict[str, Any]) -> str | None:
     """Read which of section 10's two shapes an aggregate decides with.
@@ -786,10 +805,13 @@ def shape(job: dict[str, Any]) -> str | None:
     they read `needs` at all.
 
     :param job: the aggregate job's own mapping.
-    :returns: "listing", "needs", or None where neither is found.
+    :returns: "listing", "needs", or None where neither is found. An
+        aggregate calling `CHECK_SCRIPT` reads the listing.
     :raises LookupError: where the job's text carries both, which a
         substring search cannot decide between.
     """
+    if scripted(job):
+        return "listing"
     blob = str(job)
     listing = LISTING in blob
     needs = NEEDS in blob
@@ -897,6 +919,8 @@ def test_a_listing_aggregate_accepts_success_and_skipped(
     `shape` is what selects them: the bullet fixing the allowlist is the
     one about an aggregate reading its own run's job listing, where an
     aggregate reading `needs` judges a join and is the bullet below it.
+    An aggregate calling `CHECK_SCRIPT` is left to
+    `tests/check_run_jobs_test.py`, which is where its allowlist is read.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -904,7 +928,7 @@ def test_a_listing_aggregate_accepts_success_and_skipped(
     wrong: list[str] = []
     for workflow in gated(repository, trees):
         for job_id, job in aggregates(workflow).items():
-            if shape(job) != "listing":
+            if shape(job) != "listing" or scripted(job):
                 continue
             missing = [name for name in ACCEPTED if name not in allowlist(job)]
             if missing:
@@ -979,7 +1003,7 @@ def test_a_listing_aggregate_that_tolerates_a_needs_row_reads_its_result(
     wrong: list[str] = []
     for workflow in gated(repository, trees):
         for job_id, job in aggregates(workflow).items():
-            if shape(job) != "listing":
+            if shape(job) != "listing" or scripted(job):
                 continue
             ids = unread(job)
             if ids:
@@ -1083,7 +1107,7 @@ def test_a_listing_aggregate_that_tolerates_a_needs_row_rereads_it(
     wrong: list[str] = []
     for workflow in gated(repository, trees):
         for job_id, job in aggregates(workflow).items():
-            if shape(job) != "listing" or not job.get("needs"):
+            if shape(job) != "listing" or scripted(job) or not job.get("needs"):
                 continue
             if not rereads(job):
                 wrong.append(f"{workflow.name}:{job_id}")
@@ -1297,7 +1321,7 @@ def test_a_listing_aggregate_fails_on_a_failed_needs_result(
     wrong: list[str] = []
     for workflow in gated(repository, trees):
         for job_id, job in aggregates(workflow).items():
-            if shape(job) != "listing" or not needed(job):
+            if shape(job) != "listing" or scripted(job) or not needed(job):
                 continue
             where = tmp_path / workflow.stem / job_id
             where.mkdir(parents=True)
@@ -1307,6 +1331,109 @@ def test_a_listing_aggregate_fails_on_a_failed_needs_result(
             ]
     assert not wrong, f"{wrong}; " + by_hand(
         repository, "grep -n -A12 'every job passed' .github/workflows/*.yml"
+    )
+
+
+def script_call(job: dict[str, Any]) -> tuple[int, list[dict[str, Any]]]:
+    """Find the step of an aggregate that runs `CHECK_SCRIPT`.
+
+    :param job: the aggregate job's own mapping.
+    :returns: the step's index among the job's steps, and the steps.
+    """
+    steps = [step for step in job["steps"] if isinstance(step, dict)]
+    call = next(
+        i for i, step in enumerate(steps) if CHECK_SCRIPT in str(step.get("run", ""))
+    )
+    return call, steps
+
+
+def command_faults(job: dict[str, Any]) -> list[str]:
+    """Say what is wrong with the arguments, the environment and the grant.
+
+    :param job: the aggregate job's own mapping.
+    :returns: one line per fault, empty where the call is as it should be.
+    """
+    call, steps = script_call(job)
+    step = steps[call]
+    ids = needed(job)
+    if len(ids) != 1:
+        return [f"needs {ids}, and the script takes one id"]
+    (needs,) = ids
+    env = step.get("env") or {}
+    holders = [
+        key
+        for key, value in env.items()
+        if EXPRESSION.fullmatch(str(value).strip())
+        and [needs] == NEEDS_RESULT.findall(str(value))
+    ]
+    faults: list[str] = []
+    if len(holders) != 1:
+        faults.append(f"has {holders} holding needs.{needs}.result")
+    elif f'{CHECK_SCRIPT} {needs} "${{{holders[0]}}}"' not in " ".join(
+        str(step["run"]).split()
+    ):
+        faults.append(f'does not run {CHECK_SCRIPT} {needs} "${{{holders[0]}}}"')
+    if env.get("GH_TOKEN") != "${{ github.token }}":
+        faults.append("does not pass GH_TOKEN")
+    if (job.get("permissions") or {}).get("actions") != "read":
+        faults.append("does not declare actions: read")
+    return faults
+
+
+def checkout_faults(job: dict[str, Any]) -> list[str]:
+    """Say what is wrong with the checkout the script is served from.
+
+    :param job: the aggregate job's own mapping.
+    :returns: one line per fault, empty where the checkout is as it should be.
+    """
+    call, steps = script_call(job)
+    checkouts = [
+        step["with"]
+        for step in steps[:call]
+        if str(step.get("uses", "")).startswith("actions/checkout@")
+        and (step.get("with") or {}).get("repository") == f"{ORG}/.github"
+    ]
+    if len(checkouts) != 1:
+        return [f"has {len(checkouts)} checkouts of {ORG}/.github before the script"]
+    given = checkouts[0]
+    faults: list[str] = []
+    if given.get("ref") != "main" or given.get("sparse-checkout") != ".github/scripts":
+        faults.append("does not check out .github/scripts at main")
+    if given.get("persist-credentials") is not False:
+        faults.append("persists the checkout's credentials")
+    command = " ".join(str(steps[call]["run"]).split())
+    if f"{given.get('path')}/.github/scripts/{CHECK_SCRIPT}" not in command:
+        faults.append("runs the script from somewhere its checkout's path is not")
+    return faults
+
+
+def test_a_scripted_aggregate_names_the_checkout_the_arguments_and_the_result(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """What only a tree can answer of an aggregate calling `CHECK_SCRIPT`.
+
+    The allowlist, the re-read and the refusal of a failed result are the
+    script's, and `tests/check_run_jobs_test.py` asks them. What is left
+    to the tree is what the script cannot see of its caller: that the
+    script is checked out of `btclib-org/.github` at `main`, sparse, under
+    the `path:` the command names; that the command names the id of the
+    one `needs` job and an environment variable holding that job's own
+    result; and that the token and the `actions: read` the read takes are
+    there.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    wrong = [
+        f"{workflow.name}:{job_id} {fault}"
+        for workflow in gated(repository, trees)
+        for job_id, job in aggregates(workflow).items()
+        if scripted(job)
+        for fault in command_faults(job) + checkout_faults(job)
+    ]
+    assert not wrong, f"{wrong}; " + by_hand(
+        repository, "grep -n -B12 -A6 'check_run_jobs' .github/workflows/*.yml"
     )
 
 

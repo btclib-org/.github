@@ -87,7 +87,8 @@ required-version = ">=0.12.19"
 # repository of the organization and run there on whatever interpreter
 # that caller's own pre-commit supplies, nor for
 # install_published_release.py, which runs on the interpreter of the cell
-# that calls it: none of them runs on this repository's own 3.14, and
+# that calls it, nor for check_run_jobs.py, which runs on the runner's own
+# `python3`: none of them runs on this repository's own 3.14, and
 # [tool.ruff.per-file-target-version] below overrides it for those
 # (issue btclib-org/.github#1374) -- not for the whole of
 # .github/scripts: the rest run pinned at this repository's own 3.15
@@ -112,8 +113,9 @@ required-version = ">=0.12.19"
 # with the same hazard appended left `mutation_counts.py` untouched and
 # rewrote `wait_for_pypi_release.py`. install_published_release.py runs
 # on a cell's own interpreter, `setup-python`'s at the matrix floor, which
-# is above this one.
-".github/scripts/{check_changelog,install_published_release,mutation_counts}.py" = "py310"
+# is above this one, and check_run_jobs.py on the `python3` of the runner
+# image, which no file here pins.
+".github/scripts/{check_changelog,check_run_jobs,install_published_release,mutation_counts}.py" = "py310"
 
 [tool.ruff.lint]
 # preview and explicit-preview-rules only make sense as a pair, and this
