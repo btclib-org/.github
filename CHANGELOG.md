@@ -9806,3 +9806,9 @@ nothing red follows from the copies disagreeing.
 - **`lint.yml` carries `reusable-lint.yml`'s `Dependency review` job**
   (issue #1465): it fails on an added advisory of `moderate` severity or
   above, or a licence off the organization's list.
+
+### A rebuild of a tag writes the same document until the script changes
+
+- **A rebuild of a tag writes the same document until `main` changes what
+  `generate_sbom.py` writes** (closes #1478): section 12 and the script's
+  docstring say so, and no tree's copy of the script is recorded as drift.
