@@ -153,6 +153,10 @@ jobs:
           permission-dependabot-secrets: read
           permission-organization-secrets: read
           permission-secrets: read
+          # the dismissed Dependabot alerts, which vex_test.py reads
+          # against each tree's .github/vex.toml: section 12 has a
+          # not_used or inaccurate dismissal answered there
+          permission-vulnerability-alerts: read
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

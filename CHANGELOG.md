@@ -9759,3 +9759,9 @@ nothing red follows from the copies disagreeing.
 - **`tests/workflows_test.py` refuses an aggregate reading the jobs listing
   without `check_run_jobs.py`** (closes #1481), and no longer reads such an
   aggregate's allowlist, re-read or results, which the script's test asks.
+
+### A dismissal that says not affected is answered in the list
+
+- **A `not_used` or `inaccurate` Dependabot dismissal of a declared
+  distribution owes a `.github/vex.toml` entry** (closes #1469), read by
+  `tests/vex_test.py`. Every publisher's `generate_sbom.py` carries the list.
