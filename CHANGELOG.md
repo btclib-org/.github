@@ -9735,3 +9735,9 @@ nothing red follows from the copies disagreeing.
 - **A tree's own job runs a script of this repository from a sparse
   checkout under a `path:`** (issue #1463), admitted where the job takes
   none of its own tree, and an aggregate's lagging row waits to a deadline.
+
+### Response time, secrets and grants are written down
+
+- **`SECURITY.md` promises 7 days to acknowledge and 90 to fix or advise,
+  section 11 states a secrets policy `tests/secrets_test.py` reads, and
+  `GOVERNANCE.md` gates a write or admin grant on an issue** (issue #1460).

@@ -38,6 +38,9 @@ would rather not use it for this, responsible disclosure by email to
 account and no repository setting to work, which is why it is kept
 beside the button rather than replaced by it.
 
+A report is acknowledged within 7 days, and a fix or a published advisory
+follows within 90 days.
+
 ## What belongs here, and what belongs upstream
 
 A defect belongs to the project whose code decides the wrong thing,
