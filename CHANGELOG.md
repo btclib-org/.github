@@ -9687,3 +9687,9 @@ nothing red follows from the copies disagreeing.
 - **The wait ends when the simple index's page lists a file of the
   version** (issue #1458), not when the JSON API answers its document;
   another runner can still be served an older page.
+
+### `EXPECTED_DRIFT` no longer names `CONTRIBUTING.md`
+
+- **The copies of `CONTRIBUTING.md` agree in the shared half, byte for
+  byte** (issue #1362), so the table describes copies that agree. The
+  table itself stays, empty, for the next drift a branch cannot converge.
