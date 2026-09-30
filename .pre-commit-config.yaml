@@ -81,8 +81,8 @@ repos:
               |copyright|coverage|dependabot|dependencies|dockerfile|grid|homepage|hooks
               |interpreters|issue_template|layout|links|names|per_subject|pins
               |protection|pull_request_template|pyproject|release
-              |rereads|root_files|scope|security|surface|topics|verbatim
-              |verdict|workflows)_test\.py)$
+              |root_files|scope|security|surface|topics|verbatim
+              |workflows)_test\.py)$
       - id: check-yaml
       # the toml here is read by taplo every run, but a format is not a
       # parse: what taplo cannot read fails its own hook, and what it can

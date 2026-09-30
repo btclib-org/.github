@@ -19,11 +19,8 @@ which stops matching is an error rather than a run over nothing.
 
 from __future__ import annotations
 
-import json
-import os
 import re
 import shlex
-import subprocess
 from collections import Counter
 from typing import TYPE_CHECKING, Any, NamedTuple
 
@@ -942,26 +939,30 @@ def test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing(
     )
 
 
-ACCEPTED = ("success", "skipped")
-"""The conclusions section 10 fixes a listing aggregate's allowlist to.
+def test_a_listing_aggregate_calls_the_script(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10's wait, asked of every aggregate reading the listing.
 
-Both names whatever the workflow's own jobs can report today: what keeps
-a `skipped` row out of such a listing is a condition the tree can lose,
-and this constant is what the section says a check reads rather than
-re-deriving each workflow's condition graph.
-"""
+    Such an aggregate reads a lagging row again until a deadline, and
+    section 10 puts a step that waits in a script under `.github/scripts`
+    with a test rather than in a loop of a `run:` block. `CHECK_SCRIPT` is
+    that script, and what is left to the tree is asked by
+    `test_a_scripted_aggregate_names_the_checkout_the_arguments_and_the_result`.
 
-COMMENT = re.compile(r"^[ \t]*#.*$", re.MULTILINE)
-"""A whole-line shell comment, which a `run:` block scalar keeps.
-
-A comment above a step belongs to the YAML and is gone by the time
-`document` returns; one inside a block scalar is part of the string, and
-that is where these workflows argue about the allowlist --
-`btclib-benchmarks`' aggregate says in one that `skipped` is a
-conclusion it accepts. Reading that would answer for the argument rather
-than for the filter, which is this module's docstring on `--frozen` in
-the shape a block scalar gives it.
-"""
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    wrong = [
+        f"{workflow.name}:{job_id}"
+        for workflow in gated(repository, trees)
+        for job_id, job in aggregates(workflow).items()
+        if shape(job) == "listing" and not scripted(job)
+    ]
+    assert not wrong, f"reads the listing without {CHECK_SCRIPT}: {wrong}; " + by_hand(
+        repository, "grep -n 'actions/runs\\|check_run_jobs' .github/workflows/*.yml"
+    )
 
 
 def scalars(node: object) -> list[str]:
@@ -981,49 +982,6 @@ def scalars(node: object) -> list[str]:
     if isinstance(node, list):
         return [text for value in node for text in scalars(value)]
     return []
-
-
-def allowlist(job: dict[str, Any]) -> str:
-    r"""Read the text a job's allowlist is written in, its comments dropped.
-
-    The job's whole text and not one step's `run:`, for the reason
-    `shape` gives. What is searched in it is the two words rather than
-    `"success"` with its quotes: `awk -F'\t' '$1 != "success"'` and
-    `case ... success | skipped) ;;` are one filter spelled two ways,
-    and both are section 10's.
-
-    :param job: the aggregate job's own mapping.
-    :returns: the job's strings joined, without their comment lines.
-    """
-    return COMMENT.sub("", "\n".join(scalars(job)))
-
-
-def test_a_listing_aggregate_accepts_success_and_skipped(
-    repository: str,
-    trees: dict[str, Path],
-) -> None:
-    """Section 10's allowlist, asked of the aggregates that read a listing.
-
-    `shape` is what selects them: the bullet fixing the allowlist is the
-    one about an aggregate reading its own run's job listing, where an
-    aggregate reading `needs` judges a join and is the bullet below it.
-    An aggregate calling `CHECK_SCRIPT` is left to
-    `tests/check_run_jobs_test.py`, which is where its allowlist is read.
-
-    :param repository: the repository asked about.
-    :param trees: the checkouts.
-    """
-    wrong: list[str] = []
-    for workflow in gated(repository, trees):
-        for job_id, job in aggregates(workflow).items():
-            if shape(job) != "listing" or scripted(job):
-                continue
-            missing = [name for name in ACCEPTED if name not in allowlist(job)]
-            if missing:
-                wrong.append(f"{workflow.name}:{job_id} does not name {missing}")
-    assert not wrong, f"{wrong}; " + by_hand(
-        repository, "grep -n 'success' .github/workflows/*.yml"
-    )
 
 
 EXPRESSION = re.compile(r"\$\{\{([^}]*)\}\}")
@@ -1046,221 +1004,6 @@ hyphenated id, which a bare `\\w` would cut short, still matches whole.
 """
 
 
-def excluding(job: dict[str, Any], *keys: str) -> list[str]:
-    """List a job's scalars, with the mapping's own named keys left out.
-
-    :param job: the aggregate job's own mapping.
-    :param keys: the top-level keys to leave out.
-    :returns: the strings `scalars` finds under everything else.
-    """
-    return scalars({key: value for key, value in job.items() if key not in keys})
-
-
-def unread(job: dict[str, Any]) -> list[str]:
-    """List a listing aggregate's own `needs` ids never read for their result.
-
-    :param job: the aggregate job's own mapping.
-    :returns: the `needs` ids with no `${{ }}` expression, outside the
-        job's own `if:` and `needs:`, reading `needs.<id>.result`.
-    """
-    declared = job.get("needs") or []
-    ids = [declared] if isinstance(declared, str) else declared
-    read = {
-        result
-        for text in excluding(job, "if", "needs")
-        for expression in EXPRESSION.findall(text)
-        for result in NEEDS_RESULT.findall(expression)
-    }
-    return [job_id for job_id in ids if job_id not in read]
-
-
-def test_a_listing_aggregate_that_tolerates_a_needs_row_reads_its_result(
-    repository: str,
-    trees: dict[str, Path],
-) -> None:
-    """Section 10's result requirement, asked of every listing aggregate.
-
-    The tolerated row's own result has to come from `needs`, for every
-    id the aggregate's own `needs:` names -- not only for one of them,
-    and not through an output or any other reference that is not this
-    one.
-
-    :param repository: the repository asked about.
-    :param trees: the checkouts.
-    """
-    wrong: list[str] = []
-    for workflow in gated(repository, trees):
-        for job_id, job in aggregates(workflow).items():
-            if shape(job) != "listing" or scripted(job):
-                continue
-            ids = unread(job)
-            if ids:
-                wrong.append(f"{workflow.name}:{job_id} does not read {ids}")
-    assert not wrong, f"{wrong}; " + by_hand(
-        repository, "grep -n -A40 'every job passed' .github/workflows/*.yml"
-    )
-
-
-QUOTED = re.compile(r"'[^']*'|\"(?:[^\"\\]|\\.)*\"")
-"""A shell string in single or double quotes, which a keyword never is.
-
-An awk program or an `echo` can hold `done` as a word, and quoted it is
-text rather than the end of a loop.
-"""
-
-TOKEN = re.compile(r"\n|&&|\|\||[;&|(){}]|[^\s;&|(){}]+")
-"""A shell token as far as `looped` needs one: an operator or a word.
-
-The newline is a token of its own, being what ends a command where no
-`;` does.
-"""
-
-COMMAND = frozenset({"\n", ";", "&&", "||", "|", "&", "(", "{", "do", "then", "else"})
-"""What a word follows where it starts a command.
-
-`do` and `done` are keywords only there, and `sleep` a command, so an
-unquoted `echo done` does not close the loop it sits in and `echo sleep`
-waits for nothing.
-"""
-
-LOOPED = "LISTING"
-"""What `looped` puts in place of a quoted string holding `LISTING`'s path."""
-
-
-def looped(script: str) -> bool:
-    """Say whether a script reads the listing inside a loop that sleeps.
-
-    The script's comment lines are dropped and its quoted strings
-    blanked first, a string holding the listing's path standing in as
-    one word. A loop is its `do` and its `done` where a command starts,
-    whichever of `for`, `while` and `until` opened it, and a wait is
-    `sleep` there too; a loop nested in another counts toward the outer
-    one.
-
-    :param script: one `run:` block's text.
-    :returns: whether one loop's body holds both the listing's path and a
-        `sleep`.
-    """
-
-    def blank(match: re.Match[str]) -> str:
-        return f" {LOOPED} " if LISTING in match.group() else " '' "
-
-    text = QUOTED.sub(blank, COMMENT.sub("", script))
-    frames: list[set[str]] = []
-    previous = "\n"
-    for word in TOKEN.findall(text):
-        start = previous in COMMAND
-        if start and word == "do":
-            frames.append(set())
-        elif start and word == "done" and frames:
-            body = frames.pop()
-            if {LOOPED, "sleep"} <= body:
-                return True
-            if frames:
-                frames[-1] |= body
-        elif frames and (word == LOOPED or LISTING in word):
-            frames[-1].add(LOOPED)
-        elif frames and start and word == "sleep":
-            frames[-1].add(word)
-        previous = word
-    return False
-
-
-def rereads(job: dict[str, Any]) -> bool:
-    """Say whether a listing aggregate reads the listing again after a wait.
-
-    Asked of each of the job's strings rather than of their join, a loop
-    being one script's.
-
-    :param job: the aggregate job's own mapping.
-    :returns: whether some script of the job has the shape `looped` reads.
-    """
-    return any(looped(text) for text in scalars(job))
-
-
-def test_a_listing_aggregate_that_tolerates_a_needs_row_rereads_it(
-    repository: str,
-    trees: dict[str, Path],
-) -> None:
-    """Section 10's re-read, asked of every listing aggregate with `needs:`.
-
-    Recognised by its shape, a loop whose body both asks for the listing
-    and sleeps, rather than by the count or the interval it waits: a
-    reader copying them would be a second place to change them.
-
-    :param repository: the repository asked about.
-    :param trees: the checkouts.
-    """
-    wrong: list[str] = []
-    for workflow in gated(repository, trees):
-        for job_id, job in aggregates(workflow).items():
-            if shape(job) != "listing" or scripted(job) or not job.get("needs"):
-                continue
-            if not rereads(job):
-                wrong.append(f"{workflow.name}:{job_id}")
-    assert not wrong, f"read once, not again after a wait: {wrong}; " + by_hand(
-        repository, "grep -n -B2 -A4 'actions/runs/' .github/workflows/*.yml"
-    )
-
-
-STUB_GH = """#!/bin/sh
-while [ "$#" -gt 0 ]; do
-  if [ "$1" = --jq ]; then exec jq -r "$2" "$LISTING"; fi
-  shift
-done
-echo "the stub answers only a call carrying --jq" >&2
-: > "$REFUSED"
-exit 2
-"""
-"""A `gh` answering `gh api ... --jq <filter>` with the filter over `LISTING`.
-
-`jq -r` because `--jq` prints a string raw, as the step's rows are. A
-call it cannot answer leaves `REFUSED` behind, so that its exit status,
-which a step may read as anything, is not taken for the step's verdict.
-"""
-
-STUB_SLEEP = "#!/bin/sh\nexit 0\n"
-"""A `sleep` that returns at once, the listing having no row to wait for."""
-
-PROBES = ("failure", "cancelled")
-"""The results each `needs` job is set to in turn, for its step to refuse.
-
-Two, a step refusing `failure` alone being one that passes `cancelled`
-(btclib-org/.github#1424).
-"""
-
-
-class Ran(NamedTuple):
-    """What running an aggregate's listing step against the stubs gave."""
-
-    status: int
-    """The step's exit status."""
-
-    stubbed: bool
-    """Whether the step made a call the stub could not answer."""
-
-    output: str
-    """The step's output and its errors, in that order."""
-
-
-def listing_step(job: dict[str, Any]) -> dict[str, Any]:
-    """Return the one step of an aggregate that asks for the listing.
-
-    :param job: the aggregate job's own mapping.
-    :returns: the step's mapping.
-    :raises LookupError: where no step, or more than one, names it.
-    """
-    found = [
-        step
-        for step in job.get("steps") or []
-        if isinstance(step, dict) and LISTING in str(step.get("run", ""))
-    ]
-    if len(found) != 1:
-        msg = f"{len(found)} steps of the aggregate ask for {LISTING!r}"
-        raise LookupError(msg)
-    return found[0]
-
-
 def needed(job: dict[str, Any]) -> list[str]:
     """List the ids an aggregate's own `needs:` names.
 
@@ -1269,156 +1012,6 @@ def needed(job: dict[str, Any]) -> list[str]:
     """
     declared = job.get("needs") or []
     return [declared] if isinstance(declared, str) else list(declared)
-
-
-def verdict(
-    workflow: Path,
-    job: dict[str, Any],
-    results: dict[str, str],
-    scratch: Path,
-) -> Ran:
-    """Run an aggregate's listing step against a run where every row passed.
-
-    The step's `env:` is what it runs with, each `needs.<id>.result` in
-    it reading that id's entry in `results` and any other expression
-    reading empty; nothing of this process's own environment reaches it
-    but `PATH`, behind the stubs. It runs in a directory of its own under
-    `scratch`, so a relative path it writes lands there. The listing
-    holds one finished `success` row per `needs` id, named as that job
-    declares itself, and the aggregate's own row unfinished: every row
-    passes, so what is left to fail the step is the results alone.
-
-    :param workflow: the file the job is read from.
-    :param job: the aggregate job's own mapping.
-    :param results: what each `needs.<id>.result` reads, by id.
-    :param scratch: an empty directory for the stubs and the listing.
-    :returns: the step's exit status, whether the stub refused a call,
-        and what the step printed.
-    """
-    declared = jobs(workflow)
-    rows: list[dict[str, str | None]] = [
-        {
-            "name": str(declared.get(i, {}).get("name", i)),
-            "status": "completed",
-            "conclusion": "success",
-        }
-        for i in needed(job)
-    ]
-    rows.append(
-        {"name": str(job.get("name")), "status": "in_progress", "conclusion": None}
-    )
-    listing = scratch / "listing.json"
-    listing.write_text(json.dumps({"jobs": rows}), encoding="utf-8")
-    stubs = scratch / "bin"
-    stubs.mkdir()
-    for name, body in (("gh", STUB_GH), ("sleep", STUB_SLEEP)):
-        (stubs / name).write_text(body, encoding="utf-8")
-        (stubs / name).chmod(0o755)
-    refused = scratch / "refused"
-    here = scratch / "cwd"
-    here.mkdir()
-
-    def evaluate(match: re.Match[str]) -> str:
-        read = NEEDS_RESULT.fullmatch(match.group(1).strip())
-        return results.get(read.group(1), "") if read else ""
-
-    step = listing_step(job)
-    env = {
-        str(key): EXPRESSION.sub(evaluate, str(value))
-        for key, value in (step.get("env") or {}).items()
-    }
-    env |= {
-        "PATH": f"{stubs}{os.pathsep}{os.environ.get('PATH', '')}",
-        "LISTING": str(listing),
-        "REFUSED": str(refused),
-        "GITHUB_REPOSITORY": f"{ORG}/stub",
-        "GITHUB_RUN_ID": "1",
-    }
-    script = scratch / "step.sh"
-    script.write_text(str(step["run"]), encoding="utf-8")
-    done = subprocess.run(
-        ["bash", "--noprofile", "--norc", "-eo", "pipefail", str(script)],
-        cwd=here,
-        env=env,
-        capture_output=True,
-        encoding="utf-8",
-        timeout=60,
-        check=False,
-    )
-    return Ran(done.returncode, refused.exists(), done.stdout + done.stderr)
-
-
-def probes(job: dict[str, Any]) -> dict[str, dict[str, str]]:
-    """Name each run the result rule asks for, against its results by id.
-
-    :param job: the aggregate job's own mapping.
-    :returns: every id `success` first, the control; then, per id and per
-        result in `PROBES`, that id at that result and every other at
-        `success`.
-    """
-    ids = needed(job)
-    runs = {"control": dict.fromkeys(ids, "success")}
-    for job_id in ids:
-        for result in PROBES:
-            runs[f"{job_id}={result}"] = dict.fromkeys(ids, "success") | {
-                job_id: result
-            }
-    return runs
-
-
-def refusals(workflow: Path, job: dict[str, Any], scratch: Path) -> list[str]:
-    """Run every probe of an aggregate and say what the step got wrong.
-
-    :param workflow: the file the job is read from.
-    :param job: the aggregate job's own mapping.
-    :param scratch: an empty directory, one subdirectory per run.
-    :returns: one line per run that went wrong, empty where none did.
-    """
-    wrong: list[str] = []
-    for name, results in probes(job).items():
-        (scratch / name).mkdir()
-        ran = verdict(workflow, job, results, scratch / name)
-        if ran.stubbed:
-            wrong.append(f"{name}: called gh without --jq, which the stub refuses")
-        elif name == "control" and ran.status:
-            wrong.append(f"{name}: fails a passing run: {ran.output[-300:]}")
-        elif name != "control" and not ran.status:
-            wrong.append(f"{name}: passes")
-    return wrong
-
-
-def test_a_listing_aggregate_fails_on_a_failed_needs_result(
-    repository: str,
-    trees: dict[str, Path],
-    tmp_path: Path,
-) -> None:
-    """Section 10's result rule, asked by running each listing aggregate.
-
-    Run rather than read, the aggregates matching their own rows in
-    shapes no one pattern covers. Every row passes, and each `needs` job
-    in turn reads every result in `PROBES` with the others at `success`,
-    which the step has to refuse; the run with every result `success` has
-    to pass, or the stub is not a run the step can judge and the refusals
-    would say nothing.
-
-    :param repository: the repository asked about.
-    :param trees: the checkouts.
-    :param tmp_path: where each run's stubs are written.
-    """
-    wrong: list[str] = []
-    for workflow in gated(repository, trees):
-        for job_id, job in aggregates(workflow).items():
-            if shape(job) != "listing" or scripted(job) or not needed(job):
-                continue
-            where = tmp_path / workflow.stem / job_id
-            where.mkdir(parents=True)
-            wrong += [
-                f"{workflow.name}:{job_id} {line}"
-                for line in refusals(workflow, job, where)
-            ]
-    assert not wrong, f"{wrong}; " + by_hand(
-        repository, "grep -n -A12 'every job passed' .github/workflows/*.yml"
-    )
 
 
 def script_call(job: dict[str, Any]) -> tuple[int, list[dict[str, Any]]]:
