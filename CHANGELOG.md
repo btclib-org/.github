@@ -9741,3 +9741,9 @@ nothing red follows from the copies disagreeing.
 - **`SECURITY.md` promises 7 days to acknowledge and 90 to fix or advise,
   section 11 states a secrets policy `tests/secrets_test.py` reads, and
   `GOVERNANCE.md` gates a write or admin grant on an issue** (issue #1460).
+
+### Section 3 admits a vendored library's licence notice
+
+- **`license-files` may add the `COPYING` at a submodule's root**
+  (closes #1483), as `secp256k1/COPYING`: MIT wants it in every copy, and a
+  wheel carrying the library's compiled code is one. Any other addition fails.
