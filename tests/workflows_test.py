@@ -1185,9 +1185,8 @@ def test_a_listing_aggregate_that_tolerates_a_needs_row_rereads_it(
     """Section 10's re-read, asked of every listing aggregate with `needs:`.
 
     Recognised by its shape, a loop whose body both asks for the listing
-    and sleeps, rather than by the count or the interval it waits: those
-    are section 10's numbers, and a reader copying them would be a second
-    place to change them.
+    and sleeps, rather than by the count or the interval it waits: a
+    reader copying them would be a second place to change them.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.

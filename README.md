@@ -518,10 +518,10 @@ and so falls with nothing changed.
 The Best Practices badge is admitted where REUSE's is refused, rendering
 for a registered project the questionnaire's live state, which the
 Scorecard's `CII-Best-Practices` check scores. The Baseline badge is
-admitted on the same property, rendering the level of the `OSPS-*`
-controls the same project has answered. Registration is the
-maintainer's attestation, and a tree section 10's `scorecard` entry does
-not name has a row complete without either badge.
+admitted because it too renders a registered project's live state, the
+level of the `OSPS-*` controls the same project has answered.
+Registration is the maintainer's attestation, and a tree section 10's
+`scorecard` entry does not name has a row complete without either badge.
 
 **`CONTRIBUTING.md`'s badge block is inside this rule's reach, and it is
 not the row.** Where *This repository in particular* opens with toolchain
@@ -1824,12 +1824,16 @@ without adding to it is deleted.
   for the verdict it reaches when the wait runs out, which only a test reaches
   (btclib-org/btclib#1165). The wait counts against a deadline rather than
   against attempts, and its test substitutes the transport and the clock.
-- **A reusable workflow runs a script out of `btclib-org/.github` at
-  `main`, and a caller owes no copy of it.** `actions/checkout` reads
-  `github.repository` from the run it is a step of rather than from
-  where the workflow file lives, so `repository:` and `ref:` are what
-  name the tree a script is served from; a workflow that needs the
-  caller's tree as well takes the second checkout under a `path:`.
+- **A workflow, reusable or a tree's own, runs a script out of
+  `btclib-org/.github` at `main`, sparse on `.github/scripts`, and no tree owes
+  a copy of it**; a wait served this way is the script the bullet above asks
+  for. `actions/checkout` reads `github.repository` from the run it is a step
+  of rather than from where the workflow file lives, so `repository:` and
+  `ref:` are what name the tree a script is served from; a workflow that needs
+  the caller's tree as well takes the second checkout under a `path:`. A tree's
+  own job takes it under a `path:` even where it takes none of its own source,
+  cone mode adding the root files, and the checkout is admitted there because
+  what lands is the organization's scripts and not the tree.
 
 ### The set, and its cadence
 
@@ -2148,11 +2152,12 @@ and the badge land together.
     and `schedule` on the default branch and calls `workflow_dispatch`
     experimental.
 
-    **The trees this entry names owe a registration at bestpractices.dev**, and
-    section 2's row carries its badge: `CII-Best-Practices` is the check reading
-    it. Registering is an account action, carried by btclib-org/.github#350. The
-    questionnaire restates how a vulnerability is reported, how a release is cut
-    and what gates a change, so a change to any of them owes a pass over it.
+    **The trees this entry names owe a registration at bestpractices.dev**,
+    whose badges section 2's row carries: `CII-Best-Practices` is the check
+    reading that registration. Registering is an account action, carried by
+    btclib-org/.github#350. The questionnaire restates how a vulnerability is
+    reported, how a release is cut and what gates a change, so a change to any
+    of them owes a pass over it.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
   between the parser and an adversary choosing the bytes. `btclib` and
   `btclib-secp256k1` read transactions, scripts and signatures off the wire,
@@ -2310,8 +2315,9 @@ request and the rule follows.
   (btclib-org/.github#1395). A job outside `needs`, unfinished, is
   refused — btclib-org/btclib-benchmarks#57's own point, which this does
   not loosen.
-- **Such a row is accepted only once the listing, read again up to three
-  times ten seconds apart, still shows it unfinished.** The result is
+- **Such a row is accepted only once the listing still shows it
+  unfinished at a deadline, `check_run_jobs.py`'s `DEFAULT_TIMEOUT`, read
+  again every `DEFAULT_INTERVAL` until then.** The result is
   not the listing's equal: btclib-org/btclib#1001's `needs` did not
   report `failure` for a matrix whose cells had died in *Set up job*,
   and such a cell, still listed unfinished, would pass on that result
