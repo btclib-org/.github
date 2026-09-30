@@ -1,0 +1,78 @@
+---
+name: reusable-audit
+
+# The `uv audit` a repository's release.yml runs before it publishes, so
+# that the uv it runs on, the flags it passes and what it refuses are
+# written once. `uv audit` checks the lock against OSV and fails a run
+# when it finds an advisory or cannot reach the service. A release that
+# waited for a scheduled report instead would publish with a known
+# vulnerability already in its locked set.
+#
+# What is audited is what the wheel declares, and what is ignored is what
+# the tree's `.github/vex.toml` names and nothing else: the script
+# `check_audit.py` computes both from the caller's own files and refuses a
+# tree that keeps an ignore anywhere but there, its docstring saying why.
+# The development tools a release does not publish are left to
+# Dependabot's alerts, which read the whole lock; btclib-org/.github#1465
+# is the pull request check owed for what a change adds.
+#
+# The uv version is pinned here and in no other file, `audit` being a
+# preview feature whose output and flags may change in a release of uv: a
+# caller's `required-version` is a floor for reading `uv.lock`. The pin
+# stays at or above every caller's floor, a floor above it making uv exit
+# 2 with `Required uv version ... does not match`, which reads in the log
+# like an unreachable service; so it moves with Dependabot's uv ceiling, as
+# every floor does, after running the script against a tree's lock with the
+# new uv. The preview flag is spelled as uv's own warning spells it.
+#
+# No input: the tree is the caller's checkout and the script is this
+# repository's, served from `main` the way reusable-version-check.yml
+# serves its own. The calling job's `if:` and `needs:` stay in the caller,
+# whose `publish-*` jobs name this job in theirs.
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Audit the lock for what the release publishes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # restated, a job's permissions replacing the workflow's
+      contents: read
+    steps:
+      - name: Check out the tree
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # `path:` puts it beside the caller's checkout instead of over it;
+      # sparse, so what lands is .github/scripts and this repository's
+      # root files. `ref: main` is the trust the caller extends by naming
+      # this workflow `@main`
+      - name: Check out the audit script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: btclib-org/.github
+          ref: main
+          path: standard
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+      # caching off: the job installs no dependency, so a cache has
+      # nothing to hold
+      - name: Setup uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: false
+      # --no-project, so the script installs nothing and runs on an
+      # interpreter named here, it being this repository's and not the
+      # caller's (section 10). The script's own `uv audit` runs in the
+      # caller's checkout, which is the working directory
+      - name: Audit the lock
+        run: |
+          uv run --no-project --python 3.15 \
+            standard/.github/scripts/check_audit.py

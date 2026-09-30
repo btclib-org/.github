@@ -9776,3 +9776,9 @@ nothing red follows from the copies disagreeing.
 
 - **bitcoin-node-tests' `test.yml` calls `check_run_jobs.py`** (closes #1470):
   `test_a_listing_aggregate_calls_the_script` passes there without the row.
+
+### The release path audits the lock for what the wheel declares
+
+- **A release runs `uv audit --locked` before publishing** (issue #1466),
+  through `reusable-audit.yml`, over what the wheel declares and ignoring
+  only `.github/vex.toml`'s ids; each `release.yml` still owes the call.

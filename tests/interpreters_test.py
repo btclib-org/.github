@@ -255,6 +255,7 @@ TAKEN = re.compile(r"^\d+(?:\.\d+)+t?$")
 """A `python-version:` given a version rather than a caller's expression."""
 
 NAMES_ONE = (
+    ".github/workflows/reusable-audit.yml",
     ".github/workflows/reusable-documented.yml",
     ".github/workflows/reusable-integration-bitcoind.yml",
     ".github/workflows/reusable-public-api.yml",
