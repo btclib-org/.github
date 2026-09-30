@@ -1837,6 +1837,15 @@ without adding to it is deleted.
   own job takes it under a `path:` even where it takes none of its own source,
   cone mode adding the root files, and the checkout is admitted there because
   what lands is the organization's scripts and not the tree.
+- **`generate_sbom.py` is served that way, and is the one script a tree may
+  keep a copy of as well.** It reads the gitlinks and `.github/vex.toml` of the
+  working directory, which is the tree's own checkout and not the one the
+  script was served into. `btclib-secp256k1` keeps a byte-identical copy, which
+  section 14 compares, because its build calls the script while building a
+  wheel from a checkout, and an offline build cannot fetch it. The rejected
+  alternatives are a served script alone, which fails that build, and a copy in
+  each tree, which makes every change to the document an edit in each
+  (btclib-org/.github#1478).
 
 ### The set, and its cadence
 
@@ -3105,7 +3114,8 @@ of every version already on the index, which no later release corrects.
   released tag writes the same document and the attestation verifies it as it
   does the archives. An exemption for a wrapper does not follow from
   `Requires-Dist` naming only its `cffi`: the vendored library is a component
-  too, at the commit its submodule pins.
+  too, at the commit its submodule pins. `generate_sbom.py` of this
+  repository writes it for every tree, served from `main` as section 10 says.
 - **What a release is not affected by is stated in the same document**, which
   is what `OSPS-VM-04.02` asks of a project: a reader of the release learns
   that a known vulnerability does not affect it from the release itself. The
@@ -3381,6 +3391,10 @@ The paths are what that test compares:
   invocation and not a second copy of the standard, and it stays a
   file of its own rather than folding into `CLAUDE.md`, which is read by
   every session including the one that wrote the diff.
+- `.github/scripts/generate_sbom.py` — owed where
+  `.github/scripts/generate_sbom.py`: the file itself satisfies the condition,
+  as it does `.taplo.toml`'s, the canonical copy being this repository's.
+  Section 10 says which tree keeps another.
 
 **Verbatim in part**, the file around it being the repository's own and so
 nothing a comparison by path can do: the `ci:` block of
