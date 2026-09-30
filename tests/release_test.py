@@ -34,13 +34,14 @@ that renames it renames it here.
 
 from __future__ import annotations
 
+import re
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from . import ORG, ROOT, SELF, Tier, by_hand
-from .workflows_test import COMMENT, REMOTE_CALL, document, workflows
+from .workflows_test import REMOTE_CALL, document, workflows
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -64,6 +65,14 @@ ATTEST = "actions/attest@"
 
 CREATE = "gh release create"
 """The command that attaches files to the GitHub release."""
+
+COMMENT = re.compile(r"^[ \t]*#.*$", re.MULTILINE)
+"""A whole-line shell comment, which a `run:` block scalar keeps.
+
+A comment above a step belongs to the YAML and is gone by the time
+`document` returns; one inside a block scalar is part of the string, and
+a comment naming `CREATE` is not a call of it.
+"""
 
 SOURCE = "__source__"
 """The key `jobs` stashes on a resolved job, naming where its steps live.
@@ -227,10 +236,9 @@ def attesting(workflow: Path) -> tuple[str, dict[str, Any], dict[str, Any]]:
 def arguments(run: str) -> list[str]:
     """Read the words each `gh release create` in a shell is passed.
 
-    A whole-line comment is dropped first, for the reason
-    `workflows_test.COMMENT` gives, and a line ending in a backslash is
-    joined to the one below it: the command is passed one logical line
-    however the file wraps it.
+    A whole-line comment is dropped first, for the reason `COMMENT`
+    gives, and a line ending in a backslash is joined to the one below
+    it: the command is passed one logical line however the file wraps it.
 
     :param run: the step's shell.
     :returns: the words after each occurrence of the command, in order.

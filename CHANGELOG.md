@@ -9753,3 +9753,9 @@ nothing red follows from the copies disagreeing.
 - **A tree lists what its release is not affected by** (issue #1469), in
   `.github/vex.toml`, and `generate_sbom.py` writes it as CycloneDX
   `vulnerabilities`; each tree's own copy of the script still owes it.
+
+### Every listing aggregate calls `check_run_jobs.py`
+
+- **`tests/workflows_test.py` refuses an aggregate reading the jobs listing
+  without `check_run_jobs.py`** (closes #1481), and no longer reads such an
+  aggregate's allowlist, re-read or results, which the script's test asks.
