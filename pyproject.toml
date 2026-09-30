@@ -235,6 +235,15 @@ convention = "pep257"
 # the one every sibling repository is owed to declare
 notice-rgx = "^(#![^\\n]*\\n)?# Copyright \\(c\\) The btclib developers\\n# Distributed under the MIT software license, see the accompanying\\n# LICENSE file or https://opensource\\.org/license/mit for the full text\\."
 
+# codespell's configuration, the other half of section 4's spelling gate.
+# `intoto` is the in-toto attestation format's own name, the one
+# Scorecard's `*.intoto.jsonl` suffix carries, and both spell checkers'
+# dictionaries offer "into" for it; with --write-changes that rewrites the
+# suffix the release workflow attaches the bundle under. [tool.typos]
+# below names it too.
+[tool.codespell]
+ignore-words-list = "intoto"
+
 # typos' configuration, where section 4 says both spell checkers are
 # configured and where every sibling keeps this one. What is *not* here
 # matters as much: no `files.extend-exclude`. A file the checker never
@@ -245,6 +254,8 @@ notice-rgx = "^(#![^\\n]*\\n)?# Copyright \\(c\\) The btclib developers\\n# Dist
 # the copyright notice is a ruff rule rather than a hook. typos reads it
 # as "COPY" or "CPU" misspelled, both of which it would be anywhere else
 CPY = "CPY"
+# see [tool.codespell] above
+intoto = "intoto"
 
 [tool.mypy]
 strict = true
