@@ -423,14 +423,15 @@ repos:
       # `python_version` is one value for [tool.mypy]'s own table and has
       # no per-module override (`python_version` names none of the keys a
       # `[[tool.mypy.overrides]]` module section may set), so the hook
-      # above alone leaves `check_changelog.py`, `mutation_counts.py` and
-      # `install_published_release.py` checked at this repository's own
-      # 3.14 -- newer than any of them actually runs on where it is served
-      # to another repository: `check_changelog.py` on whatever python3 a
-      # caller's own pre-commit run supplies, `mutation_counts.py` on that
-      # caller's own `uv run --locked` (issue btclib-org/.github#1374),
-      # `install_published_release.py` on the interpreter of the cell that
-      # installs with it. A CLI
+      # above alone leaves `check_changelog.py`, `mutation_counts.py`,
+      # `check_run_jobs.py` and `install_published_release.py` checked at
+      # this repository's own 3.14 -- newer than any of them actually runs
+      # on where it is served to another repository: `check_changelog.py`
+      # on whatever python3 a caller's own pre-commit run supplies,
+      # `mutation_counts.py` on that caller's own `uv run --locked` (issue
+      # btclib-org/.github#1374), `check_run_jobs.py` on the `python3` of
+      # the runner that checks a run's jobs, `install_published_release.py`
+      # on the interpreter of the cell that installs with it. A CLI
       # `--python-version` overrides the config for this run alone,
       # rather than for the table.
       #
@@ -451,11 +452,12 @@ repos:
           uv run --locked --no-default-groups --group lint --group test
           mypy --python-version 3.10
           .github/scripts/check_changelog.py
+          .github/scripts/check_run_jobs.py
           .github/scripts/install_published_release.py
           .github/scripts/mutation_counts.py
         language: system
         files: >-
-          ^\.github/scripts/(check_changelog|install_published_release|mutation_counts)\.py$
+          ^\.github/scripts/(check_changelog|check_run_jobs|install_published_release|mutation_counts)\.py$
         pass_filenames: false
         require_serial: true
   - repo: https://github.com/astral-sh/uv-pre-commit
