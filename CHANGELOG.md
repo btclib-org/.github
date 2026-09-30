@@ -9794,3 +9794,9 @@ nothing red follows from the copies disagreeing.
 - **`reusable-lint.yml` runs `dependency-review-action`** (issue #1465),
   failing on advisories of `moderate` severity or above and on a licence
   outside `.github/dependency-review.yml`; an allowed advisory owes VEX.
+
+### One `generate_sbom.py` for every tree
+
+- **`generate_sbom.py` is one script, served from `main`** (issue #1478): the
+  tree is its working directory, every property starts `btclib:`, and the
+  copies the ports have not yet replaced are recorded as drift.
