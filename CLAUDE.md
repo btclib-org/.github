@@ -4,173 +4,79 @@ This file provides guidance to Claude Code (claude.ai/code) when working
 with code in this repository.
 
 `README.md` is the standard every btclib-org repository is built and
-kept to, `profile/README.md` is the organization's page, and the issue
-tracker is where a repository's drift from that standard is filed and
-worked off. Read `README.md` before changing it: most of what a session
-here wants to add is already in it, with the alternative that was
-rejected beside it.
-
-Most of the Python is `tests/`, and its subject is the organization
-rather than this tree: whether the repositories still agree with
-`README.md`, which is the half of section 15's audit a machine can run.
-The other Python is `.github/scripts/`, this tree's own local hooks,
-their subject being this tree's `CHANGELOG.md` rather than the
-organization.
+kept to, and the issue tracker is where a repository's drift from it is
+filed and worked off. Read `README.md` before changing it: most of what
+a session here wants to add is already in it, with the alternative that
+was rejected beside it.
 
 How to work here — what the issue tracker takes, the prose style, and
 how a pull request is opened and landed — is `CONTRIBUTING.md`, which is
 the same file in every repository of the organization up to its last
 section, which is this tree's and holds the commands and the gates.
-Repository
-configuration is
-`REPOSITORY.md`: read it before changing a workflow, a branch rule or a
-setting. Reviewing is `REVIEWING.md`, and `/review` is that file as a
-command; read it before reviewing a pull request and before opening one,
-since it is what the pull request will be answered against.
+Repository configuration is `REPOSITORY.md`: read it before changing a
+workflow, a branch rule or a setting. Reviewing is `REVIEWING.md`, and
+`/review` is that file as a command; read it before reviewing a pull
+request and before opening one, since it is what the pull request will be
+answered against.
 
 ## Architecture
 
-`README.md` is the standard, and it is the product: every other
-repository of the organization is built and kept to it, and a change here
-is a change to what they are measured against. `profile/README.md` is the
-organization's page, `REPOSITORY.md` is this repository's own settings
-read back from the endpoint, and `tests/` is the half of section 15's
-audit a machine can run — its subject being the other repositories rather
-than this tree.
+`README.md` is the standard and the product: a change to it is a change
+to what every other repository is measured against. `profile/README.md`
+is the organization's page, `REPOSITORY.md` is this repository's own
+settings read back from the endpoint, `tests/` is the half of section
+15's audit a machine can run — its subject the other repositories — and
+`.github/scripts/` the scripts this tree's hooks and the reusable
+workflows run.
 
 ## The primary checkout is the maintainer's
 
-**Never work in it.** No edit, no `git add`, no commit, no branch
-switch, no rebase, no `git stash` — the hooks fix files in place. It is a
-local reference only, and it stays on `main`.
-
-Reading it is fine, but `git fetch` moves `refs/remotes/origin/main` and
-leaves the work tree where it was, so a `grep` or a `Read` against the
-checkout answers for whenever it was last brought forward, not for now.
-The read that cannot go stale is `git show origin/main:<path>`: it
-answers from the ref `git fetch` just moved, never from the tree.
-
-Where the checkout has to be current rather than merely readable, a
-fast-forward of a clean `main` brings it up:
+Never work in it: no edit, no `git add`, no commit, no branch switch, no
+rebase, no `git stash` — the hooks fix files in place. The one write
+allowed there brings it forward, and only while it is on `main` and
+`git status --porcelain` prints nothing; where it is not, stop:
 
 ```shell
-git fetch origin && git merge --ff-only origin/main
+checkout=<checkout>
 ```
-
-That writes no commit, switches no branch and runs no hook, so it is on
-the permitted side of *never work in it*, not an exception to it. Stop
-if the checkout is not on `main` or is not clean: that is no longer
-bringing it forward.
-
-**Every session works in a worktree**, its own, from the first edit, named
-`wt-<tracker>-<issue>-<repo>-<role>` rather than after the issue alone, most
-general part first: an issue filed in `btclib-org/.github`'s tracker is the key
-and the repository is a detail of it — `btclib-org/.github#255` is one issue
-owed by seven repositories, `btclib-org/.github#177` by two — so the repository
-is what varies underneath an issue rather than the other way round, which is why
-`repo` comes after `issue`. Naming it that way also sorts every worktree of one
-issue together, which is what a port leaves behind.
-
-Each of the four parts earns its place against a different collision,
-and none of them is the same collision. `tracker` is the repository
-whose issue tracker holds the issue: an issue number is unique only
-within one tracker, so `btclib-org/.github#45` and
-`btclib-org/btclib#45` are different issues that would otherwise name
-the same worktree. `issue` is what prevents the collision that has
-actually happened — two worktrees of different work sharing a generic
-basename in one repository's own `.git`, keyed on its path's basename.
-`repo` prevents a different collision, a *path* one rather than a `.git`
-one: two repositories each keep their own `.git/worktrees/<basename>`
-and cannot collide there, but the workers of one session share one
-scratchpad directory, so a session carrying one issue into several
-repositories computes the same target path for each of them, and `git
-worktree add` refuses a directory that already exists — or worse, a
-second worker reads the first one's tree. `role` covers the narrower
-case of a coder and its reviewer holding a worktree at once, which the
-ordinary sequence avoids by each removing its own.
-
-An issue of `btclib-org/.github`'s tracker, worked in `btclib` by a coder, names
-its worktree `wt-github-255-btclib-coder`. The environment is created in the
-worktree, not the checkout, by whatever that tree's own `CONTRIBUTING.md` names
-under *The environment and the gates*, and a session reads that section, not
-this one, for the command. The editing, the gates and the commits all happen in
-the worktree before the push.
 
 ```shell
-WT=<scratchpad>/wt-<tracker>-<issue>-<repo>-<role>
-git worktree add "$WT" origin/main -b <branch>
-git -C "$WT" push origin HEAD:refs/heads/<branch>
+git -C "${checkout:?}" pull --ff-only
 ```
 
-`-b <branch>` sits after the path and the commit-ish so that the placeholder
-ends the command, which is section 9 of `btclib-org/.github`'s rule. With the
-placeholder ahead of `"$WT"`, its `<` and its `>` are redirections performed
-left to right, so the `>` is reached only where the reader's own directory
-already holds the name `branch`: there the `<` succeeds, the line runs, and the
-`>` takes `"$WT"` as its target — a path with no directory at it is the file it
-creates. Ordinarily nothing holds that name, so the `<` fails first (`no such
-file or directory: branch`) and the line ends before the `>` opens anything.
+Read it only after that, once `git -C <checkout> rev-parse HEAD
+origin/main` prints one sha twice. A measurement that has to hold at a
+named revision reads `git -C <checkout> show <sha>:<path>` instead.
 
-The push names the worktree with `git -C "$WT"` because a `cd` binds the
-shell that runs it: a session that runs each line as its own command
-starts the next one in the directory it began in, the primary checkout,
-so a push after a `cd` offers that checkout's `HEAD` instead of the
-worktree's. `env -C <dir>` is the same binding for a command that takes
-no `-C` of its own. Neither binding rescues the assignment above it: a
-session that loses the `cd` loses `WT` with it, and `git -C ""` is
-documented to leave the working directory unchanged, so that push lands
-the same way, exit 0 and no diagnostic. That silence is `git`'s rather
-than the binding's: the BSD `env` macOS ships documents no case for an
-empty `-C` and refuses one — `cannot change directory to ''`, exit 125 —
-so a line bound with `env -C` stops there instead of running against the
-wrong tree. What the `-C` buys is a path that can be written out in
-full; write it out.
-
-Removing the worktree is part of finishing, and it stands in a block of
-its own: the block above ends in a placeholder, and a shell that
-discards that line as a parse error reads the next as a fresh command —
-which, in one block, is this line against whatever `$WT` already held.
-Standing alone it is a second fence, so `${WT:?}` is what it writes:
-with `$WT` unset or empty the expansion fails and the removal does not
-run. Those are the only cases it catches — a `$WT` an earlier session or
-command left holding a path expands, and the removal runs against
-whatever worktree that path names.
+Every session works in a worktree of its own, from its first edit, named
+`wt-<tracker>-<issue>-<repo>-<role>` — `wt-github-255-btclib-writer` for
+issue 255 of `btclib-org/.github`'s tracker, worked in `btclib` by a
+writer. The environment is created there, with the command `CONTRIBUTING.md`
+names under *The environment and the gates*. Every path is written out in
+full:
 
 ```shell
-git worktree remove --force "${WT:?}"
+git worktree add \
+  <scratchpad>/wt-<tracker>-<issue>-<repo>-<role> origin/main -b <branch>
 ```
 
-**Never `git stash` in a worktree either: `refs/stash` is shared.** A
-worktree isolates files, not refs, so `git stash push` pushes onto the
-same stack every other session pops from. Commit to your own branch
-instead.
+Removing it is part of finishing:
 
-**Do not rewrite `refs/heads/main`, and move it only onto
-`origin/main`.** That name is the local branch's, and no ruleset reaches
-it: a ruleset binds the forge's copy. The fast-forward above moves it
-onto `origin/main` and is inside that, where a merge, a commit on `main`
-or an `update-ref` to a branch tip leaves the ref somewhere
-`origin/main` is not. Your own branch is what you push, and the pull
-request is what moves `origin/main`.
+```shell
+git worktree remove --force <scratchpad>/wt-<tracker>-<issue>-<repo>-<role>
+```
+
+`refs/stash` and the local `main` are shared by every worktree: never
+`git stash`, and move `main` only by the fast-forward above.
 
 ## Model
 
-The default model for this repository is Sonnet. Switch to Opus only for
-a change to what the standard *says* — a convention two repositories
-disagree about, a rule whose rejected alternative has to be weighed. Use
-`/model opus` for the session, then switch back.
-
-**A port of one file into every repository is that case, and reads as
-though it were not.** The work looks mechanical — the same edit,
-repository by repository — and the decision it rests on is what the
-standard says, because trees that each derive the rule for themselves
-land different answers and the tracker gets an issue per divergence. What
-settles it is one sentence here, written before the ports go out rather
-than after; a campaign that starts on Sonnet discovers mid-flight that
-it is rewriting a section, with branches already pushed against the
-answer it had then.
-
-Do not use Fable unless explicitly instructed.
+Default model: Sonnet. Opus for a change to what the standard *says* — a
+convention two repositories disagree about, a rule whose rejected
+alternative has to be weighed — and for a port of one file into every
+repository, which looks mechanical and rests on that decision: settle it
+in one sentence here before the ports go out. Do not use Fable unless
+instructed.
 
 ## Non-obvious facts that will otherwise waste a session
 
@@ -182,24 +88,11 @@ Do not use Fable unless explicitly instructed.
   `pyproject.toml` for their configuration. A word this file's own
   prose needs — `CPY`, ruff's copyright rule — is a typo to the spell
   checker until `[tool.typos]` names it, with the reason beside it.
-- **The suite's subject is the other repositories, and there is no
-  coverage**: what it would measure is a tree that ships nothing, so the
-  number would be the suite measuring itself. What it cannot reach — a
-  claim in this file or in `README.md` that no command re-derives — a
-  reader catches or nothing does. That fact's operational half:
-  `tests/conftest.py` sets `SWITCH = "BTCLIB_INTEGRATION"`, its own
-  docstring calling it "the environment variable without which the
-  suite's `integration` tests skip themselves." A bare `uv run pytest`
-  syncs `dev` — uv's default group, which `[tool.uv]` overrides nowhere
-  and which reaches `test` — collects the suite, skips every test that
-  carries the marker for want of the switch, and runs the rest: what
-  reaches no network, `.github/scripts/`'s own tests among them. The
-  alignment question itself is what that run still answers nothing
-  about, every test asking it carrying the marker; *Verifying*, further
-  down this file, still says to trust the exit code over the filtered
-  output there, and `BTCLIB_INTEGRATION=1` is what earns it.
-  `alignment.yml` carries the whole command, with the reason for its
-  `--no-default-groups` beside it.
+- **There is no coverage: the suite's subject is the other repositories,
+  and coverage here would measure the suite itself.** A bare `uv run pytest`
+  skips every `integration` test — every alignment question — unless
+  `BTCLIB_INTEGRATION=1` is set (`tests/conftest.py`'s `SWITCH`);
+  `alignment.yml` has the full command.
 - **A `BACKLOG` row's red is often a sibling's success.** Its rows in
   `tests/__init__.py` are `xfail(strict=True)` and keyed on this
   tracker's issue numbers, while the trees they name move underneath
@@ -227,32 +120,11 @@ Do not use Fable unless explicitly instructed.
   is written into those repositories and no hook reads it, so a
   repository that wants the file gated keeps its own. A change here is a
   change to what a reader of every repository inheriting it sees.
-- **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` takes an entry where the copies
-  converge by a landing the branch cannot make.** A branch touching the shared
-  half of a file section 14 compares — the whole file, everything above a
-  marker heading such as `## This repository in particular`, or a named
-  section from its own heading to the next, the shape `CLAUDE.md`'s own
-  primary-checkout section takes — owes that entry and the issue it names, in
-  the same diff. Dropping the heading clause would lose the useful half of the
-  old sentence, which said which part of `CONTRIBUTING.md` is at stake;
-  keeping it costs one clause and reaches every path all the same,
-  `shared()`'s own three returns being exactly these three shapes.
-  What the table takes is section 14's own sentence — a copy a fix converges,
-  not one that cannot by design — so a port going out tree by tree qualifies,
-  and so does a decision for the family whose outcomes all converge: `d000842`
-  filed one against a port decision not yet taken, the paragraph ported into the
-  other trees and the paragraph moved below the heading leaving the compared
-  halves equal either way. Where the convergence is one edit of the branch's own
-  instead — tree-local text written above the heading rather than below it —
-  that edit is the answer, and an entry there registers a mistake as a
-  migration. An entry switches the comparison off meanwhile: the path leaves
-  `test_every_copy_of_a_verbatim_file_is_the_same_copy` for as long as the entry
-  stands. Not `tests/__init__.py`'s `BACKLOG`, which excuses a whole test rather
-  than one path, and not a second statement of what deletes an entry, which
-  `EXPECTED_DRIFT`'s own docstring carries. The precedent is `.gitattributes`,
-  and it is the precedent for an entry's whole life: `90faad8` added one and
-  `6bf5e5c` deleted it once the eighth tree converged, its message giving the
-  reason — "a drift filed later still wants an entry here and not a row there".
+- **`tests/verbatim_test.py`'s `EXPECTED_DRIFT` takes an entry where the
+  copies converge by a landing the branch cannot make** — a port going out
+  tree by tree. Where the fix is an edit of the branch's own, make the edit
+  instead. An entry takes its path out of the comparison while it stands;
+  its docstring says when it is deleted.
 - **A claim about "every tier-2 repository" has to hold of this tree too**,
   section 2 saying its own row is measured the same way as the others. `grep
   -c '^### A version, and no release' CONTRIBUTING.md`, run against every
@@ -283,18 +155,10 @@ Do not use Fable unless explicitly instructed.
   the `tiers` fixture — `conftest.py`'s one-liner over `trees` — rather
   than through `gh_json`.
 - **A sibling tree's documentation build reads its `CHANGELOG.md`, so a
-  changelog-only diff does not exempt the docs gate.** This tree has no
-  `docs/`, but a session driven from this tracker runs the gates of the
-  repository it is porting into, and in the five that have a
-  documentation build — `btclib`, `btclib-secp256k1`, `btclib-node`,
-  `btclib-benchmarks` and `bitcoin-core-rpc` — `docs/source/changelog_link.md`
-  pulls `../../CHANGELOG.md` through a MyST `include` and the
-  toctree lists it, under `-W`. `-C` puts `<checkout>` ahead of the read
-  it names, so it cannot sit last as section 9 asks; the assignment
-  stands in a block of its own, its own placeholder ending the line
-  being the parse error a shell discards, reading the read below as a
-  fresh command against whatever `$checkout` a paste has already set,
-  which `${checkout:?}` refuses where a paste has set nothing:
+  changelog-only diff does not exempt the docs gate.** In every tree with
+  a documentation build, `docs/source/changelog_link.md` includes
+  `../../CHANGELOG.md`, under `-W`. The assignment stands in a block of
+  its own, `${checkout:?}` refusing a paste that set nothing:
 
   ```shell
   checkout=<checkout>
@@ -305,36 +169,14 @@ Do not use Fable unless explicitly instructed.
     origin/main -- docs/
   ```
 
-  answers in each of the five and nothing in a tree with no `docs/` at all;
-  the same command with `README.md` substituted for `CHANGELOG.md` inside
-  the pattern answers in each of the five, which is the control saying the
-  zero is an absence rather than a miss. That control takes its own
-  positive in the same five trees the check already answers in, so a
-  mangled revision silences check and control alike and a `0` from either
-  in one of the other four reads the same whether the tree has no `docs/`
-  or the revision is wrong. The control that tells the two apart runs in
-  one of those four on a string it cannot fail to hold:
-  `git -C <checkout> grep -l 'btclib' origin/main -- README.md` answers
-  `README.md` there, so a `0` from that same command is the revision and
-  never the tree. The trap is that *`docs/` is unchanged* is a true
-  sentence answering the wrong question: what decides is what the tool
-  reads, not which of its inputs moved. Skipping the docs gate on that
-  reasoning was caught by a reviewer, not by a run.
+  answers where.
 - **The alignment suite is what validates a new repository, and a local
   review is not a substitute for running it.** `tests/conftest.py`'s
-  `trees` fixture clones every repository shallow and tagless, its own
-  docstring giving the reason: "every question here is about the tip of
-  the default branch" — the clone names no `--branch`, so it reads
-  whatever branch is currently default: a tree still living on a build
-  branch is measured on that branch rather than waiting for a `main` to
-  exist. Two local review rounds cleared `bitcoin-node-tests`' root tree
-  against section 16's checklist; the suite, run once that tree had a
-  `main`, still failed `[bitcoin-node-tests]` cells the review had read
-  and passed, each failing for its own stated reason (`#1334`, closed
-  once a following pull request answered them). And for as long as a
-  sibling repository exists and is empty, `alignment.yml` is red here on
-  every branch of this tree — a cost every session working here pays
-  for the gap between `gh repo create` and that sibling's first push.
+  `trees` fixture clones every repository shallow and tagless at the tip of
+  the default branch, whatever it is named. And for as long as a sibling
+  repository exists and is empty, `alignment.yml` is red here on every
+  branch of this tree — a cost every session working here pays for the gap
+  between `gh repo create` and that sibling's first push.
 - **A new repository's rulesets go on only after its first push to
   `main`, never before — section 16 states the reason.** Verify it
   against a landed repository rather than trusting the order alone:

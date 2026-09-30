@@ -9782,3 +9782,9 @@ nothing red follows from the copies disagreeing.
 - **A release runs `uv audit --locked` before publishing** (issue #1466),
   through `reusable-audit.yml`, over what the wheel declares and ignoring
   only `.github/vex.toml`'s ids; each `release.yml` still owes the call.
+
+### The primary-checkout section reads a checkout once it is brought forward
+
+- **A checkout is brought forward, then read; a sha read is for a
+  measurement that must hold** (issue #1494): the fast-forward names its
+  directory, the role is `writer`; `EXPECTED_DRIFT` carries it.

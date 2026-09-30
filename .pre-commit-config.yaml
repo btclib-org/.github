@@ -3,7 +3,8 @@
 # standard. Mostly the markdown half of it, this tree being mostly prose;
 # the Python half applies to tests/, the standard asking the
 # organization the questions no single repository can ask itself, and to
-# .github/scripts/, this tree's own local hooks.
+# .github/scripts/, the scripts this tree's hooks and the reusable
+# workflows run.
 #
 # Skip a hook with SKIP=<id>.
 ci:
