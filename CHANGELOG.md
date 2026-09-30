@@ -9771,3 +9771,8 @@ nothing red follows from the copies disagreeing.
 - **`tests/secrets_test.py` skips the organization's Dependabot store on a
   403 with the cause itself** (closes #1489): the token action has no input
   for the permission it needs, and the reason cites no yearly review.
+
+### The `BACKLOG` row for 1470 comes out, the last tree having converged
+
+- **bitcoin-node-tests' `test.yml` calls `check_run_jobs.py`** (closes #1470):
+  `test_a_listing_aggregate_calls_the_script` passes there without the row.
