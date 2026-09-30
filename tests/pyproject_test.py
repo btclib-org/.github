@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import ROOT, Tier, by_hand, fenced, name, output, rows
+from . import ROOT, Refused, Tier, by_hand, fenced, name, output, rows
 from .copyright_test import collective
 
 if TYPE_CHECKING:
@@ -427,12 +427,101 @@ def test_the_name_is_the_canonical_spelling(
     assert declared == canonical, f"name is {declared!r}, not {canonical!r}; " + command
 
 
+OWN_LICENCE_FILES = frozenset({"LICENSE", "AUTHORS.md"})
+"""Section 3's two names, which every building tree's `license-files` holds."""
+
+NOTICE = "COPYING"
+"""What a vendored library's licence notice is called at its submodule's root.
+
+libsecp256k1's name for its MIT notice.
+"""
+
+NO_MATCH = 1
+"""`git config --get-regexp`'s exit status where no key matches."""
+
+
+def submodule_paths(tree: Path) -> set[str]:
+    """Read the paths a tree's `.gitmodules` declares.
+
+    `git config` is the parser, being the one git reads the file with,
+    and `-z` ends each key at a newline, a submodule's name being free
+    to hold a space. The `trees` fixture leaves the submodules
+    unfetched, so this is what the tree declares and not what a checkout
+    of it holds.
+
+    :param tree: the checkout.
+    :returns: each submodule's path, empty where the tree has no
+        `.gitmodules` or the file declares no path.
+    :raises Refused: where `git config` fails for any other reason.
+    """
+    gitmodules = tree / ".gitmodules"
+    if not gitmodules.is_file():
+        return set()
+    try:
+        listing = output(
+            "git",
+            "config",
+            "-z",
+            "--file",
+            str(gitmodules),
+            "--get-regexp",
+            r"^submodule\..*\.path$",
+        )
+    except Refused as refused:
+        if refused.returncode != NO_MATCH:
+            raise
+        return set()
+    return {record.split("\n", 1)[1] for record in listing.split("\0") if record}
+
+
+def vendored_notices(paths: set[str]) -> set[str]:
+    """Return the licence notices `license-files` may add for these submodules.
+
+    :param paths: the submodule paths a tree declares.
+    :returns: each path joined to `NOTICE`.
+    """
+    return {f"{path}/{NOTICE}" for path in paths}
+
+
+def test_only_a_submodule_s_notice_is_admitted() -> None:
+    """A notice at a declared submodule's root is admitted, nothing else is."""
+    admitted = vendored_notices({"secp256k1"})
+    assert "secp256k1/COPYING" in admitted
+    assert "secp256k1/README.md" not in admitted
+    assert "secp256k1/src/COPYING" not in admitted
+    assert "vendor/COPYING" not in admitted
+
+
+def test_a_submodule_path_is_read_whole(tmp_path: Path) -> None:
+    """A name holding a space leaves the path it declares intact.
+
+    :param tmp_path: the tree the `.gitmodules` is written into.
+    """
+    (tmp_path / ".gitmodules").write_text(
+        '[submodule "lib one"]\n\tpath = vendor/lib one\n\turl = https://x/y.git\n',
+        encoding="utf-8",
+    )
+    assert submodule_paths(tmp_path) == {"vendor/lib one"}
+
+
+def test_a_gitmodules_without_a_path_declares_none(tmp_path: Path) -> None:
+    """A `.gitmodules` whose sections name no path reads as no submodule.
+
+    :param tmp_path: the tree the `.gitmodules` is written into.
+    """
+    (tmp_path / ".gitmodules").write_text(
+        '[submodule "lib"]\n\turl = https://x/y.git\n', encoding="utf-8"
+    )
+    assert submodule_paths(tmp_path) == set()
+
+
 @pytest.mark.tier(Tier.PYTHON)
 def test_the_licence_is_an_expression_with_its_files(
     repository: str,
+    trees: dict[str, Path],
     pyprojects: dict[str, dict[str, Any]],
 ) -> None:
-    """Section 3: PEP 639's two keys, the SPDX string and the two names.
+    """Section 3: PEP 639's two keys, the SPDX string and the files.
 
     A tree declaring the deprecated table, or no key at all, passes
     `classifiers_test.py` -- which reads `license` to refuse the
@@ -440,6 +529,7 @@ def test_the_licence_is_an_expression_with_its_files(
     has none -- and is refused here.
 
     :param repository: the repository asked about.
+    :param trees: the checkouts.
     :param pyprojects: the parsed files.
     """
     project = distribution(repository, pyprojects)
@@ -447,8 +537,16 @@ def test_the_licence_is_an_expression_with_its_files(
     expression = project.get("license")
     assert isinstance(expression, str), f"license is {expression!r}; " + command
     files = project.get("license-files")
-    named = set(files) if isinstance(files, list) else files
-    assert named == {"LICENSE", "AUTHORS.md"}, f"license-files is {files!r}; " + command
+    assert isinstance(files, list), f"license-files is {files!r}; " + command
+    named = set(files)
+    missing = OWN_LICENCE_FILES - named
+    assert not missing, f"license-files lacks {sorted(missing)}; " + command
+    notices = vendored_notices(submodule_paths(trees[repository]))
+    extra = named - OWN_LICENCE_FILES - notices
+    assert not extra, (
+        f"license-files names {sorted(extra)}, neither section 3's own"
+        " nor a declared submodule's licence notice; " + command
+    )
 
 
 FLOOR_BOUND = re.compile(r">=\s*(?P<version>[0-9]+(?:\.[0-9]+)*)")

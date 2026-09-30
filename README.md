@@ -731,10 +731,12 @@ hook then passes no path to; section 14 names each of those files.
   older hatchling rejecting both halves outright; a constant copied from
   another project is a requirement the build does not use.
 
-    **`license-files` names `LICENSE` and `AUTHORS.md`, and nothing
-    else**, in a file that declares a build backend: where nothing is
-    built the key names files into an archive that does not exist, and
-    `AUTHORS.md` is where the archive says the collective is listed.
+    **`license-files` names `LICENSE` and `AUTHORS.md`, and may add a
+    submodule's `COPYING`**, as `secp256k1/COPYING`, in a file that
+    declares a build backend: where nothing is built the key names files
+    into an archive that does not exist, `AUTHORS.md` is where the
+    archive says the collective is listed, and MIT wants its notice in
+    every copy, a compiled wheel included.
 
     **Nothing local refuses the classifier beside the expression**, a
     file carrying both passing `twine check` and the
