@@ -9765,3 +9765,9 @@ nothing red follows from the copies disagreeing.
 - **A `not_used` or `inaccurate` Dependabot dismissal of a declared
   distribution owes a `.github/vex.toml` entry** (closes #1469), read by
   `tests/vex_test.py`. Every publisher's `generate_sbom.py` carries the list.
+
+### The Dependabot store's skip says why, not which review
+
+- **`tests/secrets_test.py` skips the organization's Dependabot store on a
+  403 with the cause itself** (closes #1489): the token action has no input
+  for the permission it needs, and the reason cites no yearly review.
