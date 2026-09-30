@@ -9723,3 +9723,9 @@ nothing red follows from the copies disagreeing.
 - **`reusable-github-release.yml` attaches the bundle as
   `<tag>.intoto.jsonl`** (issue #1468), the suffix Scorecard's
   `Signed-Releases` check reads as provenance.
+
+### `check_run_jobs.py` takes several `needs` jobs and rows named exactly
+
+- **A call gives each `needs` job's id and result, and a job's rows are
+  matched by a prefix or by exact names** (issue #1470), so an aggregate
+  of several `needs` jobs, or of unprefixed rows, runs the script too.
