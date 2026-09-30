@@ -557,3 +557,142 @@ def test_a_run_that_is_not_named_is_a_usage_error(
 
     assert raised.value.code == _USAGE
     assert listing.count == 0
+
+
+_COVERAGE = ("unfinished", "in_progress", "Measure coverage")
+_CHANGES = ("unfinished", "queued", "Decide / Decide whether")
+_TWO = ["changes", "success", "coverage", "success"]
+_TWO_ROWS = ["--prefix", "changes=Decide / ", "--row", "coverage=Measure coverage"]
+
+
+def _runs(script: ModuleType, *arguments: str) -> int:
+    """Run the script with `arguments` as given, for the run the tests name."""
+    verdict = script.main(
+        [*arguments, "--repository", _REPOSITORY, "--run-id", _RUN_ID]
+    )
+    assert isinstance(verdict, int)
+    return verdict
+
+
+def test_rows_of_several_jobs_are_each_waited_for_by_their_own_rule(
+    script: ModuleType,
+    clock: _Clock,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A prefix and an exact name each hold the wait until their row ends."""
+    listing = _listing(
+        script,
+        monkeypatch,
+        [_CHANGES, _COVERAGE, _CHECK],
+        [("success", "completed", "Decide / Decide whether"), _COVERAGE, _CHECK],
+        [
+            ("success", "completed", "Decide / Decide whether"),
+            ("success", "completed", "Measure coverage"),
+            _CHECK,
+        ],
+    )
+
+    assert _runs(script, *_TWO, *_TWO_ROWS) == 0
+
+    assert listing.count == _READS_TO_SETTLE
+    assert clock.slept == [10.0, 10.0]
+    assert "accepted as" not in capsys.readouterr().out
+
+
+@pytest.mark.usefixtures("clock")
+def test_lagging_rows_of_several_jobs_are_accepted_at_the_deadline(
+    script: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Each job's accepted rows are named under its own id and result."""
+    listing = _listing(script, monkeypatch, [_CHANGES, _COVERAGE, _CHECK])
+
+    assert _runs(script, *_TWO, *_TWO_ROWS) == 0
+
+    assert listing.count == _READS_IN_30_S
+    shown = capsys.readouterr().out
+    assert (
+        "still listed unfinished, accepted as changes's (success):\n"
+        "unfinished\tqueued\tDecide / Decide whether\n"
+    ) in shown
+    assert (
+        "still listed unfinished, accepted as coverage's (success):\n"
+        "unfinished\tin_progress\tMeasure coverage\n"
+    ) in shown
+
+
+def test_a_job_given_rows_has_no_default_prefix(
+    script: ModuleType, clock: _Clock, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An exact name accepts that row alone, not everything under `id / `."""
+    listing = _listing(
+        script,
+        monkeypatch,
+        [("unfinished", "queued", "coverage / other"), _CHECK],
+    )
+
+    assert _runs(script, "coverage", "success", "--row", "coverage=Measure") == 1
+
+    assert listing.count == 1
+    assert clock.slept == []
+
+
+def test_a_job_whose_result_is_not_a_pass_accepts_none_of_its_rows(
+    script: ModuleType,
+    clock: _Clock,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """One job's failure is refused by name; the other's rows still wait."""
+    _listing(script, monkeypatch, [_CHANGES, _COVERAGE, _CHECK])
+
+    assert _runs(script, "changes", "failure", "coverage", "success", *_TWO_ROWS) == 1
+
+    shown = capsys.readouterr().out
+    assert "::error::changes's own result is 'failure'\n" in shown
+    assert "::error::coverage's own result" not in shown
+    assert "::error::this check should be the run's one unfinished job; 2 are" in shown
+    assert clock.now == pytest.approx(30.0)
+
+
+@pytest.mark.usefixtures("clock")
+def test_the_results_and_the_rows_are_read_from_the_environment(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A workflow holding them as lines passes the variable's name."""
+    listing = _listing(script, monkeypatch, [_CHANGES, _COVERAGE, _CHECK])
+    monkeypatch.setenv("RESULTS", "changes success\n\ncoverage success\n")
+    monkeypatch.setenv(
+        "ROWS", "changes Decide / Decide whether\ncoverage Measure coverage"
+    )
+
+    assert _runs(script, "--results-env", "RESULTS", "--rows-env", "ROWS") == 0
+
+    assert listing.count == _READS_IN_30_S
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        ["changes"],
+        [],
+        ["changes", "success", "changes", "success"],
+        ["changes", "success", "--row", "coverage=x"],
+        ["changes", "success", "--prefix", "coverage=x"],
+        ["changes", "success", "--row", "changes"],
+        ["changes", "success", "--prefix", "changes=a", "--prefix", "changes=b"],
+    ],
+)
+def test_a_call_that_does_not_describe_its_jobs_is_a_usage_error(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch, arguments: list[str]
+) -> None:
+    """An odd list, no job, a job twice, two prefixes or a rule for no job."""
+    listing = _listing(script, monkeypatch, [_CHECK])
+
+    with pytest.raises(SystemExit) as raised:
+        _runs(script, *arguments)
+
+    assert raised.value.code == _USAGE
+    assert listing.count == 0

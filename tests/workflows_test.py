@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shlex
 import subprocess
 from collections import Counter
 from typing import TYPE_CHECKING, Any, NamedTuple
@@ -783,14 +784,101 @@ read and the decision being the script's, so `shape` names it by this.
 """
 
 
+SHELL_OPERATORS = frozenset({";", "&&", "||", "|", "&"})
+"""What ends one command of a `run:` block and starts the next."""
+
+SCRIPT_OPTIONS = frozenset(
+    {
+        "--results-env",
+        "--rows-env",
+        "--row",
+        "--prefix",
+        "--timeout",
+        "--interval",
+        "--repository",
+        "--run-id",
+    }
+)
+"""The options `CHECK_SCRIPT` takes a value for, in the spaced form."""
+
+
+def commands(run: str) -> list[list[str]]:
+    """Split a `run:` block into the words of each command it runs.
+
+    A comment is no command, and neither is what an `echo` prints: the
+    words are the shell's own, so a pair quoted in either is not one the
+    script was given.
+
+    :param run: the step's `run:` text.
+    :returns: one list of words per command, empty ones left out.
+    :raises ValueError: where a line does not lex, an unclosed quote
+        among them, which a string holding several lines is.
+    """
+    found: list[list[str]] = [[]]
+    for line in re.sub(r"\\\n", " ", run).splitlines():
+        lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
+        for word in lexer:
+            if word in SHELL_OPERATORS:
+                found.append([])
+            else:
+                found[-1].append(word)
+        found.append([])
+    return [words for words in found if words]
+
+
+def script_words(step: dict[str, Any]) -> list[str] | None:
+    """Return the script's path and arguments where a step runs it.
+
+    :param step: a step's own mapping.
+    :returns: the words from the script's path on, or None where no
+        command of the step is `CHECK_SCRIPT` itself or run by a python,
+        or where the step does not lex, which `unparsed` says.
+    """
+    try:
+        found = commands(str(step.get("run", "")))
+    except ValueError:
+        return None
+    for words in found:
+        if words[0].endswith(CHECK_SCRIPT):
+            return words
+        if (
+            words[0].rpartition("/")[2].startswith("python")
+            and len(words) > 1
+            and words[1].endswith(CHECK_SCRIPT)
+        ):
+            return words[1:]
+    return None
+
+
+def unparsed(step: dict[str, Any]) -> bool:
+    """Say whether a step names `CHECK_SCRIPT` and cannot be read as shell.
+
+    A `run:` holding a string over several lines, an awk program say,
+    does not lex a line at a time. Such a step is not taken for a step
+    that never calls the script: it is one whose call cannot be read.
+
+    :param step: a step's own mapping.
+    :returns: whether the step names the script and `commands` refuses it.
+    """
+    run = str(step.get("run", ""))
+    if CHECK_SCRIPT not in run:
+        return False
+    try:
+        commands(run)
+    except ValueError:
+        return True
+    return False
+
+
 def scripted(job: dict[str, Any]) -> bool:
     """Say whether an aggregate hands the listing to `CHECK_SCRIPT`.
 
     :param job: the aggregate job's own mapping.
-    :returns: whether some step runs the script.
+    :returns: whether some step runs the script as a command, or names it
+        in a `run:` that cannot be read.
     """
     return any(
-        isinstance(step, dict) and CHECK_SCRIPT in str(step.get("run", ""))
+        isinstance(step, dict) and (script_words(step) is not None or unparsed(step))
         for step in job.get("steps") or []
     )
 
@@ -1342,37 +1430,95 @@ def script_call(job: dict[str, Any]) -> tuple[int, list[dict[str, Any]]]:
     """
     steps = [step for step in job["steps"] if isinstance(step, dict)]
     call = next(
-        i for i, step in enumerate(steps) if CHECK_SCRIPT in str(step.get("run", ""))
+        i
+        for i, step in enumerate(steps)
+        if script_words(step) is not None or unparsed(step)
     )
     return call, steps
 
 
+def script_arguments(words: list[str]) -> tuple[list[str], dict[str, str], list[str]]:
+    """Split the script's own arguments into positionals and options.
+
+    :param words: the words from the script's path on.
+    :returns: the positional arguments, the options with their values,
+        and every word starting `--` that is not a spaced option, which
+        includes `--option=value`.
+    """
+    positional: list[str] = []
+    options: dict[str, str] = {}
+    unread: list[str] = []
+    rest = iter(words[1:])
+    for word in rest:
+        if word in SCRIPT_OPTIONS:
+            options[word] = next(rest, "")
+        elif word.startswith("--"):
+            unread.append(word)
+        else:
+            positional.append(word)
+    return positional, options, unread
+
+
+def result_lines(step: dict[str, Any], variable: str | None) -> set[str]:
+    """List the ids whose result the `--results-env` variable holds a line for.
+
+    :param step: the step running `CHECK_SCRIPT`.
+    :param variable: the variable the call names, or None.
+    :returns: the ids, each with a line `<id> ${{ needs.<id>.result }}`.
+    """
+    if variable is None:
+        return set()
+    value = str((step.get("env") or {}).get(variable, ""))
+    return {
+        job
+        for line in value.splitlines()
+        for job, _, rest in [line.strip().partition(" ")]
+        if EXPRESSION.fullmatch(rest.strip()) and NEEDS_RESULT.findall(rest) == [job]
+    }
+
+
 def command_faults(job: dict[str, Any]) -> list[str]:
     """Say what is wrong with the arguments, the environment and the grant.
+
+    Each `needs` id has its result read either from an environment
+    variable holding that one expression and given beside the id, or from
+    a line of the variable `--results-env` names. Both are looked for in
+    the script's own arguments and nowhere else in the step: a comment
+    or an `echo` holding the pair is not a call that passes it
+    (btclib-org/.github#1424's shape). The options are read in the spaced
+    form, so `--results-env=NR` is refused; that fails closed.
 
     :param job: the aggregate job's own mapping.
     :returns: one line per fault, empty where the call is as it should be.
     """
     call, steps = script_call(job)
     step = steps[call]
-    ids = needed(job)
-    if len(ids) != 1:
-        return [f"needs {ids}, and the script takes one id"]
-    (needs,) = ids
+    if unparsed(step):
+        return [f"names {CHECK_SCRIPT} in a run: block that does not lex as shell"]
+    words = script_words(step) or []
+    positional, options, unread = script_arguments(words)
+    given = dict(zip(positional[::2], positional[1::2], strict=False))
     env = step.get("env") or {}
-    holders = [
-        key
-        for key, value in env.items()
-        if EXPRESSION.fullmatch(str(value).strip())
-        and [needs] == NEEDS_RESULT.findall(str(value))
-    ]
-    faults: list[str] = []
-    if len(holders) != 1:
-        faults.append(f"has {holders} holding needs.{needs}.result")
-    elif f'{CHECK_SCRIPT} {needs} "${{{holders[0]}}}"' not in " ".join(
-        str(step["run"]).split()
-    ):
-        faults.append(f'does not run {CHECK_SCRIPT} {needs} "${{{holders[0]}}}"')
+    ids = needed(job)
+    faults: list[str] = [f"gives {word}, which is not read" for word in unread]
+    if not ids:
+        faults.append("needs nothing, and the script takes a job")
+    held = result_lines(step, options.get("--results-env"))
+    for needs in ids:
+        holders = [
+            key
+            for key, value in env.items()
+            if EXPRESSION.fullmatch(str(value).strip())
+            and [needs] == NEEDS_RESULT.findall(str(value))
+        ]
+        if needs in held:
+            continue
+        if len(holders) != 1:
+            faults.append(f"has {holders} holding needs.{needs}.result")
+        elif given.get(needs) != f"${{{holders[0]}}}":
+            faults.append(
+                f'does not pass {needs} "${{{holders[0]}}}" to {CHECK_SCRIPT}'
+            )
     if env.get("GH_TOKEN") != "${{ github.token }}":
         faults.append("does not pass GH_TOKEN")
     if (job.get("permissions") or {}).get("actions") != "read":
@@ -1401,8 +1547,8 @@ def checkout_faults(job: dict[str, Any]) -> list[str]:
         faults.append("does not check out .github/scripts at main")
     if given.get("persist-credentials") is not False:
         faults.append("persists the checkout's credentials")
-    command = " ".join(str(steps[call]["run"]).split())
-    if f"{given.get('path')}/.github/scripts/{CHECK_SCRIPT}" not in command:
+    words = script_words(steps[call]) or [""]
+    if words[0] != f"{given.get('path')}/.github/scripts/{CHECK_SCRIPT}":
         faults.append("runs the script from somewhere its checkout's path is not")
     return faults
 
@@ -1417,10 +1563,9 @@ def test_a_scripted_aggregate_names_the_checkout_the_arguments_and_the_result(
     script's, and `tests/check_run_jobs_test.py` asks them. What is left
     to the tree is what the script cannot see of its caller: that the
     script is checked out of `btclib-org/.github` at `main`, sparse, under
-    the `path:` the command names; that the command names the id of the
-    one `needs` job and an environment variable holding that job's own
-    result; and that the token and the `actions: read` the read takes are
-    there.
+    the `path:` the command names; that the command names each `needs`
+    job's id and an environment variable holding that job's own result;
+    and that the token and the `actions: read` the read takes are there.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
