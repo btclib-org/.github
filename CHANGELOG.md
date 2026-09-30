@@ -9699,3 +9699,9 @@ nothing red follows from the copies disagreeing.
 - **A script retries a cell's install of the released version while the
   installer says the pin is not resolvable** (issue #1458), up to a
   deadline, with a test; any other failure ends it at once.
+
+### Section 2 admits the OpenSSF Baseline badge
+
+- **The Baseline badge is admitted beside the Best Practices badge, on
+  the same property** (issue #1460), and the OpenSSF line orders it
+  Scorecard, Best Practices, Baseline.

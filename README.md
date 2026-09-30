@@ -413,7 +413,9 @@ Which badge a tree carries, and what decides it:
 - **served by Read the Docs** — the Read the Docs badge at
   `app.readthedocs.org`;
 - **named by section 10's `scorecard` entry** — the OpenSSF Best
-  Practices badge, `www.bestpractices.dev/projects/<id>/badge`;
+  Practices badge, `www.bestpractices.dev/projects/<id>/badge`, and the
+  OpenSSF Baseline badge, `www.bestpractices.dev/projects/<id>/baseline`,
+  both linking to `www.bestpractices.dev/projects/<id>`;
 - **a sentinel section 10's record names the tree in** — that
   sentinel's badge.
 
@@ -469,8 +471,9 @@ compare like with like:
    workflow moved to another day moves its badge; the calendar has no
    row for the gates, and this list is where their order is decided;
 1. what the OpenSSF makes of it — the Scorecard badge, then the Best
-   Practices badge, on a line of their own; `scorecard` being the
-   calendar's last row, the sentinels end where that line begins.
+   Practices badge, then the Baseline badge, on a line of their own;
+   `scorecard` being the calendar's last row, the sentinels end where
+   that line begins.
 
 `img.shields.io/pypi/wheel` and `img.shields.io/pypi/implementation`
 are read off the files a release uploaded, not off what the project
@@ -514,9 +517,11 @@ and so falls with nothing changed.
 
 The Best Practices badge is admitted where REUSE's is refused, rendering
 for a registered project the questionnaire's live state, which the
-Scorecard's `CII-Best-Practices` check scores. Registration is the
+Scorecard's `CII-Best-Practices` check scores. The Baseline badge is
+admitted on the same property, rendering the level of the `OSPS-*`
+controls the same project has answered. Registration is the
 maintainer's attestation, and a tree section 10's `scorecard` entry does
-not name has a row complete without the badge.
+not name has a row complete without either badge.
 
 **`CONTRIBUTING.md`'s badge block is inside this rule's reach, and it is
 not the row.** Where *This repository in particular* opens with toolchain
