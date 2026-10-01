@@ -9817,3 +9817,9 @@ nothing red follows from the copies disagreeing.
 
 - **`EXPECTED_DRIFT` is empty** (closes #1494): every tree carries the
   shared primary-checkout section byte for byte.
+
+### `Dependency review` is a required check
+
+- **Section 11 names the check's context** (issue #1465):
+  `lint / Dependency review` in a tree that calls `reusable-lint.yml`, and
+  `Dependency review` in a tree that keeps its own `lint.yml`.

@@ -19,7 +19,7 @@ name: lint
 # only the tests that carry no `integration` marker, `.github/scripts/`'s
 # own among them, and none of those reaches the network.
 # btclib-org/.github#1367 is what settled it: `alignment.yml` is not a
-# required check, so this is what puts those tests in the one job every
+# required check, so this is what puts those tests in a job every
 # merge already waits on.
 
 on:
@@ -67,8 +67,8 @@ concurrency:
 
 jobs:
   lint:
-    # this job is the whole of what gates a merge here, so this name is
-    # the required check's context, a context being keyed by name alone.
+    # this job is a required check, so this name is its context, a context
+    # being keyed by name alone.
     # Not the sibling repositories' "Lint and type-check", though the
     # config it runs carries a mypy hook as theirs do: the name is bound
     # outside the repository, so changing it cannot be done in a pull
@@ -166,8 +166,8 @@ jobs:
     # file keeps its own lint job; section 11 of btclib-org/.github's
     # README.md states the rule. A job of its own rather than a step of the
     # one above: it reads the forge's dependency graph and not the checkout,
-    # so it takes no checkout and no hook environment. Its context is this
-    # name.
+    # so it takes no checkout and no hook environment. It is a required
+    # check, and its context is this name.
     name: Dependency review
     # the action compares a pull request's base and head, which only a
     # pull_request event carries: on a push or a dispatch it has no pair

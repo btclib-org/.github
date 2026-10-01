@@ -316,14 +316,11 @@ that goes stale first.
 
 ### What gates a merge, and what only reports
 
-`lint.yml`'s `Lint` job is the required check and is the whole of what a
-merge is gated on; `REPOSITORY.md` reads the rule back from the endpoint
-rather than restating it.
+`lint.yml`'s jobs, `Lint` and `Dependency review`, are the required
+checks and the whole of what a merge is gated on; `REPOSITORY.md` reads the
+rule back from the endpoint rather than restating it.
 
-Everything else reports. `lint.yml`'s second job, `Dependency review`,
-reports on the dependencies a pull request adds and is not in the rule
-yet: requiring it is the maintainer's step once a pull request has
-produced its context (#1465). `alignment.yml` is a sentinel: what it
+Everything else reports. `alignment.yml` is a sentinel: what it
 finds is drift that happened days ago in a repository nobody is working
 in, and an API that is down is nothing a pull request introduced.
 `links.yml` asks whether somebody else's server answered.

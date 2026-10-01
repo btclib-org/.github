@@ -47,7 +47,7 @@ the answer the sibling repositories give.
 ```shell
 gh api repos/btclib-org/.github/branches/main/protection \
   --jq '.required_status_checks | {strict, checks: [.checks[].context]}'
-# {"strict":true,"checks":["Lint"]}
+# {"strict":true,"checks":["Lint","Dependency review"]}
 ```
 
 The rulesets below enforce the signatures and the review, and [classic
@@ -60,10 +60,9 @@ protection needs the whole object rather than the answer above.
 | Check | Produced by |
 | --- | --- |
 | `Lint` | `lint.yml` |
+| `Dependency review` | `lint.yml`'s second job |
 
-`lint.yml`'s second job, `Dependency review`, is not in the rule yet: requiring
-it is the maintainer's step once a pull request has produced its context
-(#1465). The name `Lint` is not the sibling repositories' `Lint and type-check`,
+The name `Lint` is not the sibling repositories' `Lint and type-check`,
 though the hook config it runs carries a mypy hook as theirs do: a context is
 keyed by name alone and bound outside the tree, so changing one is not something
 a pull request can do. The direction that would matter is the other one, a name
@@ -84,7 +83,8 @@ restores it:
 gh api -X PUT repos/btclib-org/.github/branches/main/protection \
   --input - <<'JSON'
 {"required_status_checks": {"strict": true,
-   "checks": [{"context": "Lint", "app_id": 15368}]},
+   "checks": [{"context": "Lint", "app_id": 15368},
+              {"context": "Dependency review", "app_id": 15368}]},
  "enforce_admins": false,
  "required_pull_request_reviews": {"dismiss_stale_reviews": true,
    "required_approving_review_count": 1},
@@ -122,10 +122,10 @@ Everything reaches it through a pull request. Rules [aggregate rather
 than replace each other][s11-branch], so what holds on `main` is what the
 call below answers for that target **together with** the classic
 protection two headings up: that one requires a review, a linear history,
-resolved conversations and the `Lint` check, and refuses a force push or
-a deletion — under the exemption above, which these rulesets do not
-carry. Where the two overlap, the stricter answer is the one that
-applies:
+resolved conversations and the `Lint` and `Dependency review` checks, and
+refuses a force push or a deletion — under the exemption above, which these
+rulesets do not carry. Where the two overlap, the stricter answer is the one
+that applies:
 
 ```shell
 gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
