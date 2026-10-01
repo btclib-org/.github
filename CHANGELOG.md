@@ -9869,3 +9869,8 @@ nothing red follows from the copies disagreeing.
 - **Section 2's `python` mapping names `_inventories/python.inv` as a second
   location** (issue #1508), which sphinx reads only where `docs.python.org`
   fails; `tests/intersphinx_test.py` asks every tree for it.
+
+### The `python` inventory is kept in every tree
+
+- **The 1508 `BACKLOG` row is deleted** (closes #1508): all eight trees carry
+  `_inventories/python.inv` and `tests/intersphinx_test.py` passes for them.
