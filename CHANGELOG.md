@@ -9829,3 +9829,8 @@ nothing red follows from the copies disagreeing.
 - **`required-version` may not exceed the uv Dependabot runs** (issue
   #1482): it can be older than `main` pins, so a floor rises only to a uv
   a run's log names. Nothing forces one up; this tree's is `>=0.12.18`.
+
+### `claude-process` is a tier-3 repository
+
+- **Section 2's table and section 10's minute table have its rows**
+  (issue btclib-org/claude-process#2): tier 3, and minute 56 for `links`.
