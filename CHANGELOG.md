@@ -9812,3 +9812,8 @@ nothing red follows from the copies disagreeing.
 - **A rebuild of a tag writes the same document until `main` changes what
   `generate_sbom.py` writes** (closes #1478): section 12 and the script's
   docstring say so, and no tree's copy of the script is recorded as drift.
+
+### `CLAUDE.md` is compared again
+
+- **`EXPECTED_DRIFT` is empty** (closes #1494): every tree carries the
+  shared primary-checkout section byte for byte.
