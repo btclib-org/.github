@@ -9834,3 +9834,9 @@ nothing red follows from the copies disagreeing.
 
 - **Section 2's table and section 10's minute table have its rows**
   (issue btclib-org/claude-process#2): tier 3, and minute 56 for `links`.
+
+### The organization page names claude-process
+
+- **`profile/README.md` lists `claude-process` under *Around them*** (closes
+  #1510): a public repository since 2026-10-01, with no package and so no
+  edge in the dependency graph.
