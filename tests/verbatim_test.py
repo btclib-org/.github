@@ -104,6 +104,7 @@ rather than the entry's.
 
 EXPECTED_DRIFT: dict[str, str] = {
     "CONTRIBUTING.md": "btclib-org/.github#1467",
+    "CLAUDE.md": "btclib-org/.github#1500",
 }
 """A path section 14 names whose copies are known not to agree yet.
 

@@ -9852,3 +9852,9 @@ nothing red follows from the copies disagreeing.
 - **`reusable-build.yml` builds and attests a calling tree's release files,
   and the sdist rebuild accepts it as the signer** (issue #1506): section 12
   has the verification command.
+
+### The primary-checkout section uses one form for the checkout
+
+- **The section writes the checkout one way, defines `<scratchpad>` and
+  names the pull** (issue #1500): `EXPECTED_DRIFT` carries `CLAUDE.md`
+  until each tree's copy agrees.
