@@ -16,7 +16,7 @@ name: reusable-sdist-rebuild
 # caller's own RELEASING.md rebuilds it under *Rebuild a release from
 # its tag*, and `gh attestation verify` over the rebuilt sdist, which
 # passes only where its digest is one btclib-org/.github's
-# reusable-attest.yml signed.
+# reusable-build.yml signed, or reusable-attest.yml before a tree ported.
 # What moves between a release and this run is the runner image, uv,
 # and the build backend -- `uv build`'s own resolver, or
 # `python -m build`'s for a tree whose sdist comes from a
@@ -79,19 +79,17 @@ name: reusable-sdist-rebuild
 # interpreter rather than of the one this repository pins, and that
 # interpreter is part of what decides the rebuilt digest.
 #
-# **The signer is reusable-attest.yml.** `gh attestation verify`
-# requires the signer to be named once an attestation is generated
-# inside a called workflow, and the identity is then the callee's:
-# btclib-org/.github#35's OIDC probe recorded `job_workflow_ref` naming
-# btclib-org/.github on run 34814956543, while `repository` kept naming
-# the caller. So the `--repo` argument below names the calling tree and
-# the `--signer-workflow` path names this repository. A caller whose
-# latest release another workflow signed fails the job rather than
-# passing it: `gh attestation verify` exits 1. What it does not do is
-# say which signer it found or which was asked for -- the whole of its
-# output is `Error: verifying with issuer "sigstore.dev"`, with
-# `--format json` and off a TTY alike -- so a red step here is read off
-# the step name, not off the error text.
+# **The signer is reusable-build.yml, or reusable-attest.yml for a release
+# signed before the tree ported.** `gh attestation verify` requires the
+# signer to be named once an attestation is generated inside a called
+# workflow, and the identity is then the callee's, while `repository`
+# keeps naming the caller (btclib-org/.github#35). The release's tag is
+# passed as `--source-ref`, which is what keeps a rehearsal's attestation
+# from verifying as the release. reusable-attest.yml is tried second and
+# is deleted, with its step, when every tree's latest release is signed
+# by reusable-build.yml. A caller whose latest release neither signed
+# fails the job. `gh attestation verify` does not say which signer it
+# found or which was asked for, so the step prints which one passed.
 #
 # The permissions block is the calling job's, and this is not style:
 # a called workflow's own block can only downgrade what the caller
@@ -235,10 +233,19 @@ jobs:
           uv run --no-project .github/scripts/normalize_sdist.py dist/
           sha256sum dist/*.tar.gz
 
-      # the signer the header names
-      - name: Verify the rebuilt sdist against reusable-attest.yml
+      # the signers the header names, in order
+      - name: Verify the rebuilt sdist against its signer
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
         run: |
-          gh attestation verify dist/*.tar.gz --repo "$GITHUB_REPOSITORY" \
-            --signer-workflow btclib-org/.github/.github/workflows/reusable-attest.yml
+          workflows=btclib-org/.github/.github/workflows
+          if gh attestation verify dist/*.tar.gz --repo "$GITHUB_REPOSITORY" \
+            --signer-workflow "$workflows/reusable-build.yml@refs/heads/main" \
+            --source-ref "refs/tags/$TAG"; then
+            echo "signed by reusable-build.yml"
+          else
+            gh attestation verify dist/*.tar.gz --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "$workflows/reusable-attest.yml@refs/heads/main"
+            echo "signed by reusable-attest.yml"
+          fi
