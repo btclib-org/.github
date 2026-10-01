@@ -707,15 +707,15 @@ def admitted(rev: str, declared: str) -> bool | None:
     """Say whether the uv a pin bundles is one a floor admits.
 
     At least the floor, and not an equality: `autoupdate` moves the pin
-    on its own schedule while the floor waits on the ceiling section 1
-    sets it by, so a pin above the floor is the ordinary state and
+    on its own schedule while the floor waits for Dependabot to accept a
+    newer uv, so a pin above the floor is the ordinary state and
     equality here would be red at each of those moves.
 
     :param rev: the pin of the block the hook was read out of.
     :param declared: the tree's `[tool.uv] required-version`.
     :returns: whether the floor admits that uv, or `None` where the
         floor is not the bare `>=` shape section 1 asks for, which is
-        `test_the_uv_floor_is_what_dependabot_bundles`'s finding.
+        `test_the_uv_floor_is_not_above_what_dependabot_bundles`'s finding.
     """
     floor = FLOOR.match(declared)
     if floor is None:
@@ -767,7 +767,7 @@ def test_the_uv_lock_hook_bundles_a_uv_the_floor_admits(
     the running version ...` -- and the lint check the tree requires is
     red until one of the two moves. A tree carrying one of the pair
     alone is skipped: whether it owes the floor is
-    `test_the_uv_floor_is_what_dependabot_bundles`'s question, and
+    `test_the_uv_floor_is_not_above_what_dependabot_bundles`'s question, and
     whether it owes the hook is section 4's packaging bullet.
 
     :param repository: the repository asked about.

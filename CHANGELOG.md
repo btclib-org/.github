@@ -9823,3 +9823,9 @@ nothing red follows from the copies disagreeing.
 - **Section 11 names the check's context** (issue #1465):
   `lint / Dependency review` in a tree that calls `reusable-lint.yml`, and
   `Dependency review` in a tree that keeps its own `lint.yml`.
+
+### The uv floor is at most the uv Dependabot runs
+
+- **`required-version` may not exceed the uv Dependabot runs** (issue
+  #1482): it can be older than `main` pins, so a floor rises only to a uv
+  a run's log names. Nothing forces one up; this tree's is `>=0.12.18`.

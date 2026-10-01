@@ -21,9 +21,9 @@ name: reusable-audit
 # caller's `required-version` is a floor for reading `uv.lock`. The pin
 # stays at or above every caller's floor, a floor above it making uv exit
 # 2 with `Required uv version ... does not match`, which reads in the log
-# like an unreachable service; so it moves with Dependabot's uv ceiling, as
-# every floor does, after running the script against a tree's lock with the
-# new uv. The preview flag is spelled as uv's own warning spells it.
+# like an unreachable service. It moves before any floor rises above it,
+# after running the script against a tree's lock with the new uv. The
+# preview flag is spelled as uv's own warning spells it.
 #
 # No input: the tree is the caller's checkout and the script is this
 # repository's, served from `main` the way reusable-version-check.yml
