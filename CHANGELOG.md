@@ -9846,3 +9846,9 @@ nothing red follows from the copies disagreeing.
 - **A `Sign-off` job, in `reusable-lint.yml` and this tree's `lint.yml`,
   refuses a commit not signed off by its author** (issue #1467): section
   11's *Signatures* has the rule, and `CONTRIBUTING.md` how to sign off.
+
+### `reusable-build.yml` signs at SLSA Build L3
+
+- **`reusable-build.yml` builds and attests a calling tree's release files,
+  and the sdist rebuild accepts it as the signer** (issue #1506): section 12
+  has the verification command.

@@ -1780,6 +1780,11 @@ without adding to it is deleted.
 - **`permissions: contents: read` at the workflow level**, and one elevation per
   job where a job needs more: the job that writes a release holds no OIDC token,
   and the job that signs writes no release.
+- **`reusable-build.yml` builds and signs in two jobs.** Its `build` job holds
+  `contents: read` alone and prints the digests of what it wrote; its `attest`
+  job holds the OIDC token, checks the downloaded files against those digests and
+  signs them. A tree publishes from its own `release.yml`, PyPI not accepting a
+  reusable workflow as a Trusted Publisher.
 - **`timeout-minutes` on every job that runs steps**, far above what the work
   needs: it bounds a hung job holding a runner. A called job's is the callee's,
   one number for every caller, which only a caller the bound would cut raises.
@@ -3116,6 +3121,29 @@ of every version already on the index, which no later release corrects.
   the property weekly, rebuilding the latest release's sdist from its tag and
   running `gh attestation verify` over it; section 10's record names the trees
   that carry it.
+- **`reusable-build.yml` signs at SLSA Build L3** the distribution files and the
+  bill of materials of a tree whose `release.yml` calls it, over a workflow the
+  tree's own steps cannot alter. A verifier names the signing workflow and the
+  tag, the tag being what keeps a rehearsal dispatched from a branch from
+  verifying as a release:
+
+    ```shell
+    signer=btclib-org/.github/.github/workflows/reusable-build.yml
+    ```
+
+    ```shell
+    gh attestation verify <file> --repo btclib-org/<tree> \
+      --signer-workflow "${signer:?}@refs/heads/main" \
+      --source-ref refs/tags/v<version>
+    ```
+
+    The signature is made before the environment's approval, so a release whose
+    gates fail afterwards leaves an attestation for files that never reached an
+    index. A release signed before its tree ported names `reusable-attest.yml` as
+    the signer instead, and `sdist-rebuild.yml` accepts either. The compiled
+    wheels of `btclib-secp256k1` are built in that tree, so this level does not
+    cover them.
+
 - **The compiled wheels are outside that property**, and are named rather than
   passed over, the index attesting every one beside the sdist under PEP 740: a
   verifier who rebuilds one and gets other bytes would otherwise not know

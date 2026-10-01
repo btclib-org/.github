@@ -109,9 +109,6 @@ name: reusable-attest
 # sits in each tree's SECURITY.md and again in its RELEASING.md, which
 # is what a user runs by hand, and it flips when that tree's *latest
 # release* is one this job signed, not when its release.yml converts.
-# reusable-sdist-rebuild.yml accepts this job as the only signer, so
-# its run goes red for a caller whose latest release predates the
-# conversion.
 #
 # A rehearsal settles the identity without a tag: this job's `if:`
 # accepts `needs.publish-testpypi.result == 'success'`, so a

@@ -1,0 +1,107 @@
+# Copyright (c) The btclib developers
+# Distributed under the MIT software license, see the accompanying
+# LICENSE file or https://opensource.org/license/mit for the full text.
+
+"""What sections 10 and 12 say of `reusable-build.yml`, read from the file.
+
+The workflow cannot be run from this repository, which builds nothing,
+so what makes its signature SLSA Build L3 is asked of the document: the
+job that builds holds no OIDC token, the one that signs checks what it
+signs against what the build printed, and the weekly rebuild verifies
+against the signer a verifier is told to name.
+"""
+
+from __future__ import annotations
+
+import re
+from typing import Any
+
+import pytest
+import yaml
+
+from . import ROOT
+
+_WORKFLOWS = ROOT / ".github" / "workflows"
+
+
+def _jobs(name: str) -> dict[str, Any]:
+    """Return the jobs of one of this repository's workflows."""
+    parsed = yaml.safe_load((_WORKFLOWS / name).read_text(encoding="utf-8"))
+    jobs: dict[str, Any] = parsed["jobs"]
+    return jobs
+
+
+@pytest.fixture(scope="module")
+def jobs() -> dict[str, Any]:
+    """Return the jobs of `reusable-build.yml`."""
+    return _jobs("reusable-build.yml")
+
+
+def _uses(job: dict[str, Any]) -> list[str]:
+    """List the actions a job's steps use."""
+    return [step["uses"] for step in job["steps"] if "uses" in step]
+
+
+def test_the_build_job_holds_no_token(jobs: dict[str, Any]) -> None:
+    """Assert the job that builds can only read the repository."""
+    assert jobs["build"]["permissions"] == {"contents": "read"}
+
+
+def test_only_the_attest_job_signs(jobs: dict[str, Any]) -> None:
+    """Assert the signing scopes and the signing step are one job's."""
+    assert jobs["attest"]["permissions"] == {
+        "id-token": "write",
+        "attestations": "write",
+    }
+    assert not [use for use in _uses(jobs["build"]) if "attest" in use]
+    assert [use for use in _uses(jobs["attest"]) if "/attest@" in use]
+
+
+def test_the_attest_job_checks_the_files_before_it_signs(
+    jobs: dict[str, Any],
+) -> None:
+    """Assert what is signed is what the build job printed."""
+    attest = jobs["attest"]
+    assert attest["needs"] == "build"
+    assert "digests" in jobs["build"]["outputs"]
+    steps = attest["steps"]
+    signing = next(i for i, s in enumerate(steps) if "/attest@" in s.get("uses", ""))
+    checks = [
+        step
+        for step in steps[:signing]
+        if "sha256sum" in step.get("run", "")
+        and "| diff -" in step["run"]
+        and "needs.build.outputs.digests" in step.get("env", {}).get("DIGESTS", "")
+    ]
+    assert checks, "no step before the signature compares against the build job"
+
+
+def _hashed(job: dict[str, Any]) -> set[str]:
+    """Return the globs the `sha256sum` step of a job reads."""
+    globs: set[str] = set()
+    for step in job["steps"]:
+        found = re.search(r"sha256sum ((?:\S+/\* ?)+)", step.get("run", ""))
+        if found:
+            globs |= set(found.group(1).split())
+    return globs
+
+
+def test_the_files_hashed_are_the_files_signed(jobs: dict[str, Any]) -> None:
+    """Assert both jobs hash the globs the attestation covers."""
+    step = next(s for s in jobs["attest"]["steps"] if "/attest@" in s.get("uses", ""))
+    signed = set(step["with"]["subject-path"].split())
+    assert signed
+    assert _hashed(jobs["build"]) == signed
+    assert _hashed(jobs["attest"]) == signed
+
+
+def test_the_rebuild_verifies_the_signer_and_the_tag() -> None:
+    """Assert the weekly rebuild names reusable-build.yml and its tag."""
+    steps = _jobs("reusable-sdist-rebuild.yml")["rebuild"]["steps"]
+    run = next(s["run"] for s in steps if "gh attestation verify" in s.get("run", ""))
+    assert '--source-ref "refs/tags/$TAG"' in run
+    build = "reusable-build.yml@refs/heads/main"
+    attest = "reusable-attest.yml@refs/heads/main"
+    assert build in run
+    assert attest in run, "the fallback for earlier releases"
+    assert run.index(build) < run.index(attest)
