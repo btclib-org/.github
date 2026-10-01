@@ -9840,3 +9840,9 @@ nothing red follows from the copies disagreeing.
 - **`profile/README.md` lists `claude-process` under *Around them*** (closes
   #1510): a public repository since 2026-10-01, with no package and so no
   edge in the dependency graph.
+
+### A `Signed-off-by:` trailer on every commit of a pull request
+
+- **A `Sign-off` job, in `reusable-lint.yml` and this tree's `lint.yml`,
+  refuses a commit not signed off by its author** (issue #1467): section
+  11's *Signatures* has the rule, and `CONTRIBUTING.md` how to sign off.

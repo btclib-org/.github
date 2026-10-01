@@ -2468,6 +2468,20 @@ Tags too: a release tag is signed, and a `tag-integrity` ruleset over
 `refs/tags/v*` requires it — that tag being otherwise the one unattested
 link in a fully signed chain.
 
+**Every commit a pull request adds carries a `Signed-off-by:` trailer
+naming its author**, by which the author certifies the
+[Developer Certificate of Origin](https://developercertificate.org/). A
+signature attests who made a commit and the trailer the right to
+contribute it, so neither stands in for the other. A `Sign-off` job
+checks it: `reusable-lint.yml`'s, or the same job in a tree that keeps
+its own `lint.yml`, both running this repository's
+`.github/scripts/check_sign_off.py`. The trailer has to carry the
+author's own address: one from anyone else is not the author's
+attestation. The script skips merge commits and the commits of
+Dependabot and pre-commit.ci, and its docstring says why. The rejected
+alternative is the `dcoapp` GitHub App: one more party installed on the
+organization, where the job is code these trees hold.
+
 ### Branch protection and rulesets
 
 `main` is the only branch. Everything reaches it through a pull request,

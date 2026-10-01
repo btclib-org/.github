@@ -34,6 +34,11 @@ name: reusable-lint
 # alone, so an advisory published later against one stops no pull request.
 # README.md section 11 states the rule, and .github/dependency-review.yml
 # is what the job holds a pull request to.
+#
+# The third job reads the commits a pull request adds, for the
+# `Signed-off-by:` trailer section 11 asks of each. The script it runs,
+# this repository's .github/scripts/check_sign_off.py, says which commits
+# it reads and why.
 
 on:
   workflow_call:
@@ -207,3 +212,55 @@ jobs:
           # in a public repository, so nothing beyond read access is asked
           # of the token
           external-repo-token: ${{ github.token }}
+
+  sign-off:
+    # the name a check context is keyed by, after the calling job's own, as
+    # for the jobs above: `lint / Sign-off` for a caller named `lint`
+    name: Sign-off
+    # the commits read are those between a pull request's merge commit's two
+    # parents, and only a pull_request event checks that commit out. A draft
+    # and a closed pull request decline as the jobs above do
+    if: >-
+      ${{ github.event_name == 'pull_request'
+      && !github.event.pull_request.draft
+      && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    # git reads a few commits and uv fetches one interpreter, so a job past
+    # this is hung
+    timeout-minutes: 10
+    # restated, a job's permissions replacing the workflow's
+    permissions:
+      contents: read
+    steps:
+      # the whole history: a branch's commits go back to where it left the
+      # base, however far that is
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      # `path:` puts it beside the caller's checkout instead of over it;
+      # sparse, so what lands is .github/scripts and this repository's root
+      # files. `ref: main` is the trust the caller extends by naming this
+      # workflow `@main`
+      - name: Check out the sign-off script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: btclib-org/.github
+          ref: main
+          path: standard
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+      # caching off: the job installs no dependency, so a cache has nothing
+      # to hold
+      - name: Setup uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: false
+      # --no-project and the interpreter named, the script being this
+      # repository's and not the caller's (section 10). HEAD is the merge
+      # commit: its first parent is the base, its second the head
+      - name: Check that every commit is signed off by its author
+        run: |
+          uv run --no-project --python 3.15 \
+            standard/.github/scripts/check_sign_off.py HEAD^1..HEAD^2
