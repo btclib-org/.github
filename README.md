@@ -254,20 +254,24 @@ carries all of it, pre-validated by the `deps-latest` workflow.
 
 `[tool.uv] required-version` names the oldest uv that may read the lock,
 and every tree the root-files table binds to `uv.lock` carries it. The
-floor is set at the ceiling — the newest uv Dependabot's own bundled
-updater still reads — because that updater runs `uv lock` with exactly
-the uv it ships and refuses rather than upgrading itself, so a floor
-above the ceiling would silently stop every lock update it attempts.
-Below it, an *older* uv rewrites the lock. Section 15 carries the
-command that measures the floor, and `setup-uv` given no version input
-reads that key, so CI needs no second pin except `reusable-audit.yml`'s, which
+floor is at most the uv Dependabot's updater runs, because the updater
+runs `uv lock` with exactly that uv and refuses a higher floor rather
+than upgrading itself, which silently stops every lock update it
+attempts. That uv can be older than the one `dependabot-core`'s
+`uv/Dockerfile` pins on `main`, the ceiling, so a floor rises only to a
+version a Dependabot run's log has named on its `Package manager uv,
+Info : uv <version>` line. A floor below the updater's uv admits an
+older uv, which can rewrite the lock. Section 15 carries the commands
+that measure the floor, and `setup-uv` given no version input reads that
+key, so CI needs no second pin except `reusable-audit.yml`'s, which
 section 12 gives.
 
 **The `uv-lock` hook's `rev:` is at or above that floor**: the pin
 selects the uv the hook bundles rather than the project's own, and under
 the floor the hook refuses to run inside the required lint check.
 `tests/hooks_test.py` asks for at least the floor and not for equality,
-`autoupdate` moving the pin while the floor waits on the ceiling.
+`autoupdate` moving the pin while the floor waits for Dependabot to
+accept a newer uv.
 
 ## 2. The tree
 
@@ -3164,8 +3168,7 @@ of every version already on the index, which no later release corrects.
   aliases in every package audited, where an entry names one component, so an
   entry for one component exempts the same advisory in another. The uv version
   is pinned in `reusable-audit.yml` alone, `uv audit` being a preview feature,
-  and stays at or above every tree's floor, moving with Dependabot's ceiling as
-  the floors do.
+  and stays at or above every tree's floor.
 - **What is published is inspected first** — `twine check --strict`,
   `check-wheel-contents` and `pyroma --min 10` on the files the release will
   publish; then the wheel is installed from an empty directory and smoke-tested,
@@ -3766,8 +3769,8 @@ and the matrix, which only this compares, runs every one, the pin running where
 it is empty. `library` lines share one window; an `application` line is read
 against the comment in its `.python-version`.
 
-Section 1's uv floor, and the ceiling Dependabot's bundled updater ships, above
-which it refuses to re-lock:
+Section 1's uv floor, and the ceiling `dependabot-core`'s `main` pins, above
+which the service may refuse to re-lock:
 
 ```shell
 if d=$(gh api repos/dependabot/dependabot-core/contents/uv/Dockerfile \
@@ -3786,14 +3789,51 @@ for r in <every repository>; do
   e=$(gh api "repos/<org>/$r/contents/uv.lock" --silent 2>&1) && lock=yes \
     || { printf '%s' "$e" | grep -q '(HTTP 404)' && lock=no \
          || lock=unreadable; }
-  printf '%s\tlock=%s\tfloor=%s\n' "$r" "$lock" "$req"
+  f=${req#>=} c=${ceiling##*:} above=unread
+  n=$(printf '%s\n%s\n' "$f" "$c" | grep -cxE '[0-9]+(\.[0-9]+)*')
+  [ "$n" = 2 ] && { [ "$(printf '%s\n%s\n' "$f" "$c" | sort -V | tail -n1)" \
+    = "$c" ] && above=no || above=yes; }
+  printf '%s\tlock=%s\tfloor=%s\tabove=%s\n' "$r" "$lock" "$req" "$above"
 done
 ```
 
 `ceiling=absent` or empty is `dependabot-core` moving what this rests on, acted
 on that day. `lock=yes` with an empty `floor=` is the finding; `lock=no` owes
-none. A `floor=` version other than `ceiling=` is a finding: below, the tree
-admits a uv older than its lock updates; above, those updates have stopped.
+none. `above=yes` is a finding: the floor is over the ceiling and those
+updates have stopped. `above=unread` is a floor or a ceiling that is not a bare
+version. `above=no` is the rule, and cannot say whether a Dependabot run
+accepted the floor: the next command reads that.
+
+The uv a Dependabot run used is on its log's `Package manager uv, Info : uv
+<version>` line, which a successful and a failed run both print. The newest
+run is the one named `uv in ...` with the greatest `created_at` among the runs
+of the repository's Dependabot workflow:
+
+```shell
+for r in <every repository with a lock>; do
+  read_or_mark pyproject.toml
+  req=$(printf '%s' "$content" \
+    | sed -nE 's/^required-version = "(.*)"/\1/p')
+  [ "$ok" = unreadable ] && req=unreadable
+  w=$(gh api "repos/<org>/$r/actions/workflows" --jq '.workflows[]
+    | select(.path == "dynamic/dependabot/dependabot-updates") | .id')
+  id=$(gh api "repos/<org>/$r/actions/workflows/$w/runs?per_page=100" \
+    --jq '[.workflow_runs[] | select(.name | test("^uv in "))]
+          | max_by(.created_at) | .id // "none"')
+  uv=$(gh run view "$id" --repo "<org>/$r" --log 2>/dev/null \
+    | grep -oE 'Package manager uv, Info : uv [0-9.]+' | head -n1 \
+    | grep -oE '[0-9.]+$')
+  f=${req#>=} over=unread
+  n=$(printf '%s\n%s\n' "$f" "$uv" | grep -cxE '[0-9]+(\.[0-9]+)*')
+  [ "$n" = 2 ] && { [ "$(printf '%s\n%s\n' "$f" "$uv" | sort -V | tail -n1)" \
+    = "$uv" ] && over=no || over=yes; }
+  printf '%s\trun=%s\tuv=%s\tfloor=%s\tover=%s\n' "$r" "$id" "$uv" "$req" "$over"
+done
+```
+
+`over=yes` is a floor above the uv of the tree's newest run. Dependabot is one
+service, so a tree whose newest run is old is read against the newest run of any
+tree. `over=unread` is no run, or a floor that is not a bare version.
 
 Which repositories publish, deciding under section 2's first tier whether a
 `SECURITY.md` is owed, and section 11's `claude-review.yml` everywhere, which
