@@ -318,7 +318,13 @@ def names() -> list[str]:
     )
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    (
+        1467,
+        "test_the_lint_gate_checks_the_sign_off",
+        ("bbt", "btclib-org.github.io", "claude-process", "portanode"),
+    ),
+)
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what
