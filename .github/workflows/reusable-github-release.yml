@@ -5,7 +5,7 @@ name: reusable-github-release
 # accepted its files, so the notes, the assets and the bundle's naming
 # are written once rather than in every publishing tree. The trigger,
 # the `concurrency:` group a release never cancels, the `needs:` edges
-# onto the tree's own publish job and its attest job, and the `if:` that
+# onto the tree's own publish job and the job that signs, and the `if:` that
 # opens with `always()` all stay in the caller, whose run this job
 # joins.
 #
@@ -15,10 +15,10 @@ name: reusable-github-release
 # that do not install being worse than a release announced a minute
 # later, and the announcement not being what makes them installable.
 #
-# reusable-attest.yml is the other half and its header argues why the
-# two are two files. What passes between them is the `attestation`
-# artifact, the run's rather than a file's, so a caller that converts
-# one and not the other still works.
+# reusable-build.yml signs the files this job attaches, or
+# reusable-attest.yml in a tree not yet ported. What passes between this
+# file and either is the `attestation` artifact, the run's rather than a
+# file's, so a caller that converts one and not the other still works.
 #
 # **A caller's `if:` has to open with `always()`, and the two `.result`
 # checks beside it are not a substitute for saying so.** A job with a
@@ -71,8 +71,8 @@ name: reusable-github-release
 #
 # What a caller owes besides: the `needs:` edges and the `if:` above;
 # dist-artifact; artifacts named `sbom` and `attestation` in the same
-# run, the second being reusable-attest.yml's; and a RELEASE_NOTES.md at
-# the root of its own tree, which is the one this job reads --
+# run, the second being reusable-build.yml's or reusable-attest.yml's;
+# and a RELEASE_NOTES.md at the root of its own tree, which is the one this job reads --
 # `actions/checkout` takes `github.repository` from the run it is a step
 # of rather than from where this file lives. `GITHUB_REF_NAME` is the
 # caller's ref, which is the read reusable-version-check.yml already
@@ -112,8 +112,8 @@ jobs:
     permissions:
       # the one job of a release that writes to the repository through
       # its token, and what it writes is a release; the statement
-      # reusable-attest.yml signs goes to the attestations API under
-      # permissions of its own
+      # reusable-build.yml or reusable-attest.yml signs goes to the
+      # attestations API under permissions of its own
       contents: write # creating the release this job exists to create
     steps:
       # every action is pinned to a commit SHA, the tag in the comment:

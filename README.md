@@ -3130,8 +3130,8 @@ of every version already on the index, which no later release corrects.
   the property weekly, rebuilding the latest release's sdist from its tag and
   running `gh attestation verify` over it; section 10's record names the trees
   that carry it.
-- **`reusable-build.yml` signs at SLSA Build L3** the distribution files and the
-  bill of materials of a tree whose `release.yml` calls it, over a workflow the
+- **A publisher's `release.yml` calls `reusable-build.yml`**, which signs at SLSA
+  Build L3 the distribution files and the bill of materials, from a workflow the
   tree's own steps cannot alter. A verifier names the signing workflow and the
   tag, the tag being what keeps a rehearsal dispatched from a branch from
   verifying as a release:

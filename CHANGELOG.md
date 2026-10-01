@@ -9874,3 +9874,9 @@ nothing red follows from the copies disagreeing.
 
 - **The 1508 `BACKLOG` row is deleted** (closes #1508): all eight trees carry
   `_inventories/python.inv` and `tests/intersphinx_test.py` passes for them.
+
+### A publisher's `release.yml` calls `reusable-build.yml`
+
+- **Section 12 asks every publisher's `release.yml` to call
+  `reusable-build.yml`** (issue #1506): `tests/build_call_test.py` reads it, and
+  a `BACKLOG` row excuses each publisher until it has ported.
