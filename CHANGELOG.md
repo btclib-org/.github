@@ -9900,3 +9900,8 @@ nothing red follows from the copies disagreeing.
 
 - **`btclib` no longer needs the excuse** (issue #1506): its `release.yml`
   calls `reusable-build.yml`.
+
+### The 1467 `BACKLOG` row and `CONTRIBUTING.md`'s drift entry come out
+
+- **Every tree runs the `Sign-off` job and carries its paragraph**
+  (issue #1467): the cells pass and the copies agree.
