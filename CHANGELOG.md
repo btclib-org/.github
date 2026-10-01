@@ -9858,3 +9858,8 @@ nothing red follows from the copies disagreeing.
 - **The section writes the checkout one way, defines `<scratchpad>` and
   names the pull** (issue #1500): `EXPECTED_DRIFT` carries `CLAUDE.md`
   until each tree's copy agrees.
+
+### `CLAUDE.md` has no recorded drift
+
+- **`EXPECTED_DRIFT` no longer names `CLAUDE.md`** (closes #1500): every tree
+  carries the shared primary-checkout section byte for byte.
