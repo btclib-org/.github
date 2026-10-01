@@ -24,7 +24,7 @@ name: reusable-lint
 # --only-group lint pre-commit`, and still keeps its own lint.yml rather
 # than calling this one, being the file this workflow lives in, and
 # because its job also runs the offline share of its own suite in the
-# one job the branch rule names.
+# `Lint`, a job the branch rule names.
 #
 # The second job reviews the dependencies a pull request adds, which asks a
 # different question of a different input: the forge's dependency graph

@@ -2893,17 +2893,19 @@ such a finding only through a further push or a `close`/`reopen`.
   `actions/dependency-review-action` in a `Dependency review` job:
   `reusable-lint.yml`'s, or the same job in a tree that keeps its own
   `lint.yml`. It fails on an added dependency with an advisory of `moderate`
-  severity or above, or with a licence outside the allow-list, both read off
-  the dependency graph, which is therefore on in every tree. Its settings are
-  one file, this repository's `.github/dependency-review.yml`, read at `main`
-  so that a change reaches every tree in one landing. `allow-licenses` holds
-  permissive single SPDX identifiers, and a package whose concluded licence
-  carries a copyleft or a `LicenseRef` term is named by its purl in
-  `allow-dependencies-licenses`, with its reason, so that a new one is a
-  decision taken in a pull request. Only what a pull request adds or changes
-  is compared: an advisory published later against a package already locked
-  stops no pull request, Dependabot's alerts reading the whole lock and
-  section 12's audit what a release publishes.
+  severity or above, or with a licence outside the allow-list, both read off the
+  dependency graph, which is therefore on in every tree. The job is a required
+  check: its context is `lint / Dependency review` in a tree that calls
+  `reusable-lint.yml`, and `Dependency review` in a tree that keeps its own
+  `lint.yml`. Its settings are one file, this repository's
+  `.github/dependency-review.yml`, read at `main` so that a change reaches every
+  tree in one landing. `allow-licenses` holds permissive single SPDX
+  identifiers, and a package whose concluded licence carries a copyleft or a
+  `LicenseRef` term is named by its purl in `allow-dependencies-licenses`, with
+  its reason, so that a new one is a decision taken in a pull request. Only what
+  a pull request adds or changes is compared: an advisory published later
+  against a package already locked stops no pull request, Dependabot's alerts
+  reading the whole lock and section 12's audit what a release publishes.
   **`allow-ghsas` is not used**: an advisory allowed there owes a
   `.github/vex.toml` entry, section 12 stating a judgement of not affected in
   the release's own document.

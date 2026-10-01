@@ -13,6 +13,10 @@ issue closed without deciding classic's own `required_signatures`;
 btclib-org/.github#1381 settled it off, `main-integrity` already
 carrying the rule, and this test reads that field back too.
 
+The review of added dependencies is a required check too, and its
+context depends on how the tree's `lint.yml` produces the job: that file
+is what the test reads to know which one to look for.
+
 The endpoint answers 404 three times over, and none of the three is one
 case. A branch with no classic protection at all is `Branch not
 protected`, which is the drift btclib-org/.github#88 exists to catch and
@@ -34,11 +38,16 @@ none of them.
 from __future__ import annotations
 
 import subprocess
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import ORG, by_hand, gh_json
+from . import ORG, SELF, by_hand, gh_json
+from .dependency_review_test import ACTION, READ_AS, REUSABLE
+from .workflows_test import jobs
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 pytestmark = pytest.mark.integration
 
@@ -52,6 +61,12 @@ UNREADABLE = "Not Found"
 
 NO_MAIN = "Branch not found"
 """What `gh api` reports for a repository with no `main` branch yet."""
+
+ACTIONS_APP = 15368
+"""The Actions app, which section 11 binds every required check to."""
+
+CALL = f"{ORG}/{SELF}/.github/workflows/reusable-lint.yml@main"
+"""How a tree's `lint.yml` calls the workflow that holds the review job."""
 
 
 @pytest.fixture(scope="session")
@@ -148,4 +163,71 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
         "'{checks: [.required_status_checks.checks[]?.context],"
         " strict: .required_status_checks.strict,"
         " admins: .enforce_admins.enabled}'",
+    )
+
+
+def review_context(lint: Path) -> str | None:
+    """Name the check context the tree's `Dependency review` job reports.
+
+    A job calling `reusable-lint.yml` reports the called job's name after
+    its own, and a job carrying the action reports its own name.
+
+    :param lint: the tree's `lint.yml`.
+    :returns: the context, or `None` where the file holds neither job.
+    """
+    if not lint.is_file():
+        return None
+    for job_id, job in jobs(lint).items():
+        name = job.get("name", job_id)
+        if job.get("uses") == CALL:
+            called = jobs(REUSABLE)["dependency-review"]["name"]
+            return f"{name} / {called}"
+        carries = any(
+            ACTION.search(step.get("uses", ""))
+            and step.get("with", {}).get("config-file") == READ_AS
+            for step in job.get("steps") or []
+        )
+        if carries:
+            return str(name)
+    return None
+
+
+def test_main_requires_the_dependency_review(
+    repository: str,
+    trees: dict[str, Path],
+    protections: dict[str, dict[str, Any] | str | None],
+) -> None:
+    """Section 11's `Dependency review` is a required check, bound to Actions.
+
+    The context is `lint / Dependency review` in a tree calling
+    `reusable-lint.yml` and `Dependency review` in a tree with its own
+    `lint.yml`: the tree's own file says which, and the rule has to name
+    what that file produces, since a context nothing reports blocks every
+    merge and one the rule lacks gates nothing.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    :param protections: the classic protection of each repository.
+    """
+    document = protections[repository]
+    if document is None:
+        pytest.skip(
+            f"this run's token cannot read {ENDPOINT} on {repository}: "
+            f"gh api repos/{ORG}/{repository}/{ENDPOINT} answered {UNREADABLE}"
+        )
+    if isinstance(document, str):
+        pytest.fail(document)
+    context = review_context(trees[repository] / ".github" / "workflows" / "lint.yml")
+    assert context, "lint.yml neither calls reusable-lint.yml nor carries the action"
+    required = {
+        (check["context"], check["app_id"])
+        for check in (document.get("required_status_checks") or {}).get("checks", [])
+    }
+    assert (context, ACTIONS_APP) in required, (
+        f"main does not require {context!r} from the Actions app; "
+        + by_hand(
+            repository,
+            f"gh api repos/{ORG}/{repository}/{ENDPOINT}/required_status_checks "
+            "--jq '[.checks[] | [.context, .app_id]]'",
+        )
     )
