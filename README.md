@@ -327,6 +327,7 @@ rule and gives no reason is still a gap.
 | `bitcoin-node-tests` | 2 |
 | `portanode` | 3 |
 | `btclib-org.github.io` | 3 |
+| `claude-process` | 3 |
 
 The loop below checks the table in both directions: a row it
 contradicts is a finding, and so is a repository it names that the
@@ -1973,6 +1974,7 @@ day and an hour, the repository owns the minute:
 | `bitcoin-node-tests` | 44 |
 | `btclib-ecc` | 48 |
 | `btclib-mnemonics` | 52 |
+| `claude-process` | 56 |
 
 **The rows are in the order of what they ask about**, family by family. A new
 sentinel takes the slot its family already holds rather than the end of the
