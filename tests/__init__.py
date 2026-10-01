@@ -324,6 +324,20 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_the_lint_gate_checks_the_sign_off",
         ("bbt", "btclib-org.github.io", "claude-process", "portanode"),
     ),
+    (
+        1508,
+        "test_the_python_mapping_has_a_copy_kept_in_the_tree",
+        (
+            "btclib",
+            "btclib-node",
+            "btclib-secp256k1",
+            "btclib-wallet",
+            "btclib-mnemonics",
+            "btclib-ecc",
+            "btclib-benchmarks",
+            "bitcoin-core-rpc",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 

@@ -640,6 +640,15 @@ the key allows, invisibly to a diff and even under `-E`, and a sibling's
 still resolves on a checkout and fails on a runner. Asked of every
 mapping, it would cost every build a fetch and fail offline under `-W`.
 
+**The `python` mapping has a second location, a copy kept in the tree:**
+`"python": ("https://docs.python.org/3", (None, "_inventories/python.inv"))`.
+Without it, an outage of `docs.python.org` fails `-n -W` on every
+standard-library reference. Sphinx reads the copy only when the URL fails,
+so a name the standard library removes still fails the build whenever the
+site answers. The copy is refreshed by hand, with the `curl` line
+`conf.py`'s comment keeps. `tests/intersphinx_test.py` asks for the entry
+and for git to track the file.
+
 **`nitpick_ignore` holds only entries whose reason is written beside
 them**, an entry being a reference that genuinely cannot resolve. Every
 entry is a reference the build stops checking, so a broad

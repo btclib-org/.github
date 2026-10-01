@@ -9863,3 +9863,9 @@ nothing red follows from the copies disagreeing.
 
 - **`EXPECTED_DRIFT` no longer names `CLAUDE.md`** (closes #1500): every tree
   carries the shared primary-checkout section byte for byte.
+
+### The `python` inventory has a copy kept in each tree
+
+- **Section 2's `python` mapping names `_inventories/python.inv` as a second
+  location** (issue #1508), which sphinx reads only where `docs.python.org`
+  fails; `tests/intersphinx_test.py` asks every tree for it.
