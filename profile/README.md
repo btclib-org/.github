@@ -50,6 +50,9 @@ whenever that makes them clearer.
   Core and Electrum on a portable disk, for macOS, Windows and Linux.
 - **[.github](https://github.com/btclib-org/.github)** — this page, and
   the standard every repository here follows.
+- **[claude-process](https://github.com/btclib-org/claude-process)** —
+  the process the maintainers follow with Claude Code: the
+  `/btclib-org` command and the writer and reviewer agents.
 - **[btclib-org.github.io](https://github.com/btclib-org/btclib-org.github.io)**
   — the site serving this page at btclib.org.
 
