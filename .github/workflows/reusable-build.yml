@@ -237,6 +237,8 @@ jobs:
       - name: Check the files against the build job's digests
         env:
           DIGESTS: ${{ needs.build.outputs.digests }}
+        # bash with pipefail, so that a failing `sha256sum` fails the step
+        shell: bash
         run: |
           printf '%s\n' "$DIGESTS" > "$RUNNER_TEMP/digests.txt"
           sha256sum dist/* sbom/* | LC_ALL=C sort -k2 | diff - "$RUNNER_TEMP/digests.txt"

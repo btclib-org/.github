@@ -44,12 +44,20 @@ name: reusable-github-release
 # reusable-attest.yml's header has the three measurements that say the
 # prohibition does not reach the calling job.
 #
-# One input.
+# Two inputs.
 #
 # dist-artifact, string, required: the artifact whose files are attached
 # here. reusable-attest.yml's header argues the value and the absent
 # default; the two take the same one, a release carrying what was
 # signed.
+#
+# digests, string, optional: the `digests` output of reusable-build.yml.
+# Given, the job refuses a file changed, added or missing in `dist` or
+# `sbom` before it creates the release, the artifacts being ones a job
+# that ran after the build could have replaced. A caller passes
+# `${{ needs.build.outputs.digests }}`. Left empty, nothing is checked,
+# which is what a caller still on reusable-attest.yml gets, that file
+# having no such output.
 #
 # Resisted: an input for the notes file and one for the asset list.
 # Every caller keeps a RELEASE_NOTES.md whose `## <tag>` section is what
@@ -95,6 +103,13 @@ on:
           where one artifact carries the wheel and the sdist together.
         required: true
         type: string
+      digests:
+        description: >
+          The `digests` output of reusable-build.yml. Empty, the files
+          are not checked.
+        required: false
+        type: string
+        default: ""
 
 # least privilege for the GITHUB_TOKEN at the workflow level, elevated
 # on the job below -- each grant explained at its own line there
@@ -143,6 +158,17 @@ jobs:
         with:
           name: sbom
           path: sbom/
+      # the two lists are equal or no release is created: a file changed,
+      # added or missing since the build job printed its digests fails
+      # here
+      - name: Check the files against the build job's digests
+        if: inputs.digests != ''
+        shell: bash
+        env:
+          DIGESTS: ${{ inputs.digests }}
+        run: |
+          sha256sum dist/* sbom/* | LC_ALL=C sort -k2 \
+            | diff - <(printf '%s\n' "$DIGESTS")
       - name: Create the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
