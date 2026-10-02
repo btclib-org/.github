@@ -9880,3 +9880,8 @@ nothing red follows from the copies disagreeing.
 - **Section 12 asks every publisher's `release.yml` to call
   `reusable-build.yml`** (issue #1506): `tests/build_call_test.py` reads it, and
   a `BACKLOG` row excuses each publisher until it has ported.
+
+### The `BACKLOG` row for 1506 drops `btclib-ecc`
+
+- **`btclib-ecc` no longer needs the excuse** (issue #1506): its
+  `release.yml` calls `reusable-build.yml`.
