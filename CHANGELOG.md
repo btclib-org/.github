@@ -9927,3 +9927,9 @@ nothing red follows from the copies disagreeing.
 
 - **`btclib-secp256k1` no longer needs the excuse** (closes #1506): every
   tree with a release calls `reusable-build.yml`.
+
+### The Claude jobs run with narrowed tokens and short tool lists
+
+- **`reusable-claude-review.yml` narrows the token and the tools** (issue
+  btclib-org/btclib#2448): `additional_permissions` leaves `contents` and
+  `issues` at read, and the jobs run only the `gh pr` forms they need.
