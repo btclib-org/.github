@@ -9933,3 +9933,9 @@ nothing red follows from the copies disagreeing.
 - **`reusable-claude-review.yml` narrows the token and the tools** (issue
   btclib-org/btclib#2448): `additional_permissions` leaves `contents` and
   `issues` at read, and the jobs run only the `gh pr` forms they need.
+
+### The review posts through a script that ignores its arguments
+
+- **`reusable-claude-review.yml` has the review post through a script**
+  (issue btclib-org/btclib#2448): an argument the script is handed does
+  nothing, so no flag can turn `--comment` into an approval.
