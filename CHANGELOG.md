@@ -9949,3 +9949,8 @@ nothing red follows from the copies disagreeing.
 ### The `attest` job's digest check runs under pipefail
 
 - **A failing `sha256sum` fails the step** (issue #1534): it runs under `bash`.
+
+### The `CONTRIBUTING.md` drift entry comes out
+
+- **Every tree carries the shared half of `CONTRIBUTING.md`** (closes #1527):
+  the copies agree and `EXPECTED_DRIFT` is empty.
