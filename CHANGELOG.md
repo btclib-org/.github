@@ -9890,3 +9890,8 @@ nothing red follows from the copies disagreeing.
 
 - **Neither needs the excuse** (issue #1506): their `release.yml` calls
   `reusable-build.yml`.
+
+### The `BACKLOG` row for 1506 drops `btclib-node`
+
+- **`btclib-node` no longer needs the excuse** (issue #1506): its
+  `release.yml` calls `reusable-build.yml`.
