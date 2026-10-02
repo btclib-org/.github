@@ -76,6 +76,38 @@ def test_the_attest_job_checks_the_files_before_it_signs(
     assert checks, "no step before the signature compares against the build job"
 
 
+def test_the_attest_check_fails_when_sha256sum_does(jobs: dict[str, Any]) -> None:
+    """Assert the check runs under bash, so that pipefail is on."""
+    check = next(s for s in jobs["attest"]["steps"] if "| diff -" in s.get("run", ""))
+    assert check["shell"] == "bash"
+
+
+def test_the_release_checks_the_files_before_it_creates_the_release() -> None:
+    """Assert a caller's digests are compared before the release exists."""
+    parsed = yaml.safe_load(
+        (_WORKFLOWS / "reusable-github-release.yml").read_text(encoding="utf-8")
+    )
+    # PyYAML reads the key `on` as True
+    digests = parsed[True]["workflow_call"]["inputs"]["digests"]
+    assert digests["type"] == "string"
+    assert not digests["required"]
+    assert digests["default"] == ""
+    steps = parsed["jobs"]["github-release"]["steps"]
+    creating = next(
+        i for i, s in enumerate(steps) if "gh release create" in s.get("run", "")
+    )
+    checks = [
+        step
+        for step in steps[:creating]
+        if "| diff -" in step.get("run", "")
+        and "sha256sum dist/* sbom/*" in step["run"]
+        and step.get("shell") == "bash"
+        and step.get("if") == "inputs.digests != ''"
+        and step.get("env", {}).get("DIGESTS") == "${{ inputs.digests }}"
+    ]
+    assert checks, "no step before the release compares against the build job"
+
+
 def test_the_workflow_passes_the_build_digests_out() -> None:
     """Assert a caller reads the digests the build job printed."""
     parsed = yaml.safe_load(

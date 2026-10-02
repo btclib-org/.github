@@ -9939,3 +9939,13 @@ nothing red follows from the copies disagreeing.
 - **`reusable-claude-review.yml` has the review post through a script**
   (issue btclib-org/btclib#2448): an argument the script is handed does
   nothing, so no flag can turn `--comment` into an approval.
+
+### `reusable-github-release.yml` checks the files against the build's digests
+
+- **A `digests` input takes the `digests` output of `reusable-build.yml`**
+  (closes #1534, for btclib-org/btclib#2449): given, a file changed, added
+  or missing fails the job before the release is created.
+
+### The `attest` job's digest check runs under pipefail
+
+- **A failing `sha256sum` fails the step** (issue #1534): it runs under `bash`.
