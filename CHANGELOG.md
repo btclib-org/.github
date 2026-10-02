@@ -9905,3 +9905,8 @@ nothing red follows from the copies disagreeing.
 
 - **Every tree runs the `Sign-off` job and carries its paragraph**
   (issue #1467): the cells pass and the copies agree.
+
+### `reusable-build.yml` serves a tree whose wheels are built elsewhere
+
+- **`submodules`, `setup-python`, `sdist-only` and `dist-artifact`**
+  (issue #1506): a tree that passes none of them builds as before.
