@@ -9916,3 +9916,9 @@ nothing red follows from the copies disagreeing.
 - **No ack of record exists while `claude-review.yml` is disabled**
   (issue #1527, for btclib-org/btclib#2445): a local review by a reviewer
   other than the author stands in.
+
+### `reusable-build.yml` outputs the digests of what it built
+
+- **A `digests` output holds the sha256 of each file of `dist` and `sbom`**
+  (issue btclib-org/btclib#2449): a caller's publish job refuses a download
+  with a file changed, added or missing.

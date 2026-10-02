@@ -19,6 +19,14 @@ name: reusable-build
 # checks, the smoke tests and the sdist suite, and reads the `dist`
 # artifact on a release.
 #
+# The `digests` output is what `build` printed: one `sha256sum` line per
+# file, the path as `dist/<file>` or `sbom/<file>`, sorted by path. A
+# caller's publish job downloads `dist` into `dist/` and, before
+# publishing, refuses a file changed, added or missing:
+#
+#     sha256sum dist/* | LC_ALL=C sort -k2 \
+#       | diff - <(printf '%s\n' "$DIGESTS" | grep -F '  dist/')
+#
 # The signer a verifier names is this file at `main`:
 #
 #     gh attestation verify <file> --repo <owner>/<tree> \
@@ -92,6 +100,12 @@ on:
           reusable-github-release.yml download.
         type: string
         default: dist
+    outputs:
+      digests:
+        description: >
+          The sha256 of each file of the `dist` and `sbom` artifacts, as
+          `sha256sum` prints them, sorted by path.
+        value: ${{ jobs.build.outputs.digests }}
 
 # least privilege for the GITHUB_TOKEN at the workflow level, elevated
 # on the job below -- each grant explained at its own line there
@@ -176,8 +190,8 @@ jobs:
           uv run --no-project --python "$PYTHON" \
             btclib-org-github/.github/scripts/generate_sbom.py \
             "${args[@]}" dist/ sbom/
-      # the attest job's reference: what it signs is what these hashes
-      # name, whatever happens to the artifacts between the two jobs
+      # the reference the attest job and a caller's publish jobs check
+      # against: what is signed and published is what these hashes name
       - name: Record the digests
         id: digests
         run: |

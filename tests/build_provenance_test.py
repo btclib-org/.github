@@ -76,6 +76,16 @@ def test_the_attest_job_checks_the_files_before_it_signs(
     assert checks, "no step before the signature compares against the build job"
 
 
+def test_the_workflow_passes_the_build_digests_out() -> None:
+    """Assert a caller reads the digests the build job printed."""
+    parsed = yaml.safe_load(
+        (_WORKFLOWS / "reusable-build.yml").read_text(encoding="utf-8")
+    )
+    # PyYAML reads the key `on` as True
+    outputs = parsed[True]["workflow_call"]["outputs"]
+    assert outputs["digests"]["value"] == "${{ jobs.build.outputs.digests }}"
+
+
 def _hashed(job: dict[str, Any]) -> set[str]:
     """Return the globs the `sha256sum` step of a job reads."""
     globs: set[str] = set()
