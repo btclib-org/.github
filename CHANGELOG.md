@@ -9910,3 +9910,9 @@ nothing red follows from the copies disagreeing.
 
 - **`submodules`, `setup-python`, `sdist-only` and `dist-artifact`**
   (issue #1506): a tree that passes none of them builds as before.
+
+### CONTRIBUTING.md says the maintainer self-merges while the bot review is off
+
+- **No ack of record exists while `claude-review.yml` is disabled**
+  (issue #1527, for btclib-org/btclib#2445): a local review by a reviewer
+  other than the author stands in.
