@@ -2763,7 +2763,7 @@ gh api orgs/<org>/actions/variables --jq '.variables[].name'
 It names nothing, and an undefined `vars.X` is the empty string, so the
 absence is the off state and creating it with that value is the whole
 switch; the file is kept current meanwhile. A tree whose gate is off has
-no ack of record, and a landing there reads a person's reading. The
+no ack of record; `CONTRIBUTING.md`'s *The review* has what stands in. The
 switch is the organization's so that no tree can be forgotten.
 
 **A pull request that adds or edits `claude-review.yml` gets no ack**
