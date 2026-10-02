@@ -318,13 +318,7 @@ def names() -> list[str]:
     )
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
-    (
-        1506,
-        "test_the_release_calls_the_signing_build",
-        ("btclib-secp256k1",),
-    ),
-)
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what

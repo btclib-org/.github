@@ -9922,3 +9922,8 @@ nothing red follows from the copies disagreeing.
 - **A `digests` output holds the sha256 of each file of `dist` and `sbom`**
   (issue btclib-org/btclib#2449): a caller's publish job refuses a download
   with a file changed, added or missing.
+
+### The 1506 `BACKLOG` row comes out
+
+- **`btclib-secp256k1` no longer needs the excuse** (closes #1506): every
+  tree with a release calls `reusable-build.yml`.
