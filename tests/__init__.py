@@ -320,11 +320,6 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
-        1467,
-        "test_the_lint_gate_checks_the_sign_off",
-        ("bbt", "btclib-org.github.io", "claude-process", "portanode"),
-    ),
-    (
         1506,
         "test_the_release_calls_the_signing_build",
         ("btclib-secp256k1",),
