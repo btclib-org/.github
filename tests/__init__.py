@@ -327,13 +327,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         1506,
         "test_the_release_calls_the_signing_build",
-        (
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-node",
-            "btclib-secp256k1",
-            "btclib-wallet",
-        ),
+        ("btclib", "btclib-node", "btclib-secp256k1"),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
