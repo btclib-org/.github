@@ -105,3 +105,21 @@ def test_the_rebuild_verifies_the_signer_and_the_tag() -> None:
     assert build in run
     assert attest in run, "the fallback for earlier releases"
     assert run.index(build) < run.index(attest)
+
+
+def test_the_optional_inputs_default_to_the_build_a_tree_gets_without_them() -> None:
+    """Assert a caller passing none of the optional inputs builds as before.
+
+    A tree that calls the workflow with `python` and `version-suffix`
+    alone gets `uv build`: none of the inputs added for a tree that
+    builds its wheels elsewhere may change that.
+    """
+    parsed = yaml.safe_load(
+        (_WORKFLOWS / "reusable-build.yml").read_text(encoding="utf-8")
+    )
+    inputs = parsed[True]["workflow_call"]["inputs"]
+    assert {name for name, spec in inputs.items() if spec.get("required")} == {"python"}
+    assert inputs["submodules"]["default"] is False
+    assert inputs["setup-python"]["default"] is False
+    assert inputs["sdist-only"]["default"] is False
+    assert inputs["dist-artifact"]["default"] == "dist"
