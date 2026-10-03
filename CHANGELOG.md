@@ -9983,3 +9983,8 @@ nothing red follows from the copies disagreeing.
 - **A `build-constraints` input, the one `reusable-build.yml` takes**
   (issue #1542): the rebuild sets `UV_BUILD_CONSTRAINT` or
   `PIP_CONSTRAINT` to it. Empty, both builders ignore it.
+
+### Section 1 names the `bip324` group
+
+- **`bip324` is a row of the dependency-group table** (closes #1544):
+  `btclib` declares it, holding its `bip324` extra again.

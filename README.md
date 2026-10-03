@@ -202,6 +202,7 @@ alone would leave `uv sync` resolving a project without it.
 | `notebooks` | what executes and reads the tree's notebooks |
 | `excel` | what writes the tree's workbooks and reads them back |
 | `bindings` | an optional native dependency that is also an extra |
+| `bip324` | the BIP324 transport's cipher, also an extra |
 | `build` | what builds a distribution, cibuildwheel included |
 | `check` | what inspects a distribution before it is published |
 | `docs` | sphinx and `furo` |
