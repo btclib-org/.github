@@ -10053,8 +10053,14 @@ nothing red follows from the copies disagreeing.
 - **The prompt in `reusable-claude-review.yml` asks for a fixed summary**
   (issue #1572): the sha, the findings, what was not checked, the verdict
   last. `extra-prompt` lands after that, before the gates instruction.
+
 ### The maintainer's bypass is for emergencies
 
 - **Every pull request, the maintainer's included, needs another person's
-  approval** (issue #1362). The bypass stays, for emergencies.
-  `EXPECTED_DRIFT` holds `CONTRIBUTING.md` until every copy agrees.
+  approval** (issue #1362); the bypass stays, for emergencies. `EXPECTED_DRIFT`
+  holds `CONTRIBUTING.md` and `REVIEWING.md` until the copies agree.
+
+### Earlier entries on how a pull request lands
+
+- Entries above that have the maintainer landing without another person's
+  approval describe the rule before issue #1362 (issue #1569).
