@@ -10070,3 +10070,9 @@ nothing red follows from the copies disagreeing.
 - **Every tree's `CONTRIBUTING.md` and `REVIEWING.md` say a pull request
   lands with another person's approval** (issue #1362): the copies agree,
   and `EXPECTED_DRIFT` is empty.
+
+### `ROADMAP.md` takes gold in, and `CLAUDE.md` names the advisory fork
+
+- **`ROADMAP.md` takes gold in** (issue #1362), and drops the review bot
+  (issue #452) and silver, which are done.
+- **`CLAUDE.md` names the advisory fork** (issue #452): not a tree.
