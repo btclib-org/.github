@@ -2986,9 +2986,12 @@ such a finding only through a further push or a `close`/`reopen`.
     **A secret is rotated when an owner changes and when an exposure is
     suspected.** No calendar rotates one, bar the two that live outside
     an environment, `CLAUDE_CODE_OAUTH_TOKEN` and
-    `ALIGNMENT_APP_PRIVATE_KEY`, which are rotated at each yearly review.
-    Publishing needs none, the long-lived PyPI token it would rotate not
-    existing.
+    `ALIGNMENT_APP_PRIVATE_KEY`. Publishing needs none, the long-lived
+    PyPI token it would rotate not existing. The two are rotated before
+    they are a year old, the age at which
+    [the token `claude setup-token` makes expires](https://code.claude.com/docs/en/authentication#generate-a-long-lived-token).
+    `tests/secrets_test.py` reads when each was last written and fails a
+    month before the year is up.
 
     **The list is reviewed once a year**, as an issue in this tracker
     titled `Secrets review <year>`, opened by the maintainer and closed

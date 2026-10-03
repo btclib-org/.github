@@ -9,14 +9,16 @@ environment, where the owners review the job that reads it. What no
 tree shows is the stores above the environment, so this reads them
 through the API: the organization's, its Dependabot store, and each
 repository's two. An entry there is accepted only where the repository
-that spends it records it in its `REPOSITORY.md`.
+that spends it records it in its `REPOSITORY.md`, and only while it is
+younger than section 11 lets it get.
 """
 
 from __future__ import annotations
 
 import re
 import time
-from typing import TYPE_CHECKING
+from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -45,26 +47,48 @@ ORGANIZATION_EXCEPTIONS = frozenset({"CLAUDE_CODE_OAUTH_TOKEN"})
 #: Read by `alignment.yml`, which this repository's `REPOSITORY.md` records.
 REPOSITORY_EXCEPTIONS = {SELF: frozenset({"ALIGNMENT_APP_PRIVATE_KEY"})}
 
+#: Where each exception is read from. `CLAUDE_CODE_OAUTH_TOKEN` is also in
+#: the organization's Dependabot store, which this token cannot read: a
+#: rotation writes both copies, so the Actions one's date stands for both.
+DATED = {
+    "ALIGNMENT_APP_PRIVATE_KEY": f"repos/{ORG}/{SELF}/actions/secrets",
+    "CLAUDE_CODE_OAUTH_TOKEN": f"orgs/{ORG}/actions/secrets",
+}
 
-def held(endpoint: str) -> set[str]:
-    """Name the secrets a store holds.
+#: How old an exception gets before the test fails: 31 days short of the
+#: year section 11 rotates it within, so at least four weekly runs of
+#: `alignment.yml` are red before the year is up.
+DUE = timedelta(days=365 - 31)
 
-    The secrets service answers a passing 5xx now and then, so a read
-    refused with one is asked again before it fails the test; any other
-    refusal, a 403 for want of a permission included, raises at once.
 
-    :param endpoint: the store's path after `gh api`.
-    :returns: the names, never the values, which no endpoint returns.
+# Any for the reason `gh_json` gives.
+def read(endpoint: str) -> Any:  # noqa: ANN401
+    """Ask the secrets service for one document.
+
+    The service answers a passing 5xx now and then, so a read refused
+    with one is asked again before it fails the test; any other refusal,
+    a 403 for want of a permission included, raises at once.
+
+    :param endpoint: the path after `gh api`.
+    :returns: the parsed answer.
     """
-    endpoint = f"{endpoint}?per_page=100"
     for attempt in range(ATTEMPTS - 1):
         try:
-            return {s["name"] for s in gh_json(endpoint)["secrets"]}
+            return gh_json(endpoint)
         except Refused as refused:
             if not TRANSIENT.search(refused.stderr):
                 raise
             time.sleep(2**attempt)
-    return {s["name"] for s in gh_json(endpoint)["secrets"]}
+    return gh_json(endpoint)
+
+
+def held(endpoint: str) -> set[str]:
+    """Name the secrets a store holds.
+
+    :param endpoint: the store's path after `gh api`.
+    :returns: the names, never the values, which no endpoint returns.
+    """
+    return {s["name"] for s in read(f"{endpoint}?per_page=100")["secrets"]}
 
 
 def unrecorded(found: set[str], allowed: frozenset[str], tree: Path) -> set[str]:
@@ -165,3 +189,25 @@ def test_a_repository_holds_no_secret_outside_an_environment(
         assert not extra, f"{sorted(extra)} outside an environment; " + by_hand(
             repository, f"gh api {endpoint} --jq '.secrets[].name'"
         )
+
+
+@pytest.mark.parametrize(("secret", "store"), sorted(DATED.items()))
+def test_an_exception_is_rotated_before_it_is_a_year_old(
+    secret: str, store: str
+) -> None:
+    """A secret outside an environment was last written less than `DUE` ago.
+
+    :param secret: the exception asked about.
+    :param store: the store holding it, as a path after `gh api`.
+    """
+    endpoint = f"{store}/{secret}"
+    written = datetime.fromisoformat(read(endpoint)["updated_at"])
+    age = datetime.now(UTC) - written
+    assert age < DUE, f"{secret} is {age.days} days old: rotate it; " + by_hand(
+        SELF, f"gh api {endpoint} --jq .updated_at"
+    )
+
+
+def test_every_exception_is_dated() -> None:
+    """An exception added without a `DATED` entry would never be aged."""
+    assert set(DATED) == ORGANIZATION_EXCEPTIONS.union(*REPOSITORY_EXCEPTIONS.values())
