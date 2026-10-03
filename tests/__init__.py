@@ -318,7 +318,19 @@ def names() -> list[str]:
     )
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    (
+        1541,
+        "test_a_scorecard_tree_keeps_a_good_first_issue_open",
+        (
+            "btclib",
+            "btclib-secp256k1",
+            "btclib-node",
+            "btclib-ecc",
+            "btclib-mnemonics",
+        ),
+    ),
+)
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what
