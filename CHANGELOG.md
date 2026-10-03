@@ -10023,3 +10023,9 @@ nothing red follows from the copies disagreeing.
 - **`CLAUDE_CODE_OAUTH_TOKEN` and `ALIGNMENT_APP_PRIVATE_KEY` are rotated
   before they are a year old** (issue #1474), not at each yearly review.
   `secrets_test.py` reads when each was written, and fails 31 days early.
+
+### Advisory forks leave the tree list, and the 452 drift entry comes out
+
+- **The repository list drops `<name>-ghsa-xxxx-xxxx-xxxx`** (issue #452):
+  a temporary private fork of an advisory lags `main` by construction.
+  `EXPECTED_DRIFT` is empty, every tree's `CONTRIBUTING.md` agreeing.
