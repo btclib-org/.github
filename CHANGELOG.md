@@ -10006,3 +10006,8 @@ nothing red follows from the copies disagreeing.
 - **`reusable-links.yml` remaps `…/issues/N#issuecomment-ID` to the
   issue's URL** (closes #1554): GitHub's issue page has no `id` for a
   comment, so lychee failed every such link. A dead issue is still red.
+
+### The 1550 `CONTRIBUTING.md` drift entry comes out
+
+- **Every tree's `CONTRIBUTING.md` says `Sign-off` is required** (issue
+  #1550): the copies agree, and `EXPECTED_DRIFT` is empty.
