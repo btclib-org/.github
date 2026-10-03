@@ -10041,3 +10041,9 @@ nothing red follows from the copies disagreeing.
 - **A group that is only locked and never installed stays outside `dev`**
   (closes #1570): btclib-secp256k1's `build-requires` pins
   `[build-system].requires` in `uv.lock`, and section 1 describes it.
+
+### The review's tool header names the grants btclib-node passes
+
+- **`reusable-claude-review.yml` lists the reads `extra-allowed-tools`
+  carries, and why it has no deny list** (issue #1558): a deny rule
+  cannot see a `>` redirect, which writes what `--output=` writes.

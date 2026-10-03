@@ -44,14 +44,22 @@ name: reusable-claude-review
 # caller. It exists for btclib-node, whose prompt has the reviewer fetch
 # history the shallow checkout does not carry, read a file at a sha
 # through the contents API, and read the issues a pull request says it
-# closes -- `Bash(git:*)`, `Bash(gh api:*)` and `Bash(gh issue view:*)`,
-# none of them covered by the `gh pr` commands every caller gets. One
+# closes -- `git fetch origin`, `git log`, `git diff`, `gh issue view`
+# and `gh api` on its own `contents/` path, none of them covered by the
+# `gh pr` commands every caller gets. One
 # tree's prose earns no input of its own, extra-prompt above carrying
 # any tree's paragraph; one tree's capability does, the alternative
 # being every caller's reviewer holding the tools one of them asked
 # for. The two travel together: a paragraph telling a reviewer to run a
 # command it may not run buys a refusal, so a caller passing the one
 # passes the other.
+#
+# The review job has no deny list (btclib-org/.github#1558). Under
+# Claude Code 2.1.282 a rule is matched against the command without its
+# redirects, so `Bash(*>*)` and `Bash(git log*>*)` both admit
+# `git log -1 > f`, which writes what `git log --output=f` writes; only
+# denying `git log` itself refuses it. A write method on `gh api` is
+# refused by the token's `contents: read`, below.
 #
 # Neither value reaches a `run:` block. extra-prompt is text handed to a
 # model and extra-allowed-tools is an argument of the action's own,
