@@ -9977,3 +9977,9 @@ nothing red follows from the copies disagreeing.
 
 - **No workflow in the organization calls it** (closes #1531): the
   sdist rebuild still verifies the releases it signed.
+
+### `reusable-sdist-rebuild.yml` takes the sdist build's constraints
+
+- **A `build-constraints` input, the one `reusable-build.yml` takes**
+  (issue #1542): the rebuild sets `UV_BUILD_CONSTRAINT` or
+  `PIP_CONSTRAINT` to it. Empty, both builders ignore it.
