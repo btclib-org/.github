@@ -204,6 +204,7 @@ alone would leave `uv sync` resolving a project without it.
 | `bindings` | an optional native dependency that is also an extra |
 | `bip324` | the BIP324 transport's cipher, also an extra |
 | `build` | what builds a distribution, cibuildwheel included |
+| `build-requires` | `[build-system].requires`, copied for `uv.lock` to pin |
 | `check` | what inspects a distribution before it is published |
 | `docs` | sphinx and `furo` |
 | `mutation` | the mutation runner |
@@ -240,7 +241,10 @@ lock` resolving without one and a missing marker costing a developer's
 `dev` reaches every group *the tree itself declares*, transitively
 through `include-group`, rather than every row of this table, and a
 group no developer runs by hand is no exception to it: one sync is then
-enough to run anything the tree runs.
+enough to run anything the tree runs. A group that is only locked and
+never installed stays outside `dev`: `build-requires` is there so that
+`uv.lock` resolves the build's requirements, and nothing the tree runs
+imports it.
 
 Where a package is both an extra and a group, the specifier is written
 twice and a test refuses the day the two disagree.
