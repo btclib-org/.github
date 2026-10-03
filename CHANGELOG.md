@@ -9954,3 +9954,9 @@ nothing red follows from the copies disagreeing.
 
 - **Every tree carries the shared half of `CONTRIBUTING.md`** (closes #1527):
   the copies agree and `EXPECTED_DRIFT` is empty.
+
+### Every `scorecard` tree keeps an open good first issue
+
+- **Each tree section 10's `scorecard` entry names keeps an open `good first
+  issue`** (issue #1541), for `small_tasks`: `tests/good_first_issue_test.py`
+  reads it, and a `BACKLOG` row excuses each tree at zero.

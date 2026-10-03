@@ -2190,6 +2190,12 @@ and the badge land together.
     btclib-org/.github#350. The questionnaire restates how a vulnerability is
     reported, how a release is cut and what gates a change, so a change to any
     of them owes a pass over it.
+
+    **The same trees keep at least one open issue labelled `good first
+    issue`.** bestpractices.dev's gold criterion `small_tasks` asks a project
+    to identify small tasks for new contributors, and an empty label
+    identifies none. Without a test, the label empties as its issues close,
+    so `tests/good_first_issue_test.py` reads the count per tree.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
   between the parser and an adversary choosing the bytes. `btclib` and
   `btclib-secp256k1` read transactions, scripts and signatures off the wire,
