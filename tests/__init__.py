@@ -279,6 +279,10 @@ def tier(root: Path) -> Tier:
     return Tier.PYTHON
 
 
+ADVISORY_FORK = re.compile(r"-ghsa(-[0-9a-z]{4}){3}$")
+"""The tail of the name GitHub gives a private fork of an advisory."""
+
+
 @functools.cache
 def names() -> list[str]:
     r"""Ask the API for every repository, rather than listing them here.
@@ -296,7 +300,7 @@ def names() -> list[str]:
     silences the suite about the one repository the argument is wrong
     about.
 
-    The organization holds no fork, so the filter selects nothing out
+    No repository reports `fork: true`, so the filter selects nothing out
     and is a guard rather than a description::
 
         gh api 'orgs/btclib-org/repos?per_page=100' \
@@ -306,16 +310,25 @@ def names() -> list[str]:
     repository detached from its upstream and one rebuilt from scratch
     answer it alike.
 
+    A temporary private fork of a security advisory,
+    `<name>-ghsa-xxxx-xxxx-xxxx`, is out too. GitHub reports it as no
+    fork, it lags `main` by construction, and publishing the advisory
+    deletes it.
+
     Cached, because the list is read once at collection to parametrize
     the per-repository tests and once more by the `repositories` fixture,
     and the two have to be the same list.
 
     :returns: the repository names, `.github` among them.
     """
-    return gh(
-        f"orgs/{ORG}/repos?per_page=100",
-        ".[] | select(.archived == false and .fork == false) | .name",
-    )
+    return [
+        name
+        for name in gh(
+            f"orgs/{ORG}/repos?per_page=100",
+            ".[] | select(.archived == false and .fork == false) | .name",
+        )
+        if not ADVISORY_FORK.search(name)
+    ]
 
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (

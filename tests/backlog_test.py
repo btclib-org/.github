@@ -33,6 +33,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+import tests
+
 from . import BACKLOG, ORG, SELF, conftest, hooks_test, still_open
 
 if TYPE_CHECKING:
@@ -195,3 +197,31 @@ def test_a_reader_that_answered_open_for_everything_would_be_caught() -> None:
         " the control needs an issue that is not, or a state is no longer"
         " being read"
     )
+
+
+def test_the_repository_list_drops_an_advisory_fork_and_keeps_every_tree(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The list `names` returns omits an advisory fork and holds every tree.
+
+    :param monkeypatch: stands the API's answer in for the call.
+    """
+    fork = "btclib-secp256k1-ghsa-8h6f-34jj-7p6c"
+    trees = [
+        "btclib",
+        "btclib-node",
+        "btclib-secp256k1",
+        "portanode",
+        "bitcoin-core-rpc",
+        "btclib-benchmarks",
+        ".github",
+        "bbt",
+        "btclib-org.github.io",
+        "btclib-wallet",
+        "bitcoin-node-tests",
+        "btclib-ecc",
+        "btclib-mnemonics",
+        "claude-process",
+    ]
+    monkeypatch.setattr(tests, "gh", lambda _endpoint, _jq: [*trees, fork])
+    assert tests.names.__wrapped__() == trees
