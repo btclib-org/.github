@@ -59,6 +59,13 @@ jobs:
           # --include-fragments, or a heading rename breaks an anchor
           # into it with nothing red anywhere; a fragment is read off a
           # page the plain check already fetched, so it adds no request
+          # --remap drops the fragment of an issue comment link. GitHub
+          # renders an issue page client-side: the comments are JSON in
+          # the HTML and no element carries id="issuecomment-N", so lychee
+          # reports "Cannot find fragment" for a comment that exists, and
+          # for one that does not. The issue's own page is still fetched,
+          # so a dead issue is still red. A pull request page carries the
+          # id, so its comment links keep the check.
           args: >-
             --no-progress
             --max-retries 3
@@ -66,6 +73,7 @@ jobs:
             --timeout 45
             --accept 100..=103,200..=299,429
             --include-fragments
+            --remap '^(https://github\.com/[^/]+/[^/]+/issues/[0-9]+)#issuecomment-[0-9]+$ $1'
             ${{ inputs.targets }}
           # fail the job rather than only summarizing: a green run that
           # found dead links is the state this workflow exists to end
