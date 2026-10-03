@@ -10000,3 +10000,9 @@ nothing red follows from the copies disagreeing.
 - **`pygame`, `pygithub`, `pyqt6` and `speculos` are in
   `allow-dependencies-licenses`** (closes #1552): the CI-only test tools
   of `btclib-wallet`'s HWI integration. `allow-licenses` is unchanged.
+
+### `links` no longer reads the fragment of a comment link
+
+- **`reusable-links.yml` remaps `…/issues/N#issuecomment-ID` to the
+  issue's URL** (closes #1554): GitHub's issue page has no `id` for a
+  comment, so lychee failed every such link. A dead issue is still red.
