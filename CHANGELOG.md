@@ -10055,6 +10055,6 @@ nothing red follows from the copies disagreeing.
   last. `extra-prompt` lands after that, before the gates instruction.
 ### The maintainer's bypass is for emergencies
 
-- **Every pull request, the maintainer's included, lands with an owner's
+- **Every pull request, the maintainer's included, needs another person's
   approval** (issue #1362). The bypass stays, for emergencies.
   `EXPECTED_DRIFT` holds `CONTRIBUTING.md` until every copy agrees.

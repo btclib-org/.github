@@ -2551,7 +2551,7 @@ and classic protection, taking the most restrictive combination:
 
 **The bypass mode is the whole of the design.** `pull_request` excuses
 its holder *while merging a pull request* and at no other time, which
-is all an emergency needs: a fix landing before another owner can
+is all an emergency needs: a fix landing before anybody else can
 approve it. Every other pull request, the maintainer's included, waits
 for that approval. A direct push to `main` is refused for everyone;
 `always` would permit one, for nothing a valid signature does not
