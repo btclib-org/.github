@@ -33,9 +33,9 @@ repository. A rule changes by a pull request like any other change.
   `main` through one, squashed, carrying a valid signature, and with an
   approving review from somebody other than its author. The maintainer is
   the only bypass actor, in `pull_request` mode, so the maintainer can
-  merge a pull request without that approval and nobody can push to
-  `main` directly. `CONTRIBUTING.md`'s *The review* and *Landing it* are
-  the exchange and the landing.
+  merge a pull request without that approval, and does so only in an
+  emergency; nobody can push to `main` directly. `CONTRIBUTING.md`'s
+  *The review* and *Landing it* are the exchange and the landing.
 - **A disagreement goes to the maintainer.** One that survives a second
   exchange between author and reviewer goes to the maintainer instead of
   into a third round, as `CONTRIBUTING.md`'s *The review* says. A `NACK`

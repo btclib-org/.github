@@ -2171,8 +2171,8 @@ and the badge land together.
       dismissal cites the comment the workflow gives for it.
     - **A check the organization keeps below its maximum on a decision this
       file records**: Branch-Protection, held down by the `pull_request`-mode
-      bypass section 11's *Branch protection and rulesets* gives a
-      maintainer's own merge; Code-Review, held down by that merge landing
+      bypass section 11's *Branch protection and rulesets* gives an
+      emergency merge; Code-Review, held down by that merge landing
       with no second person's approval, a bot's review not counting, as
       section 11's *Review* says; and Fuzzing on `bitcoin-core-rpc`, which
       the `fuzz` entry below already answers.
@@ -2551,15 +2551,17 @@ and classic protection, taking the most restrictive combination:
 
 **The bypass mode is the whole of the design.** `pull_request` excuses
 its holder *while merging a pull request* and at no other time, which
-answers the one thing a solo-maintainer repository cannot do — produce
-someone else's approval. A direct push to `main` is refused for everyone;
+is all an emergency needs: a fix landing before anybody else can
+approve it. Every other pull request, the maintainer's included, waits
+for that approval. A direct push to `main` is refused for everyone;
 `always` would permit one, for nothing a valid signature does not
 already give.
 
 **What it excuses is the rule, not the approval count**, and
 `dismiss_stale_reviews_on_push` is a parameter of that same rule. So the
-dismissal binds every merge except the ones this organization makes, and
-the `sha` on `CONTRIBUTING.md`'s merge call is what refuses a moved head.
+dismissal binds every merge except one through the bypass, and the
+`--match-head-commit` on `CONTRIBUTING.md`'s emergency merge is what
+refuses a moved head there.
 
 Two settings hold the door, not one: the classic review requirement is
 cleared for the maintainer by `enforce_admins: false` *plus* admin, and
@@ -2767,7 +2769,7 @@ check, which does not count a review by a bot as code review.
 
 **btclib-org/.github#341 holds the removal of the ruleset's
 `bypass_actors`**, which would put a person's approval on the critical
-path of every merge.
+path of every merge, an emergency's included.
 
 **The ack of record is `claude-review.yml`'s**, and an author's own is
 not one: a comment from the account that opened the pull request says

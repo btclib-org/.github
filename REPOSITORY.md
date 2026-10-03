@@ -170,8 +170,8 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
 ```
 
 The bypass reaches that whole block and not the approving review alone,
-and every landing here is made by the account it names:
-`dismiss_stale_reviews_on_push` is on and reaches none of them.
+so `dismiss_stale_reviews_on_push`, which is on, reaches no landing made
+through it.
 [Section 11 has what stands in for it][s11-branch].
 
 `main-self-merge`'s `bypass` is one of the fields the first call above
