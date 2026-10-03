@@ -10047,3 +10047,9 @@ nothing red follows from the copies disagreeing.
 - **`reusable-claude-review.yml` lists the reads `extra-allowed-tools`
   carries, and why it has no deny list** (issue #1558): a deny rule
   cannot see a `>` redirect, which writes what `--output=` writes.
+
+### The CI review's prompt is plain and gives the summary a shape
+
+- **The prompt in `reusable-claude-review.yml` asks for a fixed summary**
+  (issue #1572): the sha, the findings, what was not checked, the verdict
+  last. `extra-prompt` lands after that, before the gates instruction.

@@ -333,59 +333,49 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            REVIEWING.md is what a review here is written against, and
-            it is the same file in every repository of the organization
-            -- its last section is this tree's. The organization's
-            standard is what a finding cites, being where the rules
-            live; CONTRIBUTING.md's last section has the gates, and
-            CLAUDE.md the facts about this tree a review has to know.
+            Review this pull request against REVIEWING.md. It is the same
+            file in every repository of the organization; its last
+            section is this tree's. Cite the organization's standard for
+            a rule. CLAUDE.md has the facts about this tree.
 
-            The title and description are the forge's, `gh pr view`,
-            and are read again before a finding about either is written:
-            a correction to them lands seconds behind the push that
-            fired this run, and a finding about a title the pull request
-            no longer carries is a finding about nothing.
+            Read the title and description again with `gh pr view` before
+            a finding about them: they may have changed since this run
+            started.
 
-            The summary's last line is the verdict, `ACK <sha>`,
-            `CHANGES REQUESTED <sha>` or `NACK <sha>`, naming the sha
-            because an ack belongs to a tree and not to a branch.
-            REVIEWING.md has the three lines and section 11's *Review*
-            what each concludes. For this review the line is not
-            optional: this is the ack of record, the one a landing
-            reads, and it is the only part of a review that anything
-            other than a person can read -- a review of record ending
-            without it cannot be told apart from one that never
-            finished. A person reading the same diff may say what they
-            found and deliver no verdict; REVIEWING.md has why that is
-            not a NACK.
+            Write plainly: the point first, plain words, short
+            sentences. Do not describe what the diff does. Do not list
+            what you checked and found fine.
+
+            The summary has, in this order:
+            1. One line: the sha reviewed, that this job ran no gates,
+               and what the author says they ran, or that they say
+               nothing.
+            2. The findings, one bullet each: where, what is wrong, how
+               it is known, and its kind (blocking, non-blocking, nit,
+               question).
+            3. What was not checked, if anything.
+            4. Findings outside this pull request, if any, under a line
+               saying they are not about it.
+            5. The verdict, alone on the last line: `ACK <sha>`,
+               `CHANGES REQUESTED <sha>` or `NACK <sha>`. It is not
+               optional: a check reads it.
 
             ${{ inputs.extra-prompt }}
 
-            Do not run the gates. They are running beside you on this
-            same sha, which is the reliance REVIEWING.md provides for
-            and CONTRIBUTING.md's last section makes sound. Say in the
-            summary that no gates were run by this job and that the
-            author's own statement of what they ran is what stands --
-            and say so too when a pull request makes no such statement.
+            Do not run the gates; they run beside you on the same sha.
+            Do not file issues.
 
-            Do not file issues from here: a collateral finding goes
-            in the summary, under a line saying it is not a finding
-            against this pull request, and a person decides whether it
-            becomes one.
-
-            Post to the forge and not as a message only this job's
-            log reads. Post the summary through this script. It posts a
-            review of type COMMENT, which is the ack of record, and
-            reads the summary from standard input:
+            Post the summary with this script. It posts a review of type
+            COMMENT, the ack of record, and reads the summary from
+            standard input:
 
             ${{ runner.temp }}/claude-review/post-review <<'EOF'
             <the summary>
             EOF
 
-            Never `--approve` and never `--request-changes`, section
-            11's *Review* having why.
+            Never `--approve` and never `--request-changes`. Use
             `mcp__github_inline_comment__create_inline_comment` (with
-            `confirmed: true`) for a finding a line is the subject of.
+            `confirmed: true`) for a finding about one line.
           # folded rather than literal: the flag has to reach the CLI as
           # one line, and the list is past the 100 columns yamllint holds
           # this file to. The fold joins its lines with a space, so each
