@@ -9994,3 +9994,9 @@ nothing red follows from the copies disagreeing.
 - **Section 11 makes the `Sign-off` job a required check** (issue #1550),
   for the OpenSSF Baseline's `OSPS-LE-01.01`: a pull request whose commits
   lack the trailer cannot merge. `protection_test.py` reads the context.
+
+### The allow-list names the HWI integration's CI tools
+
+- **`pygame`, `pygithub`, `pyqt6` and `speculos` are in
+  `allow-dependencies-licenses`** (closes #1552): the CI-only test tools
+  of `btclib-wallet`'s HWI integration. `allow-licenses` is unchanged.

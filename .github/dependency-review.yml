@@ -94,3 +94,10 @@ allow-dependencies-licenses:
   - pkg:pypi/matplotlib
   # declared MIT; the conclusion adds OFL-1.1
   - pkg:pypi/fonttools
+  # the CI-only test tools of `btclib-wallet`'s HWI integration, installed on
+  # a runner and not distributed with any package. The conclusion carries
+  # GPL-3.0 or LGPL terms
+  - pkg:pypi/pygame
+  - pkg:pypi/pygithub
+  - pkg:pypi/pyqt6
+  - pkg:pypi/speculos
