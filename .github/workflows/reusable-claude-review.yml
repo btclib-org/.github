@@ -42,17 +42,15 @@ name: reusable-claude-review
 # extra-allowed-tools, string, default "": appended to the review step's
 # tool list, the separating comma written here rather than by the
 # caller. It exists for btclib-node, whose prompt has the reviewer fetch
-# history the shallow checkout does not carry, read a file at a sha
-# through the contents API, and read the issues a pull request says it
-# closes -- `git fetch origin`, `git log`, `git diff`, `gh issue view`
+# history the shallow checkout does not carry and read a file at a sha
+# through the contents API -- `git fetch origin`, `git log`, `git diff`
 # and `gh api` on its own `contents/` path, none of them covered by the
-# `gh pr` commands every caller gets. One
-# tree's prose earns no input of its own, extra-prompt above carrying
-# any tree's paragraph; one tree's capability does, the alternative
-# being every caller's reviewer holding the tools one of them asked
-# for. The two travel together: a paragraph telling a reviewer to run a
-# command it may not run buys a refusal, so a caller passing the one
-# passes the other.
+# commands every caller gets. One tree's prose earns no input of its
+# own, extra-prompt above carrying any tree's paragraph; one tree's
+# capability does, the alternative being every caller's reviewer holding
+# the tools one of them asked for. The two travel together: a paragraph
+# telling a reviewer to run a command it may not run buys a refusal, so
+# a caller passing the one passes the other.
 #
 # The review job has no deny list (btclib-org/.github#1558). Under
 # Claude Code 2.1.282 a rule is matched against the command without its
@@ -384,12 +382,15 @@ jobs:
           # tools behind a comma written here.
           #
           # the review is posted by the script the step above writes,
-          # and `gh pr review` is not allowed as a command of its own
+          # and `gh pr review` is not allowed as a command of its own.
+          # `gh issue view` only reads, with the token's `issues: read`,
+          # and is how a review reads an issue the pull request cites
           claude_args: >-
             --allowedTools
             "mcp__github_inline_comment__create_inline_comment"
             "Bash(gh pr view:*)"
             "Bash(gh pr diff:*)"
+            "Bash(gh issue view:*)"
             "Bash(${{ runner.temp }}/claude-review/post-review:*)"
             "Read,Grep,Glob${{
             inputs.extra-allowed-tools

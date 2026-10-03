@@ -10076,3 +10076,9 @@ nothing red follows from the copies disagreeing.
 - **`ROADMAP.md` takes gold in** (issue #1362), and drops the review bot
   (issue #452) and silver, which are done.
 - **`CLAUDE.md` names the advisory fork** (issue #452): not a tree.
+
+### The review job may read an issue
+
+- **`reusable-claude-review.yml` allows `gh issue view`** (issue #1575): a
+  review reads the issues a pull request cites instead of taking the
+  pull request's own account of them.
