@@ -10082,3 +10082,8 @@ nothing red follows from the copies disagreeing.
 - **`reusable-claude-review.yml` allows `gh issue view`** (issue #1575): a
   review reads the issues a pull request cites instead of taking the
   pull request's own account of them.
+
+### The review reads an issue's comments
+
+- **The review prompt asks for `gh issue view <n> --comments`** (issue #1580):
+  a decision recorded in a comment can replace what the issue's body asks.

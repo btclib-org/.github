@@ -340,6 +340,10 @@ jobs:
             a finding about them: they may have changed since this run
             started.
 
+            Read an issue the pull request cites with
+            `gh issue view <n> --comments`. A decision in its comments
+            can replace what its body asks for.
+
             Write plainly: the point first, plain words, short
             sentences. Do not describe what the diff does. Do not list
             what you checked and found fine.
