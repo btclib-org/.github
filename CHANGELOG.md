@@ -10029,3 +10029,9 @@ nothing red follows from the copies disagreeing.
 - **The repository list drops `<name>-ghsa-xxxx-xxxx-xxxx`** (issue #452):
   a temporary private fork of an advisory lags `main` by construction.
   `EXPECTED_DRIFT` is empty, every tree's `CONTRIBUTING.md` agreeing.
+
+### A shell variable named after a repository is not a misspelled requirement
+
+- **`names_test.py` takes a name and an operator or `[` for a requirement,
+  not a name and a lone `=`** (closes #1566): `CLAUDE_PROCESS=~/Git` in
+  `claude-process`'s `README.md` is a shell variable.

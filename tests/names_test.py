@@ -46,12 +46,13 @@ if TYPE_CHECKING:
 
 pytestmark = pytest.mark.integration
 
-SPECIFIED = r"(?=[<>=!~[])"
+SPECIFIED = r"(?=(?:==|[!~]=|[<>]|\[))"
 """What follows a name written as a requirement rather than as prose.
 
 PEP 508's operators are `<`, `<=`, `!=`, `==`, `===`, `>=`, `>` and
-`~=`, so the character a specifier opens with is in this class whichever
-of them it is, and a bracket opens an extras list. The class asks
+`~=`, so a name is followed by `==`, `!=`, `~=`, `<` or `>` whichever of
+them it is, and by `[` where an extras list opens. A lone `=` is no
+operator: `CLAUDE_PROCESS=~/Git` is a shell variable. The pattern asks
 whether the token is a requirement without asking which requirement it
 is. It is a lookahead: the name is what an assertion reports, and the
 specifier is only the evidence that a name is what was written.
@@ -184,7 +185,8 @@ def decides(repository: str, names: list[str], where: str) -> str:
     :returns: the text an assertion message ends with.
     """
     alternatives = "|".join(family(name) for name in names)
-    return by_hand(repository, f"git grep -nE '({alternatives})[<>=!~[]' -- {where}")
+    command = f"git grep -nEi '({alternatives})(==|[!~]=|[<>]|\\[)' -- {where}"
+    return by_hand(repository, command)
 
 
 @pytest.fixture(scope="session")
