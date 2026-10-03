@@ -185,3 +185,19 @@ def test_each_build_step_passes_the_constraints_its_builder_reads(
     """
     step = next(s for s in jobs["build"]["steps"] if command in s.get("run", ""))
     assert step["env"] == {variable: "${{ inputs.build-constraints }}"}
+
+
+@pytest.mark.parametrize(
+    ("command", "variable"),
+    [
+        ("uv build", "UV_BUILD_CONSTRAINT"),
+        ("python -m build -s", "PIP_CONSTRAINT"),
+    ],
+)
+def test_each_rebuild_step_passes_the_constraints_its_builder_reads(
+    command: str, variable: str
+) -> None:
+    """Assert the weekly rebuild sets what the release build sets."""
+    steps = _jobs("reusable-sdist-rebuild.yml")["rebuild"]["steps"]
+    step = next(s for s in steps if command in s.get("run", ""))
+    assert step["env"] == {variable: "${{ inputs.build-constraints }}"}

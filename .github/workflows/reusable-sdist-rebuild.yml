@@ -57,6 +57,14 @@ name: reusable-sdist-rebuild
 # submodules -- so a caller naming neither gets exactly reusable-lint.yml's
 # default without asking for it by that name.
 #
+# build-constraints, string, default "": the input of the same name in
+# reusable-build.yml, which a caller passes the same value, so the
+# rebuild resolves the build requirements the release did. The file is
+# read from the release's tag, which has to carry it: a tag without it
+# fails the build step. Each step sets the variable its builder reads,
+# `uv build` UV_BUILD_CONSTRAINT and `python -m build` PIP_CONSTRAINT,
+# and neither reads the other's. Empty, both builders ignore it.
+#
 # setup-python, boolean, default false: when true the job adds an
 # actions/setup-python step ahead of Setup uv, and the job runs uv under
 # `UV_PYTHON_DOWNLOADS=never`. The two belong together: the
@@ -134,6 +142,14 @@ on:
           reusable-deps-latest.yml and reusable-os-suite.yml take: a
           caller whose sdist carries a vendored, recursively-submoduled
           library needs "recursive", which a boolean cannot express.
+        type: string
+        default: ""
+      build-constraints:
+        description: >
+          A file in the release tag's tree, as `build-constraints.txt`,
+          that constrains the requirements of the sdist build, the
+          value reusable-build.yml's input of the same name took.
+          Empty, the build resolves them from the index.
         type: string
         default: ""
       setup-python:
@@ -225,9 +241,13 @@ jobs:
       # shell: the caller chooses which step runs, never what a step runs
       - name: Build the sdist with uv
         if: inputs.sdist-builder == 'uv'
+        env:
+          UV_BUILD_CONSTRAINT: ${{ inputs.build-constraints }}
         run: uv build --sdist
       - name: Build the sdist with python -m build
         if: inputs.sdist-builder == 'build-module'
+        env:
+          PIP_CONSTRAINT: ${{ inputs.build-constraints }}
         run: uv run --locked --only-group build python -m build -s
 
       - name: Make the sdist's determinism this tree's own
