@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Report each commit with no `Signed-off-by:` trailer naming its author.
+"""Refuse each commit with no `Signed-off-by:` trailer naming its author.
 
 What the trailer attests, and why a signature does not stand in for it,
 is section 11's *Signatures* in btclib-org/.github's `README.md`.
@@ -107,7 +107,7 @@ def main(argv: list[str] | None = None) -> int:
             " this with that address as your git user.email, then force-push the"
             " branch:\n"
             f"    git rebase --signoff {fork_point(args.revisions)}\n"
-            "This check reports and does not block the merge."
+            "The pull request cannot merge until every commit above has one."
         )
         return 1
     print(f"every commit of {args.revisions} read is signed off by its author")

@@ -127,7 +127,7 @@ def test_the_command_the_failure_prints_signs_the_branch_off(
 
     assert script.main(["main..topic"]) == 1
     out = capsys.readouterr().out
-    assert "does not block the merge" in out
+    assert "cannot merge" in out
     _run_the_fix(script, "main..topic", out)
 
 

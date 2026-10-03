@@ -47,13 +47,13 @@ the answer the sibling repositories give.
 ```shell
 gh api repos/btclib-org/.github/branches/main/protection \
   --jq '.required_status_checks | {strict, checks: [.checks[].context]}'
-# {"strict":true,"checks":["Lint","Dependency review"]}
+# {"strict":true,"checks":["Lint","Dependency review","Sign-off"]}
 ```
 
 The rulesets below enforce the signatures and the review, and [classic
 protection is where the required checks go][s16]. It was created once
 `lint.yml` had produced its context, which is the order that call
-requires; the command that created it is kept at the foot of this section
+requires; the command that sets it is kept at the foot of this section
 because a `PUT` there sets every field and a reader restoring the
 protection needs the whole object rather than the answer above.
 
@@ -61,6 +61,7 @@ protection needs the whole object rather than the answer above.
 | --- | --- |
 | `Lint` | `lint.yml` |
 | `Dependency review` | `lint.yml`'s second job |
+| `Sign-off` | `lint.yml`'s third job |
 
 The name `Lint` is not the sibling repositories' `Lint and type-check`,
 though the hook config it runs carries a mypy hook as theirs do: a context is
@@ -74,7 +75,7 @@ cannot depend on; its own header carries the reasoning.
 `claude-review.yml` is not one either, and [says so itself][s11-review].
 
 A check context cannot be bound before a workflow has produced it, which
-is why `lint.yml` landed before the rule did. The call that created the
+is why `lint.yml` landed before the rule did. The call that sets the
 protection carries the whole object — every field of it, since a `PUT`
 sets what it is given and clears what it is not, so this is also what
 restores it:
@@ -84,7 +85,8 @@ gh api -X PUT repos/btclib-org/.github/branches/main/protection \
   --input - <<'JSON'
 {"required_status_checks": {"strict": true,
    "checks": [{"context": "Lint", "app_id": 15368},
-              {"context": "Dependency review", "app_id": 15368}]},
+              {"context": "Dependency review", "app_id": 15368},
+              {"context": "Sign-off", "app_id": 15368}]},
  "enforce_admins": false,
  "required_pull_request_reviews": {"dismiss_stale_reviews": true,
    "required_approving_review_count": 1},
@@ -122,10 +124,10 @@ Everything reaches it through a pull request. Rules [aggregate rather
 than replace each other][s11-branch], so what holds on `main` is what the
 call below answers for that target **together with** the classic
 protection two headings up: that one requires a review, a linear history,
-resolved conversations and the `Lint` and `Dependency review` checks, and
-refuses a force push or a deletion — under the exemption above, which these
-rulesets do not carry. Where the two overlap, the stricter answer is the one
-that applies:
+resolved conversations and the `Lint`, `Dependency review` and `Sign-off`
+checks, and refuses a force push or a deletion — under the exemption above,
+which these rulesets do not carry. Where the two overlap, the stricter answer
+is the one that applies:
 
 ```shell
 gh api repos/btclib-org/.github/rulesets --jq '.[].id' \

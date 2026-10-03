@@ -2489,8 +2489,8 @@ Tags too: a release tag is signed, and a `tag-integrity` ruleset over
 `refs/tags/v*` requires it — that tag being otherwise the one unattested
 link in a fully signed chain.
 
-**Every commit a pull request adds is asked to carry a `Signed-off-by:`
-trailer naming its author**, by which the author certifies the
+**Every commit a pull request adds carries a `Signed-off-by:` trailer
+naming its author**, by which the author certifies the
 [Developer Certificate of Origin](https://developercertificate.org/). A
 signature attests who made a commit and the trailer the right to
 contribute it, so neither stands in for the other. A `Sign-off` job
@@ -2503,14 +2503,16 @@ Dependabot and pre-commit.ci, and its docstring says why. The rejected
 alternative is the `dcoapp` GitHub App: one more party installed on the
 organization, where the job is code these trees hold.
 
-**The `Sign-off` job reports and is not a required check.** The
-rejected alternative, a required check, would hold an outside
-contribution without the trailer until its author rewrote the branch and
-force-pushed: the trailer is the author's own statement, which a
-maintainer cannot make for them. The price is the OpenSSF Baseline's
-`OSPS-LE-01.01`, which a job that only reports does not meet: it asks
-the forge to require that assertion on every commit. The job's failure
-prints the command that adds the trailer.
+**The `Sign-off` job is a required check**, for the OpenSSF Baseline's
+`OSPS-LE-01.01`, which asks the forge to require that assertion on every
+commit. Its context is `lint / Sign-off` in a tree that calls
+`reusable-lint.yml`, and `Sign-off` in a tree that keeps its own
+`lint.yml`. The cost: an outside contribution without the trailer waits
+until its author rewrites the branch and force-pushes, since the trailer
+is the author's own statement and a maintainer cannot make it for them.
+The job's failure prints the command that adds the trailer. The rejected
+alternative is a job that only reports, which leaves `OSPS-LE-01.01`
+unmet.
 
 **The organization's `web_commit_signoff_required` is on**, so a commit
 made in GitHub's web interface is signed off by its author, as

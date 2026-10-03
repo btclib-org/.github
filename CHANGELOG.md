@@ -9988,3 +9988,9 @@ nothing red follows from the copies disagreeing.
 
 - **`bip324` is a row of the dependency-group table** (closes #1544):
   `btclib` declares it, holding its `bip324` extra again.
+
+### The `Sign-off` check is required
+
+- **Section 11 makes the `Sign-off` job a required check** (issue #1550),
+  for the OpenSSF Baseline's `OSPS-LE-01.01`: a pull request whose commits
+  lack the trailer cannot merge. `protection_test.py` reads the context.
