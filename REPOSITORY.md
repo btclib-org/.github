@@ -351,6 +351,18 @@ gh api repos/btclib-org/.github/actions/permissions \
 `sha_pinning_required` is set at the organization level: [section 11
 has the reasons for both fields][s11-tokens].
 
+## Sign-off on web commits
+
+```shell
+gh api repos/btclib-org/.github --jq .web_commit_signoff_required
+# true
+gh api orgs/btclib-org --jq .web_commit_signoff_required
+# true
+```
+
+Set at the organization level, [for the reason section 11
+gives][s11-sigs].
+
 ## Secret scanning and Dependabot
 
 ```shell
@@ -534,9 +546,9 @@ arrives with the section that uses it.
 
 **A field the standard states no rule about, and no call above
 answers alongside one it does.** `allow_forking`, `allow_update_branch`,
-`has_discussions`, `has_downloads`, `is_template` and
-`web_commit_signoff_required` are in the repository document and in none
-of the `--jq` objects here, and `README.md` asks nothing of them:
+`has_discussions`, `has_downloads` and `is_template` are in the
+repository document and in none of the `--jq` objects here, and
+`README.md` asks nothing of them:
 `grep -c allow_update_branch README.md` answers `0` where
 `grep -c 'default branch' README.md` does not, which is what makes that
 zero an absence. Recording a field on no rule grows this file with
