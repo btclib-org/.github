@@ -59,7 +59,9 @@ exactly them, so a red run there is a local run that was not done.
 **Every commit of a pull request carries a `Signed-off-by:` trailer
 naming its author**, which certifies the [Developer Certificate of
 Origin][dco]. `git commit -s` adds it, and `git rebase --signoff <base>`
-adds it to commits already made. [The standard's *Signatures*][s-sigs]
+adds it to commits already made. The `Sign-off` check is required, so a
+pull request whose commits lack the trailer cannot merge; its failure
+prints the command that adds it. [The standard's *Signatures*][s-sigs]
 says why a signature does not replace it, and which commits the
 `Sign-off` job skips.
 
@@ -333,11 +335,11 @@ that goes stale first.
 
 ### What gates a merge, and what only reports
 
-`lint.yml`'s `Lint` and `Dependency review` jobs are the required
-checks and the whole of what a merge is gated on; `REPOSITORY.md` reads the
-rule back from the endpoint rather than restating it.
+`lint.yml`'s `Lint`, `Dependency review` and `Sign-off` jobs are the
+required checks and the whole of what a merge is gated on; `REPOSITORY.md`
+reads the rule back from the endpoint rather than restating it.
 
-Everything else reports, `lint.yml`'s `Sign-off` job included.
+Everything else reports.
 `alignment.yml` is a sentinel: what it finds is drift that happened days
 ago in a repository nobody is working in, and an API that is down is
 nothing a pull request introduced.

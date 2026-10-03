@@ -13,9 +13,10 @@ issue closed without deciding classic's own `required_signatures`;
 btclib-org/.github#1381 settled it off, `main-integrity` already
 carrying the rule, and this test reads that field back too.
 
-The review of added dependencies is a required check too, and its
-context depends on how the tree's `lint.yml` produces the job: that file
-is what the test reads to know which one to look for.
+The review of added dependencies and the `Signed-off-by:` check are
+required checks too, and each context depends on how the tree's
+`lint.yml` produces the job: that file is what the test reads to know
+which one to look for.
 
 The endpoint answers 404 three times over, and none of the three is one
 case. A branch with no classic protection at all is `Branch not
@@ -43,10 +44,12 @@ from typing import TYPE_CHECKING, Any
 import pytest
 
 from . import ORG, SELF, by_hand, gh_json
+from .check_sign_off_test import SCRIPT
 from .dependency_review_test import ACTION, READ_AS, REUSABLE
 from .workflows_test import jobs
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
 pytestmark = pytest.mark.integration
@@ -166,13 +169,17 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
     )
 
 
-def review_context(lint: Path) -> str | None:
-    """Name the check context the tree's `Dependency review` job reports.
+def lint_context(
+    lint: Path, called: str, carries: Callable[[dict[str, Any]], bool]
+) -> str | None:
+    """Name the check context a job of the tree's `lint.yml` reports.
 
     A job calling `reusable-lint.yml` reports the called job's name after
-    its own, and a job carrying the action reports its own name.
+    its own, and a job with a step carrying the check reports its own name.
 
     :param lint: the tree's `lint.yml`.
+    :param called: the job's id in `reusable-lint.yml`.
+    :param carries: whether a step of the tree's own job carries the check.
     :returns: the context, or `None` where the file holds neither job.
     """
     if not lint.is_file():
@@ -180,34 +187,49 @@ def review_context(lint: Path) -> str | None:
     for job_id, job in jobs(lint).items():
         name = job.get("name", job_id)
         if job.get("uses") == CALL:
-            called = jobs(REUSABLE)["dependency-review"]["name"]
-            return f"{name} / {called}"
-        carries = any(
-            ACTION.search(step.get("uses", ""))
-            and step.get("with", {}).get("config-file") == READ_AS
-            for step in job.get("steps") or []
-        )
-        if carries:
+            return f"{name} / {jobs(REUSABLE)[called]['name']}"
+        if any(carries(step) for step in job.get("steps") or []):
             return str(name)
     return None
 
 
-def test_main_requires_the_dependency_review(
+def reviews(step: dict[str, Any]) -> bool:
+    """Say whether a step runs the dependency review on the shared config."""
+    return bool(
+        ACTION.search(step.get("uses", ""))
+        and step.get("with", {}).get("config-file") == READ_AS
+    )
+
+
+def signs_off(step: dict[str, Any]) -> bool:
+    """Say whether a step runs the `Signed-off-by:` script."""
+    return SCRIPT.name in step.get("run", "")
+
+
+@pytest.mark.parametrize(
+    ("called", "carries"),
+    [("dependency-review", reviews), ("sign-off", signs_off)],
+)
+def test_main_requires_the_lint_check(
     repository: str,
     trees: dict[str, Path],
     protections: dict[str, dict[str, Any] | str | None],
+    called: str,
+    carries: Callable[[dict[str, Any]], bool],
 ) -> None:
-    """Section 11's `Dependency review` is a required check, bound to Actions.
+    """Section 11's `Dependency review` and `Sign-off`, required from Actions.
 
-    The context is `lint / Dependency review` in a tree calling
-    `reusable-lint.yml` and `Dependency review` in a tree with its own
-    `lint.yml`: the tree's own file says which, and the rule has to name
+    Each context is the called job's name after the calling job's own in
+    a tree calling `reusable-lint.yml`, and the job's name in a tree with
+    its own `lint.yml`: the tree's own file says which, and the rule has to name
     what that file produces, since a context nothing reports blocks every
     merge and one the rule lacks gates nothing.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
     :param protections: the classic protection of each repository.
+    :param called: the job's id in `reusable-lint.yml`.
+    :param carries: whether a step of the tree's own job carries the check.
     """
     document = protections[repository]
     if document is None:
@@ -217,8 +239,9 @@ def test_main_requires_the_dependency_review(
         )
     if isinstance(document, str):
         pytest.fail(document)
-    context = review_context(trees[repository] / ".github" / "workflows" / "lint.yml")
-    assert context, "lint.yml neither calls reusable-lint.yml nor carries the action"
+    lint = trees[repository] / ".github" / "workflows" / "lint.yml"
+    context = lint_context(lint, called, carries)
+    assert context, f"lint.yml neither calls reusable-lint.yml nor runs {called}"
     required = {
         (check["context"], check["app_id"])
         for check in (document.get("required_status_checks") or {}).get("checks", [])
@@ -230,38 +253,4 @@ def test_main_requires_the_dependency_review(
             f"gh api repos/{ORG}/{repository}/{ENDPOINT}/required_status_checks "
             "--jq '[.checks[] | [.context, .app_id]]'",
         )
-    )
-
-
-def test_main_does_not_require_the_sign_off(
-    repository: str,
-    protections: dict[str, dict[str, Any] | str | None],
-) -> None:
-    """Section 11's `Sign-off` job reports and is not a required check.
-
-    Its context is the job's name, after the calling job's own where the
-    tree calls `reusable-lint.yml`, so a context is matched on its last
-    part.
-
-    :param repository: the repository asked about.
-    :param protections: the classic protection of each repository.
-    """
-    document = protections[repository]
-    if document is None:
-        pytest.skip(
-            f"this run's token cannot read {ENDPOINT} on {repository}: "
-            f"gh api repos/{ORG}/{repository}/{ENDPOINT} answered {UNREADABLE}"
-        )
-    if isinstance(document, str):
-        pytest.fail(document)
-    name = jobs(REUSABLE)["sign-off"]["name"]
-    required = [
-        check["context"]
-        for check in (document.get("required_status_checks") or {}).get("checks", [])
-        if check["context"].rsplit(" / ", 1)[-1] == name
-    ]
-    assert not required, f"main requires {required}; " + by_hand(
-        repository,
-        f"gh api repos/{ORG}/{repository}/{ENDPOINT}/required_status_checks "
-        "--jq '[.checks[].context]'",
     )

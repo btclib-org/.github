@@ -13,9 +13,9 @@
 ## Checks
 
 <!-- Only the first two of these are a required check: both run in
-     `Lint`, which with `Dependency review` is the whole of what a merge
-     here is gated on. Both jobs decline a draft pull request, so a
-     draft gets no report from either.
+     `Lint`, which with `Dependency review` and `Sign-off` is the whole
+     of what a merge here is gated on. The three jobs decline a draft
+     pull request, so a draft gets no report from any of them.
      Running them before pushing is how you find out before the run
      does. `alignment.yml` runs on every pull request and gates
      nothing, so a red run from it shows on the pull request and holds
