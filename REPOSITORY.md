@@ -528,16 +528,17 @@ gh api orgs/btclib-org/dependabot/secrets \
 ```
 
 **A switch this repository does not set.** The jobs `claude-review.yml`
-calls are guarded by `vars.CLAUDE_REVIEW_ENABLED`, and neither variable
-store holds it: the repository's answers with the two variables above,
-and the organization's is empty.
+calls are guarded by `vars.CLAUDE_REVIEW_ENABLED`. The repository's
+variable store answers with the two variables above, and the
+organization's holds the switch:
 
 ```shell
-gh api orgs/btclib-org/actions/variables --jq .total_count
-# 0
+gh api orgs/btclib-org/actions/variables \
+  --jq '.variables[] | [.name, .value, .visibility]'
+# ["CLAUDE_REVIEW_ENABLED","true","all"]
 ```
 
-[Section 11 reads that absence as the switch's off state][s11-review].
+[Section 11 reads that value as the switch's on state][s11-review].
 Both stores are read because a variable set here would take precedence
 over one of the same name set on the organization.
 

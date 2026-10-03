@@ -10011,3 +10011,9 @@ nothing red follows from the copies disagreeing.
 
 - **Every tree's `CONTRIBUTING.md` says `Sign-off` is required** (issue
   #1550): the copies agree, and `EXPECTED_DRIFT` is empty.
+
+### The Claude review in CI is on
+
+- **The organization variable `CLAUDE_REVIEW_ENABLED` is `true`** (issue
+  #452): `claude-review.yml` posts the ack of record. `EXPECTED_DRIFT`
+  holds `CONTRIBUTING.md` until every tree's copy agrees.

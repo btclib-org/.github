@@ -2775,20 +2775,18 @@ fresh one. A closed run posts no review, the review job declining that
 action: what the type buys is the group, where the run supersedes a
 review nobody is going to read.
 
-**The workflow is present and neither the review nor a `@claude` answer
-runs.** `reusable-claude-review.yml`'s two jobs each carry
-`if: vars.CLAUDE_REVIEW_ENABLED == 'true'`, an organization variable, and
-every caller reaches both:
+**One organization variable turns on the review and the `@claude`
+answer.** `reusable-claude-review.yml`'s two jobs each carry
+`if: vars.CLAUDE_REVIEW_ENABLED == 'true'`, and every caller reaches both:
 
 ```shell
-gh api orgs/<org>/actions/variables --jq '.variables[].name'
+gh api orgs/<org>/actions/variables/CLAUDE_REVIEW_ENABLED \
+  --jq '[.value, .visibility]'
 ```
 
-It names nothing, and an undefined `vars.X` is the empty string, so the
-absence is the off state and creating it with that value is the whole
-switch; the file is kept current meanwhile. A tree whose gate is off has
-no ack of record; `CONTRIBUTING.md`'s *The review* has what stands in. The
-switch is the organization's so that no tree can be forgotten.
+It answers `["true","all"]`. An undefined `vars.X` is the empty string,
+so the variable's absence is the off state. The switch is the
+organization's, at `visibility=all`, so that no tree can be forgotten.
 
 **A pull request that adds or edits `claude-review.yml` gets no ack**
 until the change is on `main`, for the reason the workflow's own header
