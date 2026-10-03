@@ -10035,3 +10035,9 @@ nothing red follows from the copies disagreeing.
 - **`names_test.py` takes a name and an operator or `[` for a requirement,
   not a name and a lone `=`** (closes #1566): `CLAUDE_PROCESS=~/Git` in
   `claude-process`'s `README.md` is a shell variable.
+
+### Section 1 has a row for `build-requires`
+
+- **A group that is only locked and never installed stays outside `dev`**
+  (closes #1570): btclib-secp256k1's `build-requires` pins
+  `[build-system].requires` in `uv.lock`, and section 1 describes it.
