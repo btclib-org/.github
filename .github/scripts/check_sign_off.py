@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Refuse a commit with no `Signed-off-by:` trailer naming its author.
+"""Report each commit with no `Signed-off-by:` trailer naming its author.
 
 What the trailer attests, and why a signature does not stand in for it,
 is section 11's *Signatures* in btclib-org/.github's `README.md`.
@@ -78,6 +78,19 @@ def refused(revisions: str) -> list[str]:
     return lines
 
 
+def fork_point(revisions: str) -> str:
+    """Return the sha where a range of the form `base..head` leaves its base.
+
+    The commit is on the branch, so its author has it without fetching.
+    Where the branch merged its base, it is the base commit last merged,
+    so a rebase onto it replays the branch's own commits and none merged in.
+    """
+    ends = _git("rev-parse", revisions).split()
+    head = [end for end in ends if not end.startswith("^")]
+    base = [end[1:] for end in ends if end.startswith("^")]
+    return _git("merge-base", *head, *base).strip()
+
+
 def main(argv: list[str] | None = None) -> int:
     """Read the range from the command line and check its commits."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -89,7 +102,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"::error::{line}")
     if lines:
         print(
-            "Each commit above needs a Signed-off-by: trailer with the address shown."
+            "Each commit above needs a Signed-off-by: trailer with the address"
+            " shown, added by that commit's author. Where they are all yours, run"
+            " this with that address as your git user.email, then force-push the"
+            " branch:\n"
+            f"    git rebase --signoff {fork_point(args.revisions)}\n"
+            "This check reports and does not block the merge."
         )
         return 1
     print(f"every commit of {args.revisions} read is signed off by its author")

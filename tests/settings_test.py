@@ -330,3 +330,22 @@ def test_the_wiki_and_the_projects_board_are_off(
         repository,
         f"gh api repos/{ORG}/{repository} --jq '{{has_wiki, has_projects}}'",
     )
+
+
+def test_web_commits_are_signed_off(
+    repository: str,
+    settings: dict[str, dict[str, Any]],
+) -> None:
+    """Section 11: `web_commit_signoff_required` is on in every tree.
+
+    The organization sets it, and each repository document reads it back.
+
+    :param repository: the repository asked about.
+    :param settings: the repository documents.
+    """
+    on = settings[repository].get("web_commit_signoff_required")
+    flip = f"gh api -X PATCH orgs/{ORG} -F web_commit_signoff_required=true"
+    read = f"gh api repos/{ORG}/{repository} --jq .web_commit_signoff_required"
+    assert on is True, f"the setting is {on!r}; flip with `{flip}`; " + by_hand(
+        repository, read
+    )

@@ -9960,3 +9960,9 @@ nothing red follows from the copies disagreeing.
 - **Each tree section 10's `scorecard` entry names keeps an open `good first
   issue`** (issue #1541), for `small_tasks`: `tests/good_first_issue_test.py`
   reads it, and a `BACKLOG` row excuses each tree at zero.
+
+### The `Sign-off` check reports and is not required
+
+- **Section 11 asks for the trailer and does not require the `Sign-off`
+  check** (closes #1467): a maintainer cannot add an author's trailer. The
+  failure prints the fix, and `web_commit_signoff_required` is on.

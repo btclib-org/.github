@@ -231,3 +231,37 @@ def test_main_requires_the_dependency_review(
             "--jq '[.checks[] | [.context, .app_id]]'",
         )
     )
+
+
+def test_main_does_not_require_the_sign_off(
+    repository: str,
+    protections: dict[str, dict[str, Any] | str | None],
+) -> None:
+    """Section 11's `Sign-off` job reports and is not a required check.
+
+    Its context is the job's name, after the calling job's own where the
+    tree calls `reusable-lint.yml`, so a context is matched on its last
+    part.
+
+    :param repository: the repository asked about.
+    :param protections: the classic protection of each repository.
+    """
+    document = protections[repository]
+    if document is None:
+        pytest.skip(
+            f"this run's token cannot read {ENDPOINT} on {repository}: "
+            f"gh api repos/{ORG}/{repository}/{ENDPOINT} answered {UNREADABLE}"
+        )
+    if isinstance(document, str):
+        pytest.fail(document)
+    name = jobs(REUSABLE)["sign-off"]["name"]
+    required = [
+        check["context"]
+        for check in (document.get("required_status_checks") or {}).get("checks", [])
+        if check["context"].rsplit(" / ", 1)[-1] == name
+    ]
+    assert not required, f"main requires {required}; " + by_hand(
+        repository,
+        f"gh api repos/{ORG}/{repository}/{ENDPOINT}/required_status_checks "
+        "--jq '[.checks[].context]'",
+    )

@@ -109,6 +109,50 @@ def test_a_commit_with_no_trailer_is_refused(script: ModuleType) -> None:
     assert line.endswith(" unsigned: no Signed-off-by: <ann@example.org>")
 
 
+def _run_the_fix(script: ModuleType, revisions: str, out: str) -> None:
+    """Run the command the failure printed, as `Ann`."""
+    (command,) = (s for s in map(str.strip, out.splitlines()) if s.startswith("git "))
+    _git(*command.split()[1:])
+    assert script.refused(revisions) == []
+
+
+@pytest.mark.usefixtures("repo")
+def test_the_command_the_failure_prints_signs_the_branch_off(
+    script: ModuleType, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Run as printed, the command adds the trailer to every commit refused."""
+    _git("checkout", "--quiet", "-b", "topic")
+    _commit("one", signoff=True)
+    _commit("two")
+
+    assert script.main(["main..topic"]) == 1
+    out = capsys.readouterr().out
+    assert "does not block the merge" in out
+    _run_the_fix(script, "main..topic", out)
+
+
+@pytest.mark.usefixtures("repo")
+def test_the_command_leaves_a_merged_in_base_alone(
+    script: ModuleType, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A branch that merged its base is rebased onto the base commit it merged.
+
+    The base's commit is `Bob`'s and not signed off, so a command that
+    replayed it would carry `Ann`'s trailer on it into the range.
+    """
+    _git("checkout", "--quiet", "-b", "topic")
+    _commit("work")
+    _git("checkout", "--quiet", "main")
+    _commit("landed meanwhile", "Bob <bob@example.org>")
+    _git("checkout", "--quiet", "topic")
+    _git("merge", "--quiet", "--no-edit", "main")
+    _commit("more work")
+
+    assert script.main(["main..topic"]) == 1
+    _run_the_fix(script, "main..topic", capsys.readouterr().out)
+    _git("merge-base", "--is-ancestor", "main", "topic")
+
+
 @pytest.mark.usefixtures("repo")
 def test_a_trailer_naming_somebody_else_is_refused(script: ModuleType) -> None:
     """The author's own sign-off is asked for, not anybody's."""
