@@ -182,6 +182,9 @@ instructed.
   repository exists and is empty, `alignment.yml` is red here on every
   branch of this tree — a cost every session working here pays for the gap
   between `gh repo create` and that sibling's first push.
+- **A repository named `<tree>-ghsa-xxxx-xxxx-xxxx` is a temporary private
+  fork of a security advisory, not a tree.** `names()` in
+  `tests/__init__.py` leaves it out, and its docstring says why.
 - **A new repository's rulesets go on only after its first push to
   `main`, never before — section 16 states the reason.** Verify it
   against a landed repository rather than trusting the order alone:

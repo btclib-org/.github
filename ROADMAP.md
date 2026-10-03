@@ -57,11 +57,8 @@ not deadlines.
 - **A Bulletproofs++ range proof in `ecc/`**, beside the Borromean one,
   following secp256k1-zkp's `bppp` module as it lands upstream
   (btclib-org/btclib#1908).
-- **The review bot runs again in every repository** that carries
-  `claude-review.yml`, at the end of the campaign that switched it off
-  (btclib-org/.github#452).
-- **Silver at bestpractices.dev** for the repositories section 10's
-  `scorecard` entry names (btclib-org/.github#1321).
+- **Gold at bestpractices.dev** for the repositories section 10's
+  `scorecard` entry names (btclib-org/.github#1362).
 
 ## Not intended
 
@@ -81,5 +78,3 @@ not deadlines.
   *The compiled wheels are outside that property* says why.
 - **Removing the maintainer's bypass from the branch rules**, until the
   maintainer decides otherwise (btclib-org/.github#341).
-- **Gold at bestpractices.dev**: btclib-org/.github#1321 records the
-  criteria this organization cannot answer by writing a document.
