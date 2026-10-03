@@ -10017,3 +10017,9 @@ nothing red follows from the copies disagreeing.
 - **The organization variable `CLAUDE_REVIEW_ENABLED` is `true`** (issue
   #452): `claude-review.yml` posts the ack of record. `EXPECTED_DRIFT`
   holds `CONTRIBUTING.md` until every tree's copy agrees.
+
+### The two secrets outside an environment rotate by age
+
+- **`CLAUDE_CODE_OAUTH_TOKEN` and `ALIGNMENT_APP_PRIVATE_KEY` are rotated
+  before they are a year old** (issue #1474), not at each yearly review.
+  `secrets_test.py` reads when each was written, and fails 31 days early.
