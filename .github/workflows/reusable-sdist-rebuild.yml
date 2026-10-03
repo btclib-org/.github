@@ -85,9 +85,11 @@ name: reusable-sdist-rebuild
 # workflow, and the identity is then the callee's, while `repository`
 # keeps naming the caller (btclib-org/.github#35). The release's tag is
 # passed as `--source-ref`, which is what keeps a rehearsal's attestation
-# from verifying as the release. reusable-attest.yml is tried second and
-# is deleted, with its step, when every tree's latest release is signed
-# by reusable-build.yml. A caller whose latest release neither signed
+# from verifying as the release. reusable-attest.yml is tried second:
+# `--signer-workflow` is matched against the signing certificate's
+# identity and reads no file, so that workflow need not exist. Its step
+# is deleted when every tree's latest release is signed by
+# reusable-build.yml. A caller whose latest release neither signed
 # fails the job. `gh attestation verify` does not say which signer it
 # found or which was asked for, so the step prints which one passed.
 #

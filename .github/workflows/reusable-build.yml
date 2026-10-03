@@ -7,10 +7,9 @@ name: reusable-build
 # are written here and a tree's release.yml calls this file.
 #
 # The signature is made before the environment approval, at build
-# time, and not after the publish as reusable-attest.yml does: PyPI
-# does not accept a reusable workflow as a Trusted Publisher, so the
-# publish jobs stay in the tree, and they download what this run
-# built and attested.
+# time, and not after the publish: PyPI does not accept a reusable
+# workflow as a Trusted Publisher, so the publish jobs stay in the
+# tree, and they download what this run built and attested.
 #
 # Two jobs, so that the one that runs the build holds no OIDC token:
 # `build` has `contents: read` and prints the digests of what it wrote;
@@ -52,6 +51,16 @@ name: reusable-build
 # `submodules`, `setup-python`, `sdist-only` and `dist-artifact` serve a
 # tree whose wheels are built elsewhere; each defaults to what a tree
 # that builds with `uv build` needs.
+#
+# `build-constraints` names a file in the calling tree that pins the
+# sdist build's own requirements, `[build-system].requires`, which are
+# otherwise resolved from the index on the day the job runs. The
+# build step reads it through the variable its builder honours:
+# `uv build` reads UV_BUILD_CONSTRAINT and ignores PIP_CONSTRAINT, and
+# `python -m build` (`sdist-only`) installs the requirements with pip,
+# which reads PIP_CONSTRAINT and not UV_BUILD_CONSTRAINT. The variable
+# is set on that step alone, so nothing else pip or uv installs reads
+# it, and the path is relative to the workspace. Empty, both builders ignore it.
 #
 # `python` has no default: the interpreter that gzips the sdist decides
 # its digest, which makes it a claim of the calling tree.
@@ -100,6 +109,13 @@ on:
           reusable-github-release.yml download.
         type: string
         default: dist
+      build-constraints:
+        description: >
+          A file in the caller's tree, as `build-constraints.txt`, that
+          constrains the requirements of the sdist build. Empty, the
+          build resolves them from the index.
+        type: string
+        default: ""
     outputs:
       digests:
         description: >
@@ -160,9 +176,13 @@ jobs:
       # the sdist first and then the wheel from it
       - name: Build the distribution files
         if: ${{ !inputs.sdist-only }}
+        env:
+          UV_BUILD_CONSTRAINT: ${{ inputs.build-constraints }}
         run: uv build
       - name: Build the source distribution
         if: inputs.sdist-only
+        env:
+          PIP_CONSTRAINT: ${{ inputs.build-constraints }}
         run: uv run --locked --only-group build python -m build -s
       # rewrites the member metadata, so the digest the attestation
       # signs is the pipeline's output. --no-project: installs nothing

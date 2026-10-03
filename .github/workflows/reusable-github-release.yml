@@ -15,10 +15,8 @@ name: reusable-github-release
 # that do not install being worse than a release announced a minute
 # later, and the announcement not being what makes them installable.
 #
-# reusable-build.yml signs the files this job attaches, or
-# reusable-attest.yml in a tree not yet ported. What passes between this
-# file and either is the `attestation` artifact, the run's rather than a
-# file's, so a caller that converts one and not the other still works.
+# reusable-build.yml signs the files this job attaches. What passes
+# between this file and it is the `attestation` artifact.
 #
 # **A caller's `if:` has to open with `always()`, and the two `.result`
 # checks beside it are not a substitute for saying so.** A job with a
@@ -26,9 +24,8 @@ name: reusable-github-release
 # condition says, unless that condition opens with a status function,
 # and that opt-out holds for the job that writes it and not for whoever
 # needs that job in turn: a tag push skips the rehearsal's publish job,
-# reusable-attest.yml's caller opens with `always()` and runs, and a
-# caller of this file sits behind the same skipped ancestor and is
-# skipped in turn unless it opts out for itself. What that costs is a
+# and a caller of this file sits behind the same skipped ancestor and is
+# skipped unless it opts out for itself. What that costs is a
 # version on the index with no release cut for it, which
 # btclib-org/btclib#1142 records along with the other half: a skip is
 # neither a failure nor within `gh run rerun --failed`'s blast radius,
@@ -39,25 +36,17 @@ name: reusable-github-release
 # and answers a rehearsal the same way, that job's result there being
 # `skipped`.
 #
-# btclib-org/.github#35 records this job as unconvertible, on the ground
-# that a callee's jobs cannot `needs:` a caller's;
-# reusable-attest.yml's header has the three measurements that say the
-# prohibition does not reach the calling job.
-#
 # Two inputs.
 #
 # dist-artifact, string, required: the artifact whose files are attached
-# here. reusable-attest.yml's header argues the value and the absent
-# default; the two take the same one, a release carrying what was
-# signed.
+# here. It takes the value of reusable-build.yml's input of the same
+# name, a release carrying what was signed.
 #
 # digests, string, optional: the `digests` output of reusable-build.yml.
 # Given, the job refuses a file changed, added or missing in `dist` or
 # `sbom` before it creates the release, the artifacts being ones a job
 # that ran after the build could have replaced. A caller passes
-# `${{ needs.build.outputs.digests }}`. Left empty, nothing is checked,
-# which is what a caller still on reusable-attest.yml gets, that file
-# having no such output.
+# `${{ needs.build.outputs.digests }}`. Left empty, nothing is checked.
 #
 # Resisted: an input for the notes file and one for the asset list.
 # Every caller keeps a RELEASE_NOTES.md whose `## <tag>` section is what
@@ -79,7 +68,7 @@ name: reusable-github-release
 #
 # What a caller owes besides: the `needs:` edges and the `if:` above;
 # dist-artifact; artifacts named `sbom` and `attestation` in the same
-# run, the second being reusable-build.yml's or reusable-attest.yml's;
+# run, the second being reusable-build.yml's;
 # and a RELEASE_NOTES.md at the root of its own tree, which is the one this job reads --
 # `actions/checkout` takes `github.repository` from the run it is a step
 # of rather than from where this file lives. `GITHUB_REF_NAME` is the
@@ -127,8 +116,8 @@ jobs:
     permissions:
       # the one job of a release that writes to the repository through
       # its token, and what it writes is a release; the statement
-      # reusable-build.yml or reusable-attest.yml signs goes to the
-      # attestations API under permissions of its own
+      # reusable-build.yml signs goes to the attestations API under
+      # permissions of its own
       contents: write # creating the release this job exists to create
     steps:
       # every action is pinned to a commit SHA, the tag in the comment:

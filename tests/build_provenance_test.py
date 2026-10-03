@@ -165,3 +165,23 @@ def test_the_optional_inputs_default_to_the_build_a_tree_gets_without_them() -> 
     assert inputs["setup-python"]["default"] is False
     assert inputs["sdist-only"]["default"] is False
     assert inputs["dist-artifact"]["default"] == "dist"
+    assert inputs["build-constraints"]["default"] == ""
+
+
+@pytest.mark.parametrize(
+    ("command", "variable"),
+    [
+        ("uv build", "UV_BUILD_CONSTRAINT"),
+        ("python -m build -s", "PIP_CONSTRAINT"),
+    ],
+)
+def test_each_build_step_passes_the_constraints_its_builder_reads(
+    jobs: dict[str, Any], command: str, variable: str
+) -> None:
+    """Assert a build step sets the variable its command honours.
+
+    `uv build` ignores PIP_CONSTRAINT, and `python -m build` installs the
+    requirements with pip, which ignores UV_BUILD_CONSTRAINT.
+    """
+    step = next(s for s in jobs["build"]["steps"] if command in s.get("run", ""))
+    assert step["env"] == {variable: "${{ inputs.build-constraints }}"}

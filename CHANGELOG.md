@@ -9966,3 +9966,14 @@ nothing red follows from the copies disagreeing.
 - **Section 11 asks for the trailer and does not require the `Sign-off`
   check** (closes #1467): a maintainer cannot add an author's trailer. The
   failure prints the fix, and `web_commit_signoff_required` is on.
+
+### `reusable-build.yml` takes the sdist build's constraints
+
+- **A `build-constraints` input names a file in the caller's tree**
+  (closes #1539): the sdist step sets `UV_BUILD_CONSTRAINT` or
+  `PIP_CONSTRAINT` to it. Empty, both builders ignore it.
+
+### `reusable-attest.yml` is deleted
+
+- **No workflow in the organization calls it** (closes #1531): the
+  sdist rebuild still verifies the releases it signed.
