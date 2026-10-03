@@ -10064,3 +10064,9 @@ nothing red follows from the copies disagreeing.
 
 - Entries above that have the maintainer landing without another person's
   approval describe the rule before issue #1362 (issue #1569).
+
+### The 1362 drift entries come out
+
+- **Every tree's `CONTRIBUTING.md` and `REVIEWING.md` say a pull request
+  lands with another person's approval** (issue #1362): the copies agree,
+  and `EXPECTED_DRIFT` is empty.
