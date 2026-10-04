@@ -333,17 +333,6 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
-        1541,
-        "test_a_scorecard_tree_keeps_a_good_first_issue_open",
-        (
-            "btclib",
-            "btclib-secp256k1",
-            "btclib-node",
-            "btclib-ecc",
-            "btclib-mnemonics",
-        ),
-    ),
-    (
         1584,
         "test_an_issue_form_sets_a_type_and_no_kind_label",
         (
