@@ -232,7 +232,7 @@
     "status": "Met"
   },
   "OSPS-VM-04.01": {
-    "justification": "Vulnerabilities are published as GitHub security advisories, as SECURITY.md commits to. Three found in the 2026-09-30 review are draft advisories, to be published with the release that fixes them. https://github.com/btclib-org/btclib-node/security/advisories",
+    "justification": "Vulnerabilities are published as GitHub security advisories, as SECURITY.md commits to. The three found in the 2026-09-30 security review were published with v2026.10.4, the release that fixes them. https://github.com/btclib-org/btclib-node/security/advisories",
     "status": "Met"
   },
   "OSPS-VM-04.02": {
@@ -364,24 +364,24 @@
     "status": "N/A"
   },
   "crypto_credential_agility": {
-    "justification": "The released v2026.9.24 has no RPC authentication, so it processes no credential and holds no private key. Main adds a cookie file and -rpcauth entries kept apart from the configuration, which ship with the next release. https://github.com/btclib-org/btclib-node/blob/main/SECURITY.md",
-    "status": "N/A"
+    "justification": "Since v2026.10.4 the RPC credentials are the cookie file and the -rpcauth entries, kept apart from the rest of the configuration and replaced without recompiling. The node holds no long-term private key. https://github.com/btclib-org/btclib-node/blob/main/SECURITY.md",
+    "status": "Met"
   },
   "crypto_floss": {
     "justification": "no closed source dependencies",
     "status": "Met"
   },
   "crypto_keylength": {
-    "justification": "The released v2026.9.24 negotiates no keys itself: it speaks plaintext P2P and hashes with SHA-256 through btclib. Main adds BIP324 with secp256k1 and ChaCha20 keys, which meet the NIST 2030 floor and ship with the next release.",
-    "status": "N/A"
+    "justification": "BIP324, in v2026.10.4, uses secp256k1 and ChaCha20 keys, which meet the NIST 2030 floor. The protocol fixes the key lengths, so no smaller key can be configured. https://github.com/btclib-org/btclib-node/blob/main/SECURITY.md",
+    "status": "Met"
   },
   "crypto_password_storage": {
-    "justification": "The released v2026.9.24 stores no passwords, since its RPC listener has no authentication. Main adds Bitcoin Core's -rpcauth scheme, which keeps a salted single-round HMAC-SHA256, not a key-stretching hash, and ships with the next release.",
+    "justification": "-rpcauth credentials belong to the node's operator and the operator's own RPC clients, not to external users of a service. The node stores them as Bitcoin Core does, a salted single-round HMAC-SHA256, as SECURITY.md records. https://github.com/btclib-org/btclib-node/blob/main/SECURITY.md",
     "status": "N/A"
   },
   "crypto_pfs": {
-    "justification": "The released v2026.9.24 implements no key-agreement protocol. Main adds BIP324, which uses a fresh ElligatorSwift key pair per connection and ships with the next release. https://github.com/btclib-org/btclib-node/blob/main/SECURITY.md",
-    "status": "N/A"
+    "justification": "BIP324, in v2026.10.4, uses a fresh ElligatorSwift key pair per connection. https://github.com/btclib-org/btclib-node/blob/main/SECURITY.md",
+    "status": "Met"
   },
   "crypto_published": {
     "justification": "cryptography is delegated to btclib and btclib-secp256k1 (Bitcoin Core's libsecp256k1), which implement published algorithms",
@@ -396,7 +396,7 @@
     "status": "N/A"
   },
   "crypto_used_network": {
-    "justification": "The released v2026.9.24 sends P2P traffic in plaintext (Bitcoin's v1 transport) and serves JSON-RPC over plain HTTP. Main adds BIP324 v2 transport by default (v1 only with -v1transport=1), which ships with the next release.",
+    "justification": "Since v2026.10.4 P2P uses BIP324 v2 transport by default, and v1 only with -v1transport=1. JSON-RPC is plain HTTP, bound to loopback by default. https://github.com/btclib-org/btclib-node/blob/main/SECURITY.md",
     "status": "Unmet"
   },
   "crypto_verification_private": {
@@ -464,7 +464,7 @@
     "status": "Met"
   },
   "documentation_security": {
-    "justification": "SECURITY.md's Limitations section lists what the node does not protect against, including the unauthenticated JSON-RPC listener on every interface in v2026.9.24 and the Alpha status. Main also documents RPC credentials sent as plain HTTP and BIP324's lack of peer authentication, which ship with the next release. https://github.com/btclib-org/btclib-node/blob/main/SECURITY.md",
+    "justification": "SECURITY.md's Limitations section lists what the node does not protect against: RPC credentials sent as plain HTTP, BIP324's lack of peer authentication, and the Alpha status. https://github.com/btclib-org/btclib-node/blob/main/SECURITY.md",
     "status": "Met"
   },
   "dynamic_analysis": {
@@ -644,7 +644,7 @@
     "status": "Met"
   },
   "signed_releases": {
-    "justification": "The v2026.9.24 tag is signed and GitHub-verified; RELEASING.md documents the signing and publishing process. https://github.com/btclib-org/btclib-node/releases/tag/v2026.9.24",
+    "justification": "Every release tag since v2026.9.24 is signed and GitHub-verified, the latest being v2026.10.4. RELEASING.md documents the signing and publishing process. https://github.com/btclib-org/btclib-node/releases/tag/v2026.10.4",
     "status": "Met"
   },
   "sites_https": {
@@ -736,7 +736,7 @@
     "status": "Met"
   },
   "version_tags_signed": {
-    "justification": "Every release tag, not only the latest, is created through the signed-tag process RELEASING.md documents; the `required_signatures` rule on the tag-integrity ruleset enforces this at the forge rather than leaving it to convention. https://github.com/btclib-org/btclib-node/releases/tag/v2026.9.24",
+    "justification": "Every release tag, not only the latest, is created through the signed-tag process RELEASING.md documents; the `required_signatures` rule on the tag-integrity ruleset enforces this at the forge rather than leaving it to convention. https://github.com/btclib-org/btclib-node/releases/tag/v2026.10.4",
     "status": "Met"
   },
   "version_unique": {
@@ -752,8 +752,8 @@
     "status": "Met"
   },
   "vulnerability_report_credit": {
-    "justification": "No security advisory has been published on this repository; three are in draft, and a reporter is credited when one is published. https://github.com/btclib-org/btclib-node/security/advisories",
-    "status": "N/A"
+    "justification": "The three advisories published with v2026.10.4 credit their finder, pmazzocchi. https://github.com/btclib-org/btclib-node/security/advisories",
+    "status": "Met"
   },
   "vulnerability_report_private": {
     "justification": "https://github.com/btclib-org/btclib-node?tab=security-ov-file",
@@ -764,7 +764,7 @@
     "status": "Met"
   },
   "vulnerability_report_response": {
-    "justification": "The three vulnerabilities from the 2026-09-30 security review were taken up as draft advisories the same day. https://github.com/btclib-org/btclib-node/security/advisories",
+    "justification": "The three vulnerabilities from the 2026-09-30 security review were taken up as draft advisories the same day, and published fixed in v2026.10.4 on 2026-10-04. https://github.com/btclib-org/btclib-node/security/advisories",
     "status": "Met"
   },
   "vulnerability_response_process": {

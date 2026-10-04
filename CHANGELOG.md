@@ -10198,3 +10198,8 @@ nothing red follows from the copies disagreeing.
 - **Every Dependabot ecosystem groups its updates, and a site served by
   Pages is built and deployed by a workflow with no `CNAME` file**
   (closes #1608): `btclib-org.github.io` made both true.
+
+### `btclib-node`'s answers follow its release
+
+- **`bestpractices/btclib-node.json` holds the answers after
+  v2026.10.4** (issue #1589): none still waits on a next release.
