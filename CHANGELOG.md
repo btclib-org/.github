@@ -10117,3 +10117,9 @@ nothing red follows from the copies disagreeing.
 - **A rebase over a landing that wrote an entry stops on these files**
   (issue #1582): rebuild the file from the new base, the branch's block at
   the end of the open section. Entries above naming `merge=union` predate it.
+
+### The union script refuses a revision that does not exist
+
+- **`rebuild_union_files.py` exited 0 on a mistyped revision and 1 on a git
+  failure** (closes #1593): both now exit 2, as a refusal does, so 0 is not
+  read as "agrees" nor 1 as "written".

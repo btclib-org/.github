@@ -25,7 +25,9 @@ The script refuses, and leaves the file alone, where
 - the branch adds or deletes the file, or the new base has no such file,
 - the file has no open section in the new base, or the lines that followed
   the block are not found at the end of it,
-- a file does not end in a newline.
+- a file does not end in a newline,
+- a revision does not resolve, or git fails: the run stops before any file
+  is read.
 
 A refused file is rebuilt by hand.
 
@@ -34,8 +36,8 @@ counted as that text's. A place is found by its position in the section, so
 it is found exactly once or not at all.
 
 Exit status: 0 where every file already agrees, 1 where one was written, 2
-where one was refused. Run in the worktree, with the rebase or merge stopped
-or finished:
+where one was refused or a revision did not resolve or git failed. Run in the
+worktree, with the rebase or merge stopped or finished:
 
     uv run --no-project --python 3.15 \
         .github/scripts/rebuild_union_files.py <old base> <old tip>
@@ -176,6 +178,14 @@ def default_base() -> str:
     return _git("merge-base", "HEAD", "origin/main").stdout.decode().strip()
 
 
+def _resolve(revision: str) -> None:
+    """Refuse a revision that names no commit."""
+    ran = _git("rev-parse", "--verify", "-q", f"{revision}^{{commit}}", check=False)
+    if ran.returncode:
+        msg = f"`{revision}` does not name a commit"
+        raise Refused(msg)
+
+
 def main(argv: list[str] | None = None) -> int:
     """Read the revisions from the command line and rebuild each file."""
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
@@ -187,7 +197,16 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    new_base = args.base or default_base()
+    try:
+        new_base = args.base or default_base()
+        for revision in (args.old_base, args.old_tip, new_base):
+            _resolve(revision)
+    except Refused as why:
+        print(f"::error::{why}")
+        return 2
+    except subprocess.CalledProcessError as failed:
+        print(f"::error::{failed}: {failed.stderr.decode().strip()}")
+        return 2
     status = 0
     for name in FILES:
         try:
