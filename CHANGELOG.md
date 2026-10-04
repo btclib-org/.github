@@ -10087,3 +10087,9 @@ nothing red follows from the copies disagreeing.
 
 - **The review prompt asks for `gh issue view <n> --comments`** (issue #1580):
   a decision recorded in a comment can replace what the issue's body asks.
+
+### A script rebuilds a union file after a rebase
+
+- **`.github/scripts/rebuild_union_files.py` puts the branch's block back
+  into the new base's `CHANGELOG.md` and `RELEASE_NOTES.md`** (closes
+  #1583), after a rebase or merge, stopped or not.
