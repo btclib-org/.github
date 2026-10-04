@@ -10153,3 +10153,9 @@ nothing red follows from the copies disagreeing.
 - **Section 7 bounds a measured duration by a reference timed alongside it**
   (issue #1587), seconds only for a timeout named in the code.
   `tests/timing_test.py` refuses `clock() - start` compared with a literal.
+
+### `bitcoin-core-rpc` leaves the merge-driver and issue-form rows
+
+- **The merge-driver and issue-form `BACKLOG` rows keep only
+  `btclib-node`** (issue #1582) (issue #1584): `bitcoin-core-rpc`'s port
+  landed, and its cells were strict XPASS.

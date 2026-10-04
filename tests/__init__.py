@@ -335,18 +335,12 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         1584,
         "test_an_issue_form_sets_a_type_and_no_kind_label",
-        (
-            "btclib-node",
-            "bitcoin-core-rpc",
-        ),
+        ("btclib-node",),
     ),
     (
         1582,
         "test_neither_history_file_has_a_merge_driver",
-        (
-            "bitcoin-core-rpc",
-            "btclib-node",
-        ),
+        ("btclib-node",),
     ),
     (
         1587,
