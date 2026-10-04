@@ -10170,3 +10170,9 @@ nothing red follows from the copies disagreeing.
 - **Both jobs of `reusable-claude-review.yml` pass `--model
   claude-opus-5-5`** (closes #1607): the action's default ran the review
   on Sonnet, as btclib-node's run `37205119980` logged.
+
+### Section 12 works a security advisory in a set order
+
+- **The fix stays in the advisory's private fork until the release**
+  (issue #1588), then reaches `main` as an ordinary pull request: the
+  advisory's own merge runs no check.
