@@ -10192,3 +10192,9 @@ nothing red follows from the copies disagreeing.
 
 - **The timing `BACKLOG` row is gone** (closes #1587): `btclib-node`'s fix
   landed, the last tree owed.
+
+### Section 11 describes the site deployed by a workflow
+
+- **Every Dependabot ecosystem groups its updates, and a site served by
+  Pages is built and deployed by a workflow with no `CNAME` file**
+  (closes #1608): `btclib-org.github.io` made both true.
