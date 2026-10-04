@@ -10164,3 +10164,9 @@ nothing red follows from the copies disagreeing.
 
 - **The timing `BACKLOG` row keeps only `btclib-node`** (issue #1587):
   `bitcoin-node-tests`'s fix landed, and its cell was strict XPASS.
+
+### The Claude review names its model
+
+- **Both jobs of `reusable-claude-review.yml` pass `--model
+  claude-opus-5-5`** (closes #1607): the action's default ran the review
+  on Sonnet, as btclib-node's run `37205119980` logged.

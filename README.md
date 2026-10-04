@@ -2823,6 +2823,10 @@ It answers `["true","all"]`. An undefined `vars.X` is the empty string,
 so the variable's absence is the off state. The switch is the
 organization's, at `visibility=all`, so that no tree can be forgotten.
 
+**Both jobs name an Opus model with `--model` in `claude_args`**, rather
+than taking the action's default, because the review judges claims about
+code. The workflow holds the id.
+
 **A pull request that adds or edits `claude-review.yml` gets no ack**
 until the change is on `main`, for the reason the workflow's own header
 gives. It lands on its gates and a description saying so, and carries
