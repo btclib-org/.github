@@ -10147,3 +10147,9 @@ nothing red follows from the copies disagreeing.
 - **`BACKLOG` rows for the merge driver and the issue-form type keep only
   the trees still red** (issue #1582) (issue #1584): `bitcoin-core-rpc` and
   `btclib-node`; eleven others' ports had landed, 22 strict XPASS.
+
+### A test that bounds time bounds a ratio
+
+- **Section 7 bounds a measured duration by a reference timed alongside it**
+  (issue #1587), seconds only for a timeout named in the code.
+  `tests/timing_test.py` refuses `clock() - start` compared with a literal.

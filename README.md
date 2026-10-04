@@ -1385,6 +1385,19 @@ run wherever the capability is granted. Leaving the call bare is the
 rejected alternative, and what it costs is a red suite on the one
 machine that cannot run the case.
 
+### A test that bounds time bounds a ratio
+
+A measured duration is bounded by a reference timed in the same process,
+each the best of several runs, with the bound well above the ratio the
+code passes at and well below the ratio a regression gives. A bound in
+seconds is the rejected alternative: the same code runs many times slower
+on one runner than on another. Seconds are asserted only where the bound
+is a timeout the code under test is given, and then by the name it is
+given under. `tests/timing_test.py` refuses `clock() - start`, or a
+name or function holding it, compared with a literal number. A pull
+request adding a timing test dispatches `os-macos.yml` on its branch
+where the tree has one, for its `macos-26-intel` runner.
+
 ### Integration tests
 
 `tests/integration/` is whatever needs something the repository does not
