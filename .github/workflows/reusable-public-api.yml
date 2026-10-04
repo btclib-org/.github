@@ -18,8 +18,8 @@ name: reusable-public-api
 # A finding is refused only where the release's own section of
 # RELEASE_NOTES.md does not name its object, so the job is red on a
 # break nobody wrote down and green on one the notes list. The section
-# is the tag's on a release and the first one under the file's title on a
-# rehearsal, which is the one open for the release to come; the script
+# is the tag's on a release and, on a rehearsal, the one for the version
+# in pyproject.toml, else the first under the file's title; the script
 # says how a name is read.
 #
 # -s . -s src is not an input: every tree with a release.yml has moved
@@ -129,13 +129,14 @@ jobs:
       # tests/interpreters_test.py reads the two against each other.
       # No base ref and no tag on a rehearsal: workflow_dispatch has no
       # tag to check a public surface at, so the comparison falls back to
-      # griffe's own default, the current code, and the notes' first
-      # section. griffe prints its findings on standard error, and
-      # oneline is the format that puts the object and the file on one
-      # line for the script to read. --quiet keeps uv's own progress
-      # lines out of that file, the script refusing a line it cannot
-      # read. The exit code is 1 with findings, so any other non-zero
-      # code is griffe failing rather than finding
+      # griffe's own default, the current code, and the notes' section
+      # for pyproject.toml's version, else the first. griffe prints its
+      # findings on standard error, and oneline is the format that puts
+      # the object and the file on one line for the script to read.
+      # --quiet keeps uv's own progress lines out of that file, the
+      # script refusing a line it cannot read. The exit code is 1 with
+      # findings, so any other non-zero code is griffe failing rather
+      # than finding
       - name: Check the public API against the previous release
         if: steps.previous.outputs.has-previous == 'true'
         env:

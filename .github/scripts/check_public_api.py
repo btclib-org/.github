@@ -7,9 +7,12 @@
 `griffe check -f oneline` prints one finding per line,
 `path:line: object: explanation`, on standard error. Each finding is
 reduced to a key and compared with the keys of the backticked spans of
-one section of the notes: the section of the tag being released, or the
-first one under the file's title where there is no tag, which is the
-section open for the release to come.
+one section of the notes: the section of the tag being released. Where
+there is no tag, a rehearsal, it is the section named by the `version` of
+the `pyproject.toml` beside the notes, else the first one under the
+file's title. The release
+pull request opens the next section above the retitled one, so the first
+section is the release's own only before that pull request lands.
 
 A finding of a module, printed `<module>`, has the module's dotted path
 as its key, taken from the path griffe printed. Any other finding has
@@ -41,6 +44,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import tomllib
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
@@ -124,6 +128,21 @@ def section(notes: str, tag: str | None) -> str | None:
     return "\n".join(body)
 
 
+def rehearsal_tag(notes: Path) -> str | None:
+    """Return `v<version>` of the `pyproject.toml` beside the notes, or None.
+
+    A missing or malformed file, or one with no version, gives None.
+    """
+    try:
+        with (notes.parent / "pyproject.toml").open("rb") as stream:
+            version = tomllib.load(stream)["project"]["version"]
+    except OSError, UnicodeDecodeError, tomllib.TOMLDecodeError, KeyError, TypeError:
+        return None
+    if not isinstance(version, str):
+        return None
+    return "v" + version
+
+
 def _spans(text: str) -> list[str]:
     """Return the backticked spans of a section, each on one line.
 
@@ -181,7 +200,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     with Path(args.notes).open(encoding="utf-8") as stream:
-        body = section(stream.read(), args.tag)
+        text = stream.read()
+    tag = args.tag or rehearsal_tag(Path(args.notes))
+    body = section(text, tag)
+    if body is None and not args.tag:
+        body = section(text, None)
     if body is None:
         where = f"for {args.tag}" if args.tag else "under the title"
         print(f"::error::{args.notes} has no section {where}")

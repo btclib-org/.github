@@ -10129,3 +10129,9 @@ nothing red follows from the copies disagreeing.
 - **`CONTRIBUTING.md`'s emergency paragraph named only the approval**
   (issue #1597): with `enforce_admins` off, `--admin` skips the required
   checks too, and `REVIEWING.md`'s "hold the merge" excepts it.
+
+### A rehearsal after the release pull request reads the release's section
+
+- **`public-api` on a dispatch reads the section of `pyproject.toml`'s
+  version** (closes #1586), else the first. The release pull request opens
+  the next section above it, so btclib's rehearsal was red, its tag run green.
