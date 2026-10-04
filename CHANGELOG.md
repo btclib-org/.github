@@ -10176,3 +10176,14 @@ nothing red follows from the copies disagreeing.
 - **The fix stays in the advisory's private fork until the release**
   (issue #1588), then reaches `main` as an ordinary pull request: the
   advisory's own merge runs no check.
+
+### `btclib-node` leaves the merge-driver and issue-form rows
+
+- **The merge-driver and issue-form `BACKLOG` rows are gone, and
+  `EXPECTED_DRIFT` is empty** (closes #1582) (closes #1584) (closes #1597):
+  `btclib-node`'s port landed, the last tree owed.
+
+### The answers are saved after `btclib-node`'s release
+
+- **`bestpractices/` holds the answers bestpractices.dev gives after
+  `btclib-node`'s release** (issue #1589).

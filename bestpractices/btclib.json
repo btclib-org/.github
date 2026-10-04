@@ -656,8 +656,8 @@
     "status": "N/A"
   },
   "small_tasks": {
-    "justification": "No open issue carries the label \"good first issue\" today (2026-10-03). Small, self-contained issues get the label when they turn up: https://github.com/btclib-org/.github/issues/1541",
-    "status": "Unmet"
+    "justification": "Small tasks for new contributors carry the label \"good first issue\", which CONTRIBUTING.md sets aside for a first contribution; 25 such issues were open at some time between 2025-10-04 and 2026-10-04. The organization's standard requires one in every 12 months (README section 10). https://github.com/btclib-org/btclib/issues?q=label%3A%22good+first+issue%22",
+    "status": "Met"
   },
   "static_analysis": {
     "justification": "mypy and ruff",
