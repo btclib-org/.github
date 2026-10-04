@@ -273,3 +273,25 @@ def test_a_file_the_branch_did_not_touch_is_left_alone(
     assert run(script, old_base, old_tip) == 0
     assert (repo / name).read_text(encoding="utf-8") == "kept\n"
     assert f"{name}: the branch did not change it" in capsys.readouterr().out
+
+
+def test_a_revision_that_does_not_resolve_is_refused(
+    script: ModuleType, repo: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A mistyped revision reads as no file, so it is refused up front."""
+    head = commit(repo, BASE)
+
+    assert run(script, "deadbeef", head) == REFUSED
+    assert "`deadbeef` does not name a commit" in capsys.readouterr().out
+    assert run(script, head, head, "--base", "cafebabe") == REFUSED
+    assert "`cafebabe` does not name a commit" in capsys.readouterr().out
+
+
+def test_a_git_failure_is_refused(
+    script: ModuleType, repo: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """With no `origin/main`, the default base fails; that is not a write."""
+    head = commit(repo, BASE)
+
+    assert script.main([head, head]) == REFUSED
+    assert "merge-base" in capsys.readouterr().out
