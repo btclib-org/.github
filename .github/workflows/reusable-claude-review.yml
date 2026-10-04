@@ -389,7 +389,12 @@ jobs:
           # and `gh pr review` is not allowed as a command of its own.
           # `gh issue view` only reads, with the token's `issues: read`,
           # and is how a review reads an issue the pull request cites
+          #
+          # the model is named: the action's default ran the review on
+          # Sonnet, and the review judges claims about code. The flag
+          # comes before the tool list, as the action's usage docs put it
           claude_args: >-
+            --model claude-opus-5-5
             --allowedTools
             "mcp__github_inline_comment__create_inline_comment"
             "Bash(gh pr view:*)"
@@ -651,6 +656,9 @@ jobs:
           # edit tools change a runner nothing is pushed from. Denied
           # rather than left out of an allow list, which cannot remove
           # what tag mode adds
+          #
+          # the model is named for the reason the review job gives
           claude_args: >-
+            --model claude-opus-5-5
             --disallowedTools
             "Bash,Edit,MultiEdit,Write,NotebookEdit,mcp__github_file_ops__commit_files,mcp__github_file_ops__delete_files"
