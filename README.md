@@ -3320,6 +3320,37 @@ A label means what its description says. Who applies and removes it:
   entry for one component exempts the same advisory in another. The uv version
   is pinned in `reusable-audit.yml` alone, `uv audit` being a preview feature,
   and stays at or above every tree's floor.
+- **A security advisory is worked in this order**, so that it reaches the CVE
+  list, the GitHub Advisory Database and OSV with what a user needs to act on:
+
+    1. When the report is accepted as a draft: the severity with its CVSS
+       vector, the CWE, the reporter's credit, and a CVE requested from GitHub,
+       a numbering authority. The request keeps the draft private. GitHub
+       reserves a CVE and publishes it with the advisory.
+    1. The fix is written and reviewed in the advisory's temporary private
+       fork, and stays there until the release is ready: an ordinary pull
+       request is public from its opening. At release it reaches `main` as an
+       ordinary pull request, from a branch pushed only then, under every rule
+       of section 11. The approver reads the fix in the fork beforehand, which
+       shortens the time it is public. The advisory's own merge button is not
+       used: GitHub runs no check on it and enforces no branch protection. A
+       fix on `main` is public, so the release and the publication follow in
+       the same sitting.
+    1. The advisory is published with the release. Its patched version is that
+       release, without which Dependabot alerts with no version to upgrade to,
+       and its text names the release and the commit that fixed it rather than
+       the fix the report proposed. Publishing deletes the private fork.
+    1. A week after publication, the advisory has its CVE and is in the
+       Advisory Database, whose reviewed entries OSV imports: GitHub states 72
+       hours for each. Until then neither Dependabot nor the audit above warns
+       anybody.
+
+  `tests/advisories_test.py` reads the published advisories: the vector, the
+  CWE and the patched version, and past the week the CVE and the database
+  entry. It fails where it reads no published advisory in the whole
+  organization. It reads no draft, which the API shows only to the
+  repository's administrators and security managers and to the advisory's
+  collaborators.
 - **What is published is inspected first** — `twine check --strict`,
   `check-wheel-contents` and `pyroma --min 10` on the files the release will
   publish; then the wheel is installed from an empty directory and smoke-tested,
