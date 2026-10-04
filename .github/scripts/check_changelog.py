@@ -3,22 +3,22 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Refuse an open `CHANGELOG.md` section a rebase conflict can break.
+"""Refuse a rebase-broken `CHANGELOG.md`, or an entry under an old release.
 
 Two branches appending an entry at the same anchor conflict there.
 Deleting the conflict's markers keeps both sides and, at git's default
 conflict style, writes once the lines both blocks start or end with. The
 `merge=union` driver, which section 9 of README.md rejects, writes the
 same; btclib-org/.github#21 and btclib-org/.github#760 measured what that
-costs under it. This
-is the gate, run once over the file's own open section -- the first
-`## ` heading's, up to the line before the second, or to the end
-of the file where there is no second, section 9 of README.md giving the
-boundary the same way. A `## ` or `### ` line inside a fenced code block
-is a markdown example rather than a heading of the file's own, and is
-blanked out before either is matched (btclib-org/.github#1372) --
-character for character, unlike `_CODE_SPAN` below, which removes what
-it strips outright rather than preserving its length.
+costs under it. This is the gate, and every check but the last runs
+once over the file's own open section -- the first `## ` heading's, up
+to the line before the second, or to the end of the file where there is
+no second, section 9 of README.md giving the boundary the same way. A
+`## ` or `### ` line inside a fenced code block is a markdown example
+rather than a heading of the file's own, and is blanked out before
+either is matched (btclib-org/.github#1372) -- character for character,
+unlike `_CODE_SPAN` below, which removes what it strips outright rather
+than preserving its length.
 
 Three checks, all of them shapes a conflict resolved by deleting its
 markers produces -- a fourth, below them, that is section 9's own bound
@@ -79,12 +79,12 @@ issue the other already covered -- needs each number resolved and
 compared through the tracker's own state, `closingIssuesReferences` or
 an issue's `NOT_PLANNED` closure. That is one API call per citation, and
 a `pre-commit` hook that reaches the network is the wrong place to put
-one; btclib-org/.github#21's own ruling says so. Nor does this compare a
-section against its branch's own base to catch a misplacement or a
-revived, previously-refuted paragraph. That comparison splices the entry
-as it stood before the rebase into the file at the new base and reads
-the result against the rebased tip byte for byte; those two inputs are
-the rebase's own, and a `pre-commit` hook has one file at one revision.
+one; btclib-org/.github#21's own ruling says so. Nor does this catch a
+block misplaced within the open section, or a revived, previously-refuted
+paragraph. That comparison splices the entry as it stood before the
+rebase into the file at the new base and reads the result against the
+rebased tip byte for byte; those two inputs are the rebase's own, and a
+`pre-commit` hook sees neither.
 Nor, for the reason the second check gives, does it see two entries that
 merely *advance* the same issue without either closing it -- a tree that
 never releases lives with that shape by design, and refusing it would
@@ -168,8 +168,30 @@ MD018 does not read it as a heading and this does not refuse it.
 A tree with no release carries one open section for the whole file, this
 repository's own `CHANGELOG.md` among them; a tree that releases keeps
 everything from the first `## ` heading to the line before the second as
-open, and does not ask this script about anything a release has already
-closed over.
+open, and the checks above read nothing a release has already closed
+over.
+
+The seventh check reads the releases older than the newest, everything
+from the third `## ` heading on. It refuses a `### ` heading there that
+the file at the merge base of `HEAD` and `origin/main` does not hold
+anywhere (btclib-org/.github#1614). The base is that merge base because
+the gate runs `pre-commit run --all-files`, which sets no from and to
+refs, and `HEAD` already holds an entry the branch committed.
+
+The newest release is left out because landed commits add to it: the
+release commits btclib-org/btclib@7f63ef603 and
+btclib-org/bitcoin-core-rpc@28a1af14f, and btclib-org/btclib@cf4e19c44,
+a security advisory's fix. So in a tree with one release, an entry added
+under it passes. A bullet added under a heading the base already holds
+is not seen either.
+
+An `origin/main` behind the branch's own base gives an older merge base,
+and an entry released in between is then refused as new; an
+`origin/main` that holds the branch's base clears it.
+
+Where git finds no merge base, or the base holds no `CHANGELOG.md`,
+nothing is compared and the output says so. The manifest sets `verbose:
+true`, so a run that passes shows that output too.
 
     check_changelog.py --grandfathered N
 """
@@ -178,6 +200,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -191,6 +214,7 @@ if TYPE_CHECKING:
 # hook repository's own clone in the cache rather than the tree the
 # hook was invoked over
 _CHANGELOG = Path("CHANGELOG.md")
+_MAIN = "origin/main"
 
 _RELEASE_HEADING = re.compile(r"^## .*$", re.MULTILINE)
 _ENTRY_HEADING = re.compile(r"^### (?P<title>.*)$", re.MULTILINE)
@@ -548,34 +572,98 @@ def wrapped_citations(text: str, section: str, base: int) -> list[str]:
     return problems
 
 
-def problems(text: str, grandfathered: int = 0) -> list[str]:
-    """Return every way the open section fails the six checks.
+def released_headings(text: str, base: tuple[str, str]) -> list[str]:
+    """Report a `### ` heading under an older release that the base lacks.
+
+    An older release is any but the newest, which the second `## `
+    heading opens.
+
+    :param text: the whole file.
+    :param base: the merge base's sha, and the whole file there.
+    :returns: one message per heading new to an older release.
+    """
+    sha, before = base
+    known = {
+        heading.group("title").strip()
+        for heading in _ENTRY_HEADING.finditer(_blank_fenced_blocks(before))
+    }
+    blanked = _blank_fenced_blocks(text)
+    releases = list(_RELEASE_HEADING.finditer(blanked))
+    older = releases[2:3]
+    start = older[0].start() if older else len(text)
+    problems = []
+    for heading in _ENTRY_HEADING.finditer(blanked, start):
+        title = heading.group("title").strip()
+        if title not in known:
+            line = line_at(text, heading.start())
+            problems.append(
+                f"line {line}: heading {title!r} is under a release older than"
+                f" the newest and absent from {_CHANGELOG.name} at {sha}, the"
+                f" merge base with {_MAIN} -- a new entry goes at the end of"
+                " the open section (section 9)",
+            )
+    return problems
+
+
+def at_merge_base() -> tuple[str, str] | None:
+    """Return the merge base of `HEAD` and `_MAIN`, and `CHANGELOG.md` there.
+
+    :returns: the sha and the file, or None where git finds no merge
+        base or the base holds no such file.
+    """
+
+    def git(*args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(  # noqa: S603
+            ["git", "-C", str(_CHANGELOG.parent), *args],  # noqa: S607
+            capture_output=True,
+            encoding="utf-8",
+            check=False,
+        )
+
+    base = git("merge-base", "HEAD", _MAIN)
+    if base.returncode:
+        return None
+    sha = base.stdout.strip()
+    shown = git("show", f"{sha}:./{_CHANGELOG.name}")
+    return None if shown.returncode else (sha, shown.stdout)
+
+
+def problems(
+    text: str,
+    grandfathered: int = 0,
+    base: tuple[str, str] | None = None,
+) -> list[str]:
+    """Return every way the file fails the checks.
 
     :param text: the whole file.
     :param grandfathered: what `misplaced_entries()` measures against.
+    :param base: the merge base's sha and the whole file there, or None
+        where there is none to compare against.
     :returns: one message per finding, in the order the checks run.
     """
-    section, base = open_section(text)
+    section, start = open_section(text)
     return [
-        *repeated_headings(text, section, base),
-        *duplicate_closes(text, section, base),
-        *unblanked_headings(text, section, base),
-        *misplaced_entries(text, section, base, grandfathered),
-        *long_bodies(text, section, base),
-        *wrapped_citations(text, section, base),
+        *repeated_headings(text, section, start),
+        *duplicate_closes(text, section, start),
+        *unblanked_headings(text, section, start),
+        *misplaced_entries(text, section, start, grandfathered),
+        *long_bodies(text, section, start),
+        *wrapped_citations(text, section, start),
+        *(released_headings(text, base) if base is not None else []),
     ]
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Report every problem the open section of `CHANGELOG.md` has.
+    """Report every problem `CHANGELOG.md` has.
 
     :param argv: the arguments, `sys.argv[1:]` where none is given.
-    :returns: 1 where a problem was found, 0 where the section is clean.
+    :returns: 1 where a problem was found, 0 where the file is clean.
     """
     parser = argparse.ArgumentParser(
         description="Refuse an open CHANGELOG.md section a"
         " rebase conflict can break, or a citation number"
-        " markdownlint-cli2's own fixer mangles.",
+        " markdownlint-cli2's own fixer mangles, or a heading new to a"
+        " release older than the newest.",
     )
     parser.add_argument(
         "--grandfathered",
@@ -589,9 +677,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
     )
     arguments = parser.parse_args(argv)
+    base = at_merge_base()
     found = problems(
         _CHANGELOG.read_text(encoding="utf-8"),
         arguments.grandfathered,
+        base,
     )
     for problem in found:
         print(f"{_CHANGELOG}: {problem}")
@@ -602,6 +692,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             " line, no entry lands above the rule out of place, no entry"
             " runs past three lines, and no citation number opens a line.",
         )
+    if base is None:
+        print(
+            f"{_CHANGELOG}: no released section compared: no merge base with"
+            f" {_MAIN}, or no such file there.",
+        )
+    elif not found:
+        print(f"{_CHANGELOG}: no release older than the newest gains a heading.")
     return 1 if found else 0
 
 

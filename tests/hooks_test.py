@@ -126,6 +126,7 @@ STATED = {
     "language": "script",
     "pass_filenames": False,
     "always_run": True,
+    "verbose": True,
 }
 """What section 4's `check-changelog` bullet says that hook is, by key.
 
