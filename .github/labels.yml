@@ -1,0 +1,53 @@
+---
+# The labels the organization's repositories carry, and what each
+# means. Section 11 of README.md says who applies and removes each
+# one, and tests/labels_test.py reads every tree's labels against this
+# file.
+#
+# A label with `repositories:` is owed by those trees only, and is
+# refused anywhere else.
+labels:
+  - name: decision
+    color: "5319e7"
+    description: A decision the maintainer still has to take
+  - name: blocked
+    color: "d93f0b"
+    description: Waits for an event or a person the issue names
+  - name: on-hold
+    color: "c5def5"
+    description: Paused by someone's decision; resumes when someone decides to
+  - name: upstream-dependent
+    color: "d4c5f9"
+    description: Waits on an upstream project
+  - name: upstream-report
+    color: "bfd4f2"
+    description: A report owed to an upstream project
+  - name: plan
+    color: "fbca04"
+    description: A plan of many actions, its parts linked as sub-issues
+  - name: good first issue
+    color: "7057ff"
+    description: Small and self-contained, left to outside contributors
+  - name: security
+    color: "b60205"
+    description: Security-relevant finding
+  - name: alignment
+    color: "0e8a16"
+    description: A repository has drifted from the standard
+  - name: tf2
+    color: "1d76db"
+    description: >-
+      Core's python test framework reimplemented on btclib: btclib gets
+      the primitives, tf2 only the tests
+    repositories: [btclib, bitcoin-node-tests]
+
+# Labels the test passes over, neither owed nor refused.
+#
+# Dependabot creates these itself, one per ecosystem it updates.
+dependabot:
+  - dependencies
+  - docker
+  - github_actions
+  - python
+  - python:uv
+  - submodules
