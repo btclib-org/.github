@@ -10187,3 +10187,8 @@ nothing red follows from the copies disagreeing.
 
 - **`bestpractices/` holds the answers bestpractices.dev gives after
   `btclib-node`'s release** (issue #1589).
+
+### `btclib-node` leaves the timing row
+
+- **The timing `BACKLOG` row is gone** (closes #1587): `btclib-node`'s fix
+  landed, the last tree owed.
