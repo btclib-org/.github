@@ -10135,3 +10135,9 @@ nothing red follows from the copies disagreeing.
 - **`public-api` on a dispatch reads the section of `pyproject.toml`'s
   version** (closes #1586), else the first. The release pull request opens
   the next section above it, so btclib's rehearsal was red, its tag run green.
+
+### `reusable-codeql.yml` takes the query suite
+
+- **A `queries` input selects the CodeQL query suite** (issue #1505): empty
+  runs the default code-scanning suite, so a caller passing nothing is
+  unchanged, and `security-extended` is for btclib's one-month trial.

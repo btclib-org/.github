@@ -6,9 +6,11 @@ name: reusable-codeql
 # concurrency group and the aggregate job stay in the caller, whose run
 # these jobs join.
 #
-# No inputs: the trees carrying codeql.yml ask the same languages, the
-# same build mode and the same category, and an input for a difference
-# none of them has is a copy in disguise (btclib-org/.github#35).
+# One input, `queries`, the query suite, empty by default. The trees
+# carrying codeql.yml ask the same languages, the same build mode and the
+# same category, and an input for a difference none of them has is a copy
+# in disguise (btclib-org/.github#35); the suite is the one difference
+# that is wanted, for the trial of btclib-org/.github#1505.
 #
 # The calling job declares the token the analysis needs. README.md
 # section 11 has the mechanism: the bound refuses rather than trims, so
@@ -23,6 +25,14 @@ name: reusable-codeql
 
 on:
   workflow_call:
+    inputs:
+      queries:
+        description: >-
+          The CodeQL query suite, as the init action's `queries` input
+          takes it, `security-extended` for one. Empty runs the default
+          code-scanning suite.
+        type: string
+        default: ""
 
 # least privilege for the GITHUB_TOKEN: everything running in a job
 # (actions, dependencies, the CodeQL bundle itself) can read the token, so
@@ -91,11 +101,10 @@ jobs:
           # would have to change first if a compiled language ever joined
           # the matrix
           build-mode: none
-          # no `queries`, no `packs` and no `config`, which is not an
-          # omission: unnamed, the analysis is the default code-scanning
-          # suite, and anything written here would widen it rather than
-          # pin it -- `queries: security-extended` is the widening, and
-          # it is a decision separate from where the file lives
+          # no `packs` and no `config`: anything written there would
+          # widen the suite. `queries` is the caller's, empty for the
+          # default code-scanning suite
+          queries: ${{ inputs.queries }}
       - name: Analyze
         uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
         with:
