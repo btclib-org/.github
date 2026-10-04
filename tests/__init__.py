@@ -345,7 +345,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         1587,
         "test_a_test_bounds_time_by_a_ratio_or_a_named_timeout",
-        ("bitcoin-node-tests", "btclib-node"),
+        ("btclib-node",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.

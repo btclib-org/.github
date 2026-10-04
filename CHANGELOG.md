@@ -10159,3 +10159,8 @@ nothing red follows from the copies disagreeing.
 - **The merge-driver and issue-form `BACKLOG` rows keep only
   `btclib-node`** (issue #1582) (issue #1584): `bitcoin-core-rpc`'s port
   landed, and its cells were strict XPASS.
+
+### `bitcoin-node-tests` leaves the timing row
+
+- **The timing `BACKLOG` row keeps only `btclib-node`** (issue #1587):
+  `bitcoin-node-tests`'s fix landed, and its cell was strict XPASS.
