@@ -8,10 +8,7 @@ Section 7's changelog bullet, and section 9's *Measure, don't assert* in
 this repository's own prose: a number nothing derives is right or wrong
 invisibly, a stated total is a line every open branch has to edit, and
 two branches moving it to the same wrong number merge without a
-conflict. `.gitattributes` marks both files `merge=union`, which is the
-half no local command reports: under that driver the two branches do not
-conflict at all, and neither does a rebase that carries an edit to a
-count paragraph back over the file.
+conflict.
 
 Section 11 says a count is not reachable by a pattern, a number being a
 defect for what it counts rather than for the string it is, and that is
@@ -209,7 +206,7 @@ def counts(text: str) -> list[str]:
 
 @pytest.mark.parametrize("path", FILES, ids=lambda path: path.name)
 def test_the_file_states_no_count_of_itself(path: Path) -> None:
-    """Written by hand, or put back by a union merge with nothing to decide.
+    """The file states no count of itself, however the count got there.
 
     :param path: the history file to read.
     """
@@ -217,8 +214,7 @@ def test_the_file_states_no_count_of_itself(path: Path) -> None:
     assert not stated, (
         f"{path.name} states a count of itself: {stated}."
         " Take it out rather than correcting it -- a reader who wants"
-        " the number counts the entries, and under `merge=union` such a"
-        " paragraph comes back in silence."
+        " the number counts the entries."
     )
 
 

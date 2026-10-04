@@ -145,11 +145,10 @@ repos:
         args: [--write-changes, --force-exclude]
         types: [text]
         stages: [pre-commit, pre-merge-commit, pre-push, manual]
-  # `merge=union` stays on `CHANGELOG.md` (btclib-org/.github#21), and
-  # this is the gate its price bought back -- `.github/scripts/
-  # check_changelog.py`'s own docstring carries what its checks catch,
-  # what they still cannot, and the alternatives declined
-  # (btclib-org/.github#305, btclib-org/.github#516). It runs ahead of
+  # The gate on what a rebase conflict in `CHANGELOG.md` can leave --
+  # `.github/scripts/check_changelog.py`'s own docstring carries what
+  # its checks catch, what they still cannot, and the alternatives
+  # declined (btclib-org/.github#305, btclib-org/.github#516). It runs ahead of
   # markdownlint-cli2 below on purpose: that hook's `--fix` repairs the
   # very seam the third check exists to name, so a hook reading the
   # file after it would find nothing left to report.
@@ -162,10 +161,10 @@ repos:
   # and `--grandfathered` is what this repository's open section held
   # above the rule heading when the fifth check reached it.
   #
-  # `always_run: true`, and no `files:`: the rebase that eats the seam
-  # stages nothing, so a hook keyed on the diff is unreachable after the
-  # event the blank-line check exists to name. Section 4 carries the
-  # rest.
+  # `always_run: true`, and no `files:`: a rebase commits the resolved
+  # file and leaves nothing staged, so a hook keyed on the diff is
+  # unreachable after the event the blank-line check exists to name.
+  # Section 4 carries the rest.
   - repo: local
     hooks:
       - id: check-changelog

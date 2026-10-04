@@ -570,10 +570,9 @@ done
 tier binds, filed here.
 
 Dotfiles, each owed by the tiers that owe the section reading it:
-`.pre-commit-config.yaml`, `.python-version`, `.gitattributes`,
-`.gitignore`, `.markdownlint.jsonc`, `.taplo.toml`, `.yamllint.yaml`,
-`.readthedocs.yaml`, `.secrets.baseline`, and `.vscode/` and `.claude/`,
-both tracked.
+`.pre-commit-config.yaml`, `.python-version`, `.gitignore`,
+`.markdownlint.jsonc`, `.taplo.toml`, `.yamllint.yaml`, `.readthedocs.yaml`,
+`.secrets.baseline`, and `.vscode/` and `.claude/`, both tracked.
 
 ### Directories
 
@@ -1039,15 +1038,14 @@ pre-commit.ci does not have — the lint workflow covers it. No
   declares `language: script`, `pass_filenames: false` and `always_run:
   true`, and the gate orders it ahead of `markdownlint-cli2` so it reads
   the file before that hook's `--fix` repairs the seam the blank-line
-  check names. `merge=union` stays on that file
-  (btclib-org/.github#21's ruling) and this is the gate its price bought
-  back: a repeated `###` heading, two entries closing the same issue, a
-  heading with no blank line above it (btclib-org/.github#760), an entry
-  landed above the length rule's own entry out of section 9's order, an
-  entry past that rule's three-line bound, and a citation number wrapped
-  to a line's start, which markdownlint-cli2's own `--fix` would
-  otherwise mangle into a heading (btclib-org/.github#1398), are all
-  refused.
+  check names. It refuses what deleting a rebase conflict's markers
+  writes in that file: a repeated `###` heading, two entries closing the
+  same issue, and a heading with no blank line above it
+  (btclib-org/.github#760). It also refuses an entry landed above the
+  length rule's own entry out of section 9's order, an entry past that
+  rule's three-line bound, and a citation number wrapped to a line's
+  start, which markdownlint-cli2's own `--fix` would otherwise mangle
+  into a heading (btclib-org/.github#1398).
 
     **`btclib-org/.github` itself keeps the hook `local`**, a pin being
     a revision other than the working tree: a tree pinning itself would
@@ -1733,12 +1731,21 @@ without adding to it is deleted.
   file where nothing has been released. The changelog takes what a user
   would notice; the release notes take what a user has to act on;
   neither restates the other.
-- **Both files are `merge=union` in `.gitattributes`.** Two branches
-  appending at one anchor rebase without a conflict, the driver keeping
-  both sides in landing order and sometimes eating the blank line
-  between them. `check-changelog` names the seam, a repeated heading and
-  a double close, and not the position, which a person reads off a
-  command `CONTRIBUTING.md` has.
+- **Neither file has a merge driver.** Two branches appending at one
+  anchor conflict there, so a rebase over a landing that wrote an entry
+  stops on the file. The resolution is the file rebuilt: the new base's
+  copy with the branch's own block at the end of its open section, which
+  this repository's `.github/scripts/rebuild_union_files.py` writes
+  (btclib-org/.github#1583). Deleting the markers is not one: at git's
+  default conflict style the lines both blocks start or end with sit
+  outside them, so one entry loses its blank line, its heading or its
+  citation. `check-changelog` names a heading with no blank line
+  above it, a repeated heading and a double close, and not the position,
+  which a person reads off a command `CONTRIBUTING.md` has.
+- **`merge=union` is the rejected alternative** (btclib-org/.github#1582).
+  The driver writes what deleting the markers writes at that style, and
+  the rebase exits 0 without the rebuild. GitHub does not apply the
+  driver, and reports the conflict either way.
 - **Nothing already written is rewritten.** An entry speaks of its own
   day, and a count in it that has since moved stays. An entry in the
   open section is a live claim, though: a later entry that bears on it
@@ -1748,9 +1755,7 @@ without adding to it is deleted.
   index in `CHANGELOG.md`'s preamble linking it. Past a size ceiling
   GitHub's contents API answers a file with an empty `content` at HTTP
   200, and a file per release is what keeps each of them under it.
-  Nothing already written in an archived file is rewritten either, and
-  it takes no `merge=union` driver, nothing appending to a release its
-  own tag has sealed.
+  Nothing already written in an archived file is rewritten either.
 
 ## 10. Workflows
 
@@ -3565,13 +3570,6 @@ comparison stops:
   up to the same heading, a review that means one thing in one tree and
   another in the next being no standard. Under it is what a review of
   that tree checks beyond the generic.
-- `.gitattributes` — owed by every repository: the two `merge=union`
-  entries, the reasoning beside them, and section 9 as where the rule is
-  stated. The attributes a tree needs for files only it carries —
-  `portanode`'s binaries and line endings — go under the same heading,
-  which is a comment to git and the marker to the comparison, so that a
-  rule for one repository's paths is not a copy for every other to drift
-  from.
 - `CLAUDE.md` — owed by every repository, and compared byte for byte in each
   from `## The primary checkout is the maintainer's` to the next heading at the
   same level. The section is what every session reads before its first edit, and
@@ -3649,6 +3647,11 @@ compiles an extension ignores the object files and the shared library it links.
 The rejected alternative is one file copied into every tree, holding the union
 of what any of them writes: it grows with every repository added, and a reader
 of one tree cannot tell from it which entries that tree needs.
+
+`.gitattributes` is decided per repository too: a tree keeps one where its own
+paths need attributes, such as `portanode`'s binaries and line endings. Section
+9 gives `CHANGELOG.md` and `RELEASE_NOTES.md` no merge driver, which
+`tests/merge_driver_test.py` of this repository asks of every tree.
 
 `.github/scripts/check_vendored_vectors.py` is per repository by subject, owed
 where `.github/workflows/vendored-vectors.yml`, and deliberately outside the
@@ -3739,7 +3742,7 @@ grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'
 grep -nE -B1 'uses: [^ ]+@[0-9a-f]{40}[^#]*$' .github/workflows/*.yml
 grep -L '^permissions:' .github/workflows/*.yml
 grep -rn -- '--frozen' .github/workflows/
-grep -rn 'merge=union' .gitattributes
+git -c core.attributesFile=/dev/null check-attr merge -- CHANGELOG.md RELEASE_NOTES.md
 git ls-files '*package-content-policy*' '*_contents*'
 sed -nE '/^\[build-system\]/,/^\[/{/^\[/!p;}' pyproject.toml
 grep -n 'check-sdist' .pre-commit-config.yaml
@@ -3763,6 +3766,8 @@ cat tests/README.md
 - A pin with no trailing tag comment is a finding unless the line printed above
   it carries the tag, which is what section 10 asks of a pin a trailing comment
   would take past the width.
+- `git check-attr` answers `merge: unspecified` for both files; any other
+  value is section 9's finding.
 - A `build-backend` other than `uv_build` in a project compiling nothing is
   section 3's finding, and decides which table declares inclusion. Section 12
   owes a `package` naming a one-package wheel, else the ignored codes and an
@@ -4179,8 +4184,7 @@ No tool checks them.
    licence, keywords matching the topics, urls, dependency groups, and
    the tool tables of sections 5, 6, 7 and 8.
 1. Copy the files section 14 names for the tools whose configuration is
-   not in `pyproject.toml`, and `.gitattributes` (with the two
-   `merge=union` entries). `.python-version` and `.gitignore` are
+   not in `pyproject.toml`. `.python-version` and `.gitignore` are
    written rather than copied, section 14 deciding both per repository.
 1. `.pre-commit-config.yaml`, including the mypy hook section 4's
    criterion chooses and the `pinned-rev` guard; `uv run pre-commit run
@@ -4294,9 +4298,8 @@ runs over the whole tree rather than over what its own step added.
    workflow reduced to running it. Delete any second list of the same
    tools from the workflows. The shared configuration its hooks read
    lands with them — the files section 14 names for the tools whose
-   configuration is not in `pyproject.toml` — as does `.gitattributes`,
-   whose `merge=union` entries wait for the two history files below.
-   Then run it `--all-files`, over everything the steps above added.
+   configuration is not in `pyproject.toml`. Then run it `--all-files`,
+   over everything the steps above added.
    `.vscode/` lands with it, section 13's recommendations being the
    gate's own tools and `importStrategy` following the mypy hook the
    step below writes.
