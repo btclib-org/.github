@@ -10209,3 +10209,8 @@ nothing red follows from the copies disagreeing.
 - **A `###` heading under a release older than the newest, absent from
   the file at the merge base with `origin/main`, is refused**
   (issue #1614); with no such base the hook compares nothing and says so.
+
+### The `CONTRIBUTING.md` and `REVIEWING.md` drift entries come out
+
+- **Every tree carries the shared half of both files** (closes #1614): the
+  copies agree and `EXPECTED_DRIFT` is empty.
