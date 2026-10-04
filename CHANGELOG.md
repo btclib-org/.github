@@ -10141,3 +10141,9 @@ nothing red follows from the copies disagreeing.
 - **A `queries` input selects the CodeQL query suite** (issue #1505): empty
   runs the default code-scanning suite, so a caller passing nothing is
   unchanged, and `security-extended` is for btclib's one-month trial.
+
+### The alignment suite stops excusing trees whose port has landed
+
+- **`BACKLOG` rows for the merge driver and the issue-form type keep only
+  the trees still red** (issue #1582) (issue #1584): `bitcoin-core-rpc` and
+  `btclib-node`; eleven others' ports had landed, 22 strict XPASS.
