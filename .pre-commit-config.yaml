@@ -53,7 +53,10 @@ repos:
       - id: check-case-conflict
       - id: fix-byte-order-marker
       - id: check-merge-conflict
+      # bestpractices/ holds bestpractices.dev's answers as the site has
+      # them, links included: fixed there, not here
       - id: check-vcs-permalinks
+        exclude: ^bestpractices/
       - id: detect-private-key
       - id: debug-statements
       # a documented module-level constant here carries a PEP 258
@@ -86,6 +89,15 @@ repos:
               |root_files|scope|security|surface|topics|verbatim
               |workflows)_test\.py)$
       - id: check-yaml
+      # `.vscode` is jsonc, which prettier below parses and formats
+      - id: check-json
+        exclude: ^\.vscode/
+      # the format `.github/scripts/bestpractices.py` writes: two spaces,
+      # sorted keys, UTF-8 left as it is
+      - id: pretty-format-json
+        name: pretty-format-json (in place fixes)
+        args: [--autofix, --no-ensure-ascii]
+        exclude: ^\.vscode/
       # the toml here is read by taplo every run, but a format is not a
       # parse: what taplo cannot read fails its own hook, and what it can
       # read it rewrites and passes -- a key or a table declared twice
@@ -109,6 +121,8 @@ repos:
       - id: codespell
         name: codespell (in place fixes)
         args: [--write-changes]
+        # bestpractices.dev's answers, as for check-vcs-permalinks above
+        exclude: ^bestpractices/
   # crate-ci/typos re-tags a moving `v1` alias onto the same commit
   # as each release, and `git describe --tags` breaks the tie between
   # two tags on one commit by creation date, which names the alias.
@@ -123,6 +137,8 @@ repos:
     hooks:
       - id: typos
         name: typos
+        # bestpractices.dev's answers, as for check-vcs-permalinks above
+        exclude: ^bestpractices/
         language: python
         additional_dependencies: [typos==1.49.0]
         entry: typos
@@ -264,8 +280,7 @@ repos:
         # knows, so a types_or entry for it fails the config outright.
         # `.vscode` joins `.markdownlint.jsonc` for the same reason: both
         # carry a comment, and this is what parses and formats them --
-        # no `check-json`/`pretty-format-json` reach `.vscode` here, this
-        # tree tracking no other json for either to have kept
+        # `check-json` and `pretty-format-json` above exclude `.vscode`
         files: ^(.*\.ya?ml|\.vscode/.*\.json|\.markdownlint\.jsonc)$
   # the toml here is configuration and nothing else: .taplo.toml, which
   # carries the formatting choices and the reasoning, and pyproject.toml.
