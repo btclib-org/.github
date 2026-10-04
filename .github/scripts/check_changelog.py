@@ -3,14 +3,16 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Refuse an open `CHANGELOG.md` section a `merge=union` rebase can break.
+"""Refuse an open `CHANGELOG.md` section a rebase conflict can break.
 
-`.gitattributes` gives `CHANGELOG.md` `merge=union` so that two branches
-appending an entry at the same anchor do not conflict; btclib-org/.github#21
-prices what that costs and rules that the driver stays and a gate is
-added, and btclib-org/.github#760 is the second way the driver pays for
-it. This is that gate, run once over the file's own open section -- the
-first `## ` heading's, up to the line before the second, or to the end
+Two branches appending an entry at the same anchor conflict there.
+Deleting the conflict's markers keeps both sides and, at git's default
+conflict style, writes once the lines both blocks start or end with. The
+`merge=union` driver, which section 9 of README.md rejects, writes the
+same; btclib-org/.github#21 and btclib-org/.github#760 measured what that
+costs under it. This
+is the gate, run once over the file's own open section -- the first
+`## ` heading's, up to the line before the second, or to the end
 of the file where there is no second, section 9 of README.md giving the
 boundary the same way. A `## ` or `### ` line inside a fenced code block
 is a markdown example rather than a heading of the file's own, and is
@@ -18,24 +20,24 @@ blanked out before either is matched (btclib-org/.github#1372) --
 character for character, unlike `_CODE_SPAN` below, which removes what
 it strips outright rather than preserving its length.
 
-Three checks, all of them shapes a `merge=union` rebase produces and a
-`git rebase` exit code does not report -- a fourth, below them, that is
-section 9's own bound on an entry -- a fifth that backs the fourth's own
-exemption, which trusts a placement rule nothing else here checks -- and
-a sixth, unrelated to the rebase driver, that catches a citation number
+Three checks, all of them shapes a conflict resolved by deleting its
+markers produces -- a fourth, below them, that is section 9's own bound
+on an entry -- a fifth that backs the fourth's own exemption, which
+trusts a placement rule nothing else here checks -- and a sixth,
+unrelated to the rebase, that catches a citation number
 `markdownlint-cli2`'s own `--fix` mangles once it opens a line:
 
 - a `### ` heading repeated within the section -- measured against real
-  rebases under `merge=union`, not assumed from the driver's name. Two
-  branches each adding their *own* new heading, worded exactly alike,
-  at the section's one shared anchor is *not* this shape: union folds
-  the two into a single entry, one heading and both sides' bullets,
-  with nothing for this check to find -- which is not a fix landing
-  quietly, it is the shape the next check's own blind spot leans on.
-  A heading repeats instead where the matching text does not end up
-  adjacent once the merge is done -- one side's own further entry
-  landing between the two closes the gap that would otherwise let them
-  fold -- or where a single branch's new heading, no second branch or
+  rebases under `merge=union`, which writes what deleting the markers
+  writes. Two branches each adding their *own* new heading, worded
+  exactly alike, at the section's one shared anchor is *not* this
+  shape: the merge folds the two into a single entry, one heading and
+  both sides' bullets, with nothing for this check to find -- which is
+  not a fix landing quietly, it is the shape the next check's own blind
+  spot leans on. A heading repeats instead where the matching text does
+  not end up adjacent once the merge is done -- one side's own further
+  entry landing between the two closes the gap that would otherwise let
+  them fold -- or where a single branch's new heading, no second branch or
   merge required, repeats one already in the section at its own base.
   `markdownlint-cli2` already refuses a same-level heading repeated
   anywhere in the file as MD024, `.markdownlint.jsonc` leaving that
@@ -44,8 +46,7 @@ a sixth, unrelated to the rebase driver, that catches a citation number
   each set for their own, deliberate, per-release repeat; unlike MD022
   below, MD024 is not autofixable, so a run this check would also catch
   already fails on it. What this check adds is the line number scoped
-  to the open section and a message naming `merge=union` rather than
-  markdownlint's own generic one;
+  to the open section;
 - two entries in the section that each `(closes #N)` the same number --
   btclib-org/btclib#1168 and btclib-org/btclib#1170 is the pair
   btclib-org/.github#21 opens with, each entry closing the same defect
@@ -56,20 +57,19 @@ a sixth, unrelated to the rebase driver, that catches a citation number
   way by several unrelated entries over as many weeks -- measured
   against this file's own history, which carries that repeat with
   nothing wrong in it. Closing the same issue twice has no such reading:
-  `closes` names the entry that
-  answers an issue for good, and an issue answered twice is what the
-  driver produces when two branches each believe they are first. A
-  cross-repository citation, `(closes owner/repo#N)`, compares against
-  another written exactly the same rather than against the number
-  alone, since two different trackers numbering their own issues alike
-  name two different issues;
-- a `### ` heading with no blank line above it, which is the byte
-  `merge=union` eats at the seam where two sides' added lines abut
-  (btclib-org/.github#760). `markdownlint-cli2` already reports this as
-  MD022, but only as an autofix note -- "files were modified by this
-  hook" is what a developer's terminal shows, the same sentence it
-  prints for a stray trailing space, naming neither `merge=union` nor
-  the rebase that ate the line. This check is the one thing in the
+  `closes` names the entry that answers an issue for good, and an issue
+  answered twice is what keeping both sides produces when two branches
+  each believe they are first. A cross-repository citation, `(closes
+  owner/repo#N)`, compares against another written exactly the same
+  rather than against the number alone, since two different trackers
+  numbering their own issues alike name two different issues;
+- a `### ` heading with no blank line above it, which is the line
+  deleting the markers loses at the seam where two sides' added lines
+  abut (btclib-org/.github#760). `markdownlint-cli2` already reports
+  this as MD022, but only as an autofix note -- "files were modified by
+  this hook" is what a developer's terminal shows, the same sentence it
+  prints for a stray trailing space, naming neither the conflict nor
+  the rebase that lost the line. This check is the one thing in the
   gate that knows the difference and says so.
 
 **What this cannot see.** Two entries citing *different* issue numbers
@@ -95,7 +95,7 @@ until this file's own review found them:
 
 - the fold the first check leaves alone -- two branches' own
   identically-worded new headings, described above, united by the
-  driver into one entry -- is exactly what hides a real double-close
+  merge into one entry -- is exactly what hides a real double-close
   from the second check too. A citation repeated across one entry's own
   bullets is not reported by design, and a folded entry reads the same
   way: two different branches each closing the same issue under the one
@@ -393,7 +393,7 @@ def duplicate_closes(text: str, section: str, base: int) -> list[str]:
     something of it. What this asks is whether two different entries --
     two different `### ` headings, or the one heading-less entry
     against a headed one -- each `(closes #N)` the same issue, which
-    `merge=union` keeping both sides of an append is what produces.
+    keeping both sides of a conflicted append is what produces.
 
     :param text: the whole file, for the line numbers reported.
     :param section: the open section's own text.
@@ -434,7 +434,7 @@ def unblanked_headings(text: str, section: str, base: int) -> list[str]:
             title = heading.group("title").strip()
             problems.append(
                 f"line {line}: heading {title!r} has no blank line above"
-                " it -- the seam a merge=union rebase eats",
+                " it -- the line deleting a conflict's markers loses",
             )
     return problems
 
@@ -574,7 +574,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     """
     parser = argparse.ArgumentParser(
         description="Refuse an open CHANGELOG.md section a"
-        " merge=union rebase can break, or a citation number"
+        " rebase conflict can break, or a citation number"
         " markdownlint-cli2's own fixer mangles.",
     )
     parser.add_argument(

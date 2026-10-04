@@ -351,6 +351,25 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "claude-process",
         ),
     ),
+    (
+        1582,
+        "test_neither_history_file_has_a_merge_driver",
+        (
+            "bbt",
+            "bitcoin-core-rpc",
+            "bitcoin-node-tests",
+            "btclib",
+            "btclib-benchmarks",
+            "btclib-ecc",
+            "btclib-mnemonics",
+            "btclib-node",
+            "btclib-org.github.io",
+            "btclib-secp256k1",
+            "btclib-wallet",
+            "claude-process",
+            "portanode",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 

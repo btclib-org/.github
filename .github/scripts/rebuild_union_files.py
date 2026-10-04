@@ -4,10 +4,11 @@
 
 """Rebuild `CHANGELOG.md` and `RELEASE_NOTES.md` after a rebase or merge.
 
-A rebase can leave these files wrong with no conflict: the `merge=union`
-driver writes once a line both sides added, such as the blank line between
-entries, and a rebase stopped on a conflict in them leaves markers around
-two blocks that share lines. This script rebuilds them.
+A rebase stopped on a conflict in these files leaves markers around two blocks
+that share lines, and at git's default conflict style deleting the markers
+writes those lines once, such as the blank line between entries. A tree that
+still sets `merge=union` gets the same damage with no conflict. This script
+rebuilds them.
 
 For each file the branch changed between its old base and its old tip, the
 script takes the block the branch added and splices it into the new base's

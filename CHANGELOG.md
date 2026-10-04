@@ -10111,3 +10111,9 @@ nothing red follows from the copies disagreeing.
 - **Section 10's scorecard trees need a `good first issue` open in the last
   12 months** (issue #1541): `small_tasks` asks for small tasks to be
   identified, not kept open; filing issues to fill the label is artificial.
+
+### `CHANGELOG.md` and `RELEASE_NOTES.md` lose the `merge=union` driver
+
+- **A rebase over a landing that wrote an entry stops on these files**
+  (issue #1582): rebuild the file from the new base, the branch's block at
+  the end of the open section. Entries above naming `merge=union` predate it.

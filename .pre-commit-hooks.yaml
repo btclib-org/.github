@@ -8,9 +8,9 @@
 # `language: script` runs the file itself, which is why
 # .github/scripts/check_changelog.py carries a shebang and the
 # executable bit. `always_run: true` and no `files:`, for the reason
-# section 4 gives: the rebase that eats the seam stages nothing, so a
-# hook keyed on the diff is unreachable after the event the blank-line
-# check exists to name.
+# section 4 gives: a rebase commits the resolved file and leaves nothing
+# staged, so a hook keyed on the diff is unreachable after the event the
+# blank-line check exists to name.
 #
 # No `args:` here. The count of grandfathered entries is a fact about
 # the repository being checked, so the caller's own
