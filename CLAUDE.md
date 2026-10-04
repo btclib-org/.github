@@ -27,7 +27,7 @@ is the organization's page, `REPOSITORY.md` is this repository's own
 settings read back from the endpoint, `tests/` is the half of section
 15's audit a machine can run — its subject the other repositories — and
 `.github/scripts/` the scripts this tree's hooks and the reusable
-workflows run.
+workflows run, and `bestpractices.py`, run by hand.
 
 ## The primary checkout is the maintainer's
 

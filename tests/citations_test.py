@@ -30,7 +30,8 @@ citation, a bullet cited by its bold opening, as a defect.
 What this does not read is `CHANGELOG.md`, `RELEASE_NOTES.md` and an
 archived `changelog/`: section 9 has nothing already written in them
 rewritten, so an entry citing a heading that has since moved is a record
-of its own day, and no edit answers a failure here.
+of its own day, and no edit answers a failure here. Nor does it read
+`bestpractices/`, for the reason `SAVED` gives.
 """
 
 from __future__ import annotations
@@ -76,6 +77,10 @@ OPENING = re.compile(r"(?m)^## (\d+)\. ")
 HISTORY = re.compile(r"^(CHANGELOG|RELEASE_NOTES)\.md$|^changelog/")
 """What section 9 keeps as written, so a citation in it is a record."""
 
+SAVED = re.compile(r"^bestpractices/")
+"""bestpractices.dev's answers, which cite the documents of the tree each
+file is named after, and are corrected on the site rather than here."""
+
 
 def flattened(text: str) -> str:
     """Reduce prose to the words in it, whatever lies between them.
@@ -115,7 +120,7 @@ def prose(root: Path, paths: list[str]) -> Iterator[tuple[str, str]]:
     :yields: each path against its text, on one line.
     """
     for path in paths:
-        if HISTORY.search(path):
+        if HISTORY.search(path) or SAVED.search(path):
             continue
         try:
             text = (root / path).read_text(encoding="utf-8")

@@ -10099,3 +10099,9 @@ nothing red follows from the copies disagreeing.
 - **`.github/labels.yml` is the organization's labels** (issue #1584), and
   `tests/labels_test.py` reads every tree's labels and issue forms against
   it. An issue's kind is its issue type, which the forms set.
+
+### A release reviews the bestpractices.dev answers
+
+- **A registered tree reviews its answers at each release and advisory**
+  (issue #1589). `.github/scripts/bestpractices.py` saves them in this tree.
+  `tests/bestpractices_test.py` fails for a tree six months without a release.
