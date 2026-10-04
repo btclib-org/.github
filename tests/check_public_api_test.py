@@ -333,6 +333,104 @@ def test_a_rehearsal_reads_the_first_section_under_the_title(
         assert code == 0, heading
 
 
+_HWI = "src/btclib/hwi.py:0: <module>: Public object was removed\n"
+
+# the release pull request opened the next section above the retitled one
+_AFTER_RELEASE_PR = """\
+# Release notes
+
+## v2026.11 (work in progress, not released yet)
+
+Nothing yet.
+
+## v2026.10.4
+
+- **`btclib.hwi` is gone**: use `btclib_wallet.hwi`.
+
+## v2026.10.3
+
+- **`unrelated` is named only here.**
+"""
+
+# before it, the open section is the first and the version names it
+_BEFORE_RELEASE_PR = _AFTER_RELEASE_PR.replace(
+    "Nothing yet.", "- **`btclib.hwi` is gone**."
+).replace("- **`btclib.hwi` is gone**: use `btclib_wallet.hwi`.\n\n", "")
+
+
+def _rehearse(
+    script: ModuleType,
+    tmp_path: Path,
+    notes: str,
+    pyproject: str | bytes | None,
+) -> int:
+    """Run a rehearsal, with the `pyproject.toml` beside the notes if given."""
+    if pyproject is not None:
+        data = pyproject.encode() if isinstance(pyproject, str) else pyproject
+        (tmp_path / "pyproject.toml").write_bytes(data)
+    return _run(script, tmp_path, findings=_HWI, notes=notes, tag=None)
+
+
+def test_a_rehearsal_after_the_release_pr_answers_as_the_tag_run_does(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """The first section is then the empty new one, not the release's."""
+    pyproject = '[project]\nversion = "2026.10.4"\n'
+
+    assert _rehearse(script, tmp_path, _AFTER_RELEASE_PR, pyproject) == 0
+    assert (
+        _run(script, tmp_path, findings=_HWI, notes=_AFTER_RELEASE_PR, tag="v2026.10.4")
+        == 0
+    )
+
+
+def test_a_rehearsal_before_the_release_pr_reads_the_open_section(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """The version names the open section, which is the first."""
+    pyproject = '[project]\nversion = "2026.11"\n'
+
+    assert _rehearse(script, tmp_path, _BEFORE_RELEASE_PR, pyproject) == 0
+
+
+@pytest.mark.parametrize(
+    "pyproject",
+    [
+        None,
+        "not toml [",
+        "[tool.x]\n",
+        "[project]\n",
+        "[project]\nversion = 1\n",
+        b"\xff\xfe[project]",
+        '[project]\nversion = "2030.1"\n',
+    ],
+)
+def test_a_rehearsal_with_no_section_for_the_version_reads_the_first(
+    script: ModuleType, tmp_path: Path, pyproject: str | bytes | None
+) -> None:
+    """No file, no version, or a version with no heading: the first section."""
+    assert _rehearse(script, tmp_path, _BEFORE_RELEASE_PR, pyproject) == 0
+    assert _rehearse(script, tmp_path, _AFTER_RELEASE_PR, pyproject) == 1
+
+
+def test_a_tag_does_not_read_the_pyproject_version(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """The tag names the section, whatever `pyproject.toml` says."""
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nversion = "2026.11"\n', encoding="utf-8"
+    )
+
+    assert (
+        _run(script, tmp_path, findings=_HWI, notes=_AFTER_RELEASE_PR, tag="v2026.10.4")
+        == 0
+    )
+    assert (
+        _run(script, tmp_path, findings=_HWI, notes=_AFTER_RELEASE_PR, tag="v2026.10.3")
+        == 1
+    )
+
+
 @pytest.mark.parametrize(
     ("heading", "found"),
     [
