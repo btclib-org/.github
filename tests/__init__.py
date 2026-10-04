@@ -331,13 +331,7 @@ def names() -> list[str]:
     ]
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
-    (
-        1587,
-        "test_a_test_bounds_time_by_a_ratio_or_a_named_timeout",
-        ("btclib-node",),
-    ),
-)
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what
