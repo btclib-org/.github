@@ -2446,6 +2446,9 @@ file fixes and a copy can be held to.
 **The section headed `## What this file passes over` is where a copy
 says what falls outside that scope.**
 
+**Labels are the exception**: `.github/labels.yml` and its test are the
+record, so `REPOSITORY.md` does not list them.
+
 **A copy does not claim that nothing it records has another form in the
 tree.** The topics are section 3's `keywords`, a releasing tree's
 `.homepage` is the `[project.urls]` field of that name, and a Pages
@@ -3122,6 +3125,40 @@ renaming the project leaves the slug, and renaming the slug makes the old
 one stop answering rather than redirect. Get that URL right before a
 release, because `pyproject.toml`'s `documentation` reaches the metadata
 of every version already on the index, which no later release corrects.
+
+### Labels and issue types
+
+**Every tree carries the labels `.github/labels.yml` gives it**, with the
+colour and description written there, and `tests/labels_test.py` reads
+each tree's labels back against the file. A label only some trees need
+names those trees in the file. The rejected alternative is a set per
+tree, in which one label comes to mean a different thing in each.
+
+**An issue's kind is its issue type**, Bug, Feature or Task, which each
+issue form sets with `type:`; `tests/labels_test.py` reads the forms too.
+Issue types are the organization's, and no repository defines its own.
+No tree carries a kind label, closed issues included: their kind is
+their type.
+
+**A plan carries `plan`, and its parts are its sub-issues.** No label
+marks a part: GitHub links a sub-issue to its plan both ways, and a
+label says only that a parent exists.
+
+A label means what its description says. Who applies and removes it:
+
+- `decision` — applied by whoever puts the question on the issue, and
+  removed by whoever records the answer;
+- `blocked` — applied by whoever records the wait, and removed when it
+  ends;
+- `on-hold` — applied by whoever pauses the issue, and removed by
+  whoever resumes it;
+- `upstream-dependent` — applied by whoever finds the dependency, and
+  kept until the issue closes;
+- `upstream-report` — applied by whoever finds the report owed. Once it
+  is filed the issue closes, or takes `upstream-dependent` instead where
+  the tree's code or tests wait on the outcome;
+- `plan` and `good first issue` — applied by whoever files the issue;
+- `security` and `alignment` — applied by whoever finds it.
 
 ## 12. Releasing
 
@@ -4175,7 +4212,8 @@ No tool checks them.
    commit is necessarily one; classic protection with the required
    checks bound to the Actions app; the publishing environments; the
    read-only default token; secret scanning, its push protection and
-   Dependabot security updates; private vulnerability reporting. Then the
+   Dependabot security updates; private vulnerability reporting; the
+   labels `.github/labels.yml` gives the repository. Then the
    topics, which are the `keywords` of the `pyproject.toml` step above,
    and which nothing in the tree holds where there is no such file to
    declare them in; and, where the tree releases, the `homepage`, the

@@ -343,6 +343,25 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-mnemonics",
         ),
     ),
+    (
+        1584,
+        "test_an_issue_form_sets_a_type_and_no_kind_label",
+        (
+            "btclib",
+            "btclib-node",
+            "btclib-secp256k1",
+            "portanode",
+            "bitcoin-core-rpc",
+            "btclib-benchmarks",
+            "bbt",
+            "btclib-org.github.io",
+            "btclib-wallet",
+            "bitcoin-node-tests",
+            "btclib-ecc",
+            "btclib-mnemonics",
+            "claude-process",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 

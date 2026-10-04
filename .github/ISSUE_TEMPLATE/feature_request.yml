@@ -1,7 +1,7 @@
 ---
 name: Feature request
 description: Add something, or change how something works
-labels: [enhancement]
+type: Feature
 
 body:
   - type: textarea

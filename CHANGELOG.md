@@ -10093,3 +10093,9 @@ nothing red follows from the copies disagreeing.
 - **`.github/scripts/rebuild_union_files.py` puts the branch's block back
   into the new base's `CHANGELOG.md` and `RELEASE_NOTES.md`** (closes
   #1583), after a rebase or merge, stopped or not.
+
+### One set of labels, read back from every tree
+
+- **`.github/labels.yml` is the organization's labels** (issue #1584), and
+  `tests/labels_test.py` reads every tree's labels and issue forms against
+  it. An issue's kind is its issue type, which the forms set.
