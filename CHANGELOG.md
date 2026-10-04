@@ -10123,3 +10123,9 @@ nothing red follows from the copies disagreeing.
 - **`rebuild_union_files.py` exited 0 on a mistyped revision and 1 on a git
   failure** (closes #1593): both now exit 2, as a refusal does, so 0 is not
   read as "agrees" nor 1 as "written".
+
+### `--admin` waits for no required check
+
+- **`CONTRIBUTING.md`'s emergency paragraph named only the approval**
+  (issue #1597): with `enforce_admins` off, `--admin` skips the required
+  checks too, and `REVIEWING.md`'s "hold the merge" excepts it.
