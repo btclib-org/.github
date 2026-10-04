@@ -2202,11 +2202,13 @@ and the badge land together.
     in this repository, in `bestpractices/<tree>.json`, so that a review shows
     as a diff.
 
-    **The same trees keep at least one open issue labelled `good first
-    issue`.** bestpractices.dev's gold criterion `small_tasks` asks a project
-    to identify small tasks for new contributors, and an empty label
-    identifies none. Without a test, the label empties as its issues close,
-    so `tests/good_first_issue_test.py` reads the count per tree.
+    **Each of the same trees has had an issue labelled `good first issue` open
+    at some time in the last 12 months.** bestpractices.dev's gold criterion
+    `small_tasks` asks a project to identify its small tasks for new
+    contributors, not to keep a number of them open. Keeping one open at all
+    times is declined: filing issues only to fill the label is artificial, and
+    makes the label worth less to a newcomer.
+    `tests/good_first_issue_test.py` reads the dates per tree.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
   between the parser and an adversary choosing the bytes. `btclib` and
   `btclib-secp256k1` read transactions, scripts and signatures off the wire,

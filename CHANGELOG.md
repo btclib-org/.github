@@ -10105,3 +10105,9 @@ nothing red follows from the copies disagreeing.
 - **A registered tree reviews its answers at each release and advisory**
   (issue #1589). `.github/scripts/bestpractices.py` saves them in this tree.
   `tests/bestpractices_test.py` fails for a tree six months without a release.
+
+### A good first issue open at some time in the last 12 months
+
+- **Section 10's scorecard trees need a `good first issue` open in the last
+  12 months** (issue #1541): `small_tasks` asks for small tasks to be
+  identified, not kept open; filing issues to fill the label is artificial.
