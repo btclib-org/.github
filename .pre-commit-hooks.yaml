@@ -10,7 +10,8 @@
 # executable bit. `always_run: true` and no `files:`, for the reason
 # section 4 gives: a rebase commits the resolved file and leaves nothing
 # staged, so a hook keyed on the diff is unreachable after the event the
-# blank-line check exists to name.
+# blank-line check exists to name. `verbose: true`, so that a run that
+# passes still shows whether it compared the released sections.
 #
 # No `args:` here. The count of grandfathered entries is a fact about
 # the repository being checked, so the caller's own
@@ -22,3 +23,4 @@
   language: script
   pass_filenames: false
   always_run: true
+  verbose: true

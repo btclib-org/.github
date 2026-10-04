@@ -1035,17 +1035,20 @@ pre-commit.ci does not have — the lint workflow covers it. No
   repository cuts no tag, and `autoupdate` moves a sha by `git rev-parse
   FETCH_HEAD` where `git describe --tags` answers nothing; `pinned-rev`
   accepts forty hex characters for that reason. The hook repository
-  declares `language: script`, `pass_filenames: false` and `always_run:
-  true`, and the gate orders it ahead of `markdownlint-cli2` so it reads
-  the file before that hook's `--fix` repairs the seam the blank-line
-  check names. It refuses what deleting a rebase conflict's markers
-  writes in that file: a repeated `###` heading, two entries closing the
-  same issue, and a heading with no blank line above it
-  (btclib-org/.github#760). It also refuses an entry landed above the
-  length rule's own entry out of section 9's order, an entry past that
-  rule's three-line bound, and a citation number wrapped to a line's
-  start, which markdownlint-cli2's own `--fix` would otherwise mangle
-  into a heading (btclib-org/.github#1398).
+  declares `language: script`, `pass_filenames: false`, `always_run:
+  true` and `verbose: true`, and the gate orders it ahead of
+  `markdownlint-cli2` so it reads the file before that hook's `--fix`
+  repairs the seam the blank-line check names. It refuses what deleting
+  a rebase conflict's markers writes in that file: a repeated `###`
+  heading, two entries closing the same issue, and a heading with no
+  blank line above it (btclib-org/.github#760). It also refuses an entry
+  landed above the length rule's own entry out of section 9's order, an
+  entry past that rule's three-line bound, and a citation number wrapped
+  to a line's start, which markdownlint-cli2's own `--fix` would
+  otherwise mangle into a heading (btclib-org/.github#1398). It refuses
+  a `###` heading under a release older than the newest that the file
+  lacks at the merge base with `origin/main` (btclib-org/.github#1614);
+  the newest release is exempt, and with no merge base it passes.
 
     **`btclib-org/.github` itself keeps the hook `local`**, a pin being
     a revision other than the working tree: a tree pinning itself would
@@ -1753,8 +1756,9 @@ without adding to it is deleted.
   default conflict style the lines both blocks start or end with sit
   outside them, so one entry loses its blank line, its heading or its
   citation. `check-changelog` names a heading with no blank line
-  above it, a repeated heading and a double close, and not the position,
-  which a person reads off a command `CONTRIBUTING.md` has.
+  above it, a repeated heading, a double close and a heading new to a
+  release older than the newest, and not a block's place within the open
+  section, which a person reads off a command `CONTRIBUTING.md` has.
 - **`merge=union` is the rejected alternative** (btclib-org/.github#1582).
   The driver writes what deleting the markers writes at that style, and
   the rebase exits 0 without the rebuild. GitHub does not apply the

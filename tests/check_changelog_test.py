@@ -26,6 +26,8 @@ The script is loaded by path, `.github/scripts` being no package.
 from __future__ import annotations
 
 import importlib.util
+import os
+import subprocess
 import sys
 from typing import TYPE_CHECKING
 
@@ -572,3 +574,159 @@ def test_a_wrapped_citation_in_a_released_section_is_not_reported(
     """A wrapped citation under a second `## ` is outside the open section."""
     text = _CLEAN + "\n## v1.0\n\nprose before a citation (closes\n#9).\n"
     assert script.problems(text) == []
+
+
+_RELEASED = _CLEAN + "\n## v2\n\n### Two\n\n- two.\n\n## v1\n\n### One\n\n- one.\n"
+_LATE = "\n### Late\n\n- **late** (closes #3): three.\n"
+_BASE = ("0123abcd", _RELEASED)
+_REFUSED = "'Late' is under a release older than the newest"
+
+
+def test_an_entry_appended_under_the_oldest_release_is_caught(
+    script: ModuleType,
+) -> None:
+    """A new entry at the file's end, as btclib-org/.github#1614 measured."""
+    found = script.problems(_RELEASED + _LATE, base=_BASE)
+    assert len(found) == 1
+    assert _REFUSED in found[0]
+    assert "CHANGELOG.md at 0123abcd, the merge base with origin/main" in found[0]
+
+
+def test_an_entry_appended_to_the_open_section_is_not_reported(
+    script: ModuleType,
+) -> None:
+    """The same entry at the end of the open section passes."""
+    text = _RELEASED.replace("\n## v2", _LATE + "\n## v2")
+    assert script.problems(text, base=_BASE) == []
+
+
+def test_an_entry_under_the_newest_release_is_not_reported(
+    script: ModuleType,
+) -> None:
+    """The newest release is left out: a release branch adds to it."""
+    text = _RELEASED.replace("\n## v1", _LATE + "\n## v1")
+    assert script.problems(text, base=_BASE) == []
+
+
+def test_a_release_cut_over_the_open_section_is_not_reported(
+    script: ModuleType,
+) -> None:
+    """Cutting a release adds no heading to the releases before it."""
+    text = _RELEASED.replace("## Unreleased", "## Unreleased\n\n## v3")
+    assert script.problems(text, base=_BASE) == []
+
+
+def test_a_fenced_heading_at_the_base_does_not_vouch_for_a_real_one(
+    script: ModuleType,
+) -> None:
+    """A `### ` line in a fence at the base is an example, not the entry."""
+    before = _RELEASED + "\n```text\n### Late\n```\n"
+    found = script.problems(before + _LATE, base=("0123abcd", before))
+    assert len(found) == 1
+    assert _REFUSED in found[0]
+
+
+def test_a_fenced_heading_under_an_older_release_is_not_reported(
+    script: ModuleType,
+) -> None:
+    """A `### ` line in a fence on the branch is an example, not an entry."""
+    text = _RELEASED + "\n```text\n### Fenced\n```\n"
+    assert script.problems(text, base=_BASE) == []
+
+
+def _git(root: Path, *args: str) -> str:
+    """Run git in `root` as `Ann`, and return what it prints."""
+    return subprocess.run(
+        [
+            "git",
+            "-C",
+            str(root),
+            "-c",
+            "user.name=Ann",
+            "-c",
+            "user.email=ann@example.org",
+            *args,
+        ],
+        capture_output=True,
+        encoding="utf-8",
+        check=True,
+    ).stdout.strip()
+
+
+def _commit(changelog: Path, text: str) -> str:
+    """Commit `text` as the file, and return the commit."""
+    changelog.write_text(text, encoding="utf-8")
+    _git(changelog.parent, "add", changelog.name)
+    _git(changelog.parent, "commit", "--quiet", "-m", text[-20:])
+    return _git(changelog.parent, "rev-parse", "HEAD")
+
+
+@pytest.fixture
+def repo(
+    script: ModuleType,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> Path:
+    """Return the file of a repository whose `origin/main` holds `_RELEASED`."""
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", os.devnull)
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+    changelog = tmp_path / "CHANGELOG.md"
+    _git(tmp_path, "init", "--quiet")
+    _git(
+        tmp_path,
+        "update-ref",
+        "refs/remotes/origin/main",
+        _commit(changelog, _RELEASED),
+    )
+    monkeypatch.setattr(script, "_CHANGELOG", changelog)
+    return changelog
+
+
+def test_main_refuses_an_entry_the_branch_committed(
+    script: ModuleType,
+    repo: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The base is the merge base, not `HEAD`, which holds the entry too."""
+    base = _git(repo.parent, "rev-parse", "origin/main")
+    _commit(repo, _RELEASED + _LATE)
+    assert script.main([]) == 1
+    out = capsys.readouterr().out
+    assert _REFUSED in out
+    assert f"at {base}, the merge base" in out
+
+
+def test_main_passes_an_entry_in_the_open_section(
+    script: ModuleType,
+    repo: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The control: the same entry in the open section passes, compared."""
+    _commit(repo, _RELEASED.replace("\n## v2", _LATE + "\n## v2"))
+    assert script.main([]) == 0
+    assert "no release older than the newest gains a heading" in capsys.readouterr().out
+
+
+def test_a_stale_origin_main_refuses_until_fetched(
+    script: ModuleType,
+    repo: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """An entry landed past a stale `origin/main` reads as the branch's own."""
+    landed = _commit(repo, _RELEASED + _LATE)
+    assert script.main([]) == 1
+    assert _REFUSED in capsys.readouterr().out
+    _git(repo.parent, "update-ref", "refs/remotes/origin/main", landed)
+    assert script.main([]) == 0
+
+
+def test_main_says_so_where_there_is_no_merge_base(
+    script: ModuleType,
+    repo: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """With no `origin/main`, the entry passes and the output says why."""
+    _git(repo.parent, "update-ref", "-d", "refs/remotes/origin/main")
+    _commit(repo, _RELEASED + _LATE)
+    assert script.main([]) == 0
+    assert "no released section compared" in capsys.readouterr().out

@@ -174,6 +174,7 @@ repos:
         args: [--grandfathered, "350"]
         pass_filenames: false
         always_run: true
+        verbose: true
   # profile/dependencies.svg against the profile/dependencies.dot it is
   # rendered from, which is section 7's "Anything generated is checked
   # against its source", in the section's pinned-`additional_dependencies`

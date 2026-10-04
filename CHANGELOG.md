@@ -10203,3 +10203,9 @@ nothing red follows from the copies disagreeing.
 
 - **`bestpractices/btclib-node.json` holds the answers after
   v2026.10.4** (issue #1589): none still waits on a next release.
+
+### `check-changelog` refuses an entry added to an older release
+
+- **A `###` heading under a release older than the newest, absent from
+  the file at the merge base with `origin/main`, is refused**
+  (issue #1614); with no such base the hook compares nothing and says so.
