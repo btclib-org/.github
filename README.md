@@ -2477,8 +2477,7 @@ record, so `REPOSITORY.md` does not list them.
 
 **A copy does not claim that nothing it records has another form in the
 tree.** The topics are section 3's `keywords`, a releasing tree's
-`.homepage` is the `[project.urls]` field of that name, and a Pages
-custom domain has the root `CNAME` carrying the same value — so where a
+`.homepage` is the `[project.urls]` field of that name — so where a
 tree holds one of those, the record is a second copy read back for
 comparison, and that copy's own section on it says so.
 
@@ -3045,9 +3044,8 @@ such a finding only through a further push or a `close`/`reopen`.
       --jq '.environments[] | "\(.name) \(.protection_rules | length)"'
     ```
 
-    **`github-pages` is GitHub's**, created by enabling Pages and
-    protected by GitHub, so it is outside the rule above and outside
-    `REPOSITORY.md`.
+    **`github-pages` is GitHub's**, created by enabling Pages, so it is
+    outside the rule above; a site's deploy job names it.
 - **Code scanning**: the analysis runs from a workflow, and GitHub's
   default setup is *off* — the two cannot both be on, and while the
   setting is on the upload is refused. Turning it off has an order that
@@ -3088,12 +3086,10 @@ costs nothing, and takes effect unasked wherever dependabot-core comes
 to date the tag.
 
 Each ecosystem groups its updates into one pull request, since every pull
-request runs the whole matrix — the one exemption is `btclib-org.github.io`'s
-`bundler` block, a single gem having nothing to group with. The `uv`
-ecosystem's group is named `dev-tooling`. Weekly with a seven-day cooldown: a
-compromised release is usually yanked within days. None declares a
-`target-branch`: one naming a missing branch fails nowhere and proposes
-nothing.
+request runs the whole matrix. The `uv` ecosystem's group is named
+`dev-tooling`. Weekly with a seven-day cooldown: a compromised release is
+usually yanked within days. None declares a `target-branch`: one naming a
+missing branch fails nowhere and proposes nothing.
 
 **A Dependabot pull request reads a different secret store.** A
 `pull_request` run whose actor is `dependabot[bot]` gets the Dependabot
@@ -3112,12 +3108,13 @@ permitted to comment start a run carrying a prompt it wrote.
 
 ### Pages and Read the Docs
 
-Where a repository serves a site from its own root, the source, the
-build type and the CNAME are settings rather than files, and a workflow
-builds the same site so that a failure is a red check rather than a page
-served broken. Read the Docs' `latest` follows the default branch,
-`stable` is the highest release tag, and an automation rule activates
-each new tag. The project's public API answers without a token:
+Where a repository serves a site from its own root, a workflow builds
+the site and deploys it, so that a failure is a red check rather than a
+page served broken. The build type, `workflow`, and the custom domain are
+settings rather than files: Pages ignores a `CNAME` file under that build
+type, and the tree holds none. Read the Docs' `latest` follows the
+default branch, `stable` is the highest release tag, and an automation
+rule activates each new tag. The project's public API answers without a token:
 
 ```shell
 p=https://app.readthedocs.org/api/v3/projects/<slug>

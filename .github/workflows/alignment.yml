@@ -103,9 +103,8 @@ jobs:
       # pypi and testpypi, each named by a job of a release.yml, which
       # is the rule section 11 states. github-pages is GitHub's own,
       # created by enabling Pages, and section 11 puts it outside that
-      # rule and outside REPOSITORY.md. This repository declares none of
-      # the three, and this token publishes nothing -- its permissions
-      # are all read.
+      # rule. This repository declares none of the three, and this token
+      # publishes nothing -- its permissions are all read.
       #
       # An environment carrying no protection rule would add nothing to
       # that. One carrying a branch restriction, the only kind that adds

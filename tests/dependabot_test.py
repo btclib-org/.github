@@ -99,16 +99,6 @@ DOCKER_DIRECTORIES = (
 NAMED = EVERY_TREE | set(WATCHED) | {DOCKER}
 """Every ecosystem section 11 names, conditional or not."""
 
-UNGROUPED = frozenset({("btclib-org.github.io", "bundler")})
-"""Section 11's one exemption from grouping: a single gem, nothing to
-group it with.
-
-Named here rather than read off the block's own comment: the comment is
-prose for a person, and nothing below parses it. A second exemption is a
-change to this set and to the sentence in section 11 that states it, in
-the same diff.
-"""
-
 UV_GROUP = "dev-tooling"
 """Section 11's name for the `uv` ecosystem's group."""
 
@@ -308,9 +298,7 @@ def test_dependabot_ecosystems_are_grouped_weekly_with_a_cooldown(
 
     Section 11: "Each ecosystem groups its updates into one pull
     request... Weekly with a seven-day cooldown... None declares a
-    `target-branch`." `UNGROUPED` is the one block that same paragraph
-    exempts from grouping; nothing exempts an ecosystem from the rest,
-    so the schedule and the cooldown are asked of every block regardless.
+    `target-branch`."
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -318,7 +306,7 @@ def test_dependabot_ecosystems_are_grouped_weekly_with_a_cooldown(
     wrong = []
     for entry in updates(repository, trees):
         ecosystem = entry["package-ecosystem"]
-        if (repository, ecosystem) not in UNGROUPED and not entry.get("groups"):
+        if not entry.get("groups"):
             wrong.append(f"{ecosystem}: no groups:")
         schedule = entry.get("schedule") or {}
         if schedule.get("interval") != "weekly":
