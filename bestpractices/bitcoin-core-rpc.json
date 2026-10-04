@@ -64,7 +64,7 @@
     "status": "Met"
   },
   "OSPS-BR-06.01": {
-    "justification": "Every PyPI file carries a PEP 740 attestation, and each GitHub release since v2026.8.12 carries a Sigstore provenance bundle (<tag>.attestation.jsonl) whose subjects are the assets' SHA-256 digests. https://github.com/btclib-org/bitcoin-core-rpc/releases/latest",
+    "justification": "Every PyPI file carries a PEP 740 attestation, and each GitHub release since v2026.8.12 carries a Sigstore provenance bundle whose subjects are the assets' SHA-256 digests: <tag>.intoto.jsonl from v2026.10.4, <tag>.attestation.jsonl before. https://github.com/btclib-org/bitcoin-core-rpc/releases/latest",
     "status": "Met"
   },
   "OSPS-BR-07.01": {
@@ -588,8 +588,8 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "no publicly known vulnerability has been fixed in any release: there are no published security advisories",
-    "status": "N/A"
+    "justification": "The v2026.10.4 release notes name every vulnerability that release fixes by its public issue (575-580, 616, 619, from the 2026-09-30 security review), with what a user does about each; none had a CVE. https://github.com/btclib-org/bitcoin-core-rpc/releases/tag/v2026.10.4",
+    "status": "Met"
   },
   "repo_distributed": {
     "justification": "Repository on GitHub, which uses git. git is distributed.",
@@ -644,7 +644,7 @@
     "status": "Met"
   },
   "signed_releases": {
-    "justification": "Every PyPI file carries a PEP 740 attestation, and releases since v2026.8.12 carry a Sigstore provenance bundle and a signed tag, e.g. https://github.com/btclib-org/bitcoin-core-rpc/releases/tag/v2026.9.29 . SECURITY.md gives the gh attestation verify commands: https://github.com/btclib-org/bitcoin-core-rpc/blob/main/SECURITY.md",
+    "justification": "Every PyPI file carries a PEP 740 attestation, and releases since v2026.8.12 carry a Sigstore provenance bundle and a signed tag; from v2026.10.4 the bundle is attached as <tag>.intoto.jsonl, e.g. https://github.com/btclib-org/bitcoin-core-rpc/releases/tag/v2026.10.4 . SECURITY.md gives the gh attestation verify commands: https://github.com/btclib-org/bitcoin-core-rpc/blob/main/SECURITY.md",
     "status": "Met"
   },
   "sites_https": {
@@ -656,7 +656,7 @@
     "status": "N/A"
   },
   "small_tasks": {
-    "justification": "Issues set aside for a first contribution carry the label \"good first issue\", and CONTRIBUTING.md points to them. https://github.com/btclib-org/bitcoin-core-rpc/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22",
+    "justification": "Small tasks for new contributors carry the label \"good first issue\", which CONTRIBUTING.md sets aside for a first contribution; 8 such issues were open at some time between 2025-10-04 and 2026-10-04. The organization's standard requires one in every 12 months (README section 10). https://github.com/btclib-org/bitcoin-core-rpc/issues?q=label%3A%22good+first+issue%22",
     "status": "Met"
   },
   "static_analysis": {
@@ -748,12 +748,12 @@
     "status": "Met"
   },
   "vulnerabilities_fixed_60_days": {
-    "justification": "The released wheel declares no dependencies. Three open Dependabot alerts (urllib3, dev tooling only, opened 2026-09-30) are younger than 60 days; the fixed ones were closed within a day.",
+    "justification": "The released wheel declares no dependencies. The 2026-09-30 security review findings were fixed in v2026.10.4, released 2026-10-04. No Dependabot alert is open: the urllib3 ones (dev tooling only) were fixed on 2026-10-04. https://github.com/btclib-org/bitcoin-core-rpc/releases/tag/v2026.10.4",
     "status": "Met"
   },
   "vulnerability_report_credit": {
-    "justification": "No security advisory has been resolved on this repository in the last 12 months (`gh api repos/btclib-org/bitcoin-core-rpc/security-advisories` returns zero), so there is no reporter to credit yet. https://github.com/btclib-org/bitcoin-core-rpc/security/advisories",
-    "status": "N/A"
+    "justification": "The findings of the 2026-09-30 security review are credited to the reviewer, pmazzocchi, in SECURITY.md's Security review section and in the review's tracking issue, https://github.com/btclib-org/bitcoin-core-rpc/issues/585",
+    "status": "Met"
   },
   "vulnerability_report_private": {
     "justification": "https://github.com/btclib-org/bitcoin-core-rpc?tab=security-ov-file",
@@ -764,8 +764,8 @@
     "status": "Met"
   },
   "vulnerability_report_response": {
-    "justification": "no vulnerabilities reported in the last 6 months",
-    "status": "N/A"
+    "justification": "The findings of the 2026-09-30 security review are the reports of the last six months. Every code finding was fixed by 2026-10-04 (581 and 582 the same day, the rest in v2026.10.4), each with a maintainer comment. The process findings 583 and 584 have a maintainer response, with the decision due by 2026-10-14. https://github.com/btclib-org/bitcoin-core-rpc/issues/585",
+    "status": "Met"
   },
   "vulnerability_response_process": {
     "justification": "SECURITY.md's *Reporting a vulnerability* section documents the private channel (a GitHub security advisory, or security at btclib dot org), who can see it, and how a CVE can be requested; private vulnerability reporting is enabled on the repository (`gh api repos/btclib-org/bitcoin-core-rpc/private-vulnerability-reporting` answers enabled). https://github.com/btclib-org/bitcoin-core-rpc/blob/main/SECURITY.md",

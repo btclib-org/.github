@@ -333,16 +333,6 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
-        1584,
-        "test_an_issue_form_sets_a_type_and_no_kind_label",
-        ("btclib-node",),
-    ),
-    (
-        1582,
-        "test_neither_history_file_has_a_merge_driver",
-        ("btclib-node",),
-    ),
-    (
         1587,
         "test_a_test_bounds_time_by_a_ratio_or_a_named_timeout",
         ("btclib-node",),
