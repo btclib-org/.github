@@ -73,13 +73,15 @@ EXPECTED_DEPARTURE: dict[tuple[str, str], str] = {
 }
 """A field of the classic list known to be off, against the issue deciding it.
 
-The key is the repository and the field's name in the test below. The
-test still reads every other field there, and fails if the field is on
-again, which is the signal to delete the entry.
+The key is the repository and the field's name in the test below.
 """
 
 STAND_IN = {"strict": "merge_queue"}
-"""The rule that has to be on `main` where a classic field is excused."""
+"""The rule that has to be on `main` where a classic field is excused.
+
+The merge queue tests each pull request merged onto the current `main`
+before it lands, which is what `strict` guarantees.
+"""
 
 CALL = f"{ORG}/{SELF}/.github/workflows/reusable-lint.yml@main"
 """How a tree's `lint.yml` calls the workflow that holds the review job."""
@@ -144,6 +146,8 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
     and is reported as that rather than as a case of its own: the list
     is what section 11 states, and a branch holding none of it fails
     the list, through the one assertion the backlog knows to excuse.
+    A field `EXPECTED_DEPARTURE` lists for the repository is excused,
+    and checked to be off.
 
     :param repository: the repository asked about.
     :param protections: the classic protection of each repository.
@@ -203,10 +207,7 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
     ids=[f"{r}-{f}" for r, f in EXPECTED_DEPARTURE],
 )
 def test_a_recorded_departure_is_still_one(entry: tuple[str, str]) -> None:
-    """Each `EXPECTED_DEPARTURE` entry cites an open issue and its rule.
-
-    An entry excuses a field only while the issue deciding it is open and
-    `main` carries the rule that stands in for it.
+    """Each `EXPECTED_DEPARTURE` entry cites an open issue and has its rule.
 
     :param entry: the entry's repository and field.
     """
