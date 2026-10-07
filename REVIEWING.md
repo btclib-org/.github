@@ -128,8 +128,7 @@ wrong command, a red gate, a wrong setting, a packaging or a security
 defect. Prose is never filed — `README.md` included, and even where a
 grep can measure it. Wrong prose that leads to a wrong action is a
 functional defect, and is filed as one. A wording finding outside
-the diff is not in the review and is not filed: the session reports it as
-collateral, and the bot, which files nothing, says nothing of it.
+the diff is neither in the review nor filed.
 btclib-org/.github#1075 is where a tracker of prose findings was found
 not to converge.
 
@@ -340,8 +339,9 @@ one, is where the rule lives.
   go, not to be shortened.
 - Does the branch add an entry to `CHANGELOG.md` or `RELEASE_NOTES.md`?
   Outside a release's own pull request that is a blocking finding (section 9).
-  `check-changelog` refuses a new entry and reads nothing of a bullet
-  added under an entry the base holds.
+  `check-changelog` refuses a new entry in `CHANGELOG.md` and reads nothing
+  of a bullet added under an entry the base holds. It reads no other file, so
+  a new entry in `RELEASE_NOTES.md` is the reviewer's to catch.
 - A new or changed workflow: section 10 of the standard, and
   `REPOSITORY.md` before any rule or setting is touched. A renamed job
   is a required check renamed out of existence.

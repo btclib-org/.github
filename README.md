@@ -1763,7 +1763,8 @@ without adding to it is deleted.
   `(closes owner/repo#N)` across repositories — and carries no
   measurement, no count and no history; the reasoning is the pull
   request's. Section 4's `check-changelog` refuses a longer body, and an
-  entry written outside a release's own pull request.
+  entry written outside a release's own pull request, in `CHANGELOG.md`
+  only: a new entry in `RELEASE_NOTES.md` is the reviewer's to catch.
 - **A repository that does not release keeps `CHANGELOG.md`'s
   preamble**, saying that its history is `git log` of `main`, and adds
   no entry.
