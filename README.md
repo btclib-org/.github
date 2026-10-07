@@ -584,6 +584,12 @@ Dotfiles, each owed by the tiers that owe the section reading it:
 - `.github/` — `workflows/`, `dependabot.yml`, `ISSUE_TEMPLATE/`,
   `PULL_REQUEST_TEMPLATE.md`, `scripts/` and `mutation/`.
 
+`.github/` is every tier's, and holds what the sections the tier binds
+ask of it. The other three have a package as their subject, not a tier,
+so a tree installing none — `package = false`, or a build backend given
+no module to build — owes none of the three, and may still keep `tests/`
+above the floor, as `.github`'s own suite over the organization does.
+
 **Every issue form ends with a `type: markdown` block on sign-off**, the
 one in this repository's own forms: whoever takes the issue signs off
 every commit, the required `Sign-off` check refuses a pull request
@@ -591,12 +597,6 @@ without the trailer, and `CONTRIBUTING.md`'s *Pull requests* says why.
 A first contributor reads the issue before `CONTRIBUTING.md`, and a pull
 request opened without the trailer waits on them for a fix only they can
 make. `tests/labels_test.py` reads each form's last `body` item.
-
-`.github/` is every tier's, and holds what the sections the tier binds
-ask of it. The other three have a package as their subject, not a tier,
-so a tree installing none — `package = false`, or a build backend given
-no module to build — owes none of the three, and may still keep `tests/`
-above the floor, as `.github`'s own suite over the organization does.
 
 **`PULL_REQUEST_TEMPLATE.md` sits under `.github/`**, with the forge's
 other inputs, though GitHub also reads it from the root or `docs/`.
@@ -1753,12 +1753,10 @@ without adding to it is deleted.
   open pull request in conflict there. What a pull request changed is
   its squash subject, which is `git log`'s.
 - **A release's section is written when the release is cut**, in the
-  release's own pull request, from the squash subjects since the
-  previous tag, `git log v<prev>..HEAD --format=%s`, grouped and
-  shortened. With the whole release in view the section is clear and
-  short. Section 12 has the step. The changelog takes what a user would
-  notice; the release notes take what a user has to act on; neither
-  restates the other.
+  release's own pull request, with the whole release in view. Section 12
+  has the step. The changelog takes what a user would notice; the
+  release notes take what a user has to act on; neither restates the
+  other.
 - **An entry is a `###` title and at most three lines.** The title says
   what changed. The body cites the issue in its own text — `(closes #N)`
   where the change closes it, `(issue #N)` where it does not, and

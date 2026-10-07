@@ -95,8 +95,6 @@ pull request will be answered against.
 
 A pull request adds no entry to `CHANGELOG.md` or `RELEASE_NOTES.md`, a
 release's own pull request excepted ([section 9][s9], [section 12][s12]).
-`check-changelog` refuses a `###` heading the merge base does not hold under
-the same `##`, unless the diff adds that `##` as a new `## v<version>`.
 
 ### One subject, opened as soon as it is written
 

@@ -127,9 +127,9 @@ subject is a round spent on what the pull request was not for.
 wrong command, a red gate, a wrong setting, a packaging or a security
 defect. Prose is never filed — `README.md` included, and even where a
 grep can measure it. Wrong prose that leads to a wrong action is a
-functional defect, and is filed as one. A wording finding is named at
-the foot of the review and left there: the author fixes it where the
-diff already touches that file, and otherwise the note is the record.
+functional defect, and is filed as one. A wording finding outside
+the diff is not in the review and is not filed: the session reports it as
+collateral, and the bot, which files nothing, says nothing of it.
 btclib-org/.github#1075 is where a tracker of prose findings was found
 not to converge.
 
@@ -412,12 +412,11 @@ has what it concludes; the second declines to conclude, which is what a
 reading does. Silence is not a refusal, so a reviewer who means to
 refuse writes the line.
 
-**After the verdict line the summary is short**: the
-blocking and the non-blocking findings, one bullet each, saying where,
-what is wrong and how it is known. No nit (nits go inline only), no
-finding outside this pull request, no other account of what the diff
-does or of what was checked, beyond whose gate run a reviewer other
-than the bot relies on.
+**After the verdict line the summary is short**: the blocking and the
+non-blocking findings, one bullet each, saying where, what is wrong and
+how it is known. No nit, no finding outside this pull request, no other
+account of what the diff does or of what was checked, beyond whose gate
+run a reviewer other than the bot relies on.
 **In a verdict**, `CHANGES REQUESTED` with no blocking finding is a
 contradiction: either the finding is blocking or the ack is due. In a
 reading neither is owed, the reading having declined to say. A `NACK`
