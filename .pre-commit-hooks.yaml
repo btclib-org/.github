@@ -18,7 +18,7 @@
 # .pre-commit-config.yaml is where it is written, and the default the
 # script declares is what a caller that names none gets.
 - id: check-changelog
-  name: the open CHANGELOG.md repeats no heading, closes no issue twice
+  name: CHANGELOG.md takes an entry only in a release's own pull request
   entry: .github/scripts/check_changelog.py
   language: script
   pass_filenames: false

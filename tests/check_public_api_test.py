@@ -335,7 +335,7 @@ def test_a_rehearsal_reads_the_first_section_under_the_title(
 
 _HWI = "src/btclib/hwi.py:0: <module>: Public object was removed\n"
 
-# the release pull request opened the next section above the retitled one
+# a notes file with a work-in-progress section above the release's own
 _AFTER_RELEASE_PR = """\
 # Release notes
 

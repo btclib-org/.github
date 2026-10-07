@@ -81,8 +81,7 @@ and re-checked weekly. Coverage is held at 100%.
 
 Issues and pull requests go to each repository; its README and
 `CONTRIBUTING.md` say how. A change needs a clean lint gate, a passing
-suite at full coverage, a signed commit, and a changelog entry where a
-user would notice.
+suite at full coverage and a signed commit.
 
 ## License
 

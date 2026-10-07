@@ -10,9 +10,9 @@ reduced to a key and compared with the keys of the backticked spans of
 one section of the notes: the section of the tag being released. Where
 there is no tag, a rehearsal, it is the section named by the `version` of
 the `pyproject.toml` beside the notes, else the first one under the
-file's title. The release
-pull request opens the next section above the retitled one, so the first
-section is the release's own only before that pull request lands.
+file's title. The release pull
+request adds the release's section above the previous one, so the first
+section is the release's own once that pull request has landed.
 
 A finding of a module, printed `<module>`, has the module's dotted path
 as its key, taken from the path griffe printed. Any other finding has

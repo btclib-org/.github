@@ -24,7 +24,7 @@ name: reusable-claude-review
 # Two inputs.
 #
 # extra-prompt, string, default "": a paragraph of the calling tree's
-# own, landing between the verdict paragraph and the instruction not to
+# own, landing between the findings paragraph and the instruction not to
 # run the gates. One fixed point, a second being an input to choose
 # where an input goes. What earns it is a claim a review cannot check
 # without knowing what the tree ships: bbt's notebooks, whose committed
@@ -140,7 +140,7 @@ name: reusable-claude-review
 # whether it is a verdict. The rejected alternative filters to the
 # entries that are verdicts and takes the last of those, which answers
 # with a stale verdict whenever the newest claude[bot] entry is a
-# reading rather than an ACK, a NACK or a CHANGES REQUESTED line --
+# reading rather than one of the four verdict lines --
 # btclib-org/btclib-secp256k1#394 is what records that, and
 # btclib-secp256k1 is where the fix is. A caller stops carrying the
 # defect by calling this file, so each conversion is also that fix
@@ -324,7 +324,7 @@ jobs:
           # deliberately -- what triggers it is somebody writing @claude
           allowed_bots: "dependabot[bot]"
           # the caller's paragraph lands on the line of its own below,
-          # between the verdict paragraph and the gates instruction; a
+          # between the findings paragraph and the gates instruction; a
           # caller passing none leaves a blank line there and nothing
           # else
           prompt: |
@@ -350,22 +350,20 @@ jobs:
             tree's `CONTRIBUTING.md` still says.
 
             Write plainly: the point first, plain words, short
-            sentences. Do not describe what the diff does. Do not list
-            what you checked and found fine.
+            sentences.
 
-            The summary has, in this order:
-            1. One line: the sha reviewed, that this job ran no gates,
-               and what the author says they ran, or that they say
-               nothing.
-            2. The findings, one bullet each: where, what is wrong, how
-               it is known, and its kind (blocking, non-blocking, nit,
-               question).
-            3. What was not checked, if anything.
-            4. Findings outside this pull request, if any, under a line
-               saying they are not about it.
-            5. The verdict, alone on the last line: `ACK <sha>`,
-               `CHANGES REQUESTED <sha>` or `NACK <sha>`. It is not
-               optional: a check reads it.
+            The summary's first line is the verdict, alone on the line:
+            `ACK <sha>`, `CHANGES REQUESTED <sha>`, `NACK <sha>`, or
+            `NO VERDICT <sha>: <reason>` where you could not judge, for
+            example because a permission you needed was refused. It is
+            not optional: a check reads it.
+
+            Then the findings, blocking and non-blocking only, one
+            bullet each: where, what is wrong, how it is known. Add one
+            line starting "Not checked:" only where what you could not
+            check bears on the verdict. No nits, no findings outside
+            this pull request, no account of what the diff does or of
+            what you checked.
 
             ${{ inputs.extra-prompt }}
 
@@ -488,7 +486,7 @@ jobs:
       #           | {id, conclusion, run_started_at, updated_at}'
       #
       # So what is read here is what was posted rather than what the
-      # action produced: the verdict is the last line of a review body,
+      # action produced: the verdict is the first line of a review body,
       # which is where REVIEWING.md puts it, and only what claude[bot]
       # wrote is the ack of record -- section 11's *Review* is what says
       # an author's own is not.
@@ -498,7 +496,7 @@ jobs:
       # review` is in the first and in neither of the second.
       #
       #   gh api repos/{owner}/{repo}/pulls/<number>/reviews \
-      #     --jq '.[] | "\(.user.login) \(.body | split("\n") | last)"'
+      #     --jq '.[] | "\(.user.login) \(.body | split("\n") | first)"'
       #
       # The last verdict decides, rather than any verdict naming the
       # head: a second reading of the same tree can refuse what an
@@ -537,7 +535,7 @@ jobs:
           # alternative filters to the entries that are verdicts and
           # takes the last of those, which answers with a stale verdict
           # whenever the newest claude[bot] entry is a reading rather
-          # than one of the three lines -- a busy pull request, or a
+          # than a verdict line -- a busy pull request, or a
           # comment that declines to give a verdict, arriving after an
           # acked or changes-requested run. A later entry with no
           # verdict is itself the answer, and empties `$verdict` the
@@ -558,6 +556,7 @@ jobs:
           # `split("\n")` answering `[]` for it. A body of whitespace
           # or newlines alone is what `map(select(length > 0))` is for,
           # splitting into fields that the `sub` before it then empties.
+          # The first line that is left is the verdict's place.
           verdict=$(gh api "repos/$REPO/pulls/$NUMBER/reviews" --paginate \
             --slurp \
             | jq -r '[ .[][] | select(.user.login == "claude[bot]") ]
@@ -566,16 +565,24 @@ jobs:
                   | split("\n")
                   | map(sub("\\s+$"; ""))
                   | map(select(length > 0))
-                  | last // empty
-                  | select(test("^(ACK|NACK|CHANGES REQUESTED) [0-9a-f]{7,40}$"))')
+                  | first // empty
+                  | select(test("^((ACK|NACK|CHANGES REQUESTED) [0-9a-f]{7,40}"
+                                + "|NO VERDICT [0-9a-f]{7,40}: .+)$"))')
           if [ -z "$verdict" ]; then
             echo "::error::the review posted no verdict on this pull" \
                  "request, so nothing says whether $HEAD_SHA was read at" \
                  "all. A job that finishes green having written no" \
-                 "review, or a review whose last line is not a verdict," \
+                 "review, or a review whose first line is not a verdict," \
                  "is what this reports."
             exit 1
           fi
+          case "$verdict" in
+            "NO VERDICT "*)
+              echo "::error::the review gave $verdict. It could not judge," \
+                   "and no verdict is no ack."
+              exit 1
+              ;;
+          esac
           sha=${verdict##* }
           case "$verdict" in
             "ACK "*) ;;

@@ -150,8 +150,8 @@ gh issue create --title <the finding, as a claim> \
   --body <what was noticed and where, how it is known, why it matters, any fix>
 ```
 
-Name the issues filed at the foot of the summary, under a line saying
-they are **not** findings against this pull request.
+The summary does not name the issues filed: they are **not** findings
+against this pull request.
 
 ## What a finding says
 
@@ -164,7 +164,7 @@ they are **not** findings against this pull request.
 
     - **blocking** — wrong, misleading or unmaintainable on `main`
     - **non-blocking** — worth doing, does not hold the ack
-    - **nit** — taste; said once and never repeated
+    - **nit** — taste; said once, inline only, never in the summary
     - **question** — something not reproduced, asked as a question
       rather than asserted as a defect
 
@@ -337,7 +337,9 @@ one, is where the rule lives.
   `git log`'s and the changelog's. The finding asks for the history to
   go, not to be shortened.
 - Does the branch add an entry to `CHANGELOG.md` or `RELEASE_NOTES.md`?
-  It adds none, a release's own pull request excepted (section 9).
+  Outside a release's own pull request that is a blocking finding (section 9).
+  `check-changelog` refuses a new entry and reads nothing of a bullet
+  added under an entry the base holds.
 - A new or changed workflow: section 10 of the standard, and
   `REPOSITORY.md` before any rule or setting is touched. A renamed job
   is a required check renamed out of existence.
@@ -357,7 +359,7 @@ a gap.
 
 Inline comments for the line-anchored findings, then exactly one
 summary. **A review that decides whether the pull request lands** posts
-that summary to the forge as a review, and ends it with one of three
+that summary to the forge as a review, and opens it with one of four
 lines:
 
 ```text
@@ -372,19 +374,27 @@ CHANGES REQUESTED <sha>
 NACK <sha>
 ```
 
-The ack of record carries whichever of the three applies and is posted
+```text
+NO VERDICT <sha>: <reason>
+```
+
+The ack of record carries whichever of the four applies and is posted
 as a review of type COMMENT — `gh pr review --comment` — never as a
 forge approval or a forge request for changes. Section 11 of the
-standard says whose verdict the ack of record is, what each of the three
+standard says whose verdict the ack of record is, what each of the four
 concludes, and what forbids the workflow an approval; a forge approval
 is a person's, and it is not the ack.
+
+**`NO VERDICT` is the reviewer saying it could not judge**, and the
+reason names why: a permission it needed was refused, a file would not
+open. It is not an ack.
 
 Every other summary is a comment. Nothing else is an ack — not "looks
 good", and not a forge approval by the author of the pull request, which
 section 11 records GitHub as refusing. Every line names the sha, because
 an ack belongs to a tree and not to a branch.
 
-**A review that does not decide ends without one, and is not an
+**A review that does not decide has no verdict line, and is not an
 unfinished review.** Somebody who reads a diff and says what they found
 is worth more than the same person saying nothing because a verdict on
 the whole change was the price of speaking, and the readings worth
@@ -393,28 +403,29 @@ the ack of record and an approving review from somebody other than its
 author. Every other comment on it is evidence a person weighs before
 pressing.
 
-**A `NACK` is a decision and ending without a verdict is not.** Both
-leave the pull request unacked, which is what makes them easy to read as
-one thing, and they say opposite things: the first concludes, and
-section 11 has what it concludes; the second declines to conclude, which
-is what a reading does. Silence is not a refusal, so a reviewer who
-means to refuse writes the line.
+**A `NACK` is a decision and having no verdict is not.** Both leave the
+pull request unacked, which is what makes them easy to read as one
+thing, and they say opposite things: the first concludes, and section 11
+has what it concludes; the second declines to conclude, which is what a
+reading does. Silence is not a refusal, so a reviewer who means to
+refuse writes the line.
 
-The summary says, in a few lines, what was reviewed — the sha, the gates
-and their exit codes —, lists the blocking findings, and names the
-issues filed. **In a verdict**, `CHANGES REQUESTED` with no blocking
-finding is a contradiction: either the finding is blocking or the ack is
-due. In a reading neither is owed, the reading having declined to say. A
-`NACK` need not carry a blocking finding at all: its ground is the
-change rather than a defect in it, and that ground is what the summary
-states.
+**After the verdict line the summary is short**: the blocking and the
+non-blocking findings, one each, saying where, what is wrong and how it
+is known. No nit (nits go inline only), no finding outside this pull
+request, no account of what the diff does or of what was checked.
+**In a verdict**, `CHANGES REQUESTED` with no blocking finding is a
+contradiction: either the finding is blocking or the ack is due. In a
+reading neither is owed, the reading having declined to say. A `NACK`
+need not carry a blocking finding at all: its ground is the change
+rather than a defect in it, and that ground is what the summary states.
 
-And, in either, **what was not checked**: a command that could not be
-run, an issue that could not be read, a part of the tree left unopened.
-A review that answered "does it answer its issues" against the pull
-request's own account of them, having been unable to read the issues, is
-reasoning in a circle — and has to say so, because somebody reading the
-last line alone would never see it.
+**One line starting `Not checked:` is added only where what could not be
+checked bears on the verdict**: a command that could not be run, an
+issue that could not be read, a part of the tree left unopened. A review
+that answered "does it answer its issues" against the pull request's own
+account of them, having been unable to read the issues, is reasoning in
+a circle, and has to say so.
 
 Post it the moment it is written, and where several pull requests are
 waiting, finish and post one before opening the next: a batch of reviews
@@ -458,7 +469,8 @@ branch's history.
 
 Ack when every blocking finding is closed, the gates passed locally on
 that sha, and the diff answers its issues. Non-blocking findings and
-nits do not hold an ack — say that they are left to the author.
+inline nits do not hold an ack — say that the findings are left to the
+author.
 
 ## This repository in particular
 
