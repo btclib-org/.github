@@ -1736,6 +1736,13 @@ without adding to it is deleted.
 
 ### `CHANGELOG.md` and `RELEASE_NOTES.md`
 
+- **A pull request adds no entry to either file.** The release pull
+  request writes them (btclib-org/.github#1622). An entry per pull request
+  conflicts with every other open pull request at each landing; the
+  release pull request writes the changelog once, with the whole release
+  in view. The rules below hold for what the release pull request
+  writes; #1626 rewrites those that still assume an entry per pull
+  request.
 - **An entry is a `###` title and at most three lines.** The title says
   what changed. The body cites the issue in its own text — `(closes #N)`
   where the change closes it, `(issue #N)` where it does not, and
@@ -1758,7 +1765,7 @@ without adding to it is deleted.
   citation. `check-changelog` names a heading with no blank line
   above it, a repeated heading, a double close and a heading new to a
   release older than the newest, and not a block's place within the open
-  section, which a person reads off a command `CONTRIBUTING.md` has.
+  section.
 - **`merge=union` is the rejected alternative** (btclib-org/.github#1582).
   The driver writes what deleting the markers writes at that style, and
   the rebase exits 0 without the rebuild. GitHub does not apply the
