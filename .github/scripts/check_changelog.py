@@ -25,9 +25,9 @@ than preserving its length.
 Three checks, all of them shapes a conflict resolved by deleting its
 markers produces -- a fourth, below them, that is section 9's own bound
 on an entry -- a fifth that backs the fourth's own exemption, which
-guards the grandfathered count -- and a sixth,
-unrelated to the rebase, that catches a citation number
-`markdownlint-cli2`'s own `--fix` mangles once it opens a line:
+guards the grandfathered count -- and a sixth, unrelated to the rebase,
+that catches a citation number `markdownlint-cli2`'s own `--fix` mangles
+once it opens a line:
 
 - a `### ` heading repeated within the section -- measured against real
   rebases under `merge=union`, which writes what deleting the markers

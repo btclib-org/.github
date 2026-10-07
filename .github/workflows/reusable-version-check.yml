@@ -233,9 +233,11 @@ jobs:
       # for the detail, and a section missing there makes that a link
       # into nothing.
       # Release-only, like the comparison above and for the same
-      # reason: a rehearsal is what runs *before* the release pull
-      # request, so requiring it there would forbid the dry run it
-      # exists to be.
+      # reason: a rehearsal is dispatched from a branch on purpose. A
+      # rehearsal of a release that breaks the public API runs from the
+      # release pull request's branch, after its notes are written;
+      # before that it reads the previous release's section and the
+      # public-API check fails.
       # String comparison rather than a regex, so that the dots of the
       # version match dots and not any character, and awk rather than
       # grep, one pass answering all three questions
