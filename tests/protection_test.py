@@ -43,7 +43,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import ORG, SELF, by_hand, gh_json
+from . import ORG, SELF, by_hand, gh_json, still_open
 from .check_sign_off_test import SCRIPT
 from .dependency_review_test import ACTION, READ_AS, REUSABLE
 from .workflows_test import jobs
@@ -67,6 +67,21 @@ NO_MAIN = "Branch not found"
 
 ACTIONS_APP = 15368
 """The Actions app, which section 11 binds every required check to."""
+
+EXPECTED_DEPARTURE: dict[tuple[str, str], str] = {
+    ("claude-process", "strict"): "btclib-org/.github#1619",
+}
+"""A field of the classic list known to be off, against the issue deciding it.
+
+The key is the repository and the field's name in the test below.
+"""
+
+STAND_IN = {"strict": "merge_queue"}
+"""The rule that has to be on `main` where a classic field is excused.
+
+The merge queue tests each pull request merged onto the current `main`
+before it lands, which is what `strict` guarantees.
+"""
 
 CALL = f"{ORG}/{SELF}/.github/workflows/reusable-lint.yml@main"
 """How a tree's `lint.yml` calls the workflow that holds the review job."""
@@ -131,6 +146,8 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
     and is reported as that rather than as a case of its own: the list
     is what section 11 states, and a branch holding none of it fails
     the list, through the one assertion the backlog knows to excuse.
+    A field `EXPECTED_DEPARTURE` lists for the repository is excused,
+    and checked to be off.
 
     :param repository: the repository asked about.
     :param protections: the classic protection of each repository.
@@ -159,13 +176,48 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
         "enforce_admins off": holds(document, "enforce_admins", off=True),
         "required_signatures off": holds(document, "required_signatures", off=True),
     }
-    off = sorted(field for field, held in wanted.items() if not held)
-    assert not off, f"classic protection does not hold: {off}; " + by_hand(
-        repository,
-        f"gh api repos/{ORG}/{repository}/{ENDPOINT} --jq "
-        "'{checks: [.required_status_checks.checks[]?.context],"
-        " strict: .required_status_checks.strict,"
-        " admins: .enforce_admins.enabled}'",
+    excused = {field for name, field in EXPECTED_DEPARTURE if name == repository}
+    back = sorted(field for field in excused if wanted[field])
+    off = sorted(
+        field for field, held in wanted.items() if not held and field not in excused
+    )
+    problems: list[str] = []
+    if off:
+        problems.append(f"classic protection does not hold: {off}")
+    if back:
+        problems.append(
+            f"excused but on again, delete the EXPECTED_DEPARTURE entry: {back}"
+        )
+    assert not problems, (
+        "; ".join(problems)
+        + "; "
+        + by_hand(
+            repository,
+            f"gh api repos/{ORG}/{repository}/{ENDPOINT} --jq "
+            "'{checks: [.required_status_checks.checks[]?.context],"
+            " strict: .required_status_checks.strict,"
+            " admins: .enforce_admins.enabled}'",
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    "entry",
+    list(EXPECTED_DEPARTURE),
+    ids=[f"{r}-{f}" for r, f in EXPECTED_DEPARTURE],
+)
+def test_a_recorded_departure_is_still_one(entry: tuple[str, str]) -> None:
+    """Each `EXPECTED_DEPARTURE` entry cites an open issue and has its rule.
+
+    :param entry: the entry's repository and field.
+    """
+    repository, field = entry
+    reference = EXPECTED_DEPARTURE[entry]
+    assert still_open(reference), f"{repository} {field} cites {reference}, closed"
+    rules = gh_json(f"repos/{ORG}/{repository}/rules/branches/main")
+    assert any(rule["type"] == STAND_IN[field] for rule in rules), (
+        f"{repository} has no active {STAND_IN[field]} rule on main: its {field}"
+        " departure no longer has the rule it rests on"
     )
 
 
