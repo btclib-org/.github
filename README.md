@@ -380,7 +380,7 @@ whatever decides it:
 | `REVIEWING.md` | the standard a review is written against | 1, 2, 3 |
 | `REPOSITORY.md` | the settings that live outside the tree | 1, 2, 3 |
 | `RELEASING.md` | how a release is cut, and how one is recovered | 1 |
-| `CHANGELOG.md` | what each release changed, written when it is cut | 1, 2, 3 |
+| `CHANGELOG.md` | written when a release is cut; a preamble if none | 1, 2, 3 |
 | `RELEASE_NOTES.md` | what a user has to *act* on, on top of it | 1 |
 | `CLAUDE.md` | what a session needs and no human document holds | 1, 2, 3 |
 | `pyproject.toml` | the project and every tool's configuration | 1, 2 |
@@ -3225,8 +3225,8 @@ A label means what its description says. Who applies and removes it:
   `CHANGELOG.md` and in `RELEASE_NOTES.md`, where the repository has one. The
   changelog's section is written from the squash subjects since the previous
   tag, `git log v<prev>..HEAD --format=%s`, grouped and shortened; the release
-  notes take what a user has to act on. No other pull request touches either
-  file (section 9), so the topmost `##` heading of either file on the default
+  notes take what a user has to act on. No other pull request adds an entry to
+  either file (section 9), so the topmost `##` heading of either file on the default
   branch is the latest release's at every commit. The tag says what
   `pyproject.toml` says, so the version bump stays in the pull request that
   sets it. A release publishes the section the release pull request added.

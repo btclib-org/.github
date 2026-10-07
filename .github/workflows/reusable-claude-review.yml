@@ -361,9 +361,9 @@ jobs:
             Then the findings, blocking and non-blocking only, one
             bullet each: where, what is wrong, how it is known. Add one
             line starting "Not checked:" only where what you could not
-            check bears on the verdict. No nits, no findings outside
-            this pull request, no account of what the diff does or of
-            what you checked.
+            check bears on the verdict. No nits in the summary, no
+            findings outside this pull request, no account of what the
+            diff does or of what you checked.
 
             ${{ inputs.extra-prompt }}
 

@@ -416,7 +416,8 @@ refuse writes the line.
 blocking and the non-blocking findings, one bullet each, saying where,
 what is wrong and how it is known. No nit (nits go inline only), no
 finding outside this pull request, no other account of what the diff
-does or of what was checked.
+does or of what was checked, beyond whose gate run a reviewer other
+than the bot relies on.
 **In a verdict**, `CHANGES REQUESTED` with no blocking finding is a
 contradiction: either the finding is blocking or the ack is due. In a
 reading neither is owed, the reading having declined to say. A `NACK`

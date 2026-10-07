@@ -397,6 +397,21 @@ def test_a_rehearsal_names_the_wip_section_when_no_release_section_is_there(
     assert _rehearse(script, tmp_path, _WIP_WITHOUT_RELEASE, pyproject) == 0
 
 
+# the layout between releases: the previous release's section is first
+_PREVIOUS_FIRST = _WIP_ABOVE_RELEASE.split("## v2026.11", maxsplit=1)[0] + (
+    "## v2026.10.3\n\n- **`unrelated` is named only here.**\n"
+)
+
+
+def test_a_rehearsal_before_the_notes_are_written_leaves_the_break_unnamed(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """The first section is the previous release's: it names nothing new."""
+    pyproject = '[project]\nversion = "2026.10.4"\n'
+
+    assert _rehearse(script, tmp_path, _PREVIOUS_FIRST, pyproject) == 1
+
+
 @pytest.mark.parametrize(
     "pyproject",
     [
