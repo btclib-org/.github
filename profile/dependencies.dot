@@ -55,7 +55,7 @@ digraph dependencies {
     "btclib"           [pos="290,260"];
     "btclib-wallet"      [pos="0,160"];
     "bitcoin-node-tests" [pos="145,160"];
-    "btclib-benchmarks"  [pos="435,160"];
+    "btclib-benchmarks"  [pos="435,60"];
     "btclib-node"        [pos="290,60"];
 
     "btclib-secp256k1" -> "libsecp256k1" [style=dotted, arrowhead=none, label="bundled", lp="262,510",
@@ -75,9 +75,9 @@ digraph dependencies {
         pos="e,290,242 290,78 290,78 290,235 290,235"];
     "btclib-node" -> "btclib-wallet"
         [pos="e,0,142 229,60 229,60 0,60 0,60 0,60 0,135 0,135"];
-    "btclib-benchmarks" -> "btclib"
-        [pos="e,290,242 415,178 415,178 415,210 415,210 415,210 290,210 290,210 290,210 290,235 290,235"];
+    "btclib-benchmarks" -> "btclib-wallet"
+        [pos="e,20,142 415,78 415,78 415,110 415,110 415,110 20,110 20,110 20,110 20,135 20,135"];
     "btclib-benchmarks" -> "btclib-secp256k1"
-        [pos="e,351,460 455,178 455,178 455,460 455,460 455,460 358,460 358,460"];
+        [pos="e,351,460 455,78 455,78 455,460 455,460 455,460 358,460 358,460"];
     "btclib-wallet" -> "btclib-mnemonics" [pos="e,-20,442 -20,178 -20,178 -20,435 -20,435"];
 }
