@@ -3230,8 +3230,11 @@ A label means what its description says. Who applies and removes it:
   `pyproject.toml` says, so the version bump stays in the pull request that
   sets it. A release publishes the section the release pull request added.
   A rehearsal of a release that breaks the public API is dispatched from that
-  branch, after the notes are written: before, the public-API check reads the
-  previous release's section and fails.
+  branch, after the notes are written. A rehearsal has no tag, so the
+  public-API check reads the section headed `## v<version>`, the version being
+  `pyproject.toml`'s, else the first `##` section. Before the notes are
+  written, that section is the previous release's or a work-in-progress one,
+  and the check fails on each break it does not name.
 - **A published sdist reproduces from its tag.** The attestation every publisher
   attaches vouches for bytes, so a release rebuilt from the commit its tag names
   — by running what the release ran — gives those bytes back. What the release
