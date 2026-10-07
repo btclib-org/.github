@@ -358,16 +358,12 @@ jobs:
             example because a permission you needed was refused. It is
             not optional: a check reads it.
 
-            The second line says whose gate run the verdict relies on:
-            "the workflows on this sha", or "the author's statement of
-            what they ran", naming the sha it was run on.
-
             Then the findings, blocking and non-blocking only, one
             bullet each: where, what is wrong, how it is known. Add one
             line starting "Not checked:" only where what you could not
             check bears on the verdict. No nits, no findings outside
             this pull request, no account of what the diff does or of
-            what you checked beyond the second line.
+            what you checked.
 
             ${{ inputs.extra-prompt }}
 

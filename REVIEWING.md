@@ -295,10 +295,12 @@ reviewer's business for the reason below.
 The sha is the whole of the condition: a run on another tree is not a run
 on this one, so a rebase voids it — the branch was gated, and then the
 tree moved under the gate. Naming the run is not a disclaimer but the
-evidence's provenance, "no gates were run by this job, the workflows on
-this sha are what stands" and "the author's statement of what they ran is
-what stands" being the two forms it takes, and it is what lets a reader
-tell a gate relied on from one nobody looked at. A pull request picked up
+evidence's provenance, "the workflows on this sha are what stands" and
+"the author's statement of what they ran is what stands" being the two
+forms it takes, and it is what lets a reader tell a gate relied on from
+one nobody looked at. The review bot does not say it: it always relies
+on the workflows on its sha, which the pull request shows as checks, so
+a line saying so would be constant. A pull request picked up
 with no such run in front of you is the other case, and there they are
 run.
 
@@ -410,12 +412,11 @@ has what it concludes; the second declines to conclude, which is what a
 reading does. Silence is not a refusal, so a reviewer who means to
 refuse writes the line.
 
-**After the verdict line the summary is short**: one line naming whose
-gate run it relies on, the evidence's provenance above; then the
-blocking and the non-blocking findings, one bullet each, saying where, what is
-wrong and how it is known. No nit (nits go inline only), no finding
-outside this pull request, no other account of what the diff does or of
-what was checked.
+**After the verdict line the summary is short**: the
+blocking and the non-blocking findings, one bullet each, saying where,
+what is wrong and how it is known. No nit (nits go inline only), no
+finding outside this pull request, no other account of what the diff
+does or of what was checked.
 **In a verdict**, `CHANGES REQUESTED` with no blocking finding is a
 contradiction: either the finding is blocking or the ack is due. In a
 reading neither is owed, the reading having declined to say. A `NACK`
