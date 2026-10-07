@@ -1737,8 +1737,12 @@ without adding to it is deleted.
 ### `CHANGELOG.md` and `RELEASE_NOTES.md`
 
 - **A pull request adds no entry to either file.** The release pull
-  request writes them (btclib-org/.github#1622). The rules below hold for
-  what it writes.
+  request writes them (btclib-org/.github#1622). An entry per pull request
+  conflicts with every other open pull request at each landing; the
+  release pull request writes the changelog once, with the whole release
+  in view. The rules below hold for what the release pull request
+  writes; #1626 rewrites those that still assume an entry per pull
+  request.
 - **An entry is a `###` title and at most three lines.** The title says
   what changed. The body cites the issue in its own text — `(closes #N)`
   where the change closes it, `(issue #N)` where it does not, and

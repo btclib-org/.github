@@ -94,7 +94,10 @@ file's other half. Read before opening a pull request, it is what the
 pull request will be answered against.
 
 A pull request adds no entry to `CHANGELOG.md` or `RELEASE_NOTES.md`:
-the changelog is written at release time (btclib-org/.github#1622).
+the changelog is written at release time (btclib-org/.github#1622). An
+entry per pull request conflicts with every other open pull request at
+each landing; the release pull request writes the changelog once, with
+the whole release in view.
 
 ### One subject, opened as soon as it is written
 
