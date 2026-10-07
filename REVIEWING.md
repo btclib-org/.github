@@ -412,7 +412,7 @@ refuse writes the line.
 
 **After the verdict line the summary is short**: one line naming whose
 gate run it relies on, the evidence's provenance above; then the
-blocking and the non-blocking findings, one each, saying where, what is
+blocking and the non-blocking findings, one bullet each, saying where, what is
 wrong and how it is known. No nit (nits go inline only), no finding
 outside this pull request, no other account of what the diff does or of
 what was checked.

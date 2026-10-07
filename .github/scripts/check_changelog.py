@@ -25,7 +25,7 @@ than preserving its length.
 Three checks, all of them shapes a conflict resolved by deleting its
 markers produces -- a fourth, below them, that is section 9's own bound
 on an entry -- a fifth that backs the fourth's own exemption, which
-trusts a placement rule nothing else here checks -- and a sixth,
+guards the grandfathered count -- and a sixth,
 unrelated to the rebase, that catches a citation number
 `markdownlint-cli2`'s own `--fix` mangles once it opens a line:
 
@@ -479,12 +479,10 @@ def misplaced_entries(
     """Report more entries above `RULE_HEADING` than were grandfathered.
 
     `long_bodies()` below reads an entry above `RULE_HEADING` as older
-    than the rule, on the strength of a placement rule -- a new entry
-    goes below it -- which nothing else here checks. A branch that only
-    ever appends below `RULE_HEADING` never grows the count of entries
-    above it; where the open section holds more than `grandfathered`
-    names, one has landed above it instead, and is refused here rather
-    than silently read as predating a rule it postdates.
+    than the rule, and nothing else here checks that. Where the open
+    section holds more than `grandfathered` entries above it, one has
+    landed there instead, and is refused here rather than silently read
+    as predating a rule it postdates.
 
     :param text: the whole file, for the line number reported.
     :param section: the open section's own text.

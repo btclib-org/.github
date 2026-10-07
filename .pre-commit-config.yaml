@@ -257,7 +257,7 @@ repos:
       # read off one line, which is also where the three blind spots
       # come from. Same `\x20` as above, and the same reason.
       # `CHANGELOG.md` and `RELEASE_NOTES.md` are out of reach because
-      # section 9 makes them append-only: a refused shape in an entry
+      # section 9 rewrites neither: a refused shape in an entry
       # that has landed has no repair, and there would be no green state
       # to reach. `exclude:` selects files and pygrep reads whole ones,
       # so an exclusion keyed on the older entries alone cannot be

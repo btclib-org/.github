@@ -3,8 +3,8 @@ name: reusable-version-check
 
 # The tag and version checks a repository's release.yml runs before
 # anything publishes, so the ancestry check, the version comparison and
-# the retitling check are written once. The trigger -- a tag push, or a
-# workflow_dispatch rehearsal -- and everything after this job stay in
+# the release-notes check are written once. The trigger -- a tag push, or
+# a workflow_dispatch rehearsal -- and everything after this job stay in
 # the caller, whose run this job joins.
 #
 # One input: a release of this organization's calendar-versioned trees
@@ -16,8 +16,8 @@ name: reusable-version-check
 # which skips both and keeps the rest of the job. An input for
 # the rest of this job would be a copy in disguise (btclib-org/.github#35):
 # every tree with a release.yml runs the same checkout, the same lock
-# check, the same ancestry check and the same retitling check, line for
-# line.
+# check, the same ancestry check and the same release-notes check, line
+# for line.
 #
 # The ancestry check reads github.event.repository.default_branch rather
 # than a hardcoded "main": this is the one check whose subject is that
@@ -94,7 +94,7 @@ jobs:
       # branch, would publish code no review ever approved and no
       # branch contains. `git merge-base --is-ancestor` is the whole of
       # the question. Release-only, like the version comparison and the
-      # retitling check below and for the same reason: a rehearsal is
+      # release-notes check below and for the same reason: a rehearsal is
       # dispatched from a branch on purpose, that being what it is for
       - name: Check that the tag is merged into the default branch (release only)
         if: github.event_name == 'push'

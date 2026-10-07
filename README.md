@@ -1038,12 +1038,13 @@ pre-commit.ci does not have — the lint workflow covers it. No
   `.pre-commit-hooks.yaml` rather than every tree carrying a copy. The
   stanza names that repository under `repo:`, a 40-hex commit under
   `rev:`, and `args: [--grandfathered, N]`, where N is the number of
-  entries the open section held above the length rule's own entry on the
-  day this check reached the tree. The `rev:` is a sha because this
-  repository cuts no tag, and `autoupdate` moves a sha by `git rev-parse
-  FETCH_HEAD` where `git describe --tags` answers nothing; `pinned-rev`
-  accepts forty hex characters for that reason. The hook repository
-  declares `language: script`, `pass_filenames: false`, `always_run:
+  entries the file's first `##` section held above the length rule's own
+  entry on the day this check reached the tree. The `rev:` is a sha
+  because this repository cuts no tag, and `autoupdate` moves a sha by
+  `git rev-parse FETCH_HEAD` where `git describe --tags` answers
+  nothing; `pinned-rev` accepts forty hex characters for that reason.
+  The hook repository declares `language: script`,
+  `pass_filenames: false`, `always_run:
   true` and `verbose: true`, and the gate orders it ahead of
   `markdownlint-cli2` so it reads the file before that hook's `--fix`
   repairs the seam the blank-line check names. It refuses what deleting
@@ -1747,7 +1748,7 @@ without adding to it is deleted.
 
 ### `CHANGELOG.md` and `RELEASE_NOTES.md`
 
-- **A pull request does not touch either file.** An entry written in
+- **A pull request adds no entry to either file.** An entry written in
   every pull request lands at one place, so each landing put every other
   open pull request in conflict there. What a pull request changed is
   its squash subject, which is `git log`'s.
@@ -1765,8 +1766,9 @@ without adding to it is deleted.
   measurement, no count and no history; the reasoning is the pull
   request's. Section 4's `check-changelog` refuses a longer body, and an
   entry written outside a release's own pull request.
-- **A repository that does not release keeps `CHANGELOG.md` with a
-  preamble only**, saying that its history is `git log` of `main`.
+- **A repository that does not release keeps `CHANGELOG.md`'s
+  preamble**, saying that its history is `git log` of `main`, and adds
+  no entry.
   Section 2 owes the file to every tier.
 - **Neither file has a merge driver.** Only a release's pull request
   writes them, so a conflict there is a second writer, and a driver
