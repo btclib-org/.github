@@ -133,8 +133,8 @@ jobs:
       # for pyproject.toml's version, else the first. A rehearsal of a
       # release that breaks the public API runs from the release pull
       # request's branch after its notes are written, so that this
-      # reads the release's own section: a tree may still have a
-      # work-in-progress section on top. griffe prints its
+      # reads the release's own section: before, it reads another
+      # release's, or a work-in-progress one. griffe prints its
       # findings on standard error, and oneline is the format that puts
       # the object and the file on one line for the script to read.
       # --quiet keeps uv's own progress lines out of that file, the
