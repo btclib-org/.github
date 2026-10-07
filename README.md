@@ -588,7 +588,9 @@ Dotfiles, each owed by the tiers that owe the section reading it:
 one in this repository's own forms: whoever takes the issue signs off
 every commit, the required `Sign-off` check refuses a pull request
 without the trailer, and `CONTRIBUTING.md`'s *Pull requests* says why.
-`tests/labels_test.py` reads each form's last `body` item.
+A first contributor reads the issue before `CONTRIBUTING.md`, and a pull
+request opened without the trailer waits on them for a fix only they can
+make. `tests/labels_test.py` reads each form's last `body` item.
 
 `.github/` is every tier's, and holds what the sections the tier binds
 ask of it. The other three have a package as their subject, not a tier,
