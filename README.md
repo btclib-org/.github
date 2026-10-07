@@ -380,7 +380,7 @@ whatever decides it:
 | `REVIEWING.md` | the standard a review is written against | 1, 2, 3 |
 | `REPOSITORY.md` | the settings that live outside the tree | 1, 2, 3 |
 | `RELEASING.md` | how a release is cut, and how one is recovered | 1 |
-| `CHANGELOG.md` | every user-visible change, one entry each | 1, 2, 3 |
+| `CHANGELOG.md` | written when a release is cut; a preamble if none | 1, 2, 3 |
 | `RELEASE_NOTES.md` | what a user has to *act* on, on top of it | 1 |
 | `CLAUDE.md` | what a session needs and no human document holds | 1, 2, 3 |
 | `pyproject.toml` | the project and every tool's configuration | 1, 2 |
@@ -589,6 +589,14 @@ ask of it. The other three have a package as their subject, not a tier,
 so a tree installing none — `package = false`, or a build backend given
 no module to build — owes none of the three, and may still keep `tests/`
 above the floor, as `.github`'s own suite over the organization does.
+
+**Every issue form ends with a `type: markdown` block on sign-off**, the
+one in this repository's own forms: whoever takes the issue signs off
+every commit, the required `Sign-off` check refuses a pull request
+without the trailer, and `CONTRIBUTING.md`'s *Pull requests* says why.
+A first contributor reads the issue before `CONTRIBUTING.md`, and a pull
+request opened without the trailer waits on them for a fix only they can
+make. `tests/labels_test.py` reads each form's last `body` item.
 
 **`PULL_REQUEST_TEMPLATE.md` sits under `.github/`**, with the forge's
 other inputs, though GitHub also reads it from the root or `docs/`.
@@ -1017,8 +1025,8 @@ pre-commit.ci does not have — the lint workflow covers it. No
   the placeholder as its value instead of failing at the shell.
 
     **`CHANGELOG.md` and `RELEASE_NOTES.md` are outside it**, by
-    `exclude: ^(CHANGELOG|RELEASE_NOTES)\.md$`: section 9 makes both
-    append-only, so a refused shape in a landed entry has no repair.
+    `exclude: ^(CHANGELOG|RELEASE_NOTES)\.md$`: section 9 rewrites
+    neither, so a refused shape in a landed entry has no repair.
 
     **What separates an exempt quote from a refused one is a property of
     the line, not of the fence around it**: no shell puts a space around
@@ -1030,25 +1038,29 @@ pre-commit.ci does not have — the lint workflow covers it. No
   `.pre-commit-hooks.yaml` rather than every tree carrying a copy. The
   stanza names that repository under `repo:`, a 40-hex commit under
   `rev:`, and `args: [--grandfathered, N]`, where N is the number of
-  entries the open section held above the length rule's own entry on the
-  day this check reached the tree. The `rev:` is a sha because this
-  repository cuts no tag, and `autoupdate` moves a sha by `git rev-parse
-  FETCH_HEAD` where `git describe --tags` answers nothing; `pinned-rev`
-  accepts forty hex characters for that reason. The hook repository
-  declares `language: script`, `pass_filenames: false`, `always_run:
+  entries the file's first `##` section held above the length rule's own
+  entry on the day this check reached the tree. The `rev:` is a sha
+  because this repository cuts no tag, and `autoupdate` moves a sha by
+  `git rev-parse FETCH_HEAD` where `git describe --tags` answers
+  nothing; `pinned-rev` accepts forty hex characters for that reason.
+  The hook repository declares `language: script`,
+  `pass_filenames: false`, `always_run:
   true` and `verbose: true`, and the gate orders it ahead of
   `markdownlint-cli2` so it reads the file before that hook's `--fix`
   repairs the seam the blank-line check names. It refuses what deleting
   a rebase conflict's markers writes in that file: a repeated `###`
   heading, two entries closing the same issue, and a heading with no
   blank line above it (btclib-org/.github#760). It also refuses an entry
-  landed above the length rule's own entry out of section 9's order, an
+  landed above the length rule's own entry, an
   entry past that rule's three-line bound, and a citation number wrapped
   to a line's start, which markdownlint-cli2's own `--fix` would
-  otherwise mangle into a heading (btclib-org/.github#1398). It refuses
-  a `###` heading under a release older than the newest that the file
-  lacks at the merge base with `origin/main` (btclib-org/.github#1614);
-  the newest release is exempt, and with no merge base it passes.
+  otherwise mangle into a heading (btclib-org/.github#1398).
+
+    **It refuses an entry written outside a release's own pull request**
+    (btclib-org/.github#1622): a `###` heading the merge base with
+    `origin/main` does not hold under the same `##` heading, unless that
+    `##` is a `## v<version>` the base lacks. With no merge base it
+    passes, and says so.
 
     **`btclib-org/.github` itself keeps the hook `local`**, a pin being
     a revision other than the working tree: a tree pinning itself would
@@ -1736,44 +1748,32 @@ without adding to it is deleted.
 
 ### `CHANGELOG.md` and `RELEASE_NOTES.md`
 
-- **A pull request adds no entry to either file.** The release pull
-  request writes them (btclib-org/.github#1622). An entry per pull request
-  conflicts with every other open pull request at each landing; the
-  release pull request writes the changelog once, with the whole release
-  in view. The rules below hold for what the release pull request
-  writes; #1626 rewrites those that still assume an entry per pull
-  request.
+- **A pull request adds no entry to either file.** An entry written in
+  every pull request lands at one place, so each landing put every other
+  open pull request in conflict there. What a pull request changed is
+  its squash subject, which is `git log`'s.
+- **A release's section is written when the release is cut**, in the
+  release's own pull request, with the whole release in view. Section 12
+  has the step. The changelog takes what a user would notice; the
+  release notes take what a user has to act on; neither restates the
+  other.
 - **An entry is a `###` title and at most three lines.** The title says
   what changed. The body cites the issue in its own text — `(closes #N)`
   where the change closes it, `(issue #N)` where it does not, and
   `(closes owner/repo#N)` across repositories — and carries no
   measurement, no count and no history; the reasoning is the pull
-  request's. Section 4's `check-changelog` refuses a longer body.
-- **A `###` names one entry, and a new entry goes at the end of the open
-  section**, above the heading of the latest release — at the end of the
-  file where nothing has been released. The changelog takes what a user
-  would notice; the release notes take what a user has to act on;
-  neither restates the other.
-- **Neither file has a merge driver.** Two branches appending at one
-  anchor conflict there, so a rebase over a landing that wrote an entry
-  stops on the file. The resolution is the file rebuilt: the new base's
-  copy with the branch's own block at the end of its open section, which
-  this repository's `.github/scripts/rebuild_union_files.py` writes
-  (btclib-org/.github#1583). Deleting the markers is not one: at git's
-  default conflict style the lines both blocks start or end with sit
-  outside them, so one entry loses its blank line, its heading or its
-  citation. `check-changelog` names a heading with no blank line
-  above it, a repeated heading, a double close and a heading new to a
-  release older than the newest, and not a block's place within the open
-  section.
-- **`merge=union` is the rejected alternative** (btclib-org/.github#1582).
-  The driver writes what deleting the markers writes at that style, and
-  the rebase exits 0 without the rebuild. GitHub does not apply the
-  driver, and reports the conflict either way.
+  request's. Section 4's `check-changelog` refuses a longer body, and an
+  entry written outside a release's own pull request.
+- **A repository that does not release keeps `CHANGELOG.md`'s
+  preamble**, saying that its history is `git log` of `main`, and adds
+  no entry.
+  Section 2 owes the file to every tier.
+- **Neither file has a merge driver.** Only a release's pull request
+  writes them, so a conflict there is a second writer, and a driver
+  such as `merge=union` resolves it without a word, the rebase exiting 0
+  (btclib-org/.github#1582).
 - **Nothing already written is rewritten.** An entry speaks of its own
-  day, and a count in it that has since moved stays. An entry in the
-  open section is a live claim, though: a later entry that bears on it
-  says so in a sentence, and the append stays an append.
+  day, and a count in it that has since moved stays.
 - **A released section may leave `CHANGELOG.md` for its own
   `changelog/v<version>.md`**, that file holding one release and the
   index in `CHANGELOG.md`'s preamble linking it. Past a size ceiling
@@ -2775,18 +2775,21 @@ A pull request needs an approving review from somebody other than its
 author. GitHub refuses a self-approval, which is why an *author's* own
 verdict is a comment and can be nothing else.
 
-**What a landing reads is the ack of record**: a verdict whose last line
-is `ACK <sha>`, `CHANGES REQUESTED <sha>` or `NACK <sha>`, naming a sha
-because an ack belongs to a tree and not to a branch. `CHANGES
-REQUESTED` is the change being right in principle and wrong as written,
-and what answers it is another push. `NACK` is Bitcoin's sense of the
-word: the disagreement is with the change itself, so no alteration is
-asked for and none would earn an ack, and what answers it is an argument
-or a closed pull request. A review that delivers no verdict is a reading
-and not an unfinished review; `REVIEWING.md` states that distinction.
+**What a landing reads is the ack of record**: a verdict whose first line
+is `ACK <sha>`, `CHANGES REQUESTED <sha>`, `NACK <sha>` or `NO VERDICT
+<sha>: <reason>`, naming a sha because an ack belongs to a tree and not to
+a branch. `CHANGES REQUESTED` is the change being right in principle and
+wrong as written, and what answers it is another push. `NACK` is
+Bitcoin's sense of the word: the disagreement is with the change itself,
+so no alteration is asked for and none would earn an ack, and what
+answers it is an argument or a closed pull request. `NO VERDICT` is the
+reviewer saying it could not judge, for example because a permission it
+needed was refused: it is no ack, and it fails the check as a missing
+verdict does. A review that delivers no verdict line is a reading and not
+an unfinished review; `REVIEWING.md` states that distinction.
 
 **The ack of record is posted as a review of type COMMENT**, whichever
-of the three it carries — `gh pr review --comment` — and never as a
+of the four it carries — `gh pr review --comment` — and never as a
 forge approval or a forge request for changes:
 
 ```shell
@@ -2799,7 +2802,7 @@ The first answers `false`, closing the route a `GITHUB_TOKEN` would
 take. The second answers `claude[bot]`, a GitHub App's identity, which
 that setting does not govern: what forbids `--approve` is the prompt,
 `Bash(gh pr:*)` in `claude_args` permitting it otherwise.
-`--request-changes` goes unused, so that the body's last line, which the
+`--request-changes` goes unused, so that the body's first line, which the
 job's verification step reads, is the one place the verdict lives.
 
 **What the forge then holds is a record of the review and not an
@@ -2843,9 +2846,9 @@ gives. It lands on its gates and a description saying so, and carries
 that change alone; one touching another workflow is reviewed as usual.
 
 **A green check is an ack of the head, and nothing weaker.** The job's
-last step reads back what was posted: a refusal, a verdict never
-written, and an ack naming a sha the branch has moved past are a red row
-each. What the review found is the comment's to say, whatever the
+last step reads back what was posted: a refusal, a `NO VERDICT`, a
+verdict never written, and an ack naming a sha the branch has moved past
+are a red row each. What the review found is the comment's to say, whatever the
 colour.
 
 It is **not a required check**, its own header saying why: it is what a
@@ -3215,15 +3218,19 @@ A label means what its description says. Who applies and removes it:
   release it rehearses.
 - **The tag is signed**, is checked to be an ancestor of `main`, and is checked
   to say what `pyproject.toml` says.
-- **The release pull request closes the cycle's sections and opens the next.**
-  It retitles the work-in-progress section of `CHANGELOG.md` and of
-  `RELEASE_NOTES.md` to the version being tagged and opens an empty
-  work-in-progress section above them, in the same pull request, so the topmost
-  `##` heading of either file on the default branch is a work-in-progress
-  heading at every commit. The next generic version does not travel with the
-  retitle: the tag says what `pyproject.toml` says, so the bump stays in the
-  pull request that sets it. A release publishes the section just retitled,
-  whose heading is the tag's own, and not the empty one above it.
+- **The release pull request writes the release's sections.** It adds
+  `## v<version>`, the tag's own heading, above the previous release in
+  `CHANGELOG.md` and in `RELEASE_NOTES.md`, where the repository has one. The
+  changelog's section is written from the squash subjects since the previous
+  tag, `git log v<prev>..HEAD --format=%s`, grouped and shortened; the release
+  notes take what a user has to act on. No other pull request adds an entry to
+  either file (section 9), so the topmost `##` heading of either file on the default
+  branch is the latest release's at every commit. The tag says what
+  `pyproject.toml` says, so the version bump stays in the pull request that
+  sets it. A release publishes the section the release pull request added.
+  A rehearsal of a release that breaks the public API is dispatched from that
+  branch, after the notes are written: before, the public-API check reads the
+  previous release's section and fails.
 - **A published sdist reproduces from its tag.** The attestation every publisher
   attaches vouches for bytes, so a release rebuilt from the commit its tag names
   — by running what the release ran — gives those bytes back. What the release
@@ -4184,24 +4191,22 @@ done
 
 **`RELEASING.md`'s by-hand recovery paths are exercised by incident, and that is
 accepted rather than overlooked**: a scratch repository would join every sweep.
-A walk is written down above `github-release` or in the broken release's
-`CHANGELOG.md` entry, naming the release and what skipped the job. A column
-above zero is where to look; with `0` in both, a skipped `github-release` beside
-a present release is a walk. The raw media type and emptiness test catch a `200`
-with empty `content` past the limit:
+A walk is written down above `github-release`, naming the release and what
+skipped the job. A count above zero is where to look; with `0`, a skipped
+`github-release` beside a present release is a walk. The raw media type and
+emptiness test catch a `200` with empty `content` past the limit:
 
 ```shell
 for r in <every publisher>; do
-  for f in .github/workflows/release.yml CHANGELOG.md; do
-    if body=$(gh api "repos/<org>/$r/contents/$f" \
-      -H "Accept: application/vnd.github.raw" 2>/dev/null) \
-      && [ -n "$body" ]
-    then n=$(printf '%s' "$body" | grep -ciE \
-      'recreated by hand|created by hand from|by hand from the run')
-    else n=unreadable
-    fi
-    printf '%s\t%s=%s\n' "$r" "$f" "$n"
-  done
+  f=.github/workflows/release.yml
+  if body=$(gh api "repos/<org>/$r/contents/$f" \
+    -H "Accept: application/vnd.github.raw" 2>/dev/null) \
+    && [ -n "$body" ]
+  then n=$(printf '%s' "$body" | grep -ciE \
+    'recreated by hand|created by hand from|by hand from the run')
+  else n=unreadable
+  fi
+  printf '%s\t%s=%s\n' "$r" "$f" "$n"
 done
 ```
 

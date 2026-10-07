@@ -54,7 +54,9 @@ def test_neither_history_file_has_a_merge_driver(
     repository: str,
     trees: dict[str, Path],
 ) -> None:
-    """Section 9: a rebase stops on these files, and the file is rebuilt.
+    """Section 9: only a release's pull request writes these files.
+
+    A driver would resolve a second writer's conflict without a word.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.

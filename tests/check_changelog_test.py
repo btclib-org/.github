@@ -180,11 +180,8 @@ def test_the_same_entry_closing_twice_is_not_reported(script: ModuleType) -> Non
 def test_an_issue_advanced_by_two_entries_is_not_reported(script: ModuleType) -> None:
     """`(issue #N)` recurring across entries is this tree's own convention.
 
-    A tree that never releases, this repository among them, keeps one
-    open section for its whole history, so a long-lived issue is
-    answered across several entries over as many weeks -- normal, by
-    section 9's *A live claim* rule, and not what the second check asks
-    about.
+    A long-lived issue is answered across several entries over as many
+    weeks -- normal, and not what the second check asks about.
     """
     text = _CLEAN.replace("(closes #2)", "(issue #1)")
     assert script.problems(text) == []
@@ -576,10 +573,11 @@ def test_a_wrapped_citation_in_a_released_section_is_not_reported(
     assert script.problems(text) == []
 
 
-_RELEASED = _CLEAN + "\n## v2\n\n### Two\n\n- two.\n\n## v1\n\n### One\n\n- one.\n"
+_RELEASED = "# Changelog\n\n## v2\n\n### Two\n\n- two.\n\n## v1\n\n### One\n\n- one.\n"
 _LATE = "\n### Late\n\n- **late** (closes #3): three.\n"
+_THREE = "## v3\n\n### Three\n\n- three.\n\n"
 _BASE = ("0123abcd", _RELEASED)
-_REFUSED = "'Late' is under a release older than the newest"
+_REFUSED = "'Late' is new under"
 
 
 def test_an_entry_appended_under_the_oldest_release_is_caught(
@@ -588,32 +586,68 @@ def test_an_entry_appended_under_the_oldest_release_is_caught(
     """A new entry at the file's end, as btclib-org/.github#1614 measured."""
     found = script.problems(_RELEASED + _LATE, base=_BASE)
     assert len(found) == 1
-    assert _REFUSED in found[0]
-    assert "CHANGELOG.md at 0123abcd, the merge base with origin/main" in found[0]
+    assert f"{_REFUSED} 'v1'" in found[0]
+    assert "base 0123abcd (the merge base with origin/main)" in found[0]
 
 
-def test_an_entry_appended_to_the_open_section_is_not_reported(
-    script: ModuleType,
-) -> None:
-    """The same entry at the end of the open section passes."""
-    text = _RELEASED.replace("\n## v2", _LATE + "\n## v2")
-    assert script.problems(text, base=_BASE) == []
-
-
-def test_an_entry_under_the_newest_release_is_not_reported(
-    script: ModuleType,
-) -> None:
-    """The newest release is left out: a release branch adds to it."""
+def test_an_entry_under_the_newest_release_is_caught(script: ModuleType) -> None:
+    """The newest release is no exception: its pull request has been cut."""
     text = _RELEASED.replace("\n## v1", _LATE + "\n## v1")
-    assert script.problems(text, base=_BASE) == []
+    found = script.problems(text, base=_BASE)
+    assert len(found) == 1
+    assert f"{_REFUSED} 'v2'" in found[0]
 
 
-def test_a_release_cut_over_the_open_section_is_not_reported(
+def test_an_entry_under_a_work_in_progress_heading_is_caught(
     script: ModuleType,
 ) -> None:
-    """Cutting a release adds no heading to the releases before it."""
-    text = _RELEASED.replace("## Unreleased", "## Unreleased\n\n## v3")
+    """A heading the base holds that is no release takes no entry either."""
+    before = _RELEASED.replace("## v2", "## Unreleased")
+    found = script.problems(before + _LATE, base=("0123abcd", before))
+    assert len(found) == 1
+
+
+def test_an_entry_above_every_release_heading_is_caught(script: ModuleType) -> None:
+    """A heading in the preamble has no release to be written for."""
+    text = _RELEASED.replace("## v2", _LATE.lstrip() + "\n## v2")
+    found = script.problems(text, base=_BASE)
+    assert len(found) == 1
+    assert "above the first release heading" in found[0]
+
+
+def test_a_release_cut_over_the_newest_is_not_reported(script: ModuleType) -> None:
+    """A new release heading takes its own entries."""
+    text = _RELEASED.replace("## v2", _THREE + "## v2")
     assert script.problems(text, base=_BASE) == []
+
+
+def test_a_work_in_progress_section_retitled_is_not_reported(
+    script: ModuleType,
+) -> None:
+    """The entries it held are the base's; its new heading is a release."""
+    before = _RELEASED.replace("## v2", "## Unreleased")
+    assert script.problems(_RELEASED, base=("0123abcd", before)) == []
+
+
+def test_a_new_heading_that_is_no_release_is_caught(script: ModuleType) -> None:
+    """Only `## v<version>` alone is a release."""
+    for heading in ("Next", "v3 (work in progress, not released yet)"):
+        text = _RELEASED.replace(
+            "## v2", f"## {heading}\n\n### Late\n\n- late.\n\n## v2"
+        )
+        found = script.problems(text, base=_BASE)
+        assert len(found) == 1
+        assert f"{_REFUSED} '{heading}'" in found[0]
+
+
+def test_an_entry_added_to_an_old_release_beside_a_new_one_is_caught(
+    script: ModuleType,
+) -> None:
+    """The new release vouches for its own entries and for no other."""
+    text = (_RELEASED + _LATE).replace("## v2", _THREE + "## v2")
+    found = script.problems(text, base=_BASE)
+    assert len(found) == 1
+    assert f"{_REFUSED} 'v1'" in found[0]
 
 
 def test_a_fenced_heading_at_the_base_does_not_vouch_for_a_real_one(
@@ -626,9 +660,7 @@ def test_a_fenced_heading_at_the_base_does_not_vouch_for_a_real_one(
     assert _REFUSED in found[0]
 
 
-def test_a_fenced_heading_under_an_older_release_is_not_reported(
-    script: ModuleType,
-) -> None:
+def test_a_fenced_heading_on_the_branch_is_not_reported(script: ModuleType) -> None:
     """A `### ` line in a fence on the branch is an example, not an entry."""
     text = _RELEASED + "\n```text\n### Fenced\n```\n"
     assert script.problems(text, base=_BASE) == []
@@ -693,18 +725,18 @@ def test_main_refuses_an_entry_the_branch_committed(
     assert script.main([]) == 1
     out = capsys.readouterr().out
     assert _REFUSED in out
-    assert f"at {base}, the merge base" in out
+    assert f"base {base} (the merge base" in out
 
 
-def test_main_passes_an_entry_in_the_open_section(
+def test_main_passes_a_release_cut(
     script: ModuleType,
     repo: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """The control: the same entry in the open section passes, compared."""
-    _commit(repo, _RELEASED.replace("\n## v2", _LATE + "\n## v2"))
+    """The control: a release's section in the same diff passes, compared."""
+    _commit(repo, _RELEASED.replace("## v2", _THREE + "## v2"))
     assert script.main([]) == 0
-    assert "no release older than the newest gains a heading" in capsys.readouterr().out
+    assert "no entry is new outside a release's own section" in capsys.readouterr().out
 
 
 def test_a_stale_origin_main_refuses_until_fetched(
@@ -729,4 +761,4 @@ def test_main_says_so_where_there_is_no_merge_base(
     _git(repo.parent, "update-ref", "-d", "refs/remotes/origin/main")
     _commit(repo, _RELEASED + _LATE)
     assert script.main([]) == 0
-    assert "no released section compared" in capsys.readouterr().out
+    assert "no entry compared with the base" in capsys.readouterr().out

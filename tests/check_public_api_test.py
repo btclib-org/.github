@@ -309,18 +309,18 @@ def test_a_name_is_read_from_the_section_and_not_from_elsewhere(
 def test_a_rehearsal_reads_the_first_section_under_the_title(
     script: ModuleType, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """With no tag the open section is read, whatever its heading."""
+    """With no tag the first section is read, whatever its heading."""
     code = _run(script, tmp_path, tag=None)
     assert code == 1
     assert "does not name" in capsys.readouterr().out
 
-    open_section = _NOTES.replace("Nothing yet.", "`btclib.hwi` ...")
+    wip_section = _NOTES.replace("Nothing yet.", "`btclib.hwi` ...")
     for heading in (
         "## v2026.10 (work in progress, not released yet)",
         "## Unreleased",
         "## v0.8.0.10 (work in progress, not released yet)",
     ):
-        renamed = open_section.replace(
+        renamed = wip_section.replace(
             "## v2026.10 (work in progress, not released yet)", heading
         )
         code = _run(
@@ -335,8 +335,9 @@ def test_a_rehearsal_reads_the_first_section_under_the_title(
 
 _HWI = "src/btclib/hwi.py:0: <module>: Public object was removed\n"
 
-# the release pull request opened the next section above the retitled one
-_AFTER_RELEASE_PR = """\
+# a notes file of an older layout: a work-in-progress section above the
+# release's own, which the release pull request now writes alone
+_WIP_ABOVE_RELEASE = """\
 # Release notes
 
 ## v2026.11 (work in progress, not released yet)
@@ -352,8 +353,9 @@ Nothing yet.
 - **`unrelated` is named only here.**
 """
 
-# before it, the open section is the first and the version names it
-_BEFORE_RELEASE_PR = _AFTER_RELEASE_PR.replace(
+# the same file before the release's section is written: the version
+# names the work-in-progress section, the first
+_WIP_WITHOUT_RELEASE = _WIP_ABOVE_RELEASE.replace(
     "Nothing yet.", "- **`btclib.hwi` is gone**."
 ).replace("- **`btclib.hwi` is gone**: use `btclib_wallet.hwi`.\n\n", "")
 
@@ -371,26 +373,43 @@ def _rehearse(
     return _run(script, tmp_path, findings=_HWI, notes=notes, tag=None)
 
 
-def test_a_rehearsal_after_the_release_pr_answers_as_the_tag_run_does(
+def test_a_rehearsal_names_the_release_section_below_a_wip_one(
     script: ModuleType, tmp_path: Path
 ) -> None:
-    """The first section is then the empty new one, not the release's."""
+    """The version names the release's section, not the first one above it."""
     pyproject = '[project]\nversion = "2026.10.4"\n'
 
-    assert _rehearse(script, tmp_path, _AFTER_RELEASE_PR, pyproject) == 0
+    assert _rehearse(script, tmp_path, _WIP_ABOVE_RELEASE, pyproject) == 0
     assert (
-        _run(script, tmp_path, findings=_HWI, notes=_AFTER_RELEASE_PR, tag="v2026.10.4")
+        _run(
+            script, tmp_path, findings=_HWI, notes=_WIP_ABOVE_RELEASE, tag="v2026.10.4"
+        )
         == 0
     )
 
 
-def test_a_rehearsal_before_the_release_pr_reads_the_open_section(
+def test_a_rehearsal_names_the_wip_section_when_no_release_section_is_there(
     script: ModuleType, tmp_path: Path
 ) -> None:
-    """The version names the open section, which is the first."""
+    """The version names the work-in-progress section, which is the first."""
     pyproject = '[project]\nversion = "2026.11"\n'
 
-    assert _rehearse(script, tmp_path, _BEFORE_RELEASE_PR, pyproject) == 0
+    assert _rehearse(script, tmp_path, _WIP_WITHOUT_RELEASE, pyproject) == 0
+
+
+# the layout between releases: the previous release's section is first
+_PREVIOUS_FIRST = _WIP_ABOVE_RELEASE.split("## v2026.11", maxsplit=1)[0] + (
+    "## v2026.10.3\n\n- **`unrelated` is named only here.**\n"
+)
+
+
+def test_a_rehearsal_before_the_notes_are_written_leaves_the_break_unnamed(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """The first section is the previous release's: it names nothing new."""
+    pyproject = '[project]\nversion = "2026.10.4"\n'
+
+    assert _rehearse(script, tmp_path, _PREVIOUS_FIRST, pyproject) == 1
 
 
 @pytest.mark.parametrize(
@@ -408,9 +427,14 @@ def test_a_rehearsal_before_the_release_pr_reads_the_open_section(
 def test_a_rehearsal_with_no_section_for_the_version_reads_the_first(
     script: ModuleType, tmp_path: Path, pyproject: str | bytes | None
 ) -> None:
-    """No file, no version, or a version with no heading: the first section."""
-    assert _rehearse(script, tmp_path, _BEFORE_RELEASE_PR, pyproject) == 0
-    assert _rehearse(script, tmp_path, _AFTER_RELEASE_PR, pyproject) == 1
+    """No file, no version, or a version with no heading: the first section.
+
+    On a release branch before its notes are written that section is
+    the previous release's, which is why a breaking release is rehearsed
+    after them.
+    """
+    assert _rehearse(script, tmp_path, _WIP_WITHOUT_RELEASE, pyproject) == 0
+    assert _rehearse(script, tmp_path, _WIP_ABOVE_RELEASE, pyproject) == 1
 
 
 def test_a_tag_does_not_read_the_pyproject_version(
@@ -422,11 +446,15 @@ def test_a_tag_does_not_read_the_pyproject_version(
     )
 
     assert (
-        _run(script, tmp_path, findings=_HWI, notes=_AFTER_RELEASE_PR, tag="v2026.10.4")
+        _run(
+            script, tmp_path, findings=_HWI, notes=_WIP_ABOVE_RELEASE, tag="v2026.10.4"
+        )
         == 0
     )
     assert (
-        _run(script, tmp_path, findings=_HWI, notes=_AFTER_RELEASE_PR, tag="v2026.10.3")
+        _run(
+            script, tmp_path, findings=_HWI, notes=_WIP_ABOVE_RELEASE, tag="v2026.10.3"
+        )
         == 1
     )
 

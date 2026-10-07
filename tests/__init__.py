@@ -331,7 +331,27 @@ def names() -> list[str]:
     ]
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    (
+        1623,
+        "test_an_issue_form_ends_with_the_sign_off_block",
+        (
+            "bbt",
+            "bitcoin-core-rpc",
+            "bitcoin-node-tests",
+            "btclib",
+            "btclib-benchmarks",
+            "btclib-ecc",
+            "btclib-mnemonics",
+            "btclib-node",
+            "btclib-org.github.io",
+            "btclib-secp256k1",
+            "btclib-wallet",
+            "claude-process",
+            "portanode",
+        ),
+    ),
+)
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what

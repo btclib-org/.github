@@ -29,6 +29,9 @@ SET = ROOT / ".github" / "labels.yml"
 # where a tree keeps its issue forms; config.yml there is not a form
 FORMS = ".github/ISSUE_TEMPLATE"
 
+# how the last block of every form opens, section 2's *Directories*
+SIGN_OFF = "**Sign-off.**"
+
 # the organization's issue types: `gh api orgs/btclib-org/issue-types`
 TYPES = {"Bug", "Feature", "Task"}
 
@@ -91,6 +94,31 @@ def test_a_repository_carries_the_label_set(repository: str) -> None:
         f"{repository} against {SET.name}: missing {missing}, not in it {extra},"
         f" colour or description differing {differ}; "
         + by_hand(repository, "gh label list --limit 100 --json name,color,description")
+    )
+
+
+def test_an_issue_form_ends_with_the_sign_off_block(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Every form's last `body` item is the sign-off `markdown` block.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    root = trees[repository]
+    wrong = []
+    for path in tracked(root, f"{FORMS}/*.yml", f"{FORMS}/*.yaml"):
+        if path.rsplit("/", 1)[-1] in {"config.yml", "config.yaml"}:
+            continue
+        form = yaml.safe_load((root / path).read_text(encoding="utf-8"))
+        last = (form.get("body") or [{}])[-1]
+        value = str(last.get("attributes", {}).get("value", ""))
+        if last.get("type") != "markdown" or not value.startswith(SIGN_OFF):
+            wrong.append(path)
+    assert not wrong, (
+        f"{repository}: these forms do not end with the sign-off block: {wrong}; "
+        + by_hand(repository, f"tail -n 12 {FORMS}/*.y*ml")
     )
 
 

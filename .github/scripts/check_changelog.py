@@ -3,17 +3,19 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Refuse a rebase-broken `CHANGELOG.md`, or an entry under an old release.
+"""Refuse an entry written outside a release's own pull request.
 
-Two branches appending an entry at the same anchor conflict there.
-Deleting the conflict's markers keeps both sides and, at git's default
-conflict style, writes once the lines both blocks start or end with. The
+A pull request adds no entry, and the last check below refuses one. The
+others read what a conflict resolved by deleting its markers breaks: two
+branches appending an entry at the same anchor conflict there, and
+deleting the markers keeps both sides and, at git's default conflict
+style, writes once the lines both blocks start or end with. The
 `merge=union` driver, which section 9 of README.md rejects, writes the
 same; btclib-org/.github#21 and btclib-org/.github#760 measured what that
-costs under it. This is the gate, and every check but the last runs
-once over the file's own open section -- the first `## ` heading's, up
-to the line before the second, or to the end of the file where there is
-no second, section 9 of README.md giving the boundary the same way. A
+costs under it. They stay as the shape checks of a release's own
+section. Every check but the last runs once over the file's own open
+section -- the first `## ` heading's, up to the line before the second,
+or to the end of the file where there is no second. A
 `## ` or `### ` line inside a fenced code block is a markdown example
 rather than a heading of the file's own, and is blanked out before
 either is matched (btclib-org/.github#1372) -- character for character,
@@ -23,9 +25,9 @@ than preserving its length.
 Three checks, all of them shapes a conflict resolved by deleting its
 markers produces -- a fourth, below them, that is section 9's own bound
 on an entry -- a fifth that backs the fourth's own exemption, which
-trusts a placement rule nothing else here checks -- and a sixth,
-unrelated to the rebase, that catches a citation number
-`markdownlint-cli2`'s own `--fix` mangles once it opens a line:
+guards the grandfathered count -- and a sixth, unrelated to the rebase,
+that catches a citation number `markdownlint-cli2`'s own `--fix` mangles
+once it opens a line:
 
 - a `### ` heading repeated within the section -- measured against real
   rebases under `merge=union`, which writes what deleting the markers
@@ -51,15 +53,14 @@ unrelated to the rebase, that catches a citation number
   btclib-org/btclib#1168 and btclib-org/btclib#1170 is the pair
   btclib-org/.github#21 opens with, each entry closing the same defect
   under a number of its own. Scoped to `closes` and not `issue`: an
-  issue this tree's own section 9 lets a branch advance without closing
-  is cited `(issue #N)` by design, and a long-lived issue this
-  repository never rotates out of its one open section is cited that
-  way by several unrelated entries over as many weeks -- measured
-  against this file's own history, which carries that repeat with
-  nothing wrong in it. Closing the same issue twice has no such reading:
-  `closes` names the entry that answers an issue for good, and an issue
-  answered twice is what keeping both sides produces when two branches
-  each believe they are first. A cross-repository citation, `(closes
+  issue a change advances without closing is cited `(issue #N)` by
+  design, and a long-lived issue is cited that way by several unrelated
+  entries over as many weeks -- measured against this file's own
+  history, which carries that repeat with nothing wrong in it. Closing
+  the same issue twice has no such reading: `closes` names the entry
+  that answers an issue for good, and an issue answered twice is what
+  keeping both sides produces when two branches each believe they are
+  first. A cross-repository citation, `(closes
   owner/repo#N)`, compares against another written exactly the same
   rather than against the number alone, since two different trackers
   numbering their own issues alike name two different issues;
@@ -86,9 +87,8 @@ rebase into the file at the new base and reads the result against the
 rebased tip byte for byte; those two inputs are the rebase's own, and a
 `pre-commit` hook sees neither.
 Nor, for the reason the second check gives, does it see two entries that
-merely *advance* the same issue without either closing it -- a tree that
-never releases lives with that shape by design, and refusing it would
-refuse the very entries section 9's *A live claim* asks for.
+merely *advance* the same issue without either closing it: the same issue
+is cited `(issue #N)` across a tree's history by design.
 
 Three more gaps, none of them the network one above, and none named
 until this file's own review found them:
@@ -123,22 +123,22 @@ the heading-less entry too, comparing its own citations against a
 headed entry's.
 
 That exemption is a trust, not a check: an entry above `RULE_HEADING`
-is read as older than the rule because section 9 puts a new entry at
-the end of the open section, and nothing before this fifth check
-verified that placement was honoured. btclib-org/.github#1204 measured
+is read as older than the rule because a new entry was appended after
+it, and nothing before this fifth check verified that placement was
+honoured. btclib-org/.github#1204 measured
 what that costs -- a branch that landed an eighteen-line entry above
 `RULE_HEADING`, in a file whose whole history sits above that heading,
 passed `pre-commit run --all-files` clean, the fourth check never
 reading an entry it believed predated the rule it postdated. The fifth
 check is a count -- how many entries the open section held above
 `RULE_HEADING` the day this check was added -- and a branch that only
-ever appends below `RULE_HEADING`, per section 9, never grows that
-count on its own; where the open section holds more, one has landed
-above it instead, and this is refused for the placement rather than
-measured for the length. The count is not an identity: it does not
-name which entry above the line is the new one, and it does not see a
-grandfathered entry rewritten in place without the count changing --
-neither is the shape #1204 measured.
+ever appends below `RULE_HEADING` never grows that count on its own;
+where the open section holds more, one has landed above it instead, and
+this is refused for the placement rather than measured for the length.
+The count is not an identity: it does not name which entry above the
+line is the new one, and it does not see a grandfathered entry rewritten
+in place without the count changing -- neither is the shape #1204
+measured.
 
 **The count is a fact about a repository's history rather than about
 this script, so it arrives as `--grandfathered`** and the gate that
@@ -165,29 +165,29 @@ before this ever runs, the same as for the checks above; and a qualified
 citation, `owner/repo#N`, does not open the line with `#` at all, so
 MD018 does not read it as a heading and this does not refuse it.
 
-A tree with no release carries one open section for the whole file, this
-repository's own `CHANGELOG.md` among them; a tree that releases keeps
-everything from the first `## ` heading to the line before the second as
-open, and the checks above read nothing a release has already closed
-over.
+The six checks above read the file's first `## ` section: the newest
+release, or, in a tree that releases nothing, the one section the file
+holds, this repository's own `CHANGELOG.md` among them. They read
+nothing an earlier release holds.
 
-The seventh check reads the releases older than the newest, everything
-from the third `## ` heading on. It refuses a `### ` heading there that
-the file at the merge base of `HEAD` and `origin/main` does not hold
-anywhere (btclib-org/.github#1614). The base is that merge base because
-the gate runs `pre-commit run --all-files`, which sets no from and to
-refs, and `HEAD` already holds an entry the branch committed.
+The seventh check is the one section 9 states: a pull request adds no
+entry, and a release's section is written in the pull request that cuts
+it. It reads every `### ` heading of the file against the merge base of
+`HEAD` and `origin/main`, the base being that merge base because the
+gate runs `pre-commit run --all-files`, which sets no from and to refs,
+and `HEAD` already holds an entry the branch committed. A heading is
+refused where the base does not hold it under that same `## ` heading,
+unless that `## ` heading is a `## v<version>` (alone on its line) that the
+base lacks. The check reads headings and not whether a release is real: a
+diff that adds a `## v<version>` heading passes, and a reviewer sees it.
 
-The newest release is left out because landed commits add to it: the
-release commits btclib-org/btclib@7f63ef603 and
-btclib-org/bitcoin-core-rpc@28a1af14f, and btclib-org/btclib@cf4e19c44,
-a security advisory's fix. So in a tree with one release, an entry added
-under it passes. A bullet added under a heading the base already holds
-is not seen either.
+So an entry added under any release the base holds is refused, the
+newest included, and so is one under a new heading that is no release.
+A work-in-progress heading retitled to its release is a new release
+heading and passes. A `### ` heading inside a fenced block is an example
+and is not read.
 
-An `origin/main` behind the branch's own base gives an older merge base,
-and an entry released in between is then refused as new; an
-`origin/main` that holds the branch's base clears it.
+A bullet added under a heading the base already holds is not seen.
 
 Where git finds no merge base, or the base holds no `CHANGELOG.md`,
 nothing is compared and the output says so. The manifest sets `verbose:
@@ -218,6 +218,14 @@ _MAIN = "origin/main"
 
 _RELEASE_HEADING = re.compile(r"^## .*$", re.MULTILINE)
 _ENTRY_HEADING = re.compile(r"^### (?P<title>.*)$", re.MULTILINE)
+# a `## ` or `### ` heading, in file order
+_ANY_HEADING = re.compile(
+    r"^(?:## (?P<release>.*)|### (?P<title>.*))$",
+    re.MULTILINE,
+)
+# a release: the heading text after `## ` is `v<version>` alone, as
+# reusable-version-check.yml's release-only check requires of the tag's own
+_VERSION_HEADING = re.compile(r"v\d+(\.\d+)*")
 # a fenced code block, opened by a line of three or more backticks --
 # tildes are not read: CommonMark allows them too, but `.markdownlint.jsonc`
 # fixes this house style at MD048's default, backtick fences only -- with
@@ -326,10 +334,9 @@ def closing_tokens(body: str) -> set[str]:
 
     Scoped to that keyword and not to `issue`: section 9 of README.md
     lets a branch advance an issue under `(issue #N)` without closing
-    it, so the same number recurs wherever a long-lived issue this
-    tree's own open section never rotates out of is answered across
-    several entries over as many weeks -- normal, by that section's own
-    *A live claim* rule, and not what this asks about. A token takes
+    it, so the same number recurs wherever a long-lived issue is
+    answered across several entries over as many weeks -- normal, and
+    not what this asks about. A token takes
     whichever keyword sits nearest before it in its own parenthetical,
     so `(closes #593, issue #571)` reads only the first as closed. A
     code span is stripped first, so an entry quoting a citation's shape
@@ -472,13 +479,10 @@ def misplaced_entries(
     """Report more entries above `RULE_HEADING` than were grandfathered.
 
     `long_bodies()` below reads an entry above `RULE_HEADING` as older
-    than the rule, on the strength of section 9's own placement rule --
-    a new entry goes at the end of the open section -- which nothing
-    else here checks. A branch that only ever appends below
-    `RULE_HEADING` never grows the count of entries above it; where the
-    open section holds more than `grandfathered` names, one has landed
-    above it instead, out of section 9's order, and is refused here
-    rather than silently read as predating a rule it postdates.
+    than the rule, and nothing else here checks that. Where the open
+    section holds more than `grandfathered` entries above it, one has
+    landed there instead, and is refused here rather than silently read
+    as predating a rule it postdates.
 
     :param text: the whole file, for the line number reported.
     :param section: the open section's own text.
@@ -503,8 +507,7 @@ def misplaced_entries(
     message = (
         f"line {line}: {before} entries land above the rule heading, more"
         f" than the {grandfathered} this repository grandfathers --"
-        " an entry has landed above it instead of at the end of the open"
-        " section (section 9)"
+        " an entry has landed above it instead of below it"
     )
     return [message]
 
@@ -572,36 +575,62 @@ def wrapped_citations(text: str, section: str, base: int) -> list[str]:
     return problems
 
 
-def released_headings(text: str, base: tuple[str, str]) -> list[str]:
-    """Report a `### ` heading under an older release that the base lacks.
+def entries_by_release(text: str) -> list[tuple[str | None, str, int]]:
+    """Read each `### ` heading with the `## ` heading it sits under.
 
-    An older release is any but the newest, which the second `## `
-    heading opens.
+    :param text: the whole file.
+    :returns: each entry's release heading's text (`None` above the
+        first), its own title, and the offset of its line.
+    """
+    release: str | None = None
+    found = []
+    for heading in _ANY_HEADING.finditer(_blank_fenced_blocks(text)):
+        if heading.group("release") is not None:
+            release = heading.group("release").strip()
+        else:
+            found.append((release, heading.group("title").strip(), heading.start()))
+    return found
+
+
+def entries_outside_a_release(text: str, base: tuple[str, str]) -> list[str]:
+    """Report a `### ` heading new to a release the base already holds.
+
+    A heading is new where the base does not hold it under the same `## `
+    heading. It is allowed where its `## ` heading is a release,
+    `## v<version>` alone, that the base does not hold either: the
+    release cut in this very diff.
 
     :param text: the whole file.
     :param base: the merge base's sha, and the whole file there.
-    :returns: one message per heading new to an older release.
+    :returns: one message per entry written outside a release's own pull
+        request.
     """
     sha, before = base
-    known = {
-        heading.group("title").strip()
-        for heading in _ENTRY_HEADING.finditer(_blank_fenced_blocks(before))
+    held = {(release, title) for release, title, _ in entries_by_release(before)}
+    old_releases = {
+        heading.group("release").strip()
+        for heading in _ANY_HEADING.finditer(_blank_fenced_blocks(before))
+        if heading.group("release") is not None
     }
-    blanked = _blank_fenced_blocks(text)
-    releases = list(_RELEASE_HEADING.finditer(blanked))
-    older = releases[2:3]
-    start = older[0].start() if older else len(text)
     problems = []
-    for heading in _ENTRY_HEADING.finditer(blanked, start):
-        title = heading.group("title").strip()
-        if title not in known:
-            line = line_at(text, heading.start())
-            problems.append(
-                f"line {line}: heading {title!r} is under a release older than"
-                f" the newest and absent from {_CHANGELOG.name} at {sha}, the"
-                f" merge base with {_MAIN} -- a new entry goes at the end of"
-                " the open section (section 9)",
-            )
+    for release, title, offset in entries_by_release(text):
+        if (release, title) in held:
+            continue
+        if (
+            release is not None
+            and release not in old_releases
+            and _VERSION_HEADING.fullmatch(release)
+        ):
+            continue
+        where = f"under {release!r}"
+        if release is None:
+            where = "above the first release heading"
+        problems.append(
+            f"line {line_at(text, offset)}: heading {title!r} is new {where},"
+            f" in a file whose base {sha} (the merge base with {_MAIN}) does"
+            " not hold it there -- an entry is written in the pull request"
+            " that cuts its release (section 9)",
+        )
     return problems
 
 
@@ -649,7 +678,7 @@ def problems(
         *misplaced_entries(text, section, start, grandfathered),
         *long_bodies(text, section, start),
         *wrapped_citations(text, section, start),
-        *(released_headings(text, base) if base is not None else []),
+        *(entries_outside_a_release(text, base) if base is not None else []),
     ]
 
 
@@ -660,10 +689,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     :returns: 1 where a problem was found, 0 where the file is clean.
     """
     parser = argparse.ArgumentParser(
-        description="Refuse an open CHANGELOG.md section a"
-        " rebase conflict can break, or a citation number"
-        " markdownlint-cli2's own fixer mangles, or a heading new to a"
-        " release older than the newest.",
+        description="Refuse a CHANGELOG.md section a rebase conflict can"
+        " break, a citation number markdownlint-cli2's own fixer mangles,"
+        " or an entry written outside a release's own pull request.",
     )
     parser.add_argument(
         "--grandfathered",
@@ -673,7 +701,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         help=(
             "how many entries this repository's open section held above"
             " the rule heading when the fifth check reached it; an entry"
-            " past that count has landed out of section 9's order"
+            " past that count has landed above it"
         ),
     )
     arguments = parser.parse_args(argv)
@@ -694,11 +722,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     if base is None:
         print(
-            f"{_CHANGELOG}: no released section compared: no merge base with"
+            f"{_CHANGELOG}: no entry compared with the base: no merge base with"
             f" {_MAIN}, or no such file there.",
         )
     elif not found:
-        print(f"{_CHANGELOG}: no release older than the newest gains a heading.")
+        print(f"{_CHANGELOG}: no entry is new outside a release's own section.")
     return 1 if found else 0
 
 
