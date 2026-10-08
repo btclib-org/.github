@@ -419,6 +419,7 @@ jobs:
       # reviewer meets an error from run-pr instead, and says what it
       # could not run
       - name: Give the pull request's code a user and namespaces that hold nothing
+        continue-on-error: true
         env:
           TREE: /var/lib/review-pr/tree
         run: |
@@ -513,7 +514,52 @@ jobs:
             uv run --no-sync --directory /var/lib/review-pr/tree "$@"
           EOF
           chmod 555 "$DIR/post-review" "$DIR/run-pr" "$DIR"
+      - name: PROBE host-net and TERM
+        if: ${{ !cancelled() }}
+        env:
+          NS: /usr/local/bin/review-pr-ns
+          TREE: /var/lib/review-pr/tree
+        run: |
+          set +e
+          yn() { if "$@" >/dev/null 2>&1; then echo yes; else echo no; fi; }
+          echo "PROBE venv=$(yn sudo test -x "$TREE/.venv/bin/python")"
+          echo "PROBE iptables_review_pr_rules=$(sudo iptables -S OUTPUT | grep -c 'uid-owner')"
+          ip=$(getent ahostsv4 github.com | awk 'NR == 1 { print $1 }')
+          get='curl -sS --max-time 10 -o /dev/null'
+          meta=http://169.254.169.254/metadata/instance?api-version=2021-02-01
+          while read -r mode name check; do
+            [ "$mode" = - ] && mode=
+            sh -c "$check" >/dev/null 2>&1; o=$?
+            sudo "$NS" ${mode:+"$mode"} sh -c "$check" >/dev/null 2>&1; i=$?
+            echo "PROBE check mode=${mode:-default} $name outside_exit=$o inside_exit=$i"
+          done <<EOF
+          - lookup getent hosts github.com
+          - connect $get --resolve github.com:443:$ip https://github.com
+          - home ls $HOME
+          - procs pgrep -u $(id -u)
+          - sudo sudo -n true
+          --host-net docker $get --unix-socket /var/run/docker.sock http://localhost/_ping
+          --host-net metadata $get -H Metadata:true '$meta'
+          --host-net platform $get 'http://168.63.129.16/?comp=versions'
+          --host-net lookup getent hosts github.com
+          --host-net connect $get https://github.com
+          --host-net home ls $HOME
+          --host-net procs pgrep -u $(id -u)
+          --host-net sudo sudo -n true
+          --host-net docker_sock_exists test -S /var/run/docker.sock
+          EOF
+          echo "== N1: TERM to run-pr's sudo, then the bound"
+          start=$(date +%s)
+          "$RUNNER_TEMP/claude-review/run-pr" python -c 'import time; time.sleep(600)' &
+          pid=$!
+          sleep 5
+          echo "PROBE term before review_pr_procs=$(pgrep -c -u review-pr) comm=$(ps -o comm= -p $pid)"
+          kill -TERM "$pid"; echo "PROBE term kill_exit=$?"
+          while [ "$(pgrep -c -u review-pr)" -gt 0 ] && [ $(( $(date +%s) - start )) -lt 420 ]; do sleep 5; done
+          echo "PROBE term gone_after_s=$(( $(date +%s) - start )) review_pr_procs=$(pgrep -c -u review-pr)"
+          wait "$pid"; echo "PROBE term run_pr_exit=$?"
       - name: Review against REVIEWING.md
+        if: false
         id: review
         uses: anthropics/claude-code-action@97c53473391bff1901034d4b454b5bac7ab7a029 # v1.0.239
         # a diff read and a comment posted; a review past this is hung
