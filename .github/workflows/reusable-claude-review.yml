@@ -42,9 +42,8 @@ name: reusable-claude-review
 # extra-allowed-tools, string, default "": appended to the review step's
 # tool list, the separating comma written here rather than by the
 # caller. It exists for btclib-node, whose prompt has the reviewer fetch
-# history the shallow checkout does not carry and read a file at a sha
-# through the contents API -- `git fetch origin`, `git log`, `git diff`
-# and `gh api` on its own `contents/` path, none of them covered by the
+# the base the shallow checkout does not carry and diff against it --
+# `git fetch origin` and `git diff`, neither of them covered by the
 # commands every caller gets. One tree's prose earns no input of its
 # own, extra-prompt above carrying any tree's paragraph; one tree's
 # capability does, the alternative being every caller's reviewer holding
@@ -323,6 +322,24 @@ jobs:
           # has both. The mention job below takes no such input,
           # deliberately -- what triggers it is somebody writing @claude
           allowed_bots: "dependabot[bot]"
+          # the App's token stays out of the checkout's `.git/config`.
+          # Without this input the action writes it into origin's URL,
+          # where the review can read it; with any value, git gets it
+          # from a credential helper outside the checkout instead
+          # (`replaceCheckoutCredentials` in the action's
+          # `src/github/operations/git-config.ts`). Measured on
+          # btclib-org/.github#1650 and #1651, with v1.0.239, by
+          # `grep -c x-access-token .git/config` in a step after the
+          # review step: 1 without it, 0 with it. The value allows nobody: the
+          # action skips its write-permission check only for a listed
+          # login, and only where `github_token` is passed, which this
+          # job does not do; "-none-" cannot be a login, which never
+          # starts with a hyphen. A non-empty value also turns on the
+          # action's isolation for such runs: it sets
+          # CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1, installs bubblewrap and
+          # socat where it can, and puts /usr/bin and /bin first on
+          # PATH. The review ran with all of it on #1650
+          allowed_non_write_users: "-none-"
           # the caller's paragraph lands on the line of its own below,
           # between the findings paragraph and the gates instruction; a
           # caller passing none leaves a blank line there and nothing
@@ -680,6 +697,12 @@ jobs:
           additional_permissions: |
             contents: read
             issues: read
+          # the App's token stays out of `.git/config`, by the mechanism
+          # the review job gives. Not measured in this job: it rests on
+          # the code path the two share. The deny list below already
+          # stops an answer from reading the file; this keeps the token
+          # out of it in case that list is ever loosened
+          allowed_non_write_users: "-none-"
           # An answer is a comment, which the action's own tool posts.
           # Tag mode allows Bash for `git commit` and its push script,
           # and the two file-operation tools commit through the API when
@@ -689,10 +712,12 @@ jobs:
           # what tag mode adds
           #
           # Tag mode also allows Read, Grep, Glob and LS by name
-          # (`tagModeTools` in the action's `src/modes/tag/index.ts`),
-          # which reads any path, as the review job's comment says. They
-          # are denied too, so an answer reads no file, the checkout
-          # included
+          # (`tagModeTools` in the action's `src/modes/tag/index.ts`). A
+          # rule naming one reaches any path, so they are denied too, and
+          # an answer reads no file, the checkout included. A deny scoped
+          # to paths outside the checkout was not taken: it would have to
+          # list every such path, and a path the list missed would be the
+          # hole this closes
           #
           # the model is named for the reason the review job gives
           claude_args: >-
