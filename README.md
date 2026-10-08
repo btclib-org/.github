@@ -3466,6 +3466,77 @@ A label means what its description says. Who applies and removes it:
   succeeded. Putting `always()` on the non-gating job itself moves nothing, a
   job that ran and failed stopping a dependent exactly as a skipped one does;
   dropping it from `needs:` costs the ordering.
+- **Every release runs its dependents' suites before the tag**, whether or not
+  its notes declare a break. A dependent is an org tree whose `main` requires
+  the released package in its `pyproject.toml`, in `dependencies`, an extra or
+  a dependency group, and has a `test` dependency group. Each of them runs its
+  own suite with the release branch in place of the PyPI version. A behaviour
+  change the notes do not call breaking is the one that slips through, and
+  every org requirement is a `>=` floor without a ceiling, so a break reaches
+  the dependents' released versions the moment the release is on the index.
+  `deps-latest.yml` cannot ask the question before the tag: it installs from
+  the index, where the release is not yet, and it upgrades every other
+  dependency too, so a red there does not name the release.
+
+    From a throwaway checkout of the dependent's default branch, with the sha of
+    the release pull request's head, before it merges, in `<sha>`:
+
+    ```shell
+    uv run --locked --no-default-groups --group test \
+      --with '<package> @ git+https://github.com/btclib-org/<tree>@<sha>' \
+      python -m pytest --no-cov
+    ```
+
+    `--with` layers the branch over the locked environment for that one
+    command, so the lock stays as it is and the branch is the only change. It
+    is `python -m pytest`: the `pytest` script is the environment's own and
+    imports the locked version. `--no-cov` because the question is pass or
+    fail, not the dependent's coverage floor. A compiled package builds from
+    the ref the same way. `uv pip install` into the synced environment does not
+    serve: the next `uv run` syncs the lock back and the PyPI version returns
+    without a warning. The proof that the suite imports the branch is that run
+    failing against a ref with the package broken on purpose, from a fresh
+    `file://` directory, since a reused path serves a stale build.
+
+    **A dependent that fails gets its fix ready first**, and the two release in
+    that order: the release, then the dependent, with its floor raised to the
+    release.
+
+    **The dependents are listed in the `RELEASING.md` of each tree that
+    publishes**, in the step that runs them. The list is re-derived from the
+    `pyproject.toml` of every org tree on `main`, never carried from the
+    previous release:
+
+    ```shell
+    pkg=<package>
+    ```
+
+    ```shell
+    for r in $(gh repo list btclib-org --no-archived --limit 100 \
+      --json name --jq '.[].name'); do
+      body=$(gh api -H 'Accept: application/vnd.github.raw' \
+        "repos/btclib-org/$r/contents/pyproject.toml" 2>/dev/null) || continue
+      printf '%s' "$body" | uv run --no-project python -c '
+    import re, sys, tomllib
+    pkg = sys.argv[1]
+    t = tomllib.loads(sys.stdin.read())
+    p = t.get("project", {})
+    def norm(s):
+        name = re.match(r"[A-Za-z0-9._-]+", s)[0]
+        return re.sub(r"[-_.]+", "-", name.lower())
+    reqs = p.get("dependencies", [])
+    for extra in p.get("optional-dependencies", {}).values():
+        reqs += extra
+    for group in t.get("dependency-groups", {}).values():
+        reqs += [x for x in group if isinstance(x, str)]
+    groups = t.get("dependency-groups", {})
+    if (norm(p.get("name", "")) != pkg and pkg in map(norm, reqs)
+            and "test" in groups):
+        print(sys.argv[2])
+    ' "${pkg:?}" "$r"
+    done
+    ```
+
 - **A release run is audited job by job for `skipped`, not for red.** A failed
   job is loud; a skipped one carries no step, so a release whose post-publish
   check never ran reads as a release that finished. What answers is the run's
@@ -4284,7 +4355,9 @@ No tool checks them.
    `.claude/commands/review.md` that invokes it, `REPOSITORY.md`,
    `CHANGELOG.md`, `CLAUDE.md`; and `SECURITY.md`, `RELEASING.md` and
    `RELEASE_NOTES.md` where the repository publishes, the rows section
-   2's table marks for tier 1 alone.
+   2's table marks for tier 1 alone. `RELEASING.md` carries section 12's
+   step that runs the dependents before the tag, where another org tree
+   requires the package.
 1. GitHub, in this order: default branch `main` — set explicitly, since
    an empty repository's first pushed branch becomes the default
    whatever it is named, and a tree built on a branch of its own pushes
