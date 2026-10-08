@@ -250,7 +250,7 @@ on:
           A tag or commit of bitcoin/bitcoin whose source the review
           reads; none where empty.
         type: string
-        default: ""
+        default: "v31.1"
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN:
         description: >
@@ -413,6 +413,31 @@ jobs:
             echo "::error::review-pr can reach the network."
             exit 1
           fi
+      - name: PROBE diagnostics for 1642, not for merging
+        run: |
+          as_pr() {
+            (cd / && sudo -u review-pr -- env -i HOME=/home/review-pr \
+              PATH=/usr/local/bin:/usr/bin:/bin "$@")
+          }
+          set +e
+          echo "== id"; as_pr id
+          echo "== home"; ls -ld "$HOME" /home/review-pr
+          echo "== bwrap"; command -v bwrap
+          echo "== env as review-pr"; as_pr env | cut -d= -f1 | tr '\n' ' '; echo
+          echo "== sudo"; as_pr sudo -n true; echo "exit $?"
+          echo "== ls home"; as_pr ls "$HOME"; echo "exit $?"
+          echo "== curl github"; as_pr curl -sS --max-time 10 -o /dev/null https://github.com; echo "exit $?"
+          echo "== curl imds"; as_pr curl -sS --max-time 5 -o /dev/null http://169.254.169.254/; echo "exit $?"
+          echo "== dns getent"; as_pr getent hosts example.com; echo "exit $?"
+          echo "== python dns"; as_pr /usr/bin/python3 -c "import socket; print(socket.gethostbyname('example.com'))"; echo "exit $?"
+          echo "== loopback bind"; as_pr /usr/bin/python3 -c "import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); s.listen(); c=socket.create_connection(s.getsockname()); print('loopback ok')"; echo "exit $?"
+          echo "== other proc environ"; as_pr cat /proc/1/environ >/dev/null; echo "exit $?"
+          echo "== runner proc environ"; as_pr sh -c 'for p in $(pgrep -u runner); do cat /proc/$p/environ >/dev/null 2>&1 && echo readable $p; done; echo done'
+          echo "== cmdline token patterns"; as_pr sh -c 'cat /proc/*/cmdline 2>/dev/null | tr "\0" "\n" | grep -c -E "ghs_|sk-ant|eyJ"'
+          echo "== tmp"; ls -la /tmp | head -30
+          echo "== docker"; as_pr docker ps; echo "exit $?"
+          echo "== tree"; as_pr ls /home/review-pr/tree | head; as_pr ls /home/review-pr/tree/.venv/bin | head -5
+          exit 0
       # the scripts the review posts through and runs the pull request's
       # code through, for the reasons the header gives. The number and
       # the repository reach this step through the environment rather
