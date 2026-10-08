@@ -307,7 +307,7 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        sources: [user, default]
+        sources: [user]
     # the review's own budget is on its step below, and this is the
     # ceiling for the steps around it, which read the API and post. It
     # has to be the larger of the two: a job that hits its own limit is
@@ -418,6 +418,12 @@ jobs:
             ' "$net" "$@"
           EOF
           sudo install -m 755 "$ns" /usr/local/bin/review-pr-ns
+          # without use_pty, sudo starts the script as its own child, so
+          # the parent-death signal fires when sudo is killed; with it, a
+          # monitor process sits between them and outlives sudo
+          echo 'Defaults!/usr/local/bin/review-pr-ns !use_pty' > "$ns"
+          sudo visudo -cqf "$ns"
+          sudo install -m 440 "$ns" /etc/sudoers.d/review-pr-ns
           if ! sudo /usr/local/bin/review-pr-ns --net \
               uv sync --locked --all-groups --directory "$TREE"; then
             echo "::warning::uv sync failed, so run-pr has no environment."
@@ -498,6 +504,7 @@ jobs:
           sudo "$NS" sh -c 'setsid sleep 600 & sleep 600' &
           sleep 3
           echo "PROBE during review_pr_procs=$(pgrep -c -u review-pr)"
+          ps -e -o pid=,ppid=,user=,comm= --forest | grep -B1 -A8 ' sudo$' | sed 's/^/PROBE tree /'
           sudo pkill -u review-pr
           sleep 1
           echo "== run-pr killed mid-run, by TERM and by KILL to sudo"
