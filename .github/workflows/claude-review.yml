@@ -20,8 +20,6 @@ name: claude-review
 # a review of type COMMENT, an opinion for the author to weigh; a review
 # that gated a merge would make a model's judgement a branch rule.
 #
-# It is cheap: it reads a diff of prose and builds nothing.
-#
 # extra-allowed-tools is passed nothing rather than an empty string: a
 # review of prose reaches for no tool beyond the ones every caller gets,
 # and an explicit empty value would say something the absence does not.
