@@ -427,6 +427,50 @@ jobs:
             inputs.extra-allowed-tools
             && format(',{0}', inputs.extra-allowed-tools) || '' }}"
 
+      - name: PROBE trace
+        if: ${{ !cancelled() }}
+        env:
+          EXECUTION: ${{ steps.review.outputs.execution_file }}
+          OAUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          APPTOKEN: ${{ steps.review.outputs.github_token }}
+        run: |
+          echo "== tool calls"
+          jq -c '.[] | select(.type == "assistant") | .message.content[]?
+                 | select(.type == "tool_use")
+                 | {id, name, input: (.input | {file_path, path, pattern,
+                    offset, limit, command, output_mode})}' "$EXECUTION" || true
+          echo "== tool results: error flag, length, an error's text"
+          jq -c '.[] | select(.type == "user") | .message.content[]?
+                 | select(.type == "tool_result")
+                 | (.content | if type == "array"
+                      then (map(.text // "") | join("")) else (. // "") end) as $t
+                 | {id: .tool_use_id, is_error, length: ($t | length),
+                    saved: ($t | test("saved to"; "i")),
+                    error: (if .is_error then ($t | .[0:300]) else null end)}' \
+              "$EXECUTION" || true
+          echo "== permission_denials"
+          jq -c '.[] | select(.type == "result") | .permission_denials
+                 | map({tool_name, path: (.tool_input.file_path
+                        // .tool_input.path // .tool_input.pattern)})' \
+              "$EXECUTION" || true
+          echo "== files under HOME/.claude/projects, names only"
+          find "$HOME/.claude/projects" -printf '%y %s %P\n' | sort -k3
+          session=$(jq -r '.[] | select(.type == "system") | .session_id' \
+            "$EXECUTION" | head -1)
+          echo "== control: files under projects naming the session id (want >= 1)"
+          grep -rlF -- "$session" "$HOME/.claude/projects" | wc -l || true
+          echo "== control: OAuth token matches itself (want 1)"
+          [ -n "$OAUTH" ] && echo "OAuth set: yes" || echo "OAuth set: no"
+          printf '%s\n' "$OAUTH" | grep -cF -- "$OAUTH" || true
+          echo "== control: App token matches itself (want 1)"
+          [ -n "$APPTOKEN" ] && echo "App token set: yes" || echo "App token set: no"
+          printf '%s\n' "$APPTOKEN" | grep -cF -- "$APPTOKEN" || true
+          echo "== files under projects holding the OAuth token"
+          grep -rlF -- "$OAUTH" "$HOME/.claude/projects" | wc -l || true
+          echo "== files under projects holding the App token"
+          grep -rlF -- "$APPTOKEN" "$HOME/.claude/projects" | wc -l || true
+          echo "== end"
+
       # the action refuses to run when the calling workflow differs from
       # the copy on the caller's default branch -- a pull request must
       # not be able to edit the workflow that holds the credential --
