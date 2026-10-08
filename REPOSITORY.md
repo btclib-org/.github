@@ -181,10 +181,19 @@ would mean a direct push to `main` had become possible for its holder,
 which is a drift the call is there to catch.
 
 `tag-integrity` matches no ref: `CONTRIBUTING.md`'s *A version, and no
-release* is where nothing being tagged is measured. What the rule buys
-is [a signed release tag][s11-sigs], and it stands ahead of that tag
-rather than being created alongside one, so a `v*` pushed to this
-repository meets it.
+release* is where nothing being tagged is measured. It stands ahead
+of any tag rather than being created alongside one, so a `v*` pushed to
+this repository meets it.
+
+A `v*` tag push that brings an unsigned commit is refused. A tag on a
+commit already on `main` is accepted whether it is signed, unsigned or
+lightweight, so the rule does not make a release tag signed
+(btclib-org/.github#1635). That rests on `git tag -s` in the release
+steps and on reading the signature back:
+
+```shell
+gh api repos/<owner>/<repo>/git/tags/<sha> --jq .verification
+```
 
 ## Signed commits
 
