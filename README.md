@@ -2529,9 +2529,15 @@ one particular signer: the maintainer's key, GitHub's web-flow key on a
 button-driven merge, and a bot's key are all valid, which is what makes
 the merge buttons usable.
 
-Tags too: a release tag is signed, and a `tag-integrity` ruleset over
-`refs/tags/v*` requires it — that tag being otherwise the one unattested
-link in a fully signed chain.
+Tags too: a release tag is signed, with `git tag -s` in the release steps.
+A `tag-integrity` ruleset over `refs/tags/v*` refuses a tag push that brings
+an unsigned commit. It does not check the tag's own signature: an unsigned or
+lightweight `v*` tag on a commit already on `main` is accepted
+(btclib-org/.github#1635). The signature is read back, not assumed:
+
+```shell
+gh api repos/<owner>/<repo>/git/tags/<sha> --jq .verification
+```
 
 **Every commit a pull request adds carries a `Signed-off-by:` trailer
 naming its author**, by which the author certifies the
