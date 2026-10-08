@@ -2,7 +2,9 @@
 
 `MAX_PROTOCOL_MESSAGE_LENGTH` is Bitcoin Core's, from `src/net.h` at
 v31.1. `SHA` matches an abbreviated or a full commit sha in lowercase
-hex, and nothing else.
+hex, and nothing else. The runner this is reviewed on is Ubuntu
+22.04: `/etc/os-release` there, and `.github/scripts/os-release`, a
+link to it, both say `VERSION_ID="22.04"`.
 """
 
 import re
