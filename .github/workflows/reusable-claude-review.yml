@@ -21,7 +21,7 @@ name: reusable-claude-review
 # review's: a caller that lifts the old job's condition onto it takes
 # the mention out with it.
 #
-# Two inputs.
+# Three inputs.
 #
 # extra-prompt, string, default "": a paragraph of the calling tree's
 # own, landing between the findings paragraph and the instruction not to
@@ -52,6 +52,15 @@ name: reusable-claude-review
 # telling a reviewer to run a command it may not run buys a refusal, so
 # a caller passing the one passes the other.
 #
+# bitcoin-core-ref, string, default "": a tag or commit of
+# bitcoin/bitcoin. Where it is set, a step fetches that one commit into
+# the runner's temporary directory before the review, and the reviewer
+# reads and searches it there. An input because the version is the
+# tree's: btclib-node follows a pinned Core release, and most trees read
+# no Core at all. A checkout rather than `gh api` on the contents
+# endpoint, because a review searches Core for where it does something,
+# which a file at a time cannot do.
+#
 # The review job has no deny list (btclib-org/.github#1558). Under
 # Claude Code 2.1.282 a rule is matched against the command without its
 # redirects, so `Bash(*>*)` and `Bash(git log*>*)` both admit
@@ -59,11 +68,13 @@ name: reusable-claude-review
 # denying `git log` itself refuses it. A write method on `gh api` is
 # refused by the token's `contents: read`, below.
 #
-# Neither value reaches a `run:` block. extra-prompt is text handed to a
-# model and extra-allowed-tools is an argument of the action's own,
-# which is why a caller's string is taken as a string here where
-# reusable-sdist-rebuild.yml's builder had to be a closed choice of two
-# steps.
+# Neither of the first two values reaches a `run:` block. extra-prompt
+# is text handed to a model and extra-allowed-tools is an argument of
+# the action's own, which is why a caller's string is taken as a string
+# here where reusable-sdist-rebuild.yml's builder had to be a closed
+# choice of two steps. bitcoin-core-ref reaches one through the
+# environment, after `--end-of-options`, so git reads it as a ref and
+# never as an option.
 #
 # The permissions block is the calling job's, and this is not style: a
 # called workflow's own block can only downgrade what the caller
@@ -117,6 +128,65 @@ name: reusable-claude-review
 # The organization's `can_approve_pull_request_reviews=false` does not
 # reach the App's token, so the script and the prompt are what refuse
 # an approval.
+#
+# The review runs the pull request's code, as REVIEWING.md's *What a
+# diff decides with is run, not read* asks (btclib-org/.github#1642).
+# That happens in this job, beside the credential, so what bounds it is
+# where the code runs and what it can reach there.
+#
+# The trigger is the caller's `pull_request`, never
+# `pull_request_target`, which runs a fork's pull request with the base
+# repository's secrets. The checkout is actions/checkout's default for
+# that event: the merge of the head into the base, the tree that would
+# land. Whose code that is depends on who opened the pull request:
+#
+# - a fork: none runs. The job is skipped, for the reason its `if:`
+#   gives.
+# - Dependabot: a dependency's new release, which `uv sync` installs and
+#   a test imports. A third party wrote it.
+# - a maintainer or a collaborator: their own. They can already read the
+#   organization secret, by pushing a workflow that prints it, so running
+#   their code gives them nothing new. What it adds is whatever their
+#   diff carries from others, and what anybody writes in a comment the
+#   review reads.
+#
+# So that code runs as `review-pr`, a user the job creates and which
+# holds nothing:
+#
+# - `run-pr` passes its arguments to `uv run --locked --offline` in that
+#   user's copy of the checkout, through `sudo -u` and `env -i`. No
+#   variable of the job reaches it: not the App's token, not
+#   GITHUB_TOKEN, not the Anthropic credential, not the OIDC request
+#   token.
+# - It is not in sudoers, so it cannot become root, who can read every
+#   process's memory and with it every secret of the job.
+# - The runner's home is made 700, so it cannot read the job's files.
+# - An `iptables` owner rule leaves it loopback only. `uv sync` runs as
+#   the same user before the rule is added.
+# - The step that sets this up then tries sudo, the runner's home and
+#   the network as that user, and fails the job where one succeeds.
+#
+# The allow rule names the script, as it names post-review, so an
+# argument cannot reach the runner's own shell. Measured with Claude
+# Code 2.1.294 and a stand-in for the script: the rule admits a quoted
+# heredoc and a glob, and refuses `$( )`, backticks, a variable other
+# than HOME, a redirect, an assignment before the command and a pipe. A
+# `;` or `&&` admits a second command only where Claude Code's own list
+# of read-only commands does.
+#
+# The checkout's own `.claude/` and `.mcp.json` are not loaded
+# (`--setting-sources user`). Loaded, a pull request's hook or MCP
+# server would run as the runner's user, with the credential in its
+# environment. Measured with Claude Code 2.1.294: a project hook and a
+# project MCP server ran under the default sources, and neither ran
+# under `user`.
+#
+# Read, Grep and Glob are not allowed by name. A bare rule reads any
+# path, `/proc/self/environ` and the credential in it included. Without
+# one, Claude Code reads only its working directories: the checkout and,
+# through `--add-dir`, Core's source. Measured with Claude Code 2.1.294:
+# a bare Read rule read a file outside the working directory, and one
+# through a symlink inside it; without the rule both were refused.
 #
 # The credential is the caller's to pass as well. The organization
 # secret CLAUDE_CODE_OAUTH_TOKEN is visible to every repository of
@@ -173,6 +243,12 @@ on:
         description: >
           Tools the review step may use beyond the ones every caller
           gets, comma-separated and without a leading comma.
+        type: string
+        default: ""
+      bitcoin-core-ref:
+        description: >
+          A tag or commit of bitcoin/bitcoin whose source the review
+          reads; none where empty.
         type: string
         default: ""
     secrets:
@@ -282,11 +358,66 @@ jobs:
                  "repositories; without it this workflow reviews nothing."
             exit 1
           fi
-      # the script the review posts through, for the reason the header
-      # gives. The number and the repository reach this step through
-      # the environment rather than the `run:` text, and the step writes
-      # them into the script
-      - name: Write the script the review posts through
+      # no cache: the runner's own uv cache would hold nothing, every
+      # package going to review-pr's
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: false
+      # one commit, for the reason the header gives at the input
+      - name: Fetch Bitcoin Core's source
+        if: ${{ inputs.bitcoin-core-ref != '' }}
+        env:
+          REF: ${{ inputs.bitcoin-core-ref }}
+          DIR: ${{ runner.temp }}/bitcoin
+        run: |
+          git init -q "$DIR"
+          git -C "$DIR" fetch -q --depth 1 --end-of-options \
+            https://github.com/bitcoin/bitcoin.git "$REF"
+          git -C "$DIR" checkout -q FETCH_HEAD
+      # the user the pull request's code runs as, for the reasons the
+      # header gives. A failed sync is a warning: the reviewer meets the
+      # same error from run-pr and says what it could not run
+      - name: Give the pull request's code a user that holds nothing
+        env:
+          TREE: /home/review-pr/tree
+        run: |
+          sudo useradd --create-home --shell /bin/sh review-pr
+          sudo chmod 700 "$HOME"
+          sudo install -m 755 "$(command -v uv)" /usr/local/bin/uv
+          sudo cp -a "$GITHUB_WORKSPACE" "$TREE"
+          sudo chown -R review-pr: "$TREE"
+          as_pr() {
+            (cd / && sudo -u review-pr -- env -i HOME=/home/review-pr \
+              PATH=/usr/local/bin:/usr/bin:/bin "$@")
+          }
+          if [ -f "$TREE/uv.lock" ] \
+            && ! as_pr uv sync --locked --all-groups --directory "$TREE"; then
+            echo "::warning::uv sync failed, so run-pr has no environment."
+          fi
+          for t in iptables ip6tables; do
+            sudo "$t" -I OUTPUT -m owner --uid-owner review-pr ! -o lo -j REJECT
+          done
+          if as_pr sudo -n true 2>/dev/null; then
+            echo "::error::review-pr can run sudo."
+            exit 1
+          fi
+          if as_pr ls "$HOME" >/dev/null 2>&1; then
+            echo "::error::review-pr can read $HOME."
+            exit 1
+          fi
+          # the runner's own request first: a check that cannot succeed
+          # proves nothing
+          curl -sS --max-time 10 -o /dev/null https://github.com
+          if as_pr curl -sS --max-time 10 -o /dev/null https://github.com 2>/dev/null; then
+            echo "::error::review-pr can reach the network."
+            exit 1
+          fi
+      # the scripts the review posts through and runs the pull request's
+      # code through, for the reasons the header gives. The number and
+      # the repository reach this step through the environment rather
+      # than the `run:` text, and the step writes them into the script
+      - name: Write the scripts the review posts and runs code through
         env:
           NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
@@ -295,7 +426,13 @@ jobs:
           mkdir -p "$DIR"
           printf '#!/bin/sh\nexec gh pr review %s -R %s --comment --body-file -\n' \
             "$NUMBER" "$REPO" > "$DIR/post-review"
-          chmod 555 "$DIR/post-review" "$DIR"
+          cat > "$DIR/run-pr" <<'EOF'
+          #!/bin/sh
+          cd / && exec sudo -u review-pr -- env -i HOME=/home/review-pr \
+            PATH=/usr/local/bin:/usr/bin:/bin \
+            uv run --directory /home/review-pr/tree --locked --offline "$@"
+          EOF
+          chmod 555 "$DIR/post-review" "$DIR/run-pr" "$DIR"
       - name: Review against REVIEWING.md
         id: review
         uses: anthropics/claude-code-action@9171db3e57d6a3140a37ddc2ba92788584e0ead6 # v1.0.234
@@ -370,6 +507,19 @@ jobs:
             Do not run the gates; they run beside you on the same sha.
             Do not file issues.
 
+            Run what the diff decides with, as REVIEWING.md asks, with
+            `${{ runner.temp }}/claude-review/run-pr`. It runs
+            `uv run --locked` with your arguments, in a copy of this
+            checkout, as a user with no credential and no network:
+            `run-pr pytest <test files>`, or `run-pr python -` with the
+            code in a quoted heredoc. Name the test files; never run the
+            whole suite.
+
+            ${{ inputs.bitcoin-core-ref
+            && format('Bitcoin Core''s source at {0} is in {1}/bitcoin.',
+                      inputs.bitcoin-core-ref, runner.temp)
+            || '' }}
+
             Post the summary with this script. It posts a review of type
             COMMENT, the ack of record, and reads the summary from
             standard input:
@@ -391,20 +541,25 @@ jobs:
           # the review is posted by the script the step above writes,
           # and `gh pr review` is not allowed as a command of its own.
           # `gh issue view` only reads, with the token's `issues: read`,
-          # and is how a review reads an issue the pull request cites
+          # and is how a review reads an issue the pull request cites.
+          # run-pr, the setting sources, the add-dir and the absence of
+          # Read, Grep and Glob are the header's
           #
           # the model is named: the action's default ran the review on
-          # Sonnet, and the review judges claims about code. The flag
-          # comes before the tool list, as the action's usage docs put it
+          # Sonnet, and the review judges claims about code. The flags
+          # come before the tool list, as the action's usage docs put it
           claude_args: >-
             --model claude-opus-5-5
+            --setting-sources user
+            ${{ inputs.bitcoin-core-ref
+            && format('--add-dir {0}/bitcoin', runner.temp) || '' }}
             --allowedTools
             "mcp__github_inline_comment__create_inline_comment"
             "Bash(gh pr view:*)"
             "Bash(gh pr diff:*)"
             "Bash(gh issue view:*)"
             "Bash(${{ runner.temp }}/claude-review/post-review:*)"
-            "Read,Grep,Glob${{
+            "Bash(${{ runner.temp }}/claude-review/run-pr:*)${{
             inputs.extra-allowed-tools
             && format(',{0}', inputs.extra-allowed-tools) || '' }}"
 
