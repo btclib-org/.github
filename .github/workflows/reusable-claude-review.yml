@@ -435,6 +435,7 @@ jobs:
               PATH=/usr/local/bin:/usr/bin:/bin "$@")
           }
           set +e
+          echo VALUE=alpha > "$RUNNER_TEMP/probe-outside.txt"
           echo "== id"; as_pr id
           echo "== home"; ls -ld "$HOME" /home/review-pr
           echo "== bwrap"; command -v bwrap
