@@ -649,7 +649,11 @@ jobs:
       # this still skips, a superseded review having nothing to say.
       - name: PROBE cmdline scan during the review, not for merging
         if: ${{ !cancelled() }}
-        run: sudo cut -d' ' -f3- /home/review-pr/scan.log | sort | uniq -c
+        run: |
+          echo "scan lines: $(sudo wc -l < /home/review-pr/scan.log)"
+          sudo cut -d' ' -f3- /home/review-pr/scan.log | sort | uniq -c
+          echo "pids review-pr sees: $(cd / && sudo -u review-pr ls /proc | grep -c '^[0-9]')"
+          echo "pids runner sees: $(ls /proc | grep -c '^[0-9]')"
       - name: Refuse to report a review that never ran
         if: ${{ !cancelled() }}
         env:
