@@ -433,7 +433,32 @@ jobs:
           echo "== loopback bind"; as_pr /usr/bin/python3 -c "import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); s.listen(); c=socket.create_connection(s.getsockname()); print('loopback ok')"; echo "exit $?"
           echo "== other proc environ"; as_pr cat /proc/1/environ >/dev/null; echo "exit $?"
           echo "== runner proc environ"; as_pr sh -c 'for p in $(pgrep -u runner); do cat /proc/$p/environ >/dev/null 2>&1 && echo readable $p; done; echo done'
-          echo "== cmdline token patterns"; as_pr sh -c 'cat /proc/*/cmdline 2>/dev/null | tr "\0" "\n" | grep -c -E "ghs_|sk-ant|eyJ"'
+          cat > /tmp/scan-1642.py <<'PY'
+          import glob, os, pwd, re, sys, time
+          pat = re.compile(rb"(ghs_|ghp_|gho_|sk-ant|eyJ)[A-Za-z0-9_.-]{8,}")
+          def scan(tag):
+              for path in glob.glob("/proc/[0-9]*/cmdline"):
+                  try:
+                      data = open(path, "rb").read()
+                      st = os.stat(os.path.dirname(path))
+                      comm = open(os.path.dirname(path) + "/comm").read().strip()
+                  except OSError:
+                      continue
+                  for m in pat.finditer(data):
+                      print(tag, path.split("/")[2], pwd.getpwuid(st.st_uid).pw_name,
+                            comm, m.group(1).decode(), len(m.group(0)), flush=True)
+          if sys.argv[1] == "once":
+              scan("once")
+          else:
+              end = time.time() + 900
+              while time.time() < end:
+                  scan("loop")
+                  time.sleep(2)
+          PY
+          chmod 644 /tmp/scan-1642.py
+          echo "== cmdline token patterns"; as_pr /usr/bin/python3 /tmp/scan-1642.py once
+          (cd / && sudo -u review-pr -- env -i HOME=/home/review-pr PATH=/usr/bin:/bin \
+            sh -c 'nohup /usr/bin/python3 /tmp/scan-1642.py loop > /home/review-pr/scan.log 2>&1 &')
           echo "== tmp"; ls -la /tmp | head -30
           echo "== docker"; as_pr docker ps; echo "exit $?"
           echo "== tree"; as_pr ls /home/review-pr/tree | head; as_pr ls /home/review-pr/tree/.venv/bin | head -5
@@ -607,6 +632,9 @@ jobs:
       # the fact to report rather than leave to the step's own error. A
       # job cancelled by the caller's concurrency group is the one case
       # this still skips, a superseded review having nothing to say.
+      - name: PROBE cmdline scan during the review, not for merging
+        if: ${{ !cancelled() }}
+        run: sudo cut -d' ' -f3- /home/review-pr/scan.log | sort | uniq -c
       - name: Refuse to report a review that never ran
         if: ${{ !cancelled() }}
         env:
