@@ -443,10 +443,11 @@ the previous round's verdict named. An amend and a rebase each leave it
 off the branch, so it is read from that verdict rather than from the
 branch's history.
 
-- **Resolve every thread the author addressed, and only those.** A
-  thread they declined stays open only if it is still blocking; where
-  their reason is sound, resolve it and say so. A finding declined as
-  out of scope and filed as an issue is addressed.
+- **The author resolves a thread once they have answered it**, a
+  declined one included, so that an answered thread does not hold the
+  merge. Read each answer, and reopen the thread only where its finding
+  is still blocking, saying why. A finding declined as out of scope and
+  filed as an issue is not reopened.
 - Do not re-open settled ground, and do not introduce a preference late.
   A new blocking finding at round three is legitimate only if the new
   commits introduced it, or if leaving it would be wrong on `main`.
