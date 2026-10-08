@@ -393,6 +393,13 @@ jobs:
           # `gh issue view` only reads, with the token's `issues: read`,
           # and is how a review reads an issue the pull request cites
           #
+          # Read, Grep and Glob are not allowed by name. A bare Read rule
+          # reads any path, `/proc/self/environ` and the credential in it
+          # included. Without one, Claude Code reads only its working
+          # directory, the checkout. Measured with Claude Code 2.1.294: a
+          # bare Read rule read a file outside the working directory;
+          # without it the read was refused (btclib-org/.github#1642)
+          #
           # the model is named: the action's default ran the review on
           # Sonnet, and the review judges claims about code. The flag
           # comes before the tool list, as the action's usage docs put it
@@ -403,8 +410,7 @@ jobs:
             "Bash(gh pr view:*)"
             "Bash(gh pr diff:*)"
             "Bash(gh issue view:*)"
-            "Bash(${{ runner.temp }}/claude-review/post-review:*)"
-            "Read,Grep,Glob${{
+            "Bash(${{ runner.temp }}/claude-review/post-review:*)${{
             inputs.extra-allowed-tools
             && format(',{0}', inputs.extra-allowed-tools) || '' }}"
 
@@ -669,8 +675,15 @@ jobs:
           # rather than left out of an allow list, which cannot remove
           # what tag mode adds
           #
+          # Tag mode also allows Read, Grep, Glob and LS by name
+          # (`tagModeTools` in the action's `src/modes/tag/index.ts`),
+          # which reads any path, as the review job's comment says. They
+          # are denied too, so an answer reads no file, the checkout
+          # included, until btclib-org/.github#1642 bounds them
+          #
           # the model is named for the reason the review job gives
           claude_args: >-
             --model claude-opus-5-5
             --disallowedTools
             "Bash,Edit,MultiEdit,Write,NotebookEdit,mcp__github_file_ops__commit_files,mcp__github_file_ops__delete_files"
+            "Read,Grep,Glob,LS"
