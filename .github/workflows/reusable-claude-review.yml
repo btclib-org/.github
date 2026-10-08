@@ -323,6 +323,11 @@ jobs:
           # has both. The mention job below takes no such input,
           # deliberately -- what triggers it is somebody writing @claude
           allowed_bots: "dependabot[bot]"
+          # PROBE (btclib-org/.github#1642, not to land as is): any value
+          # makes the action back git with a credential helper rather than
+          # a token in the origin URL. "-none-" cannot be a GitHub login,
+          # which never starts with a hyphen, so it allows nobody
+          allowed_non_write_users: "-none-"
           # the caller's paragraph lands on the line of its own below,
           # between the findings paragraph and the gates instruction; a
           # caller passing none leaves a blank line there and nothing
@@ -413,6 +418,16 @@ jobs:
             "Bash(${{ runner.temp }}/claude-review/post-review:*)${{
             inputs.extra-allowed-tools
             && format(',{0}', inputs.extra-allowed-tools) || '' }}"
+
+      # PROBE (btclib-org/.github#1642, not to land as is): counts only,
+      # never a value
+      - name: Probe the checkout's git config for a token
+        if: always()
+        run: |
+          n=$(grep -c x-access-token .git/config || true)
+          h=$(git config --get credential.helper >/dev/null && echo yes || echo no)
+          printf 'x-access-token lines in .git/config: %s\n' "$n"
+          printf 'credential.helper set: %s\n' "$h"
 
       # the action refuses to run when the calling workflow differs from
       # the copy on the caller's default branch -- a pull request must
