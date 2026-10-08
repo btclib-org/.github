@@ -107,8 +107,8 @@ name: reusable-claude-review
 # script (`src/modes/tag/index.ts`, `gitPushWrapper`). The script and
 # its directory are mode 555.
 #
-# Measured with Claude Code 2.1.282, the version the action installs,
-# and a stand-in for the script: the allow admits the script with a
+# Measured with Claude Code 2.1.282, which claude-code-action v1.0.234
+# installs, and a stand-in for the script: the allow admits the script with a
 # heredoc and with `--approve` as an argument, and refuses
 # `gh pr review 5 --comment` and the script followed by
 # `; gh pr review 5 --approve` or by that command on a line of its own.
