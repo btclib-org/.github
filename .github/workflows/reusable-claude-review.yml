@@ -157,12 +157,22 @@ name: reusable-claude-review
 #   token.
 # - `unshare`: namespaces of its own. Its own processes, so it sees none
 #   of the job's. Its own /tmp, /var/tmp and /dev/shm, and an empty
-#   /home, so it reads no file of the runner's user. A network with
-#   loopback alone and an empty /run, so it reaches no host and no
-#   resolver: a name lookup is itself a message out.
+#   /home, so it reads neither the runner's home nor its temporary
+#   files. A network with loopback alone and an empty /run, so it
+#   reaches no host and no resolver: a name lookup is itself a message
+#   out.
 # - `setpriv`: no capability and no-new-privs, so sudo is closed to it.
-# - When the command ends, or the process that started it is killed,
-#   the kernel kills whatever it left running.
+# - When the command ends, or the sudo that started it is killed, the
+#   kernel kills whatever it left running.
+#
+# Measured on btclib-org/.github#1659, each check against the same
+# check outside as its control (run 37841378802). Inside, a name did
+# not resolve, and no connection reached 1.1.1.1, the runner's
+# metadata address or the host's resolver, while loopback connected.
+# The runner's home, its /tmp and every process but the check's own
+# were absent, and no environment or command line it could read held
+# a token's shape. sudo failed. A child left running was gone when the
+# command returned, and when its sudo got TERM or KILL (run KILL-RUN).
 #
 # `uv sync` runs the same way before the review, but with the network,
 # which installing takes. The step that sets this up then runs each
@@ -187,7 +197,13 @@ name: reusable-claude-review
 # is a second bound behind that one, on both jobs: the CLI then loads
 # no project source at all, the base branch's included, where the
 # action loads every source otherwise
-# (`base-action/src/parse-sdk-options.ts`). MEASURED-SOURCES
+# (`base-action/src/parse-sdk-options.ts`). Measured on
+# btclib-org/.github#1659: a `.claude/settings.json` and a `.mcp.json`
+# the pull request added were gone from the checkout once the action
+# had run, in the review job (run 37841378802) and in the mention job
+# (run 37832736314). With the flag the CLI
+# listed no command from the base branch's `.claude/commands/`;
+# without it, it did.
 #
 # The credential is the caller's to pass as well. The organization
 # secret CLAUDE_CODE_OAUTH_TOKEN is visible to every repository of
@@ -515,6 +531,20 @@ jobs:
             sleep 2
             echo "PROBE after_$sig review_pr_procs=$(pgrep -c -u review-pr)"
             sudo pkill -u review-pr
+            sleep 1
+          done
+          echo "== kill by pid: sudo itself, then the tree"
+          for sig in TERM KILL; do
+            "$RUNNER_TEMP/claude-review/run-pr" python -c \
+              'import subprocess,time; subprocess.Popen(["sleep","600"], start_new_session=True); time.sleep(600)' &
+            pid=$!
+            sleep 5
+            echo "PROBE bypid_$sig before review_pr_procs=$(pgrep -c -u review-pr) comm=$(ps -o comm= -p $pid) ruid=$(ps -o ruid= -p $pid | tr -d ' ')"
+            kill -s "$sig" "$pid"; echo "PROBE bypid_$sig kill_exit=$?"
+            sleep 3
+            echo "PROBE bypid_$sig sudo_alive=$(kill -0 $pid 2>/dev/null && echo yes || echo no) after review_pr_procs=$(pgrep -c -u review-pr)"
+            ps -e -o pid=,ppid=,user=,comm= --forest | grep -B1 -A6 ' unshare$' | sed "s/^/PROBE bypid_$sig tree /"
+            sudo pkill -KILL -x unshare; sudo pkill -KILL -u review-pr
             sleep 1
           done
           echo "== the setup step's own checks, inside"
