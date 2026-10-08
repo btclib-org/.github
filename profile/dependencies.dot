@@ -32,9 +32,9 @@
 // package depends on sits above it, in four columns 145 apart. An edge's
 // `pos` is its route as the control points of a spline whose segments
 // are straight, `e,` giving where the arrowhead's tip lands, and a
-// label's `lp` is where it is written. The arrows into `btclib` from
-// the row below meet on one horizontal run under it, and `btclib-node`'s,
-// from the row under that, goes straight up through it.
+// label's `lp` is where it is written. `btclib-wallet`'s arrow into
+// `btclib` runs along one horizontal line under it, and `btclib-node`'s,
+// from the row under that, goes straight up through that line.
 //
 // The colours are for a transparent background under both of GitHub's
 // themes: text sits on the fill of its box, and the grey of the arrows
@@ -54,7 +54,7 @@ digraph dependencies {
     "btclib-ecc"       [pos="290,360"];
     "btclib"           [pos="290,260"];
     "btclib-wallet"      [pos="0,160"];
-    "bitcoin-node-tests" [pos="145,160"];
+    "bitcoin-node-tests" [pos="145,60"];
     "btclib-benchmarks"  [pos="435,60"];
     "btclib-node"        [pos="290,60"];
 
@@ -69,14 +69,14 @@ digraph dependencies {
         [pos="e,145,442 229,260 229,260 145,260 145,260 145,260 145,435 145,435"];
     "btclib-wallet" -> "btclib"
         [pos="e,290,242 20,178 20,178 20,210 20,210 20,210 290,210 290,210 290,210 290,235 290,235"];
-    "bitcoin-node-tests" -> "btclib"
-        [pos="e,290,242 145,178 145,178 145,210 145,210 145,210 290,210 290,210 290,210 290,235 290,235"];
+    "bitcoin-node-tests" -> "btclib-wallet"
+        [pos="e,-20,142 125,78 125,78 125,92 125,92 125,92 -20,92 -20,92 -20,92 -20,135 -20,135"];
     "btclib-node" -> "btclib" [
         pos="e,290,242 290,78 290,78 290,235 290,235"];
     "btclib-node" -> "btclib-wallet"
-        [pos="e,0,142 229,60 229,60 0,60 0,60 0,60 0,135 0,135"];
+        [pos="e,0,142 270,78 270,78 270,108 270,108 270,108 0,108 0,108 0,108 0,135 0,135"];
     "btclib-benchmarks" -> "btclib-wallet"
-        [pos="e,20,142 415,78 415,78 415,110 415,110 415,110 20,110 20,110 20,110 20,135 20,135"];
+        [pos="e,20,142 415,78 415,78 415,125 415,125 415,125 20,125 20,125 20,125 20,135 20,135"];
     "btclib-benchmarks" -> "btclib-secp256k1"
         [pos="e,351,460 455,78 455,78 455,460 455,460 455,460 358,460 358,460"];
     "btclib-wallet" -> "btclib-mnemonics" [pos="e,-20,442 -20,178 -20,178 -20,435 -20,435"];
