@@ -21,7 +21,7 @@ name: reusable-claude-review
 # review's: a caller that lifts the old job's condition onto it takes
 # the mention out with it.
 #
-# Three inputs.
+# The inputs.
 #
 # extra-prompt, string, default "": a paragraph of the calling tree's
 # own, landing between the findings paragraph and the instruction not to
@@ -161,10 +161,19 @@ name: reusable-claude-review
 # - It is not in sudoers, so it cannot become root, who can read every
 #   process's memory and with it every secret of the job.
 # - The runner's home is made 700, so it cannot read the job's files.
+# - `/proc` is remounted with `hidepid`, so it sees no process but its
+#   own. The action passes the App's token on the command line of the
+#   `claude` process, where any user can read it without the mount: on
+#   btclib-org/.github#1645, a process of this user started without it
+#   found a `ghs_` token there during the review. The runner's own
+#   group is exempt, so the runner's view does not change.
 # - An `iptables` owner rule leaves it loopback only. `uv sync` runs as
-#   the same user before the rule is added.
-# - The step that sets this up then tries sudo, the runner's home and
-#   the network as that user, and fails the job where one succeeds.
+#   the same user before the rule is added. Names still resolve, through
+#   the host's resolver: with nothing to read, what it could send that
+#   way is public.
+# - The step that sets this up then tries sudo, the runner's home, a
+#   process of another user and the network as that user, and fails the
+#   job where one succeeds.
 #
 # The allow rule names the script, as it names post-review, so an
 # argument cannot reach the runner's own shell. Measured with Claude
@@ -384,6 +393,7 @@ jobs:
         run: |
           sudo useradd --create-home --shell /bin/sh review-pr
           sudo chmod 700 "$HOME"
+          sudo mount -o "remount,hidepid=invisible,gid=$(id -g)" /proc
           sudo install -m 755 "$(command -v uv)" /usr/local/bin/uv
           sudo cp -a "$GITHUB_WORKSPACE" "$TREE"
           sudo chown -R review-pr: "$TREE"
@@ -404,6 +414,11 @@ jobs:
           fi
           if as_pr ls "$HOME" >/dev/null 2>&1; then
             echo "::error::review-pr can read $HOME."
+            exit 1
+          fi
+          # 1 is systemd's, root's
+          if as_pr test -e /proc/1; then
+            echo "::error::review-pr can see another user's process."
             exit 1
           fi
           # the runner's own request first: a check that cannot succeed
