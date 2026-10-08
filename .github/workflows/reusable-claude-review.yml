@@ -414,10 +414,14 @@ jobs:
           cat > "$ns" <<'EOF'
           #!/bin/sh
           # review-pr-ns [--net] <command>...
+          # Each --pdeathsig kills its process when the parent dies:
+          # unshare when sudo does, and the namespace's first process,
+          # which takes the rest with it, when unshare does. The second
+          # is set after the change of user, which clears it
           set -eu
           if [ "$1" = --net ]; then shift; net=; else net=--net; fi
           exec setpriv --pdeathsig KILL \
-            unshare --mount --pid --fork --kill-child --mount-proc $net \
+            unshare --mount --pid --fork --mount-proc $net \
             /bin/sh -euc '
               if [ -n "$0" ]; then
                 ip link set lo up
@@ -429,14 +433,14 @@ jobs:
               done
               cd /
               exec setpriv --reuid=review-pr --regid=review-pr --init-groups \
-                --no-new-privs --bounding-set=-all \
+                --no-new-privs --bounding-set=-all --pdeathsig KILL \
                 env -i HOME=/var/lib/review-pr PATH=/usr/local/bin:/usr/bin:/bin "$@"
             ' "$net" "$@"
           EOF
           sudo install -m 755 "$ns" /usr/local/bin/review-pr-ns
-          # without use_pty, sudo starts the script as its own child, so
-          # the parent-death signal fires when sudo is killed; with it, a
-          # monitor process sits between them and outlives sudo
+          # without use_pty, which this runner's sudoers sets, sudo
+          # starts the script as its own child, so the first parent-death
+          # signal fires when sudo is killed
           echo 'Defaults!/usr/local/bin/review-pr-ns !use_pty' > "$ns"
           sudo visudo -cqf "$ns"
           sudo install -m 440 "$ns" /etc/sudoers.d/review-pr-ns
