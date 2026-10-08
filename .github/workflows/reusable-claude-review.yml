@@ -300,6 +300,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         sources: [user, default]
     # the review's own budget is on its step below, and this is the
@@ -412,7 +413,7 @@ jobs:
             ' "$net" "$@"
           EOF
           sudo install -m 755 "$ns" /usr/local/bin/review-pr-ns
-          if [ -f "$TREE/uv.lock" ] && ! sudo /usr/local/bin/review-pr-ns --net \
+          if ! sudo /usr/local/bin/review-pr-ns --net \
               uv sync --locked --all-groups --directory "$TREE"; then
             echo "::warning::uv sync failed, so run-pr has no environment."
           fi
@@ -464,13 +465,21 @@ jobs:
           echo "PROBE setup unshare_version=$(unshare --version | head -1)"
           echo "PROBE setup sudoers_use_pty=$(sudo grep -rh use_pty /etc/sudoers /etc/sudoers.d 2>/dev/null | grep -vc '^#')"
           echo "== outside, as the runner user"
-          python3 "$P" outside "$HOME" "$GITHUB_WORKSPACE" "$marker"
+          python3 "$GITHUB_WORKSPACE/probe_1642.py" outside "$HOME" "$GITHUB_WORKSPACE" "$marker"
           echo "== inside, through review-pr-ns, system python"
           sudo "$NS" python3 "$P" inside "$HOME" "$GITHUB_WORKSPACE" "$marker" --spawn
           echo "PROBE inside exit=$?"
           sleep 2
           echo "PROBE after_inside written_inside_visible_outside=$(test -e /tmp/probe-written-inside && echo yes || echo no)"
           echo "PROBE after_inside review_pr_procs=$(pgrep -c -u review-pr)"
+          echo "== stdin through run-pr: a quoted heredoc, and one line of 20000 characters"
+          "$RUNNER_TEMP/claude-review/run-pr" python - <<'PYEOF'
+          print("PROBE stdin heredoc ran")
+          PYEOF
+          echo "PROBE stdin heredoc exit=$?"
+          python3 -c 'print("x = 1" + " + 1" * 5000 + "; print(\"PROBE stdin longline ran\", x)")' \
+            | "$RUNNER_TEMP/claude-review/run-pr" python -
+          echo "PROBE stdin longline exit=$?"
           echo "== tests through run-pr, outside Claude"
           "$RUNNER_TEMP/claude-review/run-pr" pytest -q -p no:cacheprovider tests/check_sign_off_test.py > /tmp/pt.log 2>&1
           echo "PROBE runpr_pytest exit=$? summary=$(tail -1 /tmp/pt.log | tr -cd '[:alnum:] ,.=')"
@@ -650,6 +659,15 @@ jobs:
             echo "PROBE marker $m=$(test -e "$HOME/$m" && echo yes || echo no)"
           done
           echo "PROBE after_review review_pr_procs=$(pgrep -c -u review-pr)"
+          for f in .claude/settings.json .mcp.json probe_1642.py CLAUDE.md .claude/commands/review.md; do
+            echo "PROBE checkout_after_action has[$f]=$(test -e "$f" && echo yes || echo no)"
+          done
+          for m in probe-hook-sessionstart probe-hook-pretooluse probe-mcp-ran; do
+            echo "PROBE marker workspace $m=$(test -e "$GITHUB_WORKSPACE/$m" && echo yes || echo no)"
+          done
+          jq -c '.[] | select(.type == "system" and .subtype == "init")
+                 | {keys: keys, slash_commands, memory: (.memory_paths // .memoryPaths // null)}' "$EXECUTION"
+          jq -c '[.[] | select(.type == "system") | .subtype] | group_by(.) | map({(.[0]): length}) | add' "$EXECUTION"
           echo "== init"
           jq -c '.[] | select(.type == "system" and .subtype == "init")
                  | {tools: (.tools | length), mcp_servers, permissionMode}' "$EXECUTION"

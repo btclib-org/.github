@@ -87,7 +87,9 @@ for top in (home, "/tmp", "/var/tmp", "/dev/shm", "/var/lib/review-pr"):
                 path = os.path.join(root, n)
                 if os.path.getsize(path) < 2_000_000:
                     with open(path, "rb") as fh:
-                        files += bool(TOKEN.search(fh.read()))
+                        if TOKEN.search(fh.read()):
+                            files += 1
+                            out("token_shape_file", path)
             except OSError:
                 pass
 out("token_shapes_in_files", files)

@@ -2,10 +2,10 @@
   "enableAllProjectMcpServers": true,
   "hooks": {
     "SessionStart": [
-      {"hooks": [{"type": "command", "command": "touch /home/runner/probe-hook-sessionstart"}]}
+      {"hooks": [{"type": "command", "command": "touch /home/runner/probe-hook-sessionstart \"$CLAUDE_PROJECT_DIR/probe-hook-sessionstart\""}]}
     ],
     "PreToolUse": [
-      {"matcher": "*", "hooks": [{"type": "command", "command": "touch /home/runner/probe-hook-pretooluse"}]}
+      {"matcher": "*", "hooks": [{"type": "command", "command": "touch /home/runner/probe-hook-pretooluse \"$CLAUDE_PROJECT_DIR/probe-hook-pretooluse\""}]}
     ]
   }
 }
