@@ -226,6 +226,22 @@ jobs:
           && github.event.pull_request.head.repo.full_name
              == github.repository }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: v1-adddir
+            adddir: true
+            rules: ""
+          - variant: v2-adddir-scoped
+            adddir: true
+            rules: '"Grep(./**)" "Glob(./**)"'
+          - variant: v3-readrule-scoped
+            adddir: false
+            rules: '"Read(~/.claude/projects/**)" "Grep(./**)" "Glob(./**)"'
+          - variant: v4-adddir-bare
+            adddir: true
+            rules: '"Grep" "Glob"'
     # the review's own budget is on its step below, and this is the
     # ceiling for the steps around it, which read the API and post. It
     # has to be the larger of the two: a job that hits its own limit is
@@ -296,6 +312,12 @@ jobs:
           printf '#!/bin/sh\nexec gh pr review %s -R %s --comment --body-file -\n' \
             "$NUMBER" "$REPO" > "$DIR/post-review"
           chmod 555 "$DIR/post-review" "$DIR"
+      - name: PROBE home
+        id: home
+        run: |
+          echo "dir=$HOME" >> "$GITHUB_OUTPUT"
+          echo "HOME=$HOME"
+          echo "workspace=$GITHUB_WORKSPACE"
       - name: Review against REVIEWING.md
         id: review
         uses: anthropics/claude-code-action@97c53473391bff1901034d4b454b5bac7ab7a029 # v1.0.239
@@ -328,92 +350,80 @@ jobs:
           # caller passing none leaves a blank line there and nothing
           # else
           prompt: |
-            REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            PROBE of tool permissions. This is not a review. Do each step
+            below exactly once, in order. Do not retry a refused step and
+            do not look for another way to do it. Do not post anything,
+            and do not quote any file content in your final message:
+            reply only with "done".
 
-            Review this pull request against REVIEWING.md. It is the same
-            file in every repository of the organization; its last
-            section is this tree's. Cite the organization's standard for
-            a rule. CLAUDE.md has the facts about this tree.
-
-            Read the title and description again with `gh pr view` before
-            a finding about them: they may have changed since this run
-            started.
-
-            Read an issue the pull request cites with
-            `gh issue view <n> --comments`. A decision in its comments
-            can replace what its body asks for.
-
-            A pull request adds no entry to `CHANGELOG.md` or
-            `RELEASE_NOTES.md`: the changelog is written at release time
-            (btclib-org/.github#1622). Do not ask for one, whatever a
-            tree's `CONTRIBUTING.md` still says.
-
-            Write plainly: the point first, plain words, short
-            sentences.
-
-            The summary's first line is the verdict, alone on the line:
-            `ACK <sha>`, `CHANGES REQUESTED <sha>`, `NACK <sha>`, or
-            `NO VERDICT <sha>: <reason>` where you could not judge, for
-            example because a permission you needed was refused. It is
-            not optional: a check reads it.
-
-            Then the findings, blocking and non-blocking only, one
-            bullet each: where, what is wrong, how it is known. Add one
-            line starting "Not checked:" only where what you could not
-            check bears on the verdict. No nits in the summary, no
-            findings outside this pull request, no account of what the
-            diff does or of what you checked.
-
-            ${{ inputs.extra-prompt }}
-
-            Do not run the gates; they run beside you on the same sha.
-            Do not file issues.
-
-            Post the summary with this script. It posts a review of type
-            COMMENT, the ack of record, and reads the summary from
-            standard input:
-
-            ${{ runner.temp }}/claude-review/post-review <<'EOF'
-            <the summary>
-            EOF
-
-            Never `--approve` and never `--request-changes`. Use
-            `mcp__github_inline_comment__create_inline_comment` (with
-            `confirmed: true`) for a finding about one line.
-          # folded rather than literal: the flag has to reach the CLI as
-          # one line, and the list is past the 100 columns yamllint holds
-          # this file to. The fold joins its lines with a space, so each
-          # tool is a quoted word of its own, which the action reads as
-          # one list after the flag. The last word carries the caller's
-          # tools behind a comma written here.
-          #
-          # the review is posted by the script the step above writes,
-          # and `gh pr review` is not allowed as a command of its own.
-          # `gh issue view` only reads, with the token's `issues: read`,
-          # and is how a review reads an issue the pull request cites
-          #
-          # Read, Grep and Glob are not allowed by name. A rule naming a
-          # tool alone allows it on any path, outside the checkout
-          # included. Without the rule, Claude Code
-          # reads only its working directory, the checkout. Measured in
-          # the review run of btclib-org/.github#1649, with the Claude
-          # Code 2.1.287 that v1.0.239 installs: a Read of /etc/hostname
-          # was refused, and reads inside the checkout went through
-          #
-          # the model is named: the action's default ran the review on
-          # Sonnet, and the review judges claims about code. The flag
-          # comes before the tool list, as the action's usage docs put it
+            1. Run `gh pr diff 1626 -R btclib-org/.github`.
+            2. If step 1's output was saved to a file, Read that file with
+               offset 2000 and limit 3. Otherwise skip this step.
+            3. Read /etc/hostname.
+            4. Read ${{ steps.home.outputs.dir }}/.claude/settings.json.
+            5. Use the Glob tool with pattern `**/*.yml` in the current
+               working directory.
+            6. Use the Grep tool for the pattern `CLAUDE_REVIEW_ENABLED`
+               in the current working directory, output mode
+               files_with_matches.
+            7. Use the Grep tool for the pattern `root` with path `/etc`,
+               output mode count.
+            8. Use the Glob tool with pattern `*` and path `/etc`.
           claude_args: >-
             --model claude-opus-5-5
+            ${{ matrix.adddir
+            && format('--add-dir {0}/.claude/projects', steps.home.outputs.dir)
+            || '' }}
             --allowedTools
-            "mcp__github_inline_comment__create_inline_comment"
-            "Bash(gh pr view:*)"
             "Bash(gh pr diff:*)"
-            "Bash(gh issue view:*)"
-            "Bash(${{ runner.temp }}/claude-review/post-review:*)${{
-            inputs.extra-allowed-tools
-            && format(',{0}', inputs.extra-allowed-tools) || '' }}"
+            ${{ matrix.rules }}
+      - name: PROBE trace
+        if: ${{ !cancelled() }}
+        env:
+          EXECUTION: ${{ steps.review.outputs.execution_file }}
+          OAUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          APPTOKEN: ${{ steps.review.outputs.github_token }}
+        run: |
+          echo "== tools offered (init)"
+          jq -c '.[] | select(.type == "system" and .subtype == "init")
+                 | {tools, cwd, permissionMode}' "$EXECUTION" || true
+          echo "== tool calls: name, path-ish input"
+          jq -c '.[] | select(.type == "assistant") | .message.content[]?
+                 | select(.type == "tool_use")
+                 | {id, name, input: (.input | {file_path, path, pattern,
+                    offset, limit, command, output_mode})}' "$EXECUTION" || true
+          echo "== tool results: error flag, length, and an error's text"
+          jq -c '.[] | select(.type == "user") | .message.content[]?
+                 | select(.type == "tool_result")
+                 | (.content | if type == "array"
+                      then (map(.text // "") | join("")) else (. // "") end) as $t
+                 | {id: .tool_use_id, is_error, length: ($t | length),
+                    saved: ($t | test("saved to"; "i")),
+                    error: (if .is_error then ($t | .[0:300]) else null end)}' \
+              "$EXECUTION" || true
+          echo "== permission_denials"
+          jq -c '.[] | select(.type == "result") | .permission_denials
+                 | map({tool_name, path: (.tool_input.file_path
+                        // .tool_input.path // .tool_input.pattern)})' \
+              "$EXECUTION" || true
+          echo "== files under HOME/.claude, names only"
+          find "$HOME/.claude" -printf '%y %P\n' 2>/dev/null | sort
+          echo "== files under HOME/.claude holding the OAuth token"
+          if [ -n "$OAUTH" ]; then
+            grep -rlF -- "$OAUTH" "$HOME/.claude" 2>/dev/null | wc -l
+          else
+            echo "OAUTH empty"
+          fi
+          echo "== files under HOME/.claude holding the App token"
+          if [ -n "$APPTOKEN" ]; then
+            grep -rlF -- "$APPTOKEN" "$HOME/.claude" 2>/dev/null | wc -l
+          else
+            echo "APPTOKEN empty"
+          fi
+          echo "== files under HOME/.claude matching a token shape"
+          grep -rlE 'gh[pousr]_[A-Za-z0-9]{30,}|sk-ant-[A-Za-z0-9_-]{20,}' \
+            "$HOME/.claude" 2>/dev/null | sed "s|^$HOME/||"
+          echo "== end"
 
       # the action refuses to run when the calling workflow differs from
       # the copy on the caller's default branch -- a pull request must
