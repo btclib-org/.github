@@ -498,6 +498,19 @@ jobs:
             uv run --directory /home/review-pr/tree --locked --offline "$@"
           EOF
           chmod 555 "$DIR/post-review" "$DIR/run-pr" "$DIR"
+      - name: PROBE run-pr itself, not for merging
+        env:
+          DIR: ${{ runner.temp }}/claude-review
+        run: |
+          set +e
+          "$DIR/run-pr" pytest tests/probe_1642_test.py -q -p no:randomly; echo "pytest exit $?"
+          "$DIR/run-pr" python -c 'import os; print(sorted(os.environ))'; echo "env exit $?"
+          "$DIR/run-pr" python - <<'PY'
+          import os, sys
+          print("stdin heredoc ok", sys.executable, os.getcwd())
+          PY
+          echo "heredoc exit $?"
+          exit 0
       - name: Review against REVIEWING.md
         id: review
         uses: anthropics/claude-code-action@9171db3e57d6a3140a37ddc2ba92788584e0ead6 # v1.0.234

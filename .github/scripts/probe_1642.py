@@ -7,6 +7,6 @@ hex, and nothing else.
 
 import re
 
-MAX_PROTOCOL_MESSAGE_LENGTH = 4 * 1000 * 1000
+MAX_PROTOCOL_MESSAGE_LENGTH = 3 * 1000 * 1000
 
 SHA = re.compile(r"^[0-9a-f]{7,40}$")
