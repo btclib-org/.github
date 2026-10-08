@@ -10,7 +10,9 @@ repository holds is one the rule can describe. A lightweight tag is a
 ref to a commit with no object of its own, so there is nothing on it to
 sign, and a ruleset requiring a signature on `refs/tags/v*` says nothing
 about it. What a release tag is does not turn on whether the repository
-publishes: btclib-org/.github#105 is where that was settled.
+publishes: btclib-org/.github#105 is where that was settled. The ruleset
+reads no tag's own signature, so `test_the_newest_release_tag_is_verified`
+asks each tree's newest `v*` tag what GitHub says of it.
 """
 
 from __future__ import annotations
@@ -37,4 +39,30 @@ def test_the_newest_tag_is_an_object_a_signature_can_sit_on(repository: str) -> 
     kind = gh_json(endpoint)["object"]["type"]
     assert kind == "tag", f"{tag} points at a {kind}, not a tag object; " + by_hand(
         repository, f"gh api {endpoint} --jq .object.type"
+    )
+
+
+def test_the_newest_release_tag_is_verified(repository: str) -> None:
+    """GitHub verifies the signature on the newest `v*` tag.
+
+    The `tag-integrity` ruleset refuses an unsigned commit and does not
+    read the tag's own signature, and `release.yml` publishes on the
+    push. This reads the signature back as the release steps do.
+
+    :param repository: the repository asked about.
+    """
+    listed = gh_json(f"repos/{ORG}/{repository}/tags?per_page=100")
+    tags = [t["name"] for t in listed if t["name"].startswith("v")]
+    if not tags:
+        pytest.skip(f"{repository} has no v* tag")
+    tag = tags[0]
+    ref = f"repos/{ORG}/{repository}/git/ref/tags/{tag}"
+    target = gh_json(ref)["object"]
+    endpoint = f"repos/{ORG}/{repository}/git/tags/{target['sha']}"
+    command = by_hand(repository, f"gh api {endpoint} --jq .verification")
+    kind = target["type"]
+    assert kind == "tag", f"{tag} is a {kind}, which carries no signature; {command}"
+    verification = gh_json(endpoint)["verification"]
+    assert verification["verified"] is True, (
+        f"{tag} is not verified: {verification['reason']}; {command}"
     )
