@@ -393,13 +393,22 @@ jobs:
           # `gh issue view` only reads, with the token's `issues: read`,
           # and is how a review reads an issue the pull request cites
           #
-          # Read, Grep and Glob are not allowed by name. A rule naming a
-          # tool alone allows it on any path, outside the checkout
-          # included. Without the rule, Claude Code
-          # reads only its working directory, the checkout. Measured in
-          # the review run of btclib-org/.github#1649, with the Claude
-          # Code 2.1.287 that v1.0.239 installs: a Read of /etc/hostname
-          # was refused, and reads inside the checkout went through
+          # Read, Grep and Glob are not allowed by name: a rule naming a
+          # tool alone allows it on any path. Without a rule, Read
+          # reaches only the checkout, and Grep and Glob do not exist.
+          # The three path rules add the directory where Claude Code
+          # saves a Bash output too long to show whole, as a long
+          # `gh pr diff` is, and give Grep and Glob the checkout.
+          #
+          # Measured in run 37798626120 of btclib-org/.github#1655, with
+          # the Claude Code 2.1.287 that v1.0.239 installs. With these
+          # rules, a saved diff was read, Grep and Glob searched the
+          # checkout, and a Read of /etc/hostname or
+          # ~/.claude/settings.json and a Grep or Glob of /etc were
+          # refused. With Grep and Glob named alone, the Grep and the
+          # Glob of /etc went through. ~/.claude/projects held this
+          # session's transcript and saved outputs, and neither the
+          # Anthropic credential nor the App's token
           #
           # the model is named: the action's default ran the review on
           # Sonnet, and the review judges claims about code. The flag
@@ -411,6 +420,9 @@ jobs:
             "Bash(gh pr view:*)"
             "Bash(gh pr diff:*)"
             "Bash(gh issue view:*)"
+            "Read(~/.claude/projects/**)"
+            "Grep(./**)"
+            "Glob(./**)"
             "Bash(${{ runner.temp }}/claude-review/post-review:*)${{
             inputs.extra-allowed-tools
             && format(',{0}', inputs.extra-allowed-tools) || '' }}"
