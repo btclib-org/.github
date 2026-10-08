@@ -7,6 +7,7 @@ Arguments: <label> <runner home> <workspace> <tmp marker> [--spawn]
 import os
 import re
 import socket
+import stat
 import subprocess
 import sys
 
@@ -85,7 +86,8 @@ for top in (home, "/tmp", "/var/tmp", "/dev/shm", "/var/lib/review-pr"):
         for n in names:
             try:
                 path = os.path.join(root, n)
-                if os.path.getsize(path) < 2_000_000:
+                st = os.lstat(path)
+                if stat.S_ISREG(st.st_mode) and st.st_size < 2_000_000:
                     with open(path, "rb") as fh:
                         if TOKEN.search(fh.read()):
                             files += 1

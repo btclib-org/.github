@@ -178,11 +178,16 @@ name: reusable-claude-review
 # What run-pr runs is not narrowed to pytest: `python` runs anything,
 # so the bound is where it runs, not the rule. MEASURED-RUNPR
 #
-# The checkout's own `.claude/` and `.mcp.json` are not loaded:
-# `--setting-sources user`, where the action loads every source
-# otherwise (`base-action/src/parse-sdk-options.ts`). Loaded, a pull
-# request's hook or MCP server would run as the runner's user, beside
-# the credentials and outside review-pr's namespaces. MEASURED-SOURCES
+# A pull request's own `.claude/` and `.mcp.json` never load. A hook or
+# an MCP server there would run as the runner's user, beside the
+# credentials and outside review-pr's namespaces, so on a pull request
+# the action replaces both with the base branch's before the CLI starts
+# (`restoreConfigFromBase` in its
+# `src/github/operations/restore-config.ts`). `--setting-sources user`
+# is a second bound behind that one, on both jobs: the CLI then loads
+# no project source at all, the base branch's included, where the
+# action loads every source otherwise
+# (`base-action/src/parse-sdk-options.ts`). MEASURED-SOURCES
 #
 # The credential is the caller's to pass as well. The organization
 # secret CLAUDE_CODE_OAUTH_TOKEN is visible to every repository of
@@ -465,23 +470,23 @@ jobs:
           echo "PROBE setup unshare_version=$(unshare --version | head -1)"
           echo "PROBE setup sudoers_use_pty=$(sudo grep -rh use_pty /etc/sudoers /etc/sudoers.d 2>/dev/null | grep -vc '^#')"
           echo "== outside, as the runner user"
-          python3 "$GITHUB_WORKSPACE/probe_1642.py" outside "$HOME" "$GITHUB_WORKSPACE" "$marker"
+          timeout 300 python3 "$GITHUB_WORKSPACE/probe_1642.py" outside "$HOME" "$GITHUB_WORKSPACE" "$marker"
           echo "== inside, through review-pr-ns, system python"
-          sudo "$NS" python3 "$P" inside "$HOME" "$GITHUB_WORKSPACE" "$marker" --spawn
+          timeout 300 sudo "$NS" python3 "$P" inside "$HOME" "$GITHUB_WORKSPACE" "$marker" --spawn
           echo "PROBE inside exit=$?"
           sleep 2
           echo "PROBE after_inside written_inside_visible_outside=$(test -e /tmp/probe-written-inside && echo yes || echo no)"
           echo "PROBE after_inside review_pr_procs=$(pgrep -c -u review-pr)"
           echo "== stdin through run-pr: a quoted heredoc, and one line of 20000 characters"
-          "$RUNNER_TEMP/claude-review/run-pr" python - <<'PYEOF'
+          timeout 120 "$RUNNER_TEMP/claude-review/run-pr" python - <<'PYEOF'
           print("PROBE stdin heredoc ran")
           PYEOF
           echo "PROBE stdin heredoc exit=$?"
           python3 -c 'print("x = 1" + " + 1" * 5000 + "; print(\"PROBE stdin longline ran\", x)")' \
-            | "$RUNNER_TEMP/claude-review/run-pr" python -
+            | timeout 120 "$RUNNER_TEMP/claude-review/run-pr" python -
           echo "PROBE stdin longline exit=$?"
           echo "== tests through run-pr, outside Claude"
-          "$RUNNER_TEMP/claude-review/run-pr" pytest -q -p no:cacheprovider tests/check_sign_off_test.py > /tmp/pt.log 2>&1
+          timeout 600 "$RUNNER_TEMP/claude-review/run-pr" pytest -q -p no:cacheprovider tests/check_sign_off_test.py > /tmp/pt.log 2>&1
           echo "PROBE runpr_pytest exit=$? summary=$(tail -1 /tmp/pt.log | tr -cd '[:alnum:] ,.=')"
           echo "== control: pgrep sees a review-pr process outside the namespaces"
           sudo -u review-pr sleep 30 &
