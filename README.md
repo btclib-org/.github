@@ -2801,8 +2801,10 @@ gh api repos/<org>/<repo>/pulls/<n>/reviews --jq '.[].user.login'
 
 The first answers `false`, closing the route a `GITHUB_TOKEN` would
 take. The second answers `claude[bot]`, a GitHub App's identity, which
-that setting does not govern: what forbids `--approve` is the prompt,
-`Bash(gh pr:*)` in `claude_args` permitting it otherwise.
+that setting does not govern: what forbids `--approve` is the prompt
+and the script the review posts through, which runs `gh pr review
+--comment` and ignores its arguments. `gh pr review` itself is not
+allowed.
 `--request-changes` goes unused, so that the body's first line, which the
 job's verification step reads, is the one place the verdict lives.
 
