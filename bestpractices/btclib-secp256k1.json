@@ -644,7 +644,7 @@
     "status": "Met"
   },
   "signed_releases": {
-    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing, and each GitHub release carries a Sigstore provenance bundle. The tag is signed, and RELEASING.md reads its signature back; the latest, v0.8.0.10, verifies. SECURITY.md gives the gh attestation verify command. https://github.com/btclib-org/btclib-secp256k1/releases/tag/v0.8.0.10",
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing, and every GitHub release from v0.8.0 on carries a Sigstore provenance bundle. Release tags are signed from v0.8.0 on, and RELEASING.md reads each signature back; the latest, v0.8.0.10, verifies. SECURITY.md gives the gh attestation verify command. https://github.com/btclib-org/btclib-secp256k1/releases/tag/v0.8.0.10",
     "status": "Met"
   },
   "sites_https": {
