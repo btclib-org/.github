@@ -508,7 +508,7 @@
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "The project site https://btclib.org/bitcoin-core-rpc/ is served over HTTPS behind Cloudflare and answers Content-Security-Policy (with frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security; check with curl -sI https://btclib.org/bitcoin-core-rpc/",
+    "justification": "https://btclib.org/bitcoin-core-rpc/ is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security.",
     "status": "Met"
   },
   "hardening": {
