@@ -1793,8 +1793,9 @@ without adding to it is deleted.
   workflow of `btclib-org/.github` names `@main` instead, its `main` being held
   by section 11's rulesets as the caller's is; zizmor is told so,
   `btclib-org/.github/*: ref-pin` under `unpinned-uses`. **OpenSSF Scorecard's
-  Pinned-Dependencies check flags every one of these calls regardless** — the
-  `scorecard` entry further down disposes of the alert.
+  Pinned-Dependencies check and CodeQL's `actions/unpinned-tag` query flag
+  every one of these calls regardless** — the `scorecard` entry further down
+  disposes of both alerts.
 - **A tree pins an action at one commit throughout its own workflows**, so
   a new workflow takes the pin the tree already carries rather than the
   newest release: two commits of one action are two versions in effect at
@@ -2192,10 +2193,11 @@ and the badge land together.
   named exceptions, each dismissed with reason `won't fix` instead of filed,
   because the standard has already decided them:
 
-    - **Pinned-Dependencies against a reusable-workflow call naming `@main`.**
+    - **Pinned-Dependencies, or CodeQL's `actions/unpinned-tag`, against a
+      reusable-workflow call naming `@main`.**
       **Every action is pinned to a commit SHA** above requires that name for
-      every call into `btclib-org/.github`, so the alert is that bullet's own
-      consequence rather than an oversight; the dismissal cites it.
+      every call into `btclib-org/.github`, so each alert is that bullet's own
+      consequence rather than an oversight; its dismissal cites it.
     - **Pinned-Dependencies against an index install a job makes with no pin,
       on purpose, to reproduce what a user's own install does.** The
       dismissal cites the comment the workflow gives for it.
