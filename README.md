@@ -2193,11 +2193,11 @@ and the badge land together.
   named exceptions, each dismissed with reason `won't fix` instead of filed,
   because the standard has already decided them:
 
-    - **Pinned-Dependencies against a reusable-workflow call naming `@main`,**
-      and CodeQL's `actions/unpinned-tag` against the same call.
+    - **Pinned-Dependencies, or CodeQL's `actions/unpinned-tag`, against a
+      reusable-workflow call naming `@main`.**
       **Every action is pinned to a commit SHA** above requires that name for
-      every call into `btclib-org/.github`, so the alert is that bullet's own
-      consequence rather than an oversight; the dismissal cites it.
+      every call into `btclib-org/.github`, so each alert is that bullet's own
+      consequence rather than an oversight; its dismissal cites it.
     - **Pinned-Dependencies against an index install a job makes with no pin,
       on purpose, to reproduce what a user's own install does.** The
       dismissal cites the comment the workflow gives for it.
