@@ -64,7 +64,7 @@
     "status": "Met"
   },
   "OSPS-BR-06.01": {
-    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing. The GitHub release carries <tag>.intoto.jsonl, an SLSA build-provenance bundle for the sdist and its SBOM, and the tag is signed as the tag-integrity ruleset requires. https://github.com/btclib-org/btclib-secp256k1/releases/latest",
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing. The GitHub release carries <tag>.intoto.jsonl, an SLSA build-provenance bundle for the sdist and its SBOM. The tag is signed, and RELEASING.md reads its signature back. https://github.com/btclib-org/btclib-secp256k1/releases/latest",
     "status": "Met"
   },
   "OSPS-BR-07.01": {
@@ -644,7 +644,7 @@
     "status": "Met"
   },
   "signed_releases": {
-    "justification": "The v0.8.0.8 tag is signed and GitHub-verified; PyPI's simple index shows a provenance attestation on every published file for this project, confirmed live against pypi.org/simple. https://github.com/btclib-org/btclib-secp256k1/releases/tag/v0.8.0.8",
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing, and each GitHub release carries a Sigstore provenance bundle. The tag is signed, and RELEASING.md reads its signature back; the latest, v0.8.0.10, verifies. SECURITY.md gives the gh attestation verify command. https://github.com/btclib-org/btclib-secp256k1/releases/tag/v0.8.0.10",
     "status": "Met"
   },
   "sites_https": {
@@ -736,7 +736,7 @@
     "status": "Met"
   },
   "version_tags_signed": {
-    "justification": "Every release tag since v0.8.0 is signed and GitHub-verified, and the required_signatures rule of the tag-integrity ruleset enforces it for v* tags. Earlier tags predate the policy. https://github.com/btclib-org/btclib-secp256k1/tags",
+    "justification": "Every release tag from v0.8.0 on is a signed annotated tag that GitHub verifies; earlier tags predate signing. RELEASING.md signs each tag with git tag -s and reads its signature back after the push. The tag-integrity ruleset refuses a v* tag push that brings an unsigned commit; it does not check the tag's own signature. https://github.com/btclib-org/btclib-secp256k1/tags",
     "status": "Met"
   },
   "version_unique": {
