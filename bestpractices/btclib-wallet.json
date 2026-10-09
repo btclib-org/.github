@@ -20,7 +20,7 @@
     "status": "Met"
   },
   "OSPS-AC-04.02": {
-    "justification": "Every workflow sets permissions: contents: read at the top and grants each job only what that job needs. zizmor's excessive-permissions audit runs in the required lint check. https://github.com/btclib-org/.github/blob/main/README.md#what-every-workflow-does",
+    "justification": "Every workflow sets permissions: contents: read at the top, and a job adds a write scope only where it uses it. zizmor's excessive-permissions audit runs in the required lint check. https://github.com/btclib-org/.github/blob/main/README.md#what-every-workflow-does",
     "status": "Met"
   },
   "OSPS-BR-01.01": {
@@ -60,7 +60,7 @@
     "status": "Met"
   },
   "OSPS-BR-05.01": {
-    "justification": "Pipelines install dependencies with uv: from the committed uv.lock with --locked, except the jobs that test a fresh resolution and the build backend, which uv build takes within pyproject.toml's uv_build range. The HWI job installs HWI from hash-pinned requirement files, and the post-release install check uses pip. Third-party actions are pinned by commit SHA. https://github.com/btclib-org/.github/blob/main/README.md#uvlock",
+    "justification": "Pipelines take Python dependencies from PyPI. The required test check runs the suite with uv from the committed uv.lock with --locked. pre-commit installs its hooks with pip at the revisions .pre-commit-config.yaml pins. Third-party actions are pinned by commit SHA. https://github.com/btclib-org/.github/blob/main/README.md#uvlock",
     "status": "Met"
   },
   "OSPS-BR-06.01": {
