@@ -60,7 +60,7 @@
     "status": "Met"
   },
   "OSPS-BR-05.01": {
-    "justification": "Pipelines install dependencies with uv: from the committed uv.lock with --locked, except the jobs that test a fresh resolution, and with pip in the post-release install check. Third-party actions are pinned by commit SHA. https://github.com/btclib-org/.github/blob/main/README.md#uvlock",
+    "justification": "Pipelines install dependencies with uv: from the committed uv.lock with --locked, except the jobs that test a fresh resolution and the build backend, which uv build takes within pyproject.toml's uv_build range. The post-release install check uses pip. Third-party actions are pinned by commit SHA. https://github.com/btclib-org/.github/blob/main/README.md#uvlock",
     "status": "Met"
   },
   "OSPS-BR-06.01": {
