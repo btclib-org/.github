@@ -644,7 +644,7 @@
     "status": "Met"
   },
   "signed_releases": {
-    "justification": "Release tags v2026.9.24, v2026.9.30 and v2026.10.4 are signed and GitHub-verified, and the PyPI files carry attestations. RELEASING.md has the verification steps. https://github.com/btclib-org/btclib-wallet/blob/main/RELEASING.md",
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing, and each GitHub release carries a Sigstore provenance bundle. The tag is signed, and RELEASING.md reads its signature back; the latest, v2026.10.9, verifies. SECURITY.md gives the gh attestation verify command. https://github.com/btclib-org/btclib-wallet/releases/tag/v2026.10.9",
     "status": "Met"
   },
   "sites_https": {
@@ -736,7 +736,7 @@
     "status": "Met"
   },
   "version_tags_signed": {
-    "justification": "Every release tag (v2026.9.24, v2026.9.30, v2026.10.4) is signed. The tag-integrity ruleset requires a signature on every v* tag. https://github.com/btclib-org/btclib-wallet/tags",
+    "justification": "Every release tag is a signed annotated tag that GitHub verifies. RELEASING.md signs each tag with git tag -s and reads its signature back after the push. The tag-integrity ruleset refuses a v* tag push that brings an unsigned commit; it does not check the tag's own signature. https://github.com/btclib-org/btclib-wallet/tags",
     "status": "Met"
   },
   "version_unique": {

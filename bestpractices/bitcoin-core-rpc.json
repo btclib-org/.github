@@ -644,7 +644,7 @@
     "status": "Met"
   },
   "signed_releases": {
-    "justification": "Every PyPI file carries a PEP 740 attestation, and releases since v2026.8.12 carry a Sigstore provenance bundle and a signed tag; from v2026.10.4 the bundle is attached as <tag>.intoto.jsonl, e.g. https://github.com/btclib-org/bitcoin-core-rpc/releases/tag/v2026.10.4 . SECURITY.md gives the gh attestation verify commands: https://github.com/btclib-org/bitcoin-core-rpc/blob/main/SECURITY.md",
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing, and every GitHub release from v2026.8.12 on carries a Sigstore provenance bundle. Release tags are signed from v2026.8.12 on, and RELEASING.md reads each signature back; the latest, v2026.10.8, verifies. SECURITY.md gives the gh attestation verify command. https://github.com/btclib-org/bitcoin-core-rpc/releases/tag/v2026.10.8",
     "status": "Met"
   },
   "sites_https": {
@@ -736,7 +736,7 @@
     "status": "Met"
   },
   "version_tags_signed": {
-    "justification": "Every release tag from v2026.8.12 on is a signed, verified annotated tag, and the `tag-integrity` ruleset (`required_signatures` on `refs/tags/v*`, no bypass) refuses an unsigned one; earlier tags predate the rule. https://github.com/btclib-org/bitcoin-core-rpc/tags",
+    "justification": "Every release tag from v2026.8.12 on is a signed annotated tag that GitHub verifies; earlier tags predate signing. RELEASING.md signs each tag with git tag -s and reads its signature back after the push. The tag-integrity ruleset refuses a v* tag push that brings an unsigned commit; it does not check the tag's own signature. https://github.com/btclib-org/bitcoin-core-rpc/tags",
     "status": "Met"
   },
   "version_unique": {

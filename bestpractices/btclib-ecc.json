@@ -64,7 +64,7 @@
     "status": "Met"
   },
   "OSPS-BR-06.01": {
-    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing, and the GitHub release carries a Sigstore build-provenance bundle (<tag>.intoto.jsonl) over the SHA-256 of each asset. Release tags must be signed (tag-integrity ruleset). https://github.com/btclib-org/btclib-ecc/releases/latest",
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing, and the GitHub release carries a Sigstore build-provenance bundle (<tag>.intoto.jsonl) over the SHA-256 of each asset. The tag is signed, and RELEASING.md reads its signature back. https://github.com/btclib-org/btclib-ecc/releases/latest",
     "status": "Met"
   },
   "OSPS-BR-07.01": {
@@ -644,7 +644,7 @@
     "status": "Met"
   },
   "signed_releases": {
-    "justification": "The v2026.9.28 tag is a signed, GitHub-verified annotated tag (`gh api .../git/tags/<sha>` answers verification.verified: true, reason: valid); RELEASING.md documents how a release is cut and signed, and PyPI distributions carry PEP 740 attestations traceable to the workflow run. https://github.com/btclib-org/btclib-ecc/releases/tag/v2026.9.28",
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing, and each GitHub release carries a Sigstore provenance bundle. The tag is signed, and RELEASING.md reads its signature back; the latest, v2026.10.8, verifies. SECURITY.md gives the gh attestation verify command. https://github.com/btclib-org/btclib-ecc/releases/tag/v2026.10.8",
     "status": "Met"
   },
   "sites_https": {
@@ -736,7 +736,7 @@
     "status": "Met"
   },
   "version_tags_signed": {
-    "justification": "Every release tag, not only the latest, is created through the signed-tag process RELEASING.md documents; the `required_signatures` rule of the tag-integrity ruleset on refs/tags/v* enforces this at the forge rather than leaving it to convention. https://github.com/btclib-org/btclib-ecc/releases/tag/v2026.9.28",
+    "justification": "Every release tag is a signed annotated tag that GitHub verifies. RELEASING.md signs each tag with git tag -s and reads its signature back after the push. The tag-integrity ruleset refuses a v* tag push that brings an unsigned commit; it does not check the tag's own signature. https://github.com/btclib-org/btclib-ecc/tags",
     "status": "Met"
   },
   "version_unique": {
