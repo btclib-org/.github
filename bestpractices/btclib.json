@@ -60,7 +60,7 @@
     "status": "Met"
   },
   "OSPS-BR-05.01": {
-    "justification": "Pipelines take Python dependencies from PyPI. The required test check runs the suite with uv from the committed uv.lock with --locked. pre-commit installs its hooks with pip at the revisions .pre-commit-config.yaml pins. Third-party actions are pinned by commit SHA. https://github.com/btclib-org/.github/blob/main/README.md#uvlock",
+    "justification": "Python dependencies come from PyPI, and the required test check runs the suite with uv from the committed uv.lock with --locked. pre-commit installs its hooks at the revisions .pre-commit-config.yaml names. Third-party actions are pinned by commit SHA. https://github.com/btclib-org/.github/blob/main/README.md#uvlock",
     "status": "Met"
   },
   "OSPS-BR-06.01": {
@@ -132,7 +132,7 @@
     "status": "Met"
   },
   "OSPS-LE-01.01": {
-    "justification": "main requires the lint / Sign-off check, so a pull request cannot merge unless every commit carries its author's Signed-off-by: trailer. Web commits are signed off automatically. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
+    "justification": "main requires the lint / Sign-off check, which refuses a commit that lacks its author's Signed-off-by: trailer, Dependabot's and pre-commit.ci's aside. Web commits are signed off automatically. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
     "status": "Met"
   },
   "OSPS-LE-02.01": {
@@ -180,7 +180,7 @@
     "status": "N/A"
   },
   "OSPS-QA-05.01": {
-    "justification": "No generated executable is committed. The binary files are Bitcoin-serialized data (blocks, transactions, scripts, P2P messages) used as test data and fuzz seeds, and the Sphinx inventory python.inv. The lint gate's check-added-large-files keeps build output out. https://github.com/btclib-org/btclib",
+    "justification": "No generated executable is committed. The binary files are Bitcoin-serialized data (blocks, transactions, scripts, P2P messages) used as test data and fuzz seeds, and the Sphinx inventory python.inv. https://github.com/btclib-org/btclib",
     "status": "Met"
   },
   "OSPS-QA-05.02": {
@@ -248,7 +248,7 @@
     "status": "Met"
   },
   "OSPS-VM-05.03": {
-    "justification": "Every pull request runs the Dependency review job, and \"lint / Dependency review\" is a required check on main, so a pull request that breaks the policy cannot merge. Policy: https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L2892-L2909",
+    "justification": "The Dependency review job runs on every pull request and is a required check on main (lint / Dependency review), so a pull request that violates the policy cannot merge without an admin bypass. Policy: https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L2892-L2909",
     "status": "Met"
   },
   "OSPS-VM-06.01": {
@@ -412,7 +412,7 @@
     "status": "Met"
   },
   "dco": {
-    "justification": "Every commit carries its author's Signed-off-by: trailer: main requires the lint / Sign-off check, which refuses a pull request with a commit lacking it. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
+    "justification": "main requires the lint / Sign-off check, which refuses a pull request with a commit that lacks its author's Signed-off-by: trailer. Dependabot's and pre-commit.ci's commits are exempt. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
     "status": "Met"
   },
   "delivery_mitm": {
@@ -612,7 +612,7 @@
     "status": "Met"
   },
   "report_process": {
-    "justification": "SECURITY.md gives the private reporting process. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
+    "justification": "Bugs are reported in GitHub Issues, through the bug-report form. CONTRIBUTING.md's The issue tracker says where. https://github.com/btclib-org/btclib/issues",
     "status": "Met"
   },
   "report_responses": {
