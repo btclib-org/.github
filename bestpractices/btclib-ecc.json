@@ -304,8 +304,8 @@
     "status": "N/A"
   },
   "build_repeatable": {
-    "justification": "Pure-Python source is used directly (uv_build, no compilation step), so there is nothing whose bit-for-bit regeneration to test. https://github.com/btclib-org/btclib-ecc/blob/main/pyproject.toml",
-    "status": "N/A"
+    "justification": "Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag. It passes only if the rebuilt file matches the release's attested digest byte for byte. https://github.com/btclib-org/btclib-ecc/blob/main/.github/workflows/sdist-rebuild.yml",
+    "status": "Met"
   },
   "build_reproducible": {
     "justification": "The sdist is built with SOURCE_DATE_EPOCH from the commit and normalized by normalize_sdist.py, and sdist-rebuild.yml rebuilds the latest release from its signed tag and runs `gh attestation verify` over the rebuilt file against the release's build-provenance attestation; RELEASING.md tells a user how to do the same. https://github.com/btclib-org/btclib-ecc/blob/main/.github/workflows/sdist-rebuild.yml",

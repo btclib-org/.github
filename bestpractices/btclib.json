@@ -304,8 +304,8 @@
     "status": "N/A"
   },
   "build_repeatable": {
-    "justification": "btclib is pure Python built with uv_build, with no compilation step. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
-    "status": "N/A"
+    "justification": "Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag. It passes only if the rebuilt file matches the release's attested digest byte for byte. https://github.com/btclib-org/btclib/blob/main/.github/workflows/sdist-rebuild.yml",
+    "status": "Met"
   },
   "build_reproducible": {
     "justification": "The sdist is built with SOURCE_DATE_EPOCH from the commit. sdist-rebuild.yml rebuilds a release from its signed tag and verifies it against the release's PyPI attestation, and RELEASING.md tells a user how to do the same. https://github.com/btclib-org/btclib/blob/main/.github/workflows/sdist-rebuild.yml",
