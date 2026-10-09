@@ -4,27 +4,27 @@
     "status": "Met"
   },
   "OSPS-AC-02.01": {
-    "justification": "The organization's base permission is read, so a new member or collaborator gets read access until an owner grants more by hand; every elevated grant (the three owners' admin) is an explicit assignment. https://github.com/btclib-org/btclib/blob/main/REPOSITORY.md",
+    "justification": "The organization's base permission is read, so a new member or collaborator gets read access until an owner grants more. The only elevated grants on this repository are the three owners' admin. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
     "status": "Met"
   },
   "OSPS-AC-03.01": {
-    "justification": "The main-self-merge ruleset requires a pull request for every change to main; its only bypass actor (the maintainer) holds it in pull_request mode, which excuses the review while merging a pull request and never a direct push, so a direct push to main is refused for everyone. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main. Its one bypass actor holds it in pull_request mode, which never allows a direct push. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Met"
   },
   "OSPS-AC-03.02": {
-    "justification": "The main-integrity ruleset carries a deletion rule (plus non_fast_forward) with no bypass actor, and classic protection sets allow_deletions false, so main cannot be deleted by anyone. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-integrity ruleset forbids deleting main and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Met"
   },
   "OSPS-AC-04.01": {
-    "justification": "The default GITHUB_TOKEN is read-only at both the organization and the repository, and GitHub Actions cannot approve pull requests; every workflow also declares permissions: contents: read at the top. https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "justification": "The default GITHUB_TOKEN is read-only at the organization and the repository, and cannot approve pull requests. Every workflow also sets permissions: contents: read at the top. https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
     "status": "Met"
   },
   "OSPS-AC-04.02": {
-    "justification": "Every workflow sets `permissions: contents: read` at the top and elevates per job only for what the job does: `id-token`/`attestations` for publishing and attesting, `security-events` for CodeQL and Scorecard, `pull-requests` for the review, `issues` for the two sentinels that open one, `contents: write` only in the release job. zizmor's excessive-permissions audit runs in the required lint check. https://github.com/btclib-org/btclib/tree/main/.github/workflows",
+    "justification": "Every workflow sets permissions: contents: read at the top, and a job adds only the scopes it uses. zizmor's excessive-permissions audit runs in the required lint check. https://github.com/btclib-org/.github/blob/main/README.md#what-every-workflow-does",
     "status": "Met"
   },
   "OSPS-BR-01.01": {
-    "justification": "No workflow uses `pull_request_target` or `workflow_run`; untrusted event fields and dispatch inputs reach `run:` steps only through `env:` variables, and zizmor's template-injection audit runs in the required lint check. The review job runs on `issue_comment` with the default branch checked out and is gated by the `CLAUDE_REVIEW_ENABLED` variable. https://github.com/btclib-org/btclib/blob/main/.pre-commit-config.yaml",
+    "justification": "No workflow uses pull_request_target or workflow_run. Event fields and inputs reach run: steps only through env:, and zizmor's template-injection audit in the required lint check refuses the unsafe form. https://github.com/btclib-org/btclib/blob/main/.pre-commit-config.yaml",
     "status": "Met"
   },
   "OSPS-BR-01.02": {
@@ -32,19 +32,19 @@
     "status": 0
   },
   "OSPS-BR-01.03": {
-    "justification": "Pull-request runs use the pull_request trigger, which gives a fork's code no secrets and a read-only token; the one job holding a secret on a pull request (the review) runs only when the head repository is this repository, and the comment-triggered job checks out the default branch, not the pull request's code. https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-claude-review.yml",
+    "justification": "Pull-request runs use the pull_request and pull_request_review_comment triggers, which give a fork no secrets and a read-only token. The review job, which holds a secret, runs only when the head repository is this one. On issue_comment, the mention job, which holds a secret on any pull request, checks out the default branch. https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-claude-review.yml",
     "status": "Met"
   },
   "OSPS-BR-01.04": {
-    "justification": "Collaborator input reaches pipelines as workflow_dispatch inputs, which are passed to steps through env: rather than interpolated into scripts (zizmor's template-injection audit enforces it) and checked by the step that consumes them, e.g. pypi-install.yml waits for the index to serve exactly the version named. https://github.com/btclib-org/btclib/blob/main/.github/workflows/pypi-install.yml",
+    "justification": "The only workflow_dispatch input is mutation.yml's profile, a choice from a fixed list. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/btclib/blob/main/.github/workflows/mutation.yml",
     "status": "Met"
   },
   "OSPS-BR-02.01": {
-    "justification": "Each release has a unique calendar version (YYYY.M.D) set by a signed v* tag; release.yml's version-check job refuses a tag that disagrees with the package version or is not on main, and PyPI never accepts a version twice. https://github.com/btclib-org/btclib/releases",
+    "justification": "Each release has a unique calendar version, YYYY.M.D, set by a signed v* tag. release.yml refuses a tag that differs from the package version or is not on main, and PyPI never accepts a version twice. https://github.com/btclib-org/btclib/releases",
     "status": "Met"
   },
   "OSPS-BR-02.02": {
-    "justification": "Every release asset carries the version in its file name (sdist, wheel, `<name>-<version>.cdx.json`, `<tag>.intoto.jsonl`), and the attestation binds each to its digest. https://github.com/btclib-org/btclib/releases/latest",
+    "justification": "Every release asset carries the version in its file name: the sdist, the wheel, the CycloneDX SBOM and the attestation bundle. https://github.com/btclib-org/btclib/releases/latest",
     "status": "Met"
   },
   "OSPS-BR-03.01": {
@@ -52,71 +52,71 @@
     "status": "Met"
   },
   "OSPS-BR-03.02": {
-    "justification": "Releases are distributed through PyPI and GitHub Releases, both HTTPS-only; PyPI files carry PEP 740 attestations and the GitHub release a Sigstore bundle, so a tampered download fails verification. https://pypi.org/project/btclib/",
+    "justification": "Releases are distributed through PyPI and GitHub Releases, both HTTPS only. PyPI files carry PEP 740 attestations and the GitHub release a Sigstore bundle. https://pypi.org/project/btclib/",
     "status": "Met"
   },
   "OSPS-BR-04.01": {
-    "justification": "Every release carries CHANGELOG.md's entry (every change) and RELEASE_NOTES.md's (what a user must act on, breaking and security changes included); the GitHub release body is the release notes. https://github.com/btclib-org/btclib/blob/main/RELEASE_NOTES.md",
+    "justification": "Every release has a CHANGELOG.md entry, listing every change, and a RELEASE_NOTES.md entry, listing what a user must act on, breaking and security changes included. The GitHub release body is the release notes. https://github.com/btclib-org/btclib/blob/main/RELEASE_NOTES.md",
     "status": "Met"
   },
   "OSPS-BR-05.01": {
-    "justification": "Pipelines take dependencies through uv from PyPI against the committed uv.lock (`--locked`; the release build pins its build requirements with `UV_BUILD_CONSTRAINT`), and third-party actions are pinned by commit SHA (organization `sha_pinning_required`); the organization's own reusable workflows are called at `@main` on purpose. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "Pipelines install dependencies with uv: from the committed uv.lock with --locked, except the jobs that test a fresh resolution and the build backend, which uv build takes within pyproject.toml's uv_build range. The post-release install check uses uv pip install. Third-party actions are pinned by commit SHA. https://github.com/btclib-org/.github/blob/main/README.md#uvlock",
     "status": "Met"
   },
   "OSPS-BR-06.01": {
-    "justification": "Every PyPI file from 2026.8.7 on carries a PEP 740 attestation from Trusted Publishing, and the GitHub release carries a Sigstore build-provenance bundle (`<tag>.intoto.jsonl`, or `<tag>.attestation.jsonl` on releases up to v2026.9.29) whose subjects are each asset's SHA-256. The tag is signed, and RELEASING.md reads its signature back. https://github.com/btclib-org/btclib/releases/latest",
+    "justification": "Every PyPI file from 2026.8.7 on carries a PEP 740 attestation from Trusted Publishing. Every GitHub release from v2026.8.21 on carries a Sigstore provenance bundle covering each asset's SHA-256. Release tags are signed from v2026.8.21 on. https://github.com/btclib-org/btclib/releases/latest",
     "status": "Met"
   },
   "OSPS-BR-07.01": {
-    "justification": "Secret scanning and its push protection are enabled, so a push carrying a recognised credential is refused; the detect-private-key and detect-secrets hooks run against .secrets.baseline in the required lint check for credentials GitHub does not recognise. https://github.com/btclib-org/btclib/blob/main/.secrets.baseline",
+    "justification": "Secret scanning and push protection are on, so a push carrying a recognised credential is refused. The detect-private-key and detect-secrets hooks run in the required lint check. https://github.com/btclib-org/btclib/blob/main/.secrets.baseline",
     "status": "Met"
   },
   "OSPS-BR-07.02": {
-    "justification": "The organization's policy, https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L2913-L2940 : a secret is an environment secret that only the owners can reach, any other store's entry is recorded in the spending repository's REPOSITORY.md, a secret is rotated when an owner changes or an exposure is suspected, and the list is reviewed yearly in a \"Secrets review <year>\" issue. tests/secrets_test.py reads every store and refuses an unrecorded entry.",
+    "justification": "A secret is an environment secret only the owners reach, and any other store's entry is recorded in the spending repository's REPOSITORY.md. A secret is rotated when an owner changes or an exposure is suspected, and the list is reviewed yearly. btclib-org/.github's tests/secrets_test.py refuses an unrecorded entry. https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L2913-L2940",
     "status": "Met"
   },
   "OSPS-DO-01.01": {
-    "justification": "The user documentation is docs/source/guide.rst, a task-oriented guide whose examples tests/docs_examples_test.py runs, plus the API reference, published at https://btclib.readthedocs.io/.",
+    "justification": "The user guide, docs/source/guide.rst, and the API reference are published at https://btclib.readthedocs.io/. tests/docs_examples_test.py runs the guide's examples.",
     "status": "Met"
   },
   "OSPS-DO-02.01": {
-    "justification": "CONTRIBUTING.md's *The issue tracker* says where a defect is filed, and the bug-report issue form (.github/ISSUE_TEMPLATE/bug_report.yml) asks for what a report needs; SECURITY.md routes a vulnerability away from the public tracker. https://github.com/btclib-org/btclib/blob/main/.github/ISSUE_TEMPLATE/bug_report.yml",
+    "justification": "CONTRIBUTING.md says where a defect is filed, and the bug-report form asks for what a report needs. SECURITY.md sends a vulnerability to a private channel instead. https://github.com/btclib-org/btclib/blob/main/.github/ISSUE_TEMPLATE/bug_report.yml",
     "status": "Met"
   },
   "OSPS-DO-03.01": {
-    "justification": "SECURITY.md and RELEASING.md give the gh attestation verify command (with --repo and --signer-workflow, or --bundle offline) for the release assets, and RELEASING.md gives the rebuild-from-tag check that reproduces the sdist. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
+    "justification": "SECURITY.md gives the gh attestation verify command for the release assets, and RELEASING.md the check that rebuilds the sdist from its tag. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "The verification command pins the authoring identity: `--repo` names this repository and `--signer-workflow` the organization's `reusable-build.yml` (`reusable-attest.yml` or `release.yml` for older releases, as SECURITY.md lists), so an attestation from any other workflow or repository is refused. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
+    "justification": "The verify command pins the signer: --repo names this repository and --signer-workflow the workflow that signed, so an attestation from any other repository or workflow is refused. SECURITY.md names the signer of each release. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-04.01": {
-    "justification": "SECURITY.md's *Supported versions*: only the latest release is supported, a fix ships as a new release, and nothing is backported. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
+    "justification": "SECURITY.md's *Supported versions*: only the latest release is supported, and nothing is backported. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-05.01": {
-    "justification": "SECURITY.md's *Supported versions* states that a release stops receiving security updates as soon as the next one is published, since only the latest is supported and nothing is backported. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
+    "justification": "SECURITY.md's *Supported versions*: only the latest release is supported, so a release stops receiving security updates when the next one is published. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-06.01": {
-    "justification": "Each runtime dependency's reason is written beside it in pyproject.toml; dependencies are obtained from PyPI through uv and pinned in uv.lock, and tracked by Dependabot's weekly grouped updates with a seven-day cooldown, as the standard's sections 1 and 11 state. https://github.com/btclib-org/.github/blob/main/README.md#dependabot-and-pre-commitci",
+    "justification": "pyproject.toml states why each runtime dependency is there. Dependencies come from PyPI through uv, are pinned in uv.lock, and are updated by weekly grouped Dependabot pull requests with a seven-day cooldown. https://github.com/btclib-org/.github/blob/main/README.md#dependabot-and-pre-commitci",
     "status": "Met"
   },
   "OSPS-DO-07.01": {
-    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the build: uv is the only prerequisite, uv sync builds the environment from uv.lock, and uv build produces the sdist and wheel. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the build: uv is the only prerequisite, uv sync builds the environment from uv.lock, and uv build makes the sdist and wheel. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "OSPS-GV-01.01": {
-    "justification": "GOVERNANCE.md names who holds access to sensitive resources: the maintainer (the only bypass actor) and the three owners, each an administrator of every repository and a reviewer of the publishing environments, with the command that reads them back; the tree's README.md and CONTRIBUTING.md link it. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "justification": "GOVERNANCE.md's *Roles* names who holds access to sensitive resources: the maintainer, the only bypass actor, and the three owners, each an administrator of every repository and a reviewer of the publishing environments. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
     "status": "Met"
   },
   "OSPS-GV-01.02": {
-    "justification": "GOVERNANCE.md's *Roles* describes the maintainer, owners, repository collaborators, contributors, reviewers, the review bot, Dependabot and pre-commit.ci, and what each owes. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "justification": "GOVERNANCE.md's *Roles* describes the maintainer, the owners, repository collaborators, contributors, reviewers, the review bot, Dependabot and pre-commit.ci, and what each owes. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
     "status": "Met"
   },
   "OSPS-GV-02.01": {
-    "justification": "Proposed changes and usage obstacles are discussed publicly in the repository's GitHub issues (with a question form) and pull requests; cross-repository questions go to btclib-org/.github's tracker. https://github.com/btclib-org/btclib/issues",
+    "justification": "Proposed changes and usage questions are discussed publicly in the repository's issues, which have a question form, and pull requests. https://github.com/btclib-org/btclib/issues",
     "status": "Met"
   },
   "OSPS-GV-03.01": {
@@ -124,7 +124,7 @@
     "status": "Met"
   },
   "OSPS-GV-03.02": {
-    "justification": "CONTRIBUTING.md states what an acceptable contribution meets: an issue behind it, one subject, the lint gate (ruff select ALL, strict mypy), line and branch coverage at 100%, a signed commit, and a review against REVIEWING.md. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md states what a contribution must meet: one subject, a Signed-off-by trailer on every commit, the gates CI runs, 100% line and branch coverage, and a review against REVIEWING.md. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "OSPS-GV-04.01": {
@@ -132,7 +132,7 @@
     "status": "Met"
   },
   "OSPS-LE-01.01": {
-    "justification": "main requires the lint / Sign-off status check, so a pull request cannot merge unless every commit carries a Signed-off-by: trailer (the DCO assertion) from its author. Commits made in the web interface are signed off automatically (web_commit_signoff_required is on). https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
+    "justification": "main requires the lint / Sign-off check, so a pull request cannot merge unless every commit carries its author's Signed-off-by: trailer. Web commits are signed off automatically. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
     "status": "Met"
   },
   "OSPS-LE-02.01": {
@@ -148,7 +148,7 @@
     "status": "Met"
   },
   "OSPS-LE-03.02": {
-    "justification": "The LICENSE file ships inside every release asset: the sdist root and the wheel's .dist-info/licenses/. https://github.com/btclib-org/btclib/blob/main/LICENSE",
+    "justification": "The LICENSE file ships in every release asset: at the sdist root and in the wheel's .dist-info/licenses/. https://pypi.org/project/btclib/#files",
     "status": "Met"
   },
   "OSPS-QA-01.01": {
@@ -156,7 +156,7 @@
     "status": "Met"
   },
   "OSPS-QA-01.02": {
-    "justification": "Git history on GitHub records every change with its author, committer, date and signature; linear history and no force-pushes on main keep that record from being rewritten. https://github.com/btclib-org/btclib/commits/main",
+    "justification": "Git history on GitHub records every change with its author, committer, date and signature. main refuses force-pushes and requires linear history. https://github.com/btclib-org/btclib/commits/main",
     "status": "Met"
   },
   "OSPS-QA-02.01": {
@@ -164,59 +164,59 @@
     "status": "Met"
   },
   "OSPS-QA-02.02": {
-    "justification": "The release is pure Python, with nothing compiled; even so, every release attaches a CycloneDX 1.6 SBOM (<name>-<version>.cdx.json) generated from the built wheel, listing both files' SHA-256, the license and the declared dependencies, and covered by the release attestation. https://github.com/btclib-org/btclib/releases/latest",
+    "justification": "The release is pure Python. Every release from v2026.8.21 on attaches a CycloneDX 1.6 SBOM, generated from the built wheel and covered by the release attestation. https://github.com/btclib-org/btclib/releases/latest",
     "status": "Met"
   },
   "OSPS-QA-03.01": {
-    "justification": "Classic protection on main requires the listed status checks with strict up-to-date; enforce_admins is off, so an admin merge that lands without them is a manual bypass, which is the case the control allows. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "main requires the six CI status checks, up to date with main (strict). enforce_admins is off, so an admin merge without them is a manual bypass, which the control allows. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Met"
   },
   "OSPS-QA-04.01": {
-    "justification": "The organization standard's section 2 (*Which repositories, and how far*) lists every repository of btclib-org and its tier, and the organization profile lists the published packages. https://github.com/btclib-org/.github/blob/main/README.md#which-repositories-and-how-far",
+    "justification": "The organization standard's *Which repositories, and how far* lists every btclib-org repository and its tier. https://github.com/btclib-org/.github/blob/main/README.md#which-repositories-and-how-far",
     "status": "Met"
   },
   "OSPS-QA-04.02": {
-    "justification": "Each release is built from this single repository; the sibling packages it depends on are released separately from their own repositories, which are held to the same standard. https://github.com/btclib-org/btclib",
+    "justification": "Each release is built from this repository alone. The sibling packages it depends on are released from their own repositories. https://github.com/btclib-org/btclib",
     "status": "N/A"
   },
   "OSPS-QA-05.01": {
-    "justification": "No generated executable is committed: the only non-text blobs are Bitcoin-serialized test data and fuzz seeds; the lint gate's check-added-large-files and the package-content policy keep builds out of the tree. https://github.com/btclib-org/btclib",
+    "justification": "No generated executable is committed. The binary files are Bitcoin-serialized data (blocks, transactions, scripts, P2P messages) used as test data and fuzz seeds, and the Sphinx inventory python.inv. The lint gate's check-added-large-files keeps build output out. https://github.com/btclib-org/btclib",
     "status": "Met"
   },
   "OSPS-QA-05.02": {
-    "justification": "The binary files are Bitcoin blocks, transactions and P2P messages used as test vectors and fuzz seeds: each is decodable by the library itself, and the vendored ones are pinned to their source in tests/_data/README.md. https://github.com/btclib-org/btclib/blob/main/tests/_data/README.md",
+    "justification": "The binary files are Bitcoin-serialized data (blocks, transactions, scripts, P2P messages) used as test data and fuzz seeds, which the library itself decodes, and the Sphinx inventory python.inv. tests/_data/README.md pins each vendored test file to its source, and docs/source/conf.py gives the command that fetches the inventory. https://github.com/btclib-org/btclib/blob/main/tests/_data/README.md",
     "status": "Met"
   },
   "OSPS-QA-06.01": {
-    "justification": "test.yml's aggregate check ('test: every job passed') runs the test suite on every pull request and is a required status check on main. https://github.com/btclib-org/btclib/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the test suite on every pull request, and its aggregate check, 'test: every job passed', is required on main. https://github.com/btclib-org/btclib/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "OSPS-QA-06.02": {
-    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the command that runs the suite and which workflows run it on every pull request, on main and on a schedule, and which of them gate a merge. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the command that runs the tests and says which workflows run them and which gate a merge. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "OSPS-QA-06.03": {
-    "justification": "The documented policy is 100% line and branch coverage (standard section 8; CONTRIBUTING.md), so a change adding untested functionality fails the required test check; pyproject.toml sets fail_under = 100. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "The policy is 100% line and branch coverage (CONTRIBUTING.md; standard section 8). pyproject.toml sets fail_under = 100, so untested new code fails the required test check. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The ruleset asks for one approving review, but the maintainer is its bypass actor and merges his own pull requests without another person's approval as everyday practice, so main does not require a non-author approval. https://github.com/btclib-org/.github/blob/main/README.md#review",
+    "justification": "The maintainer is the ruleset's bypass actor and merges his own pull requests without another person's approval, so main does not require a non-author approval. https://github.com/btclib-org/.github/blob/main/README.md#review",
     "status": "Unmet"
   },
   "OSPS-SA-01.01": {
-    "justification": "ARCHITECTURE.md documents the components, their layering and every place the software reaches outside the process, and ASSURANCE_CASE.md's *Trust boundaries* and *Threat model* name the actors and what each can do. https://github.com/btclib-org/btclib/blob/main/ARCHITECTURE.md",
+    "justification": "ARCHITECTURE.md documents the components, their layers and where the software reaches outside the process. ASSURANCE_CASE.md's *Trust boundaries* and *Threat model* name the actors and what each can do. https://github.com/btclib-org/btclib/blob/main/ARCHITECTURE.md",
     "status": "Met"
   },
   "OSPS-SA-02.01": {
-    "justification": "The API reference at https://btclib.readthedocs.io/ is generated from the docstrings of every public module (ruff's D rules require them, and a docs test fails when a shipped module is missing from the reference); CONTRIBUTING.md's *The public surface* states what is public.",
+    "justification": "The API reference at https://btclib.readthedocs.io/ is generated from the docstrings of every public module, and a docs test fails when a shipped module is missing from it. CONTRIBUTING.md's *The public surface* states what is public.",
     "status": "Met"
   },
   "OSPS-SA-03.01": {
-    "justification": "ASSURANCE_CASE.md is the security assessment: what is claimed, the threat model, the trust boundaries and how each common implementation weakness is countered; SECURITY.md's limitations section records the known residual risks. https://github.com/btclib-org/btclib/blob/main/ASSURANCE_CASE.md",
+    "justification": "ASSURANCE_CASE.md is the security assessment: claims, threat model, trust boundaries and how each common weakness is countered. SECURITY.md's *Limitations, not vulnerabilities* records the known residual risks. https://github.com/btclib-org/btclib/blob/main/ASSURANCE_CASE.md",
     "status": "Met"
   },
   "OSPS-SA-03.02": {
-    "justification": "ASSURANCE_CASE.md's *Threat model* names the assets, adversaries and what is not defended, and *Trust boundaries* maps the attack surface where untrusted input enters, each argument naming the file, test or workflow behind it. https://github.com/btclib-org/btclib/blob/main/ASSURANCE_CASE.md",
+    "justification": "ASSURANCE_CASE.md's *Threat model* names the assets, the adversaries and what is not defended. Its *Trust boundaries* maps where untrusted input enters. https://github.com/btclib-org/btclib/blob/main/ASSURANCE_CASE.md",
     "status": "Met"
   },
   "OSPS-VM-01.01": {
@@ -232,35 +232,35 @@
     "status": "Met"
   },
   "OSPS-VM-04.01": {
-    "justification": "Vulnerabilities are published as GitHub security advisories on the repository, as SECURITY.md commits to; the first, GHSA-9fr5-46w5-5f9r, was published on 2026-10-03. https://github.com/btclib-org/btclib/security/advisories",
+    "justification": "Vulnerabilities are published as GitHub security advisories on this repository, as SECURITY.md commits to. https://github.com/btclib-org/btclib/security/advisories",
     "status": "Met"
   },
   "OSPS-VM-04.02": {
-    "justification": "https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L3120-L3135 : the CycloneDX SBOM published with each release carries a vulnerabilities array, built from the tree's .github/vex.toml, with analysis.state not_affected, a CycloneDX justification and the reason for each vulnerability judged not to affect the release. No vulnerability is judged so today, so no tree keeps the file; the alignment suite (tests/vex_test.py) refuses a Dependabot alert dismissed as not affecting without its entry.",
+    "justification": "Each release's CycloneDX SBOM lists in its vulnerabilities array every vulnerability judged not to affect it, with the reason, from the tree's .github/vex.toml. None is judged so today, so the tree has no such file. https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L3120-L3135",
     "status": "Met"
   },
   "OSPS-VM-05.01": {
-    "justification": "https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L2892-L2909 : every pull request runs actions/dependency-review-action, which fails on an added or changed dependency with an advisory of moderate severity or above, or with a licence outside the allow-list. Its settings are one file, btclib-org/.github's .github/dependency-review.yml, and an exception is a purl named there with its reason.",
+    "justification": "Every pull request runs actions/dependency-review-action, which fails on an added or changed dependency with an advisory of moderate severity or above, or with a licence outside the allow-list. https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L2892-L2909",
     "status": "Met"
   },
   "OSPS-VM-05.02": {
-    "justification": "https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L3149-L3160 : release.yml runs uv audit over every dependency the wheel declares before any publish job, and an advisory, or a service it cannot reach, stops the release. The only exemption is an id the release's own signed VEX document states as not affecting it.",
+    "justification": "release.yml runs uv audit over every dependency the wheel declares before any publish job. An advisory, or a service it cannot reach, stops the release. The only exemption is an id the release's own signed VEX states as not affecting it. https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L3149-L3160",
     "status": "Met"
   },
   "OSPS-VM-05.03": {
-    "justification": "Every pull request runs the Dependency review job (policy: https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L2892-L2909), and the job is a required status check on main (\"lint / Dependency review\" in branch protection), so a pull request that violates the policy cannot merge.",
+    "justification": "Every pull request runs the Dependency review job, and \"lint / Dependency review\" is a required check on main, so a pull request that breaks the policy cannot merge. Policy: https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L2892-L2909",
     "status": "Met"
   },
   "OSPS-VM-06.01": {
-    "justification": "The standard's section 5 sets the threshold at zero: ruff runs select = ALL (bandit's S rules included), and every finding is fixed or suppressed with a # noqa and a reason at its site; zizmor holds workflows to the same. CodeQL alerts have no stated threshold. https://github.com/btclib-org/.github/blob/main/README.md#5-ruff",
+    "justification": "The standard's section 5 sets the threshold at zero: ruff runs select = ALL, bandit's S rules included, and each finding is fixed or suppressed in place with a reason. zizmor holds workflows to the same. CodeQL alerts have no stated threshold. https://github.com/btclib-org/.github/blob/main/README.md#5-ruff",
     "status": "Met"
   },
   "OSPS-VM-06.02": {
-    "justification": "The required lint check runs .pre-commit-config.yaml on every pull request (ruff with the bandit S rules, strict mypy, zizmor on workflows, detect-secrets) and blocks the merge on any finding unless suppressed in place with a reason; CodeQL also runs on every pull request but is not a required check. https://github.com/btclib-org/btclib/blob/main/.github/workflows/lint.yml",
+    "justification": "The required lint check runs .pre-commit-config.yaml on every pull request (ruff with the S rules, strict mypy, zizmor, detect-secrets) and blocks the merge on any finding not suppressed in place with a reason. CodeQL also runs on every pull request but is not a required check. https://github.com/btclib-org/btclib/blob/main/.github/workflows/lint.yml",
     "status": "Met"
   },
   "access_continuity": {
-    "justification": "The organization now has three owners with admin rights on every repository -- fametrano, giacomocaironi and pmazzocchi, confirmed live via `gh api \"orgs/btclib-org/members?role=admin\"` -- so any two of the three can create and close issues, accept changes and cut a release within a week of the third becoming unavailable, per GOVERNANCE.md's *Continuity*. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity",
+    "justification": "The organization has three owners, fametrano, giacomocaironi and pmazzocchi, each an admin of every repository and a reviewer of the publishing environments. If one becomes unavailable, the other two can still close issues, merge changes and release. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity",
     "status": "Met"
   },
   "accessibility_best_practices": {
@@ -280,7 +280,7 @@
     "status": "Met"
   },
   "automated_integration_testing": {
-    "justification": "test.yml runs the test suite on every push to main and every pull request, and its aggregate job is a required check. https://github.com/btclib-org/btclib/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the suite, and integration-bitcoind.yml runs tests/integration against Bitcoin Core on regtest, on every pull request and push to main. Both are required checks. https://github.com/btclib-org/btclib/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "build": {
@@ -304,23 +304,23 @@
     "status": "N/A"
   },
   "build_repeatable": {
-    "justification": "Pure-Python source is used directly (uv_build, no compilation step), so there is nothing whose bit-for-bit regeneration to test. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "btclib is pure Python built with uv_build, with no compilation step. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "N/A"
   },
   "build_reproducible": {
-    "justification": "The sdist is built with SOURCE_DATE_EPOCH from the commit, and sdist-rebuild.yml rebuilds a release from its signed tag and verifies the rebuilt file against the release's own PyPI attestation; RELEASING.md tells a user how to do the same. https://github.com/btclib-org/btclib/blob/main/.github/workflows/sdist-rebuild.yml",
+    "justification": "The sdist is built with SOURCE_DATE_EPOCH from the commit. sdist-rebuild.yml rebuilds a release from its signed tag and verifies it against the release's PyPI attestation, and RELEASING.md tells a user how to do the same. https://github.com/btclib-org/btclib/blob/main/.github/workflows/sdist-rebuild.yml",
     "status": "Met"
   },
   "build_standard_variables": {
-    "justification": "This tree builds no native binaries -- it is pure Python on the uv_build backend -- so there is no compiler or linker invocation for CC/CFLAGS/LDFLAGS to reach. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "btclib is pure Python built with uv_build, so no compiler or linker runs for CC, CFLAGS or LDFLAGS to reach. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "N/A"
   },
   "bus_factor": {
-    "justification": "Besides the maintainer, no one has committed code to this repository since 2023, so the project does not show a bus factor of 2. The three organization owners hold admin access, and one of them reviewed security in issue #2450. The project does not claim a second knowledgeable maintainer yet.",
+    "justification": "Only the maintainer has deep knowledge of the code: in the last 12 months every other person made three commits or fewer. The three organization owners hold admin access, and one of them did the security review in issue #2450. The project does not claim a second knowledgeable maintainer.",
     "status": "Unmet"
   },
   "code_of_conduct": {
-    "justification": "CODE_OF_CONDUCT.md lives in btclib-org/.github and is shown by GitHub as this repository's code of conduct through the organization's default community-health-file inheritance, confirmed via the repository's community-profile API. https://github.com/btclib-org/.github/blob/main/CODE_OF_CONDUCT.md",
+    "justification": "btclib-org/.github's CODE_OF_CONDUCT.md is this repository's code of conduct, through GitHub's organization-wide default; the community-profile API reports it. https://github.com/btclib-org/.github/blob/main/CODE_OF_CONDUCT.md",
     "status": "Met"
   },
   "code_review_standards": {
@@ -328,11 +328,11 @@
     "status": "Met"
   },
   "coding_standards": {
-    "justification": "pyproject.toml's [tool.ruff] selects every ruff rule family (`select = [\"ALL\"]`) with a documented `ignore` list, and [tool.mypy] runs in strict mode; CONTRIBUTING.md's lint-gate section names both and the commands that enforce them on every contribution. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "pyproject.toml's [tool.ruff] selects every rule (select = [\"ALL\"]) with a documented ignore list, and [tool.mypy] runs in strict mode. CONTRIBUTING.md names both and the commands that run them. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "Met"
   },
   "coding_standards_enforced": {
-    "justification": "ruff-check, ruff-format and mypy run as required pre-commit hooks, and lint.yml runs the same .pre-commit-config.yaml in CI, so the style is enforced automatically rather than by review alone. https://github.com/btclib-org/btclib/blob/main/.pre-commit-config.yaml",
+    "justification": "ruff-check, ruff-format and mypy run in .pre-commit-config.yaml, which the required lint check runs on every pull request. https://github.com/btclib-org/btclib/blob/main/.pre-commit-config.yaml",
     "status": "Met"
   },
   "contribution": {
@@ -344,11 +344,11 @@
     "status": "Met"
   },
   "contributors_unassociated": {
-    "justification": "Only one contributor is significant today: the maintainer has 1604 commits in the last 12 months and every other person has three or fewer.",
+    "justification": "Only one contributor is significant: in the last 12 months the maintainer made more than 1600 commits and every other person three or fewer.",
     "status": "Unmet"
   },
   "copyright_per_file": {
-    "justification": "Every source file (.py, .c, .h) opens with \"Copyright (c) The btclib developers\", e.g. https://github.com/btclib-org/btclib/blob/main/src/btclib/__init__.py",
+    "justification": "Every Python file opens with \"Copyright (c) The btclib developers\", e.g. https://github.com/btclib-org/btclib/blob/main/src/btclib/__init__.py",
     "status": "Met"
   },
   "crypto_algorithm_agility": {
@@ -364,7 +364,7 @@
     "status": "N/A"
   },
   "crypto_credential_agility": {
-    "justification": "btclib is a library with no configuration file or credential store: a private key or password is a caller-supplied function parameter, never read from or written to a file this project owns. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
+    "justification": "btclib has no configuration file or credential store: a private key or password is a function argument, never read from or written to a file. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
     "status": "N/A"
   },
   "crypto_floss": {
@@ -396,7 +396,7 @@
     "status": "N/A"
   },
   "crypto_used_network": {
-    "justification": "btclib does not talk to the network at all -- docs/source/guide.rst states this explicitly as one of the things the library will not do -- so there are no network communications for a secure-protocol choice to apply to. https://github.com/btclib-org/btclib/blob/main/docs/source/guide.rst",
+    "justification": "btclib does not communicate over a network, as docs/source/guide.rst states. https://github.com/btclib-org/btclib/blob/main/docs/source/guide.rst",
     "status": "N/A"
   },
   "crypto_verification_private": {
@@ -404,7 +404,7 @@
     "status": "N/A"
   },
   "crypto_weaknesses": {
-    "justification": "btclib uses SHA-256 (BIP340, BIP327, RFC 6979); the only SHA-1 is Bitcoin script's `OP_SHA1`, which the protocol requires and which is flagged `usedforsecurity=False`. Curve schemes and ECIES are btclib_ecc's; SECURITY.md documents where a secret crosses into the Python fallback. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
+    "justification": "btclib's only SHA-1 is Bitcoin script's OP_SHA1, which the protocol requires and which runs with usedforsecurity=False. The curve schemes and ECIES are btclib_ecc's. SECURITY.md documents where a secret reaches the Python fallback. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
     "status": "Met"
   },
   "crypto_working": {
@@ -412,7 +412,7 @@
     "status": "Met"
   },
   "dco": {
-    "justification": "Every commit carries a Signed-off-by: trailer from its author (the DCO assertion): main requires the lint / Sign-off status check, which refuses a pull request with a commit lacking it, and CONTRIBUTING.md says so. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
+    "justification": "Every commit carries its author's Signed-off-by: trailer: main requires the lint / Sign-off check, which refuses a pull request with a commit lacking it. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
     "status": "Met"
   },
   "delivery_mitm": {
@@ -424,7 +424,7 @@
     "status": "Met"
   },
   "dependency_monitoring": {
-    "justification": "Dependabot's version-update and security-update ecosystems are configured in .github/dependabot.yml, dependabot_security_updates is enabled on the repository, and CodeQL and OpenSSF Scorecard run on a schedule as well. https://github.com/btclib-org/btclib/blob/main/.github/dependabot.yml",
+    "justification": "Dependabot version updates are configured in .github/dependabot.yml, and Dependabot security updates are enabled on the repository. https://github.com/btclib-org/btclib/blob/main/.github/dependabot.yml",
     "status": "Met"
   },
   "description_good": {
@@ -436,7 +436,7 @@
     "status": "Met"
   },
   "documentation_achievements": {
-    "justification": "README.md already carries and links the OpenSSF Best Practices badge, on the line the organization standard reserves for it, alongside the Scorecard badge. https://github.com/btclib-org/btclib/blob/main/README.md",
+    "justification": "README.md shows the OpenSSF Best Practices badge, linked to this project's page. https://github.com/btclib-org/btclib/blob/main/README.md",
     "status": "Met"
   },
   "documentation_architecture": {
@@ -448,7 +448,7 @@
     "status": "Met"
   },
   "documentation_current": {
-    "justification": "The docs build is gated in CI (docs.yml, `-W -n`) and the API reference is generated from the shipped docstrings on every release, so a documentation defect against the current release fails the gate rather than going unnoticed. https://github.com/btclib-org/btclib/blob/main/.github/workflows/docs.yml",
+    "justification": "docs.yml builds the docs with -W -n on every pull request, and the build is a required check. The API reference is generated from the shipped docstrings. https://github.com/btclib-org/btclib/blob/main/.github/workflows/docs.yml",
     "status": "Met"
   },
   "documentation_interface": {
@@ -456,15 +456,15 @@
     "status": "Met"
   },
   "documentation_quick_start": {
-    "justification": "docs/source/guide.rst is a task-oriented quick-start whose examples run under tests/docs_examples_test.py, so a stale example fails the suite rather than misleading a reader. https://github.com/btclib-org/btclib/blob/main/docs/source/guide.rst",
+    "justification": "docs/source/guide.rst is a task-oriented quick start, and tests/docs_examples_test.py runs its examples, so a stale example fails the suite. https://github.com/btclib-org/btclib/blob/main/docs/source/guide.rst",
     "status": "Met"
   },
   "documentation_roadmap": {
-    "justification": "ROADMAP.md, organization-wide in btclib-org/.github, covers the period until 2027-09-30, is reviewed every September, and states what is intended and what is deliberately not; this tree's README.md and CONTRIBUTING.md link it. https://github.com/btclib-org/.github/blob/main/ROADMAP.md",
+    "justification": "The organization's ROADMAP.md covers the period until 2027-09-30, is reviewed every September, and states what is intended and what is not. This tree's README.md and CONTRIBUTING.md link it. https://github.com/btclib-org/.github/blob/main/ROADMAP.md",
     "status": "Met"
   },
   "documentation_security": {
-    "justification": "SECURITY.md's *Limitations, not vulnerabilities* section states in detail what a user can and cannot expect -- constant-time behaviour, key zeroization, which operations delegate to libsecp256k1 and which run the pure-Python fallback -- referencing the assurance case as the threat model those promises are written against. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
+    "justification": "SECURITY.md's *Limitations, not vulnerabilities* states what a user can and cannot expect: constant-time behaviour, key zeroization, and which operations use libsecp256k1 and which the Python fallback. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
     "status": "Met"
   },
   "dynamic_analysis": {
@@ -504,15 +504,15 @@
     "status": "Met"
   },
   "governance": {
-    "justification": "GOVERNANCE.md, organization-wide in btclib-org/.github, documents the decision model, the maintainer's bypass and every role a contributor, reviewer or owner holds; this tree's README.md and CONTRIBUTING.md link it. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md",
+    "justification": "The organization's GOVERNANCE.md documents how decisions are made, the maintainer's bypass and every role. This tree's README.md and CONTRIBUTING.md link it. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md",
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "The project site https://btclib.org/btclib/ is served over HTTPS behind Cloudflare and answers Content-Security-Policy (with frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security; check with curl -sI https://btclib.org/btclib/",
+    "justification": "https://btclib.org/btclib/ sends Content-Security-Policy (with frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security. Check with curl -sI https://btclib.org/btclib/",
     "status": "Met"
   },
   "hardening": {
-    "justification": "ruff's `select = [\"ALL\"]` includes the flake8-bandit (S) family, so a hardening-relevant defect -- an unsafe deserialization, a weak temp-file, a shell injection -- is caught at the lint gate rather than only in review; CodeQL runs the same search at a different granularity on every push. https://github.com/btclib-org/btclib/blob/main/.github/workflows/codeql.yml",
+    "justification": "ruff's select = [\"ALL\"] includes the bandit S rules, so unsafe deserialization, weak temp files and shell injection fail the lint gate. CodeQL also runs on every pull request, every push to main and weekly. https://github.com/btclib-org/btclib/blob/main/.github/workflows/codeql.yml",
     "status": "Met"
   },
   "homepage_url": {
@@ -520,7 +520,7 @@
     "status": "?"
   },
   "implement_secure_design": {
-    "justification": "ASSURANCE_CASE.md's *Secure design principles* section argues how each principle applies, against ARCHITECTURE.md's layer boundaries; SECURITY.md's *Limitations* section applies the same argument to where a secret meets the curve. https://github.com/btclib-org/btclib/blob/main/ASSURANCE_CASE.md",
+    "justification": "ASSURANCE_CASE.md's *Secure design principles* argues how each principle applies to ARCHITECTURE.md's layers. https://github.com/btclib-org/btclib/blob/main/ASSURANCE_CASE.md",
     "status": "Met"
   },
   "input_validation": {
@@ -528,15 +528,15 @@
     "status": "Met"
   },
   "installation_common": {
-    "justification": "The package is on PyPI, so `pip install btclib` (or `pip uninstall`) is the commonly-used convention for installing and removing it; README.md gives the exact command. https://github.com/btclib-org/btclib/blob/main/README.md",
+    "justification": "btclib is on PyPI, so pip install and pip uninstall install and remove it. README.md gives the command. https://github.com/btclib-org/btclib/blob/main/README.md",
     "status": "Met"
   },
   "installation_development_quick": {
-    "justification": "`uv sync` installs the whole development environment in one command; CONTRIBUTING.md's repository-specific \"The environment and the gates\" section gives it beside `uv run pytest` and the lint gate. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md",
+    "justification": "uv sync installs the whole development environment in one command. CONTRIBUTING.md's *The environment and the gates* gives it. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "installation_standard_variables": {
-    "justification": "Installation is `pip install`, which follows pip's and the interpreter's own install-location conventions (site-packages, or DESTDIR-honouring behaviour inherited from pip itself); there is no project-specific installer that could diverge from that convention. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "Installation is pip install, which follows pip's own install-location conventions; the project has no installer of its own. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "N/A"
   },
   "interact": {
@@ -544,7 +544,7 @@
     "status": "Met"
   },
   "interfaces_current": {
-    "justification": "ruff's UP (pyupgrade) and FA rule families run at `select = [\"ALL\"]` and flag deprecated stdlib and typing constructs; the deps-latest and deps-oldest sentinels exercise the supported interpreter range weekly, so a newly deprecated API is caught close to its deprecation. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "ruff's UP and FA rules flag deprecated standard-library and typing constructs. pytest runs with filterwarnings = [\"error\"], so a deprecation warning fails the suite, and deps-latest.yml runs it weekly against each dependency's newest release. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "Met"
   },
   "internationalization": {
@@ -552,7 +552,7 @@
     "status": "N/A"
   },
   "know_common_errors": {
-    "justification": "The assurance case argues how each common implementation weakness (CWE-20, 209, 248, 330/338, 347, 502, 755, 843 and others) is countered in this tree. https://github.com/btclib-org/btclib/blob/main/ASSURANCE_CASE.md",
+    "justification": "ASSURANCE_CASE.md argues how each common implementation weakness (CWE-20, 209, 248, 330/338, 347, 502, 755, 843 and others) is countered in this tree. https://github.com/btclib-org/btclib/blob/main/ASSURANCE_CASE.md",
     "status": "Met"
   },
   "know_secure_design": {
@@ -564,7 +564,7 @@
     "status": "Met"
   },
   "license_per_file": {
-    "justification": "Every source file (.py, .c, .h) states \"Distributed under the MIT software license, see the accompanying LICENSE file or https://opensource.org/license/mit\", e.g. https://github.com/btclib-org/btclib/blob/main/src/btclib/__init__.py",
+    "justification": "Every Python file states \"Distributed under the MIT software license, see the accompanying LICENSE file or https://opensource.org/license/mit\", e.g. https://github.com/btclib-org/btclib/blob/main/src/btclib/__init__.py",
     "status": "Met"
   },
   "maintained": {
@@ -572,7 +572,7 @@
     "status": "Met"
   },
   "maintenance_or_update": {
-    "justification": "Only the latest release is supported and nothing is backported, per SECURITY.md's *Supported versions*; the upgrade path is documented instead -- RELEASING.md requires a breaking-changes check (`griffe check`) against the previous tag, and RELEASE_NOTES.md carries the resulting before/after list for every source-breaking change. https://github.com/btclib-org/btclib/blob/main/RELEASE_NOTES.md",
+    "justification": "Only the latest release is supported (SECURITY.md). For upgrading, RELEASING.md runs griffe check against the previous tag, and RELEASE_NOTES.md lists each breaking change with its before and after. https://github.com/btclib-org/btclib/blob/main/RELEASE_NOTES.md",
     "status": "Met"
   },
   "no_leaked_credentials": {
@@ -580,7 +580,7 @@
     "status": "Met"
   },
   "regression_tests_added50": {
-    "justification": "Every pull request merged in the last six months that fixes a bug in src/ also changes tests/, measured 2026-09-25. The suite's 100% line-and-branch coverage floor also fails a fix whose new code no test runs. https://github.com/btclib-org/btclib/pulls?q=is%3Apr+is%3Amerged",
+    "justification": "Every bug fix to src/ merged in the last six months also changes tests/. The 100% line and branch coverage gate also fails a fix whose new code no test runs. https://github.com/btclib-org/btclib/pulls?q=is%3Apr+is%3Amerged",
     "status": "Met"
   },
   "release_notes": {
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "The release notes name each advisory a release fixes by its GHSA id, for example v2026.10.4 and GHSA-9fr5-46w5-5f9r. https://github.com/btclib-org/btclib/blob/main/RELEASE_NOTES.md",
+    "justification": "The release notes name each advisory a release fixes by its GHSA id; for example, v2026.10.8 names GHSA-c6h8-5hv5-3gv7. https://github.com/btclib-org/btclib/blob/main/RELEASE_NOTES.md",
     "status": "Met"
   },
   "repo_distributed": {
@@ -612,7 +612,7 @@
     "status": "Met"
   },
   "report_process": {
-    "justification": "Non-trivial SECURITY[.md] file found file in repository: <https://github.com/btclib-org/btclib/blob/main/SECURITY.md>. [osps_do_02_01]",
+    "justification": "SECURITY.md gives the private reporting process. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
     "status": "Met"
   },
   "report_responses": {
@@ -620,7 +620,7 @@
     "status": "Met"
   },
   "report_tracker": {
-    "justification": "Each repository uses its own GitHub Issues tracker for individual issues, with issue forms under .github/ISSUE_TEMPLATE/, and an organization-wide tracker in btclib-org/.github for cross-repository findings. https://github.com/btclib-org/btclib/issues",
+    "justification": "Issues are tracked in this repository's GitHub Issues, with issue forms; cross-repository issues go to btclib-org/.github's tracker. https://github.com/btclib-org/btclib/issues",
     "status": "Met"
   },
   "report_url": {
@@ -628,11 +628,11 @@
     "status": "?"
   },
   "require_2FA": {
-    "justification": "The btclib-org GitHub organization requires two-factor authentication of every member (organization setting two_factor_requirement_enabled = true), so nobody without 2FA can change a repository. https://github.com/btclib-org",
+    "justification": "The btclib-org organization requires two-factor authentication of every member. https://github.com/btclib-org",
     "status": "Met"
   },
   "roles_responsibilities": {
-    "justification": "GOVERNANCE.md's *Roles* section names the maintainer, the owners, repository administrators, contributors, reviewers, the review bot and Dependabot, and what each owes. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "justification": "GOVERNANCE.md's *Roles* describes the maintainer, the owners, repository collaborators, contributors, reviewers, the review bot, Dependabot and pre-commit.ci, and what each owes. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
     "status": "Met"
   },
   "secure_2FA": {
@@ -640,11 +640,11 @@
     "status": "Met"
   },
   "security_review": {
-    "justification": "Security review of 2026-09-30 by pmazzocchi, an owner of the organization other than the maintainer: https://github.com/btclib-org/btclib/issues/2450 . It pins its scope to a commit, checks every claim and trust boundary of ASSURANCE_CASE.md (the security requirements and boundary, https://github.com/btclib-org/btclib/blob/main/ASSURANCE_CASE.md), states what it did not cover, and files each finding as an issue.",
+    "justification": "pmazzocchi, an owner other than the maintainer, did a security review on 2026-09-30: https://github.com/btclib-org/btclib/issues/2450 . It is pinned to a commit, checks every claim and trust boundary of ASSURANCE_CASE.md, states what it did not cover, and files each finding as an issue.",
     "status": "Met"
   },
   "signed_releases": {
-    "justification": "Every PyPI file from 2026.8.7 on carries a PEP 740 attestation from Trusted Publishing, and every GitHub release from v2026.8.21 on carries a Sigstore provenance bundle. Release tags are signed from v2026.8.21 on, and RELEASING.md reads each signature back; the latest, v2026.10.8, verifies. SECURITY.md gives the gh attestation verify command. https://github.com/btclib-org/btclib/releases/tag/v2026.10.8",
+    "justification": "Every PyPI file from 2026.8.7 on carries a PEP 740 attestation, and every GitHub release from v2026.8.21 on a Sigstore provenance bundle. Release tags are signed from v2026.8.21 on. SECURITY.md gives the verify command. https://github.com/btclib-org/btclib/releases/latest",
     "status": "Met"
   },
   "sites_https": {
@@ -656,7 +656,7 @@
     "status": "N/A"
   },
   "small_tasks": {
-    "justification": "Small tasks for new contributors carry the label \"good first issue\", which CONTRIBUTING.md sets aside for a first contribution; 25 such issues were open at some time between 2025-10-04 and 2026-10-04. The organization's standard requires one in every 12 months (README section 10). https://github.com/btclib-org/btclib/issues?q=label%3A%22good+first+issue%22",
+    "justification": "Small tasks for newcomers carry the label \"good first issue\", which CONTRIBUTING.md sets aside for a first contribution. 27 such issues were open at some time in the last 12 months. https://github.com/btclib-org/btclib/issues?q=label%3A%22good+first+issue%22",
     "status": "Met"
   },
   "static_analysis": {
@@ -664,7 +664,7 @@
     "status": "Met"
   },
   "static_analysis_common_vulnerabilities": {
-    "justification": "CodeQL's python analysis (codeql.yml) runs on a schedule and on every push to main, and ruff's `select = [\"ALL\"]` includes the bandit-derived S rules, both FLOSS static-analysis tools looking for common vulnerabilities. https://github.com/btclib-org/btclib/blob/main/.github/workflows/codeql.yml",
+    "justification": "CodeQL runs on every pull request, every push to main and weekly, and ruff's select = [\"ALL\"] includes the bandit S rules. https://github.com/btclib-org/btclib/blob/main/.github/workflows/codeql.yml",
     "status": "Met"
   },
   "static_analysis_fixed": {
@@ -676,7 +676,7 @@
     "status": "Met"
   },
   "test": {
-    "justification": "https://github.com/btclib-org/btclib/actions/workflows/test.yml\r\nThe test suite covers virtually the whole code base, a floor the build enforces, and it answers to vectors their authors publish: the BIPs' and the SLIPs' own, Bitcoin Core's script, transaction, sighash and key-encoding files, HWI's, trezor's for BIP39 and SLIP39, and Appendix A.2 of RFC 6979. tests/_data/README.md pins each vendored file to the upstream commit it was copied from, and says whether the two still match — including the few vectors that are btclib's own, having no upstream.",
+    "justification": "test.yml runs the pytest suite, gated at 100% line and branch coverage, on every pull request. It checks vectors from the BIPs, Bitcoin Core and Core's qa-assets, and tests/_data/README.md pins each vendored file to its upstream commit. https://github.com/btclib-org/btclib/actions/workflows/test.yml",
     "status": "Met"
   },
   "test_branch_coverage80": {
@@ -684,7 +684,7 @@
     "status": "Met"
   },
   "test_continuous_integration": {
-    "justification": "badge monitored at https://github.com/btclib-org/btclib?tab=readme-ov-file",
+    "justification": "test.yml runs the suite on every pull request and push to main. https://github.com/btclib-org/btclib/actions/workflows/test.yml",
     "status": "Met"
   },
   "test_invocation": {
@@ -700,11 +700,11 @@
     "status": "Met"
   },
   "test_policy_mandated": {
-    "justification": "The 100% coverage floor described in CONTRIBUTING.md's testing section is a de facto and enforced written policy: a line of new functionality with no covering test fails the CI gate outright, `fail_under = 100.0` admitting no exception. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md requires 100% coverage, and fail_under = 100.0 fails the required check for any new code without a test. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "test_statement_coverage80": {
-    "justification": "pyproject.toml sets `[tool.coverage.report] fail_under = 100.0`, gated on every pull request by the coverage job; the suite is gated well above the 80% floor this criterion asks for. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "pyproject.toml sets fail_under = 100.0 under [tool.coverage.report], gated on every pull request. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "Met"
   },
   "test_statement_coverage90": {
@@ -716,19 +716,19 @@
     "status": "Met"
   },
   "tests_documented_added": {
-    "justification": "CONTRIBUTING.md documents the 100%-coverage requirement as part of how a change is proposed, which states the same policy tests_documented_added asks for: new functionality is not accepted without a covering test. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md documents the 100% coverage requirement, so new functionality needs a test. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "The ruleset asks for one approving review, but the maintainer is its bypass actor and merges his own pull requests without another person's approval as everyday practice, so main does not require a non-author approval. https://github.com/btclib-org/.github/blob/main/README.md#review [osps_qa_07_01]",
+    "justification": "The maintainer is the ruleset's bypass actor and merges his own pull requests without another person's approval, so main does not require a non-author approval. https://github.com/btclib-org/.github/blob/main/README.md#review",
     "status": "Unmet"
   },
   "updateable_reused_components": {
-    "justification": "Reused components are either standard-library modules or PyPI packages pinned in uv.lock and bumped weekly by Dependabot and the deps-latest sentinel, which runs the full suite against the upgrade before it lands. https://github.com/btclib-org/btclib/blob/main/.github/workflows/deps-latest.yml",
+    "justification": "Reused components are standard-library modules or PyPI packages pinned in uv.lock. Dependabot updates them weekly through pull requests that run the full suite. https://github.com/btclib-org/btclib/blob/main/.github/dependabot.yml",
     "status": "Met"
   },
   "version_semver": {
-    "justification": "Calendar versioning, YYYY.M.D, with the day as the micro level; each release is tagged v<version>. https://github.com/btclib-org/.github#12-releasing",
+    "justification": "Versions are calendar versions, YYYY.M.D, and each release is tagged v<version>. https://github.com/btclib-org/.github#12-releasing",
     "status": "Met"
   },
   "version_tags": {
@@ -736,7 +736,7 @@
     "status": "Met"
   },
   "version_tags_signed": {
-    "justification": "Every release tag from v2026.8.21 on is a signed annotated tag that GitHub verifies; earlier tags predate signing. RELEASING.md signs each tag with git tag -s and reads its signature back after the push. The tag-integrity ruleset refuses a v* tag push that brings an unsigned commit; it does not check the tag's own signature. https://github.com/btclib-org/btclib/tags",
+    "justification": "Release tags are signed from v2026.8.21 on, and GitHub verifies each. RELEASING.md signs each tag with git tag -s and reads the signature back after the push. https://github.com/btclib-org/btclib/tags",
     "status": "Met"
   },
   "version_unique": {
@@ -752,7 +752,7 @@
     "status": "Met"
   },
   "vulnerability_report_credit": {
-    "justification": "The reporter of GHSA-9fr5-46w5-5f9r, pmazzocchi, is credited as finder on the published advisory: https://github.com/btclib-org/btclib/security/advisories/GHSA-9fr5-46w5-5f9r",
+    "justification": "The reporter of GHSA-9fr5-46w5-5f9r, pmazzocchi, is credited as finder on the advisory. https://github.com/btclib-org/btclib/security/advisories/GHSA-9fr5-46w5-5f9r",
     "status": "Met"
   },
   "vulnerability_report_private": {
@@ -764,23 +764,23 @@
     "status": "Met"
   },
   "vulnerability_report_response": {
-    "justification": "A vulnerability was reported privately on 2026-09-30 and fixed and published within 3 days (GHSA-9fr5-46w5-5f9r, patched in 2026.10.4), well inside the 14-day response limit. https://github.com/btclib-org/btclib/security/advisories/GHSA-9fr5-46w5-5f9r",
+    "justification": "The one vulnerability reported by someone other than the maintainer in the last six months, GHSA-9fr5-46w5-5f9r, was opened on 2026-09-30 and fixed and published on 2026-10-03. https://github.com/btclib-org/btclib/security/advisories/GHSA-9fr5-46w5-5f9r",
     "status": "Met"
   },
   "vulnerability_response_process": {
-    "justification": "SECURITY.md's *Reporting a vulnerability* section documents the private channel (a GitHub security advisory, or security at btclib dot org), who can see it, and how a CVE can be requested; private vulnerability reporting is enabled on the repository (`gh api repos/btclib-org/btclib/private-vulnerability-reporting` answers enabled). https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
+    "justification": "SECURITY.md's *Reporting a vulnerability* gives the private channels (a GitHub security advisory, or security at btclib dot org), who sees a report, and how to request a CVE. Private vulnerability reporting is enabled. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
     "status": "Met"
   },
   "warnings": {
-    "justification": "mypy strict with all relevant extra checks activated, see https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "ruff runs with select = [\"ALL\"], mypy with strict = true and pytest with filterwarnings = [\"error\"], each in a required check. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "Met"
   },
   "warnings_fixed": {
-    "justification": "warning are not tolerated: mypy strict with all relevant extra checks activated, see https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "Warnings are not tolerated: ruff, strict mypy and pytest's filterwarnings = [\"error\"] fail the required checks. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "Met"
   },
   "warnings_strict": {
-    "justification": "ruff runs with `select = [\"ALL\"]` (every rule family) and mypy runs with `strict = true`; both are required, zero-finding pre-commit hooks enforced again in the lint workflow. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "ruff runs with select = [\"ALL\"] and mypy with strict = true, both with zero findings allowed in the required lint check. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "Met"
   }
 }
