@@ -20,7 +20,7 @@
     "status": "Met"
   },
   "OSPS-AC-04.02": {
-    "justification": "Every workflow sets permissions: contents: read at the top, and a job adds only the write scopes it uses. zizmor's excessive-permissions audit runs in the required lint check. https://github.com/btclib-org/.github/blob/main/README.md#what-every-workflow-does",
+    "justification": "Every workflow sets permissions: contents: read at the top, and a job adds only the scopes it uses. zizmor's excessive-permissions audit runs in the required lint check. https://github.com/btclib-org/.github/blob/main/README.md#what-every-workflow-does",
     "status": "Met"
   },
   "OSPS-BR-01.01": {
@@ -32,7 +32,7 @@
     "status": 0
   },
   "OSPS-BR-01.03": {
-    "justification": "Pull-request runs use the pull_request and pull_request_review_comment triggers, which give a fork no secrets and a read-only token. The review job, which holds a secret, runs only when the head repository is this one. The issue_comment job, which holds a secret on any pull request, checks out the default branch. https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-claude-review.yml",
+    "justification": "Pull-request runs use the pull_request and pull_request_review_comment triggers, which give a fork no secrets and a read-only token. The review job, which holds a secret, runs only when the head repository is this one. On issue_comment, the mention job, which holds a secret on any pull request, checks out the default branch. https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-claude-review.yml",
     "status": "Met"
   },
   "OSPS-BR-01.04": {

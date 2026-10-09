@@ -20,7 +20,7 @@
     "status": "Met"
   },
   "OSPS-AC-04.02": {
-    "justification": "Every workflow sets permissions: contents: read at the top, and a job adds only the write scopes it uses. zizmor's excessive-permissions audit runs in the required lint check. https://github.com/btclib-org/.github/blob/main/README.md#what-every-workflow-does",
+    "justification": "Every workflow sets permissions: contents: read at the top, and a job adds only the scopes it uses. zizmor's excessive-permissions audit runs in the required lint check. https://github.com/btclib-org/.github/blob/main/README.md#what-every-workflow-does",
     "status": "Met"
   },
   "OSPS-BR-01.01": {
