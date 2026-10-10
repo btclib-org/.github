@@ -503,7 +503,15 @@ jobs:
           #
           # Core's source is a working directory of its own, through
           # `--add-dir`, and Grep and Glob get it by the same kind of
-          # rule, absolute where it starts with `//`. Not measured
+          # rule, absolute where it starts with `//`.
+          #
+          # Measured in runs 38080137645 and 38080629733 of
+          # btclib-org/btclib-node#1907, with the Claude Code 2.1.287
+          # that v1.0.239 installs. A Read of `src/consensus/consensus.h`,
+          # a Grep under `src/consensus` and a Glob of `src/consensus/*.h`
+          # were allowed, and each returned what Core holds at the commit
+          # read, 9be056a8. Both runs report permission denials, and the
+          # log does not say which calls they were
           #
           # the setting sources are the header's
           #
