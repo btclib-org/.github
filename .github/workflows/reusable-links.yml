@@ -66,6 +66,15 @@ jobs:
           # for one that does not. The issue's own page is still fetched,
           # so a dead issue is still red. A pull request page carries the
           # id, so its comment links keep the check.
+          # --remap asks raw.githubusercontent.com for a github.com blob
+          # URL: github.com answers a blob page with 503 much of the time,
+          # for a missing file as for a live one, so the page tells
+          # nothing. raw answers 200 or 404, so a missing file is still
+          # red, and a heading fragment on a Markdown file is still
+          # checked. A line fragment, #L10 or #L10-L20, is dropped, as
+          # lychee does for a blob URL it does not remap; raw would
+          # otherwise fail it on a Markdown file. The two remaps do not
+          # overlap: this one takes /blob/, that one /issues/.
           args: >-
             --no-progress
             --max-retries 3
@@ -74,6 +83,7 @@ jobs:
             --accept 100..=103,200..=299,429
             --include-fragments
             --remap '^(https://github\.com/[^/]+/[^/]+/issues/[0-9]+)#issuecomment-[0-9]+$ $1'
+            --remap '^https://github\.com/([^/]+/[^/]+)/blob/([^#]+)(?:#L[0-9]+(?:-L[0-9]+)?|(#.*))?$ https://raw.githubusercontent.com/$1/$2$3'
             ${{ inputs.targets }}
           # fail the job rather than only summarizing: a green run that
           # found dead links is the state this workflow exists to end
