@@ -384,7 +384,7 @@
     "status": "N/A"
   },
   "crypto_published": {
-    "justification": "The Python arithmetic implements published algorithms (SEC 1, RFC 6979, BIP340, BIP327, draft BIP445, BIP374, BIP324) and is validated against the specifications' own vectors. On secp256k1, with the optional bindings installed, a call delegates to Bitcoin Core's libsecp256k1 wherever its guard admits it. https://github.com/btclib-org/btclib-ecc/blob/main/README.md",
+    "justification": "The Python arithmetic implements published algorithms (SEC 1, RFC 6979, BIP340, BIP327, draft BIP445, BIP374, BIP324, and the DLC specification's ECDSA adaptor and oracle signatures) and is validated against the specifications' own vectors. The opt-in ecc.ssa_adaptor follows the proposal in BlockstreamResearch/secp256k1-zkp#299, which no published specification includes, and nothing else in the library calls it. On secp256k1, with the optional bindings installed, a call delegates to Bitcoin Core's libsecp256k1 wherever its guard admits it. https://github.com/btclib-org/btclib-ecc/blob/main/README.md",
     "status": "Met"
   },
   "crypto_random": {
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "The release notes name each advisory the release fixes: v2026.10.8 names GHSA-2wgq-4cfh-5gqh. https://github.com/btclib-org/btclib-ecc/releases/tag/v2026.10.8",
+    "justification": "The release notes name each vulnerability the release fixes: v2026.10.10 names the share leak of FROST's deterministic_sign (issue #168) as its first entry, and v2026.10.8 names GHSA-2wgq-4cfh-5gqh. https://github.com/btclib-org/btclib-ecc/releases/tag/v2026.10.10",
     "status": "Met"
   },
   "repo_distributed": {
