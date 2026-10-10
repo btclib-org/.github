@@ -132,6 +132,11 @@ name: reusable-claude-review
 # beside the job's credentials. Running it as another user, in
 # namespaces of its own, takes sudo, and sudo fails in the review's
 # Bash, which runs in the action's bubblewrap with no-new-privs.
+# The bubblewrap comes with the action's subprocess scrub, which
+# `allowed_non_write_users` below turns on. With the scrub off, sudo
+# works. The scrub stays on: it strips the job's secrets from the
+# review's Bash. The pull request under review can carry text written
+# to make the review leak them.
 # Measured on btclib-org/.github#1676 (run 38054639830); the decision
 # is on btclib-org/.github#1642. Do not add a Bash rule for an
 # interpreter.
