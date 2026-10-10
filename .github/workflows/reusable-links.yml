@@ -72,11 +72,9 @@ jobs:
           # nothing. raw answers 200 or 404, so a missing file is still
           # red, and a heading fragment on a Markdown file is still
           # checked. A line fragment, #L10 or #L10-L20, is dropped, as
-          # lychee does for a blob URL it does not remap; raw would
-          # otherwise fail it on a Markdown file. The two remaps do not
-          # overlap: this one takes /blob/, that one /issues/.
-          # The blob remap is one quoted word, so it
-          # cannot be wrapped to yamllint's 100 columns.
+          # lychee's own GitHub quirk does; raw would otherwise fail it
+          # on a Markdown file. The blob remap is one quoted word and
+          # cannot wrap, so the line-length rule is off around args.
           # yamllint disable rule:line-length
           args: >-
             --no-progress
@@ -86,7 +84,7 @@ jobs:
             --accept 100..=103,200..=299,429
             --include-fragments
             --remap '^(https://github\.com/[^/]+/[^/]+/issues/[0-9]+)#issuecomment-[0-9]+$ $1'
-            --remap '^https://github\.com/([^/]+/[^/]+)/blob/([^#]+)(?:#L[0-9]+(?:-L[0-9]+)?|(#.*))?$ https://raw.githubusercontent.com/$1/$2$3'
+            --remap '^https://github\.com/([^/]+/[^/]+)/blob/([^#]+)(?:#L[0-9]+(?:-L?[0-9]+)?|(#.*))?$ https://raw.githubusercontent.com/$1/$2$3'
             ${{ inputs.targets }}
           # yamllint enable rule:line-length
           # fail the job rather than only summarizing: a green run that
