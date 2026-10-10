@@ -11,13 +11,20 @@ on: pull_request
 
 permissions: {}
 
+concurrency:
+  group: probe-1642-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   probe:
+    name: Probe no-new-privs
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # a secret on a pull request asks for a deployment environment; this
+    # throwaway declines it on each line, as alignment.yml does
     permissions:
-      contents: read
-      pull-requests: read
+      contents: read # the checkout
+      pull-requests: read # the action's reads of the pull request
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -86,6 +93,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 5
         env:
+          # zizmor: ignore[secrets-outside-env]
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: $ASK 2a-cli-scrub1-no-bwrap 1
       # the action's own step when allowed_non_write_users is set
@@ -101,18 +109,21 @@ jobs:
         continue-on-error: true
         timeout-minutes: 5
         env:
+          # zizmor: ignore[secrets-outside-env]
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: $ASK 2c-cli-scrub1 1
       - name: 3a CLI, scrub 0
         continue-on-error: true
         timeout-minutes: 5
         env:
+          # zizmor: ignore[secrets-outside-env]
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: $ASK 3a-cli-scrub0 0
       - name: 3b CLI, scrub unset
         continue-on-error: true
         timeout-minutes: 5
         env:
+          # zizmor: ignore[secrets-outside-env]
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: $ASK 3b-cli-scrub-unset unset
       # the review's settings, except github_token: passing it skips the
@@ -123,6 +134,7 @@ jobs:
         timeout-minutes: 8
         uses: anthropics/claude-code-action@97c53473391bff1901034d4b454b5bac7ab7a029 # v1.0.239
         with:
+          # zizmor: ignore[secrets-outside-env]
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
           allowed_non_write_users: "-none-"
