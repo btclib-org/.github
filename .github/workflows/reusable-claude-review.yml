@@ -128,98 +128,18 @@ name: reusable-claude-review
 # reach the App's token, so the script and the prompt are what refuse
 # an approval.
 #
-# The review runs the pull request's code, as REVIEWING.md's *What a
-# diff decides with is run, not read* asks (btclib-org/.github#1642).
-# That code runs in this job, beside the credentials, so what bounds it
-# is where it runs.
-#
-# The trigger is the caller's `pull_request`, never
-# `pull_request_target`, which runs a fork's pull request with the base
-# repository's secrets. The checkout is actions/checkout's default for
-# that event: the merge of the head into the base. Whose code that is
-# depends on who opened the pull request:
-#
-# - a fork: none runs. The job is skipped, for the reason its `if:`
-#   gives.
-# - Dependabot: a dependency's new release, which `uv sync` installs and
-#   a test imports. A third party wrote it.
-# - a maintainer or a collaborator: their own. They can already read the
-#   organization secret, by pushing a workflow that reads it, so running
-#   their code gives them nothing new. What is new is code their diff
-#   carries from others, and code that text anyone can write, an issue
-#   comment or a pull request body, talks the review into running.
-#
-# So that code runs as `review-pr`, a user the job creates, through
-# `review-pr-ns`, a script the job installs as root's:
-#
-# - `env -i`: no variable of the job reaches it, so not the App's
-#   token, GITHUB_TOKEN, the Anthropic credential or the OIDC request
-#   token.
-# - `unshare`: namespaces of its own. Its own processes, so it sees none
-#   of the job's. Its own /tmp, /var/tmp and /dev/shm, and an empty
-#   /home, so it reads neither the runner's home nor its temporary
-#   files. A network with loopback alone and an empty /run, so it
-#   reaches no host and no resolver: a name lookup is itself a message
-#   out.
-# - `setpriv`: no capability and no-new-privs, so sudo is closed to it.
-# - When the command ends, or the sudo that started it gets SIGKILL,
-#   the kernel kills whatever it left running. SIGTERM to that sudo does
-#   not end it, `unshare` ignoring it, so run-pr bounds each call with
-#   `timeout -k 10 300` inside the namespaces.
-#
-# Measured on btclib-org/.github#1659, each check against the same
-# check outside as its control (run 37841378802). Inside, a name did
-# not resolve, and no connection reached 1.1.1.1, the runner's
-# metadata address or the host's resolver, while loopback connected.
-# The runner's home, its /tmp and every process but the check's own
-# were absent, and no environment or command line it could read held
-# a token's shape. sudo failed. A child left running was gone when the
-# command returned, and when its sudo got SIGKILL (run 37852259500).
-# After a SIGTERM to that sudo, the command ran on until the bound
-# ended it at 300 seconds (run 37858116237).
-#
-# `uv sync` runs the same way before the review, but under
-# `--host-net`, because installing takes the network. That mode keeps
-# the host's network, its /run and its loopback, so the host's resolver
-# and the runner's metadata addresses are in reach, and the pull
-# request's build code -- a build backend, a setup.py -- runs there.
-# What bounds it is its user: an iptables rule rejects review-pr's
-# packets to 169.254.0.0/16 and 168.63.129.16, the metadata and the
-# platform addresses, and the Docker socket in /run admits only root
-# and the docker group. Measured on btclib-org/.github#1664 (run
-# 37858116237): under `--host-net`, a name resolved, github.com
-# answered and the Docker socket was there, but the socket and the
-# metadata address refused review-pr while both answered the runner.
-# 168.63.129.16 did not answer the runner either, so no check stands
-# for it, and the rule stays as a bound that costs uv sync nothing.
-#
-# The step that sets this up then runs these checks, each a hole if it
-# passes inside: a name lookup, a connection to github.com, the
-# runner's home, the runner's processes and sudo, and under
-# `--host-net` the Docker socket and the metadata address. Each runs
-# outside first as its control, and the job fails where one fails
-# outside or passes inside.
-#
-# The action sets kernel.apparmor_restrict_unprivileged_userns=0 in a
-# step of its own, after these checks (its `action.yml` at the pinned
-# commit). Under the review, the pull request's code can therefore
-# create user namespaces the checks never saw.
-#
-# The review reaches it through `run-pr`, which runs
-# `uv run --no-sync` with the review's arguments in review-pr's copy of
-# the checkout. The allow rule names the script, as it names
-# post-review, and the script hands its arguments to uv, never to a
-# shell. What run-pr runs is not narrowed to pytest: `python` runs
-# anything, so the bound is where it runs, not the rule. Measured from
-# a step as the runner's user, not from the review (run 37852259500):
-# `run-pr pytest` ran a test file of this tree, and `run-pr python -`
-# read a quoted heredoc.
+# The review is given no interpreter: the pull request's code would run
+# beside the job's credentials. Running it as another user, in
+# namespaces of its own, takes sudo, and sudo fails in the review's
+# Bash, which runs in the action's bubblewrap with no-new-privs.
+# Measured on btclib-org/.github#1676 (run 38054639830); the decision
+# is on btclib-org/.github#1642. Do not add a Bash rule for an
+# interpreter.
 #
 # A pull request's own `.claude/` and `.mcp.json` never load. A hook or
 # an MCP server there would run as the runner's user, beside the
-# credentials and outside review-pr's namespaces, so on a pull request
-# the action replaces both with the base branch's before the CLI starts
-# (`restoreConfigFromBase` in its
+# credentials, so on a pull request the action replaces both with the
+# base branch's before the CLI starts (`restoreConfigFromBase` in its
 # `src/github/operations/restore-config.ts`). `--setting-sources user`
 # is a second bound behind that one, on both jobs: the CLI then loads
 # no project source at all, the base branch's included, where the
@@ -347,8 +267,8 @@ jobs:
              == github.repository }}
     runs-on: ubuntu-latest
     # the review's own budget is on its step below, and this is the
-    # ceiling for the steps around it, which set up the environment,
-    # read the API and post. It has to be the larger of the two: a job
+    # ceiling for the steps around it, which fetch Core's source, read
+    # the API and post. It has to be the larger of the two: a job
     # that hits its own limit is *cancelled*, which the pull request
     # shows as a failed check with nothing from this file beside it --
     # two reviews that ran out of time read as reviews that had found
@@ -403,12 +323,6 @@ jobs:
                  "repositories; without it this workflow reviews nothing."
             exit 1
           fi
-      # no cache: the runner's own uv cache would hold nothing, every
-      # package going to review-pr's
-      - name: Install uv
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
-        with:
-          enable-cache: false
       # one commit, for the reason the header gives at the input
       - name: Fetch Bitcoin Core's source
         if: ${{ inputs.bitcoin-core-ref != '' }}
@@ -420,90 +334,11 @@ jobs:
           git -C "$DIR" fetch -q --depth 1 --end-of-options \
             https://github.com/bitcoin/bitcoin.git "$REF"
           git -C "$DIR" checkout -q FETCH_HEAD
-      # the user and the namespaces the pull request's code runs in, for
-      # the reasons the header gives. A failed sync is a warning: the
-      # reviewer meets an error from run-pr instead, and says what it
-      # could not run
-      - name: Give the pull request's code a user and namespaces that hold nothing
-        env:
-          TREE: /var/lib/review-pr/tree
-        run: |
-          sudo useradd --create-home --home-dir /var/lib/review-pr review-pr
-          sudo install -m 755 "$(command -v uv)" /usr/local/bin/uv
-          sudo cp -a "$GITHUB_WORKSPACE" "$TREE"
-          sudo chown -R review-pr: "$TREE"
-          ns=$(mktemp)
-          cat > "$ns" <<'EOF'
-          #!/bin/sh
-          # review-pr-ns [--host-net] <command>...: --host-net keeps the
-          # host's network and /run, for uv sync
-          # Each --pdeathsig kills its process when the parent dies:
-          # unshare when sudo does, and the namespace's first process,
-          # which takes the rest with it, when unshare does. The second
-          # is set after the change of user, which clears it
-          set -eu
-          if [ "$1" = --host-net ]; then shift; net=; else net=--net; fi
-          exec setpriv --pdeathsig KILL \
-            unshare --mount --pid --fork --mount-proc $net \
-            /bin/sh -euc '
-              if [ -n "$0" ]; then
-                ip link set lo up
-                mount -t tmpfs tmpfs /run
-              fi
-              mount -t tmpfs tmpfs /home
-              for d in /tmp /var/tmp /dev/shm; do
-                mount -t tmpfs -o mode=1777 tmpfs "$d"
-              done
-              cd /
-              exec setpriv --reuid=review-pr --regid=review-pr --init-groups \
-                --no-new-privs --bounding-set=-all --pdeathsig KILL \
-                env -i HOME=/var/lib/review-pr PATH=/usr/local/bin:/usr/bin:/bin "$@"
-            ' "$net" "$@"
-          EOF
-          sudo install -m 755 "$ns" /usr/local/bin/review-pr-ns
-          # without use_pty, which this runner's sudoers sets, sudo
-          # starts the script as its own child, so the first parent-death
-          # signal fires when sudo is killed
-          echo 'Defaults!/usr/local/bin/review-pr-ns !use_pty' > "$ns"
-          sudo visudo -cqf "$ns"
-          sudo install -m 440 "$ns" /etc/sudoers.d/review-pr-ns
-          for dest in 169.254.0.0/16 168.63.129.16; do
-            sudo iptables -I OUTPUT -m owner --uid-owner review-pr -d "$dest" -j REJECT
-          done
-          if ! sudo /usr/local/bin/review-pr-ns --host-net \
-              uv sync --locked --all-groups --directory "$TREE"; then
-            echo "::warning::uv sync failed, so run-pr has no environment."
-          fi
-          # a mode, `-` for none, and a check; github.com's address is
-          # resolved here, so that the connection inside needs no lookup
-          ip=$(getent ahostsv4 github.com | awk 'NR == 1 { print $1 }')
-          get='curl -sS --max-time 10 -o /dev/null'
-          meta='http://169.254.169.254/metadata/instance?api-version=2021-02-01'
-          while read -r mode check; do
-            [ "$mode" = - ] && mode=
-            if ! sh -c "$check" </dev/null >/dev/null 2>&1; then
-              echo "::error::'$check' fails outside the namespaces, so it proves nothing."
-              exit 1
-            fi
-            if sudo /usr/local/bin/review-pr-ns ${mode:+"$mode"} sh -c "$check" \
-                </dev/null >/dev/null 2>&1; then
-              echo "::error::review-pr can run '$check'${mode:+ under $mode}."
-              exit 1
-            fi
-          done <<EOF
-          - getent hosts github.com
-          - $get --resolve github.com:443:$ip https://github.com
-          - ls $HOME
-          - pgrep -u $(id -u)
-          - sudo -n true
-          --host-net $get --unix-socket /var/run/docker.sock http://localhost/_ping
-          --host-net $get -H Metadata:true '$meta'
-          EOF
-      # the scripts the review posts through and runs the pull request's
-      # code through, for the reasons the header gives. The number and
-      # the repository reach this step through the environment rather
-      # than the `run:` text, and the step writes them into the script
-      - name: Write the scripts the review posts and runs code through
+      # the script the review posts through, for the reason the header
+      # gives. The number and the repository reach this step through the
+      # environment rather than the `run:` text, and the step writes them
+      # into the script
+      - name: Write the script the review posts through
         env:
           NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
@@ -512,12 +347,7 @@ jobs:
           mkdir -p "$DIR"
           printf '#!/bin/sh\nexec gh pr review %s -R %s --comment --body-file -\n' \
             "$NUMBER" "$REPO" > "$DIR/post-review"
-          cat > "$DIR/run-pr" <<'EOF'
-          #!/bin/sh
-          exec sudo -n /usr/local/bin/review-pr-ns timeout -k 10 300 \
-            uv run --no-sync --directory /var/lib/review-pr/tree "$@"
-          EOF
-          chmod 555 "$DIR/post-review" "$DIR/run-pr" "$DIR"
+          chmod 555 "$DIR/post-review" "$DIR"
       - name: Review against REVIEWING.md
         id: review
         uses: anthropics/claude-code-action@97c53473391bff1901034d4b454b5bac7ab7a029 # v1.0.239
@@ -614,15 +444,10 @@ jobs:
             Do not run the gates; they run beside you on the same sha.
             Do not file issues.
 
-            Run what the diff decides with, as REVIEWING.md asks, with
-            `${{ runner.temp }}/claude-review/run-pr`. It runs `uv run`
-            with your arguments in a copy of this checkout, as a user
-            with no credential and loopback only: `run-pr pytest <test
-            files>`, or `run-pr python -` with the code in a quoted
-            heredoc. Name the test files; never run the whole suite.
-            Each call ends after 300 seconds, with exit 124. Your Bash
-            tool stops waiting at 120 seconds unless you give it a longer
-            timeout.
+            You have no interpreter, so a script or a query in the diff
+            cannot be run. Run a pattern against the tree with Grep.
+            Where REVIEWING.md asks for a run you cannot make, the
+            summary says so, in those words: it was not run.
 
             ${{ inputs.bitcoin-core-ref
             && format('Bitcoin Core''s source at {0} is in {1}/bitcoin.',
@@ -673,7 +498,7 @@ jobs:
           # `--add-dir`, and Grep and Glob get it by the same kind of
           # rule, absolute where it starts with `//`. Not measured
           #
-          # run-pr and the setting sources are the header's
+          # the setting sources are the header's
           #
           # the model is named: the action's default ran the review on
           # Sonnet, and the review judges claims about code. The flag
@@ -694,7 +519,6 @@ jobs:
             ${{ inputs.bitcoin-core-ref
             && format('"Grep(/{0}/bitcoin/**)" "Glob(/{0}/bitcoin/**)"',
                       runner.temp) || '' }}
-            "Bash(${{ runner.temp }}/claude-review/run-pr:*)"
             "Bash(${{ runner.temp }}/claude-review/post-review:*)${{
             inputs.extra-allowed-tools
             && format(',{0}', inputs.extra-allowed-tools) || '' }}"
