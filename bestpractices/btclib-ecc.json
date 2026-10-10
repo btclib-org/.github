@@ -384,7 +384,7 @@
     "status": "N/A"
   },
   "crypto_published": {
-    "justification": "The Python arithmetic implements published algorithms (SEC 1, RFC 6979, BIP340, BIP327, draft BIP445, BIP374, BIP324, and the DLC specification's ECDSA adaptor and oracle signatures) and is validated against the specifications' own vectors. The opt-in ecc.ssa_adaptor follows BlockstreamResearch/secp256k1-zkp#299, an open pull request, and nothing else in the library calls it. On secp256k1, with the optional bindings installed, a call delegates to Bitcoin Core's libsecp256k1 wherever its guard admits it. https://github.com/btclib-org/btclib-ecc/blob/main/README.md",
+    "justification": "The Python arithmetic implements published algorithms (SEC 1, RFC 6979, BIP340, BIP327, draft BIP445, BIP374, BIP324, and the DLC specification's ECDSA adaptor and oracle signatures) and is validated against the specifications' own vectors. The opt-in ecc.ssa_adaptor follows the proposal in BlockstreamResearch/secp256k1-zkp#299, which no published specification includes, and nothing else in the library calls it. On secp256k1, with the optional bindings installed, a call delegates to Bitcoin Core's libsecp256k1 wherever its guard admits it. https://github.com/btclib-org/btclib-ecc/blob/main/README.md",
     "status": "Met"
   },
   "crypto_random": {
