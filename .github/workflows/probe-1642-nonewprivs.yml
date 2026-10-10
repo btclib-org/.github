@@ -1,0 +1,161 @@
+---
+name: probe-1642-nonewprivs
+
+# Throwaway, for btclib-org/.github#1642: which component sets
+# no-new-privs on the process tree the review's Bash runs in. Each row
+# runs the same probe script, the way the review runs run-pr: from
+# runner.temp, through an allow rule naming the script. The step summary
+# has the table. Never merged.
+
+on: pull_request
+
+permissions: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      # probe prints one line: the flag, seccomp, sudo's exit and the
+      # process ancestry up to pid 1. ask runs the CLI on it and keeps
+      # what the Bash tool returned
+      - name: Write the probe and the CLI wrapper
+        run: |
+          PROBE=$RUNNER_TEMP/probe/probe
+          ASK=$RUNNER_TEMP/probe/ask
+          RESULTS=$RUNNER_TEMP/results
+          printf 'PROBE=%s\nASK=%s\nRESULTS=%s\n' "$PROBE" "$ASK" "$RESULTS" >> "$GITHUB_ENV"
+          mkdir -p "$(dirname "$PROBE")" "$RESULTS"
+          cat > "$PROBE" <<'EOF'
+          #!/bin/sh
+          nnp=$(grep NoNewPrivs /proc/self/status | awk '{print $2}')
+          sec=$(grep Seccomp: /proc/self/status | awk '{print $2}')
+          err=$(sudo -n true 2>&1)
+          rc=$?
+          chain=
+          p=$$
+          while [ "$p" -gt 0 ] 2>/dev/null; do
+            chain="$chain $p:$(cat /proc/$p/comm 2>/dev/null)" || break
+            p=$(awk '/^PPid:/ {print $2}' /proc/$p/status 2>/dev/null) || break
+          done
+          echo "nnp=$nnp seccomp=$sec sudo=$rc chain=$chain"
+          echo "sudo-stderr=$err"
+          EOF
+          cat > "$ASK" <<'EOF'
+          #!/bin/sh
+          # ask <label> <scrub: 1, 0 or unset>
+          label=$1
+          if [ "$2" = unset ]; then
+            unset CLAUDE_CODE_SUBPROCESS_ENV_SCRUB
+          else
+            export CLAUDE_CODE_SUBPROCESS_ENV_SCRUB="$2"
+          fi
+          out=$RUNNER_TEMP/probe/$label.jsonl
+          claude -p "Run this exact command once with the Bash tool, then stop: $PROBE" \
+            --model haiku --max-turns 3 --setting-sources user \
+            --output-format stream-json --verbose \
+            --allowedTools "Bash($PROBE)" > "$out"
+          echo "claude exit $?"
+          jq -s -r -f "$RUNNER_TEMP/probe/extract.jq" "$out" | tee "$RESULTS/$label.txt"
+          EOF
+          cat > "$RUNNER_TEMP/probe/extract.jq" <<'EOF'
+          (.[] | select(.type == "assistant") | .message.content[]?
+            | select(.type == "tool_use") | "command: \(.input.command)"),
+          (.[] | select(.type == "user") | .message.content[]?
+            | select(.type == "tool_result")
+            | .content | if type == "array" then map(.text // "") | join("\n") else . end),
+          (.[] | select(.type == "result")
+            | "denials: \(.permission_denials // [] | tojson)", "result: \(.result)")
+          EOF
+          chmod 555 "$PROBE" "$ASK"
+      - name: 1 plain step
+        run: $PROBE | tee "$RESULTS/1-plain-step.txt"
+      - name: Install Claude Code 2.1.287, as the action does
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash -s -- 2.1.287
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: 2a CLI, scrub 1, before bubblewrap is installed
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: $ASK 2a-cli-scrub1-no-bwrap 1
+      # the action's own step when allowed_non_write_users is set
+      - name: Install bubblewrap and socat, as the action does
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends bubblewrap socat
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: 2b bwrap alone, no model
+        continue-on-error: true
+        run: bwrap --dev-bind / / "$PROBE" | tee "$RESULTS/2b-bwrap-alone.txt"
+      - name: 2c CLI, scrub 1
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: $ASK 2c-cli-scrub1 1
+      - name: 3a CLI, scrub 0
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: $ASK 3a-cli-scrub0 0
+      - name: 3b CLI, scrub unset
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: $ASK 3b-cli-scrub-unset unset
+      # the review's settings, except github_token: passing it skips the
+      # OIDC exchange, which refuses a workflow that is not on main
+      - name: 4 claude-code-action v1.0.239
+        id: action
+        continue-on-error: true
+        timeout-minutes: 8
+        uses: anthropics/claude-code-action@97c53473391bff1901034d4b454b5bac7ab7a029 # v1.0.239
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          allowed_non_write_users: "-none-"
+          prompt: "Run this exact command once with the Bash tool, then stop: ${{ env.PROBE }}"
+          claude_args: >-
+            --model haiku
+            --max-turns 3
+            --setting-sources user
+            --allowedTools "Bash(${{ env.PROBE }})"
+      - name: Read the action's transcript
+        if: ${{ !cancelled() }}
+        env:
+          FILE: ${{ steps.action.outputs.execution_file }}
+        run: |
+          if [ -n "$FILE" ] && [ -f "$FILE" ]; then
+            jq -r -f "$RUNNER_TEMP/probe/extract.jq" "$FILE" | tee "$RESULTS/4-action.txt"
+          else
+            echo "no execution file" | tee "$RESULTS/4-action.txt"
+          fi
+      - name: Table
+        if: ${{ !cancelled() }}
+        run: |
+          {
+            echo '| place | NoNewPrivs | Seccomp | sudo -n true | ancestry |'
+            echo '|---|---|---|---|---|'
+            for f in "$RESULTS"/*.txt; do
+              l=$(grep -m1 '^nnp=' "$f" || true)
+              if [ -z "$l" ]; then
+                echo "| $(basename "$f" .txt) | no probe output | | | |"
+                continue
+              fi
+              v() { echo "$l" | sed -n "s/.*$1=\([^ ]*\).*/\1/p"; }
+              echo "| $(basename "$f" .txt) | $(v nnp) | $(v seccomp) | $(v sudo)" \
+                "| ${l#*chain= } |"
+            done
+          } | tee -a "$GITHUB_STEP_SUMMARY"
