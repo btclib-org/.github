@@ -75,6 +75,9 @@ jobs:
           # lychee does for a blob URL it does not remap; raw would
           # otherwise fail it on a Markdown file. The two remaps do not
           # overlap: this one takes /blob/, that one /issues/.
+          # The blob remap is one quoted word, so it
+          # cannot be wrapped to yamllint's 100 columns.
+          # yamllint disable rule:line-length
           args: >-
             --no-progress
             --max-retries 3
@@ -85,6 +88,7 @@ jobs:
             --remap '^(https://github\.com/[^/]+/[^/]+/issues/[0-9]+)#issuecomment-[0-9]+$ $1'
             --remap '^https://github\.com/([^/]+/[^/]+)/blob/([^#]+)(?:#L[0-9]+(?:-L[0-9]+)?|(#.*))?$ https://raw.githubusercontent.com/$1/$2$3'
             ${{ inputs.targets }}
+          # yamllint enable rule:line-length
           # fail the job rather than only summarizing: a green run that
           # found dead links is the state this workflow exists to end
           fail: true
