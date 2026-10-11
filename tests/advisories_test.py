@@ -20,7 +20,7 @@ import pytest
 from . import ORG, by_hand, gh
 
 # section 12's six weeks after publication, for GitHub's CVE backlog:
-# https://github.com/orgs/community/discussions/200225
+# https://github.com/orgs/community/discussions/207039
 WINDOW = timedelta(days=42)
 
 
