@@ -101,3 +101,6 @@ allow-dependencies-licenses:
   - pkg:pypi/pygithub
   - pkg:pypi/pyqt6
   - pkg:pypi/speculos
+  # declared LGPL-3.0-or-later, the optional `gmpy2` extra of `btclib-ecc`
+  # (btclib-org/btclib-ecc#213): installed by the user, shipped in no wheel
+  - pkg:pypi/gmpy2
