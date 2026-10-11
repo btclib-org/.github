@@ -2050,8 +2050,10 @@ day and an hour, the repository owns the minute:
 | `vendored-vectors` | Monday | 03 |
 | `bootstrap-dns` | Monday | 04 |
 | `mutation` | Monday | 05 |
+| `qa-assets` | Tuesday | 03 |
 | `fuzz` | Tuesday | 04 |
 | `integration-bitcoind` | Tuesday | 05 |
+| `btcd-oracle` | Wednesday | 01 |
 | `zkp-oracle` | Wednesday | 02 |
 | `integration-hwi` | Wednesday | 03 |
 | `deps-latest` | Wednesday | 04 |
@@ -2189,10 +2191,12 @@ by that row.
 - `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
   `btclib-mnemonics`;
+- `qa-assets` — `btclib`;
 - `fuzz` — `btclib`, `btclib-secp256k1`, `btclib-node`, `btclib-wallet`,
   `btclib-ecc`, `btclib-mnemonics`;
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`,
   `btclib-wallet`;
+- `btcd-oracle` — `btclib`;
 - `zkp-oracle` — `btclib-ecc`;
 - `integration-hwi` — `btclib-wallet`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
@@ -2301,6 +2305,13 @@ and the badge land together.
     times is declined: filing issues only to fill the label is artificial, and
     makes the label worth less to a newcomer.
     `tests/good_first_issue_test.py` reads the dates per tree.
+- **`qa-assets` follows a tree that parses what Bitcoin Core's fuzzers feed
+  its own parsers.** The sentinel replays Bitcoin Core's `qa-assets` fuzz
+  corpora through the tree's parsers. Those corpora grow as Core's fuzzers run,
+  with no commit in the tree, so a clock asks. A failure is an issue against a
+  parser. `btclib` is the first tree; `btclib-wallet` follows in
+  btclib-org/btclib-wallet#340. btclib-org/btclib#2586 carries the debt until
+  `btclib` schedules it.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
   between the parser and an adversary choosing the bytes. `btclib` and
   `btclib-secp256k1` read transactions, scripts and signatures off the wire,
@@ -2352,6 +2363,12 @@ and the badge land together.
   says what that file says. The drift arrives from a landing here, so no pull
   request there is the occasion to ask, and asking from this suite would redden
   `main` here for a drift another repository owns.
+- **`btcd-oracle` follows a tree that parses what btcd's `wire` package also
+  parses.** The sentinel reads the tree's fuzz corpora with both and lists every
+  input they read differently that no triaged rule explains. It runs after
+  `fuzz`, whose grown corpora it reads. Each input listed is triaged against
+  Bitcoin Core. btclib-org/btclib#2584 carries the debt until `btclib`
+  schedules it.
 - **`zkp-oracle` follows a tree with an implementation of its own to compare.**
   The tree it asks holds the side written in Python; `btclib-secp256k1` is the
   other side, built from its sdist, not a tree the row reaches.
