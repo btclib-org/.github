@@ -1520,6 +1520,65 @@ requests. What must *not* be aligned is where those tests live or what
 they are called — only which conventions are tested, and that each tree
 says which.
 
+### A refusal carries no secret
+
+An exception holds no secret in its text, its args or an attribute, and
+neither does a repr, a log line or an `assert` message. They reach logs,
+bug reports and CI transcripts, where the user's own key must not.
+Echoing the refused value is the rejected alternative: it helps with a
+typo, and it publishes a key.
+
+**A secret is anything that derives a private key or authenticates a
+caller**: a key in any encoding, an xprv, a seed, a mnemonic or one of
+its words, a passphrase, a nonce, a secret share, a tweak of a private
+key, an rpc password, a cookie or an `Authorization` header. A value
+refused as a public type counts as one. Thirty-three bytes that are not
+a point may be an xprv's `00 || k`, and an argument in the wrong place
+may be a key.
+
+**What a refusal may print about such a value**: its length, its type
+name, the version or prefix field its format defines, of at most 4
+bytes, and the position of a bad character. That field is printed only
+where the value has the length its format gives it and the field holds
+one of the values the format defines: anywhere else it may hold key
+bytes. Apart from that field, and a name quoted as below, a refusal
+prints no byte or character of the value, no checksum and no hash of
+it: a hash confirms a guess at a passphrase. A fingerprint of a public
+key that parsed may be printed.
+
+**Which item failed is said by where it is**: the index in a list, the
+psbt input or output, the map and the key type, the signer. For
+example, `input 2: partial signature 0: public key of 32 bytes`. A
+string refused where a name belongs, such as a network name, a language
+or an option, is the one value a refusal may quote, and only where it
+has at most 16 characters, too short for a key. A mnemonic word or a
+short passphrase passed there by mistake is quoted too: the code cannot
+tell it from a typo. In its own position a mnemonic word is named by its
+index, and a passphrase by its parameter.
+
+**Chaining.** `raise ... from e` is allowed where `e`'s own text keeps
+this rule. An exception that holds the input, such as a `UnicodeError`,
+is neither chained nor left as context: the refusal is raised after the
+`except` block. `from None` is not enough, since it keeps `__context__`
+and only hides it from the traceback. Another program's error text that
+can quote a key, such as Bitcoin Core's descriptor errors, is not
+relayed: its error code is, with the position of the request.
+
+**Reprs and logs.** A class holding a secret leaves it out of its repr
+or prints `...` for it, and a dataclass marks that field
+`field(repr=False)`. Its `str()` holds no secret either: a serializer
+named for its encoding is how a secret is written out. A log line names
+an rpc method and not its parameters, and logs a sensitive option as
+`****`.
+
+**The test.** Every refusal a secret can reach has a test that feeds one
+and passes `assert_secret_free` the exception and each spelling a
+refusal could print: the bytes, the decimal of a scalar, each encoding,
+and a mnemonic word by word. That helper reads the text, the args and the
+attributes of the exception and of every exception it chains, and
+section 14 has it copied into every tree that owes it. A class holding a
+secret has a test that its repr and its `str()` hold none of it.
+
 ## 8. Coverage at 100%
 
 **A tree gates the code it holds against the failure that code has**, and
@@ -3683,6 +3742,11 @@ The paths are what that test compares:
   `.github/scripts/generate_sbom.py`: the file itself satisfies the condition,
   as it does `.taplo.toml`'s, the canonical copy being this repository's.
   Section 10 says which tree keeps another.
+- `tests/secret_free/__init__.py` — owed where `SECURITY.md`, since a
+  published package is what a user hands a secret to. It is section 7's
+  *A refusal carries no secret* as a test helper, a package by section
+  7's *Layout and naming*. This repository's copy is the one the others
+  are copied from, and `tests/secret_free_test.py` tests it.
 
 **Verbatim in part**, the file around it being the repository's own and so
 nothing a comparison by path can do: the `ci:` block of
