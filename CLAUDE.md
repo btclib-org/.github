@@ -208,6 +208,14 @@ instructed.
   landing, the newest run shown is still the failure it fixes, and nothing
   before the next change to that manifest can verify it —
   [the command for the pip job](https://github.com/btclib-org/.github/issues/1436#issuecomment-5899176660).
+- **A lychee `--remap` of a github.com URL loses lychee's GitHub
+  quirks.** lychee applies its quirks to the remapped URL, so a URL
+  remapped off github.com no longer matches them. The quirk that drops a
+  `#L10` line fragment is one: `reusable-links.yml`'s blob remap drops it
+  itself (#1683). A new remap of github.com URLs repeats whatever quirk
+  it still needs. The blob remap exists because github.com answers blob
+  pages with 503 much of the time, for a missing file as for a live one;
+  raw.githubusercontent.com answers 404 for a missing file.
 
 ## Conventions to match
 
