@@ -213,9 +213,7 @@ instructed.
   remapped off github.com no longer matches them. The quirk that drops a
   `#L10` line fragment is one: `reusable-links.yml`'s blob remap drops it
   itself (#1683). A new remap of github.com URLs repeats whatever quirk
-  it still needs. The blob remap exists because github.com answers blob
-  pages with 503 much of the time, for a missing file as for a live one;
-  raw.githubusercontent.com answers 404 for a missing file.
+  it still needs. The blob remap's comment says why it exists.
 
 ## Conventions to match
 
