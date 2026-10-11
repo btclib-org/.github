@@ -104,3 +104,8 @@ allow-dependencies-licenses:
   # declared LGPL-3.0-or-later, the optional `gmpy2` extra of `btclib-ecc`
   # (btclib-org/btclib-ecc#213): installed by the user, shipped in no wheel
   - pkg:pypi/gmpy2
+  # declared BSD-3-Clause; the conclusion adds the `LicenseRef` for Go's
+  # additional patent grant, the `PATENTS` file. Required through `btcd`'s
+  # `wire/v2` and `golang.org/x/crypto` by `btclib`'s `fuzz/btcd_decode`, a
+  # CI-only decoder shipped in no package
+  - pkg:golang/golang.org/x/sys

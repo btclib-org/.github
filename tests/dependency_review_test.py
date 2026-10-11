@@ -72,8 +72,10 @@ The action drops a key it does not know without a word, so a misspelt
 ACTION = re.compile(r"actions/dependency-review-action@[0-9a-f]{40}\b")
 """The action at a commit, which section 10 says every action is."""
 
-PURL = re.compile(r"pkg:[a-z]+/[a-z0-9]+(?:[-_.][a-z0-9]+)*")
-"""An ecosystem and a name, no version: the action matches by name."""
+PURL = re.compile(r"pkg:[a-z]+(?:/[a-z0-9]+(?:[-_.][a-z0-9]+)*)+")
+"""An ecosystem and a name, no version: the action matches by name.
+
+A Go name is a module path, so the name may hold slashes."""
 
 
 def test_the_organization_file_states_the_policy() -> None:
