@@ -35,8 +35,8 @@ repository. A rule changes by a pull request like any other change.
   approving review from somebody other than its author. The maintainer
   is the only bypass actor, in `pull_request` mode, so the maintainer
   can merge a pull request without that approval. The bypass is
-  everyday practice until `claude-review.yml`'s review is posted under
-  an identity of the organization's own, such as a GitHub App it owns
+  everyday practice until the review bot posts under an identity other
+  than the author's, such as a GitHub App
   ([ISS 1362](https://github.com/btclib-org/.github/issues/1362#issuecomment-6110475722)).
   `CONTRIBUTING.md`'s *The review* and *Landing it* are the exchange and
   the landing.

@@ -179,9 +179,9 @@ instead of into a third round.
 
 **The ack of record is not the approval *Landing it* asks for**: it is
 a bot's review of type COMMENT ([the standard's *Review*][s-rev] says
-whose). The maintainer's bypass is everyday practice until that review
-is posted under an identity of the organization's own
-([ISS 1362][i1362]).
+whose). The maintainer's bypass is everyday practice until the review
+bot posts under an identity other than the author's, such as a GitHub
+App ([ISS 1362][i1362]).
 
 ### Landing it
 
