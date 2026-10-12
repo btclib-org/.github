@@ -30,12 +30,16 @@ repository. A rule changes by a pull request like any other change.
   the issue it answers, and the issue is the record.
 - **A change is accepted through a pull request**, and section 11's
   *Branch protection and rulesets* is the rule: every change reaches
-  `main` through one, squashed, carrying a valid signature, and with an
-  approving review from somebody other than its author. The maintainer is
-  the only bypass actor, in `pull_request` mode, so the maintainer can
-  merge a pull request without that approval, and does so only in an
-  emergency; nobody can push to `main` directly. `CONTRIBUTING.md`'s
-  *The review* and *Landing it* are the exchange and the landing.
+  `main` through one, squashed and carrying a valid signature, and
+  nobody can push to `main` directly. A pull request lands with an
+  approving review from somebody other than its author. The maintainer
+  is the only bypass actor, in `pull_request` mode, so the maintainer
+  can merge a pull request without that approval. The bypass is
+  everyday practice until the review bot posts under an identity other
+  than the author's, such as a GitHub App
+  ([ISS 1362](https://github.com/btclib-org/.github/issues/1362#issuecomment-6110475722)).
+  `CONTRIBUTING.md`'s *The review* and *Landing it* are the exchange and
+  the landing.
 - **A disagreement goes to the maintainer.** One that survives a second
   exchange between author and reviewer goes to the maintainer instead of
   into a third round, as `CONTRIBUTING.md`'s *The review* says. A `NACK`
