@@ -203,6 +203,7 @@ alone would leave `uv sync` resolving a project without it.
 | `excel` | what writes the tree's workbooks and reads them back |
 | `bindings` | an optional native dependency that is also an extra |
 | `bip324` | the BIP324 transport's cipher, also an extra |
+| `gmpy2` | an optional arithmetic dependency that is also an extra |
 | `build` | what builds a distribution, cibuildwheel included |
 | `build-requires` | `[build-system].requires`, copied for `uv.lock` to pin |
 | `check` | what inspects a distribution before it is published |
@@ -212,9 +213,9 @@ alone would leave `uv sync` resolving a project without it.
 | `dev` | every group the tree declares, and the default of `uv sync` |
 
 The `harness`/`test` split is what lets a job ask for the suite *without*
-the optional native dependency, since uv's `--no-group` suppresses a
+the optional native dependencies, since uv's `--no-group` suppresses a
 group that was selected and not one another group includes; a project
-with no such dependency keeps the two names or not as its own workflows
+with none keeps the two names or not as its own workflows
 ask.
 
 `notebooks` is owed where the tree has notebooks and `excel` where a script
