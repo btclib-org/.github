@@ -101,7 +101,9 @@ JSON
 `enforce_admins: false` is not a relaxation but what makes a solo merge
 possible at all, the ruleset bypass reaching only the ruleset's own rule.
 It exempts an administrator from the required checks as well as from the
-review, so the `strict` above is not what makes the landing tree current;
+review, so a merge through the maintainer's bypass waits for none of these
+checks, as `CONTRIBUTING.md`'s *Landing it* says. The `strict` above is
+then not what makes the landing tree current;
 [section 11 pairs the two settings and has what does][s11-branch].
 
 The `checks` array and a JSON body on stdin, never `contexts` and never

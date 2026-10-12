@@ -2822,7 +2822,7 @@ check, which does not count a review by a bot as code review.
 
 **btclib-org/.github#341 holds the removal of the ruleset's
 `bypass_actors`**, which would put a person's approval on the critical
-path of every merge, an emergency's included.
+path of every merge.
 
 **The ack of record is `claude-review.yml`'s**, and an author's own is
 not one: a comment from the account that opened the pull request says
