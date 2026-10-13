@@ -2305,20 +2305,23 @@ and the badge land together.
     times is declined: filing issues only to fill the label is artificial, and
     makes the label worth less to a newcomer.
     `tests/good_first_issue_test.py` reads the dates per tree.
-- **`qa-assets` follows a tree that parses what Bitcoin Core's fuzzers feed
-  its own parsers.** The sentinel replays Bitcoin Core's `qa-assets` fuzz
-  corpora through the tree's parsers. Those corpora grow as Core's fuzzers run,
-  with no commit in the tree, so a clock asks. A failure is an issue against a
-  parser. `btclib` is the first tree; `btclib-wallet` follows in
-  btclib-org/btclib-wallet#340. btclib-org/btclib#2586 carries the debt until
-  `btclib` schedules it.
+- **`qa-assets` follows a tree with parsers of its own for the transactions,
+  scripts and peer-to-peer messages Bitcoin Core's fuzzers feed its own
+  parsers.** The sentinel replays Bitcoin Core's `qa-assets` fuzz corpora of
+  those three, and no others, through the tree's parsers. A tree that reads them
+  through another tree's parsers, as `btclib-node` does with `btclib`'s, would
+  replay those parsers again. Core's DER targets are not replayed: they draw
+  their values from the input, and `btclib-secp256k1` parses no transaction,
+  script or message. The corpora grow as Core's fuzzers run, with no commit in
+  the tree, so a clock asks. A failure is an issue against a parser.
+  btclib-org/btclib#2586 carries the debt until `btclib` schedules it.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
-  between the parser and an adversary choosing the bytes. `btclib` and
-  `btclib-secp256k1` read transactions, scripts and signatures off the wire,
-  `btclib-node` speaks the peer-to-peer protocol, `btclib-wallet` parses
-  PSBTs, output descriptors and BIP32/BIP322 data a counterparty hands it,
-  `btclib-ecc` decodes the DER and BIP340 signatures and the ECIES envelopes
-  a sender writes, and `btclib-mnemonics` decodes the SLIP39 shares their
+  between the parser and an adversary choosing the bytes. `btclib` reads
+  transactions, scripts and signatures off the wire, `btclib-secp256k1` reads
+  signatures, public keys and MuSig2 messages, `btclib-node` speaks the
+  peer-to-peer protocol, `btclib-wallet` parses PSBTs, output descriptors and
+  BIP32/BIP322 data a counterparty hands it, `btclib-ecc` decodes the DER and
+  BIP340 signatures and the ECIES envelopes a sender writes, and `btclib-mnemonics` decodes the SLIP39 shares their
   holders hand back, a few of whom SLIP39 allows to be compromised;
   `bitcoin-core-rpc` reads an instance its own operator runs, which the property
   does not reach. `btclib-secp256k1`'s targets reach the vendored C on purpose:
@@ -2363,12 +2366,14 @@ and the badge land together.
   says what that file says. The drift arrives from a landing here, so no pull
   request there is the occasion to ask, and asking from this suite would redden
   `main` here for a drift another repository owns.
-- **`btcd-oracle` follows a tree that parses what btcd's `wire` package also
-  parses.** The sentinel reads the tree's fuzz corpora with both and lists every
-  input they read differently that no triaged rule explains. It runs after
-  `fuzz`, whose grown corpora it reads. Each input listed is triaged against
-  Bitcoin Core. btclib-org/btclib#2584 carries the debt until `btclib`
-  schedules it.
+- **`btcd-oracle` follows a tree with decoders of its own for what btcd's `wire`
+  package also decodes**: transactions, blocks and peer-to-peer messages. The
+  sentinel reads the tree's fuzz corpora with both and lists every input they
+  read differently that no triaged rule explains. It runs after `fuzz`, whose
+  grown corpora it reads. Each input listed is triaged against Bitcoin Core. A
+  tree that decodes them with `btclib`'s decoders, as `btclib-node` does, would
+  be compared on `btclib`'s again. btclib-org/btclib#2584 carries the debt until
+  `btclib` schedules it.
 - **`zkp-oracle` follows a tree with an implementation of its own to compare.**
   The tree it asks holds the side written in Python; `btclib-secp256k1` is the
   other side, built from its sdist, not a tree the row reaches.
