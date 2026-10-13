@@ -102,7 +102,7 @@ and answers no to an arbitrary historical sha, for the clone's reason
 rather than the entry's.
 """
 
-EXPECTED_DRIFT: dict[str, str] = {}
+EXPECTED_DRIFT: dict[str, str] = {"REVIEWING.md": "btclib-org/.github#1697"}
 """A path section 14 names whose copies are known not to agree yet.
 
 The value is the issue that decides it, and the commit the drift came
@@ -410,6 +410,28 @@ def test_every_copy_of_a_verbatim_file_is_the_same_copy(
     assert not drifted, f"verbatim files that differ between trees: {drifted}"
 
 
+HELPER = "tests/secret_free/__init__.py"
+"""The one owed file whose presence a test of its own asks.
+
+It is split from the rest so that a `BACKLOG` row can excuse the trees
+that lack it, btclib-org/.github#1697, without excusing the others.
+"""
+
+
+def absent(root: Path) -> list[str]:
+    """List the files section 14 owes a tree and the tree does not carry.
+
+    :param root: the root of the checkout.
+    :returns: the owed paths and per-subject subjects the tree lacks.
+    """
+    missing = [
+        path
+        for path, clause in verbatim().items()
+        if owed(root, path, clause) and not (root / path).is_file()
+    ]
+    return missing + unowed(root, per_subject())
+
+
 def test_a_repository_carries_the_verbatim_files_owed_of_it(
     repository: str,
     trees: dict[str, Path],
@@ -424,17 +446,12 @@ def test_a_repository_carries_the_verbatim_files_owed_of_it(
     passes over. `EXPECTED_DRIFT` is not consulted: an entry there
     records copies that disagree, which is a different finding from a
     copy that is not there. The other direction is the test below.
+    `HELPER` is asked by the helper test further down.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    root = trees[repository]
-    missing = [
-        path
-        for path, clause in verbatim().items()
-        if owed(root, path, clause) and not (root / path).is_file()
-    ]
-    missing += unowed(root, per_subject())
+    missing = [path for path in absent(trees[repository]) if path != HELPER]
     assert not missing, f"section 14 files this tree does not carry: {missing}"
 
 
@@ -464,6 +481,41 @@ def test_a_repository_carries_no_copy_a_condition_does_not_reach(
     assert not spare, (
         f"section 14 owes this tree none of these, and it carries them: {spare}"
     )
+
+
+def test_a_repository_carries_the_secret_free_helper_owed_of_it(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """The helper section 14 owes where `SECURITY.md` is there where owed.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    assert HELPER not in absent(trees[repository]), (
+        f"section 14 owes this tree {HELPER}"
+    )
+
+
+def test_the_helper_is_the_only_file_the_owed_files_test_leaves_out(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """A tree missing `LICENSE` and the helper still fails the owed-files test.
+
+    `test_a_repository_carries_the_verbatim_files_owed_of_it` is called
+    as a function over a tree that `absent` is made to report.
+
+    :param monkeypatch: the fixture that replaces `absent`.
+    :param tmp_path: a directory standing for the checkout.
+    """
+    monkeypatch.setattr(
+        f"{__name__}.absent", lambda _root: [HELPER, "LICENSE", "COPYRIGHT"]
+    )
+    with pytest.raises(AssertionError, match=r"LICENSE.*COPYRIGHT"):
+        test_a_repository_carries_the_verbatim_files_owed_of_it("x", {"x": tmp_path})
+    monkeypatch.setattr(f"{__name__}.absent", lambda _root: [HELPER])
+    test_a_repository_carries_the_verbatim_files_owed_of_it("x", {"x": tmp_path})
 
 
 PLANTED = "here/probe.py"

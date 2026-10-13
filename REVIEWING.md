@@ -342,6 +342,9 @@ one, is where the rule lives.
   `check-changelog` refuses a new entry in `CHANGELOG.md` and reads nothing
   of a bullet added under an entry the base holds. It reads no other file, so
   a new entry in `RELEASE_NOTES.md` is the reviewer's to catch.
+- Does a new refusal, repr, log line or `assert` message **print a value
+  that may be secret**? Section 7's *A refusal carries no secret* has the
+  rule and the test it asks for.
 - A new or changed workflow: section 10 of the standard, and
   `REPOSITORY.md` before any rule or setting is touched. A renamed job
   is a required check renamed out of existence.
