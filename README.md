@@ -2306,22 +2306,24 @@ and the badge land together.
     makes the label worth less to a newcomer.
     `tests/good_first_issue_test.py` reads the dates per tree.
 - **`qa-assets` follows a tree with parsers of its own for the transactions,
-  scripts and peer-to-peer messages Bitcoin Core's fuzzers feed its own
-  parsers.** The sentinel replays Bitcoin Core's `qa-assets` fuzz corpora of
-  those three, and no others, through the tree's parsers. A tree that reads them
-  through another tree's parsers, as `btclib-node` does with `btclib`'s, would
-  replay those parsers again. Core's DER targets are not replayed: they draw
-  their values from the input, and `btclib-secp256k1` parses no transaction,
-  script or message. The corpora grow as Core's fuzzers run, with no commit in
-  the tree, so a clock asks. A failure is an issue against a parser.
-  btclib-org/btclib#2586 carries the debt until `btclib` schedules it.
+  scripts and peer-to-peer messages that the fuzzers of Bitcoin Core and
+  rust-bitcoin feed their parsers.** The sentinel replays the `qa-assets`
+  corpora of both for those three, and no others, through the tree's parsers. A
+  tree that reads them through another tree's parsers, as `btclib-node` does
+  with `btclib`'s, would replay those parsers again. Core's DER targets are not
+  replayed: their bytes are choices for `FuzzedDataProvider`, not a DER
+  encoding. `btclib-secp256k1` parses no transaction, script or message. The
+  corpora grow as those fuzzers run, with no commit in the tree, so a clock
+  asks. A failure is an issue against a parser. btclib-org/btclib#2586 carries
+  the debt until `btclib` schedules it.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
   between the parser and an adversary choosing the bytes. `btclib` reads
   transactions, scripts and signatures off the wire, `btclib-secp256k1` reads
-  signatures, public keys and MuSig2 messages, `btclib-node` speaks the
-  peer-to-peer protocol, `btclib-wallet` parses PSBTs, output descriptors and
-  BIP32/BIP322 data a counterparty hands it, `btclib-ecc` decodes the DER and
-  BIP340 signatures and the ECIES envelopes a sender writes, and `btclib-mnemonics` decodes the SLIP39 shares their
+  signatures, public keys and MuSig2 nonces and partial signatures,
+  `btclib-node` speaks the peer-to-peer protocol, `btclib-wallet` parses PSBTs,
+  output descriptors and BIP32/BIP322 data a counterparty hands it,
+  `btclib-ecc` decodes the DER and BIP340 signatures and the ECIES envelopes a
+  sender writes, and `btclib-mnemonics` decodes the SLIP39 shares their
   holders hand back, a few of whom SLIP39 allows to be compromised;
   `bitcoin-core-rpc` reads an instance its own operator runs, which the property
   does not reach. `btclib-secp256k1`'s targets reach the vendored C on purpose:
