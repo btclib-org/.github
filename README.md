@@ -2306,16 +2306,16 @@ and the badge land together.
     makes the label worth less to a newcomer.
     `tests/good_first_issue_test.py` reads the dates per tree.
 - **`qa-assets` follows a tree with parsers of its own for the transactions,
-  scripts and peer-to-peer messages that the fuzzers of Bitcoin Core and
+  blocks, scripts and peer-to-peer messages that the fuzzers of Bitcoin Core and
   rust-bitcoin feed their parsers.** The sentinel replays the `qa-assets`
-  corpora of both for those three, and no others, through the tree's parsers. A
+  corpora of both for those, and no others, through the tree's parsers. A
   tree that reads them through another tree's parsers, as `btclib-node` does
   with `btclib`'s, would replay those parsers again. Core's DER targets are not
   replayed: their bytes are choices for `FuzzedDataProvider`, not a DER
-  encoding. `btclib-secp256k1` parses no transaction, script or message. The
-  corpora grow as those fuzzers run, with no commit in the tree, so a clock
-  asks. A failure is an issue against a parser. btclib-org/btclib#2586 carries
-  the debt until `btclib` schedules it.
+  encoding. `btclib-secp256k1` parses no transaction, block, script or
+  message. The corpora grow as those fuzzers run, with no commit in the tree, so
+  a clock asks. A failure is an issue against a parser. btclib-org/btclib#2586
+  carries the debt until `btclib` schedules it.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
   between the parser and an adversary choosing the bytes. `btclib` reads
   transactions, scripts and signatures off the wire, `btclib-secp256k1` reads
