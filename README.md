@@ -2637,12 +2637,21 @@ reads it back on each repository.
 `main` is the only branch. Everything reaches it through a pull request,
 the bots' included.
 
-Classic protection carries the required checks with `strict`, one
-approving review, `dismiss_stale_reviews`, linear history, no force
+Classic protection carries the required checks with `strict` **off**,
+one approving review, `dismiss_stale_reviews`, linear history, no force
 pushes, no deletions, `required_conversation_resolution`, and
 `enforce_admins` **off**. `required_signatures` is **off** there too:
 `main-integrity` already enforces it with no bypass actor, so classic's
 own copy of the rule would only duplicate it.
+
+With `strict` on, each landing would leave every other open pull request
+behind, and each would need a rebase, a CI run and a new approval. What
+it buys is that the checks ran on the exact tree that lands, which
+catches two green pull requests that break `main` together. The
+maintainer judges that break too rare to pay that cost for
+(btclib-org/.github#1712), and `main`'s own CI shows it, by section 10's
+`push` trigger. The rejected merge queue keeps the guarantee without the
+rebases, for a second CI run per pull request (btclib-org/.github#1619).
 
 Three rulesets sit beside it, additive — rules aggregate across rulesets
 and classic protection, taking the most restrictive combination:
@@ -2674,10 +2683,7 @@ is what refuses a moved head there.
 Two settings hold the door, not one: the classic review requirement is
 cleared for the maintainer by `enforce_admins: false` *plus* admin, and
 turning `enforce_admins` on would deadlock every solo merge. That setting
-clears the whole of classic protection for that account, `strict`
-included, so being up to date with `main` is a rebase somebody runs and
-not a rule the forge holds: a branch merged behind `main` lands a tree
-nothing has run.
+clears the whole of classic protection for that account.
 
 When patching required checks, use the `checks` array and a JSON body on
 stdin: `contexts` has no field for an app, so sending it silently
