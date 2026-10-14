@@ -15,19 +15,10 @@ name: reusable-api-break
 # only that there is one. The release job is where a break is refused
 # unless the notes name it.
 #
-# Advisory in three ways. The job concludes green whatever griffe or the
-# label calls answer, a failure to compare being a warning in the log.
-# It joins no aggregate and is no required check. And a label is only
-# ever added or removed, never another's, so a later push that breaks
-# nothing clears it.
-#
-# Only a pull request from the calling repository is labelled. A fork's
-# pull request runs with a read-only token, and the two ways round that,
-# pull_request_target and workflow_run, hand a write token to a trigger
-# the organization declines (bestpractices/<tree>.json, OSPS-BR-01.01).
-# A fork's run still does the comparison and writes its finding to the
-# job summary, so the reviewer reads it there and the label is left to a
-# maintainer to apply by hand.
+# Advisory: a break is told by a label, and the job is no required
+# check, so no merge waits on it. Only a pull request of the calling
+# repository is labelled; README section 12 has why, and what a fork's
+# pull request gets.
 #
 # One input, the package griffe walks, with no default, for the reason
 # reusable-public-api.yml gives. The trigger, its types and the
@@ -62,8 +53,10 @@ jobs:
           && !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # advisory: a step that fails for a reason of the runner's, such as
-    # an action that cannot be fetched, must not turn the pull request red
+    # not a required check, so no merge waits on it. A step that is
+    # red anyway, an action that cannot be fetched say, leaves the run
+    # green with this job's check run red; the steps this file writes
+    # guard themselves in api_break.py
     continue-on-error: true
     permissions:
       contents: read
@@ -80,11 +73,21 @@ jobs:
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: false
+      # the script that reads griffe's answer is served from this
+      # repository, as reusable-public-api.yml serves its own
+      - name: Check out the script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: btclib-org/.github
+          ref: main
+          path: standard
+          persist-credentials: false
+          sparse-checkout: .github/scripts
       # griffe's version and interpreter are named for the reason
-      # reusable-public-api.yml gives, and are the same there. The exit
-      # code is 1 with findings and any other non-zero code is griffe
-      # failing to compare, as when the package does not exist at the
-      # base yet: then nothing is said about the label either way
+      # reusable-public-api.yml gives, and are the same there. -X keeps
+      # griffe from importing the checkout's code where it cannot read
+      # it as source. Exit 1 is findings or an uncaught exception, so
+      # api_break.py reads the output, not the code alone
       - name: Compare the public API with the base
         id: compare
         env:
@@ -94,17 +97,18 @@ jobs:
           findings="$RUNNER_TEMP/griffe-findings.txt"
           status=0
           uvx --quiet --python 3.15 griffe==2.2.0 check "$PACKAGE" -s . -s src \
-            -a "$BASE_SHA" -f oneline > "$findings" 2>&1 || status=$?
+            -a "$BASE_SHA" -f oneline -X > "$findings" 2>&1 || status=$?
           echo "findings=$findings" >> "$GITHUB_OUTPUT"
-          if [ "$status" -gt 1 ]; then
-            cat "$findings"
-            echo "::warning::griffe exited $status; the label stays as it is"
-            echo "broken=unknown" >> "$GITHUB_OUTPUT"
-          elif [ "$status" -eq 1 ]; then
-            echo "broken=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "broken=false" >> "$GITHUB_OUTPUT"
-          fi
+          uv run --no-project --python 3.15 \
+            standard/.github/scripts/api_break.py classify "$status" "$findings" \
+            >> "$GITHUB_OUTPUT"
+      - name: Warn that the label is left as it is
+        if: steps.compare.outputs.broken == 'unknown'
+        env:
+          FINDINGS: ${{ steps.compare.outputs.findings }}
+        run: |
+          cat "$FINDINGS"
+          echo "::warning::griffe did not compare; the label stays as it is"
       - name: Report the finding
         if: steps.compare.outputs.broken == 'true'
         env:
@@ -117,8 +121,6 @@ jobs:
             cat "$FINDINGS"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-      # a label that is already as it should be is left alone, and a
-      # failed call is a warning: the label is an advice
       - name: Set the label
         if: >-
           steps.compare.outputs.broken != 'unknown'
@@ -128,11 +130,6 @@ jobs:
           BROKEN: ${{ steps.compare.outputs.broken }}
           PULL_REQUEST: ${{ github.event.pull_request.number }}
         run: |
-          issue="repos/${GITHUB_REPOSITORY}/issues/${PULL_REQUEST}"
-          if [ "$BROKEN" = true ]; then
-            gh api --method POST "$issue/labels" -f 'labels[]=api-break' \
-              > /dev/null || echo "::warning::could not add api-break"
-          else
-            gh api --method DELETE "$issue/labels/api-break" \
-              > /dev/null 2>&1 || echo "api-break was not on the pull request"
-          fi
+          uv run --no-project --python 3.15 \
+            standard/.github/scripts/api_break.py label \
+            "$BROKEN" "$GITHUB_REPOSITORY" "$PULL_REQUEST"
