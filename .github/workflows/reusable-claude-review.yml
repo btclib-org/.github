@@ -523,10 +523,11 @@ jobs:
             diff does or of what you checked.
 
             Where the pull request's prose relies on a command you could
-            not run, answer `ACK <sha>` if nothing else holds the
-            verdict, with a "Not checked:" line naming that command. Do
-            not answer `NO VERDICT` for it, and do not report a trace
-            of it as a run.
+            not run, or REVIEWING.md asks for a run you cannot make, say
+            in the summary, in those words, that it was not run: answer
+            `ACK <sha>` if nothing else holds the verdict, with a "Not
+            checked:" line naming that command. Do not answer `NO
+            VERDICT` for it, and do not report a trace of it as a run.
 
             ${{ inputs.extra-prompt }}
 
@@ -543,8 +544,8 @@ jobs:
             It prints the content as it is. `gh api` is refused. Single-quote
             the argument, since a `?` is a glob character.
 
-            Read your own earlier reviews on this pull request, those of
-            claude[bot], with `gh pr view <number> --json reviews`, and
+            Read your own earlier reviews on this pull request, those whose
+            author is `claude`, with `gh pr view <number> --json reviews`, and
             read the sha each names. Raise a non-blocking point only on
             a line the commits after that sha touched, or on one that
             would be wrong on `main`. Where you cannot tell which lines
@@ -552,8 +553,6 @@ jobs:
 
             You have no interpreter, so a script or a query in the diff
             cannot be run. Run a pattern against the tree with Grep.
-            Where REVIEWING.md asks for a run you cannot make, the
-            summary says so, in those words: it was not run.
 
             ${{ inputs.bitcoin-core-ref
             && format('Bitcoin Core''s source at {0} is in {1}/bitcoin.',
