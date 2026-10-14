@@ -215,8 +215,8 @@ def declared_outputs(workflow: Path) -> set[str]:
 def test_both_local_spellings_are_local_calls(tmp_path: Path) -> None:
     """`./` and `$/` resolve alike, are not unpinned, and make a call.
 
-    A planted tree whose `links.yml` is called by the other workflow,
-    once by each spelling.
+    A planted tree whose `called.yml` is called by `caller.yml`, once by
+    each spelling.
 
     :param tmp_path: where the tree is planted.
     """
@@ -227,7 +227,7 @@ def test_both_local_spellings_are_local_calls(tmp_path: Path) -> None:
     for prefix in ("./", "$/"):
         value = f"{prefix}.github/workflows/called.yml"
         assert callee(value, "tree", {"tree": tmp_path}) == ("tree", called)
-        assert value.startswith(LOCAL)
+        assert not unpinned(value)
         caller = f"jobs:\n  call:\n    uses: {value}\n"
         (workflows_dir / "caller.yml").write_text(caller, encoding="utf-8")
         assert calls(tmp_path, "called.yml")
@@ -320,6 +320,18 @@ def test_no_step_passes_frozen(repository: str, trees: dict[str, Path]) -> None:
     )
 
 
+def unpinned(value: str) -> bool:
+    """Say whether a `uses:` value breaks section 10's pin rule.
+
+    :param value: a job's or step's `uses:` value.
+    :returns: False for a path into this tree, a commit pin, or a call
+        `REUSABLE` matches.
+    """
+    return not (
+        value.startswith(LOCAL) or PINNED.search(value) or REUSABLE.match(value)
+    )
+
+
 def test_every_action_is_pinned_to_a_commit(
     repository: str,
     trees: dict[str, Path],
@@ -334,15 +346,13 @@ def test_every_action_is_pinned_to_a_commit(
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    unpinned = [
+    found = [
         f"{workflow.name}: {value}"
         for workflow in gated(repository, trees)
         for value in uses(workflow)
-        if not value.startswith(LOCAL)
-        and not PINNED.search(value)
-        and not REUSABLE.match(value)
+        if unpinned(value)
     ]
-    assert not unpinned, f"actions not pinned to a commit: {unpinned}; " + by_hand(
+    assert not found, f"actions not pinned to a commit: {found}; " + by_hand(
         repository,
         r"grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'",
     )
