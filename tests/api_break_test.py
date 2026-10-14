@@ -154,6 +154,15 @@ def test_the_label_command_prints_each_warning(
     assert capsys.readouterr().out == ""
 
 
+def test_the_default_runner_keeps_the_output_of_a_failing_command() -> None:
+    """A non-zero exit is returned, not raised, with both streams kept."""
+    code = "import sys; print('out'); sys.stderr.write('err'); sys.exit(3)"
+
+    done = script._run([sys.executable, "-c", code])  # noqa: SLF001
+
+    assert (done.returncode, done.stdout.strip(), done.stderr) == (3, "out", "err")
+
+
 def test_a_404_on_adding_is_a_warning() -> None:
     """Only the DELETE tolerates it."""
 
@@ -228,6 +237,15 @@ def test_the_job_declines_a_closed_or_draft_pull_request() -> None:
         "github.event.action != 'closed' && "
         "!github.event.pull_request.draft }}"
     )
+
+
+def test_the_history_is_fetched_and_a_failed_griffe_is_caught() -> None:
+    """The base has to be reachable, and the status is read, not fatal."""
+    checkout = next(
+        step for step in _job()["steps"] if step.get("name") == "Checkout code"
+    )
+    assert checkout["with"]["fetch-depth"] == 0
+    assert "|| status=$?" in _step("Compare the public API with the base")["run"]
 
 
 def test_the_comparison_is_against_the_base_without_importing() -> None:

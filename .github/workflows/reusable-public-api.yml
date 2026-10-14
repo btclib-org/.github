@@ -6,13 +6,9 @@ name: reusable-public-api
 # are written once. The trigger stays in the caller, whose run this job
 # joins.
 #
-# It refuses a break, and so runs at release time rather than on every
-# pull request, on the reasoning btclib-org/.github#326 settled: before
-# 1.0 the public surface breaks deliberately and often, and a check
-# failing on every such break has nothing to say about which ones are
-# allowed, where a release-time run arrives once, while RELEASE_NOTES.md
-# is being written. A pull request is told of a break by a label from
-# reusable-api-break.yml, README section 12 having why.
+# It refuses a break, so it runs at release time and not on every pull
+# request (btclib-org/.github#326). README section 12 has why, and why a
+# pull request gets a label from reusable-api-break.yml instead.
 #
 # One input, the package griffe walks. No default: the package is the
 # calling repository's name only by a convention, and a default would be

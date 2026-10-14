@@ -78,6 +78,13 @@ def calls(broken: str, repository: str, pull_request: str) -> list[list[str]]:
     return []
 
 
+def _run(argv: Sequence[str]) -> subprocess.CompletedProcess[str]:
+    """Run a command, keeping what it printed and whatever it exited with."""
+    return subprocess.run(  # noqa: S603
+        argv, capture_output=True, check=False, encoding="utf-8"
+    )
+
+
 def label(
     broken: str,
     repository: str,
@@ -96,12 +103,7 @@ def label(
     :returns: the warnings, empty where all went as asked.
     """
 
-    def default(argv: Sequence[str]) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(  # noqa: S603
-            argv, capture_output=True, check=False, encoding="utf-8"
-        )
-
-    execute = run or default
+    execute = run or _run
     warnings = []
     for argv in calls(broken, repository, pull_request):
         done = execute(argv)
