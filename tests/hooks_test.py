@@ -11,8 +11,9 @@ without a condition, so where a tree declines one the finding is either
 the tree's or the section's, and a `BACKLOG` row is where that finding
 is recorded.
 
-One hook is read for its pin as well: `uv-lock` runs the uv its `rev:`
-names, so section 1's floor is what that pin answers to.
+Three hooks are read for their pins as well. `check-changelog` and
+`actionlint-shellcheck` are held to a sha. `uv-lock` runs the uv its
+`rev:` names, so section 1's floor is what that pin answers to.
 """
 
 from __future__ import annotations
@@ -164,7 +165,8 @@ PIN = re.compile(r"^[0-9a-f]{40}$")
 A sha and not a tag name: a commit where the hook repository cuts no
 tag, the annotated tag's own object where `autoupdate --freeze` writes
 one, as for `ACTIONLINT`. Forty hex characters is what `pinned-rev`
-accepts and what `autoupdate` moves by `git rev-parse FETCH_HEAD`.
+accepts, and what `autoupdate` writes: `git rev-parse FETCH_HEAD` where
+no tag is cut, `git rev-parse <tag>` under `--freeze`.
 """
 
 COUNT = "--grandfathered"
