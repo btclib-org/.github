@@ -357,19 +357,22 @@ ACTIONLINT_REFUSED = {
     "repo": "https://github.com/Mateusz-Grzelinski/actionlint-py",
     "rev": "v1.7.12.25",
 }
-"""The stanza a gate carries where it still takes the Python packaging.
+"""The stanza of a gate that takes the Python packaging.
 
 A literal, for the reason `REFUSED` above is one: the check below is
-green wherever every gate agrees, and a reading that accepted this
+green wherever the gates agree, and a reading that accepted this
 stanza would stay green with nothing measured.
 """
 
 
 def actionlint_departures(found: list[dict[str, Any]]) -> list[str]:
-    """Say how the hooks of a gate depart from section 4's workflow linter.
+    """Report a gate without the fork, or with a fork hook off its id or pin.
+
+    An actionlint hook taken from any other repository is reported too.
 
     :param found: the hook mappings, as `hooks()` reads them.
-    :returns: one finding per departure, empty where there is none.
+    :returns: one finding per departure listed, empty where there is none
+        of them.
     """
     ours = [hook for hook in found if hook["repo"] == ACTIONLINT]
     others = [
@@ -411,12 +414,16 @@ def test_the_gate_lints_workflows_with_the_actionlint_fork(
     )
 
 
-def test_a_gate_on_the_old_actionlint_would_be_reported() -> None:
-    """The check above reads each stanza unlike section 4's as a departure."""
-    old = f"actionlint is taken from {ACTIONLINT_REFUSED['repo']}"
+def test_a_gate_off_the_fork_is_reported() -> None:
+    """The check above reports what `actionlint_departures` lists.
+
+    That is a gate without the fork, a fork hook off its id or pin, and an
+    actionlint hook taken from any other repository.
+    """
+    other = f"actionlint is taken from {ACTIONLINT_REFUSED['repo']}"
     assert actionlint_departures([ACTIONLINT_REFUSED]) == [
         f"no hook is taken from {ACTIONLINT}",
-        old,
+        other,
     ]
     assert actionlint_departures(
         [{"id": "actionlint", "repo": ACTIONLINT, "rev": "v1.17.0"}]
@@ -426,7 +433,7 @@ def test_a_gate_on_the_old_actionlint_would_be_reported() -> None:
     ]
     agreeing = {"id": ACTIONLINT_ID, "repo": ACTIONLINT, "rev": "0" * 40}
     assert actionlint_departures([agreeing]) == []
-    assert actionlint_departures([agreeing, ACTIONLINT_REFUSED]) == [old], (
+    assert actionlint_departures([agreeing, ACTIONLINT_REFUSED]) == [other], (
         "the Python packaging kept beside the fork is read as agreeing"
     )
     upstream = {"id": "actionlint", "repo": "https://github.com/rhysd/actionlint"}

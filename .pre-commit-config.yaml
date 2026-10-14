@@ -359,8 +359,7 @@ repos:
   # unknown key, a typo in a context reference, a job depending on one
   # that is not there are things a run discovers by failing.
   # kjanat/actionlint rather than rhysd/actionlint: upstream does not parse
-  # the `uses: $/...` self-repository reference zizmor's self-repository
-  # audit asks for (rhysd/actionlint#711; rhysd/actionlint#732, unmerged,
+  # `uses: $/...` (rhysd/actionlint#711; rhysd/actionlint#732, unmerged,
   # implements it), and the fork does (btclib-org/.github#1698). The rev
   # is the sha `pre-commit autoupdate --freeze` writes for the tag its
   # comment names, the annotated tag's own object, so a moved tag cannot
