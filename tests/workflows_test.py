@@ -171,11 +171,11 @@ def callee(
     """Resolve a job's `uses:` to its owner and the workflow file it calls.
 
     A `./`-path resolves inside the calling tree, and its owner is the
-    calling repository itself. A remote call resolves through `trees`, which holds a
-    checkout of every repository this suite fetched, so a caller in one
-    tree and a callee declared in another are one lookup apart -- the
-    half no single checkout can do, and the reason this cell lives in
-    this repository (btclib-org/.github#1132). Either way the owner
+    calling repository itself. A remote call resolves through `trees`,
+    which holds a checkout of every repository this suite fetched, so a
+    caller in one tree and a callee declared in another are one lookup
+    apart -- the half no single checkout can do, and the reason this cell
+    lives in this repository (btclib-org/.github#1132). Either way the owner
     names the one checkout that holds the file, the same single-tree
     answer `lychee` in `links_test.py` resolves its own call to.
 
