@@ -338,3 +338,125 @@ def test_the_label_is_owed_by_the_publishing_trees_alone() -> None:
         "btclib-secp256k1",
         "btclib-wallet",
     ]
+
+
+CHECKOUT = "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+SETUP_UV = "astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7"
+STEPS: list[dict[str, Any]] = [
+    {
+        "name": "Checkout code",
+        "uses": CHECKOUT,
+        "with": {"persist-credentials": False, "fetch-depth": 0},
+    },
+    {
+        "name": "Setup uv",
+        "uses": SETUP_UV,
+        "with": {"enable-cache": False},
+    },
+    {
+        "name": "Check out the script",
+        "uses": CHECKOUT,
+        "with": {
+            "repository": "btclib-org/.github",
+            "ref": "main",
+            "path": "standard",
+            "persist-credentials": False,
+            "sparse-checkout": ".github/scripts",
+        },
+    },
+    {
+        "name": "Compare the public API with the base",
+        "id": "compare",
+        "env": {
+            "PACKAGE": "${{ inputs.package }}",
+            "BASE_SHA": "${{ github.event.pull_request.base.sha }}",
+        },
+        "run": (
+            'findings="$RUNNER_TEMP/griffe-findings.txt" status=0 '
+            "uvx --quiet --python 3.15 griffe==2.2.0 "
+            'check "$PACKAGE" -s . -s src -a "$BASE_SHA" -f oneline -X '
+            '> "$findings" 2>&1 || status=$? '
+            'echo "findings=$findings" >> "$GITHUB_OUTPUT" '
+            "uv run --no-project --python 3.15 "
+            "standard/.github/scripts/api_break.py "
+            'classify "$status" "$findings" >> "$GITHUB_OUTPUT"'
+        ),
+    },
+    {
+        "name": "Warn that the label is left as it is",
+        "if": "steps.compare.outputs.broken == 'unknown'",
+        "env": {"FINDINGS": "${{ steps.compare.outputs.findings }}"},
+        "run": (
+            'cat "$FINDINGS" '
+            'echo "::warning::griffe did not compare; the label stays as it is"'
+        ),
+    },
+    {
+        "name": "Report the finding",
+        "if": "steps.compare.outputs.broken == 'true'",
+        "env": {"FINDINGS": "${{ steps.compare.outputs.findings }}"},
+        "run": (
+            "{ "
+            'echo "### The public API changes against the base" '
+            "echo "
+            "echo '```text' "
+            'cat "$FINDINGS" '
+            "echo '```' "
+            '} >> "$GITHUB_STEP_SUMMARY"'
+        ),
+    },
+    {
+        "name": "Set the label",
+        "if": (
+            "steps.compare.outputs.broken != 'unknown' && "
+            "github.event.pull_request.head.repo.full_name == github.repository"
+        ),
+        "env": {
+            "GH_TOKEN": "${{ github.token }}",
+            "BROKEN": "${{ steps.compare.outputs.broken }}",
+            "PULL_REQUEST": "${{ github.event.pull_request.number }}",
+        },
+        "run": (
+            "uv run --no-project --python 3.15 "
+            "standard/.github/scripts/api_break.py label "
+            '"$BROKEN" "$GITHUB_REPOSITORY" "$PULL_REQUEST"'
+        ),
+    },
+]
+"""Every step of the job, as written: its condition, its environment and
+each token of its command, so that no line can change without a test
+saying so. Whitespace is normalized, a command's lines read as one,
+a backslash continuation included."""
+
+
+def _squeezed(step: dict[str, Any]) -> dict[str, Any]:
+    """Return the step with its `if` and `run` on one line each."""
+    return {
+        key: " ".join(value.replace("\\\n", " ").split())
+        if key in {"if", "run"} else value
+        for key, value in step.items()
+    }
+
+
+def test_every_step_is_as_written() -> None:
+    """The job's steps are exactly these, in this order."""
+    steps: list[dict[str, Any]] = _job()["steps"]
+    assert [_squeezed(step) for step in steps] == STEPS
+
+
+def test_the_job_and_the_input_are_as_written() -> None:
+    """Everything of the workflow but its steps and its comments."""
+    parsed = _parsed()
+    on: dict[str, Any] = parsed.get("on", parsed.get(True))
+    assert parsed["name"] == "reusable-api-break"
+    assert on["workflow_call"]["inputs"]["package"]["required"] is True
+    assert on["workflow_call"]["inputs"]["package"]["type"] == "string"
+    job = {key: value for key, value in _job().items() if key != "steps"}
+    assert job == {
+        "name": "Label a pull request that breaks the public API",
+        "if": _job()["if"],
+        "runs-on": "ubuntu-latest",
+        "timeout-minutes": 10,
+        "continue-on-error": True,
+        "permissions": {"contents": "read", "pull-requests": "write"},
+    }

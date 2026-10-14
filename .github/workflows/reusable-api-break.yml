@@ -1,11 +1,11 @@
 ---
 name: reusable-api-break
 
-# The pull-request counterpart of reusable-public-api.yml: the same
-# griffe walk against the pull request's base commit, its answer a label,
-# `api-break` (btclib-org/.github#1674). README section 12
-# has why, and what a fork's pull request gets. The job is no required
-# check, so no merge waits on it.
+# The pull-request counterpart of reusable-public-api.yml: its griffe
+# walk against the pull request's base commit, the answer a label,
+# `api-break` (btclib-org/.github#1674). README section 12 has why, and
+# what a fork's pull request gets. The job is no required check, so no
+# merge waits on it.
 #
 # One input, the package griffe walks, with no default, for the reason
 # reusable-public-api.yml gives. The trigger, its types and the
