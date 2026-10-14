@@ -11,9 +11,8 @@ without a condition, so where a tree declines one the finding is either
 the tree's or the section's, and a `BACKLOG` row is where that finding
 is recorded.
 
-The pins of `check-changelog` and `actionlint-shellcheck` are held to a
-sha. `uv-lock` runs the uv its `rev:` names, so section 1's floor is what
-that pin answers to.
+`uv-lock` runs the uv its `rev:` names, so section 1's floor is what that
+pin answers to.
 """
 
 from __future__ import annotations
@@ -351,7 +350,7 @@ ACTIONLINT = "https://github.com/kjanat/actionlint"
 """The repository section 4 says the workflow linter is taken from."""
 
 ACTIONLINT_ID = "actionlint-shellcheck"
-"""The hook of `ACTIONLINT` that brings a shellcheck for the `run:` bodies."""
+"""The id of the hook section 4 takes from `ACTIONLINT`."""
 
 ACTIONLINT_REFUSED = {
     "id": "actionlint",
@@ -373,14 +372,14 @@ def actionlint_departures(found: list[dict[str, Any]]) -> list[str]:
     :returns: one finding per departure, empty where there is none.
     """
     ours = [hook for hook in found if hook["repo"] == ACTIONLINT]
-    old = [
+    others = [
         hook
         for hook in found
         if "actionlint" in str(hook["repo"]) and hook["repo"] != ACTIONLINT
     ]
     return (
         ([] if ours else [f"no hook is taken from {ACTIONLINT}"])
-        + [f"{hook['id']} is still taken from {hook['repo']}" for hook in old]
+        + [f"{hook['id']} is taken from {hook['repo']}" for hook in others]
         + [
             f"{hook['id']} is pinned at {hook['rev']!r}, not a sha"
             for hook in ours
@@ -413,8 +412,8 @@ def test_the_gate_lints_workflows_with_the_actionlint_fork(
 
 
 def test_a_gate_on_the_old_actionlint_would_be_reported() -> None:
-    """The check above reads the packaging it replaced as a departure."""
-    old = f"actionlint is still taken from {ACTIONLINT_REFUSED['repo']}"
+    """The check above reads each stanza unlike section 4's as a departure."""
+    old = f"actionlint is taken from {ACTIONLINT_REFUSED['repo']}"
     assert actionlint_departures([ACTIONLINT_REFUSED]) == [
         f"no hook is taken from {ACTIONLINT}",
         old,
@@ -428,11 +427,11 @@ def test_a_gate_on_the_old_actionlint_would_be_reported() -> None:
     agreeing = {"id": ACTIONLINT_ID, "repo": ACTIONLINT, "rev": "0" * 40}
     assert actionlint_departures([agreeing]) == []
     assert actionlint_departures([agreeing, ACTIONLINT_REFUSED]) == [old], (
-        "the old packaging kept beside the fork is read as agreeing"
+        "the Python packaging kept beside the fork is read as agreeing"
     )
     upstream = {"id": "actionlint", "repo": "https://github.com/rhysd/actionlint"}
     assert actionlint_departures([agreeing, upstream]) == [
-        "actionlint is still taken from https://github.com/rhysd/actionlint"
+        "actionlint is taken from https://github.com/rhysd/actionlint"
     ], "the upstream hook kept beside the fork is read as agreeing"
 
 
