@@ -160,7 +160,7 @@ branch, which is why section 4 leaves `.github`'s own copy `local`.
 """
 
 PIN = re.compile(r"^[0-9a-f]{40}$")
-"""The `rev:` shape section 4 asks of a tree taking that hook.
+"""The `rev:` shape section 4 asks of `check-changelog` and of `ACTIONLINT`.
 
 A sha and not a tag name: a commit where the hook repository cuts no
 tag, the annotated tag's own object where `autoupdate --freeze` writes
@@ -390,7 +390,7 @@ def test_the_gate_lints_workflows_with_the_actionlint_fork(
     repository: str,
     trees: dict[str, Path],
 ) -> None:
-    """Section 4's *workflows* bullet: the kjanat fork, by its tag's sha.
+    """Section 4's *workflows* bullet: the kjanat fork, pinned by a sha.
 
     btclib-org/.github#1698 is the decision. Upstream does not parse the
     `uses: $/...` that zizmor's `self-repository` audit recommends, and

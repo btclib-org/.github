@@ -979,8 +979,7 @@ the lint workflow runs: mypy needs uv, which pre-commit.ci lacks, and
     - **A local hook**, `language: system`, running `uv run --locked
       --no-default-groups --group lint --group test mypy <package> tests
       .github/scripts` with `pass_filenames: false`, checking against the
-      project's own locked environment. Its price is `skip: [mypy]` in
-      the `ci:` block, `uv` being absent on pre-commit.ci.
+      project's own locked environment, at the price of `skip: [mypy]`.
     - **`mirrors-mypy` with pinned `additional_dependencies`**, where the
       type check needs a small, stable set pinnable by hand. Its price is
       that second declaration, which nothing keeps equal to `uv.lock`;
