@@ -3174,9 +3174,10 @@ and the others where the tree has what they watch: `uv` where a
 `uv.lock` exists, `bundler` where a site Gemfile does, `gitsubmodule`
 where a submodule does, `gomod` where a `go.mod` does, `docker` where a
 workflow builds a Dockerfile whose `FROM` lines are pinned by digest —
-conditional by section 2's rule for a subject the tree does not hold. Dependabot has a `pre-commit`
-ecosystem too, and the maintainer decided to keep pre-commit.ci for hook
-`rev:` bumps instead (issue #1391): its weekly autoupdate already
+conditional by section 2's rule for a subject the tree does not hold.
+Dependabot has a `pre-commit` ecosystem too, and the maintainer decided to
+keep pre-commit.ci for hook `rev:` bumps instead (issue #1391): its weekly
+autoupdate already
 rewrites `rev:` for every `repo:` but `local` and `meta`, so a second
 bot bumping the same pin would only open a competing pull request,
 except a hook whose `repo:` is `local`: what moves that version is where

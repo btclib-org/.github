@@ -7,11 +7,12 @@
 The section gives `github-actions` to every tree, workflows for it to
 read being every tier's, and makes the others conditional on what the
 tree holds: a lock file, a site Gemfile, a submodule, a `go.mod`, a
-Dockerfile whose base images are pinned by digest. So an ecosystem is owed exactly where
-its subject is there to be read, which is section 2's rule for a subject
-a tree does not hold. Dependabot has a `pre-commit` ecosystem too, and
-section 11 says the maintainer keeps pre-commit.ci for hook `rev:` bumps
-instead; section 2 lists the file among what `.github/` holds.
+Dockerfile whose base images are pinned by digest. So an ecosystem is owed
+exactly where its subject is there to be read, which is section 2's rule
+for a subject a tree does not hold. Dependabot has a `pre-commit`
+ecosystem too, and section 11 says the maintainer keeps pre-commit.ci for
+hook `rev:` bumps instead; section 2 lists the file among what `.github/`
+holds.
 
 The section also states how a declared ecosystem is configured -- grouped,
 weekly, a seven-day cooldown, no `target-branch` -- and, for `uv`, what its
