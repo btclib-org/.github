@@ -278,8 +278,7 @@ def test_the_answer_reaches_the_label_step() -> None:
     assert "2>&1" in run
     assert _step("Compare the public API with the base")["id"] == "compare"
     assert (
-        _step("Set the label")["env"]["BROKEN"]
-        == "${{ steps.compare.outputs.broken }}"
+        _step("Set the label")["env"]["BROKEN"] == "${{ steps.compare.outputs.broken }}"
     )
 
 
