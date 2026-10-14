@@ -358,7 +358,7 @@ ACTIONLINT_REFUSED = {
     "repo": "https://github.com/Mateusz-Grzelinski/actionlint-py",
     "rev": "v1.7.12.25",
 }
-"""The stanza the gates carried before btclib-org/.github#1698.
+"""The stanza a gate carries where it still takes the Python packaging.
 
 A literal, for the reason `REFUSED` above is one: the check below is
 green wherever every gate agrees, and a reading that accepted this
@@ -373,7 +373,11 @@ def actionlint_departures(found: list[dict[str, Any]]) -> list[str]:
     :returns: one finding per departure, empty where there is none.
     """
     ours = [hook for hook in found if hook["repo"] == ACTIONLINT]
-    old = [hook for hook in found if hook["repo"] == ACTIONLINT_REFUSED["repo"]]
+    old = [
+        hook
+        for hook in found
+        if "actionlint" in str(hook["repo"]) and hook["repo"] != ACTIONLINT
+    ]
     return (
         ([] if ours else [f"no hook is taken from {ACTIONLINT}"])
         + [f"{hook['id']} is still taken from {hook['repo']}" for hook in old]
@@ -396,9 +400,7 @@ def test_the_gate_lints_workflows_with_the_actionlint_fork(
 ) -> None:
     """Section 4's *workflows* bullet: the kjanat fork, pinned by a sha.
 
-    btclib-org/.github#1698 is the decision. Upstream does not parse the
-    `uses: $/...` that zizmor's `self-repository` audit recommends, and
-    the fork does.
+    README section 4 has why (btclib-org/.github#1698).
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -428,6 +430,10 @@ def test_a_gate_on_the_old_actionlint_would_be_reported() -> None:
     assert actionlint_departures([agreeing, ACTIONLINT_REFUSED]) == [old], (
         "the old packaging kept beside the fork is read as agreeing"
     )
+    upstream = {"id": "actionlint", "repo": "https://github.com/rhysd/actionlint"}
+    assert actionlint_departures([agreeing, upstream]) == [
+        "actionlint is still taken from https://github.com/rhysd/actionlint"
+    ], "the upstream hook kept beside the fork is read as agreeing"
 
 
 PYROMA = "pyroma"

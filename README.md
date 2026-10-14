@@ -874,12 +874,11 @@ ci:
   skip: [mypy, actionlint-shellcheck]
 ```
 
-`autofix_prs: false` because a bot committing to a branch is at odds
-with a setup where no workflow token can write; a failing hook is fixed
-by its author. `skip` names mypy, which needs uv, absent on
-pre-commit.ci, and `actionlint-shellcheck`, whose run outlasts
-pre-commit.ci's time limit. No `autoupdate_branch`: the default branch is
-the only branch.
+`autofix_prs: false` because a bot committing to a branch is at odds with
+a setup where no workflow token can write; a failing hook is fixed by its
+author. `skip` names mypy, which needs uv, absent on pre-commit.ci, and
+`actionlint-shellcheck`, whose run outlasts pre-commit.ci's time limit.
+No `autoupdate_branch`: the default branch is the only branch.
 
 ### What the hooks cover
 
@@ -943,9 +942,9 @@ the only branch.
 - **workflows** — `actionlint` and `zizmor`, both at zero findings, both
   required to stay there. actionlint is the `kjanat/actionlint` fork's
   `actionlint-shellcheck`: it parses the `uses: $/...` that zizmor's
-  `self-repository` audit recommends and upstream does not. It costs a
-  Go build in pre-commit. Its `rev` is a sha, so a moved tag cannot
-  change what runs.
+  `self-repository` audit recommends, which upstream does not parse. It
+  costs a Go build in pre-commit. Its `rev` is a sha, so a moved tag
+  cannot change what runs.
 - **Python** — `ruff-check --fix` and `ruff-format`.
 - **docstrings against signatures** — `pydoclint` over the package: the
   `D` family checks that a docstring *exists*, this that it describes
