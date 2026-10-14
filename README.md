@@ -1520,6 +1520,65 @@ requests. What must *not* be aligned is where those tests live or what
 they are called — only which conventions are tested, and that each tree
 says which.
 
+### A refusal carries no secret
+
+An exception holds no secret in its text, its args or an attribute, and
+neither does a repr, a log line or an `assert` message. They reach logs,
+bug reports and CI transcripts, where the user's own key must not.
+Echoing the refused value is the rejected alternative: it helps with a
+typo, and it publishes a key.
+
+**A secret is anything that derives a private key or authenticates a
+caller**: a key in any encoding, an xprv, a seed, a mnemonic or one of
+its words, a passphrase, a nonce, a secret share, a tweak of a private
+key, an rpc password, a cookie or an `Authorization` header. A value
+refused as a public type counts as one. Thirty-three bytes that are not
+a point may be an xprv's `00 || k`, and an argument in the wrong place
+may be a key.
+
+**What a refusal may print about such a value**: its length, its type
+name, the version or prefix field its format defines, of at most 4
+bytes, and the position of a bad character. That field is printed only
+where the value has the length its format gives it and the field holds
+one of the values the format defines: anywhere else it may hold key
+bytes. Apart from that field, and a name quoted as below, a refusal
+prints no byte or character of the value, no checksum and no hash of
+it: a hash confirms a guess at a passphrase. A fingerprint of a public
+key that parsed may be printed.
+
+**Which item failed is said by where it is**: the index in a list, the
+psbt input or output, the map and the key type, the signer. For
+example, `input 2: partial signature 0: public key of 32 bytes`. A
+string refused where a name belongs, such as a network name, a language
+or an option, is the one value a refusal may quote, and only where it
+has at most 16 characters, too short for a key. A mnemonic word or a
+short passphrase passed there by mistake is quoted too: the code cannot
+tell it from a typo. In its own position a mnemonic word is named by its
+index, and a passphrase by its parameter.
+
+**Chaining.** `raise ... from e` is allowed where `e`'s own text keeps
+this rule. An exception that holds the input, such as a `UnicodeError`,
+is neither chained nor left as context: the refusal is raised after the
+`except` block. `from None` is not enough, since it keeps `__context__`
+and only hides it from the traceback. Another program's error text that
+can quote a key, such as Bitcoin Core's descriptor errors, is not
+relayed: its error code is, with the position of the request.
+
+**Reprs and logs.** A class holding a secret leaves it out of its repr
+or prints `...` for it, and a dataclass marks that field
+`field(repr=False)`. Its `str()` holds no secret either: a serializer
+named for its encoding is how a secret is written out. A log line names
+an rpc method and not its parameters, and logs a sensitive option as
+`****`.
+
+**The test.** Every refusal a secret can reach has a test that feeds one
+and passes `assert_secret_free` the exception and each spelling a
+refusal could print: the bytes, the decimal of a scalar, each encoding,
+and a mnemonic word by word. That helper reads the text, the args and the
+attributes of the exception and of every exception it chains, and
+section 14 has it copied into every tree that owes it. A class holding a
+secret has a test that its repr and its `str()` hold none of it.
+
 ## 8. Coverage at 100%
 
 **A tree gates the code it holds against the failure that code has**, and
@@ -1991,8 +2050,10 @@ day and an hour, the repository owns the minute:
 | `vendored-vectors` | Monday | 03 |
 | `bootstrap-dns` | Monday | 04 |
 | `mutation` | Monday | 05 |
+| `qa-assets` | Tuesday | 03 |
 | `fuzz` | Tuesday | 04 |
 | `integration-bitcoind` | Tuesday | 05 |
+| `btcd-oracle` | Wednesday | 01 |
 | `zkp-oracle` | Wednesday | 02 |
 | `integration-hwi` | Wednesday | 03 |
 | `deps-latest` | Wednesday | 04 |
@@ -2130,10 +2191,12 @@ by that row.
 - `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
   `btclib-mnemonics`;
+- `qa-assets` — `btclib`;
 - `fuzz` — `btclib`, `btclib-secp256k1`, `btclib-node`, `btclib-wallet`,
   `btclib-ecc`, `btclib-mnemonics`;
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`,
   `btclib-wallet`;
+- `btcd-oracle` — `btclib`;
 - `zkp-oracle` — `btclib-ecc`;
 - `integration-hwi` — `btclib-wallet`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
@@ -2242,13 +2305,24 @@ and the badge land together.
     times is declined: filing issues only to fill the label is artificial, and
     makes the label worth less to a newcomer.
     `tests/good_first_issue_test.py` reads the dates per tree.
+- **`qa-assets` follows a tree with parsers of its own for the transactions,
+  blocks, scripts and peer-to-peer messages that the fuzzers of Bitcoin Core and
+  rust-bitcoin feed their parsers.** The sentinel replays the `qa-assets`
+  corpora of both for those, and no others, through the tree's parsers. A
+  tree that reads them through another tree's parsers, as `btclib-node` does
+  with `btclib`'s, would replay those parsers again. `btclib-secp256k1` parses
+  no transaction, block, script or message. The corpora grow as those fuzzers
+  run, with no commit in the tree, so a clock asks. A failure is an issue
+  against a parser. btclib-org/btclib#2586 carries the debt until `btclib`
+  schedules it.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
-  between the parser and an adversary choosing the bytes. `btclib` and
-  `btclib-secp256k1` read transactions, scripts and signatures off the wire,
-  `btclib-node` speaks the peer-to-peer protocol, `btclib-wallet` parses
-  PSBTs, output descriptors and BIP32/BIP322 data a counterparty hands it,
-  `btclib-ecc` decodes the DER and BIP340 signatures and the ECIES envelopes
-  a sender writes, and `btclib-mnemonics` decodes the SLIP39 shares their
+  between the parser and an adversary choosing the bytes. `btclib` reads
+  transactions, scripts and signatures off the wire, `btclib-secp256k1` reads
+  signatures, public keys and MuSig2 nonces and partial signatures,
+  `btclib-node` speaks the peer-to-peer protocol, `btclib-wallet` parses PSBTs,
+  output descriptors and BIP32/BIP322 data a counterparty hands it,
+  `btclib-ecc` decodes the DER and BIP340 signatures and the ECIES envelopes a
+  sender writes, and `btclib-mnemonics` decodes the SLIP39 shares their
   holders hand back, a few of whom SLIP39 allows to be compromised;
   `bitcoin-core-rpc` reads an instance its own operator runs, which the property
   does not reach. `btclib-secp256k1`'s targets reach the vendored C on purpose:
@@ -2293,6 +2367,14 @@ and the badge land together.
   says what that file says. The drift arrives from a landing here, so no pull
   request there is the occasion to ask, and asking from this suite would redden
   `main` here for a drift another repository owns.
+- **`btcd-oracle` follows a tree with decoders of its own for what btcd's `wire`
+  package also decodes**: transactions, blocks and peer-to-peer messages. The
+  sentinel reads the tree's fuzz corpora with both and lists every input they
+  read differently that no triaged rule explains. It runs after `fuzz`, whose
+  grown corpora it reads. Each input listed is triaged against Bitcoin Core. A
+  tree that decodes them with `btclib`'s decoders, as `btclib-node` does, would
+  be compared on `btclib`'s again. btclib-org/btclib#2584 carries the debt until
+  `btclib` schedules it.
 - **`zkp-oracle` follows a tree with an implementation of its own to compare.**
   The tree it asks holds the side written in Python; `btclib-secp256k1` is the
   other side, built from its sdist, not a tree the row reaches.
@@ -2578,12 +2660,21 @@ reads it back on each repository.
 `main` is the only branch. Everything reaches it through a pull request,
 the bots' included.
 
-Classic protection carries the required checks with `strict`, one
-approving review, `dismiss_stale_reviews`, linear history, no force
+Classic protection carries the required checks with `strict` **off**,
+one approving review, `dismiss_stale_reviews`, linear history, no force
 pushes, no deletions, `required_conversation_resolution`, and
 `enforce_admins` **off**. `required_signatures` is **off** there too:
 `main-integrity` already enforces it with no bypass actor, so classic's
 own copy of the rule would only duplicate it.
+
+With `strict` on, each landing would leave every other open pull request
+behind, and each would need a rebase, a CI run and a new approval. What
+it buys is that the checks ran on the exact tree that lands, which
+catches two green pull requests that break `main` together. The
+maintainer judges that break too rare to pay that cost for
+(btclib-org/.github#1712), and `main`'s own CI shows it, by section 10's
+`push` trigger. The rejected merge queue keeps the guarantee without the
+rebases, for a second CI run per pull request (btclib-org/.github#1619).
 
 Three rulesets sit beside it, additive — rules aggregate across rulesets
 and classic protection, taking the most restrictive combination:
@@ -2615,10 +2706,7 @@ is what refuses a moved head there.
 Two settings hold the door, not one: the classic review requirement is
 cleared for the maintainer by `enforce_admins: false` *plus* admin, and
 turning `enforce_admins` on would deadlock every solo merge. That setting
-clears the whole of classic protection for that account, `strict`
-included, so being up to date with `main` is a rebase somebody runs and
-not a rule the forge holds: a branch merged behind `main` lands a tree
-nothing has run.
+clears the whole of classic protection for that account.
 
 When patching required checks, use the `checks` array and a JSON body on
 stdin: `contexts` has no field for an app, so sending it silently
@@ -3369,13 +3457,13 @@ A label means what its description says. Who applies and removes it:
        release, without which Dependabot alerts with no version to upgrade to,
        and its text names the release and the commit that fixed it rather than
        the fix the report proposed. Publishing deletes the private fork.
-    1. A week after publication, the advisory has its CVE and is in the
+    1. Six weeks after publication, the advisory has its CVE and is in the
        Advisory Database, whose reviewed entries OSV imports: GitHub states 72
-       hours for each. Until then neither Dependabot nor the audit above warns
-       anybody.
+       hours for each, but its CVE backlog [runs past that](https://github.com/orgs/community/discussions/207039).
+       Until then neither Dependabot nor the audit above warns anybody.
 
   `tests/advisories_test.py` reads the published advisories: the vector, the
-  CWE and the patched version, and past the week the CVE and the database
+  CWE and the patched version, and past the six weeks the CVE and the database
   entry. It fails where it reads no published advisory in the whole
   organization. It reads no draft, which the API shows only to the
   repository's administrators and security managers and to the advisory's
@@ -3683,6 +3771,11 @@ The paths are what that test compares:
   `.github/scripts/generate_sbom.py`: the file itself satisfies the condition,
   as it does `.taplo.toml`'s, the canonical copy being this repository's.
   Section 10 says which tree keeps another.
+- `tests/secret_free/__init__.py` — owed where `SECURITY.md`, since a
+  published package is what a user hands a secret to. It is section 7's
+  *A refusal carries no secret* as a test helper, a package by section
+  7's *Layout and naming*. This repository's copy is the one the others
+  are copied from, and `tests/secret_free_test.py` tests it.
 
 **Verbatim in part**, the file around it being the repository's own and so
 nothing a comparison by path can do: the `ci:` block of

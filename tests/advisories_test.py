@@ -19,8 +19,9 @@ import pytest
 
 from . import ORG, by_hand, gh
 
-# section 12's week after publication
-WINDOW = timedelta(days=7)
+# section 12's six weeks after publication, for GitHub's CVE backlog:
+# https://github.com/orgs/community/discussions/207039
+WINDOW = timedelta(days=42)
 
 
 def unset(advisory: dict[str, Any]) -> list[str]:
@@ -57,7 +58,7 @@ def due(published_at: str, now: datetime, window: timedelta = WINDOW) -> bool:
 
 
 def test_the_checks_can_fail() -> None:
-    """Each field is refused when absent, and the week is a bound."""
+    """Each field is refused when absent, and the window is a bound."""
     whole = {
         "cvss_severities": {
             "cvss_v3": {"vector_string": None},
@@ -75,8 +76,8 @@ def test_the_checks_can_fail() -> None:
     assert unset(bare) == ["CVSS vector", "CWE", "patched version"]
     assert unset({**whole, "vulnerabilities": []}) == ["patched version"]
     now = datetime(2026, 10, 11, 12, tzinfo=UTC)
-    assert due("2026-10-04T11:00:00Z", now)
-    assert not due("2026-10-04T13:00:00Z", now)
+    assert due("2026-08-30T11:00:00Z", now)
+    assert not due("2026-08-30T13:00:00Z", now)
 
 
 @pytest.fixture(scope="session")
@@ -144,7 +145,7 @@ def test_a_published_advisory_has_its_cve_and_its_database_entry(
     repository: str,
     published: dict[str, list[dict[str, Any]]],
 ) -> None:
-    """Past the week, step 4's CVE is assigned and the database has the entry.
+    """Past the window, step 4's CVE is assigned and the database has the entry.
 
     The database is asked for its reviewed advisories, the default type:
     those are what Dependabot alerts on and what OSV imports.

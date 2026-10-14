@@ -47,7 +47,7 @@ the answer the sibling repositories give.
 ```shell
 gh api repos/btclib-org/.github/branches/main/protection \
   --jq '.required_status_checks | {strict, checks: [.checks[].context]}'
-# {"strict":true,"checks":["Lint","Dependency review","Sign-off"]}
+# {"checks":["Lint","Dependency review","Sign-off"],"strict":false}
 ```
 
 The rulesets below enforce the signatures and the review, and [classic
@@ -83,7 +83,7 @@ restores it:
 ```shell
 gh api -X PUT repos/btclib-org/.github/branches/main/protection \
   --input - <<'JSON'
-{"required_status_checks": {"strict": true,
+{"required_status_checks": {"strict": false,
    "checks": [{"context": "Lint", "app_id": 15368},
               {"context": "Dependency review", "app_id": 15368},
               {"context": "Sign-off", "app_id": 15368}]},
@@ -102,9 +102,8 @@ JSON
 possible at all, the ruleset bypass reaching only the ruleset's own rule.
 It exempts an administrator from the required checks as well as from the
 review, so a merge through the maintainer's bypass waits for none of these
-checks, as `CONTRIBUTING.md`'s *Landing it* says. The `strict` above is
-then not what makes the landing tree current;
-[section 11 pairs the two settings and has what does][s11-branch].
+checks, as `CONTRIBUTING.md`'s *Landing it* says. `strict` is off for
+[the reason section 11 gives][s11-branch].
 
 The `checks` array and a JSON body on stdin, never `contexts` and never
 `-f`, and a later change to the list is a `PATCH` of
@@ -446,8 +445,7 @@ turns that answer into a number, twenty concurrent jobs on the free plan,
 shared across every repository of the organization. `lint.yml` and
 `claude-review.yml` are what a pull request here starts, with
 `alignment.yml` and `links.yml` added where the paths their triggers name
-are touched. `CONTRIBUTING.md`'s *The landing queue* is what points here
-for the figure.
+are touched.
 
 Secret scanning's non-provider patterns and validity checks are the
 plan's answer too, and the reading under *Secret scanning and
