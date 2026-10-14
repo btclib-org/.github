@@ -940,8 +940,11 @@ pre-commit.ci does not have — the lint workflow covers it. No
   silently does nothing. The issue pair selects narrowly, both carrying
   `types: [yaml]`, and each goes where `ISSUE_TEMPLATE/` holds it.
 - **workflows** — `actionlint` and `zizmor`, both at zero findings, both
-  required to stay there. actionlint via its Python packaging, the
-  upstream hook's only non-docker id needing a go toolchain.
+  required to stay there. actionlint is the `kjanat/actionlint` fork's
+  `actionlint-shellcheck`: it parses the `uses: $/...` that zizmor's
+  `self-repository` audit recommends and upstream does not. It costs a
+  Go build in pre-commit, so `skip` lists it for pre-commit.ci, and its
+  `rev` is a commit sha with `# frozen: <tag>`.
 - **Python** — `ruff-check --fix` and `ruff-format`.
 - **docstrings against signatures** — `pydoclint` over the package: the
   `D` family checks that a docstring *exists*, this that it describes

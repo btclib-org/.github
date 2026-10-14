@@ -344,6 +344,80 @@ def test_the_gate_runs_mypy(repository: str, trees: dict[str, Path]) -> None:
     )
 
 
+ACTIONLINT = "https://github.com/kjanat/actionlint"
+"""The repository section 4 says the workflow linter is taken from."""
+
+ACTIONLINT_ID = "actionlint-shellcheck"
+"""The hook of `ACTIONLINT` that brings a shellcheck for the `run:` bodies."""
+
+ACTIONLINT_REFUSED = {
+    "id": "actionlint",
+    "repo": "https://github.com/Mateusz-Grzelinski/actionlint-py",
+    "rev": "v1.7.12.25",
+}
+"""The stanza the gates carried before btclib-org/.github#1698.
+
+A literal, for the reason `REFUSED` above is one: the check below is
+green wherever every gate agrees, and a reading that accepted this
+stanza would stay green with nothing measured.
+"""
+
+
+def actionlint_departures(found: list[dict[str, Any]]) -> list[str]:
+    """Say how the hooks of a gate depart from section 4's workflow linter.
+
+    :param found: the hook mappings, as `hooks()` reads them.
+    :returns: one finding per departure, empty where there is none.
+    """
+    ours = [hook for hook in found if hook["repo"] == ACTIONLINT]
+    if not ours:
+        return [f"no hook is taken from {ACTIONLINT}"]
+    return [
+        f"{hook['id']} is pinned at {hook['rev']!r}, not a commit sha"
+        for hook in ours
+        if not PIN.match(str(hook["rev"]))
+    ] + [
+        f"{hook['id']} is the hook, not {ACTIONLINT_ID}"
+        for hook in ours
+        if hook["id"] != ACTIONLINT_ID
+    ]
+
+
+def test_the_gate_lints_workflows_with_the_actionlint_fork(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 4's *workflows* bullet: the kjanat fork, by commit sha.
+
+    btclib-org/.github#1698 is the decision. Upstream does not parse the
+    `uses: $/...` that zizmor's `self-repository` audit recommends, and
+    the fork does.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    found = actionlint_departures(hooks(repository, trees))
+    assert not found, (
+        f"the gate departs from section 4's workflow linter: {found}; "
+        + by_hand(repository, f"grep -n -B1 -A3 'repo: .*actionlint' {CONFIG}")
+    )
+
+
+def test_a_gate_on_the_old_actionlint_would_be_reported() -> None:
+    """The check above reads the packaging it replaced as a departure."""
+    assert actionlint_departures([ACTIONLINT_REFUSED]) == [
+        f"no hook is taken from {ACTIONLINT}"
+    ]
+    assert actionlint_departures(
+        [{"id": "actionlint", "repo": ACTIONLINT, "rev": "v1.17.0"}]
+    ) == [
+        "actionlint is pinned at 'v1.17.0', not a commit sha",
+        f"actionlint is the hook, not {ACTIONLINT_ID}",
+    ]
+    agreeing = {"id": ACTIONLINT_ID, "repo": ACTIONLINT, "rev": "0" * 40}
+    assert actionlint_departures([agreeing]) == []
+
+
 PYROMA = "pyroma"
 """Section 4's packaging hook that reads a distribution's metadata."""
 
