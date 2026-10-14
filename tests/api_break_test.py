@@ -283,7 +283,11 @@ def test_the_answer_reaches_the_label_step() -> None:
 
 
 def test_the_finding_pattern_is_the_one_the_release_check_reads() -> None:
-    """One format of griffe's output, held equal where it is read twice."""
+    """One format of griffe's output, the same text where it is read twice.
+
+    The release check names its groups and this script does not, so the
+    names are the only difference allowed.
+    """
     spec = importlib.util.spec_from_file_location(
         "check_public_api", ROOT / ".github" / "scripts" / "check_public_api.py"
     )
@@ -292,10 +296,8 @@ def test_the_finding_pattern_is_the_one_the_release_check_reads() -> None:
     other = importlib.util.module_from_spec(spec)
     sys.modules["check_public_api"] = other
     spec.loader.exec_module(other)
-    for line in BREAK.splitlines() + ABSENT.splitlines() + BAD_REF.splitlines():
-        assert bool(script._FINDING.fullmatch(line)) == bool(  # noqa: SLF001
-            other._FINDING.fullmatch(line)  # noqa: SLF001
-        )
+    named = re.sub(r"\(\?P<\w+>", "(", other._FINDING.pattern)  # noqa: SLF001
+    assert named == script._FINDING.pattern  # noqa: SLF001
 
 
 def test_both_workflows_pin_the_same_griffe() -> None:
@@ -448,16 +450,56 @@ def test_every_step_is_as_written() -> None:
 def test_the_job_and_the_input_are_as_written() -> None:
     """Everything of the workflow but its steps and its comments."""
     parsed = _parsed()
-    on: dict[str, Any] = parsed.get("on", parsed.get(True)) or {}
     assert parsed["name"] == "reusable-api-break"
-    assert on["workflow_call"]["inputs"]["package"]["required"] is True
-    assert on["workflow_call"]["inputs"]["package"]["type"] == "string"
+    assert parsed.get("on", parsed.get(True)) == {
+        "workflow_call": {
+            "inputs": {
+                "package": {
+                    "description": 'the griffe target, e.g. "btclib" or "btclib_node"',
+                    "required": True,
+                    "type": "string",
+                }
+            }
+        }
+    }
+    assert parsed["permissions"] == {"contents": "read"}
     job = {key: value for key, value in _job().items() if key != "steps"}
+    job["if"] = " ".join(job["if"].split())
     assert job == {
         "name": "Label a pull request that breaks the public API",
-        "if": _job()["if"],
+        "if": (
+            "${{ github.event_name == 'pull_request' && "
+            "github.event.action != 'closed' && "
+            "!github.event.pull_request.draft }}"
+        ),
         "runs-on": "ubuntu-latest",
         "timeout-minutes": 10,
         "continue-on-error": True,
         "permissions": {"contents": "read", "pull-requests": "write"},
     }
+
+
+def _by_path(*args: str) -> subprocess.CompletedProcess[str]:
+    """Run the script as the workflow does, as a program."""
+    return subprocess.run(  # noqa: S603
+        [sys.executable, str(_SCRIPT), *args],
+        capture_output=True,
+        check=False,
+        encoding="utf-8",
+    )
+
+
+def test_run_as_a_program_it_prints_the_answer() -> None:
+    """The entry point exits 0 and prints what `GITHUB_OUTPUT` takes."""
+    ran = _by_path("classify", "1", str(_OUTPUTS / "break.txt"))
+
+    assert ran.returncode == 0
+    assert ran.stdout == "broken=true\n"
+
+
+def test_run_as_a_program_it_warns_of_a_non_answer() -> None:
+    """The label command warns, and exits 0, on an empty answer."""
+    ran = _by_path("label", "", "o/r", "7")
+
+    assert ran.returncode == 0
+    assert ran.stdout.startswith("::warning::")

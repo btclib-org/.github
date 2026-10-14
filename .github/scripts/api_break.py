@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
 
 LABEL = "api-break"
-_FINDING = re.compile(r".+?:\d+: \S+: .*")
+_FINDING = re.compile(r"(.+?):(\d+): (\S+): (.*)")
 _NOT_FOUND = "HTTP 404"
 
 
