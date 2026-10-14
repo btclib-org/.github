@@ -375,6 +375,18 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-wallet",
         ),
     ),
+    (
+        1723,
+        "test_a_baseline_with_the_hex_plugin_filters_frozen_rev_lines",
+        (
+            "bitcoin-core-rpc",
+            "btclib-benchmarks",
+            "btclib-org.github.io",
+            "btclib-secp256k1",
+            "btclib-wallet",
+            "portanode",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
