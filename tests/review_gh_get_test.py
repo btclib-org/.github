@@ -34,6 +34,9 @@ WORKFLOW = ROOT / ".github/workflows/reusable-claude-review.yml"
 # a blob's name: 40 lowercase hex digits
 SHA = "0123456789abcdef0123456789abcdef01234567"
 
+# the script's exit status for an argument it refuses
+REFUSED = 2
+
 BLOB = f"o/r/git/blobs/{SHA}"
 FILE = "o/r/contents/src/a.py"
 
@@ -173,7 +176,7 @@ def test_it_refuses_everything_else_and_does_not_call_gh(
     """Anything but one blob or file path is refused, status 2, `gh` unrun."""
     script, record = gh_get
     done = run(script, *args)
-    assert done.returncode == 2, (done.returncode, done.stderr)
+    assert done.returncode == REFUSED, (done.returncode, done.stderr)
     assert done.stderr.startswith("gh-get: ")
     assert not record.exists()
 
