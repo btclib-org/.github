@@ -489,8 +489,7 @@ def test_a_baseline_with_the_hex_plugin_filters_frozen_rev_lines(
 ) -> None:
     """Section 4's *secrets* bullet: a line filter, not a pragma.
 
-    A frozen `rev:` sha is a public commit id, and `autoupdate` drops a
-    pragma on every bump (btclib-org/.github#1723).
+    The bullet has why (btclib-org/.github#1723).
 
     :param repository: the repository asked about.
     :param trees: the checkouts.

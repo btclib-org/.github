@@ -923,8 +923,9 @@ No `autoupdate_branch`: the default branch is the only branch.
     **The one exception is a line filter for frozen `rev:` lines**, on
     a tree that enables `HexHighEntropyString`: `should_exclude_line`
     in `filters_used`, pattern `^\s*rev: "?[0-9a-f]{40}"?(\s|$)`. The
-    sha is a public commit id, and `autoupdate` drops a
-    `# pragma: allowlist secret` on every bump (btclib-org/.github#1723).
+    sha is a public commit id, and on a line frozen to a tag,
+    `autoupdate` rewrites the comment to `# frozen: <tag>`, dropping a
+    pragma (btclib-org/.github#1723).
 - **spelling** — `codespell` and `typos`, both configured in
   `pyproject.toml`, both skipping vendored vectors: a typo inside an
   upstream vector is part of the vector. `typos` is a `local` hook
@@ -4445,7 +4446,8 @@ No tool checks them.
    written rather than copied, section 14 deciding both per repository.
 1. `.pre-commit-config.yaml`, including the mypy hook section 4's
    criterion chooses and the `pinned-rev` guard; `uv run pre-commit run
-   --all-files` until clean; generate `.secrets.baseline`.
+   --all-files` until clean; generate `.secrets.baseline` and add section 4's
+   `rev:` line filter.
 1. `.vscode/settings.json` and `.vscode/extensions.json`,
    `mypy-type-checker.importStrategy` taking section 13's value for the
    hook the step above chose.
