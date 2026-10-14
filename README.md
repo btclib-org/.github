@@ -2882,9 +2882,9 @@ Bitcoin's sense of the word: the disagreement is with the change itself,
 so no alteration is asked for and none would earn an ack, and what
 answers it is an argument or a closed pull request. `NO VERDICT` is the
 reviewer saying it could not judge, for example because a file would
-not open or the diff could not be read: it is no ack, and it fails the check as a missing
-verdict does. A review that delivers no verdict line is a reading and not
-an unfinished review; `REVIEWING.md` states that distinction.
+not open or the diff could not be read: it is no ack, and it fails the
+check as a missing verdict does. A review that delivers no verdict line
+is a reading and not an unfinished review; `REVIEWING.md` states that distinction.
 
 **The ack of record is posted as a review of type COMMENT**, whichever
 of the four it carries — `gh pr review --comment` — and never as a
