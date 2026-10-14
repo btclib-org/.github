@@ -263,7 +263,9 @@ What this is not:
   is the author's reading performed a second time, which is what running
   it is meant to replace; it can carry a finding, and it is not reported
   as a run. What the verdict is, where the run was not made, is *The
-  verdict*'s `Not checked:` line.
+  verdict*'s `Not checked:` line. A command that only reads a blob or a
+  file from GitHub can be run by the bot, with the script its prompt
+  names, so it is run rather than marked not run.
 
 ## The gates are the evidence
 
@@ -458,6 +460,11 @@ branch's history.
 - Do not re-open settled ground, and do not introduce a preference late.
   A new blocking finding at round three is legitimate only if the new
   commits introduced it, or if leaving it would be wrong on `main`.
+- **A reviewer with no memory of the earlier rounds reads them first**:
+  the bot reads its own reviews on the pull request, and the sha each
+  names. It raises a non-blocking point only on a line the commits after
+  that sha touched, or on one that would be wrong on `main`; where it
+  cannot tell which lines those are, it raises none.
 - Where the author declined something still considered blocking, say so
   once, with the argument. If they hold their position, do not spend a
   fourth round: withhold the ack and put both positions to a human.

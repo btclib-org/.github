@@ -67,6 +67,27 @@ name: reusable-claude-review
 # denying `git log` itself refuses it. A write method on `gh api` is
 # refused by the token's `contents: read`, below.
 #
+# The review reads a blob or a file of any repository through a script,
+# `gh-get`, and has no `Bash(gh api ...)` rule (btclib-org/.github#1692).
+# A rule's `*` cannot stop at the path: `Bash(gh api repos/*/git/blobs/*)`
+# admits `-X POST`, `--method POST`, `-f` and `--input` written after it,
+# and `gh api --method GET <path> --method POST` sends a POST, the later
+# flag winning. So the allow names the script, as it does `post-review`,
+# and the script checks its one argument, `<owner>/<repo>/git/blobs/<40
+# hex digits>` or `<owner>/<repo>/contents/<path>[?ref=<ref>]`, and runs
+# `gh api --method GET -- "repos/$1"`: gh reads what follows `--` as an
+# argument, so a path is never a flag. The script is mode 555 in the
+# directory of `post-review`, and `tests/review_gh_get_test.py` runs it.
+#
+# Measured with Claude Code 2.1.299 and stand-ins for `gh` and the script.
+# The allow admitted the script with a blob, with a quoted `?ref=` path
+# and with a trailing `-X POST`, `--method POST` or `-f`, and the script
+# refused the three, so `gh` never ran. It refused a bare `gh api`,
+# `gh api -X POST`, the script followed by `; gh api -X POST ...`, the
+# script with `$(...)` as its argument and the script with a `>`
+# redirect. Against the real API the script returned the raw blob and the
+# raw file.
+#
 # Neither of the first two values reaches a `run:` block. extra-prompt
 # is text handed to a model and extra-allowed-tools is an argument of
 # the action's own, which is why a caller's string is taken as a string
@@ -341,11 +362,12 @@ jobs:
           git -C "$DIR" fetch -q --depth 1 --end-of-options \
             https://github.com/bitcoin/bitcoin.git "$REF"
           git -C "$DIR" checkout -q FETCH_HEAD
-      # the script the review posts through, for the reason the header
-      # gives. The number and the repository reach this step through the
-      # environment rather than the `run:` text, and the step writes them
-      # into the script
-      - name: Write the script the review posts through
+      # the scripts the review posts through and reads through, for the
+      # reasons the header gives. The number and the repository reach
+      # this step through the environment rather than the `run:` text,
+      # and the step writes them into the first script. The second takes
+      # nothing from the environment: its heredoc has a quoted delimiter
+      - name: Write the scripts the review posts and reads through
         env:
           NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
@@ -354,7 +376,61 @@ jobs:
           mkdir -p "$DIR"
           printf '#!/bin/sh\nexec gh pr review %s -R %s --comment --body-file -\n' \
             "$NUMBER" "$REPO" > "$DIR/post-review"
-          chmod 555 "$DIR/post-review" "$DIR"
+          cat > "$DIR/gh-get" <<'SCRIPT'
+          #!/bin/sh
+          # one argument: <owner>/<repo>/git/blobs/<40 hex> or
+          # <owner>/<repo>/contents/<path>[?ref=<ref>]
+          refuse() { echo "gh-get: $1" >&2; exit 2; }
+          [ "$#" -eq 1 ] || refuse "takes exactly one argument"
+          arg=$1
+          case $arg in
+            -*) refuse "a leading hyphen" ;;
+            *..*) refuse "two dots in a row" ;;
+            *[!A-Za-z0-9._/?=-]*) refuse "a character outside the allowed set" ;;
+          esac
+          owner=${arg%%/*}
+          rest=${arg#*/}
+          repo=${rest%%/*}
+          rest=${rest#*/}
+          case $owner/$repo in
+            /*|*/|*/*/*|.|*/.) refuse "not <owner>/<repo>" ;;
+          esac
+          case $owner$repo in
+            *[?=]*) refuse "not <owner>/<repo>" ;;
+          esac
+          case $rest in
+            git/blobs/*)
+              sha=${rest#git/blobs/}
+              [ "${#sha}" -eq 40 ] || refuse "a blob is named by 40 hex digits"
+              case $sha in
+                *[!0-9a-f]*) refuse "a blob is named by 40 hex digits" ;;
+              esac
+              ;;
+            contents/?*)
+              path=${rest#contents/}
+              case $path in
+                *\?*)
+                  query=${path#*\?}
+                  path=${path%%\?*}
+                  case $query in
+                    ref=?*) ;;
+                    *) refuse "the only query is ?ref=<ref>" ;;
+                  esac
+                  case ${query#ref=} in
+                    *[?=]*) refuse "the only query is ?ref=<ref>" ;;
+                  esac
+                  ;;
+              esac
+              [ -n "$path" ] || refuse "an empty path"
+              case $path in
+                *[?=]*) refuse "a path has no ? or =" ;;
+              esac
+              ;;
+            *) refuse "only git/blobs and contents" ;;
+          esac
+          exec gh api --method GET -H 'Accept: application/vnd.github.raw+json' -- "repos/$arg"
+          SCRIPT
+          chmod 555 "$DIR/post-review" "$DIR/gh-get" "$DIR"
       - name: Review against REVIEWING.md
         id: review
         uses: anthropics/claude-code-action@97c53473391bff1901034d4b454b5bac7ab7a029 # v1.0.239
@@ -457,6 +533,22 @@ jobs:
             Do not run the gates; they run beside you on the same sha.
             Do not file issues.
 
+            Where a command in the pull request reads a blob or a file
+            from GitHub, run it with this script, which does a GET and
+            nothing else, takes one argument and refuses any other:
+
+            ${{ runner.temp }}/claude-review/gh-get <owner>/<repo>/git/blobs/<40 hex digits>
+            ${{ runner.temp }}/claude-review/gh-get <owner>/<repo>/contents/<path>[?ref=<ref>]
+
+            It prints the content as it is. `gh api` is refused.
+
+            Read your own earlier reviews on this pull request, those of
+            claude[bot], with `gh pr view <number> --json reviews`, and
+            read the sha each names. Raise a non-blocking point only on
+            a line the commits after that sha touched, or on one that
+            would be wrong on `main`. Where you cannot tell which lines
+            those are, raise no non-blocking point.
+
             You have no interpreter, so a script or a query in the diff
             cannot be run. Run a pattern against the tree with Grep.
             Where REVIEWING.md asks for a run you cannot make, the
@@ -534,6 +626,7 @@ jobs:
             "Bash(gh pr view:*)"
             "Bash(gh pr diff:*)"
             "Bash(gh issue view:*)"
+            "Bash(${{ runner.temp }}/claude-review/gh-get:*)"
             "Read(~/.claude/projects/**)"
             "Grep(./**)"
             "Glob(./**)"
