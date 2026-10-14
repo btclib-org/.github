@@ -1,0 +1,122 @@
+---
+name: reusable-api-break
+
+# The pull-request counterpart of reusable-public-api.yml: its griffe
+# walk against the pull request's base commit, the answer a label,
+# `api-break` (btclib-org/.github#1674). README section 12 has why, and
+# what a fork's pull request gets. The job is no required check, so no
+# merge waits on it.
+#
+# One input, the package griffe walks, with no default, for the reason
+# reusable-public-api.yml gives. The trigger, its types and the
+# concurrency group stay in the caller, section 10 having them literal.
+
+on:
+  workflow_call:
+    inputs:
+      package:
+        description: the griffe target, e.g. "btclib" or "btclib_node"
+        required: true
+        type: string
+
+# least privilege for the GITHUB_TOKEN: everything running in a job
+# (actions, dependencies, griffe itself) can read the token, so the
+# workflow default must not be able to write. The one job below elevates
+# it for the label alone
+permissions:
+  contents: read
+
+jobs:
+  api-break:
+    # the name the check context is keyed by, after the calling job's
+    # own
+    name: Label a pull request that breaks the public API
+    # a draft is work its author is not asking anyone to read yet, and a
+    # closed pull request has stopped taking changes the label would be
+    # about
+    if: >-
+      ${{ github.event_name == 'pull_request'
+          && github.event.action != 'closed'
+          && !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # a step that is red anyway, an action that cannot be fetched say,
+    # leaves the run green with this job's check run red. The compare
+    # step guards itself with `|| status=$?`, and api_break.py exits 0
+    continue-on-error: true
+    permissions:
+      contents: read
+      pull-requests: write # the label; read-only on a fork
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # the base commit has to be reachable for griffe to walk it
+          fetch-depth: 0
+      # caching off: the job installs one pinned package, griffe, and
+      # setup-uv's default, `auto`, saves uv's cache after a successful
+      # pull_request run, a cache nothing here needs
+      - name: Setup uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: false
+      # the script that reads griffe's answer is served from this
+      # repository, as reusable-public-api.yml serves its own
+      - name: Check out the script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: btclib-org/.github
+          ref: main
+          path: standard
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+      # griffe's version and interpreter are named for the reason
+      # reusable-public-api.yml gives, and are the same there. -X keeps
+      # griffe from importing the checkout's code where it cannot read
+      # it as source
+      - name: Compare the public API with the base
+        id: compare
+        env:
+          PACKAGE: ${{ inputs.package }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          findings="$RUNNER_TEMP/griffe-findings.txt"
+          status=0
+          uvx --quiet --python 3.15 griffe==2.2.0 check "$PACKAGE" -s . -s src \
+            -a "$BASE_SHA" -f oneline -X > "$findings" 2>&1 || status=$?
+          echo "findings=$findings" >> "$GITHUB_OUTPUT"
+          uv run --no-project --python 3.15 \
+            standard/.github/scripts/api_break.py classify "$status" "$findings" \
+            >> "$GITHUB_OUTPUT"
+      - name: Warn that the label is left as it is
+        if: steps.compare.outputs.broken == 'unknown'
+        env:
+          FINDINGS: ${{ steps.compare.outputs.findings }}
+        run: |
+          cat "$FINDINGS"
+          echo "::warning::griffe did not compare; the label stays as it is"
+      - name: Report the finding
+        if: steps.compare.outputs.broken == 'true'
+        env:
+          FINDINGS: ${{ steps.compare.outputs.findings }}
+        run: |
+          {
+            echo "### The public API changes against the base"
+            echo
+            echo '```text'
+            cat "$FINDINGS"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Set the label
+        if: >-
+          steps.compare.outputs.broken != 'unknown'
+          && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BROKEN: ${{ steps.compare.outputs.broken }}
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
+        run: |
+          uv run --no-project --python 3.15 \
+            standard/.github/scripts/api_break.py label \
+            "$BROKEN" "$GITHUB_REPOSITORY" "$PULL_REQUEST"
