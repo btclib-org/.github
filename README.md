@@ -3370,8 +3370,7 @@ A label means what its description says. Who applies and removes it:
        the fix the report proposed. Publishing deletes the private fork.
     1. Six weeks after publication, the advisory has its CVE and is in the
        Advisory Database, whose reviewed entries OSV imports: GitHub states 72
-       hours for each, but its CVE backlog runs past that
-       ([GitHub community discussion](https://github.com/orgs/community/discussions/207039)).
+       hours for each, but its CVE backlog [runs past that](https://github.com/orgs/community/discussions/207039).
        Until then neither Dependabot nor the audit above warns anybody.
 
   `tests/advisories_test.py` reads the published advisories: the vector, the
