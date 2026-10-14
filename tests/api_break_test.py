@@ -481,7 +481,7 @@ def test_the_job_and_the_input_are_as_written() -> None:
 
 def _by_path(*args: str) -> subprocess.CompletedProcess[str]:
     """Run the script as the workflow does, as a program."""
-    return subprocess.run(  # noqa: S603
+    return subprocess.run(
         [sys.executable, str(_SCRIPT), *args],
         capture_output=True,
         check=False,
