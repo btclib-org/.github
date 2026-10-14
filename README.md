@@ -920,12 +920,22 @@ No `autoupdate_branch`: the default branch is the only branch.
   somebody has read. The two entropy plugins stay off where the vectors
   are hex strings; not gitleaks, whose hook ids all pass `--staged`.
 
-    **The one exception is a line filter for frozen `rev:` lines**, on
+    **The first exception is a line filter for frozen `rev:` lines**, on
     a tree that enables `HexHighEntropyString`: `should_exclude_line`
     in `filters_used`, pattern `^\s*rev: "?[0-9a-f]{40}"?(\s|$)`. The
     sha is a public commit id, and on a line frozen to a tag,
     `autoupdate` rewrites the comment to `# frozen: <tag>`, dropping a
     pragma (btclib-org/.github#1723).
+
+    **The second is btclib-secp256k1's file filter**,
+    `should_exclude_file` in `filters_used`, pattern
+    `^(\.secrets\..*baseline|tests/.*\.(csv|json))$`. A second
+    `detect-secrets` hook scans the vector files, `tests/**/*.csv` and
+    `.json`, against `.secrets.vectors.baseline` with the entropy
+    plugins off, so they stay watched. The filter keeps them out of the
+    entropy-on baseline, where every vector would read as a secret, and
+    keeps out the two baselines, which are hashes
+    (btclib-org/btclib-secp256k1#1176).
 - **spelling** — `codespell` and `typos`, both configured in
   `pyproject.toml`, both skipping vendored vectors: a typo inside an
   upstream vector is part of the vector. `typos` is a `local` hook
