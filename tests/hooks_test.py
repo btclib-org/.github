@@ -161,9 +161,10 @@ branch, which is why section 4 leaves `.github`'s own copy `local`.
 PIN = re.compile(r"^[0-9a-f]{40}$")
 """The `rev:` shape section 4 asks of a tree taking that hook.
 
-A commit and not a tag, this repository cutting none, and forty hex
-characters is what `pinned-rev` accepts and what `autoupdate` moves by
-`git rev-parse FETCH_HEAD`.
+A sha and not a tag name: a commit where the hook repository cuts no
+tag, the annotated tag's own object where `autoupdate --freeze` writes
+one, as for `ACTIONLINT`. Forty hex characters is what `pinned-rev`
+accepts and what `autoupdate` moves by `git rev-parse FETCH_HEAD`.
 """
 
 COUNT = "--grandfathered"
@@ -373,7 +374,7 @@ def actionlint_departures(found: list[dict[str, Any]]) -> list[str]:
     if not ours:
         return [f"no hook is taken from {ACTIONLINT}"]
     return [
-        f"{hook['id']} is pinned at {hook['rev']!r}, not a commit sha"
+        f"{hook['id']} is pinned at {hook['rev']!r}, not a sha"
         for hook in ours
         if not PIN.match(str(hook["rev"]))
     ] + [
@@ -387,7 +388,7 @@ def test_the_gate_lints_workflows_with_the_actionlint_fork(
     repository: str,
     trees: dict[str, Path],
 ) -> None:
-    """Section 4's *workflows* bullet: the kjanat fork, by commit sha.
+    """Section 4's *workflows* bullet: the kjanat fork, by its tag's sha.
 
     btclib-org/.github#1698 is the decision. Upstream does not parse the
     `uses: $/...` that zizmor's `self-repository` audit recommends, and
@@ -411,7 +412,7 @@ def test_a_gate_on_the_old_actionlint_would_be_reported() -> None:
     assert actionlint_departures(
         [{"id": "actionlint", "repo": ACTIONLINT, "rev": "v1.17.0"}]
     ) == [
-        "actionlint is pinned at 'v1.17.0', not a commit sha",
+        "actionlint is pinned at 'v1.17.0', not a sha",
         f"actionlint is the hook, not {ACTIONLINT_ID}",
     ]
     agreeing = {"id": ACTIONLINT_ID, "repo": ACTIONLINT, "rev": "0" * 40}

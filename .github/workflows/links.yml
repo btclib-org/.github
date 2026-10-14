@@ -71,8 +71,8 @@ jobs:
   # the job, its flags and its pins are reusable-links.yml's, and what is
   # this tree's is the paths: every markdown file it tracks, spelled as
   # section 10 spells it.
-  # By path and not zizmor's `$/` self-repository form, which the
-  # actionlint hook here rejects as a malformed call
+  # By path and not zizmor's `$/` self-repository form; zizmor's finding
+  # is declined on the line below (btclib-org/.github#1144)
   links:
     uses: ./.github/workflows/reusable-links.yml # zizmor: ignore[self-repository]
     with:

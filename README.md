@@ -871,13 +871,14 @@ ci:
   autofix_prs: false
   autoupdate_commit_msg: "Update the pinned pre-commit hook revisions"
   autoupdate_schedule: weekly
-  skip: [mypy]
+  skip: [mypy, actionlint-shellcheck]
 ```
 
 `autofix_prs: false` because a bot committing to a branch is at odds
 with a setup where no workflow token can write; a failing hook is fixed
-by its author. `skip: [mypy]` because that hook shells out to uv, which
-pre-commit.ci does not have — the lint workflow covers it. No
+by its author. `skip` lists what pre-commit.ci cannot run, the lint
+workflow covering it: mypy shells out to uv, which it lacks, and
+`actionlint-shellcheck`'s Go build runs past its time limit. No
 `autoupdate_branch`: the default branch is the only branch.
 
 ### What the hooks cover
@@ -943,8 +944,8 @@ pre-commit.ci does not have — the lint workflow covers it. No
   required to stay there. actionlint is the `kjanat/actionlint` fork's
   `actionlint-shellcheck`: it parses the `uses: $/...` that zizmor's
   `self-repository` audit recommends and upstream does not. It costs a
-  Go build in pre-commit, so `skip` lists it for pre-commit.ci, and its
-  `rev` is a commit sha with `# frozen: <tag>`.
+  Go build in pre-commit. Its `rev` is the annotated tag's sha with
+  `# frozen: <tag>`, so a moved tag cannot change what runs.
 - **Python** — `ruff-check --fix` and `ruff-format`.
 - **docstrings against signatures** — `pydoclint` over the package: the
   `D` family checks that a docstring *exists*, this that it describes
