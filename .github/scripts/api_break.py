@@ -97,7 +97,9 @@ def label(
     """
 
     def default(argv: Sequence[str]) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(argv, capture_output=True, check=False, encoding="utf-8")
+        return subprocess.run(  # noqa: S603
+            argv, capture_output=True, check=False, encoding="utf-8"
+        )
 
     execute = run or default
     warnings = []
