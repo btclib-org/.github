@@ -28,11 +28,11 @@ from .workflows_test import steps
 if TYPE_CHECKING:
     from pathlib import Path
 
+# the reusable review, which holds the script and the allow list
 WORKFLOW = ROOT / ".github/workflows/reusable-claude-review.yml"
-"""The reusable review, which holds the script and the allow list."""
 
+# a blob's name: 40 lowercase hex digits
 SHA = "0123456789abcdef0123456789abcdef01234567"
-"""A blob's name: 40 lowercase hex digits."""
 
 BLOB = f"o/r/git/blobs/{SHA}"
 FILE = "o/r/contents/src/a.py"
@@ -44,11 +44,9 @@ def script_text() -> str:
     :returns: the body of the heredoc.
     """
     (run,) = [
-        step["run"]
-        for step in steps(WORKFLOW)
-        if "<<'SCRIPT'" in step.get("run", "")
+        step["run"] for step in steps(WORKFLOW) if "<<'SCRIPT'" in step.get("run", "")
     ]
-    body = run.split("<<'SCRIPT'\n", 1)[1]
+    body: str = run.split("<<'SCRIPT'\n", 1)[1]
     return body.split("\nSCRIPT\n", 1)[0] + "\n"
 
 
@@ -79,10 +77,10 @@ def run(script: Path, *args: str) -> subprocess.CompletedProcess[str]:
     :returns: the finished process.
     """
     env = {**os.environ, "PATH": f"{script.parent}:{os.environ['PATH']}"}
-    return subprocess.run(  # noqa: S603
+    return subprocess.run(
         ["/bin/sh", str(script), *args],
         capture_output=True,
-        text=True,
+        encoding="utf-8",
         check=False,
         env=env,
     )
@@ -95,8 +93,10 @@ def run(script: Path, *args: str) -> subprocess.CompletedProcess[str]:
         FILE,
         "btclib-org/.github/contents/.github/workflows/test.yml",
         "o/r/contents/README.md?ref=main",
-        "C2SP/wycheproof/contents/testvectors_v1/ecdsa_secp256k1_sha256_test.json"
-        "?ref=0123456789abcdef",
+        (
+            "C2SP/wycheproof/contents/testvectors_v1/ecdsa_secp256k1_sha256_test.json"
+            "?ref=0123456789abcdef"
+        ),
         "a-b/c.d_e/contents/x/y-z.txt?ref=refs/heads/a-b",
     ],
 )
@@ -201,4 +201,3 @@ def test_the_allow_list_admits_the_script_and_no_bare_gh_api() -> None:
     words = allow_list()
     assert "Bash(${{ runner.temp }}/claude-review/gh-get:*)" in words
     assert not [word for word in words if "gh api" in word]
-

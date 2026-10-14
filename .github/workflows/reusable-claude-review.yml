@@ -393,7 +393,7 @@ jobs:
           repo=${rest%%/*}
           rest=${rest#*/}
           case $owner/$repo in
-            /*|*/|*/*/*|.|*/.) refuse "not <owner>/<repo>" ;;
+            /*|*/|*/*/*|./*|*/.) refuse "not <owner>/<repo>" ;;
           esac
           case $owner$repo in
             *[?=]*) refuse "not <owner>/<repo>" ;;
