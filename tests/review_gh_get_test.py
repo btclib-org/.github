@@ -170,7 +170,7 @@ def test_it_refuses_everything_else_and_does_not_call_gh(
     gh_get: tuple[Path, Path],
     args: list[str],
 ) -> None:
-    """Anything but one blob or file path is refused with status 2, `gh` unrun."""
+    """Anything but one blob or file path is refused, status 2, `gh` unrun."""
     script, record = gh_get
     done = run(script, *args)
     assert done.returncode == 2, (done.returncode, done.stderr)
