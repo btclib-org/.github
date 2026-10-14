@@ -38,6 +38,9 @@ REUSABLE = "reusable-links.yml"
 LOCAL = f"./.github/workflows/{REUSABLE}"
 """A call to `REUSABLE` by path, which runs the calling tree's own copy."""
 
+SELF_REPOSITORY = f"$/.github/workflows/{REUSABLE}"
+"""`LOCAL` in the self-repository form zizmor recommends."""
+
 REMOTE = f"{ORG}/{SELF}/.github/workflows/{REUSABLE}@main"
 """A call to this repository's `REUSABLE`, at section 10's `@main`."""
 
@@ -103,7 +106,9 @@ def lychee(
     for job in (document(workflow).get("jobs") or {}).values():
         if not isinstance(job, dict):
             continue
-        owner = {LOCAL: repository, REMOTE: SELF}.get(job.get("uses", ""))
+        owner = {LOCAL: repository, SELF_REPOSITORY: repository, REMOTE: SELF}.get(
+            job.get("uses", "")
+        )
         if owner is None:
             found.extend(
                 Call(step, workflow, repository, "")
@@ -167,9 +172,10 @@ def test_a_call_is_read_from_the_tree_it_names(tmp_path: Path) -> None:
         "docs",
         "docs",
     )
-    (sibling / "links.yml").write_text(call.format(LOCAL), encoding="utf-8")
-    with pytest.raises(LookupError, match="sibling has none"):
-        lychee("sibling", trees)
+    for local in (LOCAL, SELF_REPOSITORY):
+        (sibling / "links.yml").write_text(call.format(local), encoding="utf-8")
+        with pytest.raises(LookupError, match="sibling has none"):
+            lychee("sibling", trees)
 
 
 def arguments(step: dict[str, Any]) -> list[str]:

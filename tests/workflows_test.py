@@ -37,11 +37,12 @@ pytestmark = pytest.mark.integration
 PINNED = re.compile(r"@[0-9a-f]{40}$")
 """Forty hex digits after the `@`, which is what a tag is not."""
 
-LOCAL = "./"
-"""A `uses:` into this tree, which has no revision to pin.
+LOCAL = ("./", "$/")
+"""The two spellings of a `uses:` into this tree, which has no revision to pin.
 
-A composite action or a reusable workflow called by path runs at the
-calling commit, so there is nothing its owner could move.
+`./` is the path form and `$/` the self-repository form zizmor
+recommends. A composite action or a reusable workflow called either way
+runs at the calling commit, so there is nothing its owner could move.
 """
 
 REUSABLE = re.compile(
@@ -170,8 +171,8 @@ def callee(
 ) -> tuple[str, Path] | None:
     """Resolve a job's `uses:` to its owner and the workflow file it calls.
 
-    A `./`-path resolves inside the calling tree, and its owner is the
-    calling repository itself. A remote call resolves through `trees`,
+    A `./` or `$/` path resolves inside the calling tree, and its owner
+    is the calling repository itself. A remote call resolves through `trees`,
     which holds a checkout of every repository this suite fetched, so a
     caller in one tree and a callee declared in another are one lookup
     apart -- the half no single checkout can do, and the reason this cell
@@ -189,7 +190,8 @@ def callee(
     """
     if value.startswith(LOCAL):
         owner = repository
-        target = trees[repository] / value[len(LOCAL) :]
+        prefix = next(prefix for prefix in LOCAL if value.startswith(prefix))
+        target = trees[repository] / value[len(prefix) :]
     else:
         found = REMOTE_CALL.match(value)
         if found is None or found["owner"] != ORG or found["repo"] not in trees:
@@ -208,6 +210,27 @@ def declared_outputs(workflow: Path) -> set[str]:
     call = triggers(workflow).get("workflow_call")
     given = call.get("outputs") if isinstance(call, dict) else None
     return set(given) if isinstance(given, dict) else set()
+
+
+def test_both_local_spellings_are_local_calls(tmp_path: Path) -> None:
+    """`./` and `$/` resolve alike, are not unpinned, and make a call.
+
+    A planted tree whose `called.yml` is called by `caller.yml`, once by
+    each spelling.
+
+    :param tmp_path: where the tree is planted.
+    """
+    workflows_dir = tmp_path / ".github" / "workflows"
+    workflows_dir.mkdir(parents=True)
+    called = workflows_dir / "called.yml"
+    called.write_text("on: workflow_call\n", encoding="utf-8")
+    for prefix in ("./", "$/"):
+        value = f"{prefix}.github/workflows/called.yml"
+        assert callee(value, "tree", {"tree": tmp_path}) == ("tree", called)
+        assert not unpinned(value)
+        caller = f"jobs:\n  call:\n    uses: {value}\n"
+        (workflows_dir / "caller.yml").write_text(caller, encoding="utf-8")
+        assert calls(tmp_path, "called.yml")
 
 
 def test_a_read_output_is_declared_by_its_callee(
@@ -297,6 +320,18 @@ def test_no_step_passes_frozen(repository: str, trees: dict[str, Path]) -> None:
     )
 
 
+def unpinned(value: str) -> bool:
+    """Say whether a `uses:` value breaks section 10's pin rule.
+
+    :param value: a job's or step's `uses:` value.
+    :returns: False for a path into this tree, a commit pin, or a call
+        `REUSABLE` matches.
+    """
+    return not (
+        value.startswith(LOCAL) or PINNED.search(value) or REUSABLE.match(value)
+    )
+
+
 def test_every_action_is_pinned_to_a_commit(
     repository: str,
     trees: dict[str, Path],
@@ -311,15 +346,13 @@ def test_every_action_is_pinned_to_a_commit(
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    unpinned = [
+    found = [
         f"{workflow.name}: {value}"
         for workflow in gated(repository, trees)
         for value in uses(workflow)
-        if not value.startswith(LOCAL)
-        and not PINNED.search(value)
-        and not REUSABLE.match(value)
+        if unpinned(value)
     ]
-    assert not unpinned, f"actions not pinned to a commit: {unpinned}; " + by_hand(
+    assert not found, f"actions not pinned to a commit: {found}; " + by_hand(
         repository,
         r"grep -hoE 'uses: [^ ]+' .github/workflows/*.yml | grep -v '@[0-9a-f]\{40\}'",
     )
@@ -757,9 +790,9 @@ def calls(root: Path, name: str) -> bool:
     :param name: the called file's own name, `test.yml` and the like.
     :returns: whether a job of any workflow of the tree `uses:` it.
     """
-    target = f"{LOCAL}.github/workflows/{name}"
+    targets = {f"{prefix}.github/workflows/{name}" for prefix in LOCAL}
     return any(
-        job.get("uses") == target
+        job.get("uses") in targets
         for workflow in workflows(root)
         for job in (document(workflow).get("jobs") or {}).values()
         if isinstance(job, dict)
