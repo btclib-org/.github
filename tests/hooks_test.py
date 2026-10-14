@@ -373,17 +373,21 @@ def actionlint_departures(found: list[dict[str, Any]]) -> list[str]:
     :returns: one finding per departure, empty where there is none.
     """
     ours = [hook for hook in found if hook["repo"] == ACTIONLINT]
-    if not ours:
-        return [f"no hook is taken from {ACTIONLINT}"]
-    return [
-        f"{hook['id']} is pinned at {hook['rev']!r}, not a sha"
-        for hook in ours
-        if not PIN.match(str(hook["rev"]))
-    ] + [
-        f"{hook['id']} is the hook, not {ACTIONLINT_ID}"
-        for hook in ours
-        if hook["id"] != ACTIONLINT_ID
-    ]
+    old = [hook for hook in found if hook["repo"] == ACTIONLINT_REFUSED["repo"]]
+    return (
+        ([] if ours else [f"no hook is taken from {ACTIONLINT}"])
+        + [f"{hook['id']} is still taken from {hook['repo']}" for hook in old]
+        + [
+            f"{hook['id']} is pinned at {hook['rev']!r}, not a sha"
+            for hook in ours
+            if not PIN.match(str(hook["rev"]))
+        ]
+        + [
+            f"{hook['id']} is the hook, not {ACTIONLINT_ID}"
+            for hook in ours
+            if hook["id"] != ACTIONLINT_ID
+        ]
+    )
 
 
 def test_the_gate_lints_workflows_with_the_actionlint_fork(
@@ -408,8 +412,10 @@ def test_the_gate_lints_workflows_with_the_actionlint_fork(
 
 def test_a_gate_on_the_old_actionlint_would_be_reported() -> None:
     """The check above reads the packaging it replaced as a departure."""
+    old = f"actionlint is still taken from {ACTIONLINT_REFUSED['repo']}"
     assert actionlint_departures([ACTIONLINT_REFUSED]) == [
-        f"no hook is taken from {ACTIONLINT}"
+        f"no hook is taken from {ACTIONLINT}",
+        old,
     ]
     assert actionlint_departures(
         [{"id": "actionlint", "repo": ACTIONLINT, "rev": "v1.17.0"}]
@@ -419,6 +425,9 @@ def test_a_gate_on_the_old_actionlint_would_be_reported() -> None:
     ]
     agreeing = {"id": ACTIONLINT_ID, "repo": ACTIONLINT, "rev": "0" * 40}
     assert actionlint_departures([agreeing]) == []
+    assert actionlint_departures([agreeing, ACTIONLINT_REFUSED]) == [old], (
+        "the old packaging kept beside the fork is read as agreeing"
+    )
 
 
 PYROMA = "pyroma"

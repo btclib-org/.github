@@ -170,9 +170,8 @@ def callee(
 ) -> tuple[str, Path] | None:
     """Resolve a job's `uses:` to its owner and the workflow file it calls.
 
-    A `./`-path resolves inside the calling tree -- a shape
-    `actionlint` types, with `$/` -- and its owner is the calling
-    repository itself. A remote call resolves through `trees`, which holds a
+    A `./`-path resolves inside the calling tree, and its owner is the
+    calling repository itself. A remote call resolves through `trees`, which holds a
     checkout of every repository this suite fetched, so a caller in one
     tree and a callee declared in another are one lookup apart -- the
     half no single checkout can do, and the reason this cell lives in
