@@ -342,6 +342,10 @@ def test_the_label_is_owed_by_the_publishing_trees_alone() -> None:
 
 CHECKOUT = "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
 SETUP_UV = "astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7"
+# Every step of the job, as written: its condition, its environment and
+# each token of its command, so that no line can change without a test
+# saying so. Whitespace is normalized, a command's lines read as one,
+# a backslash continuation included.
 STEPS: list[dict[str, Any]] = [
     {
         "name": "Checkout code",
@@ -423,17 +427,14 @@ STEPS: list[dict[str, Any]] = [
         ),
     },
 ]
-"""Every step of the job, as written: its condition, its environment and
-each token of its command, so that no line can change without a test
-saying so. Whitespace is normalized, a command's lines read as one,
-a backslash continuation included."""
 
 
 def _squeezed(step: dict[str, Any]) -> dict[str, Any]:
     """Return the step with its `if` and `run` on one line each."""
     return {
         key: " ".join(value.replace("\\\n", " ").split())
-        if key in {"if", "run"} else value
+        if key in {"if", "run"}
+        else value
         for key, value in step.items()
     }
 
@@ -447,7 +448,7 @@ def test_every_step_is_as_written() -> None:
 def test_the_job_and_the_input_are_as_written() -> None:
     """Everything of the workflow but its steps and its comments."""
     parsed = _parsed()
-    on: dict[str, Any] = parsed.get("on", parsed.get(True))
+    on: dict[str, Any] = parsed.get("on", parsed.get(True)) or {}
     assert parsed["name"] == "reusable-api-break"
     assert on["workflow_call"]["inputs"]["package"]["required"] is True
     assert on["workflow_call"]["inputs"]["package"]["type"] == "string"
