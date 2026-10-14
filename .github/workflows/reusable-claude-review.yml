@@ -540,7 +540,8 @@ jobs:
             ${{ runner.temp }}/claude-review/gh-get <owner>/<repo>/git/blobs/<40 hex digits>
             ${{ runner.temp }}/claude-review/gh-get <owner>/<repo>/contents/<path>[?ref=<ref>]
 
-            It prints the content as it is. `gh api` is refused.
+            It prints the content as it is. `gh api` is refused. Single-quote
+            the argument, since a `?` is a glob character.
 
             Read your own earlier reviews on this pull request, those of
             claude[bot], with `gh pr view <number> --json reviews`, and
