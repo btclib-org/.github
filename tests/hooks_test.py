@@ -11,9 +11,9 @@ without a condition, so where a tree declines one the finding is either
 the tree's or the section's, and a `BACKLOG` row is where that finding
 is recorded.
 
-Three hooks are read for their pins as well. `check-changelog` and
-`actionlint-shellcheck` are held to a sha. `uv-lock` runs the uv its
-`rev:` names, so section 1's floor is what that pin answers to.
+The pins of `check-changelog` and `actionlint-shellcheck` are held to a
+sha. `uv-lock` runs the uv its `rev:` names, so section 1's floor is what
+that pin answers to.
 """
 
 from __future__ import annotations

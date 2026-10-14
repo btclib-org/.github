@@ -876,9 +876,9 @@ ci:
 
 `autofix_prs: false` because a bot committing to a branch is at odds
 with a setup where no workflow token can write; a failing hook is fixed
-by its author. `skip` lists the hooks pre-commit.ci cannot run, which
-the lint workflow runs: mypy needs uv, which pre-commit.ci lacks, and
-`actionlint-shellcheck`'s run outlasts pre-commit.ci's time limit. No
+by its author. `skip` lists the hooks pre-commit.ci cannot run: mypy
+needs uv, which pre-commit.ci lacks, and `actionlint-shellcheck`'s run
+outlasts pre-commit.ci's time limit. No
 `autoupdate_branch`: the default branch is the only branch.
 
 ### What the hooks cover

@@ -14,7 +14,8 @@ name: reusable-changes
 # expression reading an output nothing declares is an empty string and no
 # error, so every dependent `if:` goes false and the gate skips while it
 # reports green. What refuses such a read is actionlint, and only where
-# the caller calls by path: the run itself goes green.
+# the caller calls a workflow of its own repository, by `./` or `$/`: the
+# run itself goes green.
 #
 # The calling job declares the token this job needs, and the bound
 # refuses rather than trims: a scope a called job declares that the
