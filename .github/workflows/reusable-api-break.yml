@@ -67,9 +67,7 @@ jobs:
     continue-on-error: true
     permissions:
       contents: read
-      # to add or remove the label, which is an issue write; GitHub
-      # hands a fork's run a read-only token whatever is asked here
-      pull-requests: write
+      pull-requests: write # the label; read-only on a fork
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -100,7 +98,7 @@ jobs:
           echo "findings=$findings" >> "$GITHUB_OUTPUT"
           if [ "$status" -gt 1 ]; then
             cat "$findings"
-            echo "::warning::griffe exited $status, so the label is left as it is"
+            echo "::warning::griffe exited $status; the label stays as it is"
             echo "broken=unknown" >> "$GITHUB_OUTPUT"
           elif [ "$status" -eq 1 ]; then
             echo "broken=true" >> "$GITHUB_OUTPUT"

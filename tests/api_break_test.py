@@ -53,7 +53,8 @@ def test_the_workflow_declares_no_trigger_but_the_call() -> None:
 
     `pull_request_target` and `workflow_run` are the two that would.
     """
-    on = _parsed().get("on", _parsed().get(True))
+    parsed = _parsed()
+    on: dict[str, Any] = parsed.get("on", parsed.get(True)) or {}
     assert list(on) == ["workflow_call"]
 
 
@@ -94,11 +95,12 @@ def test_the_label_is_added_on_a_break_and_removed_otherwise() -> None:
     assert "POST" in run
     assert "labels[]=api-break" in run
     assert "DELETE" in run
-    assert run.count("||") == 2
+    calls = 2
+    assert run.count("||") == calls
 
 
 def test_the_findings_go_to_the_job_summary() -> None:
-    """A fork's pull request is not labelled, so the summary is where it is read."""
+    """A fork's pull request is not labelled, so its finding is read here."""
     step = _step("Report the finding")
     assert "$GITHUB_STEP_SUMMARY" in step["run"]
     assert "github.event.pull_request.head" not in step.get("if", "")
