@@ -436,10 +436,17 @@ def test_a_gate_off_the_fork_is_reported() -> None:
     assert actionlint_departures([agreeing, ACTIONLINT_REFUSED]) == [other], (
         "the Python packaging kept beside the fork is read as agreeing"
     )
-    upstream = {"id": "actionlint", "repo": "https://github.com/rhysd/actionlint"}
+    upstream = {
+        "id": "actionlint-system",
+        "repo": "https://github.com/rhysd/actionlint",
+    }
     assert actionlint_departures([agreeing, upstream]) == [
-        "actionlint is taken from https://github.com/rhysd/actionlint"
+        "actionlint-system is taken from https://github.com/rhysd/actionlint"
     ], "the upstream hook kept beside the fork is read as agreeing"
+    mirror = {"id": "actionlint-docker", "repo": "https://example.org/actionlint"}
+    assert actionlint_departures([agreeing, mirror]) == [
+        "actionlint-docker is taken from https://example.org/actionlint"
+    ], "a hook from a third actionlint repository is read as agreeing"
 
 
 PYROMA = "pyroma"
