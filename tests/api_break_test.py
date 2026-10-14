@@ -11,10 +11,11 @@ answers, that the right call sets the label, and that the workflow
 holds the one write it needs and no trigger that would hand a fork's
 code a write token.
 
-The outputs below are what griffe 2.2.0 printed, `-f oneline -X`, for a
-two-commit repository holding `src/pkg/__init__.py`: a parameter added
-and a function removed, a package that is not there, and a base that is
-no commit. The paths of the installation are replaced and nothing else.
+The files in `griffe_output/` are what griffe 2.2.0 printed with
+`-f oneline -X` over a two-commit repository holding
+`src/pkg/__init__.py`: a parameter added and a function removed, a
+package that is not there, and a base that is no commit. The paths of
+the installation are replaced and nothing else.
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ from __future__ import annotations
 import importlib.util
 import subprocess
 import sys
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -37,9 +39,10 @@ _WORKFLOW = ROOT / ".github" / "workflows" / "reusable-api-break.yml"
 _SCRIPT = ROOT / ".github" / "scripts" / "api_break.py"
 _LABELS = ROOT / ".github" / "labels.yml"
 
-BREAK = 'src/pkg/__init__.py:1: f(b): Parameter was added as required\nsrc/pkg/__init__.py:0: g: Public object was removed\n'
-ABSENT = 'Traceback (most recent call last):\n  File "/runner/uv/archive-v0/x/bin/griffe", line 12, in <module>\n    sys.exit(main())\n             ~~~~^^\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffecli/_internal/cli.py", line 643, in main\n    return commands[subcommand](**opts_dict)\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffecli/_internal/cli.py", line 547, in check\n    old_package = load_git(\n        against_path,\n    ...<8 lines>...\n        resolve_external=None,\n    )\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/loader.py", line 934, in load_git\n    return load(\n        objspec,\n    ...<13 lines>...\n        resolve_implicit=resolve_implicit,\n    )\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/loader.py", line 857, in load\n    result = loader.load(\n        objspec,\n    ...<2 lines>...\n        find_stubs_package=find_stubs_package,\n    )\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/loader.py", line 165, in load\n    obj_path, package = self.finder.find_spec(\n                        ~~~~~~~~~~~~~~~~~~~~~^\n        objspec,  # ty:ignore[invalid-argument-type]\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        try_relative_path=try_relative_path,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        find_stubs_package=find_stubs_package,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/finder.py", line 220, in find_spec\n    return module_name, self.find_package(top_module_name)\n                        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/finder.py", line 292, in find_package\n    raise ModuleNotFoundError(module_name)\nModuleNotFoundError: nopkg\n'
-BAD_REF = 'Traceback (most recent call last):\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/git.py", line 141, in _tmp_worktree\n    _git("-C", str(repo), "worktree", "add", "-b", tmp_branch, location, ref)\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/git.py", line 62, in _git\n    raise GitError(process.stdout.strip())\ngriffe._internal.exceptions.GitError: fatal: invalid reference: deadbeef\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File "/runner/uv/archive-v0/x/bin/griffe", line 12, in <module>\n    sys.exit(main())\n             ~~~~^^\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffecli/_internal/cli.py", line 643, in main\n    return commands[subcommand](**opts_dict)\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffecli/_internal/cli.py", line 547, in check\n    old_package = load_git(\n        against_path,\n    ...<8 lines>...\n        resolve_external=None,\n    )\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/loader.py", line 929, in load_git\n    with _tmp_worktree(repo, ref) as worktree:\n         ~~~~~~~~~~~~~^^^^^^^^^^^\n  File "/runner/uv/python/lib/python3.15/contextlib.py", line 203, in __enter__\n    return next(self.gen)\n  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/git.py", line 143, in _tmp_worktree\n    raise RuntimeError(f"Could not create git worktree: {error}") from error\nRuntimeError: Could not create git worktree: fatal: invalid reference: deadbeef\n'
+_OUTPUTS = Path(__file__).parent / "griffe_output"
+BREAK = (_OUTPUTS / "break.txt").read_text(encoding="utf-8")
+ABSENT = (_OUTPUTS / "absent.txt").read_text(encoding="utf-8")
+BAD_REF = (_OUTPUTS / "bad_ref.txt").read_text(encoding="utf-8")
 
 
 def _script() -> ModuleType:
@@ -138,7 +141,7 @@ def test_a_404_on_adding_is_a_warning() -> None:
 
 
 def test_the_command_prints_the_answer_for_the_output_file(
-    tmp_path: Any, capsys: pytest.CaptureFixture[str]
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     """`broken=<answer>` is the line `GITHUB_OUTPUT` takes."""
     findings = tmp_path / "findings.txt"
@@ -205,7 +208,7 @@ def test_the_comparison_is_against_the_base_without_importing() -> None:
 
 
 def test_the_workflow_runs_the_script_where_its_checkout_puts_it() -> None:
-    """Both steps take the script from the checkout's `path:` and this file's."""
+    """Both steps take the script from the checkout's `path:`."""
     checkout = _step("Check out the script")
     assert checkout["with"]["path"] == "standard"
     assert checkout["with"]["sparse-checkout"] == ".github/scripts"

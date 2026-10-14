@@ -1,0 +1,2 @@
+src/pkg/__init__.py:1: f(b): Parameter was added as required
+src/pkg/__init__.py:0: g: Public object was removed

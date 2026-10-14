@@ -1,0 +1,42 @@
+Traceback (most recent call last):
+  File "/runner/uv/archive-v0/x/bin/griffe", line 12, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffecli/_internal/cli.py", line 643, in main
+    return commands[subcommand](**opts_dict)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffecli/_internal/cli.py", line 547, in check
+    old_package = load_git(
+        against_path,
+    ...<8 lines>...
+        resolve_external=None,
+    )
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/loader.py", line 934, in load_git
+    return load(
+        objspec,
+    ...<13 lines>...
+        resolve_implicit=resolve_implicit,
+    )
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/loader.py", line 857, in load
+    result = loader.load(
+        objspec,
+    ...<2 lines>...
+        find_stubs_package=find_stubs_package,
+    )
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/loader.py", line 165, in load
+    obj_path, package = self.finder.find_spec(
+                        ~~~~~~~~~~~~~~~~~~~~~^
+        objspec,  # ty:ignore[invalid-argument-type]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        try_relative_path=try_relative_path,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        find_stubs_package=find_stubs_package,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/finder.py", line 220, in find_spec
+    return module_name, self.find_package(top_module_name)
+                        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/finder.py", line 292, in find_package
+    raise ModuleNotFoundError(module_name)
+ModuleNotFoundError: nopkg

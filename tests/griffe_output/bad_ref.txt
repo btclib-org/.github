@@ -1,0 +1,31 @@
+Traceback (most recent call last):
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/git.py", line 141, in _tmp_worktree
+    _git("-C", str(repo), "worktree", "add", "-b", tmp_branch, location, ref)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/git.py", line 62, in _git
+    raise GitError(process.stdout.strip())
+griffe._internal.exceptions.GitError: fatal: invalid reference: deadbeef
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/runner/uv/archive-v0/x/bin/griffe", line 12, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffecli/_internal/cli.py", line 643, in main
+    return commands[subcommand](**opts_dict)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffecli/_internal/cli.py", line 547, in check
+    old_package = load_git(
+        against_path,
+    ...<8 lines>...
+        resolve_external=None,
+    )
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/loader.py", line 929, in load_git
+    with _tmp_worktree(repo, ref) as worktree:
+         ~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/runner/uv/python/lib/python3.15/contextlib.py", line 203, in __enter__
+    return next(self.gen)
+  File "/runner/uv/archive-v0/x/lib/python3.15/site-packages/griffe/_internal/git.py", line 143, in _tmp_worktree
+    raise RuntimeError(f"Could not create git worktree: {error}") from error
+RuntimeError: Could not create git worktree: fatal: invalid reference: deadbeef

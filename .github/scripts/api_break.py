@@ -62,7 +62,17 @@ def calls(broken: str, repository: str, pull_request: str) -> list[list[str]]:
     """
     issue = f"repos/{repository}/issues/{pull_request}"
     if broken == "true":
-        return [["gh", "api", "--method", "POST", f"{issue}/labels", "-f", f"labels[]={LABEL}"]]
+        return [
+            [
+                "gh",
+                "api",
+                "--method",
+                "POST",
+                f"{issue}/labels",
+                "-f",
+                f"labels[]={LABEL}",
+            ]
+        ]
     if broken == "false":
         return [["gh", "api", "--method", "DELETE", f"{issue}/labels/{LABEL}"]]
     return []
@@ -87,9 +97,7 @@ def label(
     """
 
     def default(argv: Sequence[str]) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(
-            argv, capture_output=True, check=False, encoding="utf-8"
-        )
+        return subprocess.run(argv, capture_output=True, check=False, encoding="utf-8")
 
     execute = run or default
     warnings = []
