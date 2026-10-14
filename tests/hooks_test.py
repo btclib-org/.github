@@ -17,6 +17,7 @@ pin answers to.
 
 from __future__ import annotations
 
+import json
 import re
 from typing import TYPE_CHECKING, Any
 
@@ -447,6 +448,81 @@ def test_a_gate_off_the_fork_is_reported() -> None:
     assert actionlint_departures([agreeing, mirror]) == [
         "actionlint-docker is taken from https://example.org/actionlint"
     ], "a hook from a third actionlint repository is read as agreeing"
+
+
+BASELINE = ".secrets.baseline"
+"""The file section 4 says `detect-secrets` reads, at the root of a tree."""
+
+HEX_PLUGIN = "HexHighEntropyString"
+"""The `detect-secrets` plugin that reads a frozen `rev:` sha as a secret."""
+
+REV_LINE_FILTER = {
+    "path": "detect_secrets.filters.regex.should_exclude_line",
+    "pattern": ['^\\s*rev: "?[0-9a-f]{40}"?(\\s|$)'],
+}
+"""The `filters_used` entry section 4's *secrets* bullet gives.
+
+A literal, for the reason `REFUSED` above is one: a reading that
+accepted any line filter would stay green with nothing measured.
+"""
+
+
+def rev_line_departures(baseline: dict[str, Any]) -> list[str]:
+    """Report a baseline that enables the hex plugin without the filter.
+
+    :param baseline: a parsed `.secrets.baseline`.
+    :returns: the finding, empty where the plugin is off or the filter
+        stands.
+    """
+    plugins = {plugin["name"] for plugin in baseline.get("plugins_used", [])}
+    if HEX_PLUGIN not in plugins:
+        return []
+    filters = baseline.get("filters_used", [])
+    if REV_LINE_FILTER in filters:
+        return []
+    return [f"{HEX_PLUGIN} is enabled and filters_used has no {REV_LINE_FILTER}"]
+
+
+def test_a_baseline_with_the_hex_plugin_filters_frozen_rev_lines(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 4's *secrets* bullet: a line filter, not a pragma.
+
+    A frozen `rev:` sha is a public commit id, and `autoupdate` drops a
+    pragma on every bump (btclib-org/.github#1723).
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    path = trees[repository] / BASELINE
+    if not path.is_file():
+        pytest.skip(f"{repository} has no {BASELINE}")
+    found = rev_line_departures(json.loads(path.read_text(encoding="utf-8")))
+    assert not found, f"{found}; " + by_hand(
+        repository, f"grep -n -A4 'should_exclude_line' {BASELINE}"
+    )
+
+
+def test_a_baseline_without_the_rev_line_filter_would_be_reported() -> None:
+    """The check above reports what `rev_line_departures` lists."""
+    on = {"plugins_used": [{"name": HEX_PLUGIN, "limit": 3.0}]}
+    assert rev_line_departures(on) == [
+        f"{HEX_PLUGIN} is enabled and filters_used has no {REV_LINE_FILTER}"
+    ]
+    file_filter = {
+        "path": "detect_secrets.filters.regex.should_exclude_file",
+        "pattern": ["^tests/"],
+    }
+    assert rev_line_departures({**on, "filters_used": [file_filter]}), (
+        "a file exclusion is read as the line filter"
+    )
+    other_line = {**REV_LINE_FILTER, "pattern": ["^rev:"]}
+    assert rev_line_departures({**on, "filters_used": [other_line]}), (
+        "another line pattern is read as the filter"
+    )
+    assert rev_line_departures({**on, "filters_used": [REV_LINE_FILTER]}) == []
+    assert rev_line_departures({"plugins_used": [{"name": "AWSKeyDetector"}]}) == []
 
 
 PYROMA = "pyroma"

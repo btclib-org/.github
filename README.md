@@ -919,6 +919,13 @@ No `autoupdate_branch`: the default branch is the only branch.
   excluded file is unwatched, where a baseline entry is a finding
   somebody has read. The two entropy plugins stay off where the vectors
   are hex strings; not gitleaks, whose hook ids all pass `--staged`.
+
+    **The exception is a line filter, on a tree that enables
+    `HexHighEntropyString`**: `should_exclude_line` in `filters_used`,
+    pattern `^\s*rev: "?[0-9a-f]{40}"?(\s|$)`. A frozen `rev:` sha is a
+    public commit id, not a secret. A `# pragma: allowlist secret` on
+    the line will not do, `autoupdate` dropping it on every bump
+    (btclib-org/.github#1723).
 - **spelling** — `codespell` and `typos`, both configured in
   `pyproject.toml`, both skipping vendored vectors: a typo inside an
   upstream vector is part of the vector. `typos` is a `local` hook
