@@ -4,12 +4,16 @@ name: reusable-public-api
 # The griffe walk a repository's release.yml runs before publishing, so
 # the previous-tag resolution, the comparison and the failure message
 # are written once. The trigger stays in the caller, whose run this job
-# joins; it runs here rather than as a merge gate on the reasoning
-# btclib-org/.github#326 already settled -- before 1.0 the public
-# surface breaks deliberately and often, and a gate reporting every such
-# break on every pull request has nothing to say about which ones are
+# joins.
+#
+# It refuses a break, and so runs at release time rather than on every
+# pull request, on the reasoning btclib-org/.github#326 settled: before
+# 1.0 the public surface breaks deliberately and often, and a check
+# failing on every such break has nothing to say about which ones are
 # allowed, where a release-time run arrives once, while RELEASE_NOTES.md
-# is being written.
+# is being written. A pull request is told of a break by a label and
+# not by a check, in reusable-api-break.yml
+# (btclib-org/.github#1674): what informs a review is not what gates it.
 #
 # One input, the package griffe walks. No default: the package is the
 # calling repository's name only by a convention, and a default would be

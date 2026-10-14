@@ -333,6 +333,19 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
+        1674,
+        "test_a_repository_carries_the_label_set",
+        (
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-ecc",
+            "btclib-mnemonics",
+            "btclib-node",
+            "btclib-secp256k1",
+            "btclib-wallet",
+        ),
+    ),
+    (
         1697,
         "test_a_repository_carries_the_secret_free_helper_owed_of_it",
         (

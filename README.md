@@ -3299,6 +3299,9 @@ A label means what its description says. Who applies and removes it:
   the tree's code or tests wait on the outcome;
 - `plan` and `good first issue` — applied by whoever files the issue;
 - `security` and `alignment` — applied by whoever finds it.
+- `api-break` — applied and removed by the job of `reusable-api-break.yml`
+  on a pull request of the same repository, and by a maintainer on a
+  fork's (section 12 says why).
 
 ## 12. Releasing
 
@@ -3543,6 +3546,18 @@ A label means what its description says. Who applies and removes it:
     warning the policy owes*, which a command can answer on its own; so the
     invocation takes a second reference pair rather than being replaced by
     one.
+
+    **A pull request is told of a break by a label, and gated by nothing.**
+    `reusable-api-break.yml` runs the same walk against the pull request's
+    base commit and adds `api-break` where it finds a break, removing it on
+    a later push that finds none (btclib-org/.github#1674). The job
+    concludes green whatever the walk or the label call answers, and is no
+    required check. A pull request from a fork is not labelled: its token is
+    read-only, and the ways round that, `pull_request_target` and
+    `workflow_run`, are triggers the organization declines
+    (`bestpractices/<tree>.json`, `OSPS-BR-01.01`). The job still compares,
+    and writes its finding to the run's summary, where the reviewer reads it
+    and a maintainer applies the label by hand.
 
 - **A job named in `needs:` that is not a gate takes `always()` in the
   dependent's own guard**, beside an explicit `needs.<job>.result == 'success'`

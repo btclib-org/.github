@@ -6,6 +6,8 @@
 
 `reusable-public-api.yml` runs on a release, so no pull request reaches
 it and the day a release breaks the surface is the first run that would.
+A pull request's own advisory is `reusable-api-break.yml`, which
+`api_break_test.py` reads.
 What decides a finding covered is established here instead, against
 lines `griffe check -f oneline` printed for btclib between two of its
 releases, and a section of notes written the way btclib's are.
