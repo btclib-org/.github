@@ -2880,10 +2880,10 @@ wrong as written, and what answers it is another push. `NACK` is
 Bitcoin's sense of the word: the disagreement is with the change itself,
 so no alteration is asked for and none would earn an ack, and what
 answers it is an argument or a closed pull request. `NO VERDICT` is the
-reviewer saying it could not judge, for example because a permission it
-needed was refused: it is no ack, and it fails the check as a missing
-verdict does. A review that delivers no verdict line is a reading and not
-an unfinished review; `REVIEWING.md` states that distinction.
+reviewer saying it could not judge, for example because a file would
+not open or the diff could not be read: it is no ack, and it fails the
+check as a missing verdict does. A review that delivers no verdict line
+is a reading and not an unfinished review; `REVIEWING.md` states that distinction.
 
 **The ack of record is posted as a review of type COMMENT**, whichever
 of the four it carries — `gh pr review --comment` — and never as a
@@ -2971,8 +2971,8 @@ being the strongest finding available. A rebase voids the reliance.
 a grep, a script or a query the diff adds is executed by the review,
 against the shapes its prose claims and the shapes the tree holds, and
 the finding quotes what it printed; a claim the prose makes about the
-tree is checked the same way. Where it cannot be run, the summary says
-so in those words: a hand trace can carry a finding but not an ack.
+tree is checked the same way. Where it cannot be run, `REVIEWING.md`'s
+*A hand trace wearing a run's authority* says what the summary carries.
 
 **What a force-push costs is the review attached to the sha it
 replaces**, a bot's included, and whether there is one is read before the
