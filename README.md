@@ -2313,8 +2313,7 @@ and the badge land together.
   with `btclib`'s, would replay those parsers again. `btclib-secp256k1` parses
   no transaction, block, script or message. The corpora grow as those fuzzers
   run, with no commit in the tree, so a clock asks. A failure is an issue
-  against a parser. btclib-org/btclib#2586 carries the debt until `btclib`
-  schedules it.
+  against a parser.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
   between the parser and an adversary choosing the bytes. `btclib` reads
   transactions, scripts and signatures off the wire, `btclib-secp256k1` reads
@@ -3173,9 +3172,9 @@ such a finding only through a further push or a `close`/`reopen`.
 `github-actions` everywhere, every tree having workflows for it to read,
 and the others where the tree has what they watch: `uv` where a
 `uv.lock` exists, `bundler` where a site Gemfile does, `gitsubmodule`
-where a submodule does, `docker` where a workflow builds a Dockerfile
-whose `FROM` lines are pinned by digest — conditional by section 2's
-rule for a subject the tree does not hold. Dependabot has a `pre-commit`
+where a submodule does, `gomod` where a `go.mod` does, `docker` where a
+workflow builds a Dockerfile whose `FROM` lines are pinned by digest —
+conditional by section 2's rule for a subject the tree does not hold. Dependabot has a `pre-commit`
 ecosystem too, and the maintainer decided to keep pre-commit.ci for hook
 `rev:` bumps instead (issue #1391): its weekly autoupdate already
 rewrites `rev:` for every `repo:` but `local` and `meta`, so a second

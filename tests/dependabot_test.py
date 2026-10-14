@@ -6,8 +6,8 @@
 
 The section gives `github-actions` to every tree, workflows for it to
 read being every tier's, and makes the others conditional on what the
-tree holds: a lock file, a site Gemfile, a submodule, a Dockerfile whose
-base images are pinned by digest. So an ecosystem is owed exactly where
+tree holds: a lock file, a site Gemfile, a submodule, a `go.mod`, a
+Dockerfile whose base images are pinned by digest. So an ecosystem is owed exactly where
 its subject is there to be read, which is section 2's rule for a subject
 a tree does not hold. Dependabot has a `pre-commit` ecosystem too, and
 section 11 says the maintainer keeps pre-commit.ci for hook `rev:` bumps
@@ -46,6 +46,7 @@ WATCHED = {
     "uv": ("uv.lock", "*/uv.lock"),
     "bundler": ("Gemfile", "*/Gemfile"),
     "gitsubmodule": (".gitmodules",),
+    "gomod": ("go.mod", "*/go.mod"),
 }
 """Section 11's conditional ecosystems, each against what it watches.
 
@@ -235,7 +236,7 @@ def test_dependabot_watches_a_conditional_ecosystem_where_its_subject_is_there(
     repository: str,
     trees: dict[str, Path],
 ) -> None:
-    """`uv` where the tree has a lock file, and the other two likewise.
+    """`uv` where the tree has a lock file, and the others likewise.
 
     Both directions, since an ecosystem watching what the tree does not
     have and a subject nothing watches are the same disagreement with
