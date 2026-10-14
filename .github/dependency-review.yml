@@ -67,7 +67,7 @@ allow-licenses:
 #
 # The graph's conclusion is a scan of every file a package ships, which is why
 # most entries below are not what the package declares: each comment names
-# the declared licence where PyPI's metadata gives one.
+# the declared licence where PyPI's metadata or pkg.go.dev gives one.
 allow-dependencies-licenses:
   # declared GPLv3+, required by `cibuildwheel` in `btclib-secp256k1`'s lock.
   # `btclib-secp256k1`'s wheel names only `cffi`
