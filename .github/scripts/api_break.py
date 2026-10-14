@@ -102,7 +102,6 @@ def label(
     :param run: runs a command; `subprocess.run` where none is given.
     :returns: the warnings, empty where all went as asked.
     """
-
     execute = run or _run
     warnings = []
     for argv in calls(broken, repository, pull_request):
