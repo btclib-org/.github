@@ -54,7 +54,9 @@ jobs:
           persist-credentials: false
           # the base commit has to be reachable for griffe to walk it
           fetch-depth: 0
-      # caching off, for the reason reusable-public-api.yml gives
+      # caching off: the job installs one pinned package, griffe, and
+      # setup-uv's default, `auto`, saves uv's cache after a successful
+      # pull_request run, a cache nothing here needs
       - name: Setup uv
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:

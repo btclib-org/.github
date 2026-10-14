@@ -79,6 +79,7 @@ def test_a_finding_among_a_traceback_is_not_a_break() -> None:
 def test_no_findings_is_no_break() -> None:
     """Exit 0 is a clean comparison, whatever it printed."""
     assert script.classify(0, "") == "false"
+    assert script.classify(0, BREAK) == "false"
 
 
 @pytest.mark.parametrize("status", [2, 127])
@@ -175,6 +176,17 @@ def test_the_default_runner_keeps_the_output_of_a_failing_command() -> None:
     done = script._run([sys.executable, "-c", code])  # noqa: SLF001
 
     assert (done.returncode, done.stdout.strip(), done.stderr) == (3, "out", "err")
+
+
+def test_a_403_that_mentions_404_is_a_warning_with_its_text() -> None:
+    """Only `HTTP 404` is the label being absent, and the warning says why."""
+
+    def run(_: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        return _done(1, "gh: forbidden, see issue 404 (HTTP 403)")
+
+    [warning] = script.label("false", "o/r", "7", run)
+
+    assert "forbidden, see issue 404 (HTTP 403)" in warning
 
 
 def test_a_404_on_adding_is_a_warning() -> None:
