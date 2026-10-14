@@ -2972,10 +2972,8 @@ being the strongest finding available. A rebase voids the reliance.
 a grep, a script or a query the diff adds is executed by the review,
 against the shapes its prose claims and the shapes the tree holds, and
 the finding quotes what it printed; a claim the prose makes about the
-tree is checked the same way. Where it cannot be run, the summary says
-so in those words, and with the `Not checked:` line that `REVIEWING.md`'s
-*The verdict* gives: a hand trace can carry a finding but is not reported
-as a run.
+tree is checked the same way. Where it cannot be run, `REVIEWING.md`'s
+*A hand trace wearing a run's authority* says what the summary carries.
 
 **What a force-push costs is the review attached to the sha it
 replaces**, a bot's included, and whether there is one is read before the

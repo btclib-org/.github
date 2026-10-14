@@ -263,9 +263,9 @@ What this is not:
   is the author's reading performed a second time, which is what running
   it is meant to replace; it can carry a finding, and it is not reported
   as a run. The verdict then carries *The verdict*'s `Not checked:`
-  line. A command that only reads a blob or a
-  file from GitHub can be run by the bot, with the script its prompt
-  names, so it is run rather than marked not run.
+  line. A command that only reads a blob or a file from GitHub can be
+  run by the bot, with the script its prompt names, so it is run rather
+  than marked not run.
 
 ## The gates are the evidence
 

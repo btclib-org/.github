@@ -75,8 +75,8 @@ name: reusable-claude-review
 # flag winning. So the allow names the script, as it does `post-review`,
 # and the script checks its one argument, `<owner>/<repo>/git/blobs/<40
 # hex digits>` or `<owner>/<repo>/contents/<path>[?ref=<ref>]`, and runs
-# `gh api --method GET -- "repos/$1"`: gh reads what follows `--` as an
-# argument, so a path is never a flag. The script is mode 555 in the
+# `gh api --method GET` with the raw media type and the path after `--`:
+# gh reads what follows `--` as an argument, so a path is never a flag. The script is mode 555 in the
 # directory of `post-review`, and `tests/review_gh_get_test.py` runs it.
 #
 # Measured with Claude Code 2.1.299 and stand-ins for `gh` and the script.
