@@ -131,6 +131,29 @@ def test_any_other_failure_is_a_warning() -> None:
     assert len(script.label("true", "o/r", "7", run)) == 1
 
 
+def test_a_call_that_succeeds_is_no_warning() -> None:
+    """Both answers, with the command exiting 0."""
+
+    def run(_: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        return _done(0)
+
+    assert script.label("true", "o/r", "7", run) == []
+    assert script.label("false", "o/r", "7", run) == []
+
+
+def test_the_label_command_prints_each_warning(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A warning is a workflow command line, and none prints nothing."""
+    monkeypatch.setattr(script, "label", lambda *_: ["boom"])
+    assert script.main(["label", "true", "o/r", "7"]) == 0
+    assert capsys.readouterr().out == "::warning::boom\n"
+
+    monkeypatch.setattr(script, "label", lambda *_: [])
+    assert script.main(["label", "true", "o/r", "7"]) == 0
+    assert capsys.readouterr().out == ""
+
+
 def test_a_404_on_adding_is_a_warning() -> None:
     """Only the DELETE tolerates it."""
 
@@ -190,12 +213,21 @@ def test_the_write_is_the_job_s_alone() -> None:
 
 def test_the_label_is_set_only_on_a_pull_request_of_the_calling_repository() -> None:
     """A fork's token is read-only, so the step declines it by name."""
-    condition = _step("Set the label")["if"]
-    assert (
+    condition = " ".join(_step("Set the label")["if"].split())
+    assert condition == (
+        "steps.compare.outputs.broken != 'unknown' && "
         "github.event.pull_request.head.repo.full_name == github.repository"
-        in condition
     )
-    assert "!= 'unknown'" in condition
+
+
+def test_the_job_declines_a_closed_or_draft_pull_request() -> None:
+    """Only a pull request that is open and ready is walked."""
+    condition = " ".join(_job()["if"].split())
+    assert condition == (
+        "${{ github.event_name == 'pull_request' && "
+        "github.event.action != 'closed' && "
+        "!github.event.pull_request.draft }}"
+    )
 
 
 def test_the_comparison_is_against_the_base_without_importing() -> None:

@@ -1,24 +1,11 @@
 ---
 name: reusable-api-break
 
-# The advisory a tree's pull request runs beside reusable-public-api.yml:
-# the same griffe walk, against the pull request's base commit instead
-# of the last release, and its answer a label, `api-break`, instead of a
-# check. btclib-org/.github#1674 decided that the label informs a
-# review and gates nothing, so a break the notes would have to name is
-# seen while the pull request can still change.
-#
-# It reaches the release's reasoning from the other side
-# (btclib-org/.github#326): before 1.0 the public surface breaks
-# deliberately and often, so a check that failed on every such break
-# would have nothing to say about which ones are allowed. A label says
-# only that there is one. The release job is where a break is refused
-# unless the notes name it.
-#
-# Advisory: a break is told by a label, and the job is no required
-# check, so no merge waits on it. Only a pull request of the calling
-# repository is labelled; README section 12 has why, and what a fork's
-# pull request gets.
+# The pull-request counterpart of reusable-public-api.yml: the same
+# griffe walk against the pull request's base commit, its answer a label,
+# `api-break`, and no check (btclib-org/.github#1674). README section 12
+# has why, and what a fork's pull request gets. The job is no required
+# check, so no merge waits on it.
 #
 # One input, the package griffe walks, with no default, for the reason
 # reusable-public-api.yml gives. The trigger, its types and the
@@ -42,7 +29,7 @@ permissions:
 jobs:
   api-break:
     # the name the check context is keyed by, after the calling job's
-    # own, and not a required check
+    # own
     name: Label a pull request that breaks the public API
     # a draft is work its author is not asking anyone to read yet, and a
     # closed pull request has stopped taking changes the label would be
@@ -53,10 +40,9 @@ jobs:
           && !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # not a required check, so no merge waits on it. A step that is
-    # red anyway, an action that cannot be fetched say, leaves the run
-    # green with this job's check run red; the steps this file writes
-    # guard themselves in api_break.py
+    # a step that is red anyway, an action that cannot be fetched say,
+    # leaves the run green with this job's check run red. The compare
+    # step guards itself with `|| status=$?`, and api_break.py exits 0
     continue-on-error: true
     permissions:
       contents: read
@@ -86,8 +72,7 @@ jobs:
       # griffe's version and interpreter are named for the reason
       # reusable-public-api.yml gives, and are the same there. -X keeps
       # griffe from importing the checkout's code where it cannot read
-      # it as source. Exit 1 is findings or an uncaught exception, so
-      # api_break.py reads the output, not the code alone
+      # it as source
       - name: Compare the public API with the base
         id: compare
         env:

@@ -3299,9 +3299,8 @@ A label means what its description says. Who applies and removes it:
   the tree's code or tests wait on the outcome;
 - `plan` and `good first issue` — applied by whoever files the issue;
 - `security` and `alignment` — applied by whoever finds it;
-- `api-break` — applied and removed by the job of `reusable-api-break.yml`
-  on a pull request of the same repository, and by a maintainer on a
-  fork's (section 12 says why).
+- `api-break` — applied and removed by `reusable-api-break.yml`'s job, and
+  by a maintainer on a fork's pull request (section 12).
 
 ## 12. Releasing
 
@@ -3547,16 +3546,14 @@ A label means what its description says. Who applies and removes it:
     invocation takes a second reference pair rather than being replaced by
     one.
 
-    **A pull request is told of a break by a label, and gated by nothing.**
+    **A pull request is told of a break by a label, not by a check.**
     `reusable-api-break.yml` walks the surface against the pull request's
     base commit, adds `api-break` on a break and removes it on a later push
-    that finds none (btclib-org/.github#1674). Exit code 1 is a break only
-    where every line griffe printed is a finding: an uncaught exception, as
-    for a package absent at the base, exits 1 too, and leaves the label as
-    it is. A fork's pull request is not labelled: its token is read-only,
-    and `pull_request_target` and `workflow_run`, the ways round that, are
-    triggers the organization declines (`OSPS-BR-01.01`). Its run still
-    writes the finding to the run's summary.
+    that finds none (btclib-org/.github#1674). A fork's pull request is not
+    labelled: its token is read-only, and `pull_request_target` and
+    `workflow_run`, the ways round that, are triggers the organization
+    declines (`OSPS-BR-01.01`). Its run still writes the finding to the
+    run's summary.
 
 - **A job named in `needs:` that is not a gate takes `always()` in the
   dependent's own guard**, beside an explicit `needs.<job>.result == 'success'`

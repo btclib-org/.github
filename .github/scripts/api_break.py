@@ -17,7 +17,7 @@ where every line of the output is a finding, and anything else is
     uv run --no-project --python 3.15 .github/scripts/api_break.py \
         label "$broken" "$GITHUB_REPOSITORY" "$pull_request"
 
-`label` never exits non-zero: the label is an advice, and a call that
+`label` never exits non-zero: the label is advisory, and a call that
 failed is a warning for the log.
 """
 
@@ -116,7 +116,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Run one of the two commands.
 
     :param argv: the arguments, `sys.argv[1:]` where none are given.
-    :returns: 0 always: the label is an advice.
+    :returns: 0 always: the label is advisory.
     """
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
