@@ -261,8 +261,9 @@ What this is not:
   where a pattern against the tree needs only a grep and is the usual
   case — say so in the summary, in those words: it was not run. A trace
   is the author's reading performed a second time, which is what running
-  it is meant to replace; it can carry a finding, and it cannot carry an
-  ack.
+  it is meant to replace; it can carry a finding, and it is not reported
+  as a run. What the verdict is, where the run was not made, is *The
+  verdict*'s `Not checked:` line.
 
 ## The gates are the evidence
 
@@ -391,8 +392,9 @@ concludes, and what forbids the workflow an approval; a forge approval
 is a person's, and it is not the ack.
 
 **`NO VERDICT` is the reviewer saying it could not judge**, and the
-reason names why: a permission it needed was refused, a file would not
-open. It is not an ack.
+reason names why: a file would not open, the diff could not be read. It
+is not an ack. A command the reviewer could not run is not that: it is
+the `Not checked:` line below.
 
 Every other summary is a comment. Nothing else is an ack — not "looks
 good", and not a forge approval by the author of the pull request, which
@@ -427,10 +429,13 @@ rather than a defect in it, and that ground is what the summary states.
 
 **One line starting `Not checked:` is added only where what could not be
 checked bears on the verdict**: a command that could not be run, an
-issue that could not be read, a part of the tree left unopened. A review
-that answered "does it answer its issues" against the pull request's own
-account of them, having been unable to read the issues, is reasoning in
-a circle, and has to say so.
+issue that could not be read, a part of the tree left unopened. **Where
+the pull request's prose relies on a command the reviewer could not run,
+the verdict is `ACK` when nothing else holds it, and this line names
+that command**: the ack says it was not run, and says nothing of what it
+would have printed. A review that answered "does it answer its issues"
+against the pull request's own account of them, having been unable to
+read the issues, is reasoning in a circle, and has to say so.
 
 Post it the moment it is written, and where several pull requests are
 waiting, finish and post one before opening the next: a batch of reviews

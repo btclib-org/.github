@@ -436,8 +436,8 @@ jobs:
             The summary's first line is the verdict, alone on the line:
             `ACK <sha>`, `CHANGES REQUESTED <sha>`, `NACK <sha>`, or
             `NO VERDICT <sha>: <reason>` where you could not judge, for
-            example because a permission you needed was refused. It is
-            not optional: a check reads it.
+            example because the diff could not be read. It is not
+            optional: a check reads it.
 
             Then the findings, blocking and non-blocking only, one
             bullet each: where, what is wrong, how it is known. Add one
@@ -445,6 +445,12 @@ jobs:
             check bears on the verdict. No nits in the summary, no
             findings outside this pull request, no account of what the
             diff does or of what you checked.
+
+            Where the pull request's prose relies on a command you could
+            not run, answer `ACK <sha>` if nothing else holds the
+            verdict, with a "Not checked:" line naming that command. Do
+            not answer `NO VERDICT` for it, and do not report a trace
+            of it as a run.
 
             ${{ inputs.extra-prompt }}
 
