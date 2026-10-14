@@ -384,7 +384,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-org.github.io",
             "btclib-secp256k1",
             "btclib-wallet",
-            "claude-process",
             "portanode",
         ),
     ),
