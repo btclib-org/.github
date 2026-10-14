@@ -72,9 +72,8 @@ jobs:
   # this tree's is the paths: every markdown file it tracks, spelled as
   # section 10 spells it.
   # By path and not zizmor's `$/` self-repository form, which
-  # workflows_test.py reads as an unpinned action (btclib-org/.github#1720);
-  # zizmor's finding is declined on the line below
-  # (btclib-org/.github#1144)
+  # workflows_test.py reads as a local call just the same; zizmor's
+  # finding is declined on the line below (btclib-org/.github#1144)
   links:
     uses: ./.github/workflows/reusable-links.yml # zizmor: ignore[self-repository]
     with:
