@@ -21,6 +21,7 @@ the installation are replaced and nothing else.
 from __future__ import annotations
 
 import importlib.util
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -129,6 +130,19 @@ def test_any_other_failure_is_a_warning() -> None:
 
     assert len(script.label("false", "o/r", "7", run)) == 1
     assert len(script.label("true", "o/r", "7", run)) == 1
+
+
+@pytest.mark.parametrize("answer", ["", "unknown", "True", "break"])
+def test_an_answer_that_is_not_true_or_false_is_a_warning(answer: str) -> None:
+    """A wiring fault reads as an empty answer, and is told, not silent."""
+    ran: list[Sequence[str]] = []
+
+    def run(argv: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        ran.append(argv)
+        return _done(0)
+
+    assert len(script.label(answer, "o/r", "7", run)) == 1
+    assert not ran
 
 
 def test_a_call_that_succeeds_is_no_warning() -> None:
@@ -257,6 +271,44 @@ def test_the_comparison_is_against_the_base_without_importing() -> None:
     assert "${{" not in step["run"]
 
 
+def test_the_answer_reaches_the_label_step() -> None:
+    """The classify line writes to the step output, and the label reads it."""
+    run = _step("Compare the public API with the base")["run"]
+    assert run.rstrip().endswith('>> "$GITHUB_OUTPUT"')
+    assert "2>&1" in run
+    assert _step("Compare the public API with the base")["id"] == "compare"
+    assert (
+        _step("Set the label")["env"]["BROKEN"]
+        == "${{ steps.compare.outputs.broken }}"
+    )
+
+
+def test_the_finding_pattern_is_the_one_the_release_check_reads() -> None:
+    """One format of griffe's output, held equal where it is read twice."""
+    spec = importlib.util.spec_from_file_location(
+        "check_public_api", ROOT / ".github" / "scripts" / "check_public_api.py"
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    other = importlib.util.module_from_spec(spec)
+    sys.modules["check_public_api"] = other
+    spec.loader.exec_module(other)
+    for line in BREAK.splitlines() + ABSENT.splitlines() + BAD_REF.splitlines():
+        assert bool(script._FINDING.fullmatch(line)) == bool(  # noqa: SLF001
+            other._FINDING.fullmatch(line)  # noqa: SLF001
+        )
+
+
+def test_both_workflows_pin_the_same_griffe() -> None:
+    """The comment says the version is the same there, so it is asked."""
+    pins = {
+        tuple(re.findall(r"griffe==[\d.]+", path.read_text(encoding="utf-8")))
+        for path in (_WORKFLOW, _WORKFLOW.with_name("reusable-public-api.yml"))
+    }
+    assert len(pins) == 1
+    assert pins != {()}
+
+
 def test_the_workflow_runs_the_script_where_its_checkout_puts_it() -> None:
     """Both steps take the script from the checkout's `path:`."""
     checkout = _step("Check out the script")
@@ -275,7 +327,7 @@ def test_the_findings_go_to_the_job_summary() -> None:
 
 
 def test_the_label_is_owed_by_the_publishing_trees_alone() -> None:
-    """`labels.yml` names every tree that calls `reusable-public-api.yml`."""
+    """The trees `labels.yml` owes the label to, as listed there."""
     labels = yaml.safe_load(_LABELS.read_text(encoding="utf-8"))["labels"]
     label = next(entry for entry in labels if entry["name"] == "api-break")
     assert sorted(label["repositories"]) == [

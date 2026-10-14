@@ -3299,8 +3299,7 @@ A label means what its description says. Who applies and removes it:
   the tree's code or tests wait on the outcome;
 - `plan` and `good first issue` — applied by whoever files the issue;
 - `security` and `alignment` — applied by whoever finds it;
-- `api-break` — applied and removed by `reusable-api-break.yml`'s job
-  (section 12).
+- `api-break` — section 12.
 
 ## 12. Releasing
 

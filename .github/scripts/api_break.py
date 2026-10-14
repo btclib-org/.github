@@ -4,8 +4,8 @@
 
 """Decide whether `griffe check` found a break, and set the label from it.
 
-`griffe check -f oneline` prints one finding per line,
-`path:line: object: explanation`, and exits 1 with findings. An uncaught
+`griffe check -f oneline` prints one finding per line, which
+`check_public_api.py` reads, and exits 1 with findings. An uncaught
 exception exits 1 too, with a traceback in place of findings: a package
 absent at the base and a base that is no commit both do. So the exit
 code alone cannot say there is a break. `classify` calls it one only
@@ -18,7 +18,8 @@ where every line of the output is a finding, and anything else is
         label "$broken" "$GITHUB_REPOSITORY" "$pull_request"
 
 `label` never exits non-zero: the label is advisory, and a call that
-failed is a warning for the log.
+failed, or an answer that is neither `true` nor `false`, is a warning
+for the log.
 """
 
 from __future__ import annotations
@@ -96,13 +97,15 @@ def label(
     A 404 on removing the label means it was not there, which is the
     state asked for. Any other failure is a warning.
 
-    :param broken: `true`, `false` or `unknown`.
+    :param broken: `true` or `false`; anything else is warned of.
     :param repository: `owner/name`.
     :param pull_request: the pull request's number.
     :param run: runs a command; `subprocess.run` where none is given.
     :returns: the warnings, empty where all went as asked.
     """
     execute = run or _run
+    if broken not in {"true", "false"}:
+        return [f"no answer to set the label from: {broken!r}"]
     warnings = []
     for argv in calls(broken, repository, pull_request):
         done = execute(argv)

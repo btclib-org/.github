@@ -6,11 +6,12 @@
 
 `reusable-public-api.yml` runs on a release, so no pull request reaches
 it and the day a release breaks the surface is the first run that would.
-A pull request's break is labelled by `reusable-api-break.yml`, which
-`api_break_test.py` tests.
 What decides a finding covered is established here instead, against
 lines `griffe check -f oneline` printed for btclib between two of its
 releases, and a section of notes written the way btclib's are.
+
+A pull request's break is labelled by `reusable-api-break.yml`, which
+`api_break_test.py` tests.
 
 The script is loaded by path, `.github/scripts` being no package, as the
 other scripts under it are tested.
