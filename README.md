@@ -3457,13 +3457,13 @@ A label means what its description says. Who applies and removes it:
        release, without which Dependabot alerts with no version to upgrade to,
        and its text names the release and the commit that fixed it rather than
        the fix the report proposed. Publishing deletes the private fork.
-    1. A week after publication, the advisory has its CVE and is in the
+    1. Six weeks after publication, the advisory has its CVE and is in the
        Advisory Database, whose reviewed entries OSV imports: GitHub states 72
-       hours for each. Until then neither Dependabot nor the audit above warns
-       anybody.
+       hours for each, but its CVE backlog [runs past that](https://github.com/orgs/community/discussions/207039).
+       Until then neither Dependabot nor the audit above warns anybody.
 
   `tests/advisories_test.py` reads the published advisories: the vector, the
-  CWE and the patched version, and past the week the CVE and the database
+  CWE and the patched version, and past the six weeks the CVE and the database
   entry. It fails where it reads no published advisory in the whole
   organization. It reads no draft, which the API shows only to the
   repository's administrators and security managers and to the advisory's
