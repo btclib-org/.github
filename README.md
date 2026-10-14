@@ -871,14 +871,14 @@ ci:
   autofix_prs: false
   autoupdate_commit_msg: "Update the pinned pre-commit hook revisions"
   autoupdate_schedule: weekly
-  skip: [mypy]
+  skip: [mypy, actionlint-shellcheck]
 ```
 
-`autofix_prs: false` because a bot committing to a branch is at odds
-with a setup where no workflow token can write; a failing hook is fixed
-by its author. `skip: [mypy]` because that hook shells out to uv, which
-pre-commit.ci does not have — the lint workflow covers it. No
-`autoupdate_branch`: the default branch is the only branch.
+`autofix_prs: false` because a bot committing to a branch is at odds with
+a setup where no workflow token can write; a failing hook is fixed by its
+author. `skip` names mypy, which needs uv, absent on pre-commit.ci, and
+`actionlint-shellcheck`, whose run outlasts pre-commit.ci's time limit.
+No `autoupdate_branch`: the default branch is the only branch.
 
 ### What the hooks cover
 
@@ -940,8 +940,11 @@ pre-commit.ci does not have — the lint workflow covers it. No
   silently does nothing. The issue pair selects narrowly, both carrying
   `types: [yaml]`, and each goes where `ISSUE_TEMPLATE/` holds it.
 - **workflows** — `actionlint` and `zizmor`, both at zero findings, both
-  required to stay there. actionlint via its Python packaging, the
-  upstream hook's only non-docker id needing a go toolchain.
+  required to stay there. actionlint is the `kjanat/actionlint` fork's
+  `actionlint-shellcheck`: it parses the `uses: $/...` that zizmor's
+  `self-repository` audit recommends, which upstream does not parse. It
+  costs a Go build in pre-commit. Its `rev` is a sha, so a moved tag
+  cannot change what runs.
 - **Python** — `ruff-check --fix` and `ruff-format`.
 - **docstrings against signatures** — `pydoclint` over the package: the
   `D` family checks that a docstring *exists*, this that it describes
@@ -975,8 +978,7 @@ pre-commit.ci does not have — the lint workflow covers it. No
     - **A local hook**, `language: system`, running `uv run --locked
       --no-default-groups --group lint --group test mypy <package> tests
       .github/scripts` with `pass_filenames: false`, checking against the
-      project's own locked environment. Its price is `skip: [mypy]` in
-      the `ci:` block, `uv` being absent on pre-commit.ci.
+      project's own locked environment, at the price of `skip: [mypy]`.
     - **`mirrors-mypy` with pinned `additional_dependencies`**, where the
       type check needs a small, stable set pinnable by hand. Its price is
       that second declaration, which nothing keeps equal to `uv.lock`;

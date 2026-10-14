@@ -11,8 +11,8 @@ without a condition, so where a tree declines one the finding is either
 the tree's or the section's, and a `BACKLOG` row is where that finding
 is recorded.
 
-One hook is read for its pin as well: `uv-lock` runs the uv its `rev:`
-names, so section 1's floor is what that pin answers to.
+`uv-lock` runs the uv its `rev:` names, so section 1's floor is what that
+pin answers to.
 """
 
 from __future__ import annotations
@@ -159,11 +159,13 @@ branch, which is why section 4 leaves `.github`'s own copy `local`.
 """
 
 PIN = re.compile(r"^[0-9a-f]{40}$")
-"""The `rev:` shape section 4 asks of a tree taking that hook.
+"""The `rev:` shape section 4 asks of `check-changelog` and of `ACTIONLINT`.
 
-A commit and not a tag, this repository cutting none, and forty hex
-characters is what `pinned-rev` accepts and what `autoupdate` moves by
-`git rev-parse FETCH_HEAD`.
+A sha and not a tag name: a commit where the hook repository cuts no
+tag, the annotated tag's own object where `autoupdate --freeze` writes
+one, as for `ACTIONLINT`. Forty hex characters is what `pinned-rev`
+accepts, and what `autoupdate` writes: `git rev-parse FETCH_HEAD` where
+no tag is cut, `git rev-parse <tag>` under `--freeze`.
 """
 
 COUNT = "--grandfathered"
@@ -342,6 +344,109 @@ def test_the_gate_runs_mypy(repository: str, trees: dict[str, Path]) -> None:
     assert runs, "no hook runs mypy; " + by_hand(
         repository, f"grep -n 'mirrors-mypy\\|id: mypy' {CONFIG}"
     )
+
+
+ACTIONLINT = "https://github.com/kjanat/actionlint"
+"""The repository section 4 says the workflow linter is taken from."""
+
+ACTIONLINT_ID = "actionlint-shellcheck"
+"""The id of the hook section 4 takes from `ACTIONLINT`."""
+
+ACTIONLINT_REFUSED = {
+    "id": "actionlint",
+    "repo": "https://github.com/Mateusz-Grzelinski/actionlint-py",
+    "rev": "v1.7.12.25",
+}
+"""The stanza of a gate that takes the Python packaging.
+
+A literal, for the reason `REFUSED` above is one: the check below is
+green wherever the gates agree, and a reading that accepted this
+stanza would stay green with nothing measured.
+"""
+
+
+def actionlint_departures(found: list[dict[str, Any]]) -> list[str]:
+    """Report a gate without the fork, or with a fork hook off its id or pin.
+
+    An actionlint hook taken from any other repository is reported too.
+
+    :param found: the hook mappings, as `hooks()` reads them.
+    :returns: one finding per departure listed, empty where there is none
+        of them.
+    """
+    ours = [hook for hook in found if hook["repo"] == ACTIONLINT]
+    others = [
+        hook
+        for hook in found
+        if "actionlint" in str(hook["repo"]) and hook["repo"] != ACTIONLINT
+    ]
+    return (
+        ([] if ours else [f"no hook is taken from {ACTIONLINT}"])
+        + [f"{hook['id']} is taken from {hook['repo']}" for hook in others]
+        + [
+            f"{hook['id']} is pinned at {hook['rev']!r}, not a sha"
+            for hook in ours
+            if not PIN.match(str(hook["rev"]))
+        ]
+        + [
+            f"{hook['id']} is the hook, not {ACTIONLINT_ID}"
+            for hook in ours
+            if hook["id"] != ACTIONLINT_ID
+        ]
+    )
+
+
+def test_the_gate_lints_workflows_with_the_actionlint_fork(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 4's *workflows* bullet: the kjanat fork, pinned by a sha.
+
+    README section 4 has why (btclib-org/.github#1698).
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    found = actionlint_departures(hooks(repository, trees))
+    assert not found, (
+        f"the gate departs from section 4's workflow linter: {found}; "
+        + by_hand(repository, f"grep -n -B1 -A3 'repo: .*actionlint' {CONFIG}")
+    )
+
+
+def test_a_gate_off_the_fork_is_reported() -> None:
+    """The check above reports what `actionlint_departures` lists.
+
+    That is a gate without the fork, a fork hook off its id or pin, and an
+    actionlint hook taken from any other repository.
+    """
+    other = f"actionlint is taken from {ACTIONLINT_REFUSED['repo']}"
+    assert actionlint_departures([ACTIONLINT_REFUSED]) == [
+        f"no hook is taken from {ACTIONLINT}",
+        other,
+    ]
+    assert actionlint_departures(
+        [{"id": "actionlint", "repo": ACTIONLINT, "rev": "v1.17.0"}]
+    ) == [
+        "actionlint is pinned at 'v1.17.0', not a sha",
+        f"actionlint is the hook, not {ACTIONLINT_ID}",
+    ]
+    agreeing = {"id": ACTIONLINT_ID, "repo": ACTIONLINT, "rev": "0" * 40}
+    assert actionlint_departures([agreeing]) == []
+    assert actionlint_departures([agreeing, ACTIONLINT_REFUSED]) == [other], (
+        "the Python packaging kept beside the fork is read as agreeing"
+    )
+    upstream = {
+        "id": "actionlint-system",
+        "repo": "https://github.com/rhysd/actionlint",
+    }
+    assert actionlint_departures([agreeing, upstream]) == [
+        "actionlint-system is taken from https://github.com/rhysd/actionlint"
+    ], "the upstream hook kept beside the fork is read as agreeing"
+    mirror = {"id": "actionlint-docker", "repo": "https://example.org/actionlint"}
+    assert actionlint_departures([agreeing, mirror]) == [
+        "actionlint-docker is taken from https://example.org/actionlint"
+    ], "a hook from a third actionlint repository is read as agreeing"
 
 
 PYROMA = "pyroma"

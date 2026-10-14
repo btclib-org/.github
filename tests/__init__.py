@@ -346,6 +346,23 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ),
     ),
     (
+        1698,
+        "test_the_gate_lints_workflows_with_the_actionlint_fork",
+        (
+            "bbt",
+            "bitcoin-core-rpc",
+            "bitcoin-node-tests",
+            "btclib-benchmarks",
+            "btclib-ecc",
+            "btclib-mnemonics",
+            "btclib-org.github.io",
+            "btclib-secp256k1",
+            "btclib-wallet",
+            "claude-process",
+            "portanode",
+        ),
+    ),
+    (
         1697,
         "test_a_repository_carries_the_secret_free_helper_owed_of_it",
         (
