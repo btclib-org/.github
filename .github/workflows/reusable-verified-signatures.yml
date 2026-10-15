@@ -62,7 +62,7 @@ jobs:
           AFTER: ${{ inputs.after || github.event.after || github.sha }}
         run: |
           zeros=0000000000000000000000000000000000000000
-          is_sha() { printf '%s' "$1" | grep -Eq '^[0-9a-f]{7,40}$'; }
+          is_sha() { [[ $1 =~ ^[0-9a-f]{7,40}$ ]]; }
           if ! is_sha "$AFTER"; then
             echo "::error::'$AFTER' is not a commit sha"
             exit 1
