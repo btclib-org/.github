@@ -19,12 +19,12 @@
      Running them before pushing is how you find out before the run
      does. `alignment.yml` runs on every pull request and gates
      nothing, so a red run from it shows on the pull request and holds
-     nothing. An unsigned commit is refused where it is written to
-     `main`, by a ruleset rather than by a run, and what a squash writes
-     there is the commit GitHub composes rather than the branch's own,
-     so that rule never reaches yours. So the last one is yours and
-     your reviewer's; CONTRIBUTING.md's *What gates a merge, and what
-     only reports* is where the division is stated.
+     nothing. What a squash writes to `main` is the commit GitHub composes
+     and signs, not the branch's own, so a branch's commits need not be
+     signed. `verified-signatures.yml` checks what lands, after the
+     push. So the last one is yours and your reviewer's;
+     CONTRIBUTING.md's *What gates a merge, and what only reports* is
+     where the division is stated.
      A repository whose commands differ from these carries a template of
      its own; this one is what GitHub shows where there is none. -->
 

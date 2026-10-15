@@ -148,7 +148,10 @@ def test_main_refuses_a_rewritten_commit(
     refusing = sorted(
         repository
         for repository, active in rulesets.items()
-        if enforcing(covering(active, "branch", MAIN), "required_signatures")
+        if any(
+            enforcing(covering(active, "branch", ref), "required_signatures")
+            for ref in (MAIN, "~DEFAULT_BRANCH", "~ALL")
+        )
     )
     assert not refusing, f"rulesets over main still require signatures: {refusing}"
     assert not missing, f"main is not protected by: {missing}"

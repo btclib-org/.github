@@ -3,11 +3,12 @@ name: reusable-verified-signatures
 
 # The check a repository's push-to-main workflow calls, so that every
 # commit landing on the default branch is shown to be signed, in a tree
-# where no ruleset refuses an unsigned one (btclib-org/.github#1738). A
-# squash merge carries GitHub's web-flow signature, our own commits the
-# maintainer's, and a bot's its own; the forge's `verified` field is the
-# answer for all three, and an outside contributor's branch is not asked
-# to be signed.
+# where no ruleset refuses an unsigned one (btclib-org/.github#1738).
+# What lands is the squash GitHub composes, which carries its web-flow
+# signature, and the forge's `verified` field is the answer for any
+# valid key rather than one particular signer. A contributor's branch is
+# not asked to be signed, since its commits never reach the default
+# branch.
 #
 # The caller triggers on `push` to its default branch and calls this
 # job. The range is `github.event.before..github.event.after`, which is
@@ -56,31 +57,46 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
           BEFORE: ${{ inputs.before || github.event.before }}
-          AFTER: ${{ inputs.after || github.event.after }}
+          # a dispatch carries no push event, so its head is the sha
+          # the run was dispatched on
+          AFTER: ${{ inputs.after || github.event.after || github.sha }}
         run: |
-          if [ -z "$AFTER" ]; then
-            echo "::error::no head commit: this is neither a push nor a call naming one"
+          zeros=0000000000000000000000000000000000000000
+          is_sha() { printf '%s' "$1" | grep -Eq '^[0-9a-f]{7,40}$'; }
+          if ! is_sha "$AFTER"; then
+            echo "::error::'$AFTER' is not a commit sha"
             exit 1
           fi
-          zeros=0000000000000000000000000000000000000000
-          shas=""
-          if [ -n "$BEFORE" ] && [ "$BEFORE" != "$zeros" ] &&
-             shas=$(gh api --paginate "repos/$REPOSITORY/compare/$BEFORE...$AFTER" \
-               --jq '.commits[].sha' 2>/dev/null) && [ -n "$shas" ]; then
+          if [ -n "$BEFORE" ] && ! is_sha "$BEFORE"; then
+            echo "::error::'$BEFORE' is not a commit sha"
+            exit 1
+          fi
+          shas=$AFTER
+          err=$(mktemp)
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "$zeros" ]; then
+            echo "no range (a new branch or a dispatch): checking $AFTER alone"
+          elif out=$(gh api --paginate "repos/$REPOSITORY/compare/$BEFORE...$AFTER" \
+              --jq '.commits[].sha' 2>"$err"); then
+            [ -z "$out" ] || shas=$out
             echo "checking $BEFORE..$AFTER"
+          elif grep -q 'HTTP 404' "$err"; then
+            echo "no range from $BEFORE (a forced push): checking $AFTER alone"
           else
-            shas=$AFTER
-            echo "no range from '$BEFORE' (a new branch or a forced push): checking $AFTER alone"
+            cat "$err"
+            echo "::error::the compare of $BEFORE...$AFTER failed"
+            exit 1
           fi
           failed=0
-          for sha in $shas; do
-            read -r verified reason < <(gh api "repos/$REPOSITORY/commits/$sha" \
-              --jq '[.commit.verification.verified, .commit.verification.reason] | join(" ")')
+          while IFS= read -r sha; do
+            out=$(gh api "repos/$REPOSITORY/commits/$sha" \
+              --jq '[.commit.verification.verified, .commit.verification.reason]
+                    | join(" ")') || out=""
+            read -r verified reason <<< "$out"
             if [ "$verified" = "true" ]; then
               echo "$sha verified"
             else
-              echo "::error::$sha is not verified ($reason)"
+              echo "::error::$sha is not verified (${reason:-lookup failed})"
               failed=1
             fi
-          done
+          done <<< "$shas"
           exit "$failed"

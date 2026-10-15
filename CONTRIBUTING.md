@@ -309,6 +309,8 @@ Everything else reports.
 ago in a repository nobody is working in, and an API that is down is
 nothing a pull request introduced.
 `links.yml` asks whether somebody else's server answered.
+`verified-signatures.yml` reports after each push to `main` whether every
+commit pushed is `verified`; section 11's *Signatures* has the rule.
 `claude-review.yml`'s own header says it must not become a required
 check — requiring it would make a review a gate to satisfy rather than a
 reading to answer.

@@ -2626,11 +2626,11 @@ more issues than the drift it caught (btclib-org/.github#1017).
 
 ### Signatures
 
-**Every commit that lands on `main` is signed.** A squash merge carries
-GitHub's web-flow signature. Our own commits carry the maintainer's key, and
-a bot's carry its own. A contributor need not sign their commits, since the
-squash merge is what lands. Their `Signed-off-by:` trailer is still required,
-as below.
+**Every commit that lands on `main` is signed**, by any valid key rather
+than one particular signer. What lands is the squash GitHub composes, which
+carries its web-flow signature. A contributor need not sign their branch's
+commits, since they never reach `main`. Their `Signed-off-by:` trailer is
+still required, as below.
 
 **`reusable-verified-signatures.yml` checks it**, on each push to `main`. It
 reads `.commit.verification.verified` of every commit in the push from the
