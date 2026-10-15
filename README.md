@@ -2044,6 +2044,18 @@ reason, a job reading the pull request's files deciding which builds run;
 and `codeql`, whose result the OpenSSF Scorecard reads off a merged pull
 request's own commits.
 
+**x86_64 macOS runs on the calendar and at release, and never as an ordinary
+check on a pull request.** Its runner fails on network steps far more often than
+the others (btclib-org/btclib-secp256k1#1191). Two cases stay: a calendar
+workflow's `pull_request` trigger filtered to its own configuration (*What
+decides is the clock, not the trigger*), and the timing-test dispatch of
+`os-macos.yml` (section 7's *A test that bounds time bounds a ratio*). The rule
+ends when GitHub Actions drops its x86_64 macOS runners, announced for August
+2027 (actions/runner-images#13045), or at any earlier date GitHub announces.
+Then the Intel runner leaves every workflow, and `btclib-secp256k1` stops
+publishing a `macosx` x86_64 wheel, announced in the release notes one release
+before.
+
 **A rewrite owes a dispatch.** A schedule-only workflow keeps the previous
 file's verdict as its newest run until its cron comes round, so a landing that
 changes its steps dispatches it from `main` and reads the badge after that run;
