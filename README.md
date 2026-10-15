@@ -269,8 +269,7 @@ version a Dependabot run's log has named on its `Package manager uv,
 Info : uv <version>` line. A floor below the updater's uv admits an
 older uv, which can rewrite the lock. Section 15 carries the commands
 that measure the floor, and `setup-uv` given no version input reads that
-key, so CI needs no second pin except `reusable-audit.yml`'s, which
-section 12 gives.
+key, so CI needs no second pin except the audit's, which section 12 gives.
 
 **The `uv-lock` hook's `rev:` is at or above that floor**: the pin
 selects the uv the hook bundles rather than the project's own, and under
@@ -3133,9 +3132,9 @@ such a finding only through a further push or a `close`/`reopen`.
   identifiers, and a package whose concluded licence carries a copyleft or a
   `LicenseRef` term is named by its purl in `allow-dependencies-licenses`, with
   its reason, so that a new one is a decision taken in a pull request. Only what
-  a pull request adds or changes is compared: an advisory published later
-  against a package already locked stops no pull request, Dependabot's alerts
-  reading the whole lock and section 12's audit what a release publishes.
+  a pull request adds or changes is compared; a package already locked is the
+  lint-job audit's of section 12, which also reads OSV's `MAL-` entries that the
+  compare does not.
   **`allow-ghsas` is not used**: an advisory allowed there owes a
   `.github/vex.toml` entry, section 12 stating a judgement of not affected in
   the release's own document.
@@ -3451,8 +3450,13 @@ A label means what its description says. Who applies and removes it:
   reach the service (exit 2) does not reach an index. What is audited is what the
   wheel declares: `[project] dependencies` and the extras, every key of
   `[dependency-groups]` being passed as `--no-group`. The development tools a
-  release does not publish are left to Dependabot's alerts, which read the whole
-  lock, and what a change adds to section 11's dependency review.
+  release does not publish are audited by the lint job, as below.
+  The last step of the lint job, `reusable-lint.yml`'s and this repository's
+  `lint.yml`'s, audits the whole lock: `check_audit.py --all-groups` passes no
+  `--no-group`. An advisory or an OSV malicious-package entry (`MAL-`) in any
+  group fails the job, a required check, on every run the job is not skipped,
+  and so does an OSV that cannot be reached (exit 2). Section 11's dependency
+  review reads no `MAL-` entry.
   The only ignore is an `id` of the tree's `.github/vex.toml`, passed as
   `--ignore`, so a release is exempted only from what its own signed document
   says it is not affected by. `check_audit.py` refuses a tree that keeps an
@@ -3460,8 +3464,10 @@ A label means what its description says. Who applies and removes it:
   ignore it passes, uv printing none. `--ignore` matches an advisory's id and its
   aliases in every package audited, where an entry names one component, so an
   entry for one component exempts the same advisory in another. The uv version
-  is pinned in `reusable-audit.yml` alone, `uv audit` being a preview feature,
-  and stays at or above every tree's floor.
+  is pinned in `reusable-audit.yml`, `uv audit` being a preview feature, and
+  stays at or above every tree's floor. The `setup-uv` of the audit step in
+  `reusable-lint.yml`'s and `lint.yml`'s lint job repeats the pin, and
+  `tests/check_audit_test.py` holds the three equal.
 - **A security advisory is worked in this order**, so that it reaches the CVE
   list, the GitHub Advisory Database and OSV with what a user needs to act on:
 

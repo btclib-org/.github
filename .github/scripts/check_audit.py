@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Audit the lock for what a release publishes, before it publishes.
+"""Audit the lock, for what a release publishes or for the whole lock.
 
 `uv audit` checks `uv.lock` against OSV and exits 1 on an advisory, 2 when
 the service cannot be reached, and 0 otherwise; this script passes that
@@ -17,7 +17,7 @@ dependency group unless told otherwise, and no flag selects the default
 groups alone, so every key of `[dependency-groups]` is passed as
 `--no-group`. What is left is `[project] dependencies` and the extras,
 which is what `Requires-Dist` carries. The development tools a release
-does not publish are left to Dependabot's alerts, which read the whole lock.
+does not publish are audited by the lint job (`--all-groups`, below).
 
 What is ignored is what `.github/vex.toml` names: each `[[not_affected]]`
 table's `id` is passed as `--ignore`, so the gate's only exemptions are
@@ -30,6 +30,11 @@ id and its aliases in every package of the set, where an entry names one
 component, so an entry for a component can exempt the same advisory in
 another. `--ignore-until-fixed` is not used, a finding that does not
 affect a release having nothing to do with whether a fix exists.
+
+`--all-groups` passes no `--no-group`, so the whole lock is audited: that is
+what the lint job of `reusable-lint.yml` runs, a malicious package being as
+harmful in a development tool as in the wheel. The refusals and the ignores
+are the same.
 
     uv run --no-project --python 3.15 .github/scripts/check_audit.py
 
@@ -90,10 +95,15 @@ def ignored(root: Path) -> list[str]:
     return list(dict.fromkeys(ids))
 
 
-def command(root: Path) -> list[str]:
-    """Return the `uv audit` command line for the tree at the root."""
+def command(root: Path, *, all_groups: bool = False) -> list[str]:
+    """Return the `uv audit` command line for the tree at the root.
+
+    :param root: the tree whose lock is audited.
+    :param all_groups: whether the dependency groups are audited too.
+    """
+    left_out = [] if all_groups else groups(root)
     flags = [
-        *(part for group in groups(root) for part in ("--no-group", group)),
+        *(part for group in left_out for part in ("--no-group", group)),
         *(
             part
             for vulnerability in ignored(root)
@@ -112,6 +122,11 @@ def main(
     parser.add_argument(
         "root", nargs="?", default=".", type=Path, help="the tree whose lock is audited"
     )
+    parser.add_argument(
+        "--all-groups",
+        action="store_true",
+        help="audit the dependency groups too, not only what the wheel declares",
+    )
     args = parser.parse_args(argv)
 
     refused = refusals(args.root)
@@ -120,7 +135,7 @@ def main(
             print(f"::error::{why}")
         return 1
     try:
-        audit = command(args.root)
+        audit = command(args.root, all_groups=args.all_groups)
     except ValueError as error:
         print(f"::error::{error}")
         return 1

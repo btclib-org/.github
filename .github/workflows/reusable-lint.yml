@@ -31,7 +31,8 @@ name: reusable-lint
 # rather than the checkout, so it takes no checkout and no hook
 # environment, and runs beside the hooks rather than after them. It compares
 # what the pull request adds or changes and reads no package it leaves
-# alone, so an advisory published later against one stops no pull request.
+# alone, so this job does not fail on an advisory published later against
+# one; the first job's audit step does.
 # README.md section 11 states the rule, and .github/dependency-review.yml
 # is what the job holds a pull request to.
 #
@@ -39,6 +40,13 @@ name: reusable-lint
 # `Signed-off-by:` trailer section 11 asks of each. The script it runs,
 # this repository's .github/scripts/check_sign_off.py, says which commits
 # it reads and why.
+#
+# The last step of the first job audits the whole lock against OSV, which
+# reports the malicious packages the second job's graph compare never
+# reads. It is a step and not a job so that it is under the context a
+# branch rule already names. It runs reusable-audit.yml's script over
+# every dependency group, where a release audits what the wheel declares,
+# on the uv that workflow pins.
 
 on:
   workflow_call:
@@ -187,6 +195,37 @@ jobs:
         run: >
           uv run --locked --only-group lint
           pre-commit run --all-files --show-diff-on-failure
+
+      # the whole lock, every group, against OSV: the malicious packages
+      # the dependency-review job never reads. A step of this job and not
+      # a job, so that its failure is under the context the branch rule
+      # already names. Installed last so that the steps above run on the
+      # default uv; the version is reusable-audit.yml's, `audit` being a
+      # preview feature, and tests/check_audit_test.py holds the two equal
+      - name: Install the uv the audit is pinned to
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: false
+      # `path:` puts it beside the caller's checkout instead of over it;
+      # sparse, so what lands is .github/scripts and this repository's
+      # root files. `ref: main` is the trust the caller extends by naming
+      # this workflow `@main`
+      - name: Check out the audit script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: btclib-org/.github
+          ref: main
+          path: standard
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+      # a calling tree has a uv.lock, the hooks step above running
+      # `uv run --locked`. --no-project and the interpreter named, the
+      # script being this repository's and not the caller's (section 10)
+      - name: Audit the whole lock
+        run: |
+          uv run --no-project --python 3.15 \
+            standard/.github/scripts/check_audit.py --all-groups
 
   dependency-review:
     # the name a check context is keyed by, after the calling job's own, as

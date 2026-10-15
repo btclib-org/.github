@@ -69,7 +69,7 @@ def _tree(root: Path, pyproject: str = _PYPROJECT, vex: str | None = None) -> Pa
 
 
 def _ran(
-    script: ModuleType, root: Path, status: int = 0
+    script: ModuleType, root: Path, status: int = 0, *flags: str
 ) -> tuple[int, list[list[str]]]:
     """Run `main` with a stand-in for uv, returning its status and commands."""
     commands: list[list[str]] = []
@@ -78,7 +78,7 @@ def _ran(
         commands.append(command)
         return status
 
-    return script.main([str(root)], run=run), commands
+    return script.main([str(root), *flags], run=run), commands
 
 
 def test_every_group_is_left_out_and_the_locked_flag_is_passed(
@@ -102,6 +102,38 @@ def test_every_group_is_left_out_and_the_locked_flag_is_passed(
         ]
     ]
     assert "--frozen" not in commands[0]
+
+
+def test_all_groups_leaves_none_out_and_keeps_the_rest(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """The lint job's audit reads the whole lock, with the same ignores."""
+    vex = '[[not_affected]]\nid = "GHSA-aaaa"\n'
+    code, commands = _ran(script, _tree(tmp_path, vex=vex), 0, "--all-groups")
+
+    assert code == 0
+    assert commands == [
+        [
+            "uv",
+            "audit",
+            "--preview-features",
+            "audit-command",
+            "--locked",
+            "--ignore",
+            "GHSA-aaaa",
+        ]
+    ]
+
+
+def test_all_groups_still_refuses_a_tree_ignore(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """The refusal of a second ignore list does not depend on the groups."""
+    pyproject = _PYPROJECT + '\n[tool.uv.audit]\nignore = ["GHSA-aaaa"]\n'
+    code, commands = _ran(script, _tree(tmp_path, pyproject), 0, "--all-groups")
+
+    assert code == 1
+    assert commands == []
 
 
 def test_a_tree_with_no_group_passes_no_group_flag(
@@ -282,3 +314,41 @@ def test_the_workflow_runs_the_script_where_its_checkout_puts_it() -> None:
 
     assert checkout["with"]["sparse-checkout"] == ".github/scripts"
     assert f"standard/{_SCRIPT.relative_to(ROOT).as_posix()}" in run
+
+
+def _setup(job: dict[str, Any]) -> dict[str, Any]:
+    """Return the job's `setup-uv` step that names a version."""
+    step: dict[str, Any] = next(
+        s
+        for s in job["steps"]
+        if s.get("uses", "").startswith("astral-sh/setup-uv@")
+        and "version" in s.get("with", {})
+    )
+    return step
+
+
+@pytest.mark.parametrize(
+    ("name", "script"),
+    [
+        ("reusable-lint.yml", "standard/.github/scripts/check_audit.py"),
+        ("lint.yml", ".github/scripts/check_audit.py"),
+    ],
+)
+def test_the_lint_job_audits_on_the_uv_the_release_audit_pins(
+    name: str, script: str
+) -> None:
+    """The pin is written once per workflow file, and the copies are equal.
+
+    :param name: the workflow holding a copy of the pin.
+    :param script: where its step finds the script.
+    """
+    path = ROOT / ".github" / "workflows" / name
+    job = yaml.safe_load(path.read_text(encoding="utf-8"))["jobs"]["lint"]
+
+    assert _setup(job)["with"]["version"] == _setup(_job())["with"]["version"]
+    steps = job["steps"]
+    run = next(s["run"] for s in steps if "check_audit.py" in s.get("run", ""))
+    assert "--all-groups" in run
+    assert script in run
+    assert steps[-1]["run"] == run, "the audit is the last step"
+    assert "if" not in steps[-1]
