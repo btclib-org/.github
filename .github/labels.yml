@@ -10,9 +10,32 @@ labels:
   - name: decision
     color: "5319e7"
     description: A decision the maintainer still has to take
-  - name: blocked
+  - name: needs-maintainer
     color: "d93f0b"
-    description: Waits for an event or a person the issue names
+    description: >-
+      Waits on a step only the maintainer can take, named in the issue
+  - name: needs-contributors
+    color: "f29513"
+    description: >-
+      Waits on people other than the maintainer contributing or reviewing
+  - name: waits-release
+    color: "fef2c0"
+    description: >-
+      Waits on a release of a btclib-org package, named in the issue
+  - name: waits-github
+    color: "ededed"
+    description: >-
+      Waits on GitHub acting (a CVE, an advisory entry, a support ticket)
+  - name: waits-issue
+    color: "f9d0c4"
+    description: Waits on another issue, named in the issue
+  - name: flaky-watch
+    color: "e4e669"
+    description: >-
+      A test failed once; waits for it to fail again with a log to read
+  - name: needs-hardware
+    color: "006b75"
+    description: Can be tested only on real hardware no runner has
   - name: on-hold
     color: "c5def5"
     description: Paused by someone's decision; resumes when someone decides to

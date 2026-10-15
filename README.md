@@ -3311,8 +3311,11 @@ A label means what its description says. Who applies and removes it:
 
 - `decision` — applied by whoever puts the question on the issue, and
   removed by whoever records the answer;
-- `blocked` — applied by whoever records the wait, and removed when it
-  ends;
+- `needs-maintainer`, `needs-contributors`, `waits-release`,
+  `waits-github`, `waits-issue`, `flaky-watch` and `needs-hardware` —
+  each names why an issue waits, which one generic label would not; a
+  one-line comment gives the detail. Applied by whoever records the
+  wait, and removed by whoever finds it over;
 - `on-hold` — applied by whoever pauses the issue, and removed by
   whoever resumes it;
 - `upstream-dependent` — applied by whoever finds the dependency, and
