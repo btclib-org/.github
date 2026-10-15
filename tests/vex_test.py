@@ -46,6 +46,9 @@ LIST = ".github/vex.toml"
 # the keys of one `[[not_affected]]` table, all of them required
 KEYS = frozenset({"id", "source", "component", "justification", "detail"})
 
+# the keys of an entry about a development group the release does not ship
+GROUP_KEYS = frozenset({"id", "source", "component", "group", "detail"})
+
 # the dismissal reasons that say the release is not affected; the API's
 # others, `tolerable_risk`, `no_bandwidth` and `fix_started`, say it is
 NOT_AFFECTING = frozenset({"not_used", "inaccurate"})
@@ -83,11 +86,12 @@ def problems(text: str) -> list[str]:
         return ["has no `[[not_affected]]` entry"]
     found = []
     for position, entry in enumerate(entries, 1):
-        if set(entry) != KEYS:
-            found.append(f"entry {position} holds {sorted(entry)}, not {sorted(KEYS)}")
+        keys = GROUP_KEYS if "group" in entry else KEYS
+        if set(entry) != keys:
+            found.append(f"entry {position} holds {sorted(entry)}, not {sorted(keys)}")
         elif not all(isinstance(value, str) and value for value in entry.values()):
             found.append(f"entry {position} has a value that is not a non-empty string")
-        elif entry["justification"] not in JUSTIFICATIONS:
+        elif "group" not in entry and entry["justification"] not in JUSTIFICATIONS:
             found.append(
                 f"entry {position} has the justification {entry['justification']!r}"
             )
@@ -363,3 +367,16 @@ def test_a_well_formed_list_has_no_problem() -> None:
         'justification = "code_not_present"\ndetail = "d"\n'
     )
     assert problems(text) == []
+
+
+_GROUP_ENTRY = (
+    '[[not_affected]]\nid = "GHSA-aaaa"\nsource = "GitHub"\ncomponent = "ecdsa"\n'
+    'group = "dev"\ndetail = "A development tool the release does not ship."\n'
+)
+
+
+def test_an_entry_about_a_group_holds_a_group_and_no_justification() -> None:
+    """A development group's entry has its own keys, and its own refusals."""
+    assert problems(_GROUP_ENTRY) == []
+    assert problems(_GROUP_ENTRY + 'justification = "code_not_present"\n')
+    assert problems(_GROUP_ENTRY.replace('group = "dev"\n', 'group = ""\n'))

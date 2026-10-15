@@ -177,6 +177,24 @@ jobs:
       - name: Run the offline tests
         run: uv run --locked --no-default-groups --group test pytest
 
+      # the whole lock, every group, against OSV: the malicious packages
+      # the Dependency review job never reads. A step of this job and not
+      # a job, so that its failure is under the context the branch rule
+      # already names. btclib-org/.github's reusable-lint.yml carries the
+      # same step, the script run from this checkout rather than from main
+      # so that a branch changing it is checked by its own copy. The uv
+      # version is reusable-audit.yml's, `audit` being a preview feature,
+      # and tests/check_audit_test.py holds the copies equal; it is
+      # installed last so that the steps above run on the default uv
+      - name: Install the uv the audit is pinned to
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: false
+
+      - name: Audit the whole lock
+        run: uv run --no-project .github/scripts/check_audit.py --all-groups
+
   dependency-review:
     # btclib-org/.github's reusable-lint.yml job, written out because this
     # file keeps its own lint job; section 11 of btclib-org/.github's
