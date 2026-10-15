@@ -176,8 +176,8 @@
     "status": "Met"
   },
   "OSPS-QA-04.02": {
-    "justification": "libsecp256k1 is bitcoin-core's repository, which this project does not administer. The sdist also ships secp256k1-zkp from the fork fametrano/secp256k1-zkp, pinned by submodule commit, and no wheel carries it. Every publish job needs zkp-pin, which checks that the pinned commit is signed by a recognized signer and close to upstream's master. https://github.com/btclib-org/btclib-secp256k1/blob/main/.gitmodules https://github.com/btclib-org/btclib-secp256k1/blob/main/.github/workflows/zkp-pin.yml",
-    "status": "N/A"
+    "justification": "libsecp256k1 comes from bitcoin-core/secp256k1, which this project does not administer. The sdist also ships secp256k1-zkp from the fork fametrano/secp256k1-zkp, and no wheel carries it. The fork's branches are unprotected, so what ships is the one commit the submodule pins by sha, and the pin moves only through a pull request here, under main's rules. Every publish job needs zkp-pin. It checks that the pinned commit is the one README.md names and documents, that it is at most one commit ahead of BlockstreamResearch/secp256k1-zkp's master, and that every commit ahead carries a valid signature from fametrano's or Andrew Poelstra's key. https://github.com/btclib-org/btclib-secp256k1/blob/main/.github/workflows/zkp-pin.yml https://github.com/btclib-org/btclib-secp256k1/blob/main/.gitmodules",
+    "status": "Met"
   },
   "OSPS-QA-05.01": {
     "justification": "No generated executable is committed. The only binary files are fuzz seed inputs and the Sphinx inventory python.inv. The vendored C libraries are git submodules of source. https://github.com/btclib-org/btclib-secp256k1",
@@ -248,7 +248,7 @@
     "status": "Met"
   },
   "OSPS-VM-05.03": {
-    "justification": "The Dependency review job runs on every pull request and is a required check on main (lint / Dependency review). It blocks a change that adds or changes a dependency with an advisory of moderate severity or above, or a licence outside the allow-list, unless an admin bypasses it. The standard names no check for malicious packages beyond that advisory check. https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "justification": "The required lint check audits the whole uv.lock, every dependency group, on every pull request: check_audit.py --all-groups runs uv audit, which reads OSV's malicious-package (MAL-) entries as well as advisories. Any such entry fails the check, and so does an OSV that cannot be reached. The audit's only exemption is a .github/vex.toml entry, reviewed like any other change. The required Dependency review check also blocks a change that adds a dependency with an advisory of moderate severity or above, or a licence outside the allow-list. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
     "status": "Met"
   },
   "OSPS-VM-06.01": {
