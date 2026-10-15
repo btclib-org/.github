@@ -4,7 +4,7 @@
     "status": "Met"
   },
   "OSPS-AC-02.01": {
-    "justification": "A new member gets read access, the organization's base permission. Every higher grant is assigned by hand. https://github.com/btclib-org/btclib-ecc/blob/main/REPOSITORY.md",
+    "justification": "A new member gets read access, the organization's base permission (gh api orgs/btclib-org --jq .default_repository_permission). Every higher grant is assigned by hand, through an issue in btclib-org/.github that an owner other than the one asking approves. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
     "status": "Met"
   },
   "OSPS-AC-03.01": {
@@ -72,7 +72,7 @@
     "status": "Met"
   },
   "OSPS-BR-07.02": {
-    "justification": "A secret is an environment secret only the owners reach, and any other store's entry is recorded in the spending repository's REPOSITORY.md. A secret is rotated when an owner changes or an exposure is suspected, and the list is reviewed yearly. btclib-org/.github's tests/secrets_test.py refuses an unrecorded entry. https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L2913-L2940",
+    "justification": "A secret is an environment secret that only the owners reach. A secret kept in any other store is recorded in the REPOSITORY.md of the repository that uses it, and btclib-org/.github's tests/secrets_test.py refuses an unrecorded one. A secret is rotated when an owner changes or an exposure is suspected. The secrets kept outside an environment are rotated before they are a year old, and the list is reviewed yearly. https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
     "status": "Met"
   },
   "OSPS-DO-01.01": {
@@ -108,7 +108,7 @@
     "status": "Met"
   },
   "OSPS-GV-01.01": {
-    "justification": "GOVERNANCE.md's Roles names who holds access to sensitive resources: the maintainer, the only bypass actor, and the three owners, each an administrator of every repository and a reviewer of the publishing environments. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "justification": "GOVERNANCE.md's Roles names who holds access to sensitive resources. fametrano is the maintainer and the only bypass actor. Every owner, named there by login, is an administrator of every repository and a reviewer of the publishing environments. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
     "status": "Met"
   },
   "OSPS-GV-01.02": {
@@ -128,7 +128,7 @@
     "status": "Met"
   },
   "OSPS-GV-04.01": {
-    "justification": "https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/GOVERNANCE.md#L44-L46 : a grant of write or admin, to any repository of the organization, is an issue in btclib-org/.github that states the reason, and an owner other than the one asking approves it there.",
+    "justification": "A grant of write or admin, to any repository of the organization, is an issue in btclib-org/.github that states the reason, and an owner other than the one asking approves it there. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
     "status": "Met"
   },
   "OSPS-LE-01.01": {
@@ -164,11 +164,11 @@
     "status": "Met"
   },
   "OSPS-QA-02.02": {
-    "justification": "Every release attaches a CycloneDX 1.6 SBOM generated from the built wheel, listing its dependencies and covered by the release attestation. https://github.com/btclib-org/btclib-ecc/releases/latest",
+    "justification": "The release is pure Python. Every GitHub release attaches a CycloneDX SBOM, generated from the built wheel and covered by the release attestation. https://github.com/btclib-org/btclib-ecc/releases/latest",
     "status": "Met"
   },
   "OSPS-QA-03.01": {
-    "justification": "main requires the five CI status checks, up to date with main (strict). enforce_admins is off, so an admin merge without them is a manual bypass, which the control allows. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "main requires the five CI status checks. enforce_admins is off, so an admin merge without them is a manual bypass, which the control allows. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Met"
   },
   "OSPS-QA-04.01": {
@@ -200,11 +200,11 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "main's ruleset requires one approving review, but the maintainer's pull_request-mode bypass remains, and recent pull requests landed without a non-author approval. https://github.com/btclib-org/.github/blob/main/README.md#review",
+    "justification": "main's ruleset requires one approving review from somebody other than the author, but fametrano remains a pull_request-mode bypass actor, so the repository still allows a merge without that approval. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Unmet"
   },
   "OSPS-SA-01.01": {
-    "justification": "CLAUDE.md's Architecture gives the components and their layering. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors and what each can do. https://github.com/btclib-org/btclib-ecc/blob/main/CLAUDE.md#architecture",
+    "justification": "CLAUDE.md's Architecture gives the package's modules, their layers bottom-up and what each may import. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversary, and what each can do. https://github.com/btclib-org/btclib-ecc/blob/main/CLAUDE.md#architecture https://github.com/btclib-org/btclib-ecc/blob/main/ASSURANCE_CASE.md#trust-boundaries",
     "status": "Met"
   },
   "OSPS-SA-02.01": {
@@ -220,11 +220,11 @@
     "status": "Met"
   },
   "OSPS-VM-01.01": {
-    "justification": "SECURITY.md gives the private reporting channels and states the timeframes: a report is acknowledged within 7 days, and a fix or a published advisory follows within 90 days. https://github.com/btclib-org/btclib-ecc/blob/main/SECURITY.md#L19",
+    "justification": "SECURITY.md's *Reporting a vulnerability* gives the private channels, a GitHub security advisory or email, and the timeframes: a report is acknowledged within 7 days, and a fix or a published advisory follows within 90 days. https://github.com/btclib-org/btclib-ecc/blob/main/SECURITY.md#reporting-a-vulnerability",
     "status": "Met"
   },
   "OSPS-VM-02.01": {
-    "justification": "SECURITY.md names the security contacts: a private GitHub security advisory, or email to security at btclib dot org, which reaches the three organization owners. https://github.com/btclib-org/btclib-ecc/blob/main/SECURITY.md",
+    "justification": "SECURITY.md names the security contacts: a private GitHub security advisory, or email to security at btclib dot org. GOVERNANCE.md's Roles says that address reaches every organization owner. https://github.com/btclib-org/btclib-ecc/blob/main/SECURITY.md#reporting-a-vulnerability https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
     "status": "Met"
   },
   "OSPS-VM-03.01": {
@@ -236,23 +236,23 @@
     "status": "Met"
   },
   "OSPS-VM-04.02": {
-    "justification": "Each release's CycloneDX SBOM lists in its vulnerabilities array every vulnerability judged not to affect it, with the reason, from the tree's .github/vex.toml. None is judged so today, so the tree has no such file. https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L3120-L3135",
+    "justification": "The CycloneDX SBOM a release attaches lists, in its vulnerabilities array, every vulnerability that the tree's .github/vex.toml judges not to affect the release, with the reason. A tree with no such judgement has no vex.toml, and its SBOM has no vulnerabilities key. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing",
     "status": "Met"
   },
   "OSPS-VM-05.01": {
-    "justification": "Every pull request runs actions/dependency-review-action, which fails on an added or changed dependency with an advisory of moderate severity or above, or with a licence outside the allow-list. https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L2892-L2909",
+    "justification": "The standard sets the threshold: actions/dependency-review-action fails a pull request that adds or changes a dependency with an advisory of moderate severity or above, or with a licence outside the allow-list. Its settings are one file, btclib-org/.github's .github/dependency-review.yml. https://github.com/btclib-org/.github/blob/main/.github/dependency-review.yml https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
     "status": "Met"
   },
   "OSPS-VM-05.02": {
-    "justification": "release.yml runs uv audit over every dependency the wheel declares before any publish job. An advisory, or a service it cannot reach, stops the release. The only exemption is an id the release's own signed VEX states as not affecting it. https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L3149-L3160",
+    "justification": "release.yml runs uv audit over every dependency the wheel declares, and every publish job needs it to succeed. An advisory, or a service it cannot reach, stops the release. The only exemption is an id that the tree's own .github/vex.toml, carried into the release's signed SBOM, states as not affecting it. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing",
     "status": "Met"
   },
   "OSPS-VM-05.03": {
-    "justification": "The Dependency review job runs on every pull request and is a required check on main (lint / Dependency review), so a pull request that violates the policy cannot merge without an admin bypass. Policy: https://github.com/btclib-org/.github/blob/7bc0f27d387604b70df8e4cb03afe873f6a821bb/README.md#L2892-L2909",
+    "justification": "The Dependency review job runs on every pull request and is a required check on main (lint / Dependency review). It blocks a change that adds or changes a dependency with an advisory of moderate severity or above, or a licence outside the allow-list, unless an admin bypasses it. The standard names no check for malicious packages beyond that advisory check. https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
     "status": "Met"
   },
   "OSPS-VM-06.01": {
-    "justification": "The standard's section 5 sets the threshold at zero: ruff runs select = ALL, bandit's S rules included, and each finding is fixed or suppressed in place with a reason. zizmor holds workflows to the same. CodeQL alerts have no stated threshold. https://github.com/btclib-org/.github/blob/main/README.md#5-ruff",
+    "justification": "The standard's section 5 sets a threshold of zero for ruff: select = ALL, bandit's S rules included, and each finding is fixed or suppressed in place with a reason. zizmor holds workflows to the same, in the required lint check. CodeQL runs on every pull request, but the standard sets no threshold for its alerts. https://github.com/btclib-org/.github/blob/main/README.md#5-ruff",
     "status": "Met"
   },
   "OSPS-VM-06.02": {
@@ -276,7 +276,7 @@
     "status": "Met"
   },
   "assurance_case": {
-    "justification": "The assurance case is https://github.com/btclib-org/btclib-ecc/blob/main/ASSURANCE_CASE.md: threat model, trust boundaries, the argument that secure design principles are applied, and how common implementation weaknesses are countered.",
+    "justification": "ASSURANCE_CASE.md gives the threat model, the trust boundaries, the argument that secure design principles are applied, and how each common implementation weakness is countered. https://github.com/btclib-org/btclib-ecc/blob/main/ASSURANCE_CASE.md",
     "status": "Met"
   },
   "automated_integration_testing": {
@@ -316,7 +316,7 @@
     "status": "N/A"
   },
   "bus_factor": {
-    "justification": "Almost every commit is the maintainer's, and one other person has landed one pull request. Continuity rests on the three organization owners, each an administrator of this repository. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md",
+    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review but has made no commit to this repository. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/btclib-ecc/graphs/contributors",
     "status": "Unmet"
   },
   "code_of_conduct": {
@@ -344,7 +344,7 @@
     "status": "Met"
   },
   "contributors_unassociated": {
-    "justification": "The project has one significant contributor; one other person has contributed once.",
+    "justification": "fametrano is the only significant contributor. In the last year, outside contributors have made only small changes. pmazzocchi, an organization owner, has made no commit to this repository. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. giacomocaironi, also an organization owner, has made no commit to this repository. https://github.com/fametrano https://github.com/pmazzocchi",
     "status": "Unmet"
   },
   "copyright_per_file": {
@@ -420,7 +420,7 @@
     "status": "Met"
   },
   "delivery_unsigned": {
-    "justification": null,
+    "justification": "Releases are published to PyPI and GitHub Releases and installed with pip from PyPI, all over HTTPS. No package or hash is fetched over plain HTTP. https://pypi.org/project/btclib-ecc/ https://github.com/btclib-org/btclib-ecc/releases",
     "status": "Met"
   },
   "dependency_monitoring": {
@@ -428,7 +428,7 @@
     "status": "Met"
   },
   "description_good": {
-    "justification": null,
+    "justification": "btclib-ecc is elliptic curve arithmetic, and the signature, key-agreement and commitment schemes built on it, in typed Python. It provides ECDSA, BIP340 Schnorr, MuSig2, FROST and Diffie-Hellman among others. https://btclib.org/btclib-ecc/",
     "status": "Met"
   },
   "discussion": {
@@ -444,7 +444,7 @@
     "status": "Met"
   },
   "documentation_basics": {
-    "justification": "Some documentation basics file contents found.",
+    "justification": "README.md says what btclib-ecc holds, how to install it and gives a first use, and the documentation holds the API reference. https://github.com/btclib-org/btclib-ecc#first-use https://btclib-ecc.readthedocs.io/",
     "status": "Met"
   },
   "documentation_current": {
@@ -456,11 +456,11 @@
     "status": "Met"
   },
   "documentation_quick_start": {
-    "justification": "The README's \"First use\" section (https://github.com/btclib-org/btclib-ecc#first-use) shows an ECDSA and a BIP340 sign-and-verify; tests/readme_test.py runs it in the test suite.",
+    "justification": "README.md's First use shows an ECDSA and a BIP340 sign-and-verify, and tests/readme_test.py runs it in the suite. https://github.com/btclib-org/btclib-ecc#first-use",
     "status": "Met"
   },
   "documentation_roadmap": {
-    "justification": "ROADMAP.md, organization-wide in btclib-org/.github, covers the period until 2027-09-30, is reviewed every September, and states what is intended and what is deliberately not; this tree's README.md links it. https://github.com/btclib-org/.github/blob/main/ROADMAP.md",
+    "justification": "ROADMAP.md, organization-wide in btclib-org/.github, is reviewed every September and states what is maintained, what is intended and what is deliberately not. This repository's README.md and CONTRIBUTING.md link it. https://github.com/btclib-org/.github/blob/main/ROADMAP.md",
     "status": "Met"
   },
   "documentation_security": {
@@ -468,7 +468,7 @@
     "status": "Met"
   },
   "dynamic_analysis": {
-    "justification": "mutation testing and fuzzing: https://github.com/btclib-org/btclib-ecc/actions/workflows/mutation.yml, https://github.com/btclib-org/btclib-ecc/actions/workflows/fuzz.yml",
+    "justification": "Every release runs the test suite before it is published. release.yml calls test.yml, and the PyPI upload runs only if it passes. The suite fails below 100% coverage, branches included. ClusterFuzzLite fuzzing and cosmic-ray mutation testing also run every week. https://github.com/btclib-org/btclib-ecc/blob/main/.github/workflows/release.yml https://github.com/btclib-org/btclib-ecc/blob/main/.github/workflows/fuzz.yml",
     "status": "Met"
   },
   "dynamic_analysis_enable_assertions": {
@@ -476,7 +476,7 @@
     "status": "Met"
   },
   "dynamic_analysis_fixed": {
-    "justification": null,
+    "justification": "No fuzzing or mutation-testing finding is open, and the weekly fuzz and mutation runs on main pass. https://github.com/btclib-org/btclib-ecc/actions/workflows/fuzz.yml https://github.com/btclib-org/btclib-ecc/actions/workflows/mutation.yml",
     "status": "Met"
   },
   "dynamic_analysis_unsafe": {
@@ -580,7 +580,7 @@
     "status": "Met"
   },
   "regression_tests_added50": {
-    "justification": "Every merged pull request that changes src/ also changes tests/, bar one that only edits docstrings (#155). The 100% line and branch coverage gate also fails a fix whose new code no test runs. https://github.com/btclib-org/btclib-ecc/pulls?q=is%3Apr+is%3Amerged",
+    "justification": "A merged pull request that changes code under src/ also changes tests/, unless it leaves behaviour as it was: a docstring, a comment, a move, a removal or a refactor. The 100% line and branch coverage gate also fails a fix whose new code no test runs. https://github.com/btclib-org/btclib-ecc/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
     "status": "Met"
   },
   "release_notes": {
@@ -612,7 +612,7 @@
     "status": "Met"
   },
   "report_process": {
-    "justification": "Non-trivial SECURITY[.md] file found file in repository: <https://github.com/btclib-org/btclib-ecc/blob/main/SECURITY.md>. [osps_do_02_01]",
+    "justification": "Bugs are reported in GitHub Issues, through the bug-report form. CONTRIBUTING.md's The issue tracker says where, and SECURITY.md takes vulnerabilities instead. https://github.com/btclib-org/btclib-ecc/issues https://github.com/btclib-org/btclib-ecc/blob/main/CONTRIBUTING.md#the-issue-tracker",
     "status": "Met"
   },
   "report_responses": {
@@ -668,7 +668,7 @@
     "status": "Met"
   },
   "static_analysis_fixed": {
-    "justification": null,
+    "justification": "No static-analysis finding is open: CodeQL has no open alert, and ruff and mypy findings fail the required lint check. https://github.com/btclib-org/btclib-ecc/blob/main/.github/workflows/codeql.yml",
     "status": "Met"
   },
   "static_analysis_often": {
@@ -684,7 +684,7 @@
     "status": "Met"
   },
   "test_continuous_integration": {
-    "justification": "badge monitored at https://github.com/btclib-org/btclib-ecc?tab=readme-ov-file",
+    "justification": "test.yml runs the suite on every pull request and on every push to main that changes more than Markdown files. Its aggregate job, test: every job passed, is a required check on main. https://github.com/btclib-org/btclib-ecc/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "test_invocation": {
@@ -696,7 +696,7 @@
     "status": "Met"
   },
   "test_policy": {
-    "justification": "100% coverage floor",
+    "justification": "CONTRIBUTING.md makes 100% coverage a gate every change must pass, so new functionality comes with its tests. https://github.com/btclib-org/btclib-ecc/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
     "status": "Met"
   },
   "test_policy_mandated": {
@@ -712,7 +712,7 @@
     "status": "Met"
   },
   "tests_are_added": {
-    "justification": "100% coverage floor",
+    "justification": "The required check test: every job passed fails any pull request that leaves a line or branch untested. The merged pull requests show recent changes landing with their tests. https://github.com/btclib-org/btclib-ecc/pulls?q=is%3Apr+is%3Amerged",
     "status": "Met"
   },
   "tests_documented_added": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "main's ruleset requires one approving review, but the maintainer's pull_request-mode bypass remains, and recent pull requests landed without a non-author approval. https://github.com/btclib-org/.github/blob/main/README.md#review",
+    "justification": "main's ruleset requires one approving review from somebody other than the author, and fametrano can merge without it through a pull_request-mode bypass. Since 2026-10-14 the bypass is no longer everyday practice. The releases published before that date ship mostly changes merged through it, so fewer than half of what they ship was reviewed by another person. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {
@@ -748,7 +748,7 @@
     "status": "Met"
   },
   "vulnerabilities_fixed_60_days": {
-    "justification": "No publicly known vulnerability is left unpatched. Each was fixed in a release within two days of being reported. https://github.com/btclib-org/btclib-ecc/security/advisories",
+    "justification": "Every published advisory names the release that fixes it, and no Dependabot alert is open. https://github.com/btclib-org/btclib-ecc/security/advisories",
     "status": "Met"
   },
   "vulnerability_report_credit": {
@@ -764,7 +764,7 @@
     "status": "Met"
   },
   "vulnerability_report_response": {
-    "justification": "Every vulnerability report so far was answered and fixed within two days of being filed. https://github.com/btclib-org/btclib-ecc/security/advisories",
+    "justification": "GHSA-m38m-987v-j55h and GHSA-r5pw-9wrg-m3mj, reported privately by pmazzocchi on 2026-09-30, were fixed in v2026.10.2 and published on 2026-10-02. GHSA-2wgq-4cfh-5gqh was published with its fix the day it was opened. https://github.com/btclib-org/btclib-ecc/security/advisories",
     "status": "Met"
   },
   "vulnerability_response_process": {
@@ -776,7 +776,7 @@
     "status": "Met"
   },
   "warnings_fixed": {
-    "justification": "warning are not tolerated: mypy strict with all relevant extra checks activated, see https://github.com/btclib-org/btclib-ecc/blob/main/pyproject.toml",
+    "justification": "Warnings are not tolerated: ruff, strict mypy and pytest's filterwarnings = [\"error\"] fail the required checks. https://github.com/btclib-org/btclib-ecc/blob/main/pyproject.toml",
     "status": "Met"
   },
   "warnings_strict": {
