@@ -333,32 +333,16 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
-        1674,
-        "test_a_repository_carries_the_label_set",
-        (
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-ecc",
-            "btclib-mnemonics",
-            "btclib-node",
-            "btclib-secp256k1",
-            "btclib-wallet",
-        ),
-    ),
-    (
         1698,
         "test_the_gate_lints_workflows_with_the_actionlint_fork",
         (
-            "bbt",
             "bitcoin-core-rpc",
-            "bitcoin-node-tests",
             "btclib-benchmarks",
             "btclib-ecc",
             "btclib-mnemonics",
             "btclib-org.github.io",
             "btclib-secp256k1",
             "btclib-wallet",
-            "claude-process",
             "portanode",
         ),
     ),
