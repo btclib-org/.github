@@ -434,7 +434,7 @@ jobs:
           chmod 555 "$DIR/post-review" "$DIR/gh-get" "$DIR"
       - name: Review against REVIEWING.md
         id: review
-        uses: anthropics/claude-code-action@97c53473391bff1901034d4b454b5bac7ab7a029 # v1.0.239
+        uses: anthropics/claude-code-action@2dca132ff0e0c4094ce6048b422c6915a071210b # v1.0.247
         # a diff read and a comment posted; a review past this is hung
         # on the API or on its own reasoning, and either way it has
         # written no verdict. On the step rather than on the job for the
@@ -884,7 +884,7 @@ jobs:
             exit 1
           fi
       - name: Answer the mention
-        uses: anthropics/claude-code-action@97c53473391bff1901034d4b454b5bac7ab7a029 # v1.0.239
+        uses: anthropics/claude-code-action@2dca132ff0e0c4094ce6048b422c6915a071210b # v1.0.247
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # the token's scopes, for the reason the header gives
