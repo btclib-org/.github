@@ -1,0 +1,86 @@
+---
+name: reusable-verified-signatures
+
+# The check a repository's push-to-main workflow calls, so that every
+# commit landing on the default branch is shown to be signed, in a tree
+# where no ruleset refuses an unsigned one (btclib-org/.github#1738). A
+# squash merge carries GitHub's web-flow signature, our own commits the
+# maintainer's, and a bot's its own; the forge's `verified` field is the
+# answer for all three, and an outside contributor's branch is not asked
+# to be signed.
+#
+# The caller triggers on `push` to its default branch and calls this
+# job. The range is `github.event.before..github.event.after`, which is
+# the caller's event, as it is in reusable-changes.yml. Two optional
+# inputs replace the two ends, and a rehearsal names them: the range of
+# commits to check cannot otherwise be chosen, the event being the push.
+#
+# The commits are listed and read through the API, so no checkout is
+# made and the job needs nothing beyond `contents: read`. A new branch,
+# whose `before` is all zeros, and a forced push, whose `before` the
+# forge no longer has, give no range: the head commit alone is checked,
+# and the log says so.
+
+on:
+  workflow_call:
+    inputs:
+      before:
+        description: >
+          The sha the range starts after, in place of the push event's
+          `before`. For a rehearsal; leave empty on a push.
+        type: string
+        default: ""
+      after:
+        description: >
+          The sha the range ends at, in place of the push event's
+          `after`. For a rehearsal; leave empty on a push.
+        type: string
+        default: ""
+
+# least privilege for the GITHUB_TOKEN: the job reads commits and writes
+# nothing, so no elevation
+permissions:
+  contents: read
+
+jobs:
+  verified-signatures:
+    # the name the check context is keyed by, after the calling job's own
+    name: Verified signatures
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # the sha and the repository arrive through the environment and not
+      # through an expression pasted into the script
+      - name: Check that every commit pushed is verified
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          BEFORE: ${{ inputs.before || github.event.before }}
+          AFTER: ${{ inputs.after || github.event.after }}
+        run: |
+          if [ -z "$AFTER" ]; then
+            echo "::error::no head commit: this is neither a push nor a call naming one"
+            exit 1
+          fi
+          zeros=0000000000000000000000000000000000000000
+          shas=""
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != "$zeros" ] &&
+             shas=$(gh api --paginate "repos/$REPOSITORY/compare/$BEFORE...$AFTER" \
+               --jq '.commits[].sha' 2>/dev/null) && [ -n "$shas" ]; then
+            echo "checking $BEFORE..$AFTER"
+          else
+            shas=$AFTER
+            echo "no range from '$BEFORE' (a new branch or a forced push): checking $AFTER alone"
+          fi
+          failed=0
+          for sha in $shas; do
+            read -r verified reason < <(gh api "repos/$REPOSITORY/commits/$sha" \
+              --jq '[.commit.verification.verified, .commit.verification.reason] | join(" ")')
+            if [ "$verified" = "true" ]; then
+              echo "$sha verified"
+            else
+              echo "::error::$sha is not verified ($reason)"
+              failed=1
+            fi
+          done
+          exit "$failed"

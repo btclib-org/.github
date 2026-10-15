@@ -2626,11 +2626,16 @@ more issues than the drift it caught (btclib-org/.github#1017).
 
 ### Signatures
 
-**Every commit reaching a protected branch carries a valid signature**,
-enforced by a `required_signatures` ruleset rule. It does not have to be
-one particular signer: the maintainer's key, GitHub's web-flow key on a
-button-driven merge, and a bot's key are all valid, which is what makes
-the merge buttons usable.
+**Every commit that lands on `main` is signed.** A squash merge carries
+GitHub's web-flow signature. Our own commits carry the maintainer's key, and
+a bot's carry its own. A contributor need not sign their commits, since the
+squash merge is what lands. Their `Signed-off-by:` trailer is still required,
+as below.
+
+**`reusable-verified-signatures.yml` checks it**, on each push to `main`. It
+reads `.commit.verification.verified` of every commit in the push from the
+API, and fails naming each one that is not `true`. It replaces the
+`required_signatures` ruleset rule, which is removed.
 
 Tags too: a release tag is signed, with `git tag -s` in the release steps.
 A `tag-integrity` ruleset over `refs/tags/v*` refuses a tag push that brings
