@@ -335,38 +335,17 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         1698,
         "test_the_gate_lints_workflows_with_the_actionlint_fork",
-        (
-            "bitcoin-core-rpc",
-            "btclib-benchmarks",
-            "btclib-ecc",
-            "btclib-mnemonics",
-            "btclib-org.github.io",
-            "btclib-wallet",
-            "portanode",
-        ),
+        ("btclib-wallet",),
     ),
     (
         1697,
         "test_a_repository_carries_the_secret_free_helper_owed_of_it",
-        (
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-ecc",
-            "btclib-mnemonics",
-            "btclib-node",
-            "btclib-wallet",
-        ),
+        ("btclib-node", "btclib-wallet"),
     ),
     (
         1723,
         "test_a_baseline_with_the_hex_plugin_filters_frozen_rev_lines",
-        (
-            "bitcoin-core-rpc",
-            "btclib-benchmarks",
-            "btclib-org.github.io",
-            "btclib-wallet",
-            "portanode",
-        ),
+        ("btclib-wallet",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
