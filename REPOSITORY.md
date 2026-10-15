@@ -138,8 +138,8 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
            bypass: [.bypass_actors[]?.bypass_mode]}'
 # {"bypass":[],"enforcement":"active","name":"main-integrity",
 #  "refs":["refs/heads/main"],
-#  "rules":["required_signatures","required_linear_history",
-#           "non_fast_forward","deletion"],"target":"branch"}
+#  "rules":["required_linear_history","non_fast_forward","deletion"],
+#  "target":"branch"}
 # {"bypass":["pull_request"],"enforcement":"active",
 #  "name":"main-self-merge","refs":["refs/heads/main"],
 #  "rules":["pull_request"],"target":"branch"}
@@ -147,7 +147,7 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
 #  "refs":["refs/tags/v*"],"rules":["required_signatures"],"target":"tag"}
 ```
 
-- `main-integrity` — required signatures, required linear history, no
+- `main-integrity` — required linear history, no
   force pushes, no deletions — with **no bypass actor at all**, which is
   what makes every one of those true of an administrator too.
 - `main-self-merge` — a pull request, an approving review, stale reviews
@@ -204,28 +204,27 @@ gh api repos/btclib-org/.github/commits/main \
 # {"reason":"valid","verified":true}
 ```
 
-`required_signatures` is a rule of `main-integrity`, so what it refuses
-is a push writing an unsigned commit to `refs/heads/main`, at the push
-rather than in a check reported afterwards, and with no bypass actor it
-refuses one from everybody. Nothing above reaches a branch other than
-that one.
+No ruleset over `main` carries `required_signatures`, so nothing refuses
+an unsigned commit at the push. `verified-signatures.yml` checks after the
+push: for each commit pushed it reads the call above and fails naming any
+whose `verified` is not `true`. A red run is read in the Actions tab; the
+check is not a required one.
 
 What the call answers is the signature on the squash GitHub composed at
 the merge button, made with its own web-flow key rather than the
-maintainer's, and that satisfies the rule: [it asks for a valid signature
-and not for a particular signer][s11-sigs]. The section below reads back
-squash as the only merge method, so that commit is also the only one the
-rule ever sees: a branch's own are never written to `main`.
+maintainer's. [The standard asks for a verified commit and not for a
+particular signer][s11-sigs]. The section below reads back squash as the
+only merge method, so that commit is also the only one a pull request
+writes to `main`: a branch's own are never written there.
 
-So what no rule covers is every commit but that one, pushed or not, and a
-verified `main` is not evidence that any of them is signed.
-`git log --format='%G? %GS' origin/main..` is what answers for a branch's
-own, an `N` being a defect to fix rather than to explain.
+`git log --format='%G? %GS' origin/main..` answers for the maintainer's own
+commits before they are pushed, an `N` being a defect to fix rather than
+to explain.
 
 The call above answers for whichever commit is at the tip today, so it
 is a fact about a changing world rather than a setting: the next merge
 changes what it answers without anything here having decided
-differently. Read at 2026-09-21T06:11:42Z.
+differently. Read at 2026-10-15T15:00:34Z.
 
 ```shell
 gh api repos/btclib-org/.github/branches/main/protection \

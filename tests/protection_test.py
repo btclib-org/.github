@@ -10,8 +10,9 @@ dismissal of stale reviews, conversation resolution and `enforce_admins`
 live in classic protection alone, which is the half that had drifted
 while nothing read it -- btclib-org/.github#88 has the measurement. That
 issue closed without deciding classic's own `required_signatures`;
-btclib-org/.github#1381 settled it off, `main-integrity` already
-carrying the rule, and this test reads that field back too.
+btclib-org/.github#1381 settled it off, and this test reads that field
+back too. No ruleset over `main` carries the rule either
+(btclib-org/.github#1738), which `settings_test.py` reads.
 
 The review of added dependencies and the `Signed-off-by:` check are
 required checks too, and each context depends on how the tree's
