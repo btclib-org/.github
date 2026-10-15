@@ -2210,7 +2210,7 @@ by that row.
 - `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
   `btclib-mnemonics`;
-- `qa-assets` — `btclib`;
+- `qa-assets` — `btclib`, `btclib-wallet`;
 - `fuzz` — `btclib`, `btclib-secp256k1`, `btclib-node`, `btclib-wallet`,
   `btclib-ecc`, `btclib-mnemonics`;
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`,
@@ -2325,12 +2325,12 @@ and the badge land together.
     makes the label worth less to a newcomer.
     `tests/good_first_issue_test.py` reads the dates per tree.
 - **`qa-assets` follows a tree with parsers of its own for the transactions,
-  blocks, scripts and peer-to-peer messages that the fuzzers of Bitcoin Core and
-  rust-bitcoin feed their parsers.** The sentinel replays the `qa-assets`
-  corpora of both for those, and no others, through the tree's parsers. A
-  tree that reads them through another tree's parsers, as `btclib-node` does
-  with `btclib`'s, would replay those parsers again. `btclib-secp256k1` parses
-  no transaction, block, script or message. The corpora grow as those fuzzers
+  blocks, scripts, peer-to-peer messages, PSBTs and output descriptors that the
+  fuzzers of Bitcoin Core and rust-bitcoin feed their parsers.** The sentinel
+  replays the `qa-assets` corpora of both for those, and no others, through the
+  tree's parsers. A tree that reads them through another tree's parsers, as
+  `btclib-node` does with `btclib`'s, would replay those parsers again.
+  `btclib-secp256k1` parses none of them. The corpora grow as those fuzzers
   run, with no commit in the tree, so a clock asks. A failure is an issue
   against a parser.
 - **`fuzz` follows a tree that parses whatever a stranger sends**: nobody stands
