@@ -248,7 +248,7 @@
     "status": "Met"
   },
   "OSPS-VM-05.03": {
-    "justification": "The Dependency review job runs on every pull request and is a required check on main (lint / Dependency review). It blocks a change that adds or changes a dependency with an advisory of moderate severity or above, or a licence outside the allow-list, unless an admin bypasses it. The standard names no check for malicious packages beyond that advisory check. https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "justification": "The required lint check audits the whole uv.lock, every dependency group, on every pull request: check_audit.py --all-groups runs uv audit, which reads OSV's malicious-package (MAL-) entries as well as advisories. Any such entry fails the check, and so does an OSV that cannot be reached. The audit's only exemption is a .github/vex.toml entry, reviewed like any other change. The required Dependency review check also blocks a change that adds a dependency with an advisory of moderate severity or above, or a licence outside the allow-list. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
     "status": "Met"
   },
   "OSPS-VM-06.01": {
@@ -264,8 +264,8 @@
     "status": "Met"
   },
   "accessibility_best_practices": {
-    "justification": "The only user interface is entropy.collect_rolls, a plain-text dice prompt in the terminal built on input() and print(). There is no GUI and no web front end, so the terminal and the user's own screen reader carry accessibility. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md#limitations-not-vulnerabilities",
-    "status": "N/A"
+    "justification": "The only user interface is entropy.collect_rolls, a dice prompt in the terminal built on input() and print(). Its prompts are plain text, with no colour, cursor movement or layout, so any screen reader the terminal supports reads them as written. There is no GUI and no web front end. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md#limitations-not-vulnerabilities",
+    "status": "Met"
   },
   "achieve_passing": {
     "justification": null,
@@ -548,8 +548,8 @@
     "status": "Met"
   },
   "internationalization": {
-    "justification": "The text the package produces for end users is the mnemonic sentence, and it comes in every language the specifications give a word list for: BIP39's reference lists, with Japanese joined by the ideographic space BIP39 requires, and Electrum's own. The language is read back off the words. SLIP-0039 defines English alone. The dice prompt of entropy.collect_rolls is in English only. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics/_data",
-    "status": "Met"
+    "justification": "The mnemonic sentence comes in every language the specifications give a word list for: BIP39's reference lists, with Japanese joined by the ideographic space BIP39 requires, and Electrum's own. The language is read back off the words. SLIP-0039 defines English alone. The dice prompt of entropy.collect_rolls is in English only, and issue #94 weighs offering it in those languages. https://github.com/btclib-org/btclib-mnemonics/issues/94 https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics/_data",
+    "status": "Unmet"
   },
   "know_common_errors": {
     "justification": "ASSURANCE_CASE.md lists the common implementation weaknesses, such as CWE-209 and CWE-330, and what counters each: https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md",
