@@ -2626,11 +2626,16 @@ more issues than the drift it caught (btclib-org/.github#1017).
 
 ### Signatures
 
-**Every commit reaching a protected branch carries a valid signature**,
-enforced by a `required_signatures` ruleset rule. It does not have to be
-one particular signer: the maintainer's key, GitHub's web-flow key on a
-button-driven merge, and a bot's key are all valid, which is what makes
-the merge buttons usable.
+**Every commit that lands on `main` is signed**, by any valid key rather
+than one particular signer. What lands is the squash GitHub composes, which
+carries its web-flow signature. A contributor need not sign their branch's
+commits, since they never reach `main`. Their `Signed-off-by:` trailer is
+still required, as below.
+
+**`reusable-verified-signatures.yml` checks it**, on each push to `main`. It
+reads `.commit.verification.verified` of every commit in the push from the
+API, and fails naming each one that is not `true`. It replaces the
+`required_signatures` ruleset rule, which is removed.
 
 Tags too: a release tag is signed, with `git tag -s` in the release steps.
 A `tag-integrity` ruleset over `refs/tags/v*` refuses a tag push that brings
@@ -2681,9 +2686,9 @@ the bots' included.
 Classic protection carries the required checks with `strict` **off**,
 one approving review, `dismiss_stale_reviews`, linear history, no force
 pushes, no deletions, `required_conversation_resolution`, and
-`enforce_admins` **off**. `required_signatures` is **off** there too:
-`main-integrity` already enforces it with no bypass actor, so classic's
-own copy of the rule would only duplicate it.
+`enforce_admins` **off**. `required_signatures` is **off** there too, as it
+is in every ruleset over `main`: the check of section 11's *Signatures*
+replaces the rule.
 
 With `strict` on, each landing would leave every other open pull request
 behind, and each would need a rebase, a CI run and a new approval. What
@@ -2697,7 +2702,7 @@ rebases, for a second CI run per pull request (btclib-org/.github#1619).
 Three rulesets sit beside it, additive — rules aggregate across rulesets
 and classic protection, taking the most restrictive combination:
 
-- **`main-integrity`** — required signatures, linear history, no force
+- **`main-integrity`** — linear history, no force
   pushes, no deletions. **No bypass actor, for anyone, ever.**
 - **`main-self-merge`** — require a pull request, one approving review,
   dismissal of stale reviews, conversation resolution, and `squash` as
@@ -2712,8 +2717,8 @@ its holder *while merging a pull request* and at no other time, which
 is all the bypass is for: a pull request landing without anybody
 else's approval. `GOVERNANCE.md`'s *How a decision is made* says when
 the maintainer uses it. A direct push to `main` is refused for everyone;
-`always` would permit one, for nothing a valid signature does not
-already give.
+`always` would permit one, and the signature check reports after a push
+and refuses nothing.
 
 **What it excuses is the rule, not the approval count**, and
 `dismiss_stale_reviews_on_push` is a parameter of that same rule. So the
@@ -3979,8 +3984,9 @@ decides, not being a library, because an index shows the classifiers of any
 distribution. A workflow's interpreters against the window stay a reading: one
 outside it is correct where the reason is beside it.
 
-The settings: squash the only method, signatures required with an **empty**
-bypass list, classic's own `required_signatures` **off**, the self-merge
+The settings: squash the only method, the `main-integrity` rules held with an
+**empty** bypass list, `required_signatures` **off** in classic protection and
+in every ruleset over `main`, the self-merge
 bypass in `pull_request` mode and never `always`, a token that is `read`,
 and `allowed_actions: all` with `sha_pinning_required: true`:
 
@@ -4537,9 +4543,10 @@ runs over the whole tree rather than over what its own step added.
    it. The credential is an organization secret with `visibility=all`,
    so a repository configures nothing for it:
    `gh api orgs/<org>/actions/secrets` is the reading.
-1. **Signatures and branch rules** — `required_signatures`, no direct
-   push, linear history, one review, squash-only. An unsigned commit that
-   already landed is history; the rule stops the next one.
+1. **Signatures and branch rules** — the signature check on each push to
+   `main`, no direct push, linear history, one review, squash-only. An
+   unsigned commit that already landed is history; the check names the
+   next one.
 1. **Token permissions** — `contents: read` by default, one elevation per
    job, and no long-lived publishing token where OIDC works.
 1. **Secret scanning and its push protection**, with the settings above:

@@ -1,0 +1,102 @@
+---
+name: reusable-verified-signatures
+
+# The check a repository's push-to-main workflow calls, so that every
+# commit landing on the default branch is shown to be signed, in a tree
+# where no ruleset refuses an unsigned one (btclib-org/.github#1738).
+# What lands is the squash GitHub composes, which carries its web-flow
+# signature, and the forge's `verified` field is the answer for any
+# valid key rather than one particular signer. A contributor's branch is
+# not asked to be signed, since its commits never reach the default
+# branch.
+#
+# The caller triggers on `push` to its default branch and calls this
+# job. The range is `github.event.before..github.event.after`, which is
+# the caller's event, as it is in reusable-changes.yml. Two optional
+# inputs replace the two ends, and a rehearsal names them: the range of
+# commits to check cannot otherwise be chosen, the event being the push.
+#
+# The commits are listed and read through the API, so no checkout is
+# made and the job needs nothing beyond `contents: read`. A new branch,
+# whose `before` is all zeros, and a forced push, whose `before` the
+# forge no longer has, give no range: the head commit alone is checked,
+# and the log says so.
+
+on:
+  workflow_call:
+    inputs:
+      before:
+        description: >
+          The sha the range starts after, in place of the push event's
+          `before`. For a rehearsal; leave empty on a push.
+        type: string
+        default: ""
+      after:
+        description: >
+          The sha the range ends at, in place of the push event's
+          `after`. For a rehearsal; leave empty on a push.
+        type: string
+        default: ""
+
+# least privilege for the GITHUB_TOKEN: the job reads commits and writes
+# nothing, so no elevation
+permissions:
+  contents: read
+
+jobs:
+  verified-signatures:
+    # the name the check context is keyed by, after the calling job's own
+    name: Verified signatures
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # the sha and the repository arrive through the environment and not
+      # through an expression pasted into the script
+      - name: Check that every commit pushed is verified
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          BEFORE: ${{ inputs.before || github.event.before }}
+          # a dispatch carries no push event, so its head is the sha
+          # the run was dispatched on
+          AFTER: ${{ inputs.after || github.event.after || github.sha }}
+        run: |
+          zeros=0000000000000000000000000000000000000000
+          is_sha() { [[ $1 =~ ^[0-9a-f]{7,40}$ ]]; }
+          if ! is_sha "$AFTER"; then
+            echo "::error::'$AFTER' is not a commit sha"
+            exit 1
+          fi
+          if [ -n "$BEFORE" ] && ! is_sha "$BEFORE"; then
+            echo "::error::'$BEFORE' is not a commit sha"
+            exit 1
+          fi
+          shas=$AFTER
+          err=$(mktemp)
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "$zeros" ]; then
+            echo "no range (a new branch or a dispatch): checking $AFTER alone"
+          elif out=$(gh api --paginate "repos/$REPOSITORY/compare/$BEFORE...$AFTER" \
+              --jq '.commits[].sha' 2>"$err"); then
+            [ -z "$out" ] || shas=$out
+            echo "checking $BEFORE..$AFTER"
+          elif grep -q 'HTTP 404' "$err"; then
+            echo "no range from $BEFORE (a forced push): checking $AFTER alone"
+          else
+            cat "$err"
+            echo "::error::the compare of $BEFORE...$AFTER failed"
+            exit 1
+          fi
+          failed=0
+          while IFS= read -r sha; do
+            out=$(gh api "repos/$REPOSITORY/commits/$sha" \
+              --jq '[.commit.verification.verified, .commit.verification.reason]
+                    | join(" ")') || out=""
+            read -r verified reason <<< "$out"
+            if [ "$verified" = "true" ]; then
+              echo "$sha verified"
+            else
+              echo "::error::$sha is not verified (${reason:-lookup failed})"
+              failed=1
+            fi
+          done <<< "$shas"
+          exit "$failed"

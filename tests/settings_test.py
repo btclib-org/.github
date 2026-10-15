@@ -100,13 +100,17 @@ def enforcing(rulesets_of_ref: list[dict[str, Any]], rule: str) -> list[dict[str
     ]
 
 
-def test_main_refuses_an_unsigned_or_rewritten_commit(
+def test_main_refuses_a_rewritten_commit(
     rulesets: dict[str, list[dict[str, Any]]],
 ) -> None:
-    """The four rules that make `main` an append-only, signed branch.
+    """The three rules that make `main` an append-only branch.
 
     No bypass on any of them: the review rule is what one person is
     excused from, and this is what nobody is.
+
+    `required_signatures` is not among them, and is asserted absent: an
+    outside contributor need not sign, and `verified-signatures.yml`
+    checks after each push what lands (btclib-org/.github#1738).
 
     Which rules hold the door is public; who is excused from one is not,
     the endpoint omitting `bypass_actors` for a token without push
@@ -117,7 +121,6 @@ def test_main_refuses_an_unsigned_or_rewritten_commit(
     :param rulesets: the active rulesets of each repository.
     """
     wanted = (
-        "required_signatures",
         "required_linear_history",
         "non_fast_forward",
         "deletion",
@@ -142,6 +145,15 @@ def test_main_refuses_an_unsigned_or_rewritten_commit(
         )
         if bypassed:
             excused[repository] = bypassed
+    refusing = sorted(
+        repository
+        for repository, active in rulesets.items()
+        if any(
+            enforcing(covering(active, "branch", ref), "required_signatures")
+            for ref in (MAIN, "~DEFAULT_BRANCH", "~ALL")
+        )
+    )
+    assert not refusing, f"rulesets over main still require signatures: {refusing}"
     assert not missing, f"main is not protected by: {missing}"
     assert not excused, f"integrity rules somebody may bypass: {excused}"
     if unseen:
