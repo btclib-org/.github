@@ -3132,12 +3132,12 @@ such a finding only through a further push or a `close`/`reopen`.
   identifiers, and a package whose concluded licence carries a copyleft or a
   `LicenseRef` term is named by its purl in `allow-dependencies-licenses`, with
   its reason, so that a new one is a decision taken in a pull request. Only what
-  a pull request adds or changes is compared; a package already locked is the
-  lint-job audit's of section 12, which also reads OSV's `MAL-` entries that the
-  compare does not.
+  a pull request adds or changes is compared; a package already locked is
+  audited by section 12's lint-job step, which also reads OSV's `MAL-` entries
+  that the compare does not.
   **`allow-ghsas` is not used**: an advisory allowed there owes a
-  `.github/vex.toml` entry, section 12 stating a judgement of not affected in
-  the release's own document.
+  `.github/vex.toml` entry, section 12 stating the judgement of not affected
+  there and, for a shipped component, in the release's own document.
 - **Publishing waits for an approval**: `pypi` and `testpypi` are
   environments requiring a review, and `pypi` is restricted to `v*` tags.
   Trusted publishing via OIDC, so no long-lived token exists.
@@ -3435,7 +3435,15 @@ A label means what its description says. Who applies and removes it:
   The judgement is about one tree's code, so the list is the tree's. A tree
   with no entries has no file, and the document has no `vulnerabilities` key:
   an empty array would claim a search the script cannot check. An entry
-  naming a component the document does not carry fails the script.
+  naming a component the document does not carry fails the script, unless it
+  names a `group`: a dependency group the tree declares, naming a component the
+  wheel does not ship. Such an entry has exactly `id`, `source`, `component`,
+  `group` and `detail`, the reason, and no `justification`. `generate_sbom.py`
+  leaves it out of the document, and refuses one whose component the document
+  carries. `check_audit.py` refuses a group the tree does not declare. It is
+  passed by the lint-job step only; `--ignore` being global there,
+  `check_audit.py` refuses one whose component the wheel ships, read from
+  `uv.lock`.
 
   A Dependabot alert dismissed as `not_used` or `inaccurate`, on a
   distribution the wheel's `Requires-Dist` names, owes an entry whose
@@ -3459,11 +3467,13 @@ A label means what its description says. Who applies and removes it:
   review reads no `MAL-` entry.
   The only ignore is an `id` of the tree's `.github/vex.toml`, passed as
   `--ignore`, so a release is exempted only from what its own signed document
-  says it is not affected by. `check_audit.py` refuses a tree that keeps an
-  ignore in `[tool.uv.audit]` or in `uv.toml`'s `[audit]`, and the log says each
-  ignore it passes, uv printing none. `--ignore` matches an advisory's id and its
-  aliases in every package audited, where an entry names one component, so an
-  entry for one component exempts the same advisory in another. The uv version
+  says it is not affected by. An entry with a `group` (above) is passed by the
+  lint-job step and not by the release's audit. `check_audit.py` refuses a tree
+  that keeps an ignore in `[tool.uv.audit]` or in `uv.toml`'s `[audit]`, and the
+  log says each ignore it passes, uv printing none. `--ignore` matches an
+  advisory's id and its aliases in every package audited, where an entry names
+  one component, so an entry for one component exempts the same advisory in
+  another. The uv version
   is pinned in `reusable-audit.yml`, `uv audit` being a preview feature, and
   stays at or above every tree's floor. The `setup-uv` of the audit step in
   `reusable-lint.yml`'s and `lint.yml`'s lint job repeats the pin, and

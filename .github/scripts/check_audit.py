@@ -33,8 +33,15 @@ affect a release having nothing to do with whether a fix exists.
 
 `--all-groups` passes no `--no-group`, so the whole lock is audited: that is
 what the lint job of `reusable-lint.yml` runs, a malicious package being as
-harmful in a development tool as in the wheel. The refusals and the ignores
-are the same.
+harmful in a development tool as in the wheel. The refusals are the same. So
+are the ignores, with one addition: an entry with a `group`, naming a
+dependency group the release does not ship and giving its reason in `detail`,
+is passed as `--ignore` here and in no release audit. A group the tree does
+not declare, a missing `detail`, and a `component` the wheel ships are
+refused: `--ignore` is global, so such an entry would exempt the release's own
+copy of the package. What the wheel ships is read from `pyproject.toml` and
+from `uv.lock`, the root package's runtime closure, so a package a dependency
+brings in counts.
 
     uv run --no-project --python 3.15 .github/scripts/check_audit.py
 
@@ -44,6 +51,7 @@ run from the root of the tree whose lock it audits.
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 import tomllib
 from pathlib import Path
@@ -56,6 +64,9 @@ if TYPE_CHECKING:
 PREVIEW = ("--preview-features", "audit-command")
 
 VEX = Path(".github") / "vex.toml"
+
+# the name a requirement starts with, before any extras, version or marker
+REQUIREMENT = re.compile(r"\s*([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)")
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -85,14 +96,126 @@ def groups(root: Path) -> list[str]:
     return list(declared)
 
 
-def ignored(root: Path) -> list[str]:
-    """Return the ids `.github/vex.toml` judges not to affect the release."""
+def _normalized(name: str) -> str:
+    """Return the PEP 503 form of a distribution name."""
+    return re.sub(r"[-_.]+", "-", name).lower()
+
+
+def _edges(package: dict[str, Any], extra: str | None, *, is_root: bool) -> list[Any]:
+    """Return the dependencies a package, or one of its extras, brings in."""
+    if extra is not None:
+        return list(package.get("optional-dependencies", {}).get(extra, []))
+    edges = list(package.get("dependencies", []))
+    if is_root:
+        for each in package.get("optional-dependencies", {}).values():
+            edges.extend(each)
+    return edges
+
+
+def _closure(lock: dict[str, Any]) -> set[str]:
+    """Return the names reachable from the lock's root package.
+
+    :param lock: the parsed `uv.lock`.
+    """
+    packages = {_normalized(each["name"]): each for each in lock.get("package", [])}
+    roots = {
+        name
+        for name, package in packages.items()
+        if "." in package.get("source", {}).values()
+    }
+    pending: list[tuple[str, str | None]] = [(name, None) for name in roots]
+    seen: set[tuple[str, str | None]] = set()
+    reached: set[str] = set()
+    while pending:
+        item = pending.pop()
+        name, extra = item
+        if item in seen or name not in packages:
+            continue
+        seen.add(item)
+        for edge in _edges(packages[name], extra, is_root=name in roots):
+            target = _normalized(edge["name"])
+            reached.add(target)
+            pending.append((target, None))
+            pending.extend((target, requested) for requested in edge.get("extra", []))
+    return reached
+
+
+def shipped(root: Path) -> set[str]:
+    """Return the PEP 503 names of everything the wheel requires.
+
+    The names `[project]` gives, extras included, and the runtime closure of
+    `uv.lock`: the root package's dependencies and optional dependencies,
+    then those of every package reached, and of the extras each asks for. The
+    lock covers a requirement `pyproject.toml` leaves to the backend, and a
+    package a dependency brings in. The root's dependency groups are not
+    followed.
+
+    :param root: the tree whose files are read.
+    :returns: the names, a set that is empty for a tree with neither file.
+    """
+    project = _load(root / "pyproject.toml").get("project", {})
+    requirements = list(project.get("dependencies", []))
+    for extra in project.get("optional-dependencies", {}).values():
+        requirements.extend(extra)
+    matches = (REQUIREMENT.match(requirement) for requirement in requirements)
+    names = {_normalized(match[1]) for match in matches if match}
+
+    return names | _closure(_load(root / "uv.lock"))
+
+
+def _check_group(root: Path, table: dict[str, Any]) -> None:
+    """Refuse a group entry that is unfit to ignore, and say why.
+
+    :param root: the tree whose files say which groups it declares and requires.
+    :param table: the `[[not_affected]]` table naming a group.
+    :raises ValueError: where the entry is refused.
+    """
+    group = table["group"]
+    detail = table.get("detail")
+    if not isinstance(detail, str) or not detail:
+        msg = f"{VEX}: {table['id']} names the group {group!r} and gives no `detail`"
+        raise ValueError(msg)
+    if group not in groups(root):
+        msg = f"{VEX}: {table['id']} names the group {group!r}, which the tree lacks"
+        raise ValueError(msg)
+    component = table.get("component")
+    if not isinstance(component, str) or not component:
+        msg = f"{VEX}: {table['id']} names the group {group!r} and no `component`"
+        raise ValueError(msg)
+    if _normalized(component) in shipped(root):
+        msg = (
+            f"{VEX}: {table['id']} names {component!r}, which the wheel ships: "
+            "`--ignore` is global, so the entry would exempt the release's copy"
+        )
+        raise ValueError(msg)
+
+
+def ignored(root: Path, *, all_groups: bool = False) -> list[str]:
+    """Return the ids `.github/vex.toml` judges not to affect the audited set.
+
+    An entry with a `group` is about a development group the release does
+    not ship, so only the audit of the whole lock ignores it.
+
+    :param root: the tree whose list is read.
+    :param all_groups: whether the development groups are audited too.
+    :raises ValueError: where an id or a group entry is not valid.
+    """
     tables = _load(root / VEX).get("not_affected", [])
     ids = [table.get("id") for table in tables]
     if not all(isinstance(each, str) and each for each in ids):
         msg = f"{VEX} has a [[not_affected]] table whose id is not a string"
         raise ValueError(msg)
-    return list(dict.fromkeys(ids))
+    kept = []
+    for table in tables:
+        if "group" in table:
+            if not isinstance(table["group"], str):
+                msg = f"{VEX}: {table['id']} has a `group` that is not a string"
+                raise ValueError(msg)
+            _check_group(root, table)
+            if not all_groups:
+                continue
+        kept.append(table["id"])
+    return list(dict.fromkeys(kept))
 
 
 def command(root: Path, *, all_groups: bool = False) -> list[str]:
@@ -106,7 +229,7 @@ def command(root: Path, *, all_groups: bool = False) -> list[str]:
         *(part for group in left_out for part in ("--no-group", group)),
         *(
             part
-            for vulnerability in ignored(root)
+            for vulnerability in ignored(root, all_groups=all_groups)
             for part in ("--ignore", vulnerability)
         ),
     ]
@@ -139,10 +262,16 @@ def main(
     except ValueError as error:
         print(f"::error::{error}")
         return 1
-    for vulnerability in ignored(args.root):
+    grouped = {
+        table.get("id")
+        for table in _load(args.root / VEX).get("not_affected", [])
+        if "group" in table
+    }
+    for vulnerability in ignored(args.root, all_groups=args.all_groups):
+        affects = "what is audited" if vulnerability in grouped else "the release"
         print(
             f"::notice::{vulnerability} is ignored, {VEX} judging it not to"
-            " affect the release",
+            f" affect {affects}",
             flush=True,
         )
     print(" ".join(audit), flush=True)

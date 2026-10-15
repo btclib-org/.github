@@ -1241,6 +1241,57 @@ def test_a_list_the_rule_does_not_allow_is_refused_cleanly(
         sbom(script, tmp_path)
 
 
+_GROUP_FINDING = """id = "GHSA-yyyy-yyyy-yyyy"
+source = "GitHub Advisories"
+component = "ecdsa"
+group = "dev"
+detail = "A development tool the release does not ship."
+"""
+
+
+def test_a_group_entry_is_left_out_of_the_document(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """The document lists shipped components, so no group entry is in it."""
+    write_vex(tmp_path, _GROUP_FINDING)
+    assert "vulnerabilities" not in sbom(script, tmp_path)
+
+    write_vex(tmp_path, _GROUP_FINDING, _FINDING)
+    document = sbom(script, tmp_path, requirements=("some-dep>=1",))
+    assert [each["id"] for each in document["vulnerabilities"]] == [
+        "GHSA-xxxx-xxxx-xxxx"
+    ]
+
+
+@pytest.mark.parametrize(
+    "entry",
+    [
+        _GROUP_FINDING + 'justification = "code_not_present"\n',
+        _GROUP_FINDING.replace(
+            'detail = "A development tool the release does not ship."\n', ""
+        ),
+        _GROUP_FINDING.replace("A development tool the release does not ship.", ""),
+    ],
+    ids=["justification", "no reason", "empty reason"],
+)
+def test_a_malformed_group_entry_is_refused(
+    script: ModuleType, tmp_path: Path, entry: str
+) -> None:
+    """A group entry is stated whole, with its reason, or not at all."""
+    write_vex(tmp_path, entry)
+    with pytest.raises(SystemExit, match="a group entry needs exactly"):
+        sbom(script, tmp_path)
+
+
+def test_a_group_entry_for_a_component_the_document_carries_is_refused(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """The release ships the package, so an exemption for a group is not its."""
+    write_vex(tmp_path, _GROUP_FINDING.replace("ecdsa", "Some_Dep"))
+    with pytest.raises(SystemExit, match="some-dep, which this document carries"):
+        sbom(script, tmp_path, requirements=("some-dep>=1",))
+
+
 def test_a_submodule_named_in_another_spelling_is_still_reached(
     script: ModuleType, tmp_path: Path
 ) -> None:

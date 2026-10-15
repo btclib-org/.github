@@ -136,6 +136,74 @@ def test_all_groups_still_refuses_a_tree_ignore(
     assert commands == []
 
 
+_GROUPED = (
+    '[[not_affected]]\nid = "GHSA-aaaa"\nsource = "GitHub"\ncomponent = "ecdsa"\n'
+    'group = "test"\ndetail = "A test tool the release does not ship."\n\n'
+    '[[not_affected]]\nid = "GHSA-bbbb"\nsource = "GitHub"\n'
+)
+
+
+def _ignores(command: list[str]) -> list[str]:
+    """Return the ids a command passes as `--ignore`."""
+    return [command[i + 1] for i, part in enumerate(command) if part == "--ignore"]
+
+
+def test_a_group_entry_is_ignored_by_the_whole_lock_audit_only(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """The release ships the wheel, so a development group's id is not its."""
+    tree = _tree(tmp_path, vex=_GROUPED)
+
+    _, release = _ran(script, tree)
+    _, whole = _ran(script, tree, 0, "--all-groups")
+
+    assert _ignores(release[0]) == ["GHSA-bbbb"]
+    assert _ignores(whole[0]) == ["GHSA-aaaa", "GHSA-bbbb"]
+
+
+@pytest.mark.parametrize(
+    ("entry", "message"),
+    [
+        ('group = "nope"\ndetail = "r"\ncomponent = "x"\n', "which the tree lacks"),
+        ('group = "test"\ncomponent = "x"\n', "gives no `detail`"),
+        ('group = "test"\ndetail = ""\ncomponent = "x"\n', "gives no `detail`"),
+        ('group = 7\ndetail = "r"\ncomponent = "x"\n', "not a string"),
+        ('group = "test"\ndetail = "r"\n', "no `component`"),
+        # the rehearsal: a package both required and in a group, whose
+        # advisory `--ignore`, being global, would exempt in the wheel too
+        ('group = "test"\ndetail = "r"\ncomponent = "Left_Pad"\n', "wheel ships"),
+        ('group = "test"\ndetail = "r"\ncomponent = "sphinx"\n', "wheel ships"),
+    ],
+    ids=[
+        "unknown group",
+        "no reason",
+        "empty reason",
+        "not a string",
+        "no component",
+        "required",
+        "extra",
+    ],
+)
+def test_a_bad_group_entry_is_refused(
+    script: ModuleType,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    entry: str,
+    message: str,
+) -> None:
+    """An unfit group entry stops both audits."""
+    pyproject = _PYPROJECT + '\n[project.optional-dependencies]\ndocs = ["sphinx"]\n'
+    vex = f'[[not_affected]]\nid = "GHSA-aaaa"\n{entry}'
+    tree = _tree(tmp_path, pyproject, vex)
+
+    for flags in ((), ("--all-groups",)):
+        code, commands = _ran(script, tree, 0, *flags)
+
+        assert code == 1
+        assert commands == []
+        assert message in capsys.readouterr().out
+
+
 def test_a_tree_with_no_group_passes_no_group_flag(
     script: ModuleType, tmp_path: Path
 ) -> None:
@@ -349,6 +417,107 @@ def test_the_lint_job_audits_on_the_uv_the_release_audit_pins(
     steps = job["steps"]
     run = next(s["run"] for s in steps if "check_audit.py" in s.get("run", ""))
     assert "--all-groups" in run
-    assert script in run
+    assert re.search(rf"(?<![\w/]){re.escape(script)}(?!\w)", run)
     assert steps[-1]["run"] == run, "the audit is the last step"
     assert "if" not in steps[-1]
+
+
+def test_a_group_entry_notice_does_not_say_the_release(
+    script: ModuleType, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A group's id does not affect what is audited, not the release."""
+    _ran(script, _tree(tmp_path, vex=_GROUPED), 0, "--all-groups")
+
+    out = capsys.readouterr().out
+    assert "GHSA-aaaa is ignored" in out
+    assert "GHSA-aaaa is ignored, .github/vex.toml judging it not to affect what" in out
+    assert "GHSA-bbbb is ignored, .github/vex.toml judging it not to affect the" in out
+
+
+_LOCK = """\
+version = 1
+
+[[package]]
+name = "t"
+version = "0"
+source = { virtual = "." }
+dependencies = [{ name = "carrier" }]
+
+[package.dev-dependencies]
+dev = [{ name = "py-wormgpt" }, { name = "dev-only" }]
+
+[[package]]
+name = "carrier"
+version = "1.0.0"
+source = { registry = "https://invalid.invalid/simple" }
+dependencies = [
+    { name = "t" },
+    { name = "py-wormgpt", extra = ["fast"] },
+]
+
+[[package]]
+name = "py-wormgpt"
+version = "1.0.0"
+source = { registry = "https://invalid.invalid/simple" }
+dependencies = [{ name = "carrier" }]
+
+[package.optional-dependencies]
+fast = [{ name = "Speed_Up" }]
+
+[[package]]
+name = "speed-up"
+version = "1"
+source = { registry = "https://invalid.invalid/simple" }
+
+[[package]]
+name = "dev-only"
+version = "1"
+source = { registry = "https://invalid.invalid/simple" }
+"""
+
+
+def test_the_lock_closure_reaches_what_a_dependency_brings_in(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """Carrier needs py-wormgpt, and the cycles back to it end the walk."""
+    tree = _tree(tmp_path)
+    (tree / "uv.lock").write_text(_LOCK, encoding="utf-8")
+
+    names = script.shipped(tree)
+
+    assert {"left-pad", "carrier", "py-wormgpt", "speed-up", "t"} <= names
+    assert "dev-only" not in names
+
+
+def test_a_group_entry_for_a_package_a_dependency_ships_is_refused(
+    script: ModuleType, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The rehearsal: the group holds py-wormgpt and so does the wheel."""
+    vex = (
+        '[[not_affected]]\nid = "MAL-2026-17886"\nsource = "OSV"\n'
+        'component = "py-wormgpt"\ngroup = "test"\ndetail = "r"\n'
+    )
+    tree = _tree(tmp_path, vex=vex)
+    (tree / "uv.lock").write_text(_LOCK, encoding="utf-8")
+
+    code, commands = _ran(script, tree, 0, "--all-groups")
+
+    assert code == 1
+    assert commands == []
+    assert "which the wheel ships" in capsys.readouterr().out
+
+
+def test_a_group_only_package_is_not_shipped_by_the_lock(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """A group entry for a package only a group holds is still passed."""
+    vex = (
+        '[[not_affected]]\nid = "GHSA-aaaa"\nsource = "OSV"\n'
+        'component = "dev-only"\ngroup = "test"\ndetail = "r"\n'
+    )
+    tree = _tree(tmp_path, vex=vex)
+    (tree / "uv.lock").write_text(_LOCK, encoding="utf-8")
+
+    _, commands = _ran(script, tree, 0, "--all-groups")
+
+    assert _ignores(commands[0]) == ["GHSA-aaaa"]
