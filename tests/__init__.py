@@ -345,11 +345,9 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-mnemonics",
             "btclib-ecc",
             "btclib-wallet",
-            "bitcoin-node-tests",
             "btclib-secp256k1",
             "btclib",
             "bitcoin-core-rpc",
-            "btclib-benchmarks",
         ),
     ),
 )
