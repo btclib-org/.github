@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 import yaml
 
-from . import ROOT
+from . import ORG, ROOT, SELF, by_hand
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -384,15 +384,35 @@ def test_the_workflow_runs_the_script_where_its_checkout_puts_it() -> None:
     assert f"standard/{_SCRIPT.relative_to(ROOT).as_posix()}" in run
 
 
-def _setup(job: dict[str, Any]) -> dict[str, Any]:
-    """Return the job's `setup-uv` step that names a version."""
-    step: dict[str, Any] = next(
-        s
-        for s in job["steps"]
-        if s.get("uses", "").startswith("astral-sh/setup-uv@")
-        and "version" in s.get("with", {})
-    )
+def _setup(steps: list[dict[str, Any]]) -> dict[str, Any]:
+    """Return the last `setup-uv` step of these, the one the next runs on."""
+    step: dict[str, Any] = [
+        s for s in steps if s.get("uses", "").startswith("astral-sh/setup-uv@")
+    ][-1]
     return step
+
+
+# `!cancelled()` runs the step after a failed one.
+_ALWAYS = "${{ !cancelled() }}"
+
+
+def _audit_step(job: dict[str, Any]) -> str:
+    """Return the job's audit command, once it ends the job on the pin.
+
+    :param job: a `lint` job that writes the audit out.
+    :returns: the `run` of the step that calls the script.
+    """
+    steps = job["steps"]
+    last = steps[-1]
+    run: str = last.get("run", "")
+    assert "check_audit.py" in run, "the audit is not the last step"
+    assert "--all-groups" in run, "the audit passes no --all-groups"
+    assert last.get("if", _ALWAYS) == _ALWAYS, "the audit step is conditional"
+    setup = _setup(steps[:-1])
+    pinned = _setup(_job()["steps"])["with"]["version"]
+    assert setup.get("with", {}).get("version") == pinned, f"not the pin, {pinned}"
+    assert setup.get("if") == last.get("if"), "the uv step's condition differs"
+    return run
 
 
 @pytest.mark.parametrize(
@@ -413,13 +433,44 @@ def test_the_lint_job_audits_on_the_uv_the_release_audit_pins(
     path = ROOT / ".github" / "workflows" / name
     job = yaml.safe_load(path.read_text(encoding="utf-8"))["jobs"]["lint"]
 
-    assert _setup(job)["with"]["version"] == _setup(_job())["with"]["version"]
-    steps = job["steps"]
-    run = next(s["run"] for s in steps if "check_audit.py" in s.get("run", ""))
-    assert "--all-groups" in run
+    run = _audit_step(job)
+
     assert re.search(rf"(?<![\w/]){re.escape(script)}(?!\w)", run)
-    assert steps[-1]["run"] == run, "the audit is the last step"
-    assert "if" not in steps[-1]
+
+
+def test_the_lint_gate_audits_the_whole_lock(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """The tree's `lint.yml` calls the reusable workflow or carries the step.
+
+    A call is enough: the job it runs is the one the test above reads. A
+    tree that writes its `lint` job out owes the audit as the job's last
+    step, on the uv `reusable-audit.yml` pins. A tree with no `uv.lock`
+    has nothing for `uv audit --locked` to read, and owes none.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    if not (trees[repository] / "uv.lock").is_file():
+        pytest.skip(f"{repository} has no uv.lock")
+    path = trees[repository] / ".github" / "workflows" / "lint.yml"
+    text = path.read_text(encoding="utf-8") if path.is_file() else ""
+    if f"{ORG}/{SELF}/.github/workflows/reusable-lint.yml@main" in text:
+        return
+    hint = by_hand(repository, "grep -c check_audit .github/workflows/lint.yml")
+    jobs = yaml.safe_load(text).get("jobs", {}) if text else {}
+    assert "lint" in jobs, (
+        f"lint.yml neither calls reusable-lint.yml nor has a lint job; {hint}"
+    )
+    try:
+        _audit_step(jobs["lint"])
+    except (AssertionError, IndexError) as lacking:
+        msg = (
+            "lint.yml's lint job does not end with the audit on the uv "
+            f"{_WORKFLOW.name} pins ({lacking!r}); {hint}"
+        )
+        raise AssertionError(msg) from lacking
 
 
 def test_a_group_entry_notice_does_not_say_the_release(

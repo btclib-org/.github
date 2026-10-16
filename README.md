@@ -3494,7 +3494,9 @@ A label means what its description says. Who applies and removes it:
   is pinned in `reusable-audit.yml`, `uv audit` being a preview feature, and
   stays at or above every tree's floor. The `setup-uv` of the audit step in
   `reusable-lint.yml`'s and `lint.yml`'s lint job repeats the pin, and
-  `tests/check_audit_test.py` holds the three equal.
+  `tests/check_audit_test.py` holds the three equal, and asks the `lint.yml`
+  of each tree with a `uv.lock` to call `reusable-lint.yml` or to end its `lint`
+  job with the same step on that pin.
 - **A security advisory is worked in this order**, so that it reaches the CVE
   list, the GitHub Advisory Database and OSV with what a user needs to act on:
 
