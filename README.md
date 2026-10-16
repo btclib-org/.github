@@ -2091,6 +2091,7 @@ day and an hour, the repository owns the minute:
 | `deps-oldest` | Thursday | 03 |
 | `py-arm-authority` | Thursday | 04 |
 | `os-macos` | Thursday | 05 |
+| `slow` | Friday | 03 |
 | `os-ubuntu` | Friday | 04 |
 | `os-windows` | Friday | 05 |
 | `homepage` | Saturday | 03 |
@@ -2241,6 +2242,7 @@ by that row.
 - `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
   `btclib-mnemonics`;
+- `slow` — `btclib-node`;
 - `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
   `btclib-mnemonics`;
@@ -2371,6 +2373,10 @@ and the badge land together.
   repository are outside the row whatever their `pyproject.toml` declares. It is
   the set `deps-latest` names, the two asking one question in opposite
   directions.
+- **`slow` follows a tree with a tier of tests too slow for every run.** The
+  tier is opt-in and the default run skips it, so a clock asks.
+  btclib-org/btclib-node#1899 carries the debt until `btclib-node` schedules
+  it.
 - **`sdist-rebuild` follows a tree that publishes an attestation.** A released
   tag either rebuilds to the sdist that was signed or the attestation vouches
   for bytes no rebuild answers for: section 12 states that property, and each
