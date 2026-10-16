@@ -333,19 +333,9 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
-        1698,
-        "test_the_gate_lints_workflows_with_the_actionlint_fork",
-        ("btclib-wallet",),
-    ),
-    (
         1697,
         "test_a_repository_carries_the_secret_free_helper_owed_of_it",
-        ("btclib-node", "btclib-wallet"),
-    ),
-    (
-        1723,
-        "test_a_baseline_with_the_hex_plugin_filters_frozen_rev_lines",
-        ("btclib-wallet",),
+        ("btclib-node",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
