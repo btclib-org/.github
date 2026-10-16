@@ -3331,7 +3331,7 @@ A label means what its description says. Who applies and removes it:
 - `on-hold` — applied by whoever pauses the issue, and removed by
   whoever resumes it;
 - `upstream-dependent` — applied by whoever finds the dependency, and
-  kept until the issue closes;
+  removed by whoever finds the wait over;
 - `upstream-report` — applied by whoever finds the report owed. Once it
   is filed the issue closes, or takes `upstream-dependent` instead where
   the tree's code or tests wait on the outcome;
