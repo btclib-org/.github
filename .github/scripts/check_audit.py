@@ -21,15 +21,16 @@ does not publish are audited by the lint job (`--all-groups`, below).
 
 What is ignored is what `.github/vex.toml` names: each `[[not_affected]]`
 table's `id` is passed as `--ignore`, so the gate's only exemptions are
-the ones the release states in its own signed document. A tree owes no
-such file where it has no entry. `uv audit` would read an ignore from
-`[tool.uv.audit]` in `pyproject.toml` and from `[audit]` in `uv.toml`, and
-neither is read here, the run refusing a tree that has one: an ignore kept
-there is not in the release's document. `--ignore` matches an advisory's
-id and its aliases in every package of the set, where an entry names one
-component, so an entry for a component can exempt the same advisory in
-another. `--ignore-until-fixed` is not used, a finding that does not
-affect a release having nothing to do with whether a fix exists.
+the ones the tree states there and, for a shipped component, in a release's
+own signed document. A tree owes no such file where it has no entry. `uv
+audit` would read an ignore from `[tool.uv.audit]` in `pyproject.toml` and
+from `[audit]` in `uv.toml`, and neither is read here, the run refusing a
+tree that has one: an ignore kept there is not in the release's document.
+`--ignore` matches an advisory's id and its aliases in every package of the
+set, where an entry names one component, so an entry for a component can
+exempt the same advisory in another. `--ignore-until-fixed` is not used, a
+finding that does not affect a release having nothing to do with whether a
+fix exists.
 
 `--all-groups` passes no `--no-group`, so the whole lock is audited: that is
 what the lint job of `reusable-lint.yml` runs, a malicious package being as

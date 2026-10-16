@@ -3448,12 +3448,14 @@ A label means what its description says. Who applies and removes it:
   `not_affected`.
 
   The judgement is about one tree's code, so the list is the tree's. A tree
-  with no entries has no file, and the document has no `vulnerabilities` key:
-  an empty array would claim a search the script cannot check. An entry
-  naming a component the document does not carry fails the script, unless it
-  names a `group`: a dependency group the tree declares, naming a component the
-  wheel does not ship. Such an entry has exactly `id`, `source`, `component`,
-  `group` and `detail`, the reason, and no `justification`. `generate_sbom.py`
+  that publishes no release keeps the same file for its lint job's audit. A
+  tree with no entries has no file, and the document has no
+  `vulnerabilities` key: an empty array would claim a search the script
+  cannot check. An entry naming a component the document does not carry fails
+  the script, unless it names a `group`: a dependency group the tree
+  declares, naming a component the wheel does not ship. Such an entry has
+  exactly `id`, `source`, `component`, `group` and `detail`, the reason, and no
+  `justification`. `generate_sbom.py`
   leaves it out of the document, and refuses one whose component the document
   carries. `check_audit.py` refuses a group the tree does not declare. It is
   passed by the lint-job step only; `--ignore` being global there,
