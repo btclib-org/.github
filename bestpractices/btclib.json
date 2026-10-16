@@ -8,7 +8,7 @@
     "status": "Met"
   },
   "OSPS-AC-03.01": {
-    "justification": "The main-self-merge ruleset requires a pull request for every change to main. Its one bypass actor holds it in pull_request mode, which never allows a direct push. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main and has no bypass actor, so nobody pushes to main directly. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Met"
   },
   "OSPS-AC-03.02": {
@@ -108,7 +108,7 @@
     "status": "Met"
   },
   "OSPS-GV-01.01": {
-    "justification": "GOVERNANCE.md's Roles names who holds access to sensitive resources. fametrano is the maintainer and the only bypass actor. Every owner, named there by login, is an administrator of every repository and a reviewer of the publishing environments. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "justification": "GOVERNANCE.md's Roles names who holds access to sensitive resources. fametrano is the maintainer. Every owner, named there by login, is an administrator of every repository and a reviewer of the publishing environments. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
     "status": "Met"
   },
   "OSPS-GV-01.02": {
@@ -200,8 +200,8 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "main's ruleset requires one approving review from somebody other than the author, but fametrano remains a pull_request-mode bypass actor, so the repository still allows a merge without that approval. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Unmet"
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
   },
   "OSPS-SA-01.01": {
     "justification": "ARCHITECTURE.md documents the components, their layers and where the software reaches outside the process. ASSURANCE_CASE.md's *Trust boundaries* and *Threat model* name the actors and what each can do. https://github.com/btclib-org/btclib/blob/main/ARCHITECTURE.md",
@@ -504,7 +504,7 @@
     "status": "Met"
   },
   "governance": {
-    "justification": "The organization's GOVERNANCE.md documents how decisions are made, the maintainer's bypass and every role. This tree's README.md and CONTRIBUTING.md link it. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md",
+    "justification": "The organization's GOVERNANCE.md documents how decisions are made and every role. This tree's README.md and CONTRIBUTING.md link it. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md",
     "status": "Met"
   },
   "hardened_site": {
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "The release notes name each advisory a release fixes by its GHSA id; for example, v2026.10.8 names GHSA-c6h8-5hv5-3gv7. https://github.com/btclib-org/btclib/blob/main/RELEASE_NOTES.md",
+    "justification": "The release notes name each advisory a release fixes by its GHSA id; for example, v2026.10.8 names GHSA-c6h8-5hv5-3gv7. GHSA-47wq-xh8q-pfxj names 2026.9.29, which removed the function; that release's notes tell users the module moved to btclib-wallet. https://github.com/btclib-org/btclib/blob/main/RELEASE_NOTES.md",
     "status": "Met"
   },
   "repo_distributed": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "main's ruleset requires one approving review from somebody other than the author, and fametrano can merge without it through a pull_request-mode bypass. Since 2026-10-14 the bypass is no longer everyday practice. The releases published before that date ship mostly changes merged through it, so fewer than half of what they ship was reviewed by another person. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "v2026.10.16 shipped 24 of 52 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {
@@ -748,7 +748,7 @@
     "status": "Met"
   },
   "vulnerabilities_fixed_60_days": {
-    "justification": "Every published advisory names the release that fixes it, and no Dependabot alert is open. https://github.com/btclib-org/btclib/security/advisories",
+    "justification": "Every published advisory names the release that fixes it, and no Dependabot alert is open. GHSA-47wq-xh8q-pfxj names 2026.9.29, which removed the function; btclib-wallet 2026.10.16 fixes it. https://github.com/btclib-org/btclib/security/advisories",
     "status": "Met"
   },
   "vulnerability_report_credit": {
@@ -764,7 +764,7 @@
     "status": "Met"
   },
   "vulnerability_report_response": {
-    "justification": "GHSA-9fr5-46w5-5f9r, reported privately by pmazzocchi on 2026-09-30, was fixed in v2026.10.4 and published on 2026-10-03. GHSA-9r97-9x22-2pp4, found by fametrano, was published with its fix the day it was opened. https://github.com/btclib-org/btclib/security/advisories",
+    "justification": "GHSA-9fr5-46w5-5f9r, reported privately by pmazzocchi on 2026-09-30, was fixed in v2026.10.4 and published on 2026-10-03. GHSA-9r97-9x22-2pp4, found by fametrano, was published with its fix the day it was opened. GHSA-47wq-xh8q-pfxj, found by fametrano, was published on 2026-10-16. btclib has no fix for it: 2026.9.29 had already removed the function, and the advisory points to btclib-wallet 2026.10.16. https://github.com/btclib-org/btclib/security/advisories",
     "status": "Met"
   },
   "vulnerability_response_process": {
