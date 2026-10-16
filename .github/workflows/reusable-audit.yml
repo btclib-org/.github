@@ -19,10 +19,9 @@ name: reusable-audit
 # lint job.
 #
 # The uv version is pinned here, `audit` being a preview feature whose
-# output and flags may change in a release of uv. reusable-lint.yml's and
-# lint.yml's lint jobs repeat the pin, and tests/check_audit_test.py
-# holds the three equal. A caller's
-# `required-version` is a floor for reading `uv.lock`. The pin
+# output and flags may change in a release of uv. README.md section 12 says
+# where the pin is repeated and what tests/check_audit_test.py holds to it.
+# A caller's `required-version` is a floor for reading `uv.lock`. The pin
 # stays at or above every caller's floor, a floor above it making uv exit
 # 2 with `Required uv version ... does not match`, which reads in the log
 # like an unreachable service. It moves before any floor rises above it,
