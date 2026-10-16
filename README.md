@@ -225,9 +225,9 @@ back import what the groups hold, and mypy type-checks them against `lint`.
 
 `build` and `check` are two names because one tree holds both and they
 mean different things there: `--only-group build` compiles wheels,
-`--only-group check` reads them without compiling anything. A tree with
-no build step of its own still names its inspection tools `check`, so
-the command means the same thing everywhere.
+`--only-group check` inspects them. A tree with no build step of its own
+still names its inspection tools `check`, so the command means the same
+thing everywhere.
 
 `fuzz` is `mutation`'s shape, a scheduled workflow's group rather than a
 gate's: a tree declares it where that workflow runs the fuzzer as a
@@ -978,12 +978,16 @@ No `autoupdate_branch`: the default branch is the only branch.
 
     **`pyroma` is declared locally as well, and run out of the `check`
     group**: `language: system` with
-    `entry: uv run --locked --only-group check pyroma`, and upstream's
-    own `args: [-d, --min=10, .]`, `pass_filenames: false` and
+    `entry: uv run --locked --no-build --only-group check pyroma`, and
+    upstream's own `args: [-d, --min=10, .]`, `pass_filenames: false` and
     `always_run: true` written out. Its version is then the lock file's,
     and a bound naming no prerelease is the only thing holding the
     packaging checker at a release; what the shape buys is the bot's
     pull request going red while it carries one (btclib-org/.github#1199).
+
+    `--no-build` makes a locked package with no wheel for the hook's
+    Python fail at once and name itself, where uv would build it from
+    source over the network (btclib-org/.github#1763).
 
 ### The local hooks
 

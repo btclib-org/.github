@@ -529,7 +529,7 @@ PYROMA = "pyroma"
 
 PYROMA_STATED = {
     "repo": "local",
-    "entry": "uv run --locked --only-group check pyroma",
+    "entry": "uv run --locked --no-build --only-group check pyroma",
     "language": "system",
     "args": ["-d", "--min=10", "."],
     "pass_filenames": False,
