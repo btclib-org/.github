@@ -337,6 +337,21 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_a_tree_carries_the_sentinels_its_entries_give_it",
         ("btclib-node",),
     ),
+    (
+        1763,
+        "test_pyroma_says_what_section_4_says",
+        (
+            "btclib-node",
+            "btclib-mnemonics",
+            "btclib-ecc",
+            "btclib-wallet",
+            "bitcoin-node-tests",
+            "btclib-secp256k1",
+            "btclib",
+            "bitcoin-core-rpc",
+            "btclib-benchmarks",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
