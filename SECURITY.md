@@ -41,6 +41,10 @@ beside the button rather than replaced by it.
 A report is acknowledged within 7 days, and a fix or a published advisory
 follows within 90 days.
 
+A report triaged as easy to rediscover is fixed as soon as possible, since
+anyone can find it in the meantime, and its advisory is published with the
+fix.
+
 ## What belongs here, and what belongs upstream
 
 A defect belongs to the project whose code decides the wrong thing,
