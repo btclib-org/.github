@@ -178,8 +178,9 @@ gh pr merge <n> --squash --match-head-commit <the head the checks ran on>
 With `--auto` added, GitHub runs the same merge once the approval and
 the checks are in.
 
-**Where [`GOVERNANCE.md`][governance]'s *How a decision is made* allows
-it, the maintainer lands without that approval, through the bypass.**
+**Where the repository has a bypass, the maintainer may land without
+that approval, through it**: [`GOVERNANCE.md`][governance]'s *How a
+decision is made* says which repositories.
 `--admin` turns off `gh`'s own refusal, and GitHub applies
 the bypass to the merge. `enforce_admins` is off, so it waits for no
 required check either:

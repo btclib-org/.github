@@ -32,14 +32,15 @@ repository. A rule changes by a pull request like any other change.
   *Branch protection and rulesets* is the rule: every change reaches
   `main` through one, squashed (section 11's *Signatures* has the
   signature), and nobody can push to `main` directly. A pull request lands
-  with an approving review from somebody other than its author. The maintainer
-  is the only bypass actor, in `pull_request` mode, so the maintainer
-  can merge a pull request without that approval. In a repository that
-  publishes releases and whose `README.md` carries the OpenSSF Best
-  Practices badge (section 2's badge row), the maintainer does so only in
-  an emergency. In any other repository, the maintainer does so wherever
-  it helps. The badge's `two_person_review` criterion asks that at least
-  half of the changes a release ships were reviewed by another person.
+  with an approving review from somebody other than its author. In a
+  repository whose `README.md` carries the OpenSSF Best Practices badge
+  (section 2's badge row), the ruleset has no bypass actor, so nobody
+  merges without that approval; in an emergency the maintainer adds the
+  bypass back and removes it after the merge. The badge's
+  `two_person_review` criterion asks that at least half of the changes a
+  release ships were reviewed by another person. In any other repository
+  the maintainer is the only bypass actor, in `pull_request` mode, and
+  can merge without that approval wherever it helps.
   `CONTRIBUTING.md`'s *The review* and *Landing it* are the exchange and
   the landing.
 - **A disagreement goes to the maintainer.** One that survives a second
@@ -62,13 +63,13 @@ repository. A rule changes by a pull request like any other change.
 Each entry says who holds the role and names the file that says what it
 owes, rather than restating it.
 
-- **The maintainer** holds the bypass above, and takes the decisions *How
-  a decision is made* gives the role. The role is held by
+- **The maintainer** holds the bypass above where there is one, and takes
+  the decisions *How a decision is made* gives the role. The role is held by
   [`fametrano`](https://github.com/fametrano), Ferdinando Ametrano.
 - **An owner** holds the organization role `admin`, which makes the
   holder an administrator of every repository of the organization. An
   administrator can change a repository's rules, so the role is a grant
-  of trust and not only of access; the bypass stays the maintainer's
+  of trust and not only of access; a bypass is the maintainer's
   alone, and a repository's `RELEASING.md` names the three owners as the
   reviewers of its publishing environments. The owners are
   [`fametrano`](https://github.com/fametrano),
