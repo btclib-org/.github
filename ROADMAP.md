@@ -76,5 +76,6 @@ not deadlines.
 - **A pinned toolchain for the macOS and Windows wheels of
   `btclib-secp256k1`** (btclib-org/btclib-secp256k1#554): section 12's
   *The compiled wheels are outside that property* says why.
-- **Removing the maintainer's bypass from the branch rules**, until the
-  maintainer decides otherwise (btclib-org/.github#341).
+- **Removing the maintainer's bypass from the branch rules of the trees
+  without the Best Practices badge**, until the maintainer decides
+  otherwise.

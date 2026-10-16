@@ -18,6 +18,9 @@ it in a list.
 
 from __future__ import annotations
 
+import importlib.util
+import sys
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -28,6 +31,29 @@ MAIN = "refs/heads/main"
 TAGS = "refs/tags/v*"
 
 pytestmark = pytest.mark.integration
+
+_SCRIPT = Path(__file__).parent.parent / ".github" / "scripts" / "bestpractices.py"
+
+
+@pytest.fixture(scope="session")
+def badge_trees() -> set[str]:
+    """Return the trees whose README carries a bestpractices.dev badge.
+
+    Read by the script that registers them, so that this suite and the
+    saved answers agree on which trees these are.
+
+    :returns: their names.
+    """
+    spec = importlib.util.spec_from_file_location("bestpractices", _SCRIPT)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["bestpractices"] = module
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        del sys.modules["bestpractices"]
+    return set(module.registered())
 
 
 @pytest.fixture(scope="session")
@@ -163,24 +189,29 @@ def test_main_refuses_a_rewritten_commit(
         )
 
 
-def test_a_merge_needs_one_review_and_one_person_may_merge_anyway(
+def test_a_merge_needs_one_review_and_a_badge_tree_has_no_bypass(
     rulesets: dict[str, list[dict[str, Any]]],
+    badge_trees: set[str],
 ) -> None:
-    """Review is the gate, and the bypass excuses it while merging only.
+    """Review is the gate; a badge tree has no bypass, any other has one.
 
-    `pull_request` as a bypass mode excuses its holder from the review
-    rule while merging a pull request and at no other time. `always`
-    would permit a direct push, which is the thing the integrity rules
-    above are for.
+    A tree whose README carries the bestpractices.dev badge has no bypass
+    actor on the review rule, so every merge needs an approval from
+    somebody other than its author. Any other tree has exactly one actor,
+    in `pull_request` mode, which excuses its holder from the review rule
+    while merging a pull request and at no other time. `always` would
+    permit a direct push, which is the thing the integrity rules above
+    are for.
 
     One ruleset carries it, because two would each name their own
     approval count and their own bypass list and the branch would enforce
     whichever is stricter -- an answer nobody can read off either page.
 
     That the rule exists and how many approvals it asks for is public;
-    the mode is not, for the reason the test above gives.
+    the bypass list is not, for the reason the test above gives.
 
     :param rulesets: the active rulesets of each repository.
+    :param badge_trees: the trees whose README carries the badge.
     """
     wrong: dict[str, str] = {}
     unseen: list[str] = []
@@ -202,7 +233,10 @@ def test_a_merge_needs_one_review_and_one_person_may_merge_anyway(
             unseen.append(repository)
             continue
         modes = sorted(actor["bypass_mode"] for actor in actors)
-        if modes != ["pull_request"]:
+        if repository in badge_trees:
+            if modes:
+                wrong[repository] = f"bypass actors are {modes}, not none"
+        elif modes != ["pull_request"]:
             wrong[repository] = f"bypass actors are {modes}, not one merging one"
     assert not wrong, f"repositories whose review rule is not the design: {wrong}"
     if unseen:

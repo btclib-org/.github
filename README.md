@@ -2296,12 +2296,12 @@ and the badge land together.
       on purpose, to reproduce what a user's own install does.** The
       dismissal cites the comment the workflow gives for it.
     - **A check the organization keeps below its maximum on a decision this
-      file records**: Branch-Protection, held down by the maintainer's
-      `pull_request`-mode bypass in section 11's *Branch protection and
-      rulesets*; Code-Review, held down by merges through it landing
-      with no second person's approval, a bot's review not counting, as
-      section 11's *Review* says; and Fuzzing on `bitcoin-core-rpc`, which
-      the `fuzz` entry below already answers.
+      file records**: Branch-Protection, held down by `enforce_admins` off and
+      one approving review, as section 11's *Branch protection and
+      rulesets* records; Code-Review, held down by a bot's review not
+      counting, as section 11's *Review* says, and by merges through the
+      bypass in the trees that keep it; and Fuzzing on
+      `bitcoin-core-rpc`, which the `fuzz` entry below already answers.
 
     A sub-maximum score outside these three classes is still an issue.
 
@@ -2717,28 +2717,32 @@ and classic protection, taking the most restrictive combination:
   pushes, no deletions. **No bypass actor, for anyone, ever.**
 - **`main-self-merge`** — require a pull request, one approving review,
   dismissal of stale reviews, conversation resolution, and `squash` as
-  the only merge method it accepts. Bypass: the maintainer, in
-  **`pull_request` mode**.
+  the only merge method it accepts. **No bypass actor** in a tree whose
+  `README.md` carries the OpenSSF Best Practices badge; in any other
+  tree, the maintainer, in **`pull_request` mode**.
 - **`tag-integrity`**, target `tag`, `refs/tags/v*` — required
   signatures and nothing else, so the recovery path that deletes and
   re-tags a failed release still works.
 
-**The bypass mode is the whole of the design.** `pull_request` excuses
-its holder *while merging a pull request* and at no other time, which
-is all the bypass is for: a pull request landing without anybody
-else's approval. `GOVERNANCE.md`'s *How a decision is made* says when
-the maintainer uses it. A direct push to `main` is refused for everyone;
-`always` would permit one, and the signature check reports after a push
-and refuses nothing.
+`GOVERNANCE.md`'s *How a decision is made* says what a tree with the
+badge does in an emergency.
 
-**What it excuses is the rule, not the approval count**, and
+**In a tree without the badge, the bypass mode is the whole of the
+design.** `pull_request` excuses its holder *while merging a pull
+request* and at no other time, which is all the bypass is for: a pull
+request landing without anybody else's approval. A direct push to `main`
+is refused for everyone; `always` would permit one, and the signature
+check reports after a push and refuses nothing.
+
+**What the bypass excuses is the rule, not the approval count**, and
 `dismiss_stale_reviews_on_push` is a parameter of that same rule. So the
 dismissal binds every merge except one through the bypass, and the
 `--match-head-commit` on `CONTRIBUTING.md`'s merge through the bypass
 is what refuses a moved head there.
 
-Two settings hold the door, not one: the classic review requirement is
-cleared for the maintainer by `enforce_admins: false` *plus* admin, and
+Where the bypass stays, two settings hold the door, not one: the classic
+review requirement is cleared for the maintainer by `enforce_admins: false`
+*plus* admin, and
 turning `enforce_admins` on would deadlock every solo merge. That setting
 clears the whole of classic protection for that account.
 
@@ -2941,10 +2945,6 @@ job's verification step reads, is the one place the verdict lives.
 **What the forge then holds is a record of the review and not an
 approval**, and it does not buy the OpenSSF Scorecard's `Code-Review`
 check, which does not count a review by a bot as code review.
-
-**btclib-org/.github#341 holds the removal of the ruleset's
-`bypass_actors`**, which would put a person's approval on the critical
-path of every merge.
 
 **The ack of record is `claude-review.yml`'s**, and an author's own is
 not one: a comment from the account that opened the pull request says
@@ -4019,8 +4019,9 @@ outside it is correct where the reason is beside it.
 
 The settings: squash the only method, the `main-integrity` rules held with an
 **empty** bypass list, `required_signatures` **off** in classic protection and
-in every ruleset over `main`, the self-merge
-bypass in `pull_request` mode and never `always`, a token that is `read`,
+in every ruleset over `main`, the `main-self-merge`
+bypass list empty in a tree with the badge and, in any other, one actor
+in `pull_request` mode and never `always`, a token that is `read`,
 and `allowed_actions: all` with `sha_pinning_required: true`:
 
 ```shell
@@ -4531,7 +4532,8 @@ No tool checks them.
    squash-only, with auto-merge; `delete_branch_on_merge`; the three
    rulesets — only after that push, since section 11's bypass mode
    refuses a direct one once `main-self-merge` is active, and the root
-   commit is necessarily one; classic protection with the required
+   commit is necessarily one; the bypass is the maintainer's until the
+   `README.md` carries the badge; classic protection with the required
    checks bound to the Actions app; the publishing environments; the
    read-only default token; secret scanning, its push protection and
    Dependabot security updates; private vulnerability reporting; the
