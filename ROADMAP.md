@@ -47,8 +47,9 @@ not deadlines.
   (btclib-org/btclib#2712).
 - **`btclib-ecc` becomes `ecc`** once PyPI transfers the name
   (btclib-org/btclib-ecc#306).
-- **`btclib-mnemonics` becomes `bip39-slip39`**
-  (btclib-org/btclib-mnemonics#106).
+- **`btclib-mnemonics` becomes `bip39-slip39`**: the repository has the
+  new name, and the distribution and the import package, `bip39_slip39`,
+  follow (btclib-org/bip39-slip39#106).
 - **tf2, one conformance suite for any bitcoin node**
   (btclib-org/btclib#2220): Bitcoin Core's functional tests rewritten on
   `btclib`, in a repository of its own, `bitcoin-node-tests`, reaching a

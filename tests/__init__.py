@@ -342,7 +342,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_pyroma_says_what_section_4_says",
         (
             "btclib-node",
-            "btclib-mnemonics",
+            "bip39-slip39",
             "btclib-ecc",
             "btclib-wallet",
             "btclib-secp256k1",
