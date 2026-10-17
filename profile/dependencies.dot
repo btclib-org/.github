@@ -48,6 +48,7 @@ digraph dependencies {
 
     "libsecp256k1"     [pos="290,560", style="rounded,dashed", color="#7d8590", fontcolor="#7d8590"];
     "libsecp256k1-zkp" [pos="435,560", style="rounded,dashed", color="#7d8590", fontcolor="#7d8590"];
+    "base58-bech32"    [pos="145,560"];
     "btclib-mnemonics" [pos="0,460"];
     "bitcoin-core-rpc" [pos="145,460"];
     "btclib-secp256k1" [pos="290,460"];
