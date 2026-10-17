@@ -42,6 +42,13 @@ not deadlines.
   `btclib-ecc` `curves/` and the parts of `ecc/` the issue does not
   keep in `btclib`, which stays the protocol package a node consumes. The
   issue holds the steps, in that order, and what each is done when.
+- **The codecs leave `btclib`**: `base58` and `bech32` move to a package
+  of their own, `base58-bech32`, which `btclib` depends on
+  (btclib-org/btclib#2712).
+- **`btclib-ecc` becomes `ecc`** once PyPI transfers the name
+  (btclib-org/btclib-ecc#306).
+- **`btclib-mnemonics` becomes `bip39-slip39`**
+  (btclib-org/btclib-mnemonics#106).
 - **tf2, one conformance suite for any bitcoin node**
   (btclib-org/btclib#2220): Bitcoin Core's functional tests rewritten on
   `btclib`, in a repository of its own, `bitcoin-node-tests`, reaching a
@@ -68,9 +75,9 @@ not deadlines.
 - **A binding to `sipa/miniscript`** (btclib-org/btclib#508), and **an
   in-process HWI adapter** beside the subprocess one
   (btclib-org/btclib#469).
-- **A further split of `btclib`** once `btclib-ecc` has left it, and a
-  package of their own for the codecs, the hashes, `p2p` or the shared
-  substrate (btclib-org/btclib#2129).
+- **A package of their own for the hashes, `p2p` or the shared
+  substrate**, and any split of `btclib` other than those under
+  *Intended* (btclib-org/btclib#2129).
 - **A cipher of `btclib`'s own, and code in `btclib` or `btclib-node`
   written for tf2 alone** (btclib-org/btclib#2220).
 - **A pinned toolchain for the macOS and Windows wheels of
