@@ -344,10 +344,10 @@ def test_the_label_is_owed_by_the_publishing_trees_alone() -> None:
     labels = yaml.safe_load(_LABELS.read_text(encoding="utf-8"))["labels"]
     label = next(entry for entry in labels if entry["name"] == "api-break")
     assert sorted(label["repositories"]) == [
+        "bip39-slip39",
         "bitcoin-core-rpc",
         "btclib",
         "btclib-ecc",
-        "btclib-mnemonics",
         "btclib-node",
         "btclib-secp256k1",
         "btclib-wallet",

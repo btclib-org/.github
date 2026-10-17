@@ -73,7 +73,7 @@ labels:
       - btclib-node
       - btclib-wallet
       - btclib-ecc
-      - btclib-mnemonics
+      - bip39-slip39
 
 # Labels the test passes over, neither owed nor refused.
 #

@@ -220,7 +220,7 @@ def test_the_repository_list_drops_an_advisory_fork_and_keeps_every_tree(
         "btclib-wallet",
         "bitcoin-node-tests",
         "btclib-ecc",
-        "btclib-mnemonics",
+        "bip39-slip39",
         "claude-process",
     ]
     monkeypatch.setattr(tests, "gh", lambda _endpoint, _jq: [*trees, fork])
