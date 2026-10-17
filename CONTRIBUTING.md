@@ -162,16 +162,19 @@ has seen.
 When `main`'s CI is red after a merge, its repair takes priority over
 every other pull request, because until it lands `main`'s runs cannot
 tell a new failure from the one already there. A pull request armed with
-`--auto` (below) stays armed, and others keep landing meanwhile: the risk
-of landing on a red `main` is accepted (btclib-org/.github#1777).
+`--auto` (below) stays armed, and others keep landing meanwhile. Holding
+every landing for a repair costs more than the break it guards against,
+so the risk of landing on a red `main` is accepted
+(btclib-org/.github#1777).
 
 A pull request whose required check is red only because `main` was red
 is closed and reopened once the repair lands (`gh pr close <n>`, then
 `gh pr reopen <n>`). GitHub then runs its checks on a fresh merge with
 the repaired `main`, where a re-run would test the old merge commit. No
-push is made, so its approvals stand. The reopen also runs the review
-bot again, and `--auto`, where closing dropped it, is armed again once
-the checks are green and the new review acks the head.
+push is made, so its approvals and its ack of record stand. `--auto`,
+where closing dropped it, is armed again once the checks are green. The
+reopen also runs the review bot again, and changes that review requests
+are answered like any other review's.
 
 Then squash, [the only method the rule accepts][s11].
 
