@@ -165,6 +165,13 @@ tell a new failure from the one already there. A pull request armed with
 `--auto` (below) stays armed, and others keep landing meanwhile: the risk
 of landing on a red `main` is accepted (btclib-org/.github#1777).
 
+A pull request whose required check is red only because `main` was red
+is closed and reopened once the repair lands (`gh pr close <n>`, then
+`gh pr reopen <n>`): GitHub then runs its checks on a fresh merge with
+the repaired `main`, where a re-run would test the old merge commit. No
+push is made, so its approvals and its ack stand, but closing disables
+`--auto`, which is armed again afterwards.
+
 Then squash, [the only method the rule accepts][s11].
 
 **It lands once somebody other than its author has approved that
