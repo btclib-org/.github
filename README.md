@@ -2385,8 +2385,6 @@ and the badge land together.
   directions.
 - **`slow` follows a tree with a tier of tests too slow for every run.** The
   tier is opt-in and the default run skips it, so a clock asks.
-  btclib-org/btclib-node#1899 carries the debt until `btclib-node` schedules
-  it.
 - **`sdist-rebuild` follows a tree that publishes an attestation.** A released
   tag either rebuilds to the sdist that was signed or the attestation vouches
   for bytes no rebuild answers for: section 12 states that property, and each
