@@ -21,6 +21,9 @@ whenever that makes them clearer.
   built on it: ECDSA, BIP340 Schnorr, MuSig2, FROST, Diffie-Hellman,
   commitments and range proofs. For secp256k1 it uses btclib-secp256k1,
   and tests its own arithmetic against it.
+- **[base58-bech32](https://github.com/btclib-org/base58-bech32)** —
+  Base58, Base58Check, bech32, bech32m, SS58 and CashAddr codecs, on
+  the standard library alone.
 - **[btclib](https://github.com/btclib-org/btclib)** — bitcoin's
   protocol on top of btclib-ecc: addresses, scripts, transactions and
   blocks.

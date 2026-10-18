@@ -98,56 +98,62 @@
 <path fill="none" stroke="#7d8590" stroke-dasharray="5,2" d="M545.4,-536C545.4,-536 447,-536 447,-536 441,-536 435,-530 435,-524 435,-524 435,-512 435,-512 435,-506 441,-500 447,-500 447,-500 545.4,-500 545.4,-500 551.4,-500 557.4,-506 557.4,-512 557.4,-512 557.4,-524 557.4,-524 557.4,-530 551.4,-536 545.4,-536"/>
 <text xml:space="preserve" text-anchor="middle" x="496.2" y="-514.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#7d8590">libsecp256k1&#45;zkp</text>
 </g>
-<!-- btclib&#45;mnemonics -->
+<!-- base58&#45;bech32 -->
 <g id="node3" class="node">
+<title>base58&#45;bech32</title>
+<path fill="#1f6feb" stroke="#1f6feb" d="M255.4,-536C255.4,-536 157,-536 157,-536 151,-536 145,-530 145,-524 145,-524 145,-512 145,-512 145,-506 151,-500 157,-500 157,-500 255.4,-500 255.4,-500 261.4,-500 267.4,-506 267.4,-512 267.4,-512 267.4,-524 267.4,-524 267.4,-530 261.4,-536 255.4,-536"/>
+<text xml:space="preserve" text-anchor="middle" x="206.2" y="-514.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">base58&#45;bech32</text>
+</g>
+<!-- btclib&#45;mnemonics -->
+<g id="node4" class="node">
 <title>btclib&#45;mnemonics</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M110.4,-436C110.4,-436 12,-436 12,-436 6,-436 0,-430 0,-424 0,-424 0,-412 0,-412 0,-406 6,-400 12,-400 12,-400 110.4,-400 110.4,-400 116.4,-400 122.4,-406 122.4,-412 122.4,-412 122.4,-424 122.4,-424 122.4,-430 116.4,-436 110.4,-436"/>
 <text xml:space="preserve" text-anchor="middle" x="61.2" y="-414.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">btclib&#45;mnemonics</text>
 </g>
 <!-- bitcoin&#45;core&#45;rpc -->
-<g id="node4" class="node">
+<g id="node5" class="node">
 <title>bitcoin&#45;core&#45;rpc</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M255.4,-436C255.4,-436 157,-436 157,-436 151,-436 145,-430 145,-424 145,-424 145,-412 145,-412 145,-406 151,-400 157,-400 157,-400 255.4,-400 255.4,-400 261.4,-400 267.4,-406 267.4,-412 267.4,-412 267.4,-424 267.4,-424 267.4,-430 261.4,-436 255.4,-436"/>
 <text xml:space="preserve" text-anchor="middle" x="206.2" y="-414.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">bitcoin&#45;core&#45;rpc</text>
 </g>
 <!-- btclib&#45;secp256k1 -->
-<g id="node5" class="node">
+<g id="node6" class="node">
 <title>btclib&#45;secp256k1</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M400.4,-436C400.4,-436 302,-436 302,-436 296,-436 290,-430 290,-424 290,-424 290,-412 290,-412 290,-406 296,-400 302,-400 302,-400 400.4,-400 400.4,-400 406.4,-400 412.4,-406 412.4,-412 412.4,-412 412.4,-424 412.4,-424 412.4,-430 406.4,-436 400.4,-436"/>
 <text xml:space="preserve" text-anchor="middle" x="351.2" y="-414.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">btclib&#45;secp256k1</text>
 </g>
 <!-- btclib&#45;ecc -->
-<g id="node6" class="node">
+<g id="node7" class="node">
 <title>btclib&#45;ecc</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M400.4,-336C400.4,-336 302,-336 302,-336 296,-336 290,-330 290,-324 290,-324 290,-312 290,-312 290,-306 296,-300 302,-300 302,-300 400.4,-300 400.4,-300 406.4,-300 412.4,-306 412.4,-312 412.4,-312 412.4,-324 412.4,-324 412.4,-330 406.4,-336 400.4,-336"/>
 <text xml:space="preserve" text-anchor="middle" x="351.2" y="-314.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">btclib&#45;ecc</text>
 </g>
 <!-- btclib -->
-<g id="node7" class="node">
+<g id="node8" class="node">
 <title>btclib</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M400.4,-236C400.4,-236 302,-236 302,-236 296,-236 290,-230 290,-224 290,-224 290,-212 290,-212 290,-206 296,-200 302,-200 302,-200 400.4,-200 400.4,-200 406.4,-200 412.4,-206 412.4,-212 412.4,-212 412.4,-224 412.4,-224 412.4,-230 406.4,-236 400.4,-236"/>
 <text xml:space="preserve" text-anchor="middle" x="351.2" y="-214.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">btclib</text>
 </g>
 <!-- btclib&#45;wallet -->
-<g id="node8" class="node">
+<g id="node9" class="node">
 <title>btclib&#45;wallet</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M110.4,-136C110.4,-136 12,-136 12,-136 6,-136 0,-130 0,-124 0,-124 0,-112 0,-112 0,-106 6,-100 12,-100 12,-100 110.4,-100 110.4,-100 116.4,-100 122.4,-106 122.4,-112 122.4,-112 122.4,-124 122.4,-124 122.4,-130 116.4,-136 110.4,-136"/>
 <text xml:space="preserve" text-anchor="middle" x="61.2" y="-114.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">btclib&#45;wallet</text>
 </g>
 <!-- bitcoin&#45;node&#45;tests -->
-<g id="node9" class="node">
+<g id="node10" class="node">
 <title>bitcoin&#45;node&#45;tests</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M255.4,-36C255.4,-36 157,-36 157,-36 151,-36 145,-30 145,-24 145,-24 145,-12 145,-12 145,-6 151,0 157,0 157,0 255.4,0 255.4,0 261.4,0 267.4,-6 267.4,-12 267.4,-12 267.4,-24 267.4,-24 267.4,-30 261.4,-36 255.4,-36"/>
 <text xml:space="preserve" text-anchor="middle" x="206.2" y="-14.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">bitcoin&#45;node&#45;tests</text>
 </g>
 <!-- btclib&#45;benchmarks -->
-<g id="node10" class="node">
+<g id="node11" class="node">
 <title>btclib&#45;benchmarks</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M545.4,-36C545.4,-36 447,-36 447,-36 441,-36 435,-30 435,-24 435,-24 435,-12 435,-12 435,-6 441,0 447,0 447,0 545.4,0 545.4,0 551.4,0 557.4,-6 557.4,-12 557.4,-12 557.4,-24 557.4,-24 557.4,-30 551.4,-36 545.4,-36"/>
 <text xml:space="preserve" text-anchor="middle" x="496.2" y="-14.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">btclib&#45;benchmarks</text>
 </g>
 <!-- btclib&#45;node -->
-<g id="node11" class="node">
+<g id="node12" class="node">
 <title>btclib&#45;node</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M400.4,-36C400.4,-36 302,-36 302,-36 296,-36 290,-30 290,-24 290,-24 290,-12 290,-12 290,-6 296,0 302,0 302,0 400.4,0 400.4,0 406.4,0 412.4,-6 412.4,-12 412.4,-12 412.4,-24 412.4,-24 412.4,-30 406.4,-36 400.4,-36"/>
 <text xml:space="preserve" text-anchor="middle" x="351.2" y="-14.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">btclib&#45;node</text>
