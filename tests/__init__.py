@@ -333,22 +333,19 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
-        1764,
-        "test_a_tree_carries_the_sentinels_its_entries_give_it",
-        ("btclib-node",),
-    ),
-    (
         1763,
         "test_pyroma_says_what_section_4_says",
-        (
-            "btclib-node",
-            "bip39-slip39",
-            "btclib-ecc",
-            "btclib-wallet",
-            "btclib-secp256k1",
-            "btclib",
-            "bitcoin-core-rpc",
-        ),
+        ("btclib-wallet",),
+    ),
+    (
+        1788,
+        "test_a_scorecard_tree_has_a_recent_good_first_issue",
+        ("base58-bech32",),
+    ),
+    (
+        1789,
+        "test_the_name_normalizes_to_the_repository",
+        ("bip39-slip39",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
