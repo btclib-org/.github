@@ -1,0 +1,786 @@
+{
+  "OSPS-AC-01.01": {
+    "justification": "The btclib-org organization requires two-factor authentication of every member and accepts only secure methods, not SMS. https://github.com/btclib-org/.github/issues/1362#issuecomment-5903994882",
+    "status": "Met"
+  },
+  "OSPS-AC-02.01": {
+    "justification": "A new member gets read access, the organization's base permission (gh api orgs/btclib-org --jq .default_repository_permission). Every higher grant is assigned by hand, through an issue in btclib-org/.github that an owner other than the one asking approves. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
+    "status": "Met"
+  },
+  "OSPS-AC-03.01": {
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main. Its one bypass actor, the maintainer, is in pull_request mode, which excuses the rule only while merging a pull request and permits no direct push. Issue 4 removes that bypass. https://github.com/btclib-org/base58-bech32/issues/4 https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
+  },
+  "OSPS-AC-03.02": {
+    "justification": "The main-integrity ruleset forbids deleting main and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
+  },
+  "OSPS-AC-04.01": {
+    "justification": "The default GITHUB_TOKEN is read-only at the organization and the repository, and cannot approve pull requests. Every workflow also sets permissions: contents: read at the top. https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "status": "Met"
+  },
+  "OSPS-AC-04.02": {
+    "justification": "Every workflow sets permissions: contents: read at the top, and a job adds a write scope only where it uses it. zizmor's excessive-permissions audit runs in the required lint check. https://github.com/btclib-org/.github/blob/main/README.md#what-every-workflow-does",
+    "status": "Met"
+  },
+  "OSPS-BR-01.01": {
+    "justification": "No workflow uses pull_request_target or workflow_run. Event fields and inputs reach run: steps only through env:, and zizmor's template-injection audit in the required lint check refuses the unsafe form. https://github.com/btclib-org/base58-bech32/blob/main/.pre-commit-config.yaml",
+    "status": "Met"
+  },
+  "OSPS-BR-01.02": {
+    "justification": null,
+    "status": 0
+  },
+  "OSPS-BR-01.03": {
+    "justification": "Pull-request runs use the pull_request and pull_request_review_comment triggers, which give a fork no secrets and a read-only token. The review job, which holds a secret, runs only when the head repository is this one. The mention job holds a secret on any pull request's issue comment, and there checks out the default branch. It answers only users with write access, and its tools exclude Bash, edits, writes and file reads. https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-claude-review.yml",
+    "status": "Met"
+  },
+  "OSPS-BR-01.04": {
+    "justification": "A workflow_dispatch input is either mutation.yml's profile, a choice from a fixed list, or verified-signatures.yml's before and after, which the called workflow reads through env: and refuses unless they are commit shas. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/mutation.yml",
+    "status": "Met"
+  },
+  "OSPS-BR-02.01": {
+    "justification": "Each release has a unique calendar version (YYYY.M.D), set by a signed v* tag. release.yml refuses a tag that disagrees with the package version or is not on main, and PyPI never accepts a version twice. https://github.com/btclib-org/base58-bech32/releases",
+    "status": "Met"
+  },
+  "OSPS-BR-02.02": {
+    "justification": "Every release asset carries the version in its file name: the sdist, the wheel, the CycloneDX SBOM (base58_bech32-2026.10.18.cdx.json) and the attestation bundle (v2026.10.18.intoto.jsonl). The attestation binds each asset to its digest. https://github.com/btclib-org/base58-bech32/releases/latest",
+    "status": "Met"
+  },
+  "OSPS-BR-03.01": {
+    "justification": "Every official channel the project lists is served over HTTPS only: the GitHub repository, its issue tracker and advisories, and the documentation at https://base58-bech32.readthedocs.io/.",
+    "status": "Met"
+  },
+  "OSPS-BR-03.02": {
+    "justification": "Releases are distributed through PyPI and GitHub Releases, both HTTPS only. PyPI files carry PEP 740 attestations and the GitHub release a Sigstore bundle. https://pypi.org/project/base58-bech32/",
+    "status": "Met"
+  },
+  "OSPS-BR-04.01": {
+    "justification": "The GitHub release body is RELEASE_NOTES.md's entry: what a user must act on, breaking and security changes included. CHANGELOG.md lists every change. https://github.com/btclib-org/base58-bech32/blob/main/RELEASE_NOTES.md",
+    "status": "Met"
+  },
+  "OSPS-BR-05.01": {
+    "justification": "Python dependencies come from PyPI, and the required test check runs the suite with uv from the committed uv.lock with --locked. pre-commit installs its hooks at the revisions .pre-commit-config.yaml names. Third-party actions are pinned by commit SHA. https://github.com/btclib-org/.github/blob/main/README.md#uvlock",
+    "status": "Met"
+  },
+  "OSPS-BR-06.01": {
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing. The GitHub release carries a Sigstore build-provenance bundle over each asset's SHA-256. The tag is signed. https://github.com/btclib-org/base58-bech32/releases/latest",
+    "status": "Met"
+  },
+  "OSPS-BR-07.01": {
+    "justification": "Secret scanning and push protection are on, so a push carrying a recognised credential is refused. The detect-private-key and detect-secrets hooks run in the required lint check. https://github.com/btclib-org/base58-bech32/blob/main/.secrets.baseline",
+    "status": "Met"
+  },
+  "OSPS-BR-07.02": {
+    "justification": "A secret is an environment secret that only the owners reach. A secret kept in any other store is recorded in the REPOSITORY.md of the repository that uses it, and btclib-org/.github's tests/secrets_test.py refuses an unrecorded one. A secret is rotated when an owner changes or an exposure is suspected. The secrets kept outside an environment are rotated before they are a year old, and the list is reviewed yearly. https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "status": "Met"
+  },
+  "OSPS-DO-01.01": {
+    "justification": "The user documentation is README.md, whose Python example tests/readme_test.py runs, and the API reference and migration page on Read the Docs. https://github.com/btclib-org/base58-bech32/blob/main/README.md#an-address-of-each-format https://base58-bech32.readthedocs.io/",
+    "status": "Met"
+  },
+  "OSPS-DO-02.01": {
+    "justification": "CONTRIBUTING.md says where a defect is filed, and the bug-report form asks for what a report needs. SECURITY.md sends a vulnerability to a private channel instead. https://github.com/btclib-org/base58-bech32/blob/main/.github/ISSUE_TEMPLATE/bug_report.yml",
+    "status": "Met"
+  },
+  "OSPS-DO-03.01": {
+    "justification": "SECURITY.md gives the gh attestation verify command for the release assets, and RELEASING.md the check that rebuilds the sdist from its tag. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md",
+    "status": "Met"
+  },
+  "OSPS-DO-03.02": {
+    "justification": "The verify command pins the signer: --repo names this repository, --signer-workflow the organization's reusable-build.yml and --source-ref the release tag. It passed on the v2026.10.18 wheel. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md",
+    "status": "Met"
+  },
+  "OSPS-DO-04.01": {
+    "justification": "SECURITY.md's *Supported versions*: only the latest release is supported, a fix ships as a new release, and nothing is backported. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md",
+    "status": "Met"
+  },
+  "OSPS-DO-05.01": {
+    "justification": "SECURITY.md: only the latest release is supported, so a release stops receiving security updates when the next one is published. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md",
+    "status": "Met"
+  },
+  "OSPS-DO-06.01": {
+    "justification": "The package has no runtime dependency: pyproject.toml declares dependencies = []. uv obtains the development dependencies from PyPI and pins them in uv.lock, and Dependabot tracks them weekly with a seven-day cooldown. https://github.com/btclib-org/.github/blob/main/README.md#dependabot-and-pre-commitci",
+    "status": "Met"
+  },
+  "OSPS-DO-07.01": {
+    "justification": "CONTRIBUTING.md gives the build: uv is the only prerequisite, uv sync builds the environment from uv.lock, and uv build produces the sdist and wheel. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "OSPS-GV-01.01": {
+    "justification": "GOVERNANCE.md's Roles names who holds access to sensitive resources. fametrano is the maintainer. Every owner, named there by login, is an administrator of every repository and a reviewer of the publishing environments. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "status": "Met"
+  },
+  "OSPS-GV-01.02": {
+    "justification": "GOVERNANCE.md's *Roles* describes the maintainer, owners, repository collaborators, contributors, reviewers, the review bot, Dependabot and pre-commit.ci, and what each owes. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "status": "Met"
+  },
+  "OSPS-GV-02.01": {
+    "justification": "Proposed changes and usage obstacles are discussed publicly in the repository's GitHub issues (with a question form) and pull requests; cross-repository questions go to btclib-org/.github's tracker. https://github.com/btclib-org/base58-bech32/issues",
+    "status": "Met"
+  },
+  "OSPS-GV-03.01": {
+    "justification": "CONTRIBUTING.md explains the contribution process: one subject per pull request, the local gates, the review and the landing. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "OSPS-GV-03.02": {
+    "justification": "CONTRIBUTING.md states what a contribution must meet: one subject, a Signed-off-by trailer on every commit, the gates CI runs, 100% line and branch coverage, and a review against REVIEWING.md. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "OSPS-GV-04.01": {
+    "justification": "A grant of write or admin, to any repository of the organization, is an issue in btclib-org/.github that states the reason, and an owner other than the one asking approves it there. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
+    "status": "Met"
+  },
+  "OSPS-LE-01.01": {
+    "justification": "main requires the lint / Sign-off check, which refuses a commit that lacks its author's Signed-off-by: trailer, Dependabot's and pre-commit.ci's aside. Web commits are signed off automatically. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
+    "status": "Met"
+  },
+  "OSPS-LE-02.01": {
+    "justification": "The source code is under the MIT license, which the OSI approves. https://github.com/btclib-org/base58-bech32/blob/main/LICENSE",
+    "status": "Met"
+  },
+  "OSPS-LE-02.02": {
+    "justification": "The released wheels and sdist declare License-Expression: MIT, the same OSI-approved license as the source. https://pypi.org/project/base58-bech32/",
+    "status": "Met"
+  },
+  "OSPS-LE-03.01": {
+    "justification": "The license text is the repository's root LICENSE file. https://github.com/btclib-org/base58-bech32/blob/main/LICENSE",
+    "status": "Met"
+  },
+  "OSPS-LE-03.02": {
+    "justification": "The LICENSE file ships inside every release asset: the sdist root and the wheel's .dist-info/licenses/. https://github.com/btclib-org/base58-bech32/blob/main/LICENSE",
+    "status": "Met"
+  },
+  "OSPS-QA-01.01": {
+    "justification": "The repository is public on GitHub at a static URL. https://github.com/btclib-org/base58-bech32",
+    "status": "Met"
+  },
+  "OSPS-QA-01.02": {
+    "justification": "Git history on GitHub records every change with its author, committer, date and signature; linear history and no force-pushes on main keep that record from being rewritten. https://github.com/btclib-org/base58-bech32/commits/main",
+    "status": "Met"
+  },
+  "OSPS-QA-02.01": {
+    "justification": "pyproject.toml declares the direct dependencies, none at run time and the development tools in dependency groups, and the committed uv.lock pins them. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "OSPS-QA-02.02": {
+    "justification": "The release is pure Python. Every GitHub release attaches a CycloneDX SBOM, generated from the built wheel and covered by the release attestation. https://github.com/btclib-org/base58-bech32/releases/latest",
+    "status": "Met"
+  },
+  "OSPS-QA-03.01": {
+    "justification": "main requires the listed status checks. enforce_admins is off, so an admin merge without them is a manual bypass, which the control allows. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
+  },
+  "OSPS-QA-04.01": {
+    "justification": "The organization standard's section 2 (*Which repositories, and how far*) lists every repository of btclib-org and its tier, and the organization profile lists the published packages. https://github.com/btclib-org/.github/blob/main/README.md#which-repositories-and-how-far",
+    "status": "Met"
+  },
+  "OSPS-QA-04.02": {
+    "justification": "The project has no additional subproject repository: each release is built from this one repository, and the package has no runtime dependency. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "N/A"
+  },
+  "OSPS-QA-05.01": {
+    "justification": "No generated executable is committed. The only file git treats as binary is the Sphinx inventory docs/source/_inventories/python.inv, and fuzz/corpus/ holds input seeds for the fuzzers.",
+    "status": "Met"
+  },
+  "OSPS-QA-05.02": {
+    "justification": "No executable, library or compiled file is committed. The Sphinx inventory docs/source/_inventories/python.inv and the fuzz seeds under fuzz/corpus/ are data, and .clusterfuzzlite/build.sh is the only file with the executable bit, a shell script.",
+    "status": "Met"
+  },
+  "OSPS-QA-06.01": {
+    "justification": "test.yml's aggregate check ('test: every job passed') runs the test suite on every pull request and is a required status check on main. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/test.yml",
+    "status": "Met"
+  },
+  "OSPS-QA-06.02": {
+    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the command that runs the suite. Its *What gates a merge, and what only reports* lists the workflows that run it on every pull request, on main and on a schedule, and which of them gate a merge. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "OSPS-QA-06.03": {
+    "justification": "The policy is 100% line and branch coverage (CONTRIBUTING.md, standard section 8). pyproject.toml sets fail_under = 100, so untested new code fails the required test check. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "OSPS-QA-07.01": {
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author, but it carries a temporary bypass for the maintainer, and pull requests 3 and 5 merged through it with no approving review. Issue 4 removes the bypass after the first release. https://github.com/btclib-org/base58-bech32/issues/4 https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Unmet"
+  },
+  "OSPS-SA-01.01": {
+    "justification": "CLAUDE.md's Architecture gives the package's modules, their layers bottom-up and what each may import. ASSURANCE_CASE.md's Threat model names the adversaries, and its Trust boundaries the two places input crosses, the public API and strings from outside. https://github.com/btclib-org/base58-bech32/blob/main/CLAUDE.md#architecture https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md#trust-boundaries",
+    "status": "Met"
+  },
+  "OSPS-SA-02.01": {
+    "justification": "The API reference at https://base58-bech32.readthedocs.io/ is generated from the docstrings of every public module, and tests/docs_test.py fails when a shipped module is missing from it. CONTRIBUTING.md's The public surface states what is public.",
+    "status": "Met"
+  },
+  "OSPS-SA-03.01": {
+    "justification": "ASSURANCE_CASE.md is the security assessment: what is claimed, the threat model, the trust boundaries and how each common implementation weakness is countered; SECURITY.md's limitations section records the known residual risks. https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md",
+    "status": "Met"
+  },
+  "OSPS-SA-03.02": {
+    "justification": "ASSURANCE_CASE.md's *Threat model* names what is defended, the adversaries and what is not defended, and *Trust boundaries* maps the attack surface where untrusted input enters, each argument naming the file, test or workflow behind it. https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md",
+    "status": "Met"
+  },
+  "OSPS-VM-01.01": {
+    "justification": "SECURITY.md's *Reporting a vulnerability* gives the private channels, a GitHub security advisory or email, and the timeframes: a report is acknowledged within 7 days, and a fix or a published advisory follows within 90 days. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md#reporting-a-vulnerability",
+    "status": "Met"
+  },
+  "OSPS-VM-02.01": {
+    "justification": "SECURITY.md names the security contacts: a private GitHub security advisory, or email to security at btclib dot org. GOVERNANCE.md's Roles says that address reaches every organization owner. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md#reporting-a-vulnerability https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "status": "Met"
+  },
+  "OSPS-VM-03.01": {
+    "justification": "Private vulnerability reporting is enabled, and SECURITY.md points to it (the Security tab's 'Report a vulnerability') and gives an email address as the alternative. https://github.com/btclib-org/base58-bech32/security/advisories/new",
+    "status": "Met"
+  },
+  "OSPS-VM-04.01": {
+    "justification": "Vulnerabilities are published as GitHub security advisories on this repository, each naming the release that fixes it. None has been published yet. https://github.com/btclib-org/base58-bech32/security/advisories",
+    "status": "Met"
+  },
+  "OSPS-VM-04.02": {
+    "justification": "The CycloneDX SBOM a release attaches lists, in its vulnerabilities array, every vulnerability that the tree's .github/vex.toml judges not to affect the release, with the reason. A tree with no such judgement has no vex.toml, and its SBOM has no vulnerabilities key. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing",
+    "status": "Met"
+  },
+  "OSPS-VM-05.01": {
+    "justification": "The standard sets the threshold: actions/dependency-review-action fails a pull request that adds or changes a dependency with an advisory of moderate severity or above, or with a licence outside the allow-list. Its settings are one file, btclib-org/.github's .github/dependency-review.yml. https://github.com/btclib-org/.github/blob/main/.github/dependency-review.yml https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "status": "Met"
+  },
+  "OSPS-VM-05.02": {
+    "justification": "release.yml runs uv audit over every dependency the wheel declares, none today, and every publish job needs it to succeed. An advisory, or a service it cannot reach, stops the release. The only exemption is an id that the tree's own .github/vex.toml, carried into the release's signed SBOM, states as not affecting it. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing",
+    "status": "Met"
+  },
+  "OSPS-VM-05.03": {
+    "justification": "The required lint check audits the whole uv.lock, every dependency group, on every pull request: check_audit.py --all-groups runs uv audit, which reads OSV's malicious-package (MAL-) entries as well as advisories. Any such entry fails the check, and so does an OSV that cannot be reached. The audit's only exemption is a .github/vex.toml entry, reviewed like any other change. The required Dependency review check also blocks a change that adds a dependency with an advisory of moderate severity or above, or a licence outside the allow-list. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "status": "Met"
+  },
+  "OSPS-VM-06.01": {
+    "justification": "The standard's section 5 sets a threshold of zero for ruff: select = ALL, bandit's S rules included, and each finding is fixed or suppressed in place with a reason. zizmor holds workflows to the same, in the required lint check. CodeQL runs on every pull request, but the standard sets no threshold for its alerts. https://github.com/btclib-org/.github/blob/main/README.md#5-ruff",
+    "status": "Met"
+  },
+  "OSPS-VM-06.02": {
+    "justification": "The required lint check runs .pre-commit-config.yaml on every pull request (ruff with the S rules, strict mypy, zizmor, detect-secrets) and blocks the merge on any finding not suppressed in place with a reason. CodeQL also runs on every pull request but is not a required check. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/lint.yml",
+    "status": "Met"
+  },
+  "access_continuity": {
+    "justification": "The organization has three owners, fametrano, giacomocaironi and pmazzocchi, each an administrator of this repository and a reviewer of its publishing environments. If one becomes unavailable, the other two can still close issues, merge changes and release. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity",
+    "status": "Met"
+  },
+  "accessibility_best_practices": {
+    "justification": "The package is a library of functions with no user interface: no terminal prompt, no GUI and no web front end, and nothing under src/ calls input or print. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
+    "status": "N/A"
+  },
+  "achieve_passing": {
+    "justification": null,
+    "status": "Met"
+  },
+  "achieve_silver": {
+    "justification": null,
+    "status": "Met"
+  },
+  "assurance_case": {
+    "justification": "ASSURANCE_CASE.md gives the threat model (what is defended, the adversaries, what is not defended), the trust boundaries, the secure design principles and the common implementation weaknesses with what counters each, naming the file, test or workflow behind every argument. https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md",
+    "status": "Met"
+  },
+  "automated_integration_testing": {
+    "justification": "test.yml runs the test suite on every pull request and on every push to main that changes more than Markdown, and its aggregate job `test: every job passed` is a required check. The os-ubuntu, os-macos and os-windows workflows run it on every supported interpreter weekly and before a release. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/test.yml",
+    "status": "Met"
+  },
+  "build": {
+    "justification": "CONTRIBUTING.md gives the build: uv is the only prerequisite, uv sync builds the environment from uv.lock and uv build produces the sdist and wheel. https://github.com/btclib-org/base58-bech32?tab=contributing-ov-file",
+    "status": "Met"
+  },
+  "build_common_tools": {
+    "justification": "The build uses uv with the uv_build backend, the standard tools of a Python package. https://github.com/btclib-org/base58-bech32?tab=contributing-ov-file",
+    "status": "Met"
+  },
+  "build_floss_tools": {
+    "justification": "uv, uv_build, and every tool CONTRIBUTING.md names are FLOSS. https://github.com/btclib-org/base58-bech32?tab=contributing-ov-file",
+    "status": "Met"
+  },
+  "build_non_recursive": {
+    "justification": "This tree builds no native binaries, so there is no recursive-build question to answer. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "N/A"
+  },
+  "build_preserve_debug": {
+    "justification": "No native build or installation step exists to strip or preserve debugging information. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "N/A"
+  },
+  "build_repeatable": {
+    "justification": "Rebuilt from the tag v2026.10.18 with the uv named in the wheel, the sdist and the wheel are byte-identical to the released files (SHA-256 compared on 2026-10-18). Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag and passes only if it matches the release's attested digest. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/sdist-rebuild.yml",
+    "status": "Met"
+  },
+  "build_reproducible": {
+    "justification": "The sdist is built with SOURCE_DATE_EPOCH from the commit and normalized by .github/scripts/normalize_sdist.py. A rebuild of v2026.10.18 gave the same SHA-256 as the released sdist and wheel, and RELEASING.md's *Rebuild a release from its tag* gives the command. https://github.com/btclib-org/base58-bech32/blob/main/RELEASING.md#rebuild-a-release-from-its-tag",
+    "status": "Met"
+  },
+  "build_standard_variables": {
+    "justification": "This tree builds no native binaries -- it is pure Python on the uv_build backend -- so there is no compiler or linker invocation for CC/CFLAGS/LDFLAGS to reach. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "N/A"
+  },
+  "bus_factor": {
+    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. This repository opened on 2026-10-17 with the Base58 and bech32 code moved from btclib and new SS58 and CashAddr codecs. Its commits are fametrano's and Dependabot's, and git log --follow at btclib 8e87317b4 shows fametrano made 109 of 111 commits to base58.py and 62 of 64 to bech32.py. The claude account in the contributors graph comes from Co-Authored-By trailers on AI-assisted commits. pmazzocchi and giacomocaironi, also organization owners, have made no commit here. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/base58-bech32/graphs/contributors",
+    "status": "Unmet"
+  },
+  "code_of_conduct": {
+    "justification": "btclib-org/.github's CODE_OF_CONDUCT.md is this repository's code of conduct, through GitHub's organization-wide default; the community-profile API reports it. https://github.com/btclib-org/.github/blob/main/CODE_OF_CONDUCT.md",
+    "status": "Met"
+  },
+  "code_review_standards": {
+    "justification": "REVIEWING.md states what a review checks, how a finding is written and what clears a pull request; the part shared by every repository is followed by what this tree checks in particular. https://github.com/btclib-org/base58-bech32/blob/main/REVIEWING.md",
+    "status": "Met"
+  },
+  "coding_standards": {
+    "justification": "pyproject.toml selects every ruff rule (select = [\"ALL\"]) with a documented ignore list, and runs mypy in strict mode. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "coding_standards_enforced": {
+    "justification": "ruff-check, ruff-format and mypy run as pre-commit hooks, and lint.yml runs the same .pre-commit-config.yaml in CI as a required check, so the style is enforced automatically rather than by review alone. https://github.com/btclib-org/base58-bech32/blob/main/.pre-commit-config.yaml",
+    "status": "Met"
+  },
+  "contribution": {
+    "justification": "Non-trivial contribution file in repository: <https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md>.",
+    "status": "Met"
+  },
+  "contribution_requirements": {
+    "justification": "CONTRIBUTING.md states the public-surface, input-validation, lint-gate and 100%-coverage requirements a contribution must meet before it can land. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "contributors_unassociated": {
+    "justification": "fametrano is the only significant contributor. No person outside the organization owners has committed here. pmazzocchi and giacomocaironi, organization owners, have made no commit here. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. https://github.com/fametrano https://github.com/pmazzocchi",
+    "status": "Unmet"
+  },
+  "copyright_per_file": {
+    "justification": "Every Python file opens with \"Copyright (c) The btclib developers\", and ruff's flake8-copyright rule (CPY001) keeps it there, e.g. https://github.com/btclib-org/base58-bech32/blob/main/src/base58_bech32/__init__.py",
+    "status": "Met"
+  },
+  "crypto_algorithm_agility": {
+    "justification": "The two hashes are fixed by the formats: Base58Check's checksum is double SHA-256 and SS58's is BLAKE2b-512, so a user cannot switch to another without leaving the format. They detect typing errors and authenticate nothing. https://github.com/btclib-org/base58-bech32/blob/main/README.md",
+    "status": "Unmet"
+  },
+  "crypto_call": {
+    "justification": "The only primitives are hashlib's sha256 (Base58Check) and blake2b (SS58), called from the standard library and not reimplemented. What the package writes itself is what the specifications define above them: the bech32 and CashAddr checksums, which are BCH error-detecting codes and not cryptography. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
+    "status": "Met"
+  },
+  "crypto_certificate_verification": {
+    "justification": "base58-bech32 performs no network communications, so it uses no TLS: no module under src/ imports socket, ssl, http or urllib. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
+    "status": "N/A"
+  },
+  "crypto_credential_agility": {
+    "justification": "base58-bech32 is a library with no configuration file, credential store or password: it encodes and decodes the bytes and strings a caller passes in, and keeps nothing. https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md",
+    "status": "N/A"
+  },
+  "crypto_floss": {
+    "justification": "no closed source dependencies: the standard library alone",
+    "status": "Met"
+  },
+  "crypto_keylength": {
+    "justification": "The package generates and uses no cryptographic key. A key or WIF a caller passes is a payload to encode, and SHA-256 and BLAKE2b take no key. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
+    "status": "N/A"
+  },
+  "crypto_password_storage": {
+    "justification": "The package stores no password and authenticates no one: it has no user, account or secret of its own.",
+    "status": "N/A"
+  },
+  "crypto_pfs": {
+    "justification": "The package implements no network key-agreement protocol: it performs no network communications at all.",
+    "status": "N/A"
+  },
+  "crypto_published": {
+    "justification": "Every algorithm is a published one: SHA-256 (FIPS 180-4) in Base58Check's double-hash checksum and BLAKE2b (RFC 7693) in SS58's. bech32, bech32m and CashAddr use the BCH codes their specifications publish, which detect errors and are not cryptography. Each format is checked against the vectors its authors publish. https://github.com/btclib-org/base58-bech32/blob/main/README.md",
+    "status": "Met"
+  },
+  "crypto_random": {
+    "justification": "The package draws no random number: nothing under src/ imports random or secrets or reads os.urandom. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
+    "status": "N/A"
+  },
+  "crypto_tls12": {
+    "justification": "base58-bech32 performs no network communications and so uses no TLS. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
+    "status": "N/A"
+  },
+  "crypto_used_network": {
+    "justification": "base58-bech32 does not use the network: no module under src/ imports socket, ssl, http or urllib. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
+    "status": "N/A"
+  },
+  "crypto_verification_private": {
+    "justification": "base58-bech32 performs no network communications and so uses no TLS. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
+    "status": "N/A"
+  },
+  "crypto_weaknesses": {
+    "justification": "No SHA-1 or MD5 appears under src/: hashlib is called for sha256 (Base58Check, in base58.py) and blake2b (SS58, in ss58.py) alone. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
+    "status": "Met"
+  },
+  "crypto_working": {
+    "justification": "no broken cryptographic algorithms",
+    "status": "Met"
+  },
+  "dco": {
+    "justification": "main requires the lint / Sign-off check, which refuses a pull request with a commit that lacks its author's Signed-off-by: trailer. Dependabot's and pre-commit.ci's commits are exempt. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
+    "status": "Met"
+  },
+  "delivery_mitm": {
+    "justification": "Distribution channels use HTTPS exclusively: GitHub, and PyPI through Trusted Publishing. [osps_br_03_02]",
+    "status": "Met"
+  },
+  "delivery_unsigned": {
+    "justification": "Releases are published to PyPI and GitHub Releases and installed with pip from PyPI, all over HTTPS. No package or hash is fetched over plain HTTP. https://pypi.org/project/base58-bech32/ https://github.com/btclib-org/base58-bech32/releases",
+    "status": "Met"
+  },
+  "dependency_monitoring": {
+    "justification": "Dependabot version updates cover uv, github-actions and docker, and Dependabot security updates are on. https://github.com/btclib-org/base58-bech32/blob/main/.github/dependabot.yml",
+    "status": "Met"
+  },
+  "description_good": {
+    "justification": "base58-bech32 implements the binary-to-text codecs of cryptocurrency addresses and keys, Base58, Base58Check, bech32, bech32m, SS58 and CashAddr, in typed Python with no runtime dependency. https://base58-bech32.readthedocs.io/",
+    "status": "Met"
+  },
+  "discussion": {
+    "justification": "GitHub supports discussions on issues and pull requests.",
+    "status": "Met"
+  },
+  "documentation_achievements": {
+    "justification": "README.md links the OpenSSF Scorecard, Best Practices and Baseline badges on the lines the organization standard reserves for them. https://github.com/btclib-org/base58-bech32/blob/main/README.md",
+    "status": "Met"
+  },
+  "documentation_architecture": {
+    "justification": "CLAUDE.md's Architecture gives the layers bottom-up (exceptions and _utils, then base58 and bech32, then ss58 and cashaddr, which read the two below) and states that the package imports only the standard library and stops at the encoding. https://github.com/btclib-org/base58-bech32/blob/main/CLAUDE.md#architecture",
+    "status": "Met"
+  },
+  "documentation_basics": {
+    "justification": "README.md says what the package holds and what it does not, how to install it, and gives a first use that tests/readme_test.py runs; CONTRIBUTING.md, SECURITY.md and ASSURANCE_CASE.md cover the rest. https://github.com/btclib-org/base58-bech32/blob/main/README.md",
+    "status": "Met"
+  },
+  "documentation_current": {
+    "justification": "The docs build is gated in CI as a required check (docs.yml, `-n -W`), tests/docs_test.py fails when a shipped module has no API page, and tests/readme_test.py runs every Python block of README.md, so neither the reference generated from the docstrings nor the README's example can drift from the code. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/docs.yml",
+    "status": "Met"
+  },
+  "documentation_interface": {
+    "justification": "Every public module and function carries a docstring, gated by ruff's pydocstyle rules and pydoclint, and docs/source's automodule pages render them into the API reference published at https://base58-bech32.readthedocs.io/; tests/docs_test.py fails when a shipped module is missing from them.",
+    "status": "Met"
+  },
+  "documentation_quick_start": {
+    "justification": "README.md's *An address of each format* is a first use: a WIF in Base58Check, a bech32 address decoded to its witness program, an SS58 address re-encoded for another chain, and a CashAddr address decoded. tests/readme_test.py runs it, so it is the one the suite checks. https://github.com/btclib-org/base58-bech32/blob/main/README.md#an-address-of-each-format",
+    "status": "Met"
+  },
+  "documentation_roadmap": {
+    "justification": "ROADMAP.md, organization-wide in btclib-org/.github, is reviewed every September and states what is maintained, what is intended and what is deliberately not. This repository's README.md and CONTRIBUTING.md link it. https://github.com/btclib-org/.github/blob/main/ROADMAP.md",
+    "status": "Met"
+  },
+  "documentation_security": {
+    "justification": "SECURITY.md's *Limitations, not vulnerabilities* states the known limits: secret material is not zeroized, nothing is constant-time, and b58decode_check quotes both checksums unless its secret argument is true. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md#limitations-not-vulnerabilities",
+    "status": "Met"
+  },
+  "dynamic_analysis": {
+    "justification": "Every release runs the test suite before it is published: release.yml calls test.yml, and the PyPI upload runs only if it passes. The suite fails below 100% coverage, branches included. ClusterFuzzLite fuzzing ran by hand on 2026-10-18 and passes, and it and cosmic-ray mutation testing are scheduled weekly. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/release.yml https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/fuzz.yml",
+    "status": "Met"
+  },
+  "dynamic_analysis_enable_assertions": {
+    "justification": "pytest, the mutation runs and the ClusterFuzzLite targets run Python without -O, so every assert is checked. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/fuzz.yml",
+    "status": "Met"
+  },
+  "dynamic_analysis_fixed": {
+    "justification": "No fuzzing or mutation-testing finding is open. The one fuzz run, by hand on 2026-10-18, passed, and the weekly fuzz and mutation schedules have not yet run. https://github.com/btclib-org/base58-bech32/actions/workflows/fuzz.yml https://github.com/btclib-org/base58-bech32/actions/workflows/mutation.yml",
+    "status": "Met"
+  },
+  "dynamic_analysis_unsafe": {
+    "justification": "This tree ships pure Python, a memory-safe language; it produces no software written in a memory-unsafe language for a dynamic memory-safety tool to run against. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "N/A"
+  },
+  "english": {
+    "justification": "https://github.com/btclib-org/base58-bech32/issues",
+    "status": "Met"
+  },
+  "enhancement_responses": {
+    "justification": "No enhancement request has been filed since the repository opened on 2026-10-17, so none is unanswered. https://github.com/btclib-org/base58-bech32/issues",
+    "status": "Met"
+  },
+  "external_dependencies": {
+    "justification": "pyproject.toml declares `dependencies = []` -- the package imports the standard library alone, which tests/imports_test.py asserts of every module -- and the test and tooling dependencies in its dependency-groups, resolved and pinned in the committed uv.lock. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "floss_license": {
+    "justification": "The MIT license is approved by the Open Source Initiative (OSI).",
+    "status": "Met"
+  },
+  "floss_license_osi": {
+    "justification": "The MIT license is approved by the Open Source Initiative (OSI).",
+    "status": "Met"
+  },
+  "governance": {
+    "justification": "GOVERNANCE.md, organization-wide in btclib-org/.github, documents the decision model and every role a contributor, reviewer or owner holds; this tree's README.md links it. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md",
+    "status": "Met"
+  },
+  "hardened_site": {
+    "justification": "The project page https://btclib.org/base58-bech32/ sends Content-Security-Policy (default-src 'self', frame-ancestors 'none'), Strict-Transport-Security, X-Frame-Options DENY and X-Content-Type-Options nosniff (curl -sI, 2026-10-18). The repository on github.com sends all four. PyPI's project page sends the last three and no CSP; that is PyPI's to set.",
+    "status": "Met"
+  },
+  "hardening": {
+    "justification": "ruff's select = [\"ALL\"] includes the bandit S rules, so a hardening defect such as unsafe deserialization or shell injection fails the lint gate. CodeQL also runs on every pull request and every push to main. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/codeql.yml",
+    "status": "Met"
+  },
+  "homepage_url": {
+    "justification": null,
+    "status": "?"
+  },
+  "implement_secure_design": {
+    "justification": "ASSURANCE_CASE.md's *Secure design principles* applies Saltzer and Schroeder's principles one by one -- economy of mechanism, fail-safe defaults, complete mediation, open design, least privilege, psychological acceptability -- each to the file or test that carries it. https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md",
+    "status": "Met"
+  },
+  "input_validation": {
+    "justification": "Every public function validates its inputs and refuses what is invalid with a Base58Bech32TypeError or Base58Bech32ValueError, as CONTRIBUTING.md's *The public surface* requires. tests/input_validation_test.py drives the rule over every public function, and tests/fuzz_test.py holds every decoder to it on hostile strings. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "installation_common": {
+    "justification": "`python -m pip install --upgrade base58-bech32` installs it from PyPI, as README.md says, and pypi-install.yml installs the published version on Ubuntu, macOS and Windows after each release and weekly. https://pypi.org/project/base58-bech32/",
+    "status": "Met"
+  },
+  "installation_development_quick": {
+    "justification": "`uv sync` installs the whole development environment in one command, uv being the only tool to install first; CONTRIBUTING.md's *The environment and the gates* section gives it beside `uv run pytest` and the lint gate. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "installation_standard_variables": {
+    "justification": "Installation is `pip install`, which follows pip's and the interpreter's own install-location conventions; there is no project-specific installer that could diverge from that convention. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "N/A"
+  },
+  "interact": {
+    "justification": "https://github.com/btclib-org/base58-bech32",
+    "status": "Met"
+  },
+  "interfaces_current": {
+    "justification": "ruff's UP and FA rules flag deprecated constructs, and pytest turns every warning into an error. deps-latest and deps-oldest run the suite weekly at the newest and the floor versions. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "internationalization": {
+    "justification": "The package produces no text for end users and sorts none: it converts bytes to ASCII strings and back, and its exceptions are English messages for developers. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
+    "status": "N/A"
+  },
+  "know_common_errors": {
+    "justification": "ASSURANCE_CASE.md lists the common implementation weaknesses that apply here, among them CWE-20 (input validation), CWE-209 (sensitive information in errors) and CWE-400 (resource consumption), and what counters each. https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md#common-implementation-weaknesses",
+    "status": "Met"
+  },
+  "know_secure_design": {
+    "justification": "The primary developer maintains ASSURANCE_CASE.md, whose *Secure design principles* section applies Saltzer and Schroeder's principles to the code one by one. No security review of it has been done yet. https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md#secure-design-principles",
+    "status": "Met"
+  },
+  "license_location": {
+    "justification": "Non-trivial license location file in repository: <https://github.com/btclib-org/base58-bech32/blob/main/LICENSE>.",
+    "status": "Met"
+  },
+  "license_per_file": {
+    "justification": "Every Python file states \"Distributed under the MIT software license, see the accompanying LICENSE file or https://opensource.org/license/mit\", e.g. https://github.com/btclib-org/base58-bech32/blob/main/src/base58_bech32/__init__.py",
+    "status": "Met"
+  },
+  "maintained": {
+    "justification": "The first release, v2026.10.18, was published on 2026-10-18, a day after the repository opened. Four pull requests merged that day, two of them Dependabot's weekly updates. https://github.com/btclib-org/base58-bech32/pulls?q=is%3Apr+is%3Amerged https://github.com/btclib-org/base58-bech32/releases",
+    "status": "Met"
+  },
+  "maintenance_or_update": {
+    "justification": "Only the latest release is supported and nothing is backported (SECURITY.md). release.yml compares each release's public API with the previous tag's using griffe; v2026.10.18, the first release, had no previous tag. RELEASE_NOTES.md lists what a user must act on to upgrade. https://github.com/btclib-org/base58-bech32/blob/main/RELEASE_NOTES.md",
+    "status": "Met"
+  },
+  "no_leaked_credentials": {
+    "justification": "detect-secrets baseline gated by pre-commit, and GitHub secret scanning with push protection enabled on the repository: https://github.com/btclib-org/base58-bech32/blob/main/.secrets.baseline",
+    "status": "Met"
+  },
+  "regression_tests_added50": {
+    "justification": "No bug fix has been merged yet. REVIEWING.md asks of every change whether what it adds is tested, and the 100% line and branch coverage gate fails a fix whose new code no test runs. https://github.com/btclib-org/base58-bech32/blob/main/REVIEWING.md https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Met"
+  },
+  "release_notes": {
+    "justification": "RELEASE_NOTES.md holds each release's notes, and release.yml publishes the tag's section as the GitHub release body. https://github.com/btclib-org/base58-bech32/releases/tag/v2026.10.18",
+    "status": "Met"
+  },
+  "release_notes_vulns": {
+    "justification": "v2026.10.18 is the first release and fixes no vulnerability, and no advisory exists, so the notes name none. https://github.com/btclib-org/base58-bech32/releases/tag/v2026.10.18",
+    "status": "Met"
+  },
+  "repo_distributed": {
+    "justification": "Repository on GitHub, which uses git. git is distributed.",
+    "status": "Met"
+  },
+  "repo_interim": {
+    "justification": "development is on the main branch of https://github.com/btclib-org/base58-bech32",
+    "status": "Met"
+  },
+  "repo_public": {
+    "justification": "Repository on GitHub, which provides public git repositories with URLs.",
+    "status": "Met"
+  },
+  "repo_track": {
+    "justification": "Repository on GitHub, which uses git. git can track the changes, who made them, and when they were made.",
+    "status": "Met"
+  },
+  "report_archive": {
+    "justification": "https://github.com/btclib-org/base58-bech32/pulls?q=is%3Apr+is%3Aclosed https://github.com/btclib-org/base58-bech32/issues?q=is%3Aissue%20state%3Aclosed",
+    "status": "Met"
+  },
+  "report_process": {
+    "justification": "Bugs are reported on the GitHub issue tracker, through the issue forms under .github/ISSUE_TEMPLATE/, as CONTRIBUTING.md's *The issue tracker* describes: <https://github.com/btclib-org/base58-bech32/issues>. Vulnerabilities go through SECURITY.md instead: <https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md>.",
+    "status": "Met"
+  },
+  "report_responses": {
+    "justification": "No bug report has been filed since the repository opened on 2026-10-17, so none is unanswered. The only issue, 4, is the maintainer's own task. https://github.com/btclib-org/base58-bech32/issues",
+    "status": "Met"
+  },
+  "report_tracker": {
+    "justification": "Each repository uses its own GitHub Issues tracker for individual issues, with issue forms under .github/ISSUE_TEMPLATE/, and an organization-wide tracker in btclib-org/.github for cross-repository findings. https://github.com/btclib-org/base58-bech32/issues",
+    "status": "Met"
+  },
+  "report_url": {
+    "justification": null,
+    "status": "?"
+  },
+  "require_2FA": {
+    "justification": "The btclib-org organization requires two-factor authentication of every member. https://github.com/btclib-org",
+    "status": "Met"
+  },
+  "roles_responsibilities": {
+    "justification": "GOVERNANCE.md's Roles names the maintainer, the owners, repository collaborators, contributors, reviewers, the review bot, Dependabot and pre-commit.ci, and what each owes. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "status": "Met"
+  },
+  "secure_2FA": {
+    "justification": "The btclib-org organization requires two-factor authentication and allows only secure methods: TOTP apps, security keys or passkeys, and GitHub Mobile, not SMS. https://github.com/btclib-org/.github/issues/1362#issuecomment-5903994882",
+    "status": "Met"
+  },
+  "security_review": {
+    "justification": "No security review of this repository has been done. SECURITY.md's *Security review* says so, and ASSURANCE_CASE.md is what one will be done against. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md#security-review",
+    "status": "Unmet"
+  },
+  "signed_releases": {
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing, and each GitHub release a Sigstore provenance bundle. SECURITY.md gives the gh attestation verify command. https://github.com/btclib-org/base58-bech32/releases/latest",
+    "status": "Met"
+  },
+  "sites_https": {
+    "justification": "Given only https: URLs.",
+    "status": "Met"
+  },
+  "sites_password_security": {
+    "justification": "Project sites are GitHub, PyPI and Read the Docs; this repository runs no site of its own that stores user passwords -- authentication is GitHub's and PyPI's, not this project's. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md",
+    "status": "N/A"
+  },
+  "small_tasks": {
+    "justification": "The label good first issue marks a small task for a first contribution, as CONTRIBUTING.md says, and one search lists the open ones across the organization. No issue in this repository carries it yet. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md#the-issue-tracker https://github.com/search?q=org%3Abtclib-org+label%3A%22good+first+issue%22+is%3Aopen&type=issues",
+    "status": "Met"
+  },
+  "static_analysis": {
+    "justification": "mypy in strict mode, ruff with every rule and CodeQL's python analysis.",
+    "status": "Met"
+  },
+  "static_analysis_common_vulnerabilities": {
+    "justification": "CodeQL's python analysis (codeql.yml) runs on a schedule, on every pull request and on every push to main, and ruff's `select = [\"ALL\"]` includes the bandit-derived S rules, both FLOSS static-analysis tools looking for common vulnerabilities. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/codeql.yml",
+    "status": "Met"
+  },
+  "static_analysis_fixed": {
+    "justification": "No static-analysis finding is open: CodeQL has no open alert, and ruff and mypy findings fail the required lint check. The 30 open code-scanning alerts are OpenSSF Scorecard's scores for pinning, code review, maintenance, branch protection and the Best Practices badge. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/codeql.yml",
+    "status": "Met"
+  },
+  "static_analysis_often": {
+    "justification": "On every pull request and every push to main: https://github.com/btclib-org/base58-bech32/actions/workflows/lint.yml, https://github.com/btclib-org/base58-bech32/actions/workflows/codeql.yml",
+    "status": "Met"
+  },
+  "test": {
+    "justification": "test.yml runs the suite, gated at 100% line and branch coverage, against vectors their authors publish: Bitcoin Core's and the base58 package's for Base58, BIP173's and BIP350's for bech32, Substrate's and polkadot-js' for SS58, and the CashAddr specification's. tests/_data/README.md pins each vendored file to its upstream commit. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/test.yml",
+    "status": "Met"
+  },
+  "test_branch_coverage80": {
+    "justification": "pyproject.toml sets branch = true under [tool.coverage.run], and the 100% fail_under gate includes branches: https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "test_continuous_integration": {
+    "justification": "test.yml runs the suite on every pull request and on every push to main that changes more than Markdown files. Its aggregate job, test: every job passed, is a required check on main. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/test.yml",
+    "status": "Met"
+  },
+  "test_invocation": {
+    "justification": "https://github.com/btclib-org/base58-bech32?tab=contributing-ov-file",
+    "status": "Met"
+  },
+  "test_most": {
+    "justification": "100% coverage floor",
+    "status": "Met"
+  },
+  "test_policy": {
+    "justification": "CONTRIBUTING.md makes 100% coverage a gate every change must pass, so new functionality comes with its tests. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Met"
+  },
+  "test_policy_mandated": {
+    "justification": "CONTRIBUTING.md requires 100% line and branch coverage, and fail_under = 100.0 fails the CI gate on any new code without a test. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "test_statement_coverage80": {
+    "justification": "pyproject.toml sets fail_under = 100.0, gated on every pull request by test.yml. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "test_statement_coverage90": {
+    "justification": "pyproject.toml sets fail_under = 100.0 under [tool.coverage.report], and the required test check enforces it on every pull request: https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "tests_are_added": {
+    "justification": "The required check test: every job passed fails any pull request that leaves a line or branch untested, so a change to src/ cannot land without its tests. https://github.com/btclib-org/base58-bech32/pulls?q=is%3Apr+is%3Amerged",
+    "status": "Met"
+  },
+  "tests_documented_added": {
+    "justification": "CONTRIBUTING.md documents the 100% coverage gate, so new functionality is not accepted without a test. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "two_person_review": {
+    "justification": "v2026.10.18 shipped 0 of 4 pull requests approved by somebody other than the author and other than fametrano. Dependabot's 1 and 2 were approved by fametrano, and 3 and 5 merged with no approving review. main's ruleset requires one approving review from somebody other than the author, and carries a temporary maintainer bypass that issue 4 removes. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets https://github.com/btclib-org/base58-bech32/issues/4",
+    "status": "Unmet"
+  },
+  "updateable_reused_components": {
+    "justification": "At runtime the package reuses only the standard library. The test and tooling components are PyPI packages pinned in uv.lock and bumped by Dependabot, and the deps-latest sentinel runs the full suite against the upgraded set every week. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/deps-latest.yml",
+    "status": "Met"
+  },
+  "version_semver": {
+    "justification": "CalVer, YYYY.M.D, declared in pyproject.toml and explained in RELEASE_NOTES.md: the number says when a release was cut and promises nothing about compatibility, so a breaking change is announced in RELEASE_NOTES.md. https://github.com/btclib-org/base58-bech32/blob/main/RELEASE_NOTES.md",
+    "status": "Met"
+  },
+  "version_tags": {
+    "justification": "Each release is tagged v<version> on the release commit, as RELEASING.md requires. https://github.com/btclib-org/base58-bech32/tags",
+    "status": "Met"
+  },
+  "version_tags_signed": {
+    "justification": "Every release tag is signed, and RELEASING.md reads each signature back. https://github.com/btclib-org/base58-bech32/tags",
+    "status": "Met"
+  },
+  "version_unique": {
+    "justification": "Each release carries a unique calendar version, YYYY.M.D, declared once in pyproject.toml and tagged v<version>. https://github.com/btclib-org/base58-bech32/releases",
+    "status": "Met"
+  },
+  "vulnerabilities_critical_fixed": {
+    "justification": "No vulnerability is known and none is unfixed: the advisories list is empty and no Dependabot alert is open. https://github.com/btclib-org/base58-bech32/security/advisories",
+    "status": "Met"
+  },
+  "vulnerabilities_fixed_60_days": {
+    "justification": "No vulnerability has been reported or published, and no Dependabot alert is open. Each advisory would name the release that fixes it. https://github.com/btclib-org/base58-bech32/security/advisories",
+    "status": "Met"
+  },
+  "vulnerability_report_credit": {
+    "justification": "No vulnerability has been reported to this repository, so there is no reporter to credit. SECURITY.md says how a report is made. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md#reporting-a-vulnerability",
+    "status": "N/A"
+  },
+  "vulnerability_report_private": {
+    "justification": "https://github.com/btclib-org/base58-bech32?tab=security-ov-file",
+    "status": "Met"
+  },
+  "vulnerability_report_process": {
+    "justification": "https://github.com/btclib-org/base58-bech32?tab=security-ov-file",
+    "status": "Met"
+  },
+  "vulnerability_report_response": {
+    "justification": "No vulnerability report has been received since the repository opened on 2026-10-17. SECURITY.md promises an acknowledgement within 7 days. https://github.com/btclib-org/base58-bech32/security/advisories",
+    "status": "N/A"
+  },
+  "vulnerability_response_process": {
+    "justification": "SECURITY.md's Reporting a vulnerability gives the private channels (a GitHub security advisory, or security at btclib dot org), who can see a report, and how a CVE is requested. Private vulnerability reporting is enabled. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md",
+    "status": "Met"
+  },
+  "warnings": {
+    "justification": "mypy strict with all relevant extra checks activated, see https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "warnings_fixed": {
+    "justification": "Warnings are not tolerated: ruff, strict mypy and pytest's filterwarnings = [\"error\"] fail the required checks. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "warnings_strict": {
+    "justification": "ruff runs with `select = [\"ALL\"]` (every rule family) and mypy runs with `strict = true`; both are zero-finding pre-commit hooks enforced again by the required lint workflow. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
+    "status": "Met"
+  }
+}

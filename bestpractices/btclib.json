@@ -220,7 +220,7 @@
     "status": "Met"
   },
   "OSPS-VM-01.01": {
-    "justification": "SECURITY.md's *Reporting a vulnerability* gives the private channels, a GitHub security advisory or email, and the timeframes: a report is acknowledged within 7 days, and a fix or a published advisory follows within 90 days. https://github.com/btclib-org/btclib/blob/main/SECURITY.md#reporting-a-vulnerability",
+    "justification": "SECURITY.md's *Reporting a vulnerability* gives the private channels, a GitHub security advisory or email, and the timeframes: a report is acknowledged within 7 days, and a fix or a published advisory follows within 90 days. A report triaged as easy to rediscover is fixed as soon as possible, and its advisory is published with the fix. https://github.com/btclib-org/btclib/blob/main/SECURITY.md#reporting-a-vulnerability",
     "status": "Met"
   },
   "OSPS-VM-02.01": {

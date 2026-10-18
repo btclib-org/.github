@@ -8,11 +8,9 @@ name: reusable-scorecard
 # workflow-level `permissions:` and the concurrency group stay in the
 # caller, whose run this job joins.
 #
-# No inputs at all: the four trees carrying scorecard.yml ask the same
-# question of themselves, comments and blanks stripped, differing in
-# only the caller's own cron minute and one action pin three of them
-# were a Dependabot bump behind on -- neither a right difference, so
-# neither is a parameter (btclib-org/.github#35).
+# No inputs at all: the trees carrying scorecard.yml ask the same
+# question of themselves, comments and blanks stripped, and differ only
+# in the cron minute (btclib-org/.github#35).
 #
 # What the row asks is a third-party, external audit of the calling
 # tree's supply-chain posture, run independently rather than by
