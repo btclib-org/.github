@@ -1,0 +1,786 @@
+{
+  "OSPS-AC-01.01": {
+    "justification": "The btclib-org organization requires two-factor authentication of every member and accepts only secure methods, not SMS. https://github.com/btclib-org/.github/issues/1362#issuecomment-5903994882",
+    "status": "Met"
+  },
+  "OSPS-AC-02.01": {
+    "justification": "A new member gets read access, the organization's base permission (gh api orgs/btclib-org --jq .default_repository_permission). This repository has no direct collaborator. A higher grant is an issue in btclib-org/.github that an owner other than the one asking approves. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
+    "status": "Met"
+  },
+  "OSPS-AC-03.01": {
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main. Its one bypass actor holds it in pull_request mode, which excuses a merge and never a direct push. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
+  },
+  "OSPS-AC-03.02": {
+    "justification": "The main-integrity ruleset forbids deleting main and has no bypass actor. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
+    "status": "Met"
+  },
+  "OSPS-AC-04.01": {
+    "justification": "The default GITHUB_TOKEN is read-only and cannot approve pull requests (gh api repos/btclib-org/portanode/actions/permissions/workflow). Every workflow also sets permissions: contents: read at the top. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#token-permissions",
+    "status": "Met"
+  },
+  "OSPS-AC-04.02": {
+    "justification": "Every workflow sets permissions: contents: read at the top. Only the claude-review job adds scopes, pull-requests: write and id-token: write, which it uses. zizmor's excessive-permissions audit runs in the required Lint check. https://github.com/btclib-org/portanode/blob/main/.github/workflows/claude-review.yml",
+    "status": "Met"
+  },
+  "OSPS-BR-01.01": {
+    "justification": "No workflow uses pull_request_target or workflow_run. No run: step expands an event field; verified-signatures.yml's inputs reach a script only through env:. zizmor's template-injection audit runs in the required Lint check. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "status": "Met"
+  },
+  "OSPS-BR-01.02": {
+    "justification": null,
+    "status": 0
+  },
+  "OSPS-BR-01.03": {
+    "justification": "Pull-request runs use the pull_request and pull_request_review_comment triggers, which give a fork no secrets and a read-only token. The review job, which holds a secret, runs only when the head repository is this one. On issue_comment, the mention job checks out the default branch. https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-claude-review.yml",
+    "status": "Met"
+  },
+  "OSPS-BR-01.04": {
+    "justification": "Only verified-signatures.yml takes workflow_dispatch inputs, before and after. They reach the script through env:, and the script refuses any value that is not a hex commit sha. https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-verified-signatures.yml",
+    "status": "Met"
+  },
+  "OSPS-BR-02.01": {
+    "justification": "Each release has a unique calendar version, YYYY.M.D, set by a signed v* tag. A fix to a shipped release is another day's release. https://github.com/btclib-org/portanode/blob/main/RELEASING.md#the-version-string",
+    "status": "Met"
+  },
+  "OSPS-BR-02.02": {
+    "justification": "The only asset of a release is GitHub's source archive, named after the tag: portanode-2026.10.17.zip for v2026.10.17. https://github.com/btclib-org/portanode/releases/latest",
+    "status": "Met"
+  },
+  "OSPS-BR-03.01": {
+    "justification": "Every official channel is served over HTTPS only: the GitHub repository, its issue tracker, its Security tab and its releases. https://github.com/btclib-org/portanode",
+    "status": "Met"
+  },
+  "OSPS-BR-03.02": {
+    "justification": "The project is distributed only from GitHub, over HTTPS: git clone, the ZIP of main and the release's source archive. Each release is a signed tag. https://github.com/btclib-org/portanode/releases",
+    "status": "Met"
+  },
+  "OSPS-BR-04.01": {
+    "justification": "The GitHub release body is RELEASE_NOTES.md's section for that release: what a user must act on. CHANGELOG.md lists what changed. https://github.com/btclib-org/portanode/blob/main/RELEASE_NOTES.md",
+    "status": "Met"
+  },
+  "OSPS-BR-05.01": {
+    "justification": "No build ingests a dependency, and a release is a tag. CI installs its tools with pre-commit at the revisions .pre-commit-config.yaml pins, and every third-party action is pinned by commit SHA. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "status": "Met"
+  },
+  "OSPS-BR-06.01": {
+    "justification": "Each release is a signed annotated tag, and GitHub verifies its signature. The tag covers the commit and every file in it. The source archive GitHub generates carries no signature of its own. https://github.com/btclib-org/portanode/tags",
+    "status": "Met"
+  },
+  "OSPS-BR-07.01": {
+    "justification": "Secret scanning and its push protection are on. The detect-private-key and detect-secrets hooks run in the required Lint check. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#security-settings",
+    "status": "Met"
+  },
+  "OSPS-BR-07.02": {
+    "justification": "A secret is an environment secret that only the owners reach. A secret kept in any other store is recorded in the REPOSITORY.md of the repository that uses it, and btclib-org/.github's tests/secrets_test.py refuses an unrecorded one. A secret is rotated when an owner changes or an exposure is suspected. The secrets kept outside an environment are rotated before they are a year old, and the list is reviewed yearly. This repository holds no secret of its own. https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#secrets",
+    "status": "Met"
+  },
+  "OSPS-DO-01.01": {
+    "justification": "README.md is the user guide: getting the folder, the quick start, each launcher, updating and rolling back the binaries, and troubleshooting. Each scripts directory has its own README.md. https://github.com/btclib-org/portanode/blob/main/README.md",
+    "status": "Met"
+  },
+  "OSPS-DO-02.01": {
+    "justification": "README.md's Getting Help says to search the open issues and file through the bug form. CONTRIBUTING.md's The issue tracker says where an issue goes, and the security policy sends a vulnerability to a private channel. https://github.com/btclib-org/portanode/blob/main/.github/ISSUE_TEMPLATE/bug_report.yml",
+    "status": "Met"
+  },
+  "OSPS-DO-03.01": {
+    "justification": "No document tells a user how to verify a release: RELEASING.md reads the tag's signature back through the API for the maintainer, and nothing explains git verify-tag or where the signing key is. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "status": "Unmet"
+  },
+  "OSPS-DO-03.02": {
+    "justification": "No document names the identity a release tag is expected to be signed by, such as the key fingerprint or the account. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "status": "Unmet"
+  },
+  "OSPS-DO-04.01": {
+    "justification": "The security policy's Supported versions says that only the latest release is supported, nothing is backported, and a fix is a new release. https://github.com/btclib-org/.github/blob/main/SECURITY.md#supported-versions",
+    "status": "Met"
+  },
+  "OSPS-DO-05.01": {
+    "justification": "The security policy: only the latest release is supported, so a release stops receiving security updates when the next one is published. https://github.com/btclib-org/.github/blob/main/SECURITY.md#supported-versions",
+    "status": "Met"
+  },
+  "OSPS-DO-06.01": {
+    "justification": "README.md's Updating Binaries says how Bitcoin Core and Electrum are obtained and verified: from their publishers, with PGP signatures from pinned keys. .github/dependabot.yml says how the actions are tracked, and .pre-commit-config.yaml's ci: block how the hook revisions are. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
+    "status": "Met"
+  },
+  "OSPS-DO-07.01": {
+    "justification": "Nothing is built: README.md's Getting the folder and Updating Binaries say how to assemble a working folder, and Prerequisites names gpg. CONTRIBUTING.md gives the development environment: uv, then uvx pre-commit. https://github.com/btclib-org/portanode/blob/main/README.md#getting-the-folder",
+    "status": "Met"
+  },
+  "OSPS-GV-01.01": {
+    "justification": "GOVERNANCE.md's Roles names who holds access to sensitive resources: fametrano is the maintainer, and the three owners, named by login, administer every repository. This repository has no direct collaborator. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "status": "Met"
+  },
+  "OSPS-GV-01.02": {
+    "justification": "GOVERNANCE.md's Roles describes the maintainer, owners, repository collaborators, contributors, reviewers, the review bot, Dependabot and pre-commit.ci, and what each owes. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "status": "Met"
+  },
+  "OSPS-GV-02.01": {
+    "justification": "Proposed changes and usage obstacles are discussed publicly in the repository's GitHub issues and pull requests; cross-repository questions go to btclib-org/.github's tracker. https://github.com/btclib-org/portanode/issues",
+    "status": "Met"
+  },
+  "OSPS-GV-03.01": {
+    "justification": "CONTRIBUTING.md explains the contribution process: one subject per pull request, the local gates, the review and the landing. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "OSPS-GV-03.02": {
+    "justification": "CONTRIBUTING.md states what a contribution must meet: one subject, a Signed-off-by trailer on every commit, the gates CI runs, and a review against REVIEWING.md. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "OSPS-GV-04.01": {
+    "justification": "A grant of write or admin, to any repository of the organization, is an issue in btclib-org/.github that states the reason, and an owner other than the one asking approves it there. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
+    "status": "Met"
+  },
+  "OSPS-LE-01.01": {
+    "justification": "main requires the Sign-off check, which refuses a commit that lacks its author's Signed-off-by: trailer, Dependabot's and pre-commit.ci's aside. Web commits are signed off automatically. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
+    "status": "Met"
+  },
+  "OSPS-LE-02.01": {
+    "justification": "The source code is under the MIT license, which the OSI approves. https://github.com/btclib-org/portanode/blob/main/LICENSE",
+    "status": "Met"
+  },
+  "OSPS-LE-02.02": {
+    "justification": "The only release asset is GitHub's source archive of the tag, which carries the same MIT LICENSE file. https://github.com/btclib-org/portanode/releases/latest",
+    "status": "Met"
+  },
+  "OSPS-LE-03.01": {
+    "justification": "The license text is the repository's root LICENSE file. https://github.com/btclib-org/portanode/blob/main/LICENSE",
+    "status": "Met"
+  },
+  "OSPS-LE-03.02": {
+    "justification": "The release's source archive holds the root LICENSE file; .gitattributes excludes nothing from it. https://github.com/btclib-org/portanode/blob/main/LICENSE",
+    "status": "Met"
+  },
+  "OSPS-QA-01.01": {
+    "justification": "The repository is public on GitHub at a static URL. https://github.com/btclib-org/portanode",
+    "status": "Met"
+  },
+  "OSPS-QA-01.02": {
+    "justification": "Git history on GitHub records every change with its author, committer and date; linear history and no force-push on main keep it from being rewritten. https://github.com/btclib-org/portanode/commits/main",
+    "status": "Met"
+  },
+  "OSPS-QA-02.01": {
+    "justification": "Bash, batch and PowerShell have no package manager here, and the tree has no manifest or lock file. The binaries the updaters install are fetched from their publishers and pinned by keys/*.fingerprints. https://github.com/btclib-org/portanode/blob/main/.github/dependabot.yml",
+    "status": "N/A"
+  },
+  "OSPS-QA-02.02": {
+    "justification": "A release ships no compiled asset: its only asset is GitHub's source archive of scripts and text. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "status": "N/A"
+  },
+  "OSPS-QA-03.01": {
+    "justification": "main requires the Lint, Dependency review and Sign-off checks. enforce_admins is off, so an admin merge without them is a manual bypass, which the control allows. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#what-gates-a-merge",
+    "status": "Met"
+  },
+  "OSPS-QA-04.01": {
+    "justification": "The organization standard's section 2 lists every repository of btclib-org and its tier, portanode included. PortaNode is this one repository. https://github.com/btclib-org/.github#which-repositories-and-how-far",
+    "status": "Met"
+  },
+  "OSPS-QA-04.02": {
+    "justification": "Each release is built from this single repository and from no subproject. https://github.com/btclib-org/portanode",
+    "status": "N/A"
+  },
+  "OSPS-QA-05.01": {
+    "justification": "No generated executable is committed: git ls-files names no binary file. The bin/ directories hold only a README.md and a .gitignore naming the binaries the updaters install. https://github.com/btclib-org/portanode/blob/main/macos/bin/.gitignore",
+    "status": "Met"
+  },
+  "OSPS-QA-05.02": {
+    "justification": "The tree holds no binary file of any kind: every tracked file is text. https://github.com/btclib-org/portanode",
+    "status": "Met"
+  },
+  "OSPS-QA-06.01": {
+    "justification": "The tree has no automated test suite: lint.yml runs the pre-commit hooks and nothing runs a launcher. CONTRIBUTING.md says a launcher is tested by running it by hand on macOS, Windows and Linux. The required checks are lint, dependency review and sign-off. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "OSPS-QA-06.02": {
+    "justification": "CONTRIBUTING.md's The environment and the gates gives the command that runs the gates, says lint.yml runs it on every pull request, and says the launchers are tested by hand on each platform, from a volume that is not the boot disk. lint.yml also runs on every push to main. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Met"
+  },
+  "OSPS-QA-06.03": {
+    "justification": "No document asks a change to add or update tests in an automated suite, and the tree has none. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "OSPS-QA-07.01": {
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author, but the maintainer bypasses it in pull_request mode and can merge without one. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
+    "status": "Unmet"
+  },
+  "OSPS-SA-01.01": {
+    "justification": "README.md names the actors and actions: the user and the launchers, the per-platform scripts they reach, Bitcoin Core and Electrum, the publishers' download sites, gpg and the user's keyring. Updating Binaries and Limitations, not vulnerabilities say what each update, verification and rollback does and whom it trusts. https://github.com/btclib-org/portanode/blob/main/README.md#folder-structure https://github.com/btclib-org/portanode/blob/main/README.md#limitations-not-vulnerabilities",
+    "status": "Met"
+  },
+  "OSPS-SA-02.01": {
+    "justification": "README.md and each scripts directory's README.md document the interface: every launcher and its menu, the PORTANODE_ROOT, PORTANODE_ALLOW_UNVERIFIED and PORTANODE_NO_NOTIFY variables, the pin files and the exit statuses of set-permissions. https://github.com/btclib-org/portanode/blob/main/README.md",
+    "status": "Met"
+  },
+  "OSPS-SA-03.01": {
+    "justification": "README.md's Limitations, not vulnerabilities assesses the known risks of running the folder: the user's keyring as the trust root, the switch that installs unverified binaries, checksums that give integrity and not authenticity, an unencrypted portable folder, Bitcoin Core's exFAT warning, and unsigned launchers. https://github.com/btclib-org/portanode/blob/main/README.md#limitations-not-vulnerabilities",
+    "status": "Met"
+  },
+  "OSPS-SA-03.02": {
+    "justification": "No threat model or attack-surface analysis exists. README.md's Limitations, not vulnerabilities lists known risks, but no document models the adversaries, the entry points or the trust boundaries. https://github.com/btclib-org/portanode/blob/main/README.md#limitations-not-vulnerabilities",
+    "status": "Unmet"
+  },
+  "OSPS-VM-01.01": {
+    "justification": "The security policy's Reporting a vulnerability gives the private channels and the timeframes: a report is acknowledged within 7 days, and a fix or a published advisory follows within 90 days. https://github.com/btclib-org/portanode/security/policy",
+    "status": "Met"
+  },
+  "OSPS-VM-02.01": {
+    "justification": "The security policy on the Security tab, the organization's SECURITY.md, names the contacts: a private GitHub security advisory, or email to security at btclib dot org. GOVERNANCE.md's Roles says that address reaches every owner. https://github.com/btclib-org/portanode/security/policy https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "status": "Met"
+  },
+  "OSPS-VM-03.01": {
+    "justification": "Private vulnerability reporting is enabled, and the security policy and the issue form's contact link point to it, with an email address as the alternative. https://github.com/btclib-org/portanode/security/advisories/new",
+    "status": "Met"
+  },
+  "OSPS-VM-04.01": {
+    "justification": "A vulnerability is published as a GitHub security advisory on this repository, as the security policy says. None has been published. https://github.com/btclib-org/portanode/security/advisories",
+    "status": "Met"
+  },
+  "OSPS-VM-04.02": {
+    "justification": "A release ships no third-party component: Bitcoin Core and Electrum are fetched from their publishers at update time and are not in the tree or the release. https://github.com/btclib-org/portanode/blob/main/AUTHORS.md",
+    "status": "N/A"
+  },
+  "OSPS-VM-05.01": {
+    "justification": "The standard sets the threshold: actions/dependency-review-action fails a pull request that adds or changes a dependency with an advisory of moderate severity or above, or with a licence outside the allow-list. Its settings are btclib-org/.github's .github/dependency-review.yml. https://github.com/btclib-org/.github/blob/main/.github/dependency-review.yml",
+    "status": "Met"
+  },
+  "OSPS-VM-05.02": {
+    "justification": "RELEASING.md's steps gate the tree with pre-commit only. No step checks Dependabot alerts or another SCA result before the tag is cut. https://github.com/btclib-org/portanode/blob/main/RELEASING.md#cutting-one",
+    "status": "Unmet"
+  },
+  "OSPS-VM-05.03": {
+    "justification": "The required Dependency review check runs on every pull request and blocks a change that adds a dependency with an advisory of moderate severity or above, or a licence outside the allow-list. The only dependencies it can see are the pinned actions. https://github.com/btclib-org/portanode/blob/main/.github/workflows/lint.yml",
+    "status": "Met"
+  },
+  "OSPS-VM-06.01": {
+    "justification": "The threshold is zero: a finding of any hook in .pre-commit-config.yaml fails the required Lint check, and CONTRIBUTING.md's What gates a merge says a red Lint stops the merge. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#what-gates-a-merge-and-what-only-reports",
+    "status": "Met"
+  },
+  "OSPS-VM-06.02": {
+    "justification": "The required Lint check runs shellcheck on the .sh and .command scripts, zizmor and actionlint on the workflows, and detect-secrets on every file. No security analysis is run on the .bat and .ps1 scripts: Blinter and PSScriptAnalyzer are run by hand. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "status": "Unmet"
+  },
+  "access_continuity": {
+    "justification": "The organization has three owners, fametrano, giacomocaironi and pmazzocchi, each an administrator of this repository. If one becomes unavailable, the other two can still close issues, merge changes and cut a release. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity",
+    "status": "Met"
+  },
+  "accessibility_best_practices": {
+    "justification": "The launchers are plain-text numbered menus driven from the keyboard, with no colour, which a screen reader can read. The project site is GitHub. https://github.com/btclib-org/portanode/blob/main/README.md#launcher-notes",
+    "status": "Met"
+  },
+  "achieve_passing": {
+    "justification": null,
+    "status": "Unmet"
+  },
+  "achieve_silver": {
+    "justification": null,
+    "status": "Unmet"
+  },
+  "assurance_case": {
+    "justification": "No assurance case exists: no document argues that the security requirements are met, and there is no threat model, trust-boundary analysis or argument against common weaknesses. https://github.com/btclib-org/portanode/blob/main/README.md#limitations-not-vulnerabilities",
+    "status": "Unmet"
+  },
+  "automated_integration_testing": {
+    "justification": "No automated test suite runs on a check-in; lint.yml runs only the lint hooks. https://github.com/btclib-org/portanode/blob/main/.github/workflows/lint.yml",
+    "status": "Unmet"
+  },
+  "build": {
+    "justification": "Nothing is built: the launchers are scripts run as they are, and the binaries they start are the publishers' own. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "status": "N/A"
+  },
+  "build_common_tools": {
+    "justification": "Nothing is built. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "status": "N/A"
+  },
+  "build_floss_tools": {
+    "justification": "Nothing is built. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "status": "N/A"
+  },
+  "build_non_recursive": {
+    "justification": "There is no build system. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "status": "N/A"
+  },
+  "build_preserve_debug": {
+    "justification": "There is no build or installation system: the folder is cloned or unzipped as it is. https://github.com/btclib-org/portanode/blob/main/README.md#getting-the-folder",
+    "status": "N/A"
+  },
+  "build_repeatable": {
+    "justification": "No building occurs: the scripts are used directly. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "status": "N/A"
+  },
+  "build_reproducible": {
+    "justification": "No building occurs: the scripts are used directly. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "status": "N/A"
+  },
+  "build_standard_variables": {
+    "justification": "No native binary is built. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "status": "N/A"
+  },
+  "bus_factor": {
+    "justification": "fametrano made every human commit and filed every issue. Knowledge of the code rests on him alone. https://github.com/btclib-org/portanode/graphs/contributors",
+    "status": "Unmet"
+  },
+  "code_of_conduct": {
+    "justification": "btclib-org/.github's CODE_OF_CONDUCT.md is this repository's code of conduct, through GitHub's organization-wide default; the community-profile API reports it. https://github.com/btclib-org/.github/blob/main/CODE_OF_CONDUCT.md",
+    "status": "Met"
+  },
+  "code_review_standards": {
+    "justification": "REVIEWING.md states what a review checks, how a finding is written and what clears a pull request. https://github.com/btclib-org/portanode/blob/main/REVIEWING.md",
+    "status": "Met"
+  },
+  "coding_standards": {
+    "justification": "No style guide is named for bash, batch or PowerShell. shellcheck checks correctness, not a style. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
+    "status": "Unmet"
+  },
+  "coding_standards_enforced": {
+    "justification": "No coding style is selected, so none is enforced. The hooks enforce whitespace, line endings and shellcheck's correctness checks. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "status": "Unmet"
+  },
+  "contribution": {
+    "justification": "CONTRIBUTING.md explains the process: issues, one pull request per subject, the review and the landing. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "contribution_requirements": {
+    "justification": "CONTRIBUTING.md states the requirements: the Signed-off-by trailer, the gates that must pass, and REVIEWING.md, which the change is reviewed against. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "contributors_unassociated": {
+    "justification": "fametrano is the only significant contributor; the other committers are Dependabot and pre-commit.ci. https://github.com/btclib-org/portanode/graphs/contributors",
+    "status": "Unmet"
+  },
+  "copyright_per_file": {
+    "justification": "No script carries a copyright statement; the tree's COPYRIGHT file holds it. https://github.com/btclib-org/portanode/blob/main/COPYRIGHT",
+    "status": "Unmet"
+  },
+  "crypto_algorithm_agility": {
+    "justification": "Signatures are checked by gpg, which accepts the OpenPGP algorithms the publishers use. A publisher's new key is a one-line change to a pin file only for a v4 key: a pin line must be 40 hex characters. https://github.com/btclib-org/portanode/blob/main/keys/electrum.fingerprints",
+    "status": "Met"
+  },
+  "crypto_call": {
+    "justification": "Nothing is reimplemented: signatures are checked by gpg, and hashes computed by sha256sum, shasum or Get-FileHash. https://github.com/btclib-org/portanode/blob/main/shared/utilities/lib.sh",
+    "status": "Met"
+  },
+  "crypto_certificate_verification": {
+    "justification": "No script turns certificate verification off: none passes --insecure, -k or -SkipCertificateCheck. https://github.com/btclib-org/portanode",
+    "status": "Met"
+  },
+  "crypto_credential_agility": {
+    "justification": "PortaNode processes no credential or private key: Bitcoin Core's RPC cookie and the wallets are Bitcoin Core's and Electrum's own. https://github.com/btclib-org/portanode/blob/main/bitcoin-datadir/bitcoin.conf",
+    "status": "N/A"
+  },
+  "crypto_floss": {
+    "justification": "Signature checks use GnuPG, which is FLOSS, and hashing uses the system's SHA-256 tools.",
+    "status": "Met"
+  },
+  "crypto_keylength": {
+    "justification": "PortaNode generates and selects no key. It checks the publishers' signatures with keys the user imports and pins. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
+    "status": "N/A"
+  },
+  "crypto_password_storage": {
+    "justification": "PortaNode stores no password for authenticating users. bitcoin.conf sets no RPC password. https://github.com/btclib-org/portanode/blob/main/bitcoin-datadir/bitcoin.conf",
+    "status": "N/A"
+  },
+  "crypto_pfs": {
+    "justification": "PortaNode implements no key agreement protocol.",
+    "status": "N/A"
+  },
+  "crypto_published": {
+    "justification": "The software uses only OpenPGP signatures, checked by gpg, and SHA-256 checksums. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
+    "status": "Met"
+  },
+  "crypto_random": {
+    "justification": "PortaNode generates no cryptographic key or nonce.",
+    "status": "N/A"
+  },
+  "crypto_tls12": {
+    "justification": "Downloads use curl and PowerShell's Invoke-WebRequest, and no script sets the TLS version. Whether Windows PowerShell 5.1 offers TLS 1.2 by default on every supported Windows was not measured. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
+    "status": "?"
+  },
+  "crypto_used_network": {
+    "justification": "Every download URL is HTTPS, and the Electrum local-server launcher connects over TLS. curl follows redirects with -L and does not restrict them to HTTPS. https://github.com/btclib-org/portanode/blob/main/linux/scripts/utilities/update-bitcoin.sh",
+    "status": "Unmet"
+  },
+  "crypto_verification_private": {
+    "justification": "Certificates are verified before any request, and no request carries a cookie or credential. https://github.com/btclib-org/portanode",
+    "status": "Met"
+  },
+  "crypto_weaknesses": {
+    "justification": "Key pinning depends on SHA-1: the pin files name keys by OpenPGP v4 fingerprint, which is SHA-1 over the key (RFC 4880 section 12.2), and the check compares the signing key's fingerprint with them. The downloads themselves are checked with SHA-256. https://github.com/btclib-org/portanode/blob/main/keys/electrum.fingerprints",
+    "status": "Unmet"
+  },
+  "crypto_working": {
+    "justification": "No script uses MD4, MD5, DES or RC4: the checks are OpenPGP signatures and SHA-256 checksums. The pin files name keys by OpenPGP v4 fingerprint, which is SHA-1 over the key (RFC 4880 section 12.2), as the OpenPGP keys the publishers use require. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
+    "status": "Met"
+  },
+  "dco": {
+    "justification": "main requires the Sign-off check, which refuses a pull request with a commit that lacks its author's Signed-off-by: trailer. CONTRIBUTING.md links the DCO. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#pull-requests",
+    "status": "Met"
+  },
+  "delivery_mitm": {
+    "justification": "The project is delivered from GitHub over HTTPS, and each release is a signed tag. The updaters download over HTTPS and check PGP signatures. https://github.com/btclib-org/portanode",
+    "status": "Met"
+  },
+  "delivery_unsigned": {
+    "justification": "No hash is fetched over HTTP: every download URL is HTTPS. Bitcoin Core's SHA256SUMS is used only after its PGP signature is checked. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
+    "status": "Met"
+  },
+  "dependency_monitoring": {
+    "justification": "Dependabot alerts and security updates are on, and Dependency review is a required check. Bitcoin Core and Electrum are not pinned: the updaters fetch each publisher's latest release. https://github.com/btclib-org/portanode/blob/main/.github/dependabot.yml",
+    "status": "Met"
+  },
+  "description_good": {
+    "justification": "README.md says PortaNode runs Bitcoin Core and Electrum from one folder on an external disk that macOS, Windows and Linux share. https://github.com/btclib-org/portanode/blob/main/README.md",
+    "status": "Met"
+  },
+  "discussion": {
+    "justification": "GitHub issues and pull requests: searchable, addressable by URL, open to anyone. https://github.com/btclib-org/portanode/issues",
+    "status": "Met"
+  },
+  "documentation_achievements": {
+    "justification": "README.md carries no Best Practices or Baseline badge yet. https://github.com/btclib-org/portanode/blob/main/README.md",
+    "status": "Unmet"
+  },
+  "documentation_architecture": {
+    "justification": "README.md's Folder Structure and Launcher Notes describe the root launchers, the per-platform menus and scripts, the bin/ directories and the data directories, and how a launcher reaches each. CLAUDE.md's What is in the tree, and what is not adds the shared libraries under shared/ and the pin files under keys/. https://github.com/btclib-org/portanode/blob/main/README.md#folder-structure https://github.com/btclib-org/portanode/blob/main/CLAUDE.md",
+    "status": "Met"
+  },
+  "documentation_basics": {
+    "justification": "README.md covers getting the folder, the quick start, each launcher, updating, troubleshooting and the security notes. https://github.com/btclib-org/portanode/blob/main/README.md",
+    "status": "Met"
+  },
+  "documentation_current": {
+    "justification": "REVIEWING.md blocks a pull request on a false sentence in the tree's documentation, and links.yml checks every link weekly. https://github.com/btclib-org/portanode/blob/main/REVIEWING.md",
+    "status": "Met"
+  },
+  "documentation_interface": {
+    "justification": "README.md and each scripts directory's README.md describe every launcher, its menu, the environment variables and the pin files. https://github.com/btclib-org/portanode/blob/main/README.md",
+    "status": "Met"
+  },
+  "documentation_quick_start": {
+    "justification": "https://github.com/btclib-org/portanode/blob/main/README.md#quick-start",
+    "status": "Met"
+  },
+  "documentation_roadmap": {
+    "justification": "ROADMAP.md, organization-wide, says portanode is maintained as it is, with no new features planned; it is reviewed every September. README.md links it. https://github.com/btclib-org/.github/blob/main/ROADMAP.md",
+    "status": "Met"
+  },
+  "documentation_security": {
+    "justification": "README.md says what a user can and cannot expect: Updating Binaries says the PGP check fails closed, and Limitations, not vulnerabilities says checksums give integrity only, the folder is unencrypted and the launchers are unsigned. https://github.com/btclib-org/portanode/blob/main/README.md#limitations-not-vulnerabilities",
+    "status": "Met"
+  },
+  "dynamic_analysis": {
+    "justification": "No dynamic analysis tool is applied. CONTRIBUTING.md says a launcher is tested by running it by hand, and RELEASING.md's steps run no launcher. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "dynamic_analysis_enable_assertions": {
+    "justification": "No dynamic analysis runs, so no configuration enables assertions in one. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "dynamic_analysis_fixed": {
+    "justification": "No dynamic analysis runs, so it has found nothing. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "N/A"
+  },
+  "dynamic_analysis_unsafe": {
+    "justification": "The project produces no software in a memory-unsafe language: it is bash, batch and PowerShell. https://github.com/btclib-org/portanode",
+    "status": "N/A"
+  },
+  "english": {
+    "justification": "All documentation is in English, and issues are taken in English. https://github.com/btclib-org/portanode/issues",
+    "status": "Met"
+  },
+  "enhancement_responses": {
+    "justification": "Enhancement requests are issues like any other, and are answered or closed. https://github.com/btclib-org/portanode/issues?q=is%3Aissue%20state%3Aclosed",
+    "status": "Met"
+  },
+  "external_dependencies": {
+    "justification": "The dependencies are Bitcoin Core, Electrum, gpg and the shells. README.md names them in prose, but no file lists them in a computer-processable way. https://github.com/btclib-org/portanode/blob/main/README.md#prerequisites",
+    "status": "Unmet"
+  },
+  "floss_license": {
+    "justification": "The MIT license. https://github.com/btclib-org/portanode/blob/main/LICENSE",
+    "status": "Met"
+  },
+  "floss_license_osi": {
+    "justification": "The MIT license is approved by the Open Source Initiative (OSI).",
+    "status": "Met"
+  },
+  "governance": {
+    "justification": "GOVERNANCE.md, organization-wide in btclib-org/.github, documents the decision model and the roles; README.md and CONTRIBUTING.md link it. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md",
+    "status": "Met"
+  },
+  "hardened_site": {
+    "justification": "The project site is GitHub, which sends Content-Security-Policy, Strict-Transport-Security, X-Content-Type-Options: nosniff and X-Frame-Options: deny. https://github.com/btclib-org/portanode",
+    "status": "Met"
+  },
+  "hardening": {
+    "justification": "On macOS and Linux the update, rollback, verify and validate scripts run under set -euo pipefail, so an unexpected failure stops them. The PGP check fails closed. https://github.com/btclib-org/portanode/blob/main/linux/scripts/utilities/update-bitcoin.sh",
+    "status": "Met"
+  },
+  "homepage_url": {
+    "justification": null,
+    "status": "?"
+  },
+  "implement_secure_design": {
+    "justification": "Fail-safe defaults: an update without enough good signatures from pinned keys is refused, and a rollback refuses to run while the node is up. Checksums are append-only. set-permissions restricts the data directories to the owner where the filesystem allows. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
+    "status": "Met"
+  },
+  "input_validation": {
+    "justification": "Menus accept only their listed numbers and reject anything else. A pin-file line that is not a 40-hex fingerprint, a min-signatures= line or a comment refuses the update. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
+    "status": "Met"
+  },
+  "installation_common": {
+    "justification": "PortaNode is a portable folder: git clone or the ZIP of main installs it, and deleting the folder removes it. https://github.com/btclib-org/portanode/blob/main/README.md#getting-the-folder",
+    "status": "Met"
+  },
+  "installation_development_quick": {
+    "justification": "git clone, then uv: CONTRIBUTING.md's The environment and the gates gives the uvx commands that run every gate. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Met"
+  },
+  "installation_standard_variables": {
+    "justification": "There is no installer that writes outside the folder; the folder may sit anywhere, and PORTANODE_ROOT overrides where it is looked for. https://github.com/btclib-org/portanode/blob/main/README.md#environment-overrides",
+    "status": "N/A"
+  },
+  "interact": {
+    "justification": "README.md says how to get the folder, how to report a bug and how to contribute. https://github.com/btclib-org/portanode",
+    "status": "Met"
+  },
+  "interfaces_current": {
+    "justification": "No script calls wmic, Get-WmiObject, egrep or fgrep. Downloads use curl and Invoke-WebRequest. https://github.com/btclib-org/portanode",
+    "status": "Met"
+  },
+  "internationalization": {
+    "justification": "Every message and menu is in English only.",
+    "status": "Unmet"
+  },
+  "know_common_errors": {
+    "justification": "The primary developer counters the common shell errors: shellcheck gates every .sh and .command script, the macOS and Linux updaters run under set -euo pipefail, and a pin-file line that is not a fingerprint refuses the update. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
+    "status": "Met"
+  },
+  "know_secure_design": {
+    "justification": "The primary developer designed the updaters to fail closed: an install needs good signatures from enough distinct pinned keys, and checksums are appended only after that. README.md's Limitations, not vulnerabilities states the trust model. https://github.com/btclib-org/portanode/blob/main/README.md#limitations-not-vulnerabilities",
+    "status": "Met"
+  },
+  "license_location": {
+    "justification": "https://github.com/btclib-org/portanode/blob/main/LICENSE",
+    "status": "Met"
+  },
+  "license_per_file": {
+    "justification": "No script carries a license statement; the root LICENSE file holds it. https://github.com/btclib-org/portanode/blob/main/LICENSE",
+    "status": "Unmet"
+  },
+  "maintained": {
+    "justification": "https://github.com/btclib-org/portanode/commits/main",
+    "status": "Met"
+  },
+  "maintenance_or_update": {
+    "justification": "Only the latest release is supported. Upgrading is pulling the folder again, and RELEASE_NOTES.md says what a user must act on. https://github.com/btclib-org/portanode/blob/main/RELEASE_NOTES.md",
+    "status": "Met"
+  },
+  "no_leaked_credentials": {
+    "justification": "detect-secrets and detect-private-key run in the required Lint check, and secret scanning has no alert. https://github.com/btclib-org/portanode/blob/main/.secrets.baseline",
+    "status": "Met"
+  },
+  "regression_tests_added50": {
+    "justification": "No regression test is added for a fix: the tree has no automated test suite. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "release_notes": {
+    "justification": "Each GitHub release carries RELEASE_NOTES.md's section for it, written for a user, not a git log. https://github.com/btclib-org/portanode/blob/main/RELEASE_NOTES.md",
+    "status": "Met"
+  },
+  "release_notes_vulns": {
+    "justification": "No release has fixed a publicly known vulnerability: the repository has no security advisory. https://github.com/btclib-org/portanode/security/advisories",
+    "status": "N/A"
+  },
+  "repo_distributed": {
+    "justification": "Repository on GitHub, which uses git. git is distributed.",
+    "status": "Met"
+  },
+  "repo_interim": {
+    "justification": "Every change lands on main between releases. https://github.com/btclib-org/portanode/commits/main",
+    "status": "Met"
+  },
+  "repo_public": {
+    "justification": "Repository on GitHub, which provides public git repositories with URLs. https://github.com/btclib-org/portanode",
+    "status": "Met"
+  },
+  "repo_track": {
+    "justification": "Repository on GitHub, which uses git. git tracks what changed, who changed it and when. https://github.com/btclib-org/portanode/commits/main",
+    "status": "Met"
+  },
+  "report_archive": {
+    "justification": "https://github.com/btclib-org/portanode/issues?q=is%3Aissue",
+    "status": "Met"
+  },
+  "report_process": {
+    "justification": "Bugs are reported in GitHub Issues, through the bug form. README.md's Getting Help and CONTRIBUTING.md's The issue tracker say where. https://github.com/btclib-org/portanode/issues",
+    "status": "Met"
+  },
+  "report_responses": {
+    "justification": "On 2026-10-18, 329 of the 340 issues filed were closed. The maintainer filed every one of them. https://github.com/btclib-org/portanode/issues?q=is%3Aissue%20state%3Aclosed",
+    "status": "Met"
+  },
+  "report_tracker": {
+    "justification": "GitHub Issues, with an issue form under .github/ISSUE_TEMPLATE/, and btclib-org/.github's tracker for cross-repository findings. https://github.com/btclib-org/portanode/issues",
+    "status": "Met"
+  },
+  "report_url": {
+    "justification": null,
+    "status": "?"
+  },
+  "require_2FA": {
+    "justification": "The btclib-org organization requires two-factor authentication of every member. https://github.com/btclib-org",
+    "status": "Met"
+  },
+  "roles_responsibilities": {
+    "justification": "GOVERNANCE.md's Roles names who holds each role and what each owes. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "status": "Met"
+  },
+  "secure_2FA": {
+    "justification": "The organization allows only secure two-factor methods, not SMS. https://github.com/btclib-org/.github/issues/1362#issuecomment-5903994882",
+    "status": "Met"
+  },
+  "security_review": {
+    "justification": "No security review of portanode has been performed. https://github.com/btclib-org/portanode",
+    "status": "Unmet"
+  },
+  "signed_releases": {
+    "justification": "Each release tag is signed, but no document tells a user how to get the signing key and verify a release. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "status": "Unmet"
+  },
+  "sites_https": {
+    "justification": "The project site is the GitHub repository, served over HTTPS only. https://github.com/btclib-org/portanode",
+    "status": "Met"
+  },
+  "sites_password_security": {
+    "justification": "The project sites are GitHub only; the project runs no site that stores passwords.",
+    "status": "N/A"
+  },
+  "small_tasks": {
+    "justification": "Small tasks for new contributors carry the label good first issue, which CONTRIBUTING.md sets aside for a first contribution. https://github.com/btclib-org/portanode/issues?q=label%3A%22good+first+issue%22",
+    "status": "Met"
+  },
+  "static_analysis": {
+    "justification": "shellcheck on every .sh and .command script, and zizmor and actionlint on the workflows, in the required Lint check. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "status": "Met"
+  },
+  "static_analysis_common_vulnerabilities": {
+    "justification": "shellcheck flags unquoted expansions and the injection and globbing errors they allow. zizmor audits the workflows for template injection and excessive permissions. Blinter's security rules are run by hand on the .bat scripts. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "status": "Met"
+  },
+  "static_analysis_fixed": {
+    "justification": "No vulnerability found by static analysis is open: shellcheck, zizmor and actionlint findings fail the required Lint check, and code scanning has no open alert. https://github.com/btclib-org/portanode/blob/main/.github/workflows/lint.yml",
+    "status": "Met"
+  },
+  "static_analysis_often": {
+    "justification": "On every pull request and every push to main. https://github.com/btclib-org/portanode/actions/workflows/lint.yml",
+    "status": "Met"
+  },
+  "test": {
+    "justification": "The tree has no automated test suite: lint.yml runs the pre-commit hooks and nothing runs a launcher. CONTRIBUTING.md says a launcher is tested by running it by hand on macOS, Windows and Linux. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "test_branch_coverage80": {
+    "justification": "There is no automated test suite, so no coverage. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "test_continuous_integration": {
+    "justification": "lint.yml runs the lint hooks on every pull request and every push to main, but no automated test. https://github.com/btclib-org/portanode/blob/main/.github/workflows/lint.yml",
+    "status": "Unmet"
+  },
+  "test_invocation": {
+    "justification": "There is no test suite to invoke. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "test_most": {
+    "justification": "There is no automated test suite. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "test_policy": {
+    "justification": "No policy asks new functionality to come with automated tests, and the tree has no suite. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "test_policy_mandated": {
+    "justification": "No written policy asks new functionality to come with automated tests. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
+    "status": "Unmet"
+  },
+  "test_statement_coverage80": {
+    "justification": "There is no automated test suite, so no coverage. FLOSS coverage tools exist for bash, such as kcov. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "test_statement_coverage90": {
+    "justification": "There is no automated test suite, so no coverage. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "tests_are_added": {
+    "justification": "No tests are added: the tree has no automated test suite. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Unmet"
+  },
+  "tests_documented_added": {
+    "justification": "CONTRIBUTING.md has no policy on adding tests. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
+    "status": "Unmet"
+  },
+  "two_person_review": {
+    "justification": "v2026.10.17 shipped 86 pull requests, 5 of them approved by a person other than the author. The maintainer merges through the bypass. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
+    "status": "Unmet"
+  },
+  "updateable_reused_components": {
+    "justification": "The binaries are replaced by the update scripts, and rolled back by the rollback scripts. Dependabot moves the pinned actions weekly. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
+    "status": "Met"
+  },
+  "version_semver": {
+    "justification": "Calendar versioning, YYYY.M.D, with the day as the micro level. https://github.com/btclib-org/portanode/blob/main/RELEASING.md#the-version-string",
+    "status": "Met"
+  },
+  "version_tags": {
+    "justification": "https://github.com/btclib-org/portanode/tags",
+    "status": "Met"
+  },
+  "version_tags_signed": {
+    "justification": "Every release tag is signed, and GitHub verifies each, but no document tells a user how to verify one, as signed_releases asks. https://github.com/btclib-org/portanode/tags",
+    "status": "Unmet"
+  },
+  "version_unique": {
+    "justification": "Each release has its own YYYY.M.D version and v-prefixed tag. https://github.com/btclib-org/portanode/releases",
+    "status": "Met"
+  },
+  "vulnerabilities_critical_fixed": {
+    "justification": "No vulnerability has been reported or found: the repository has no security advisory and no open alert. https://github.com/btclib-org/portanode/security",
+    "status": "Met"
+  },
+  "vulnerabilities_fixed_60_days": {
+    "justification": "There is no security advisory and no open Dependabot alert. https://github.com/btclib-org/portanode/security",
+    "status": "Met"
+  },
+  "vulnerability_report_credit": {
+    "justification": "No vulnerability report has been resolved: the repository has no security advisory. https://github.com/btclib-org/portanode/security/advisories",
+    "status": "N/A"
+  },
+  "vulnerability_report_private": {
+    "justification": "A private GitHub security advisory, or email to security at btclib dot org. https://github.com/btclib-org/portanode/security/policy",
+    "status": "Met"
+  },
+  "vulnerability_report_process": {
+    "justification": "The security policy on the Security tab, the organization's SECURITY.md, gives the process. https://github.com/btclib-org/portanode/security/policy",
+    "status": "Met"
+  },
+  "vulnerability_report_response": {
+    "justification": "No vulnerability has been reported: the repository has no security advisory. https://github.com/btclib-org/portanode/security/advisories",
+    "status": "N/A"
+  },
+  "vulnerability_response_process": {
+    "justification": "The security policy gives the private channels, who sees a report, and the timeframes for acknowledgement and fix. https://github.com/btclib-org/portanode/security/policy",
+    "status": "Met"
+  },
+  "warnings": {
+    "justification": "shellcheck reads every .sh and .command script in the required Lint check. Blinter and PSScriptAnalyzer are run by hand on the .bat and .ps1 scripts. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "status": "Met"
+  },
+  "warnings_fixed": {
+    "justification": "shellcheck findings fail the required Lint check, so none is open on the .sh and .command scripts. Blinter, run by hand on the .bat scripts, reports warnings that are not addressed; only its Error and Security findings are reviewed, as false positives, in .pre-commit-config.yaml's header. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "status": "Unmet"
+  },
+  "warnings_strict": {
+    "justification": "shellcheck runs at its default severity with none of its optional checks enabled. Blinter and PSScriptAnalyzer are run by hand, not in a gate. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "status": "Unmet"
+  }
+}
