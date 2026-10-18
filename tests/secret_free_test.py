@@ -245,6 +245,17 @@ def test_a_whitespace_passphrase_is_compared_as_given(
         assert_secret_free(raised(ValueError, secret), [secret])
 
 
+@pytest.mark.parametrize("secret", [" a", "ke y", b" a", b"ke y"])
+def test_a_secret_with_spaces_does_not_flag_a_clean_refusal(
+    secret: str | bytes,
+) -> None:
+    """A secret's own whitespace is kept, so it cannot match across words.
+
+    :param secret: a passphrase with whitespace of its own.
+    """
+    assert_secret_free(raised(ValueError, "bad key"), [secret])
+
+
 def test_the_input_of_a_unicode_error_is_found() -> None:
     """A `UnicodeError` hides its input from `str` and `vars`, not `args`."""
     with pytest.raises(UnicodeDecodeError) as caught:
