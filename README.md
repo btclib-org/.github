@@ -2266,7 +2266,7 @@ by that row.
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
   `bip39-slip39`, `base58-bech32`;
 - `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `btclib-node`,
-  `btclib-wallet`, `btclib-ecc`, `bip39-slip39`, `base58-bech32`.
+  `portanode`, `btclib-wallet`, `btclib-ecc`, `bip39-slip39`, `base58-bech32`.
 
 **An entry is what was decided, not what a tree happens to hold**, where section
 2's tier is read off the tree. A tree short of what its entry names is a gap in
