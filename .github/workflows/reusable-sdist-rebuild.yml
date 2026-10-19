@@ -105,11 +105,19 @@ name: reusable-sdist-rebuild
 # keeps the id and changes the name, so `--repo` refuses every release
 # signed before a rename (btclib-org/.github#1798). The step reads the
 # attestations from the caller's own endpoint with
-# `gh attestation download --repo`, verifies them offline with `--owner`,
-# and passes only where a verified certificate's
+# `gh attestation download --repo`, verifies them with `--owner` and
+# `--bundle`, and passes only where a verified certificate's
 # `sourceRepositoryIdentifier` is the caller's `GITHUB_REPOSITORY_ID`.
 # That certificate field comes from the OIDC token GitHub issued to the
 # signing run, so the workflow that signed cannot set it.
+#
+# **Why a download and then `--bundle`, not one online `--owner` call.**
+# Online, `--owner` reads `orgs/<owner>/attestations/<digest>` and
+# `--repo` reads `repos/<repo>/attestations/<digest>` (`GH_DEBUG=api`).
+# The workflow's token with `attestations: read` has only been run
+# against the repository endpoint; whether it can read the organization's
+# is unmeasured. `--bundle` means the attestations are not fetched again,
+# but Sigstore's trusted root still is.
 #
 # The permissions block is the calling job's, and this is not style:
 # a called workflow's own block can only downgrade what the caller
