@@ -133,10 +133,10 @@ def assert_secret_free(
     secret fed is a fixed random value, not a run such as all zeros, and
     a mnemonic's words are not words of the refusal's own text.
 
-    Whitespace a refusal puts inside a spelling that has none of its own does
+    Whitespace a refusal puts inside a piece that has none of its own does
     not hide it where the text holds that whitespace as itself. `repr` writes
     a tab or a newline as an escape, so one that a refusal shows only through
-    `repr`, as a `KeyError` shows its key, does hide it. A spelling with
+    `repr`, as a `KeyError` shows its key, does hide it. A piece with
     whitespace of its own is looked for as given, so a refusal that changes
     that whitespace does not match it.
 
