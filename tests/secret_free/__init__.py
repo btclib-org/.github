@@ -151,5 +151,4 @@ def assert_secret_free(
         compact_text = "".join(text.split())
         for piece in pieces:
             assert piece not in text
-            if piece.split() == [piece]:
-                assert piece not in compact_text
+            assert piece not in compact_text
