@@ -93,13 +93,6 @@ before the rule stays where it is.
 file's other half. Read before opening a pull request, it is what the
 pull request will be answered against.
 
-## Worktrees
-
-Fetch `origin/main`, create a separate worktree for each task with
-`git worktree add <path> origin/main -b <branch>`, and remove it with
-`git worktree remove <path>` when done. Keep the primary checkout clean
-and on `main`; do not switch branches or stash there.
-
 A pull request adds no entry to `CHANGELOG.md` or `RELEASE_NOTES.md`, a
 release's own pull request excepted ([section 9][s9], [section 12][s12]).
 
@@ -253,6 +246,14 @@ settings and why they are what they are.
 [governance]: https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md
 [roadmap]: https://github.com/btclib-org/.github/blob/main/ROADMAP.md
 [good-first]: https://github.com/search?q=org%3Abtclib-org+label%3A%22good+first+issue%22+is%3Aopen&type=issues
+
+## Worktrees
+
+Fetch `origin/main`, create a separate worktree for each task with
+`git worktree add <path> origin/main -b <branch>`, and remove it with
+`git worktree remove <path>` when done. Keep the primary checkout clean
+and on `main`; do not switch branches or stash there. Hooks can fix files
+in place, and the local `main` and `refs/stash` are shared by all worktrees.
 
 ## This repository in particular
 

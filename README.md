@@ -313,9 +313,9 @@ subject that is declined.
 **A tier is a floor, not a ceiling.** Above it, a repository carries
 what its own practice needs, as `portanode` carries a `RELEASING.md`.
 Below it, a repository short of what its tier binds is a gap, filed
-here; a gap with the reason beside it, in the repository's `AGENTS.md`
-or its `REPOSITORY.md`, is a decision, and a sentence that declines a
-rule and gives no reason is still a gap.
+here; a gap with the reason beside it in the repository's `REPOSITORY.md`
+or in the configuration that carries the deviation is a decision, and a
+sentence that declines a rule and gives no reason is still a gap.
 
 | repository | tier |
 | --- | --- |
@@ -354,7 +354,7 @@ done
 
 `.github` is this repository, and its row is measured like the others;
 what it declines of tier 2 — coverage, and the metadata of section 3
-only an index reads — its `AGENTS.md` says, with the reason.
+only an index reads — `REPOSITORY.md` and `pyproject.toml` give the reasons.
 `btclib-org.github.io`, the organization site served by Pages from its
 `main` (btclib-org/.github#530), is measured the same way.
 
@@ -383,7 +383,7 @@ whatever decides it:
 | `RELEASING.md` | how a release is cut, and how one is recovered | 1 |
 | `CHANGELOG.md` | written when a release is cut; a preamble if none | 1, 2, 3 |
 | `RELEASE_NOTES.md` | what a user has to *act* on, on top of it | 1 |
-| `AGENTS.md` | stable repository-specific guidance for coding agents | 1, 2, 3 |
+| `AGENTS.md` | repository guidance for coding agents | 1, 2, 3 |
 | `pyproject.toml` | the project and every tool's configuration | 1, 2 |
 | `uv.lock` | the pinned resolution | 1, 2 |
 
@@ -3891,6 +3891,7 @@ comparison stops:
   up to the same heading, a review that means one thing in one tree and
   another in the next being no standard. Under it is what a review of
   that tree checks beyond the generic.
+
 `AGENTS.md` is per repository by subject, owed by every repository: it gives
 coding agents concise, stable guidance and points to that tree's canonical
 documents. Worktree commands belong in `CONTRIBUTING.md`; Claude-specific

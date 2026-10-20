@@ -1,10 +1,10 @@
 # Repository instructions
 
-Follow [CONTRIBUTING.md](CONTRIBUTING.md) for issues, pull requests,
-local gates, and worktree commands. Use [REVIEWING.md](REVIEWING.md)
-for reviews, [README.md](README.md) for the repository standard, and
-[REPOSITORY.md](REPOSITORY.md) before changing workflows or settings.
-See [SECURITY.md](SECURITY.md) for vulnerability reporting.
+Follow [CONTRIBUTING.md](./CONTRIBUTING.md) for issues, pull requests,
+local gates, and worktree commands. Use [REVIEWING.md](./REVIEWING.md)
+for reviews, [README.md](./README.md) for the repository standard, and
+[REPOSITORY.md](./REPOSITORY.md) before changing workflows or settings.
+See [SECURITY.md](./SECURITY.md) for vulnerability reporting.
 
 Keep the primary checkout clean and on `main`; use a separate worktree
 for each task, following the setup and cleanup commands in
