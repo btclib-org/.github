@@ -488,7 +488,7 @@ jobs:
             Review this pull request against REVIEWING.md. It is the same
             file in every repository of the organization; its last
             section is this tree's. Cite the organization's standard for
-            a rule. CLAUDE.md has the facts about this tree.
+            a rule. AGENTS.md has the agent guidance for this tree.
 
             Read the title and description again with `gh pr view` before
             a finding about them: they may have changed since this run

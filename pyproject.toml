@@ -71,7 +71,7 @@ lint = ["mypy", "pre-commit", "types-PyYAML"]
 # section 1's `dev` row: every group this file declares, so that one
 # sync installs what any command here runs. uv makes it the default of
 # `uv sync` and `uv run`, `[tool.uv]` below naming no `default-groups`;
-# CLAUDE.md says what a bare `uv run pytest` then measures
+# AGENTS.md points to the test command and its documented scope
 dev = [{ include-group = "test" }, { include-group = "lint" }]
 
 [tool.uv]
