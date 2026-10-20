@@ -131,8 +131,8 @@ def output(*command: str) -> str:
     """Run a command that has to answer, and return what it wrote.
 
     What a failure raises is `Refused` and not an assertion: the
-    backlog's rows are strict expected failures keyed on
-    `AssertionError`, so an assertion here would be excused as the
+    backlog's rows are expected failures keyed on `AssertionError`, so an
+    assertion here would be excused as the
     finding a row records -- reported as an expected failure, in a green
     run, whether it was raised in a test's body or in a fixture that
     test asked for. A refused API call is neither the finding nor
@@ -378,6 +378,17 @@ same range, so the citation names a real issue about something else.
 A row is an exemption, and nothing here is a place a new failure
 belongs -- a red cell is answered in the tree that is red, and a row is
 what says the answer is already written down and waiting.
+"""
+
+
+BACKLOG_NON_STRICT: frozenset[tuple[int, str]] = frozenset(
+    {(1808, "test_a_repository_carries_the_verbatim_files_owed_of_it")}
+)
+"""The AGENTS rollout may XPASS as sibling repositories add the file.
+
+Keep those XPASS results visible without breaking alignment between
+ports; every other backlog row remains strict. Remove this entry with
+its `BACKLOG` row when issue 1808 closes.
 """
 
 

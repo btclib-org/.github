@@ -5,10 +5,12 @@
 """A backlog row that has stopped excusing anything, and a green run.
 
 A row of `tests/__init__.py`'s `BACKLOG` excuses a failure the tracker
-records, as a strict expected failure, so that a repository that catches
-up is reported until its name is taken out. `conftest.py` refuses at
-collection a row naming a test or a repository that does not exist, or
-no repository at all -- one `pytester` test here asks that of it -- and
+records. Rows are strict by default, so a repository that catches up is
+reported until its name is taken out; the #1808 rollout is non-strict so
+XPASS stays visible without interrupting sibling migrations.
+`conftest.py` refuses at collection a row naming a test or repository
+that does not exist, or no repository at all -- one `pytester` test
+here asks that of it -- and
 what is left to this module is the pair of ways a row stops recording
 anything with the report unchanged: the cell it excuses is skipped
 rather than asked, and the issue it cites is closed.

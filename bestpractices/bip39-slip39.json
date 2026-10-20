@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 14928)
+Total output lines: 786
+
 {
   "OSPS-AC-01.01": {
     "justification": "The btclib-org organization requires two-factor authentication of every member and accepts only secure methods, not SMS. https://github.com/btclib-org/.github/issues/1362#issuecomment-5903994882",
@@ -204,7 +207,7 @@
     "status": "Met"
   },
   "OSPS-SA-01.01": {
-    "justification": "CLAUDE.md's Architecture gives the package's modules, their layers bottom-up and what each may import. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversary, and what each can do. https://github.com/btclib-org/btclib-mnemonics/blob/main/CLAUDE.md#architecture https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md#trust-boundaries",
+    "justification": "ASSURANCE_CASE.md's Threat model names the adversaries, including holders of fewer shares than a SLIP-0039 threshold. Its Trust boundaries describe inputs crossing the public API, sentences and shares from outside, and caller-selected files. https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md#threat-model https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md#trust-boundaries",
     "status": "Met"
   },
   "OSPS-SA-02.01": {
@@ -296,155 +299,7 @@
     "status": "Met"
   },
   "build_non_recursive": {
-    "justification": "This tree builds no native binaries, so there is no recursive-build question to answer. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
-    "status": "N/A"
-  },
-  "build_preserve_debug": {
-    "justification": "No native build or installation step exists to strip or preserve debugging information. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
-    "status": "N/A"
-  },
-  "build_repeatable": {
-    "justification": "Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag. It passes only if the rebuilt file matches the release's attested digest byte for byte. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/sdist-rebuild.yml",
-    "status": "Met"
-  },
-  "build_reproducible": {
-    "justification": "The sdist is built with SOURCE_DATE_EPOCH from the commit and normalized by .github/scripts/normalize_sdist.py. sdist-rebuild.yml rebuilds the latest release's sdist from its tag every week and verifies it against the release's build-provenance attestation. https://github.com/btclib-org/btclib-mnemonics/actions/workflows/sdist-rebuild.yml",
-    "status": "Met"
-  },
-  "build_standard_variables": {
-    "justification": "This tree builds no native binaries -- it is pure Python on the uv_build backend -- so there is no compiler or linker invocation for CC/CFLAGS/LDFLAGS to reach. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
-    "status": "N/A"
-  },
-  "bus_factor": {
-    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review but has made no commit to this repository. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/btclib-mnemonics/graphs/contributors",
-    "status": "Unmet"
-  },
-  "code_of_conduct": {
-    "justification": "btclib-org/.github's CODE_OF_CONDUCT.md is this repository's code of conduct, through GitHub's organization-wide default; the community-profile API reports it. https://github.com/btclib-org/.github/blob/main/CODE_OF_CONDUCT.md",
-    "status": "Met"
-  },
-  "code_review_standards": {
-    "justification": "REVIEWING.md states what a review checks, how a finding is written and what clears a pull request; the part shared by every repository is followed by what this tree checks in particular. https://github.com/btclib-org/btclib-mnemonics/blob/main/REVIEWING.md",
-    "status": "Met"
-  },
-  "coding_standards": {
-    "justification": "pyproject.toml selects every ruff rule (select = [\"ALL\"]) with a documented ignore list, and runs mypy in strict mode. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
-    "status": "Met"
-  },
-  "coding_standards_enforced": {
-    "justification": "ruff-check, ruff-format and mypy run as pre-commit hooks, and lint.yml runs the same .pre-commit-config.yaml in CI as a required check, so the style is enforced automatically rather than by review alone. https://github.com/btclib-org/btclib-mnemonics/blob/main/.pre-commit-config.yaml",
-    "status": "Met"
-  },
-  "contribution": {
-    "justification": "Non-trivial contribution file in repository: <https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md>.",
-    "status": "Met"
-  },
-  "contribution_requirements": {
-    "justification": "CONTRIBUTING.md states the public-surface, input-validation, lint-gate and 100%-coverage requirements a contribution must meet before it can land. https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md",
-    "status": "Met"
-  },
-  "contributors_unassociated": {
-    "justification": "fametrano is the only significant contributor. In the last year, outside contributors have made only small changes. pmazzocchi, an organization owner, has made no commit to this repository. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. giacomocaironi, also an organization owner, has made no commit to this repository. https://github.com/fametrano https://github.com/pmazzocchi",
-    "status": "Unmet"
-  },
-  "copyright_per_file": {
-    "justification": "Every Python file opens with \"Copyright (c) The btclib developers\", and ruff's flake8-copyright rule (CPY001) keeps it there, e.g. https://github.com/btclib-org/btclib-mnemonics/blob/main/src/btclib_mnemonics/__init__.py",
-    "status": "Met"
-  },
-  "crypto_algorithm_agility": {
-    "justification": "The algorithms are fixed by the specifications the package implements -- a BIP39, SLIP-0039 or Electrum sentence has to stretch to the seed every other implementation computes -- so there is no alternative algorithm a user could switch to without leaving the standard. https://github.com/btclib-org/btclib-mnemonics/blob/main/README.md",
-    "status": "Unmet"
-  },
-  "crypto_call": {
-    "justification": "Every primitive is called from the standard library -- hashlib's sha256, sha512 and pbkdf2_hmac, hmac, secrets and os.urandom -- and none is reimplemented. What the package writes itself is only what the specifications define above those primitives: SLIP-0039's GF(256) interpolation and its Feistel structure, and the mnemonic encodings. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
-    "status": "Met"
-  },
-  "crypto_certificate_verification": {
-    "justification": "btclib-mnemonics performs no network communications -- nothing under src/ imports socket, ssl, http or urllib -- and so uses no TLS. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
-    "status": "N/A"
-  },
-  "crypto_credential_agility": {
-    "justification": "btclib-mnemonics is a library with no configuration file or credential store: entropy, mnemonics, passphrases and shares are caller-supplied function parameters, never read from or written to a file this project owns. https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md",
-    "status": "N/A"
-  },
-  "crypto_floss": {
-    "justification": "no closed source dependencies: the standard library alone",
-    "status": "Met"
-  },
-  "crypto_keylength": {
-    "justification": "Every default meets 112 bits: bip39.mnemonic_from_entropy draws 128 bits when given none, electrum's generator draws 132 bits rounded up to whole words, and slip39 refuses a master secret under 128 bits. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
-    "status": "Met"
-  },
-  "crypto_password_storage": {
-    "justification": "does not store passwords: a passphrase is stretched into a seed and handed back, never stored or used to authenticate anyone",
-    "status": "N/A"
-  },
-  "crypto_pfs": {
-    "justification": "implements no network key-agreement protocol: the package performs no network communications at all",
-    "status": "N/A"
-  },
-  "crypto_published": {
-    "justification": "Every mechanism is a published one: BIP39 (PBKDF2-HMAC-SHA512, SHA-256 checksum), SLIP-0039 (Shamir sharing over GF(256), an HMAC-SHA256 digest share, a four-round Feistel network whose round function is PBKDF2-HMAC-SHA256) and Electrum's seed schemes (HMAC-SHA512 version prefix, PBKDF2-HMAC-SHA512, and the pre-2.0 iterated SHA-256), each checked against the vectors its authors publish. https://github.com/btclib-org/btclib-mnemonics/blob/main/README.md",
-    "status": "Met"
-  },
-  "crypto_random": {
-    "justification": "Every random draw comes from the operating system's CSPRNG: secrets for BIP39's and Electrum's default entropy and the simulated dice, and os.urandom for SLIP-0039's default entropy_source. Nothing under src/ uses the random module. https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md",
-    "status": "Met"
-  },
-  "crypto_tls12": {
-    "justification": "btclib-mnemonics performs no network communications and so uses no TLS. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
-    "status": "N/A"
-  },
-  "crypto_used_network": {
-    "justification": "btclib-mnemonics does not use the network: nothing under src/ imports socket, ssl, http or urllib. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
-    "status": "N/A"
-  },
-  "crypto_verification_private": {
-    "justification": "btclib-mnemonics performs no network communications and so uses no TLS. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
-    "status": "N/A"
-  },
-  "crypto_weaknesses": {
-    "justification": "No SHA-1 or MD5 appears under src/: the hashes are SHA-256 and SHA-512, alone, in HMAC or in PBKDF2, with the iteration counts the specifications fix (BIP39's and Electrum's 2048, SLIP-0039's 10000 * 2^e, the pre-2.0 Electrum scheme's 100000). https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
-    "status": "Met"
-  },
-  "crypto_working": {
-    "justification": "no broken cryptographic algorithms",
-    "status": "Met"
-  },
-  "dco": {
-    "justification": "main requires the lint / Sign-off check, which refuses a pull request with a commit that lacks its author's Signed-off-by: trailer. Dependabot's and pre-commit.ci's commits are exempt. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
-    "status": "Met"
-  },
-  "delivery_mitm": {
-    "justification": "Distribution channels use HTTPS exclusively: GitHub, and PyPI through Trusted Publishing. [osps_br_03_02]",
-    "status": "Met"
-  },
-  "delivery_unsigned": {
-    "justification": "Releases are published to PyPI and GitHub Releases and installed with pip from PyPI, all over HTTPS. No package or hash is fetched over plain HTTP. https://pypi.org/project/btclib-mnemonics/ https://github.com/btclib-org/btclib-mnemonics/releases",
-    "status": "Met"
-  },
-  "dependency_monitoring": {
-    "justification": "Dependabot version updates cover uv, github-actions and docker, and Dependabot security updates are on. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/dependabot.yml",
-    "status": "Met"
-  },
-  "description_good": {
-    "justification": "btclib-mnemonics implements the mnemonic schemes of bitcoin wallets, BIP39, SLIP-0039 and Electrum's, from the entropy to the seed, in typed Python. https://btclib.org/btclib-mnemonics/",
-    "status": "Met"
-  },
-  "discussion": {
-    "justification": "GitHub supports discussions on issues and pull requests.",
-    "status": "Met"
-  },
-  "documentation_achievements": {
-    "justification": "README.md links the OpenSSF Scorecard, Best Practices and Baseline badges on the lines the organization standard reserves for them. https://github.com/btclib-org/btclib-mnemonics/blob/main/README.md",
-    "status": "Met"
-  },
-  "documentation_architecture": {
-    "justification": "CLAUDE.md's Architecture gives the layers bottom-up (exceptions and _utils, entropy and mnemonic, the schemes bip39, electrum and slip39, none importing another, and dispatch), and states that the package imports only the standard library and stops at the seed. https://github.com/btclib-org/btclib-mnemonics/blob/main/CLAUDE.md#architecture",
-    "status": "Met"
-  },
-  "documentation_basics": {
-    "justification": "README.md says what the package holds and what it does not, how to install it, and gives a first use that tests/readme_test.py runs; CONTRIBUTING.md, SECURITY.md and ASSURANCE_CASE.md cover the rest. https://github.com/btclib-org/btclib-mnemonics/blob/main/README.md",
+    "justification": "This tree builds no native binaries, so there is no recursive-build question to answer. https://github.…2928 tokens truncated…in/README.md",
     "status": "Met"
   },
   "documentation_current": {

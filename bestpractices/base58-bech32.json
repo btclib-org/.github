@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 15142)
+Total output lines: 786
+
 {
   "OSPS-AC-01.01": {
     "justification": "The btclib-org organization requires two-factor authentication of every member and accepts only secure methods, not SMS. https://github.com/btclib-org/.github/issues/1362#issuecomment-5903994882",
@@ -204,7 +207,7 @@
     "status": "Unmet"
   },
   "OSPS-SA-01.01": {
-    "justification": "CLAUDE.md's Architecture gives the package's modules, their layers bottom-up and what each may import. ASSURANCE_CASE.md's Threat model names the adversaries, and its Trust boundaries the two places input crosses, the public API and strings from outside. https://github.com/btclib-org/base58-bech32/blob/main/CLAUDE.md#architecture https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md#trust-boundaries",
+    "justification": "ASSURANCE_CASE.md's Threat model names the adversaries. Its Trust boundaries describe inputs crossing the public API and strings from outside. https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md#threat-model https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md#trust-boundaries",
     "status": "Met"
   },
   "OSPS-SA-02.01": {
@@ -284,175 +287,7 @@
     "status": "Met"
   },
   "build": {
-    "justification": "CONTRIBUTING.md gives the build: uv is the only prerequisite, uv sync builds the environment from uv.lock and uv build produces the sdist and wheel. https://github.com/btclib-org/base58-bech32?tab=contributing-ov-file",
-    "status": "Met"
-  },
-  "build_common_tools": {
-    "justification": "The build uses uv with the uv_build backend, the standard tools of a Python package. https://github.com/btclib-org/base58-bech32?tab=contributing-ov-file",
-    "status": "Met"
-  },
-  "build_floss_tools": {
-    "justification": "uv, uv_build, and every tool CONTRIBUTING.md names are FLOSS. https://github.com/btclib-org/base58-bech32?tab=contributing-ov-file",
-    "status": "Met"
-  },
-  "build_non_recursive": {
-    "justification": "This tree builds no native binaries, so there is no recursive-build question to answer. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
-    "status": "N/A"
-  },
-  "build_preserve_debug": {
-    "justification": "No native build or installation step exists to strip or preserve debugging information. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
-    "status": "N/A"
-  },
-  "build_repeatable": {
-    "justification": "Rebuilt from the tag v2026.10.18 with the uv named in the wheel, the sdist and the wheel are byte-identical to the released files (SHA-256 compared on 2026-10-18). Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag and passes only if it matches the release's attested digest. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/sdist-rebuild.yml",
-    "status": "Met"
-  },
-  "build_reproducible": {
-    "justification": "The sdist is built with SOURCE_DATE_EPOCH from the commit and normalized by .github/scripts/normalize_sdist.py. A rebuild of v2026.10.18 gave the same SHA-256 as the released sdist and wheel, and RELEASING.md's *Rebuild a release from its tag* gives the command. https://github.com/btclib-org/base58-bech32/blob/main/RELEASING.md#rebuild-a-release-from-its-tag",
-    "status": "Met"
-  },
-  "build_standard_variables": {
-    "justification": "This tree builds no native binaries -- it is pure Python on the uv_build backend -- so there is no compiler or linker invocation for CC/CFLAGS/LDFLAGS to reach. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
-    "status": "N/A"
-  },
-  "bus_factor": {
-    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. This repository opened on 2026-10-17 with the Base58 and bech32 code moved from btclib and new SS58 and CashAddr codecs. Its commits are fametrano's and Dependabot's, and git log --follow at btclib 8e87317b4 shows fametrano made 109 of 111 commits to base58.py and 62 of 64 to bech32.py. The claude account in the contributors graph comes from Co-Authored-By trailers on AI-assisted commits. pmazzocchi and giacomocaironi, also organization owners, have made no commit here. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/base58-bech32/graphs/contributors",
-    "status": "Unmet"
-  },
-  "code_of_conduct": {
-    "justification": "btclib-org/.github's CODE_OF_CONDUCT.md is this repository's code of conduct, through GitHub's organization-wide default; the community-profile API reports it. https://github.com/btclib-org/.github/blob/main/CODE_OF_CONDUCT.md",
-    "status": "Met"
-  },
-  "code_review_standards": {
-    "justification": "REVIEWING.md states what a review checks, how a finding is written and what clears a pull request; the part shared by every repository is followed by what this tree checks in particular. https://github.com/btclib-org/base58-bech32/blob/main/REVIEWING.md",
-    "status": "Met"
-  },
-  "coding_standards": {
-    "justification": "pyproject.toml selects every ruff rule (select = [\"ALL\"]) with a documented ignore list, and runs mypy in strict mode. https://github.com/btclib-org/base58-bech32/blob/main/pyproject.toml",
-    "status": "Met"
-  },
-  "coding_standards_enforced": {
-    "justification": "ruff-check, ruff-format and mypy run as pre-commit hooks, and lint.yml runs the same .pre-commit-config.yaml in CI as a required check, so the style is enforced automatically rather than by review alone. https://github.com/btclib-org/base58-bech32/blob/main/.pre-commit-config.yaml",
-    "status": "Met"
-  },
-  "contribution": {
-    "justification": "Non-trivial contribution file in repository: <https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md>.",
-    "status": "Met"
-  },
-  "contribution_requirements": {
-    "justification": "CONTRIBUTING.md states the public-surface, input-validation, lint-gate and 100%-coverage requirements a contribution must meet before it can land. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md",
-    "status": "Met"
-  },
-  "contributors_unassociated": {
-    "justification": "fametrano is the only significant contributor. No person outside the organization owners has committed here. pmazzocchi and giacomocaironi, organization owners, have made no commit here. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. https://github.com/fametrano https://github.com/pmazzocchi",
-    "status": "Unmet"
-  },
-  "copyright_per_file": {
-    "justification": "Every Python file opens with \"Copyright (c) The btclib developers\", and ruff's flake8-copyright rule (CPY001) keeps it there, e.g. https://github.com/btclib-org/base58-bech32/blob/main/src/base58_bech32/__init__.py",
-    "status": "Met"
-  },
-  "crypto_algorithm_agility": {
-    "justification": "The two hashes are fixed by the formats: Base58Check's checksum is double SHA-256 and SS58's is BLAKE2b-512, so a user cannot switch to another without leaving the format. They detect typing errors and authenticate nothing. https://github.com/btclib-org/base58-bech32/blob/main/README.md",
-    "status": "Unmet"
-  },
-  "crypto_call": {
-    "justification": "The only primitives are hashlib's sha256 (Base58Check) and blake2b (SS58), called from the standard library and not reimplemented. What the package writes itself is what the specifications define above them: the bech32 and CashAddr checksums, which are BCH error-detecting codes and not cryptography. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
-    "status": "Met"
-  },
-  "crypto_certificate_verification": {
-    "justification": "base58-bech32 performs no network communications, so it uses no TLS: no module under src/ imports socket, ssl, http or urllib. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
-    "status": "N/A"
-  },
-  "crypto_credential_agility": {
-    "justification": "base58-bech32 is a library with no configuration file, credential store or password: it encodes and decodes the bytes and strings a caller passes in, and keeps nothing. https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md",
-    "status": "N/A"
-  },
-  "crypto_floss": {
-    "justification": "no closed source dependencies: the standard library alone",
-    "status": "Met"
-  },
-  "crypto_keylength": {
-    "justification": "The package generates and uses no cryptographic key. A key or WIF a caller passes is a payload to encode, and SHA-256 and BLAKE2b take no key. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
-    "status": "N/A"
-  },
-  "crypto_password_storage": {
-    "justification": "The package stores no password and authenticates no one: it has no user, account or secret of its own.",
-    "status": "N/A"
-  },
-  "crypto_pfs": {
-    "justification": "The package implements no network key-agreement protocol: it performs no network communications at all.",
-    "status": "N/A"
-  },
-  "crypto_published": {
-    "justification": "Every algorithm is a published one: SHA-256 (FIPS 180-4) in Base58Check's double-hash checksum and BLAKE2b (RFC 7693) in SS58's. bech32, bech32m and CashAddr use the BCH codes their specifications publish, which detect errors and are not cryptography. Each format is checked against the vectors its authors publish. https://github.com/btclib-org/base58-bech32/blob/main/README.md",
-    "status": "Met"
-  },
-  "crypto_random": {
-    "justification": "The package draws no random number: nothing under src/ imports random or secrets or reads os.urandom. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
-    "status": "N/A"
-  },
-  "crypto_tls12": {
-    "justification": "base58-bech32 performs no network communications and so uses no TLS. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
-    "status": "N/A"
-  },
-  "crypto_used_network": {
-    "justification": "base58-bech32 does not use the network: no module under src/ imports socket, ssl, http or urllib. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
-    "status": "N/A"
-  },
-  "crypto_verification_private": {
-    "justification": "base58-bech32 performs no network communications and so uses no TLS. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
-    "status": "N/A"
-  },
-  "crypto_weaknesses": {
-    "justification": "No SHA-1 or MD5 appears under src/: hashlib is called for sha256 (Base58Check, in base58.py) and blake2b (SS58, in ss58.py) alone. https://github.com/btclib-org/base58-bech32/tree/main/src/base58_bech32",
-    "status": "Met"
-  },
-  "crypto_working": {
-    "justification": "no broken cryptographic algorithms",
-    "status": "Met"
-  },
-  "dco": {
-    "justification": "main requires the lint / Sign-off check, which refuses a pull request with a commit that lacks its author's Signed-off-by: trailer. Dependabot's and pre-commit.ci's commits are exempt. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
-    "status": "Met"
-  },
-  "delivery_mitm": {
-    "justification": "Distribution channels use HTTPS exclusively: GitHub, and PyPI through Trusted Publishing. [osps_br_03_02]",
-    "status": "Met"
-  },
-  "delivery_unsigned": {
-    "justification": "Releases are published to PyPI and GitHub Releases and installed with pip from PyPI, all over HTTPS. No package or hash is fetched over plain HTTP. https://pypi.org/project/base58-bech32/ https://github.com/btclib-org/base58-bech32/releases",
-    "status": "Met"
-  },
-  "dependency_monitoring": {
-    "justification": "Dependabot version updates cover uv, github-actions and docker, and Dependabot security updates are on. https://github.com/btclib-org/base58-bech32/blob/main/.github/dependabot.yml",
-    "status": "Met"
-  },
-  "description_good": {
-    "justification": "base58-bech32 implements the binary-to-text codecs of cryptocurrency addresses and keys, Base58, Base58Check, bech32, bech32m, SS58 and CashAddr, in typed Python with no runtime dependency. https://base58-bech32.readthedocs.io/",
-    "status": "Met"
-  },
-  "discussion": {
-    "justification": "GitHub supports discussions on issues and pull requests.",
-    "status": "Met"
-  },
-  "documentation_achievements": {
-    "justification": "README.md links the OpenSSF Scorecard, Best Practices and Baseline badges on the lines the organization standard reserves for them. https://github.com/btclib-org/base58-bech32/blob/main/README.md",
-    "status": "Met"
-  },
-  "documentation_architecture": {
-    "justification": "CLAUDE.md's Architecture gives the layers bottom-up (exceptions and _utils, then base58 and bech32, then ss58 and cashaddr, which read the two below) and states that the package imports only the standard library and stops at the encoding. https://github.com/btclib-org/base58-bech32/blob/main/CLAUDE.md#architecture",
-    "status": "Met"
-  },
-  "documentation_basics": {
-    "justification": "README.md says what the package holds and what it does not, how to install it, and gives a first use that tests/readme_test.py runs; CONTRIBUTING.md, SECURITY.md and ASSURANCE_CASE.md cover the rest. https://github.com/btclib-org/base58-bech32/blob/main/README.md",
-    "status": "Met"
-  },
-  "documentation_current": {
-    "justification": "The docs build is gated in CI as a required check (docs.yml, `-n -W`), tests/docs_test.py fails when a shipped module has no API page, and tests/readme_test.py runs every Python block of README.md, so neither the reference generated from the docstrings nor the README's example can drift from the code. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/docs.yml",
-    "status": "Met"
-  },
-  "documentation_interface": {
-    "justification": "Every public module and function carries a docstring, gated by ruff's pydocstyle rules and pydoclint, and docs/source's automodule pages render them into the API reference published at https://base58-bech32.readthedocs.io/; tests/docs_test.py fails when a shipped module is missing from them.",
+    "justification": "CONTRIBUTING.md gives the build: uv is the only prerequisite, uv sync builds the environment from uv.lock and uv build pro…3142 tokens truncated…by ruff's pydocstyle rules and pydoclint, and docs/source's automodule pages render them into the API reference published at https://base58-bech32.readthedocs.io/; tests/docs_test.py fails when a shipped module is missing from them.",
     "status": "Met"
   },
   "documentation_quick_start": {

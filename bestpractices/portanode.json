@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 13187)
+Total output lines: 786
+
 {
   "OSPS-AC-01.01": {
     "justification": "The btclib-org organization requires two-factor authentication of every member and accepts only secure methods, not SMS. https://github.com/btclib-org/.github/issues/1362#issuecomment-5903994882",
@@ -320,83 +323,7 @@
     "status": "Unmet"
   },
   "code_of_conduct": {
-    "justification": "btclib-org/.github's CODE_OF_CONDUCT.md is this repository's code of conduct, through GitHub's organization-wide default; the community-profile API reports it. https://github.com/btclib-org/.github/blob/main/CODE_OF_CONDUCT.md",
-    "status": "Met"
-  },
-  "code_review_standards": {
-    "justification": "REVIEWING.md states what a review checks, how a finding is written and what clears a pull request. https://github.com/btclib-org/portanode/blob/main/REVIEWING.md",
-    "status": "Met"
-  },
-  "coding_standards": {
-    "justification": "No style guide is named for bash, batch or PowerShell. shellcheck checks correctness, not a style. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
-    "status": "Unmet"
-  },
-  "coding_standards_enforced": {
-    "justification": "No coding style is selected, so none is enforced. The hooks enforce whitespace, line endings and shellcheck's correctness checks. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
-    "status": "Unmet"
-  },
-  "contribution": {
-    "justification": "CONTRIBUTING.md explains the process: issues, one pull request per subject, the review and the landing. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
-    "status": "Met"
-  },
-  "contribution_requirements": {
-    "justification": "CONTRIBUTING.md states the requirements: the Signed-off-by trailer, the gates that must pass, and REVIEWING.md, which the change is reviewed against. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
-    "status": "Met"
-  },
-  "contributors_unassociated": {
-    "justification": "fametrano is the only significant contributor; the other committers are Dependabot and pre-commit.ci. https://github.com/btclib-org/portanode/graphs/contributors",
-    "status": "Unmet"
-  },
-  "copyright_per_file": {
-    "justification": "No script carries a copyright statement; the tree's COPYRIGHT file holds it. https://github.com/btclib-org/portanode/blob/main/COPYRIGHT",
-    "status": "Unmet"
-  },
-  "crypto_algorithm_agility": {
-    "justification": "Signatures are checked by gpg, which accepts the OpenPGP algorithms the publishers use. A publisher's new key is a one-line change to a pin file only for a v4 key: a pin line must be 40 hex characters. https://github.com/btclib-org/portanode/blob/main/keys/electrum.fingerprints",
-    "status": "Met"
-  },
-  "crypto_call": {
-    "justification": "Nothing is reimplemented: signatures are checked by gpg, and hashes computed by sha256sum, shasum or Get-FileHash. https://github.com/btclib-org/portanode/blob/main/shared/utilities/lib.sh",
-    "status": "Met"
-  },
-  "crypto_certificate_verification": {
-    "justification": "No script turns certificate verification off: none passes --insecure, -k or -SkipCertificateCheck. https://github.com/btclib-org/portanode",
-    "status": "Met"
-  },
-  "crypto_credential_agility": {
-    "justification": "PortaNode processes no credential or private key: Bitcoin Core's RPC cookie and the wallets are Bitcoin Core's and Electrum's own. https://github.com/btclib-org/portanode/blob/main/bitcoin-datadir/bitcoin.conf",
-    "status": "N/A"
-  },
-  "crypto_floss": {
-    "justification": "Signature checks use GnuPG, which is FLOSS, and hashing uses the system's SHA-256 tools.",
-    "status": "Met"
-  },
-  "crypto_keylength": {
-    "justification": "PortaNode generates and selects no key. It checks the publishers' signatures with keys the user imports and pins. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
-    "status": "N/A"
-  },
-  "crypto_password_storage": {
-    "justification": "PortaNode stores no password for authenticating users. bitcoin.conf sets no RPC password. https://github.com/btclib-org/portanode/blob/main/bitcoin-datadir/bitcoin.conf",
-    "status": "N/A"
-  },
-  "crypto_pfs": {
-    "justification": "PortaNode implements no key agreement protocol.",
-    "status": "N/A"
-  },
-  "crypto_published": {
-    "justification": "The software uses only OpenPGP signatures, checked by gpg, and SHA-256 checksums. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
-    "status": "Met"
-  },
-  "crypto_random": {
-    "justification": "PortaNode generates no cryptographic key or nonce.",
-    "status": "N/A"
-  },
-  "crypto_tls12": {
-    "justification": "Downloads use curl and PowerShell's Invoke-WebRequest, and no script sets the TLS version. Whether Windows PowerShell 5.1 offers TLS 1.2 by default on every supported Windows was not measured. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
-    "status": "?"
-  },
-  "crypto_used_network": {
-    "justification": "Every download URL is HTTPS, and the Electrum local-server launcher connects over TLS. curl follows redirects with -L and does not restrict them to HTTPS. https://github.com/btclib-org/portanode/blob/main/linux/scripts/utilities/update-bitcoin.sh",
+    "justification": "btclib-org/.github's CODE_OF_CONDUCT.md is this repository's code of conduc…1187 tokens truncated…them to HTTPS. https://github.com/btclib-org/portanode/blob/main/linux/scripts/utilities/update-bitcoin.sh",
     "status": "Unmet"
   },
   "crypto_verification_private": {
@@ -440,7 +367,7 @@
     "status": "Unmet"
   },
   "documentation_architecture": {
-    "justification": "README.md's Folder Structure and Launcher Notes describe the root launchers, the per-platform menus and scripts, the bin/ directories and the data directories, and how a launcher reaches each. CLAUDE.md's What is in the tree, and what is not adds the shared libraries under shared/ and the pin files under keys/. https://github.com/btclib-org/portanode/blob/main/README.md#folder-structure https://github.com/btclib-org/portanode/blob/main/CLAUDE.md",
+    "justification": "README.md's Folder Structure inventories macos/, win/, linux/, bitcoin-datadir/ and electrum-datadir/, and Detailed Setup and Updating Binaries describe how launchers and updaters install. ASSURANCE_CASE.md's Secure Design Principles describes the shared macOS/Linux libraries and the distinct Windows implementation; README.md's Updating Binaries documents the keys/*.fingerprints pins and fail-closed behavior. https://github.com/btclib-org/portanode/blob/main/README.md#folder-structure https://github.com/btclib-org/portanode/blob/main/README.md#detailed-setup https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries https://github.com/btclib-org/portanode/blob/main/ASSURANCE_CASE.md#secure-design-principles",
     "status": "Met"
   },
   "documentation_basics": {
