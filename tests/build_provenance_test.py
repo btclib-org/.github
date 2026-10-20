@@ -149,6 +149,23 @@ def test_the_rebuild_verifies_the_signer_and_the_tag() -> None:
     assert run.index(build) < run.index(attest)
 
 
+def test_the_rebuild_pins_the_source_repository_by_its_id() -> None:
+    """Assert the weekly rebuild compares the repository id, not the name.
+
+    A rename changes the name an attestation was signed under and keeps
+    the id (btclib-org/.github#1798).
+    """
+    steps = _jobs("reusable-sdist-rebuild.yml")["rebuild"]["steps"]
+    run = next(s["run"] for s in steps if "gh attestation verify" in s.get("run", ""))
+    verify = run[run.index("gh attestation verify") :]
+    assert "--repo" not in verify
+    assert '--owner "$GITHUB_REPOSITORY_OWNER"' in verify
+    assert "sourceRepositoryIdentifier" in verify
+    _, build, attest = run.split("@refs/heads/main")
+    for signer in (build, attest):
+        assert 'grep -qx "$GITHUB_REPOSITORY_ID"' in signer
+
+
 def test_the_optional_inputs_default_to_the_build_a_tree_gets_without_them() -> None:
     """Assert a caller passing none of the optional inputs builds as before.
 

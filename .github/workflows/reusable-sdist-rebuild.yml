@@ -101,6 +101,24 @@ name: reusable-sdist-rebuild
 # fails the job. `gh attestation verify` does not say which signer it
 # found or which was asked for, so the step prints which one passed.
 #
+# **The source repository is pinned by its id, not its name.** A rename
+# keeps the id and changes the name, so `--repo` refuses every release
+# signed before a rename (btclib-org/.github#1798). The step reads the
+# attestations from the caller's own endpoint with
+# `gh attestation download --repo`, verifies them with `--owner` and
+# `--bundle`, and passes only where a verified certificate's
+# `sourceRepositoryIdentifier` is the caller's `GITHUB_REPOSITORY_ID`.
+# That certificate field comes from the OIDC token GitHub issued to the
+# signing run, so the workflow that signed cannot set it.
+#
+# **Why a download and then `--bundle`, not one online `--owner` call.**
+# Online, `--owner` reads `orgs/<owner>/attestations/<digest>` and
+# `--repo` reads `repos/<repo>/attestations/<digest>` (`GH_DEBUG=api`).
+# The workflow's token with `attestations: read` has only been run
+# against the repository endpoint; whether it can read the organization's
+# is unmeasured. `--bundle` means the attestations are not fetched again,
+# but Sigstore's trusted root still is.
+#
 # The permissions block is the calling job's, and this is not style:
 # a called workflow's own block can only downgrade what the caller
 # granted, never restore an omitted scope, so a caller whose calling job
@@ -173,8 +191,7 @@ jobs:
     permissions:
       # restated, a job's permissions replacing the workflow's
       contents: read
-      # the attestations API, which gh attestation verify reads
-      attestations: read # the attestation `gh attestation verify` reads
+      attestations: read # the attestations API, which gh attestation download reads
     # the header's setup-python paragraphs: automatic fetches an
     # interpreter where none is found, as uv does with the variable
     # unset, so a caller asking for no setup-python builds and
@@ -261,13 +278,23 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.release.outputs.tag }}
         run: |
+          gh attestation download dist/*.tar.gz --repo "$GITHUB_REPOSITORY"
+          bundle="sha256:$(sha256sum dist/*.tar.gz | cut -d' ' -f1).jsonl"
           workflows=btclib-org/.github/.github/workflows
-          if gh attestation verify dist/*.tar.gz --repo "$GITHUB_REPOSITORY" \
-            --signer-workflow "$workflows/reusable-build.yml@refs/heads/main" \
-            --source-ref "refs/tags/$TAG"; then
+          # the source repository id of each attestation that verifies
+          ids() {
+            gh attestation verify dist/*.tar.gz --bundle "$bundle" \
+              --owner "$GITHUB_REPOSITORY_OWNER" --signer-workflow "$@" \
+              --format json --jq \
+              '.[].verificationResult.signature.certificate.sourceRepositoryIdentifier'
+          }
+          if ids "$workflows/reusable-build.yml@refs/heads/main" \
+            --source-ref "refs/tags/$TAG" | grep -qx "$GITHUB_REPOSITORY_ID"; then
             echo "signed by reusable-build.yml"
-          else
-            gh attestation verify dist/*.tar.gz --repo "$GITHUB_REPOSITORY" \
-              --signer-workflow "$workflows/reusable-attest.yml@refs/heads/main"
+          elif ids "$workflows/reusable-attest.yml@refs/heads/main" |
+            grep -qx "$GITHUB_REPOSITORY_ID"; then
             echo "signed by reusable-attest.yml"
+          else
+            echo "::error::no attestation of repository $GITHUB_REPOSITORY_ID verifies"
+            exit 1
           fi
