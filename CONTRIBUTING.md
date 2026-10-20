@@ -249,11 +249,15 @@ settings and why they are what they are.
 
 ## Worktrees
 
-Fetch `origin/main`, create a separate worktree for each task with
-`git worktree add <path> origin/main -b <branch>`, and remove it with
-`git worktree remove <path>` when done. Keep the primary checkout clean
-and on `main`; do not switch branches or stash there. Hooks can fix files
-in place, and the local `main` and `refs/stash` are shared by all worktrees.
+Run `git fetch origin` in the primary checkout, then check that
+`git status --porcelain` is empty and `git branch --show-current` is
+`main`. Run `git pull --ff-only` only when both checks pass, then verify
+`git rev-parse HEAD origin/main` prints the same sha twice. Create a separate
+worktree for each task with `git worktree add <path> origin/main -b <branch>`,
+and remove it with `git worktree remove <path>` when done. Keep the primary
+checkout clean and on `main`; do not switch branches or stash there. Hooks can
+fix files in place, and the local `main` and `refs/stash` are shared by all
+worktrees.
 
 ## This repository in particular
 
