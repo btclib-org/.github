@@ -252,8 +252,13 @@ twice and a test refuses the day the two disagree.
 
 ### `uv.lock`
 
-Committed, and the only thing that moves it is Dependabot's uv ecosystem
-and the `uv-lock` hook. A dependency group's own entry may carry a lower
+Committed. Dependabot's uv ecosystem and the `uv-lock` hook move it, with
+one exception: a security fix the lint job's audit (section 12) asks for
+may upgrade one package by hand, `uv lock --upgrade-package <name>`,
+inside the cooldown (section 11), on the maintainer's decision recorded
+on the pull request. The audit fails every pull request until the fix
+lands, and a `vex.toml` entry may only say the release is not affected.
+A dependency group's own entry may carry a lower
 bound, and nothing here moves one: the drift of ruff, mypy, pytest and
 sphinx above it lives in the lock file, so one pull request a week
 carries all of it, pre-validated by the `deps-latest` workflow.
