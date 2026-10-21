@@ -270,8 +270,9 @@ jobs:
     # credential empty and fail -- a red job on the pull requests of
     # exactly the people least able to tell it apart from their own
     # mistake. Skipped, it reports nothing at all, and the mention job
-    # below is the path that still works there: issue_comment is a
-    # base-repository event, so it is handed the secret.
+    # below is the path that still works there, for the commenters it
+    # answers: issue_comment is a base-repository event, so it is handed
+    # the secret.
     #
     # Compared by full_name rather than by `.fork`: what withholds the
     # secret is the head repository not being the caller's, and `.fork`
@@ -849,9 +850,17 @@ jobs:
     #
     # Behind the same switch as the review job above: this job shares
     # that job's credential and its action, so a file that is not to run
-    # is not to run here either
+    # is not to run here either.
+    #
+    # It answers only a comment whose author is an owner, a member or a
+    # collaborator of the repository, in either event: anybody can
+    # comment on a public pull request, and this job runs with the
+    # credential. claude-review.yml's decline of zizmor's
+    # dangerous-triggers rests on this guard (btclib-org/.github#1813)
     if: >-
       ${{ vars.CLAUDE_REVIEW_ENABLED == 'true'
+          && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'),
+                      github.event.comment.author_association)
           && ((github.event_name == 'issue_comment'
                && github.event.issue.pull_request
                && contains(github.event.comment.body, '@claude'))
