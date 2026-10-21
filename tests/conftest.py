@@ -16,18 +16,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import (
-    BACKLOG,
-    BACKLOG_NON_STRICT,
-    ORG,
-    ROOT,
-    SELF,
-    Tier,
-    filed,
-    gh_json,
-    names,
-    tier,
-)
+from . import BACKLOG, ORG, ROOT, SELF, Tier, filed, gh_json, names, tier
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -61,10 +50,9 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     which is what makes the run a matrix rather than one assertion over
     a dict: a reader sees which tree failed which question without
     parsing a message. A failure the tracker already records carries the
-    issue as an expected failure, strict except for the #1808 rollout.
-    The issue is read off the backlog here and not in the test, so the
-    test states the rule and this says who is known not to keep it yet.
-    Only an assertion counts as the expected
+    issue as a strict expected failure, read off the backlog here and not
+    in the test, so the test states the rule and this says who is known
+    not to keep it yet. Only an assertion counts as the expected
     failure: a repository that errors before the assertion -- a file it
     no longer has, a key it dropped -- is reported as the error it is
     rather than passing for the wrong reason, and one that skips before
@@ -96,11 +84,9 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
         marks = [pytest.mark.integration]
         if issues:
             marks.append(pytest.mark.backlog(*issues))
-            # The #1808 rollout must not fail as sibling repositories migrate.
-            strict = not any((issue, test) in BACKLOG_NON_STRICT for issue in issues)
             marks.append(
                 pytest.mark.xfail(
-                    strict=strict, raises=AssertionError, reason=cited(issues)
+                    strict=True, raises=AssertionError, reason=cited(issues)
                 )
             )
         params.append(pytest.param(name, id=name, marks=marks))
@@ -153,7 +139,6 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
         and REPOSITORY in inspect.signature(function).parameters
     }
     orphans: list[str] = []
-    rows = {(issue, test) for issue, test, _ in BACKLOG}
     for issue, test, repositories in BACKLOG:
         if not repositories:
             orphans.append(f"#{issue}: {test} names no repository")
@@ -162,11 +147,6 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
             for repository in repositories
             if test not in defined or repository not in names()
         )
-    orphans.extend(
-        f"#{issue}: {test} is not a BACKLOG row"
-        for issue, test in BACKLOG_NON_STRICT
-        if (issue, test) not in rows
-    )
     if orphans:
         msg = f"BACKLOG in tests/__init__.py lists rows no test answers to: {orphans}"
         raise pytest.UsageError(msg)
@@ -192,8 +172,7 @@ def pytest_runtest_makereport(
     """Fail a backlog cell this run skipped instead of asking.
 
     A row excuses a failure, and a strict expected failure is what turns
-    a repository that catches up into a red cell outside the #1808
-    rollout. A cell the run skips
+    a repository that catches up into a red cell. A cell the run skips
     -- the tree dropped the file the test reads, or its tier moved past
     the one the test asks -- is neither: pytest reports a skip, the
     expected failure is never asked, and the row excuses nothing while

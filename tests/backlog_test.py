@@ -5,12 +5,10 @@
 """A backlog row that has stopped excusing anything, and a green run.
 
 A row of `tests/__init__.py`'s `BACKLOG` excuses a failure the tracker
-records. Rows are strict by default, so a repository that catches up is
-reported until its name is taken out; the #1808 rollout is non-strict so
-XPASS stays visible without interrupting sibling migrations.
-`conftest.py` refuses at collection a row naming a test or repository
-that does not exist, or no repository at all -- one `pytester` test
-here asks that of it -- and
+records, as a strict expected failure, so that a repository that catches
+up is reported until its name is taken out. `conftest.py` refuses at
+collection a row naming a test or a repository that does not exist, or
+no repository at all -- one `pytester` test here asks that of it -- and
 what is left to this module is the pair of ways a row stops recording
 anything with the report unchanged: the cell it excuses is skipped
 rather than asked, and the issue it cites is closed.
@@ -151,8 +149,6 @@ def test_a_row_naming_nothing_is_refused_at_collection(
     )
     monkeypatch.setenv(conftest.SWITCH, "1")
     monkeypatch.setattr(conftest, "BACKLOG", planted)
-    # This run tests its planted table, independently of rollout exceptions.
-    monkeypatch.setattr(conftest, "BACKLOG_NON_STRICT", frozenset())
     monkeypatch.setattr(conftest, "names", lambda: [listed])
     pytester.makeini("[pytest]\n")
     pytester.makeconftest("from tests.conftest import pytest_collection_modifyitems\n")
@@ -165,26 +161,6 @@ def test_a_row_naming_nothing_is_refused_at_collection(
         f"#999: test_renamed_away on {listed}",
     ]
     assert f"lists rows no test answers to: {refused}" in result.stderr.str()
-
-
-def test_a_non_strict_exception_must_name_a_backlog_row(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """A stale rollout exception is refused instead of becoming inert.
-
-    :param monkeypatch: plants an exception with no corresponding row.
-    """
-    monkeypatch.setenv(conftest.SWITCH, "1")
-    monkeypatch.setattr(conftest, "BACKLOG", ())
-    monkeypatch.setattr(
-        conftest, "BACKLOG_NON_STRICT", frozenset({(999, "test_missing")})
-    )
-    monkeypatch.setattr(conftest, "names", list)
-    with pytest.raises(
-        pytest.UsageError,
-        match=r"#999: test_missing is not a BACKLOG row",
-    ):
-        conftest.pytest_collection_modifyitems([])
 
 
 @pytest.mark.integration
