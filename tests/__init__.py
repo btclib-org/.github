@@ -367,6 +367,26 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "base58-bech32",
         ),
     ),
+    (
+        1808,
+        "test_a_repository_carries_the_root_files_its_tier_owes",
+        (
+            "btclib",
+            "btclib-node",
+            "btclib-secp256k1",
+            "portanode",
+            "bitcoin-core-rpc",
+            "btclib-benchmarks",
+            "bbt",
+            "btclib-org.github.io",
+            "btclib-wallet",
+            "bitcoin-node-tests",
+            "ecc",
+            "bip39-slip39",
+            "claude-process",
+            "base58-bech32",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
