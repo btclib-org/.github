@@ -119,7 +119,7 @@ jobs:
       # time rather than for this comment. The environments that cost the
       # minutes today are cached below
       - name: Install uv
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
 
       # the cache key needs the runner image, not only the OS: a
       # pre-commit environment built on one image is not always usable on
@@ -187,7 +187,7 @@ jobs:
       # and tests/check_audit_test.py holds the copies equal; it is
       # installed last so that the steps above run on the default uv
       - name: Install the uv the audit is pinned to
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           version: "0.12.19"
           enable-cache: false
@@ -263,7 +263,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
 
       # --no-project, so the script installs nothing, on the interpreter this
       # tree's .python-version names. HEAD is the merge commit: its first
