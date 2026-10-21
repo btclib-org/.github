@@ -151,6 +151,8 @@ def test_a_row_naming_nothing_is_refused_at_collection(
     )
     monkeypatch.setenv(conftest.SWITCH, "1")
     monkeypatch.setattr(conftest, "BACKLOG", planted)
+    # This run tests its planted table, independently of rollout exceptions.
+    monkeypatch.setattr(conftest, "BACKLOG_NON_STRICT", frozenset())
     monkeypatch.setattr(conftest, "names", lambda: [listed])
     pytester.makeini("[pytest]\n")
     pytester.makeconftest("from tests.conftest import pytest_collection_modifyitems\n")
@@ -163,6 +165,26 @@ def test_a_row_naming_nothing_is_refused_at_collection(
         f"#999: test_renamed_away on {listed}",
     ]
     assert f"lists rows no test answers to: {refused}" in result.stderr.str()
+
+
+def test_a_non_strict_exception_must_name_a_backlog_row(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A stale rollout exception is refused instead of becoming inert.
+
+    :param monkeypatch: plants an exception with no corresponding row.
+    """
+    monkeypatch.setenv(conftest.SWITCH, "1")
+    monkeypatch.setattr(conftest, "BACKLOG", ())
+    monkeypatch.setattr(
+        conftest, "BACKLOG_NON_STRICT", frozenset({(999, "test_missing")})
+    )
+    monkeypatch.setattr(conftest, "names", list)
+    with pytest.raises(
+        pytest.UsageError,
+        match=r"#999: test_missing is not a BACKLOG row",
+    ):
+        conftest.pytest_collection_modifyitems([])
 
 
 @pytest.mark.integration
