@@ -100,22 +100,23 @@ required-version = ">=0.12.18"
 # can be configured in it."
 
 [tool.ruff.per-file-target-version]
-# pre-commit's own floor (`Requires-Python: >=3.10`, its METADATA), which
-# is at or below every caller's own interpreter this issue measured:
-# `uv run --locked`'s project venv where a caller has one, or whatever
-# ambient python3 a caller with none reaches the hook through. At any
-# target above this, `ruff-check --fix`'s own UP017 rewrites
-# `datetime.timezone.utc` to `datetime.UTC` -- valid from 3.11, an
-# `AttributeError` on 3.10, and so the gate would write the very hazard
-# this key exists to refuse. Named by file and not by directory: the files
+# The lowest `requires-python` floor among the organization's repositories,
+# which section 15's interpreter-window command prints. It bounds the
+# interpreter of a caller that runs the hook through `uv run --locked`'s
+# project venv. A caller with no venv reaches the hook through its pre-commit
+# environment's python3, which no floor bounds; issue btclib-org/.github#1374
+# recorded `uvx` callers at 3.11.15. At any target above this, `ruff-check`
+# reports PEP 695 syntax as the fix (UP040, UP046, UP047), a `SyntaxError` on
+# 3.11, and at 3.14 `ruff format` writes `except A, B:` (PEP 758) itself.
+# This key exists to refuse both. Named by file and not by directory: the files
 # below are what a caller's own floor actually reaches, and the glob is
 # proved to reach only them -- `ruff format --diff` on a copy of each
 # with the same hazard appended left `mutation_counts.py` untouched and
 # rewrote `wait_for_pypi_release.py`. install_published_release.py runs
 # on a cell's own interpreter, `setup-python`'s at the matrix floor, which
-# is above this one, and check_run_jobs.py on the `python3` of the runner
-# image, which no file here pins.
-".github/scripts/{check_changelog,check_run_jobs,install_published_release,mutation_counts}.py" = "py310"
+# is at or above this one, and check_run_jobs.py on the `python3` of the
+# runner image, which no file here pins.
+".github/scripts/{check_changelog,check_run_jobs,install_published_release,mutation_counts}.py" = "py311"
 
 [tool.ruff.lint]
 # preview and explicit-preview-rules only make sense as a pair, and this

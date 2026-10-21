@@ -459,19 +459,17 @@ repos:
       # The other scripts under .github/scripts are not named here:
       # each runs pinned at `uv run --no-project --python 3.15`, its own
       # module docstring giving the command, never on a caller's own
-      # floor -- `check_calendar_version.py`'s `datetime.UTC` (3.11+) is
+      # floor -- `install_bitcoind.py`'s `typing.override` (3.12+) is
       # what a run over the whole directory at this floor would refuse
       # for a script that never runs below 3.15.
       #
-      # 3.10 is pre-commit's own floor (`Requires-Python: >=3.10`, its
-      # METADATA), at or below every caller this issue measured --
-      # `[tool.ruff.per-file-target-version]` gives the same figure and
-      # the same reason.
+      # 3.11 is the callers' floor: `[tool.ruff.per-file-target-version]`
+      # gives the figure and the reason.
       - id: mypy-scripts-floor
         name: mypy (strict, at the shared scripts' own callers' floor)
         entry: >
           uv run --locked --no-default-groups --group lint --group test
-          mypy --python-version 3.10
+          mypy --python-version 3.11
           .github/scripts/check_changelog.py
           .github/scripts/check_run_jobs.py
           .github/scripts/install_published_release.py
