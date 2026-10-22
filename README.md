@@ -3784,10 +3784,14 @@ editor cannot use it whatever the hook does. It reads the project's instead,
 which `uv sync` built the extension into — so `fromEnvironment` under the
 mirror.
 
-`AGENTS.md` gives coding agents concise, stable guidance and points to
-the canonical documents. Worktree setup and cleanup belong in
-`CONTRIBUTING.md`. `.claude/` is tracked where a repository keeps
-Claude-specific commands, with the same argument as `.vscode/`.
+`AGENTS.md` gives each repository concise, provider-neutral guidance for
+coding agents and points to its canonical documents; putting contributor
+procedures there would duplicate `CONTRIBUTING.md`. Worktree setup and
+cleanup belong in `CONTRIBUTING.md`, where contributors find repository
+commands. Claude-specific commands belong under `.claude/` where needed,
+just as editor-specific settings belong under `.vscode/`; putting either
+provider's instructions in `AGENTS.md` would make the shared guidance
+provider-specific.
 
 ## 14. Copied verbatim, and decided per repository
 
@@ -3891,11 +3895,6 @@ comparison stops:
   up to the same heading, a review that means one thing in one tree and
   another in the next being no standard. Under it is what a review of
   that tree checks beyond the generic.
-
-`AGENTS.md` is per repository by subject, owed by every repository: it gives
-coding agents concise, stable guidance and points to that tree's canonical
-documents. Worktree commands belong in `CONTRIBUTING.md`; Claude-specific
-commands, where needed, belong under `.claude/`.
 
 `tests/verbatim_test.py` compares what precedes that heading where a file
 carries one, the whole file where it does not, and only the section a bullet
