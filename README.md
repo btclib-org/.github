@@ -2316,7 +2316,10 @@ and the badge land together.
       rulesets* records; Code-Review, held down by a bot's review not
       counting, as section 11's *Review* says, and by merges through the
       bypass in the trees that keep it; and Fuzzing on
-      `bitcoin-core-rpc`, which the `fuzz` entry below already answers.
+      `bitcoin-core-rpc`, which the `fuzz` entry below already answers, and on
+      `portanode`, whose launchers are shell, batch and PowerShell, which no
+      fuzzer Scorecard recognises runs, and adversarial tests on the updaters'
+      parsing stand in for one (btclib-org/portanode#715).
 
     A sub-maximum score outside these three classes is still an issue.
 
@@ -2371,7 +2374,8 @@ and the badge land together.
   `base58-bech32` decodes the base58, bech32, SS58 and CashAddr strings
   of the addresses and keys a stranger hands over;
   `bitcoin-core-rpc` reads an instance its own operator runs, which the property
-  does not reach. `btclib-secp256k1`'s targets reach the vendored C on purpose:
+  does not reach, and `portanode` is answered by the `scorecard` entry's third
+  exception. `btclib-secp256k1`'s targets reach the vendored C on purpose:
   what they exercise is this tree's own length checks in front of it
   (btclib-org/.github#342). Section 7's *Property tests* has how a fuzzer and
   the property layer stand to each other. A crash the sentinel finds is an issue
