@@ -3785,13 +3785,11 @@ which `uv sync` built the extension into — so `fromEnvironment` under the
 mirror.
 
 `AGENTS.md` gives each repository concise, provider-neutral guidance for
-coding agents and points to its canonical documents; putting contributor
-procedures there would duplicate `CONTRIBUTING.md`. Worktree setup and
-cleanup belong in `CONTRIBUTING.md`, where contributors find repository
-commands. Claude-specific commands belong under `.claude/` where needed,
-just as editor-specific settings belong under `.vscode/`; putting either
-provider's instructions in `AGENTS.md` would make the shared guidance
-provider-specific.
+coding agents and points to its canonical documents. Contributor
+procedures there would duplicate `CONTRIBUTING.md`, which holds worktree
+setup and cleanup. Claude-specific commands belong under `.claude/` where
+needed, as editor settings belong under `.vscode/`; in `AGENTS.md` they
+would make the shared guidance provider-specific.
 
 ## 14. Copied verbatim, and decided per repository
 
