@@ -136,7 +136,8 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
     Required checks with `strict` off, one approving review with stale ones
     dismissed, linear history, no force pushes, no deletions,
     conversation resolution, and `enforce_admins` off -- the last being
-    what lets the maintainer's review bypass work at all. A `main` with
+    what lets the maintainer's review bypass work in a tree that keeps
+    one. A `main` with
     no classic protection is the same question with every field off,
     and is reported as that rather than as a case of its own: the list
     is what section 11 states, and a branch holding none of it fails

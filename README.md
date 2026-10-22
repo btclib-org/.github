@@ -2737,16 +2737,17 @@ and classic protection, taking the most restrictive combination:
 - **`main-self-merge`** — require a pull request, one approving review,
   dismissal of stale reviews, conversation resolution, and `squash` as
   the only merge method it accepts. **No bypass actor** in a tree whose
-  `README.md` carries the OpenSSF Best Practices badge; in any other
-  tree, the maintainer, in **`pull_request` mode**.
+  `README.md` carries the OpenSSF Best Practices badge, nor in this
+  repository (btclib-org/.github#1794); in any other tree, the
+  maintainer, in **`pull_request` mode**.
 - **`tag-integrity`**, target `tag`, `refs/tags/v*` — required
   signatures and nothing else, so the recovery path that deletes and
   re-tags a failed release still works.
 
-`GOVERNANCE.md`'s *How a decision is made* says what a tree with the
-badge does in an emergency.
+`GOVERNANCE.md`'s *How a decision is made* says what a tree with no
+bypass does in an emergency.
 
-**In a tree without the badge, the bypass mode is the whole of the
+**In a tree that keeps the bypass, the bypass mode is the whole of the
 design.** `pull_request` excuses its holder *while merging a pull
 request* and at no other time, which is all the bypass is for: a pull
 request landing without anybody else's approval. A direct push to `main`
@@ -4034,8 +4035,9 @@ outside it is correct where the reason is beside it.
 The settings: squash the only method, the `main-integrity` rules held with an
 **empty** bypass list, `required_signatures` **off** in classic protection and
 in every ruleset over `main`, the `main-self-merge`
-bypass list empty in a tree with the badge and, in any other, one actor
-in `pull_request` mode and never `always`, a token that is `read`,
+bypass list empty in a tree with the badge and in this repository and, in
+any other, one actor in `pull_request` mode and never `always`, a token
+that is `read`,
 and `allowed_actions: all` with `sha_pinning_required: true`:
 
 ```shell
