@@ -72,7 +72,7 @@ labels:
       - bitcoin-core-rpc
       - btclib-node
       - btclib-wallet
-      - btclib-ecc
+      - ecc
       - bip39-slip39
       - base58-bech32
 

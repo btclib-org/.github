@@ -348,10 +348,10 @@ def test_the_label_is_owed_by_the_publishing_trees_alone() -> None:
         "bip39-slip39",
         "bitcoin-core-rpc",
         "btclib",
-        "btclib-ecc",
         "btclib-node",
         "btclib-secp256k1",
         "btclib-wallet",
+        "ecc",
     ]
 
 
