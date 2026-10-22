@@ -3409,21 +3409,16 @@ A label means what its description says. Who applies and removes it:
   tag, the tag being what keeps a rehearsal dispatched from a branch from
   verifying as a release, and compares the source repository's id with the
   tree's, not its name, because `--repo` refuses every release signed before
-  the tree was renamed. The attestations are downloaded from the tree's
-  repository endpoint, which a non-member can read, and verified from the
-  file with `--bundle`, so that the organization's endpoint, which answers 401
-  without a member's token, is not called:
+  the tree was renamed:
 
     ```shell
     signer=btclib-org/.github/.github/workflows/reusable-build.yml
     id=$(gh api repos/btclib-org/<tree> --jq .id)
     cert='.[].verificationResult.signature.certificate'
-    bundle="sha256:$(sha256sum <file> | cut -d' ' -f1).jsonl"
     ```
 
     ```shell
-    gh attestation download <file> --repo btclib-org/<tree> &&
-    gh attestation verify <file> --bundle "${bundle:?}" --owner btclib-org \
+    gh attestation verify <file> --owner btclib-org \
       --signer-workflow "${signer:?}@refs/heads/main" \
       --source-ref refs/tags/v<version> --format json \
       --jq "${cert:?}.sourceRepositoryIdentifier" | grep -qx "${id:?}"

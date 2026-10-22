@@ -26,15 +26,10 @@ name: reusable-build
 #     sha256sum dist/* | LC_ALL=C sort -k2 \
 #       | diff - <(printf '%s\n' "$DIGESTS" | grep -F '  dist/')
 #
-# The signer a verifier names is this file at `main`, and the source
-# repository is compared by id, which a rename keeps. The attestations
-# are downloaded from the repository endpoint and verified with
-# `--bundle`, which does not call the organization's endpoint, closed to
-# a non-member (README.md, section 12):
+# The signer a verifier names is this file at `main`, and the repository
+# is compared by id, which a rename keeps (README.md, section 12):
 #
-#     gh attestation download <file> --repo <owner>/<tree>
-#     bundle="sha256:$(sha256sum <file> | cut -d' ' -f1).jsonl"
-#     gh attestation verify <file> --bundle "$bundle" --owner <owner> \
+#     gh attestation verify <file> --owner <owner> \
 #       --signer-workflow btclib-org/.github/.github/workflows/reusable-build.yml@refs/heads/main \
 #       --source-ref refs/tags/v<version> --format json --jq \
 #       '.[].verificationResult.signature.certificate.sourceRepositoryIdentifier' \
