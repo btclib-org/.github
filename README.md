@@ -2318,8 +2318,8 @@ and the badge land together.
       bypass in the trees that keep it; and Fuzzing on
       `bitcoin-core-rpc`, which the `fuzz` entry below already answers, and on
       `portanode`, whose launchers are shell, batch and PowerShell, which no
-      fuzzer Scorecard recognises runs, and adversarial tests on the updaters'
-      parsing stand in for one (btclib-org/portanode#715).
+      fuzzer Scorecard recognises runs; adversarial tests of the updaters'
+      parsing are to stand in for one (btclib-org/portanode#715).
 
     A sub-maximum score outside these three classes is still an issue.
 
