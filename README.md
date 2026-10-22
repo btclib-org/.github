@@ -3407,18 +3407,23 @@ A label means what its description says. Who applies and removes it:
   Build L3 the distribution files and the bill of materials, from a workflow the
   tree's own steps cannot alter. A verifier names the signing workflow and the
   tag, the tag being what keeps a rehearsal dispatched from a branch from
-  verifying as a release, and compares the signing repository's id with the
+  verifying as a release, and compares the source repository's id with the
   tree's, not its name, because `--repo` refuses every release signed before
-  the tree was renamed:
+  the tree was renamed. The attestations are downloaded from the tree's
+  repository endpoint, which a non-member can read, and verified from the
+  file with `--bundle`, so that the organization's endpoint, which answers 401
+  without a member's token, is not called:
 
     ```shell
     signer=btclib-org/.github/.github/workflows/reusable-build.yml
     id=$(gh api repos/btclib-org/<tree> --jq .id)
     cert='.[].verificationResult.signature.certificate'
+    bundle="sha256:$(sha256sum <file> | cut -d' ' -f1).jsonl"
     ```
 
     ```shell
-    gh attestation verify <file> --owner btclib-org \
+    gh attestation download <file> --repo btclib-org/<tree> &&
+    gh attestation verify <file> --bundle "${bundle:?}" --owner btclib-org \
       --signer-workflow "${signer:?}@refs/heads/main" \
       --source-ref refs/tags/v<version> --format json \
       --jq "${cert:?}.sourceRepositoryIdentifier" | grep -qx "${id:?}"
