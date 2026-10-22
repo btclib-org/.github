@@ -13,7 +13,7 @@
 // only an `optional-dependencies` extra does. An arrow is drawn only
 // where the dependent, bare or with one of its extras, does not already
 // install its target, with the extras it asks of it, through the arrows
-// that are drawn: `btclib[secp256k1]` asks `btclib-ecc[secp256k1]`, so
+// that are drawn: `btclib[secp256k1]` asks `ecc[secp256k1]`, so
 // `btclib`'s own requirement of `btclib-secp256k1` draws nothing, while
 // `btclib-node` asks `btclib[secp256k1]` and `btclib-wallet`'s
 // `dependencies` ask bare `btclib`, so both of `btclib-node`'s arrows are
@@ -52,7 +52,7 @@ digraph dependencies {
     "btclib-mnemonics" [pos="0,460"];
     "bitcoin-core-rpc" [pos="145,460"];
     "btclib-secp256k1" [pos="290,460"];
-    "btclib-ecc"       [pos="290,360"];
+    "ecc"              [pos="290,360"];
     "btclib"           [pos="290,260"];
     "btclib-wallet"      [pos="0,160"];
     "bitcoin-node-tests" [pos="145,60"];
@@ -63,9 +63,9 @@ digraph dependencies {
         pos="290,478 290,478 290,542 290,542"];
     "btclib-secp256k1" -> "libsecp256k1-zkp" [style=dotted, arrowhead=none, label="bundled", lp="463,526",
         pos="320,478 320,478 320,510 320,510 320,510 435,510 435,510 435,510 435,542 435,542"];
-    "btclib-ecc" -> "btclib-secp256k1" [style=dashed,
+    "ecc" -> "btclib-secp256k1" [style=dashed,
         pos="e,290,442 290,378 290,378 290,435 290,435"];
-    "btclib" -> "btclib-ecc" [pos="e,290,342 290,278 290,278 290,335 290,335"];
+    "btclib" -> "ecc" [pos="e,290,342 290,278 290,278 290,335 290,335"];
     "btclib" -> "bitcoin-core-rpc"
         [pos="e,145,442 229,260 229,260 145,260 145,260 145,260 145,435 145,435"];
     "btclib-wallet" -> "btclib"

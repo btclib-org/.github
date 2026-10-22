@@ -20,9 +20,9 @@
 <path fill="none" stroke="#7d8590" stroke-dasharray="1,5" d="M381.2,-436C381.2,-436 381.2,-468 381.2,-468 381.2,-468 496.2,-468 496.2,-468 496.2,-468 496.2,-500 496.2,-500"/>
 <text xml:space="preserve" text-anchor="middle" x="524.2" y="-481" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#7d8590">bundled</text>
 </g>
-<!-- btclib&#45;ecc&#45;&gt;btclib&#45;secp256k1 -->
+<!-- ecc&#45;&gt;btclib&#45;secp256k1 -->
 <g id="edge3" class="edge">
-<title>btclib&#45;ecc&#45;&gt;btclib&#45;secp256k1</title>
+<title>ecc&#45;&gt;btclib&#45;secp256k1</title>
 <path fill="none" stroke="#7d8590" stroke-dasharray="5,2" d="M351.2,-336C351.2,-336 351.2,-393 351.2,-393"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="348.75,-391.49 351.2,-398.49 353.65,-391.49 348.75,-391.49"/>
 </g>
@@ -32,9 +32,9 @@
 <path fill="none" stroke="#7d8590" d="M290.2,-218C290.2,-218 206.2,-218 206.2,-218 206.2,-218 206.2,-393 206.2,-393"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="203.75,-391.49 206.2,-398.49 208.65,-391.49 203.75,-391.49"/>
 </g>
-<!-- btclib&#45;&gt;btclib&#45;ecc -->
+<!-- btclib&#45;&gt;ecc -->
 <g id="edge4" class="edge">
-<title>btclib&#45;&gt;btclib&#45;ecc</title>
+<title>btclib&#45;&gt;ecc</title>
 <path fill="none" stroke="#7d8590" d="M351.2,-236C351.2,-236 351.2,-293 351.2,-293"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="348.75,-291.49 351.2,-298.49 353.65,-291.49 348.75,-291.49"/>
 </g>
@@ -122,11 +122,11 @@
 <path fill="#1f6feb" stroke="#1f6feb" d="M400.4,-436C400.4,-436 302,-436 302,-436 296,-436 290,-430 290,-424 290,-424 290,-412 290,-412 290,-406 296,-400 302,-400 302,-400 400.4,-400 400.4,-400 406.4,-400 412.4,-406 412.4,-412 412.4,-412 412.4,-424 412.4,-424 412.4,-430 406.4,-436 400.4,-436"/>
 <text xml:space="preserve" text-anchor="middle" x="351.2" y="-414.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">btclib&#45;secp256k1</text>
 </g>
-<!-- btclib&#45;ecc -->
+<!-- ecc -->
 <g id="node7" class="node">
-<title>btclib&#45;ecc</title>
+<title>ecc</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M400.4,-336C400.4,-336 302,-336 302,-336 296,-336 290,-330 290,-324 290,-324 290,-312 290,-312 290,-306 296,-300 302,-300 302,-300 400.4,-300 400.4,-300 406.4,-300 412.4,-306 412.4,-312 412.4,-312 412.4,-324 412.4,-324 412.4,-330 406.4,-336 400.4,-336"/>
-<text xml:space="preserve" text-anchor="middle" x="351.2" y="-314.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">btclib&#45;ecc</text>
+<text xml:space="preserve" text-anchor="middle" x="351.2" y="-314.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">ecc</text>
 </g>
 <!-- btclib -->
 <g id="node8" class="node">

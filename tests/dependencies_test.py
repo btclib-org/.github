@@ -610,18 +610,18 @@ def test_every_line_of_the_graph_is_read() -> None:
 @pytest.mark.parametrize(
     "line",
     [
-        '    {rank=same; "btclib"; "btclib-ecc";}',
+        '    {rank=same; "btclib"; "ecc";}',
         "    btclib_mnemonics;",
         '    "btclib" [pos="0,0"',
         '    "extra" [];',
         '    "extra" [pos="0,0", style=bold];',
         '    "extra" [pos="0,0", color="red"];',
-        '    "btclib" -> "btclib-ecc";',
-        '    "btclib" -> "btclib-ecc" [pos="0,0", color="red"];',
-        '    "btclib" -> "btclib-ecc" [pos="0,0", label="secp256k1"];',
-        '    "btclib" -> "btclib-ecc" [pos="0,0", arrowhead=none];',
-        '    "btclib" -> "btclib-ecc" [pos="0,0", style=bold];',
-        '    "btclib" -> "btclib-ecc" [pos="0,0", style=dotted];',
+        '    "btclib" -> "ecc";',
+        '    "btclib" -> "ecc" [pos="0,0", color="red"];',
+        '    "btclib" -> "ecc" [pos="0,0", label="secp256k1"];',
+        '    "btclib" -> "ecc" [pos="0,0", arrowhead=none];',
+        '    "btclib" -> "ecc" [pos="0,0", style=bold];',
+        '    "btclib" -> "ecc" [pos="0,0", style=dotted];',
         '    "btclib" -> "libsecp256k1" [pos="0,0", style=dotted, label="bundled"];',
         '    "btclib" -> "libsecp256k1" [pos="0,0", style=dashed];',
         '    "btclib" -> "elsewhere" [pos="0,0"];',
@@ -676,8 +676,8 @@ def test_an_edge_painted_where_it_is_not_named_is_refused(
 @pytest.mark.parametrize(
     "line",
     [
-        '    "btclib" -> "btclib-ecc" [style=dashed, ' + ECC_POS + "];",
-        '    "btclib" -> "btclib-ecc" [' + ECC_POS + "];",
+        '    "btclib" -> "ecc" [style=dashed, ' + ECC_POS + "];",
+        '    "btclib" -> "ecc" [' + ECC_POS + "];",
         '    "btclib-secp256k1" -> "libsecp256k1" [style=dotted, arrowhead=none, '
         'label="bundled", lp="0,0", ' + BUNDLED_POS + "];",
         '    "btclib" [pos="290,260"];',
