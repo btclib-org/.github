@@ -338,11 +338,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("btclib-wallet",),
     ),
     (
-        1788,
-        "test_a_scorecard_tree_has_a_recent_good_first_issue",
-        ("base58-bech32",),
-    ),
-    (
         1789,
         "test_the_name_normalizes_to_the_repository",
         ("bip39-slip39",),
