@@ -2250,7 +2250,7 @@ by that row.
 - `deps-oldest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
   `bip39-slip39`, `base58-bech32`;
-- `py-arm-authority` — `btclib`, `btclib-ecc`;
+- `py-arm-authority` — `btclib-ecc`;
 - `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `btclib-ecc`,
   `bip39-slip39`, `base58-bech32`;
