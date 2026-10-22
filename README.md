@@ -318,9 +318,9 @@ subject that is declined.
 **A tier is a floor, not a ceiling.** Above it, a repository carries
 what its own practice needs, as `portanode` carries a `RELEASING.md`.
 Below it, a repository short of what its tier binds is a gap, filed
-here; a gap with the reason beside it, in the repository's `CLAUDE.md`
-or its `REPOSITORY.md`, is a decision, and a sentence that declines a
-rule and gives no reason is still a gap.
+here; a gap with the reason beside it in the repository's `REPOSITORY.md`
+or in the configuration that carries the deviation is a decision, and a
+sentence that declines a rule and gives no reason is still a gap.
 
 | repository | tier |
 | --- | --- |
@@ -359,7 +359,7 @@ done
 
 `.github` is this repository, and its row is measured like the others;
 what it declines of tier 2 — coverage, and the metadata of section 3
-only an index reads — its `CLAUDE.md` says, with the reason.
+only an index reads — `REPOSITORY.md` and `pyproject.toml` give the reasons.
 `btclib-org.github.io`, the organization site served by Pages from its
 `main` (btclib-org/.github#530), is measured the same way.
 
@@ -388,7 +388,7 @@ whatever decides it:
 | `RELEASING.md` | how a release is cut, and how one is recovered | 1 |
 | `CHANGELOG.md` | written when a release is cut; a preamble if none | 1, 2, 3 |
 | `RELEASE_NOTES.md` | what a user has to *act* on, on top of it | 1 |
-| `CLAUDE.md` | what a session needs and no human document holds | 1, 2, 3 |
+| `AGENTS.md` | repository guidance for coding agents | 1, 2, 3 |
 | `pyproject.toml` | the project and every tool's configuration | 1, 2 |
 | `uv.lock` | the pinned resolution | 1, 2 |
 
@@ -3789,11 +3789,12 @@ editor cannot use it whatever the hook does. It reads the project's instead,
 which `uv sync` built the extension into — so `fromEnvironment` under the
 mirror.
 
-`CLAUDE.md` carries what an agent cannot read off the tree — the
-non-obvious failure modes, and the rule that a session never works in the
-maintainer's own checkout — a worktree per session, and never `git stash`
-in one, `refs/stash` being shared across worktrees. `.claude/` is tracked
-beside it, with the same argument as `.vscode/`.
+`AGENTS.md` gives each repository concise, provider-neutral guidance for
+coding agents and points to its canonical documents. Contributor
+procedures there would duplicate `CONTRIBUTING.md`, which holds worktree
+setup and cleanup. Claude-specific commands belong under `.claude/` where
+needed, as editor settings belong under `.vscode/`; in `AGENTS.md` they
+would make the shared guidance provider-specific.
 
 ## 14. Copied verbatim, and decided per repository
 
@@ -3853,8 +3854,7 @@ The paths are what that test compares:
   holder without one.
 - `.claude/commands/review.md` — owed where `REVIEWING.md`: it is the
   invocation and not a second copy of the standard, and it stays a
-  file of its own rather than folding into `CLAUDE.md`, which is read by
-  every session including the one that wrote the diff.
+  file of its own rather than being folded into `AGENTS.md`.
 - `.github/scripts/generate_sbom.py` — owed where
   `.github/scripts/generate_sbom.py`: the file itself satisfies the condition,
   as it does `.taplo.toml`'s, the canonical copy being this repository's.
@@ -3893,18 +3893,11 @@ comparison stops:
 - `CONTRIBUTING.md` — owed by every repository, and the same file in each
   **up to `## This repository in particular`**. Under that heading are
   the commands and the gates of that tree, because a human should not
-  open an agent's file to learn how to run one — which is what holding
-  them in `CLAUDE.md` asked.
+  open `AGENTS.md` to learn how to run one.
 - `REVIEWING.md` — owed by every repository, and the same file in each
   up to the same heading, a review that means one thing in one tree and
   another in the next being no standard. Under it is what a review of
   that tree checks beyond the generic.
-- `CLAUDE.md` — owed by every repository, and compared byte for byte in each
-  from `## The primary checkout is the maintainer's` to the next heading at the
-  same level. The section is what every session reads before its first edit, and
-  it states the same rule in every tree; the rest of the file is that
-  repository's own. The rejected alternative compares the whole file, which
-  would report drift in the part that is meant to differ.
 
 `tests/verbatim_test.py` compares what precedes that heading where a file
 carries one, the whole file where it does not, and only the section a bullet
@@ -4541,7 +4534,7 @@ No tool checks them.
    `PULL_REQUEST_TEMPLATE.md`.
 1. `CONTRIBUTING.md`, `REVIEWING.md` with the
    `.claude/commands/review.md` that invokes it, `REPOSITORY.md`,
-   `CHANGELOG.md`, `CLAUDE.md`; and `SECURITY.md`, `RELEASING.md` and
+   `CHANGELOG.md`, `AGENTS.md`; and `SECURITY.md`, `RELEASING.md` and
    `RELEASE_NOTES.md` where the repository publishes, the rows section
    2's table marks for tier 1 alone. `RELEASING.md` carries section 12's
    step that runs the dependents before the tag, where another org tree

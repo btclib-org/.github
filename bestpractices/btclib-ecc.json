@@ -204,7 +204,7 @@
     "status": "Met"
   },
   "OSPS-SA-01.01": {
-    "justification": "CLAUDE.md's Architecture gives the package's modules, their layers bottom-up and what each may import. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversary, and what each can do. https://github.com/btclib-org/btclib-ecc/blob/main/CLAUDE.md#architecture https://github.com/btclib-org/btclib-ecc/blob/main/ASSURANCE_CASE.md#trust-boundaries",
+    "justification": "ASSURANCE_CASE.md's Threat model names the adversaries, including remote parties, protocol counterparties, and timing observers. Its Trust boundaries describe caller-provided inputs and the environment variable. https://github.com/btclib-org/ecc/blob/main/ASSURANCE_CASE.md#threat-model https://github.com/btclib-org/ecc/blob/main/ASSURANCE_CASE.md#trust-boundaries",
     "status": "Met"
   },
   "OSPS-SA-02.01": {
@@ -440,11 +440,11 @@
     "status": "Met"
   },
   "documentation_architecture": {
-    "justification": "CLAUDE.md's Architecture gives the layers bottom-up (number_theory and hashes, curves/, ecc/), the rule that ecc imports curves and never the reverse, and the one module that imports the libsecp256k1 bindings. https://github.com/btclib-org/btclib-ecc/blob/main/CLAUDE.md#architecture",
+    "justification": "README.md's What is here describes modular arithmetic in number_theory, elliptic curves and signatures in ecc, and the kdf and hashes modules, and explains when secp256k1 bindings are used. https://github.com/btclib-org/ecc/blob/main/README.md#what-is-here",
     "status": "Met"
   },
   "documentation_basics": {
-    "justification": "README.md says what btclib-ecc holds, how to install it and gives a first use, and the documentation holds the API reference. https://github.com/btclib-org/btclib-ecc#first-use https://btclib-ecc.readthedocs.io/",
+    "justification": "README.md says what ecc holds, how to install it and gives a first use, and the documentation holds the API reference. https://github.com/btclib-org/ecc#first-use https://btclib-ecc.readthedocs.io/",
     "status": "Met"
   },
   "documentation_current": {

@@ -440,7 +440,7 @@
     "status": "Unmet"
   },
   "documentation_architecture": {
-    "justification": "README.md's Folder Structure and Launcher Notes describe the root launchers, the per-platform menus and scripts, the bin/ directories and the data directories, and how a launcher reaches each. CLAUDE.md's What is in the tree, and what is not adds the shared libraries under shared/ and the pin files under keys/. https://github.com/btclib-org/portanode/blob/main/README.md#folder-structure https://github.com/btclib-org/portanode/blob/main/CLAUDE.md",
+    "justification": "README.md's Folder Structure inventories macos/, win/, linux/, bitcoin-datadir/ and electrum-datadir/, and Detailed Setup and Updating Binaries describe how launchers and updaters install. ASSURANCE_CASE.md's Secure Design Principles describes the shared macOS/Linux libraries and the distinct Windows implementation; README.md's Updating Binaries documents the keys/*.fingerprints pins and fail-closed behavior. https://github.com/btclib-org/portanode/blob/main/README.md#folder-structure https://github.com/btclib-org/portanode/blob/main/README.md#detailed-setup https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries https://github.com/btclib-org/portanode/blob/main/ASSURANCE_CASE.md#secure-design-principles",
     "status": "Met"
   },
   "documentation_basics": {

@@ -347,6 +347,26 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_the_name_normalizes_to_the_repository",
         ("bip39-slip39",),
     ),
+    (
+        1808,
+        "test_a_repository_carries_the_verbatim_files_owed_of_it",
+        ("portanode",),
+    ),
+    (
+        1808,
+        "test_a_repository_carries_the_root_files_its_tier_owes",
+        (
+            "btclib",
+            "btclib-node",
+            "btclib-secp256k1",
+            "portanode",
+            "bitcoin-core-rpc",
+            "btclib-wallet",
+            "ecc",
+            "bip39-slip39",
+            "base58-bech32",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 

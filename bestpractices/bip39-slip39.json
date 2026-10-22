@@ -204,7 +204,7 @@
     "status": "Met"
   },
   "OSPS-SA-01.01": {
-    "justification": "CLAUDE.md's Architecture gives the package's modules, their layers bottom-up and what each may import. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversary, and what each can do. https://github.com/btclib-org/btclib-mnemonics/blob/main/CLAUDE.md#architecture https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md#trust-boundaries",
+    "justification": "ASSURANCE_CASE.md's Threat model names the adversaries, including holders of fewer shares than a SLIP-0039 threshold. Its Trust boundaries describe inputs crossing the public API, sentences and shares from outside, and caller-selected files. https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md#threat-model https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md#trust-boundaries",
     "status": "Met"
   },
   "OSPS-SA-02.01": {
@@ -440,7 +440,7 @@
     "status": "Met"
   },
   "documentation_architecture": {
-    "justification": "CLAUDE.md's Architecture gives the layers bottom-up (exceptions and _utils, entropy and mnemonic, the schemes bip39, electrum and slip39, none importing another, and dispatch), and states that the package imports only the standard library and stops at the seed. https://github.com/btclib-org/btclib-mnemonics/blob/main/CLAUDE.md#architecture",
+    "justification": "README.md's What is here maps BIP39, SLIP-0039, Electrum, dispatch, entropy and mnemonic to their modules, and says that a seed's BIP32 key, address and wallet are outside this library. https://github.com/btclib-org/btclib-mnemonics/blob/main/README.md#what-is-here",
     "status": "Met"
   },
   "documentation_basics": {
