@@ -50,11 +50,13 @@ allow-licenses:
   - MIT
   - MIT-0
   - MIT-CMU
+  - MITNFA
   - MPL-2.0
   - PSF-2.0
   - Python-2.0
   - Python-2.0.1
   - Ruby
+  - Unicode-3.0
   - Unlicense
   - Zlib
 
