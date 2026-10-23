@@ -922,6 +922,21 @@ jobs:
           # list every such path, and a path the list missed would be the
           # hole this closes
           #
+          # Monitor runs a shell command and reads its output, as Bash
+          # does, and an answer runs nothing. The third list below is the
+          # tools other than Bash that Claude Code marks
+          # `enablesCodeExecution` in its bundle, measured on 2.1.301,
+          # which v1.0.251 of this action installs
+          #
+          # Agent starts a sub-agent, and so do Workflow and Skill, which
+          # runs a skill marked `context: fork` as one. An answer reads
+          # no file, so a sub-agent gives it nothing, and it needs no
+          # skill (btclib-org/.github#1809). GetTask reads a background
+          # shell command's output and TaskStop stops a background task,
+          # and an answer starts none. On 2.1.301 a rule naming Task is
+          # read as Agent, and one naming KillShell or KillBash as
+          # TaskStop, so the older names need no rule of their own
+          #
           # the model is named for the reason the review job gives, and
           # the setting sources for the reason the header gives
           claude_args: >-
@@ -930,3 +945,5 @@ jobs:
             --disallowedTools
             "Bash,Edit,MultiEdit,Write,NotebookEdit,mcp__github_file_ops__commit_files,mcp__github_file_ops__delete_files"
             "Read,Grep,Glob,LS"
+            "Monitor,PowerShell,AppifactRepl,CronCreate,RemoteTrigger,Workflow,self_hosted_runner_spawn_local,self_hosted_runner_requeue_session"
+            "Agent,Skill,GetTask,TaskStop"
