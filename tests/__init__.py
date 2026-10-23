@@ -342,6 +342,26 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_a_repository_carries_the_verbatim_files_owed_of_it",
         ("portanode",),
     ),
+    (
+        1846,
+        "test_a_readme_opens_its_contributing_section_with_the_paragraph",
+        (
+            "btclib",
+            "btclib-node",
+            "btclib-secp256k1",
+            "portanode",
+            "bitcoin-core-rpc",
+            "btclib-benchmarks",
+            "bbt",
+            "btclib-org.github.io",
+            "btclib-wallet",
+            "bitcoin-node-tests",
+            "ecc",
+            "bip39-slip39",
+            "claude-process",
+            "base58-bech32",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 

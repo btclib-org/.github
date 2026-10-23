@@ -12,7 +12,7 @@
 
 ## Checks
 
-<!-- Both of these are required checks: both run in
+<!-- The gates below are required checks: both run in
      `Lint`, which with `Dependency review` and `Sign-off` is the whole
      of what a merge here is gated on. The three jobs decline a draft
      pull request, so a draft gets no report from any of them.
@@ -32,6 +32,8 @@
 - [ ] `uv run --locked --no-default-groups --group test pytest` passes —
       required as written; `alignment.yml` sets `BTCLIB_INTEGRATION` and
       runs the rest, which is not a gate
+- [ ] I have read and understood every line of this change, and can
+      answer a review of it without the model
 
 ## Anything the reviewer should know
 
