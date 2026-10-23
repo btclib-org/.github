@@ -85,5 +85,5 @@ not deadlines.
   `btclib-secp256k1`** (btclib-org/btclib-secp256k1#554): section 12's
   *The compiled wheels are outside that property* says why.
 - **Removing the maintainer's bypass from the branch rules of the trees
-  without the Best Practices badge**, until the maintainer decides
-  otherwise.
+  without the Best Practices badge**, other than this repository's,
+  until the maintainer decides otherwise.

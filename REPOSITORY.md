@@ -98,12 +98,12 @@ gh api -X PUT repos/btclib-org/.github/branches/main/protection \
 JSON
 ```
 
-`enforce_admins: false` is not a relaxation but what makes a solo merge
-possible at all, the ruleset bypass reaching only the ruleset's own rule.
-It exempts an administrator from the required checks as well as from the
-review, so a merge through the maintainer's bypass waits for none of these
-checks, as `CONTRIBUTING.md`'s *Landing it* says. `strict` is off for
-[the reason section 11 gives][s11-branch].
+`enforce_admins: false` exempts an administrator from this classic
+protection, the required checks included, so an administrator's
+`--admin` merge waits for none of them. `main-self-merge` also requires
+the review, with no bypass actor, so no account merges without an
+approving review from somebody other than the author. `strict` is off
+for [the reason section 11 gives][s11-branch].
 
 The `checks` array and a JSON body on stdin, never `contexts` and never
 `-f`, and a later change to the list is a `PATCH` of
@@ -140,7 +140,7 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
 #  "refs":["refs/heads/main"],
 #  "rules":["required_linear_history","non_fast_forward","deletion"],
 #  "target":"branch"}
-# {"bypass":["pull_request"],"enforcement":"active",
+# {"bypass":[],"enforcement":"active",
 #  "name":"main-self-merge","refs":["refs/heads/main"],
 #  "rules":["pull_request"],"target":"branch"}
 # {"bypass":[],"enforcement":"active","name":"tag-integrity",
@@ -152,8 +152,13 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
   what makes every one of those true of an administrator too.
 - `main-self-merge` — a pull request, an approving review, stale reviews
   dismissed on push, conversations resolved, and `squash` as the only
-  merge method it accepts — bypassed by the maintainer in
-  **`pull_request` mode**.
+  merge method it accepts — with **no bypass actor at all**, the
+  maintainer's included. The other trees call this repository's
+  reusable workflows at `@main`, as the standard requires, and some of
+  those jobs hold write permissions, such as `pull-requests: write` in
+  `reusable-claude-review.yml`. A change merged here runs in them at
+  once, so another person's approval stands before it
+  (btclib-org/.github#1794).
 - `tag-integrity` — required signatures and nothing else, over
   `refs/tags/v*` rather than over a branch, with **no bypass actor**.
 
@@ -170,16 +175,21 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
 #  "required_review_thread_resolution":true,"required_reviewers":[]}
 ```
 
-The bypass reaches that whole block and not the approving review alone,
-so `dismiss_stale_reviews_on_push`, which is on, reaches no landing made
-through it.
-[Section 11 has what stands in for it][s11-branch].
+No bypass reaches that block, so `dismiss_stale_reviews_on_push`, which
+is on, applies to every landing.
 
 `main-self-merge`'s `bypass` is one of the fields the first call above
-is read for. It answers `["pull_request"]`, and [that mode against
-`always` is the whole of the design][s11-branch]; `always` in that field
-would mean a direct push to `main` had become possible for its holder,
-which is a drift the call is there to catch.
+is read for. It answers `[]`: an entry would be an account merging
+without an approving review from somebody other than the author, or, in
+`always` mode, pushing to `main` directly, which is a drift the call is
+there to catch. That call reads `[]` too where the endpoint omits
+`bypass_actors`, which it does for a token without push access, so the
+actors themselves are read from the ruleset:
+
+```shell
+gh api repos/btclib-org/.github/rulesets/21142971 --jq .bypass_actors
+# []
+```
 
 `tag-integrity` matches no ref: `CONTRIBUTING.md`'s *A version, and no
 release* is where nothing being tagged is measured. It stands ahead
@@ -250,18 +260,11 @@ gh api repos/btclib-org/.github \
 ```
 
 [Squash is the only method the standard enables][s11-merge], and
-`allowed_merge_methods` above holds it for every account the
-`main-self-merge` bypass does not cover. For the maintainer, who is
-covered, what stands against this setting being flipped back is
-`main-integrity`'s `required_linear_history`: no bypass actor, and a
-merge commit refused for everybody. Rebase-and-merge is linear, so that
-rule does not reach it, and [the reason it is not enabled is section
+`allowed_merge_methods` above holds it for every account, the ruleset
+having no bypass actor. `main-integrity`'s `required_linear_history`
+refuses a merge commit for everybody too. Rebase-and-merge is linear, so
+that rule does not reach it, and [the reason it is not enabled is section
 11's][s11-merge].
-
-Whether a bypass holder is offered a merge method `allowed_merge_methods`
-excludes is not read back here: measuring it means flipping
-`allow_rebase_merge` and pressing the button on a live pull request,
-which is a settings change and a landing rather than a call.
 
 `COMMIT_OR_PR_TITLE` with `COMMIT_MESSAGES` is the pair
 [Merge method][s11-merge] asks for, and which of the two titles lands is

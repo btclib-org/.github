@@ -25,7 +25,7 @@ from typing import Any
 
 import pytest
 
-from . import ORG, by_hand, gh_json
+from . import ORG, SELF, by_hand, gh_json
 
 MAIN = "refs/heads/main"
 TAGS = "refs/tags/v*"
@@ -131,7 +131,7 @@ def test_main_refuses_a_rewritten_commit(
 ) -> None:
     """The three rules that make `main` an append-only branch.
 
-    No bypass on any of them: the review rule is what one person is
+    No bypass on any of them: the review rule is what one person may be
     excused from, and this is what nobody is.
 
     `required_signatures` is not among them, and is asserted absent: an
@@ -193,13 +193,15 @@ def test_a_merge_needs_one_review_and_a_badge_tree_has_no_bypass(
     rulesets: dict[str, list[dict[str, Any]]],
     badge_trees: set[str],
 ) -> None:
-    """Review is the gate; a badge tree has no bypass, any other has one.
+    """Review is the gate; a badge tree and this one have no bypass.
 
     A tree whose README carries the bestpractices.dev badge has no bypass
     actor on the review rule, so every merge needs an approval from
-    somebody other than its author. Any other tree has exactly one actor,
-    in `pull_request` mode, which excuses its holder from the review rule
-    while merging a pull request and at no other time. `always` would
+    somebody other than its author. So has this repository, by the
+    maintainer's decision (btclib-org/.github#1794). Any other tree has
+    exactly one actor, in `pull_request` mode, which excuses its holder
+    from the review rule while merging a pull request and at no other
+    time. `always` would
     permit a direct push, which is the thing the integrity rules above
     are for.
 
@@ -213,6 +215,7 @@ def test_a_merge_needs_one_review_and_a_badge_tree_has_no_bypass(
     :param rulesets: the active rulesets of each repository.
     :param badge_trees: the trees whose README carries the badge.
     """
+    without_bypass = badge_trees | {SELF}
     wrong: dict[str, str] = {}
     unseen: list[str] = []
     for repository, active in sorted(rulesets.items()):
@@ -233,7 +236,7 @@ def test_a_merge_needs_one_review_and_a_badge_tree_has_no_bypass(
             unseen.append(repository)
             continue
         modes = sorted(actor["bypass_mode"] for actor in actors)
-        if repository in badge_trees:
+        if repository in without_bypass:
             if modes:
                 wrong[repository] = f"bypass actors are {modes}, not none"
         elif modes != ["pull_request"]:
