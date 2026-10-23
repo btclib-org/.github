@@ -362,6 +362,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "base58-bech32",
         ),
     ),
+    (
+        1842,
+        "test_a_tree_carries_the_sentinels_its_entries_give_it",
+        ("portanode",),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 

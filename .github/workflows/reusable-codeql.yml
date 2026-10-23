@@ -6,11 +6,16 @@ name: reusable-codeql
 # concurrency group and the aggregate job stay in the caller, whose run
 # these jobs join.
 #
-# One input, `queries`, the query suite, empty by default. The trees
-# carrying codeql.yml ask the same languages, the same build mode and the
-# same category, and an input for a difference none of them has is a copy
-# in disguise (btclib-org/.github#35); the suite is the one difference
-# that is wanted, for the trial of btclib-org/.github#1505.
+# Two inputs. `queries` is the query suite, empty by default, for the
+# trial of btclib-org/.github#1505. `languages` is the list of languages
+# to analyse, JSON-encoded because a workflow_call input is a string, a
+# number or a boolean, and fromJSON turns the string into the list the
+# matrix takes. Its default is both languages, so the trees that carry
+# both pass nothing.
+# It is owed to `portanode`, which holds no Python: CodeQL fails a
+# language it finds no source for. A difference one tree has is not the
+# copy in disguise btclib-org/.github#35 refuses, and
+# btclib-org/.github#1842 adds the input.
 #
 # The calling job declares the token the analysis needs. README.md
 # section 11 has the mechanism: the bound refuses rather than trims, so
@@ -33,6 +38,13 @@ on:
           code-scanning suite.
         type: string
         default: ""
+      languages:
+        description: >-
+          The languages to analyse, JSON-encoded: '["actions"]'. A
+          language the tree holds no source for fails its job, so a
+          tree names the ones it holds.
+        type: string
+        default: '["actions", "python"]'
 
 # least privilege for the GITHUB_TOKEN: everything running in a job
 # (actions, dependencies, the CodeQL bundle itself) can read the token, so
@@ -42,9 +54,9 @@ permissions:
 
 jobs:
   analyze:
-    # one job per language rather than one job analysing both, so a
+    # one job per language rather than one job analysing them all, so a
     # failure names the language in the checks list instead of sending a
-    # reader into the log to find out which half broke -- and so the two
+    # reader into the log to find out which half broke -- and so they
     # run in parallel
     name: Analyze ${{ matrix.language }}
     # a draft pull request is work in progress: every push to one would
@@ -54,7 +66,7 @@ jobs:
     # github.event is the caller's, which is the event its trigger took
     if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
     runs-on: ubuntu-latest
-    # far above what either language needs; what it bounds is a hung job
+    # far above what any language needs; what it bounds is a hung job
     # holding a runner for six hours
     timeout-minutes: 20
     # the elevation, on the job that needs it: security-events: write is
@@ -75,13 +87,11 @@ jobs:
       contents: read
       actions: read # run metadata, which only a private repository gates
     strategy:
-      # one language failing must not cancel the other: which of the two
-      # is red is the information, and cancelling throws half of it away
+      # one language failing must not cancel the others: which language
+      # is red is the information, and cancelling throws the rest away
       fail-fast: false
       matrix:
-        language:
-          - actions
-          - python
+        language: ${{ fromJSON(inputs.languages) }}
     steps:
       # every action is pinned to a commit SHA, the tag in the comment: a
       # tag, let alone a branch, is a name its owner can move, and these
@@ -95,7 +105,7 @@ jobs:
         uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
         with:
           languages: ${{ matrix.language }}
-          # both languages are interpreted, so no build step sits between
+          # the languages are interpreted, so no build step sits between
           # init and analyze and no autobuild is attempted. Written out
           # rather than left to the default because it is the input that
           # would have to change first if a compiled language ever joined
