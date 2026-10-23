@@ -3412,17 +3412,25 @@ A label means what its description says. Who applies and removes it:
   Build L3 the distribution files and the bill of materials, from a workflow the
   tree's own steps cannot alter. A verifier names the signing workflow and the
   tag, the tag being what keeps a rehearsal dispatched from a branch from
-  verifying as a release:
+  verifying as a release, and compares the source repository's id with the
+  tree's, not its name, because `--repo` refuses every release signed before
+  the tree was renamed:
 
     ```shell
     signer=btclib-org/.github/.github/workflows/reusable-build.yml
+    id=$(gh api repos/btclib-org/<tree> --jq .id)
+    cert='.[].verificationResult.signature.certificate'
     ```
 
     ```shell
-    gh attestation verify <file> --repo btclib-org/<tree> \
+    gh attestation verify <file> --owner btclib-org \
       --signer-workflow "${signer:?}@refs/heads/main" \
-      --source-ref refs/tags/v<version>
+      --source-ref refs/tags/v<version> --format json \
+      --jq "${cert:?}.sourceRepositoryIdentifier" | grep -qx "${id:?}"
     ```
+
+    The exit code is `0` only where a verified attestation names that
+    repository.
 
     The signature is made before the environment's approval, so a release whose
     gates fail afterwards leaves an attestation for files that never reached an
