@@ -16,7 +16,7 @@ whenever that makes them clearer.
   — Python bindings to
   [libsecp256k1](https://github.com/bitcoin-core/secp256k1), Bitcoin
   Core's optimized C library.
-- **[btclib-ecc](https://github.com/btclib-org/btclib-ecc)** — elliptic
+- **[ecc](https://github.com/btclib-org/ecc)** — elliptic
   curve arithmetic over any short Weierstrass curve, and the schemes
   built on it: ECDSA, BIP340 Schnorr, MuSig2, FROST, Diffie-Hellman,
   commitments and range proofs. For secp256k1 it uses btclib-secp256k1,
@@ -25,7 +25,7 @@ whenever that makes them clearer.
   Base58, Base58Check, bech32, bech32m, SS58 and CashAddr codecs, on
   the standard library alone.
 - **[btclib](https://github.com/btclib-org/btclib)** — bitcoin's
-  protocol on top of btclib-ecc: addresses, scripts, transactions and
+  protocol on top of ecc: addresses, scripts, transactions and
   blocks.
 - **[bip39-slip39](https://github.com/btclib-org/bip39-slip39)** —
   BIP39, SLIP39 and Electrum mnemonics, from the entropy up to the seed,
@@ -67,7 +67,7 @@ An arrow points at what a package depends on, which is on a row above
 it, and a dashed one at what only an extra of the package installs. An
 arrow is drawn only where the package does not already install its
 target through the arrows that are drawn, so `btclib-wallet` has none to
-`btclib-ecc`, which `btclib` brings. `btclib-node` keeps its own to
+`ecc`, which `btclib` brings. `btclib-node` keeps its own to
 `btclib` all the same, asking it for the `secp256k1` extra, which
 `btclib-wallet` installs `btclib` without. A grey dashed box is a C
 library and not a package of the organization: the dotted line to it
