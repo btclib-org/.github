@@ -2268,7 +2268,7 @@ by that row.
   `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`,
   `base58-bech32`;
 - `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`,
+  `btclib-benchmarks`, `btclib-node`, `portanode`, `btclib-wallet`, `ecc`,
   `bip39-slip39`, `base58-bech32`;
 - `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `btclib-node`,
   `portanode`, `btclib-wallet`, `ecc`, `bip39-slip39`, `base58-bech32`.
