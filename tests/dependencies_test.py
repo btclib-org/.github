@@ -26,6 +26,11 @@ the drawing. The drawing is right where it draws no arrow the trees do
 not declare, draws each in the style its requirements have, installs
 from every state what the trees' own requirements install, and draws
 no arrow the others already imply.
+
+The source's header says what a requirement on a name no tree builds
+draws, and so a requirement on a name the organization retired is not
+on the drawing. The last tests here name each such requirement, in any
+tree and any group.
 """
 
 from __future__ import annotations
@@ -37,7 +42,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 import pytest
 
-from . import ROOT
+from . import ROOT, still_open
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -901,3 +906,150 @@ def test_the_graph_draws_what_each_pyproject_declares(
     }
     found = problems(packages, requirements, bundled(pyprojects, modules), drawn(GRAPH))
     assert not found, "; ".join(found)
+
+
+RETIRED: dict[str, str] = {
+    "btclib-ecc": "ecc",
+    "btclib-libsecp256k1": "btclib-secp256k1",
+    "btclib-mnemonics": "bip39-slip39",
+}
+"""Each name the organization published a distribution under and has left,
+against the `[project]` name of the tree that carries it on.
+
+A requirement on one installs a release nothing updates any more. The
+names are PyPI's, `https://pypi.org/pypi/<name>/json` answering for each.
+"""
+
+EXPECTED_RETIRED: dict[tuple[str, str], str] = {
+    ("bbt", "btclib-ecc"): "btclib-org/bbt#199",
+    ("bip39-slip39", "btclib-ecc"): "btclib-org/bip39-slip39#165",
+    ("bitcoin-node-tests", "btclib-ecc"): "btclib-org/bitcoin-node-tests#513",
+    ("btclib-benchmarks", "btclib-ecc"): "btclib-org/btclib-benchmarks#504",
+    ("btclib-node", "btclib-ecc"): "btclib-org/btclib-node#2041",
+    ("btclib-wallet", "btclib-ecc"): "btclib-org/btclib-wallet#537",
+}
+"""Each tree known to require a retired name, against what moves it.
+
+An entry goes the day its tree no longer requires the name, and the
+issue or pull request it cites is open until then: the tests below fail
+on either.
+"""
+
+
+def requirement_lists(document: dict[str, Any]) -> list[list[Any]]:
+    """Gather every list of requirements a parsed `pyproject.toml` holds.
+
+    :param document: the parsed file.
+    :returns: `dependencies`, each extra, each dependency group, and
+        `[build-system]`'s `requires`.
+    """
+    project = document.get("project", {})
+    return [
+        project.get("dependencies", []),
+        *project.get("optional-dependencies", {}).values(),
+        *document.get("dependency-groups", {}).values(),
+        document.get("build-system", {}).get("requires", []),
+    ]
+
+
+def on_retired(pyprojects: dict[str, dict[str, Any]]) -> set[tuple[str, str]]:
+    """Name every requirement, in any tree, on a retired name.
+
+    An `include-group` entry of a dependency group is a table and not a
+    requirement, and is passed over: the group it includes is read on
+    its own.
+
+    :param pyprojects: every tree's parsed file.
+    :returns: each repository and the retired name it requires.
+    """
+    found: set[tuple[str, str]] = set()
+    for repository, document in pyprojects.items():
+        for requirements in requirement_lists(document):
+            for requirement in requirements:
+                if not isinstance(requirement, str):
+                    continue
+                match = REQUIREMENT.match(requirement)
+                assert match, (
+                    f"{repository} requires {requirement!r}, which names nothing"
+                )
+                if normalized(match[1]) in RETIRED:
+                    found.add((repository, normalized(match[1])))
+    return found
+
+
+def test_a_retired_name_is_found_in_every_list_of_requirements() -> None:
+    """Each group of the file is read, and a name is compared normalized."""
+    document = pyproject(
+        "a",
+        dependencies=["BTClib_ECC>=1"],
+        extras={"x": ["btclib.mnemonics[y]"]},
+    )
+    document["dependency-groups"] = {
+        "test": [{"include-group": "lint"}, "btclib-libsecp256k1"],
+        "lint": ["ecc"],
+    }
+    document["build-system"] = {"requires": ["btclib-ecc"]}
+    assert on_retired({"a": document, "b": pyproject("b", dependencies=["ecc"])}) == {
+        ("a", "btclib-ecc"),
+        ("a", "btclib-mnemonics"),
+        ("a", "btclib-libsecp256k1"),
+    }
+
+
+@pytest.mark.integration
+def test_a_retired_name_is_no_tree_s_and_its_successor_is(
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """`RETIRED` names what the trees left, and the trees that carry it on.
+
+    :param pyprojects: every tree's parsed file.
+    """
+    names = {
+        normalized(d.get("project", {}).get("name", "")) for d in pyprojects.values()
+    }
+    assert not set(RETIRED) & names, (
+        f"a tree's own name is in RETIRED: {set(RETIRED) & names}"
+    )
+    gone = sorted(set(RETIRED.values()) - names)
+    assert not gone, f"RETIRED names successors no tree carries: {gone}"
+
+
+@pytest.mark.integration
+def test_every_requirement_on_a_retired_name_is_expected(
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """A tree requiring a retired name is in `EXPECTED_RETIRED`, and only then.
+
+    :param pyprojects: every tree's parsed file.
+    """
+    found = on_retired(pyprojects)
+    unexpected = sorted(found - set(EXPECTED_RETIRED))
+    moved = sorted(set(EXPECTED_RETIRED) - found)
+    assert not unexpected, (
+        f"requirements on a retired name EXPECTED_RETIRED does not list: {unexpected}."
+        " Each is filed in its tree, and its entry cites that issue"
+    )
+    assert not moved, (
+        f"EXPECTED_RETIRED lists requirements no tree has any more: {moved}."
+        " Their entries go"
+    )
+
+
+@pytest.mark.integration
+def test_every_expected_retired_name_cites_an_open_issue() -> None:
+    """An entry goes when what it cites closes, as in `EXPECTED_DRIFT`.
+
+    `verbatim_test.py`'s `PRECEDENT` is the control proving `still_open`
+    tells a closed issue from an open one.
+    """
+    stale = sorted(
+        {
+            reference
+            for reference in EXPECTED_RETIRED.values()
+            if not still_open(reference)
+        }
+    )
+    assert not stale, (
+        f"EXPECTED_RETIRED cites issues or pull requests that have closed: {stale}."
+        " Where the tree still requires the name, the entry cites what moves it now"
+    )
