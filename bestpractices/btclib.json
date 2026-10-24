@@ -36,7 +36,7 @@
     "status": "Met"
   },
   "OSPS-BR-01.04": {
-    "justification": "mutation.yml's profile is a choice from a fixed list. kernel-differential.yml's seed is free text: it reaches the shell only through env: and is passed to pytest as one quoted argument, so it cannot inject a command, and nothing else checks its value. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/btclib/blob/main/.github/workflows/kernel-differential.yml https://github.com/btclib-org/btclib/blob/main/.github/workflows/mutation.yml",
+    "justification": "mutation.yml's profile is a choice from a fixed list. verified-signatures.yml's before and after are read by the called workflow through env: and refused unless they are commit shas. kernel-differential.yml's seed is free text: it reaches the shell only through env: and is passed to pytest as one quoted argument, so it cannot inject a command, and nothing else checks its value. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/btclib/blob/main/.github/workflows/kernel-differential.yml https://github.com/btclib-org/btclib/blob/main/.github/workflows/mutation.yml",
     "status": "Met"
   },
   "OSPS-BR-02.01": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.16 shipped 24 of 52 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Unmet"
+    "justification": "v2026.10.17 shipped 7 of 10 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. That is 70%, above the 50% the criterion asks. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
   },
   "updateable_reused_components": {
     "justification": "Reused components are standard-library modules or PyPI packages pinned in uv.lock. Dependabot updates them weekly through pull requests that run the full suite. https://github.com/btclib-org/btclib/blob/main/.github/dependabot.yml",

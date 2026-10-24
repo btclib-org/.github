@@ -32,11 +32,11 @@
     "status": 0
   },
   "OSPS-BR-01.03": {
-    "justification": "Pull-request runs use the pull_request and pull_request_review_comment triggers, which give a fork no secrets and a read-only token. The review job, which holds a secret, runs only when the head repository is this one. The mention job holds a secret on any pull request's issue comment, and there checks out the default branch. It answers only users with write access, and its tools exclude Bash, edits, writes and file reads. https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-claude-review.yml",
+    "justification": "Pull-request runs use the pull_request and pull_request_review_comment triggers, which give a fork no secrets and a read-only token. The review job, which holds a secret, runs only when the head repository is this one. The mention job holds a secret on any pull request's issue comment, and there checks out the default branch. It answers only a comment whose author is an owner, a member or a collaborator, and its tools exclude Bash, edits, writes, file reads and every tool that runs code. https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-claude-review.yml",
     "status": "Met"
   },
   "OSPS-BR-01.04": {
-    "justification": "No workflow_dispatch takes an input. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/.github/workflows/release.yml",
+    "justification": "The only workflow_dispatch input is verified-signatures.yml's before and after, which the called workflow reads through env: and refuses unless they are commit shas. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/.github/workflows/release.yml",
     "status": "Met"
   },
   "OSPS-BR-02.01": {
@@ -316,7 +316,7 @@
     "status": "N/A"
   },
   "bus_factor": {
-    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review but has made no commit to this repository. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/bitcoin-core-rpc/graphs/contributors",
+    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review and has since made one commit, a lock bump on 2026-10-19. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/bitcoin-core-rpc/graphs/contributors",
     "status": "Unmet"
   },
   "code_of_conduct": {
@@ -344,7 +344,7 @@
     "status": "Met"
   },
   "contributors_unassociated": {
-    "justification": "fametrano is the only significant contributor. In the last year, outside contributors have made only small changes. pmazzocchi, an organization owner, has made no commit to this repository. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. giacomocaironi, also an organization owner, has made no commit to this repository. https://github.com/fametrano https://github.com/pmazzocchi",
+    "justification": "fametrano is the only significant contributor. In the last year, outside contributors have made only small changes. pmazzocchi, an organization owner, has made one commit, a lock bump on 2026-10-19; pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. giacomocaironi, also an organization owner, has made no commit to this repository. https://github.com/fametrano https://github.com/pmazzocchi",
     "status": "Unmet"
   },
   "copyright_per_file": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.8 shipped 0 of 12 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Unmet"
+    "justification": "v2026.10.23 shipped 8 of 16 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. That is 50%, the least the criterion asks. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
   },
   "updateable_reused_components": {
     "justification": "At run time the package reuses only the standard library. Its development tools are pinned in uv.lock and updated weekly by Dependabot. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/.github/dependabot.yml",

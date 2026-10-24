@@ -36,7 +36,7 @@
     "status": "Met"
   },
   "OSPS-BR-01.04": {
-    "justification": "No workflow_dispatch takes an input. A release tag's name reaches steps only through env:, and is checked against the package version before the release is built. https://github.com/btclib-org/btclib-secp256k1/blob/main/.github/workflows/release.yml",
+    "justification": "The only workflow_dispatch input is verified-signatures.yml's before and after, which the called workflow reads through env: and refuses unless they are commit shas. A release tag's name reaches steps only through env:, and is checked against the package version before the release is built. https://github.com/btclib-org/btclib-secp256k1/blob/main/.github/workflows/release.yml",
     "status": "Met"
   },
   "OSPS-BR-02.01": {
@@ -316,7 +316,7 @@
     "status": "Met"
   },
   "bus_factor": {
-    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review and has made only a small change. No person outside the owners has committed to this repository. giacomocaironi, also an organization owner, wrote early parts of the code but has made no commit since 2023. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/btclib-secp256k1/graphs/contributors",
+    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review and has since made four small changes. No person outside the owners has committed to this repository. giacomocaironi, also an organization owner, wrote early parts of the code but has made no commit since 2023. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/btclib-secp256k1/graphs/contributors",
     "status": "Unmet"
   },
   "code_of_conduct": {
@@ -344,7 +344,7 @@
     "status": "Met"
   },
   "contributors_unassociated": {
-    "justification": "fametrano is the only significant contributor. pmazzocchi has made only a small change. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. No person outside the owners has committed to this repository. giacomocaironi, also an organization owner, wrote early parts of the code but has made no commit since 2023. https://github.com/fametrano https://github.com/pmazzocchi",
+    "justification": "fametrano is the only significant contributor. pmazzocchi has made four small changes. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. No person outside the owners has committed to this repository. giacomocaironi, also an organization owner, wrote early parts of the code but has made no commit since 2023. https://github.com/fametrano https://github.com/pmazzocchi",
     "status": "Unmet"
   },
   "copyright_per_file": {
@@ -512,8 +512,8 @@
     "status": "Met"
   },
   "hardening": {
-    "justification": "ruff's bandit S rules and CodeQL check the Python source only. The 0.8.0.11 Linux wheels have no stack protector, no FORTIFY_SOURCE, no CET or BTI marking and no BIND_NOW. The macOS wheels have only the compiler defaults, and the Windows wheels have /GS but not CFG. No workflow checks a built wheel for these. https://github.com/btclib-org/btclib-secp256k1/issues/1194",
-    "status": "Unmet"
+    "justification": "The compiled wheels are built with hardening flags and read back for them. scripts/cffi_build.py builds a stack protector and FORTIFY_SOURCE on Linux and macOS; on Linux, immediate binding (-z now), a read-only relocation segment and, on x86_64 glibc, the CET marking; /GS and control flow guard on MSVC; ASLR, DEP and high entropy for the mingw-w64 DLL. test.yml runs .github/scripts/verify_wheel_contents.py over every built wheel and refuses one that lacks a property. The first release built so is v0.8.0.13. The CET and BTI marking is not asked of aarch64 and musllinux wheels, whose C runtime does not carry it. https://github.com/btclib-org/btclib-secp256k1/blob/main/docs/source/package-content-policy.md#what-the-compiled-file-has-to-be-built-with https://github.com/btclib-org/btclib-secp256k1/issues/1194",
+    "status": "Met"
   },
   "homepage_url": {
     "justification": null,
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v0.8.0.11 shipped 0 of 23 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "v0.8.0.13 shipped 9 of 25 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {
@@ -748,7 +748,7 @@
     "status": "Met"
   },
   "vulnerabilities_fixed_60_days": {
-    "justification": "Every published advisory names the release that fixes it, and no Dependabot alert is open. https://github.com/btclib-org/btclib-secp256k1/security/advisories",
+    "justification": "Every published advisory names the release that fixes it, and no Dependabot alert is open. Issues 1228, 1229 and 1231, labelled security, are hardening against a caller's programming error, not vulnerabilities, and v0.8.0.13 fixes them. https://github.com/btclib-org/btclib-secp256k1/security/advisories",
     "status": "Met"
   },
   "vulnerability_report_credit": {

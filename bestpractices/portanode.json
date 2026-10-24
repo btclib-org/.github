@@ -20,7 +20,7 @@
     "status": "Met"
   },
   "OSPS-AC-04.02": {
-    "justification": "Every workflow sets permissions: contents: read at the top. Only the claude-review job adds scopes, pull-requests: write and id-token: write, which it uses. zizmor's excessive-permissions audit runs in the required Lint check. https://github.com/btclib-org/portanode/blob/main/.github/workflows/claude-review.yml",
+    "justification": "Every workflow sets permissions: contents: read at the top. Four jobs add scopes: claude-review (pull-requests: write and id-token: write), codeql and scorecard (security-events: write, scorecard also id-token: write, both actions: read), and the test aggregate (actions: read, to read its own run's jobs). zizmor's excessive-permissions audit runs in the required Lint check. https://github.com/btclib-org/portanode/blob/main/.github/workflows/claude-review.yml",
     "status": "Met"
   },
   "OSPS-BR-01.01": {
@@ -84,11 +84,11 @@
     "status": "Met"
   },
   "OSPS-DO-03.01": {
-    "justification": "No document tells a user how to verify a release: RELEASING.md reads the tag's signature back through the API for the maintainer, and nothing explains git verify-tag or where the signing key is. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "justification": "VERIFYING.md tells a user how to check a release: import the maintainer's key from GitHub, compare its fingerprint, then run git verify-tag on a clone. It names a key revoked on 2026-10-19, so its commands do not exit 0 for v2026.10.17 (ISS 724); the answer stays Unmet until it is fixed. https://github.com/btclib-org/portanode/blob/main/VERIFYING.md",
     "status": "Unmet"
   },
   "OSPS-DO-03.02": {
-    "justification": "No document names the identity a release tag is expected to be signed by, such as the key fingerprint or the account. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "justification": "VERIFYING.md names the key a release tag is expected to be signed by, by fingerprint. The fingerprint is of a key revoked on 2026-10-19 (ISS 724); the answer stays Unmet until the file names the keys that sign now. https://github.com/btclib-org/portanode/blob/main/VERIFYING.md",
     "status": "Unmet"
   },
   "OSPS-DO-04.01": {
@@ -168,7 +168,7 @@
     "status": "N/A"
   },
   "OSPS-QA-03.01": {
-    "justification": "main requires the Lint, Dependency review and Sign-off checks. enforce_admins is off, so an admin merge without them is a manual bypass, which the control allows. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#what-gates-a-merge",
+    "justification": "main requires the Lint, Dependency review, Sign-off, Script security and test: every job passed checks. enforce_admins is off, so an admin merge without them is a manual bypass, which the control allows. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#what-gates-a-merge",
     "status": "Met"
   },
   "OSPS-QA-04.01": {
@@ -188,16 +188,16 @@
     "status": "Met"
   },
   "OSPS-QA-06.01": {
-    "justification": "The tree has no automated test suite: lint.yml runs the pre-commit hooks and nothing runs a launcher. CONTRIBUTING.md says a launcher is tested by running it by hand on macOS, Windows and Linux. The required checks are lint, dependency review and sign-off. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
-    "status": "Unmet"
+    "justification": "The tree has an automated test suite under tests/. test.yml runs tests/run.sh and the PowerShell tests that start no cmd.exe on Ubuntu, on every pull request and every push to main; its aggregate job `test: every job passed` is a required check. The macOS and Windows halves run by hand before a release. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Met"
   },
   "OSPS-QA-06.02": {
-    "justification": "CONTRIBUTING.md's The environment and the gates gives the command that runs the gates, says lint.yml runs it on every pull request, and says the launchers are tested by hand on each platform, from a volume that is not the boot disk. lint.yml also runs on every push to main. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "justification": "CONTRIBUTING.md's The environment and the gates gives the command that runs the gates and the command that runs the suite, says lint.yml and test.yml run them on every pull request, and says the macOS and Windows halves of the suite are run by hand. lint.yml also runs on every push to main. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
     "status": "Met"
   },
   "OSPS-QA-06.03": {
-    "justification": "No document asks a change to add or update tests in an automated suite, and the tree has none. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
-    "status": "Unmet"
+    "justification": "CONTRIBUTING.md says a major change adds or updates tests: one that gives a launcher or a helper a new behaviour, or corrects one. tests/README.md says how a test is added. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Met"
   },
   "OSPS-QA-07.01": {
     "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author, but the maintainer bypasses it in pull_request mode and can merge without one. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
@@ -208,16 +208,16 @@
     "status": "Met"
   },
   "OSPS-SA-02.01": {
-    "justification": "README.md and each scripts directory's README.md document the interface: every launcher and its menu, the PORTANODE_ROOT, PORTANODE_ALLOW_UNVERIFIED and PORTANODE_NO_NOTIFY variables, the pin files and the exit statuses of set-permissions. https://github.com/btclib-org/portanode/blob/main/README.md",
+    "justification": "README.md and each scripts directory's README.md document the interface: every launcher and its menu, the PORTANODE_ROOT and PORTANODE_NO_NOTIFY variables, the pin files and the exit statuses of set-permissions. https://github.com/btclib-org/portanode/blob/main/README.md",
     "status": "Met"
   },
   "OSPS-SA-03.01": {
-    "justification": "README.md's Limitations, not vulnerabilities assesses the known risks of running the folder: the user's keyring as the trust root, the switch that installs unverified binaries, checksums that give integrity and not authenticity, an unencrypted portable folder, Bitcoin Core's exFAT warning, and unsigned launchers. https://github.com/btclib-org/portanode/blob/main/README.md#limitations-not-vulnerabilities",
+    "justification": "README.md's Limitations, not vulnerabilities assesses the known risks of running the folder: the user's keyring as the trust root, checksums that give integrity and not authenticity, an unencrypted portable folder, Bitcoin Core's exFAT warning, and unsigned launchers; ASSURANCE_CASE.md assesses the threats and the weaknesses. https://github.com/btclib-org/portanode/blob/main/README.md#limitations-not-vulnerabilities https://github.com/btclib-org/portanode/blob/main/ASSURANCE_CASE.md",
     "status": "Met"
   },
   "OSPS-SA-03.02": {
-    "justification": "No threat model or attack-surface analysis exists. README.md's Limitations, not vulnerabilities lists known risks, but no document models the adversaries, the entry points or the trust boundaries. https://github.com/btclib-org/portanode/blob/main/README.md#limitations-not-vulnerabilities",
-    "status": "Unmet"
+    "justification": "ASSURANCE_CASE.md's Threat model names what is defended, the adversaries and what is not defended; its Entry points and Trust boundaries map where untrusted input enters. https://github.com/btclib-org/portanode/blob/main/ASSURANCE_CASE.md",
+    "status": "Met"
   },
   "OSPS-VM-01.01": {
     "justification": "The security policy's Reporting a vulnerability gives the private channels and the timeframes: a report is acknowledged within 7 days, and a fix or a published advisory follows within 90 days. https://github.com/btclib-org/portanode/security/policy",
@@ -244,8 +244,8 @@
     "status": "Met"
   },
   "OSPS-VM-05.02": {
-    "justification": "RELEASING.md's steps gate the tree with pre-commit only. No step checks Dependabot alerts or another SCA result before the tag is cut. https://github.com/btclib-org/portanode/blob/main/RELEASING.md#cutting-one",
-    "status": "Unmet"
+    "justification": "RELEASING.md's Cutting one reads the open Dependabot and code-scanning alerts and stops while any is open, with a command that exits 0 only where there is none and both calls answered. https://github.com/btclib-org/portanode/blob/main/RELEASING.md#cutting-one",
+    "status": "Met"
   },
   "OSPS-VM-05.03": {
     "justification": "The required Dependency review check runs on every pull request and blocks a change that adds a dependency with an advisory of moderate severity or above, or a licence outside the allow-list. The only dependencies it can see are the pinned actions. https://github.com/btclib-org/portanode/blob/main/.github/workflows/lint.yml",
@@ -256,8 +256,8 @@
     "status": "Met"
   },
   "OSPS-VM-06.02": {
-    "justification": "The required Lint check runs shellcheck on the .sh and .command scripts, zizmor and actionlint on the workflows, and detect-secrets on every file. No security analysis is run on the .bat and .ps1 scripts: Blinter and PSScriptAnalyzer are run by hand. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
-    "status": "Unmet"
+    "justification": "The required Lint check runs shellcheck on the .sh and .command scripts, zizmor and actionlint on the workflows, and detect-secrets on every file; the required Script security check runs PSScriptAnalyzer's security rules on the .ps1 scripts and Blinter's Error and Security rules on the .bat scripts, and CodeQL runs over the workflow files. https://github.com/btclib-org/portanode/blob/main/.github/workflows/script-security.yml",
+    "status": "Met"
   },
   "access_continuity": {
     "justification": "The organization has three owners, fametrano, giacomocaironi and pmazzocchi, each an administrator of this repository. If one becomes unavailable, the other two can still close issues, merge changes and cut a release. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity",
@@ -276,12 +276,12 @@
     "status": "Unmet"
   },
   "assurance_case": {
-    "justification": "No assurance case exists: no document argues that the security requirements are met, and there is no threat model, trust-boundary analysis or argument against common weaknesses. https://github.com/btclib-org/portanode/blob/main/README.md#limitations-not-vulnerabilities",
-    "status": "Unmet"
+    "justification": "ASSURANCE_CASE.md gives what is claimed, the threat model, the entry points, the trust boundaries, the secure design principles and the common implementation weaknesses with what counters each. https://github.com/btclib-org/portanode/blob/main/ASSURANCE_CASE.md",
+    "status": "Met"
   },
   "automated_integration_testing": {
-    "justification": "No automated test suite runs on a check-in; lint.yml runs only the lint hooks. https://github.com/btclib-org/portanode/blob/main/.github/workflows/lint.yml",
-    "status": "Unmet"
+    "justification": "test.yml runs tests/run.sh and the PowerShell tests that start no cmd.exe on Ubuntu, on every pull request and every push to main; its aggregate job `test: every job passed` is a required check. The macOS and Windows halves run by hand before a release. https://github.com/btclib-org/portanode/blob/main/.github/workflows/test.yml",
+    "status": "Met"
   },
   "build": {
     "justification": "Nothing is built: the launchers are scripts run as they are, and the binaries they start are the publishers' own. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
@@ -316,7 +316,7 @@
     "status": "N/A"
   },
   "bus_factor": {
-    "justification": "fametrano made every human commit and filed every issue. Knowledge of the code rests on him alone. https://github.com/btclib-org/portanode/graphs/contributors",
+    "justification": "fametrano made most of the commits and filed almost every issue. pmazzocchi, an organization owner, has made 16 commits and filed 11 issues since 2026-10-17. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/portanode/graphs/contributors",
     "status": "Unmet"
   },
   "code_of_conduct": {
@@ -344,7 +344,7 @@
     "status": "Met"
   },
   "contributors_unassociated": {
-    "justification": "fametrano is the only significant contributor; the other committers are Dependabot and pre-commit.ci. https://github.com/btclib-org/portanode/graphs/contributors",
+    "justification": "fametrano is the only significant contributor; pmazzocchi, an organization owner, has made 16 commits and filed 11 issues, and is associated with fametrano: both are CheckSig co-founders, as their GitHub profiles state. The other committers are Dependabot and pre-commit.ci. https://github.com/fametrano https://github.com/pmazzocchi",
     "status": "Unmet"
   },
   "copyright_per_file": {
@@ -396,7 +396,7 @@
     "status": "?"
   },
   "crypto_used_network": {
-    "justification": "Every download URL is HTTPS, and the Electrum local-server launcher connects over TLS. curl follows redirects with -L and does not restrict them to HTTPS. https://github.com/btclib-org/portanode/blob/main/linux/scripts/utilities/update-bitcoin.sh",
+    "justification": "Every download URL is HTTPS, and the Electrum local-server launcher connects over TLS. On macOS and Linux curl is called through curl_https, which restricts the protocol and every redirect to HTTPS. Whether the Windows updaters' Invoke-WebRequest calls follow a redirect to plain HTTP is not known (ISS 695). https://github.com/btclib-org/portanode/blob/main/shared/utilities/lib.sh",
     "status": "Unmet"
   },
   "crypto_verification_private": {
@@ -436,11 +436,11 @@
     "status": "Met"
   },
   "documentation_achievements": {
-    "justification": "README.md carries no Best Practices or Baseline badge yet. https://github.com/btclib-org/portanode/blob/main/README.md",
-    "status": "Unmet"
+    "justification": "README.md links the OpenSSF Scorecard, Best Practices and Baseline badges on the lines the organization standard reserves for them. https://github.com/btclib-org/portanode/blob/main/README.md",
+    "status": "Met"
   },
   "documentation_architecture": {
-    "justification": "README.md's Folder Structure inventories macos/, win/, linux/, bitcoin-datadir/ and electrum-datadir/, and Detailed Setup and Updating Binaries describe how launchers and updaters install. ASSURANCE_CASE.md's Secure Design Principles describes the shared macOS/Linux libraries and the distinct Windows implementation; README.md's Updating Binaries documents the keys/*.fingerprints pins and fail-closed behavior. https://github.com/btclib-org/portanode/blob/main/README.md#folder-structure https://github.com/btclib-org/portanode/blob/main/README.md#detailed-setup https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries https://github.com/btclib-org/portanode/blob/main/ASSURANCE_CASE.md#secure-design-principles",
+    "justification": "README.md's Folder Structure and Launcher Notes describe the root launchers, the per-platform menus and scripts, the bin/ directories and the data directories, and how a launcher reaches each. ASSURANCE_CASE.md's Entry points and Secure design principles describe the shared library under shared/ and the pin files under keys/. https://github.com/btclib-org/portanode/blob/main/README.md#folder-structure https://github.com/btclib-org/portanode/blob/main/ASSURANCE_CASE.md#entry-points",
     "status": "Met"
   },
   "documentation_basics": {
@@ -616,7 +616,7 @@
     "status": "Met"
   },
   "report_responses": {
-    "justification": "On 2026-10-18, 329 of the 340 issues filed were closed. The maintainer filed every one of them. https://github.com/btclib-org/portanode/issues?q=is%3Aissue%20state%3Aclosed",
+    "justification": "On 2026-10-23, 363 of the 383 issues filed were closed. The maintainer filed all but 11, which pmazzocchi filed between 2026-10-18 and 2026-10-20: 5 of them were closed by 2026-10-19, and the 6 open ones carry labels. https://github.com/btclib-org/portanode/issues?q=is%3Aissue%20state%3Aclosed",
     "status": "Met"
   },
   "report_tracker": {
@@ -644,7 +644,7 @@
     "status": "Unmet"
   },
   "signed_releases": {
-    "justification": "Each release tag is signed, but no document tells a user how to get the signing key and verify a release. https://github.com/btclib-org/portanode/blob/main/RELEASING.md",
+    "justification": "Each release tag is signed, and VERIFYING.md tells a user how to get the signing key and verify a release. The key it names was revoked on 2026-10-19 (ISS 724), so the answer stays Unmet until it is fixed. https://github.com/btclib-org/portanode/blob/main/VERIFYING.md",
     "status": "Unmet"
   },
   "sites_https": {
@@ -664,11 +664,11 @@
     "status": "Met"
   },
   "static_analysis_common_vulnerabilities": {
-    "justification": "shellcheck flags unquoted expansions and the injection and globbing errors they allow. zizmor audits the workflows for template injection and excessive permissions. Blinter's security rules are run by hand on the .bat scripts. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "justification": "shellcheck flags unquoted expansions and the injection and globbing errors they allow. zizmor audits the workflows for template injection and excessive permissions, and CodeQL runs over the workflow files. The required Script security check runs the security rules of PSScriptAnalyzer on the .ps1 scripts and of Blinter on the .bat scripts. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
     "status": "Met"
   },
   "static_analysis_fixed": {
-    "justification": "No vulnerability found by static analysis is open: shellcheck, zizmor and actionlint findings fail the required Lint check, and code scanning has no open alert. https://github.com/btclib-org/portanode/blob/main/.github/workflows/lint.yml",
+    "justification": "No vulnerability found by static analysis is open: shellcheck, zizmor and actionlint findings and the Script security check fail the merge, and CodeQL has no open alert. Code scanning shows one open OpenSSF Scorecard alert, SAST (alert 3, being closed by ISS 719). https://github.com/btclib-org/portanode/blob/main/.github/workflows/lint.yml",
     "status": "Met"
   },
   "static_analysis_often": {
@@ -676,32 +676,32 @@
     "status": "Met"
   },
   "test": {
-    "justification": "The tree has no automated test suite: lint.yml runs the pre-commit hooks and nothing runs a launcher. CONTRIBUTING.md says a launcher is tested by running it by hand on macOS, Windows and Linux. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
-    "status": "Unmet"
+    "justification": "tests/run.sh and tests/run.ps1 run the suite; the cases are published in the repository as FLOSS. test.yml runs tests/run.sh and the PowerShell tests that start no cmd.exe on Ubuntu, on every pull request and every push to main; its aggregate job `test: every job passed` is a required check. The macOS and Windows halves run by hand before a release. https://github.com/btclib-org/portanode/blob/main/tests/README.md",
+    "status": "Met"
   },
   "test_branch_coverage80": {
     "justification": "There is no automated test suite, so no coverage. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
     "status": "Unmet"
   },
   "test_continuous_integration": {
-    "justification": "lint.yml runs the lint hooks on every pull request and every push to main, but no automated test. https://github.com/btclib-org/portanode/blob/main/.github/workflows/lint.yml",
-    "status": "Unmet"
+    "justification": "test.yml runs tests/run.sh and the PowerShell tests that start no cmd.exe on Ubuntu, on every pull request and every push to main; its aggregate job `test: every job passed` is a required check. The macOS and Windows halves run by hand before a release. https://github.com/btclib-org/portanode/blob/main/.github/workflows/test.yml",
+    "status": "Met"
   },
   "test_invocation": {
-    "justification": "There is no test suite to invoke. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
-    "status": "Unmet"
+    "justification": "The suite is invoked in one command per platform: `bash tests/run.sh` on macOS and Linux, `pwsh -NoProfile -File tests\\run.ps1` on Windows. https://github.com/btclib-org/portanode/blob/main/tests/README.md",
+    "status": "Met"
   },
   "test_most": {
     "justification": "There is no automated test suite. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
     "status": "Unmet"
   },
   "test_policy": {
-    "justification": "No policy asks new functionality to come with automated tests, and the tree has no suite. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
-    "status": "Unmet"
+    "justification": "CONTRIBUTING.md says a major change adds or updates tests: one that gives a launcher or a helper a new behaviour, or corrects one. tests/README.md says how a test is added. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Met"
   },
   "test_policy_mandated": {
-    "justification": "No written policy asks new functionality to come with automated tests. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
-    "status": "Unmet"
+    "justification": "CONTRIBUTING.md says a major change adds or updates tests: one that gives a launcher or a helper a new behaviour, or corrects one. tests/README.md says how a test is added. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
+    "status": "Met"
   },
   "test_statement_coverage80": {
     "justification": "There is no automated test suite, so no coverage. FLOSS coverage tools exist for bash, such as kcov. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
@@ -712,15 +712,15 @@
     "status": "Unmet"
   },
   "tests_are_added": {
-    "justification": "No tests are added: the tree has no automated test suite. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
-    "status": "Unmet"
+    "justification": "Recent changes to a launcher or a helper add tests: pull request 717 (updaters on malformed downloads) changes two test files, 721 one, 701 added the suite. https://github.com/btclib-org/portanode/pulls?q=is%3Apr+is%3Amerged",
+    "status": "Met"
   },
   "tests_documented_added": {
-    "justification": "CONTRIBUTING.md has no policy on adding tests. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
-    "status": "Unmet"
+    "justification": "CONTRIBUTING.md says a major change adds or updates tests: one that gives a launcher or a helper a new behaviour, or corrects one. tests/README.md says how a test is added. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md",
+    "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.17 shipped 86 pull requests, 5 of them approved by a person other than the author. The maintainer merges through the bypass. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
+    "justification": "v2026.10.17 shipped 86 pull requests, 8 of them approved by somebody other than the author and other than fametrano. The maintainer merges through the bypass, which main-self-merge keeps in pull_request mode. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {
@@ -736,7 +736,7 @@
     "status": "Met"
   },
   "version_tags_signed": {
-    "justification": "Every release tag is signed, and GitHub verifies each, but no document tells a user how to verify one, as signed_releases asks. https://github.com/btclib-org/portanode/tags",
+    "justification": "Every release tag is signed, and GitHub verifies each. VERIFYING.md tells a user how to verify one, with a key revoked on 2026-10-19 (ISS 724); the answer stays Unmet until it is fixed. https://github.com/btclib-org/portanode/tags",
     "status": "Unmet"
   },
   "version_unique": {
@@ -772,15 +772,15 @@
     "status": "Met"
   },
   "warnings": {
-    "justification": "shellcheck reads every .sh and .command script in the required Lint check. Blinter and PSScriptAnalyzer are run by hand on the .bat and .ps1 scripts. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "justification": "shellcheck reads every .sh and .command script in the required Lint check. The required Script security check runs the security rules of Blinter and PSScriptAnalyzer on the .bat and .ps1 scripts; their other rules are run by hand. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
     "status": "Met"
   },
   "warnings_fixed": {
-    "justification": "shellcheck findings fail the required Lint check, so none is open on the .sh and .command scripts. Blinter, run by hand on the .bat scripts, reports warnings that are not addressed; only its Error and Security findings are reviewed, as false positives, in .pre-commit-config.yaml's header. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "justification": "shellcheck findings fail the required Lint check, so none is open on the .sh and .command scripts. The required Script security check fails on a Blinter Error or Security finding or a PSScriptAnalyzer security finding outside its baseline. Blinter's other warnings on the .bat scripts are not addressed. https://github.com/btclib-org/portanode/blob/main/.github/workflows/script-security.yml",
     "status": "Unmet"
   },
   "warnings_strict": {
-    "justification": "shellcheck runs at its default severity with none of its optional checks enabled. Blinter and PSScriptAnalyzer are run by hand, not in a gate. https://github.com/btclib-org/portanode/blob/main/.pre-commit-config.yaml",
+    "justification": "shellcheck runs at its default severity with none of its optional checks enabled. Blinter's Error and Security rules and PSScriptAnalyzer's security rules run in the required Script security check; their other rules are run by hand. https://github.com/btclib-org/portanode/blob/main/.github/workflows/script-security.yml",
     "status": "Unmet"
   }
 }
