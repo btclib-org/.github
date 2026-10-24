@@ -204,7 +204,7 @@
     "status": "Met"
   },
   "OSPS-SA-01.01": {
-    "justification": "CLAUDE.md's Architecture gives the package's modules, their layers bottom-up and what each may import. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversary, and what each can do. https://github.com/btclib-org/bip39-slip39/blob/main/CLAUDE.md#architecture https://github.com/btclib-org/bip39-slip39/blob/main/ASSURANCE_CASE.md#trust-boundaries",
+    "justification": "ARCHITECTURE.md gives the package's modules, their layers bottom-up and what each may import. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversary, and what each can do. https://github.com/btclib-org/bip39-slip39/blob/main/ARCHITECTURE.md https://github.com/btclib-org/bip39-slip39/blob/main/ASSURANCE_CASE.md#trust-boundaries",
     "status": "Met"
   },
   "OSPS-SA-02.01": {
@@ -440,7 +440,7 @@
     "status": "Met"
   },
   "documentation_architecture": {
-    "justification": "CLAUDE.md's Architecture gives the layers bottom-up (exceptions and _utils, entropy and mnemonic, the schemes bip39, electrum and slip39, none importing another, and dispatch), and states that the package imports only the standard library and stops at the seed. https://github.com/btclib-org/bip39-slip39/blob/main/CLAUDE.md#architecture",
+    "justification": "ARCHITECTURE.md gives the layers bottom-up: exceptions and _utils, entropy and mnemonic, the schemes bip39, electrum and slip39, none importing another, and dispatch. README.md says the package imports nothing but the standard library, and its What is here maps each scheme to its module. https://github.com/btclib-org/bip39-slip39/blob/main/ARCHITECTURE.md https://github.com/btclib-org/bip39-slip39/blob/main/README.md#what-is-here",
     "status": "Met"
   },
   "documentation_basics": {
