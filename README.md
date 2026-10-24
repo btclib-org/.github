@@ -588,11 +588,11 @@ read and understood by the person who submits it.
 ```
 
 A newcomer reads the `README.md` first, and may never open
-`CONTRIBUTING.md`. The words are the same everywhere, so
-`tests/contributing_test.py` compares them with the line breaks
-ignored; a paragraph each tree words for itself is what no test can
-read. `profile/README.md` carries it too, with the link absolute: the
-organization's page resolves a relative link against `profile/`.
+`CONTRIBUTING.md`. The words are the same everywhere, so a test may read
+them despite the preamble: the text is fixed, compared as a string, and
+nothing in it is interpreted. `profile/README.md` carries it too, with
+the link absolute: the organization's page resolves a relative link
+against `profile/`.
 
 Dotfiles, each owed by the tiers that owe the section reading it:
 `.pre-commit-config.yaml`, `.python-version`, `.gitignore`,
