@@ -926,7 +926,6 @@ EXPECTED_RETIRED: dict[tuple[str, str], str] = {
     ("bitcoin-node-tests", "btclib-ecc"): "btclib-org/bitcoin-node-tests#513",
     ("btclib-benchmarks", "btclib-ecc"): "btclib-org/btclib-benchmarks#504",
     ("btclib-node", "btclib-ecc"): "btclib-org/btclib-node#2041",
-    ("btclib-wallet", "btclib-ecc"): "btclib-org/btclib-wallet#537",
 }
 """Each tree known to require a retired name, against what moves it.
 
