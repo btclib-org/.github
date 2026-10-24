@@ -24,7 +24,7 @@
     "status": "Met"
   },
   "OSPS-BR-01.01": {
-    "justification": "No workflow uses pull_request_target or workflow_run. Event fields and inputs reach run: steps only through env:, and zizmor's template-injection audit in the required lint check refuses the unsafe form. https://github.com/btclib-org/btclib-mnemonics/blob/main/.pre-commit-config.yaml",
+    "justification": "No workflow uses pull_request_target or workflow_run. Event fields and inputs reach run: steps only through env:, and zizmor's template-injection audit in the required lint check refuses the unsafe form. https://github.com/btclib-org/bip39-slip39/blob/main/.pre-commit-config.yaml",
     "status": "Met"
   },
   "OSPS-BR-01.02": {
@@ -36,27 +36,27 @@
     "status": "Met"
   },
   "OSPS-BR-01.04": {
-    "justification": "The only workflow_dispatch input is mutation.yml's profile, a choice from a fixed list. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/mutation.yml",
+    "justification": "The only workflow_dispatch input is mutation.yml's profile, a choice from a fixed list. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/mutation.yml",
     "status": "Met"
   },
   "OSPS-BR-02.01": {
-    "justification": "Each release has a unique calendar version (YYYY.M.D), set by a signed v* tag. release.yml refuses a tag that disagrees with the package version or is not on main, and PyPI never accepts a version twice. https://github.com/btclib-org/btclib-mnemonics/releases",
+    "justification": "Each release has a unique calendar version (YYYY.M.D), set by a signed v* tag. release.yml refuses a tag that disagrees with the package version or is not on main, and PyPI never accepts a version twice. https://github.com/btclib-org/bip39-slip39/releases",
     "status": "Met"
   },
   "OSPS-BR-02.02": {
-    "justification": "Every release asset carries the version in its file name: the sdist, the wheel, the CycloneDX SBOM and the attestation bundle. The attestation binds each asset to its digest. https://github.com/btclib-org/btclib-mnemonics/releases/latest",
+    "justification": "Every release asset carries the version in its file name: the sdist, the wheel, the CycloneDX SBOM and the attestation bundle. The attestation binds each asset to its digest. https://github.com/btclib-org/bip39-slip39/releases/latest",
     "status": "Met"
   },
   "OSPS-BR-03.01": {
-    "justification": "Every official channel the project lists is served over HTTPS only: the GitHub repository, its issue tracker and advisories, and the documentation at https://btclib-mnemonics.readthedocs.io/.",
+    "justification": "Every official channel the project lists is served over HTTPS only: the GitHub repository, its issue tracker and advisories, and the documentation at https://bip39-slip39.readthedocs.io/.",
     "status": "Met"
   },
   "OSPS-BR-03.02": {
-    "justification": "Releases are distributed through PyPI and GitHub Releases, both HTTPS only. PyPI files carry PEP 740 attestations and the GitHub release a Sigstore bundle. https://pypi.org/project/btclib-mnemonics/",
+    "justification": "Releases are distributed through PyPI and GitHub Releases, both HTTPS only. PyPI files carry PEP 740 attestations and the GitHub release a Sigstore bundle. https://pypi.org/project/bip39-slip39/",
     "status": "Met"
   },
   "OSPS-BR-04.01": {
-    "justification": "The GitHub release body is RELEASE_NOTES.md's entry: what a user must act on, breaking and security changes included. CHANGELOG.md lists every change. https://github.com/btclib-org/btclib-mnemonics/blob/main/RELEASE_NOTES.md",
+    "justification": "The GitHub release body is RELEASE_NOTES.md's entry: what a user must act on, breaking and security changes included. CHANGELOG.md lists every change. https://github.com/btclib-org/bip39-slip39/blob/main/RELEASE_NOTES.md",
     "status": "Met"
   },
   "OSPS-BR-05.01": {
@@ -64,11 +64,11 @@
     "status": "Met"
   },
   "OSPS-BR-06.01": {
-    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing. The GitHub release carries a Sigstore build-provenance bundle over each asset's SHA-256. The tag is signed. https://github.com/btclib-org/btclib-mnemonics/releases/latest",
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing. The GitHub release carries a Sigstore build-provenance bundle over each asset's SHA-256. The tag is signed. https://github.com/btclib-org/bip39-slip39/releases/latest",
     "status": "Met"
   },
   "OSPS-BR-07.01": {
-    "justification": "Secret scanning and push protection are on, so a push carrying a recognised credential is refused. The detect-private-key and detect-secrets hooks run in the required lint check. https://github.com/btclib-org/btclib-mnemonics/blob/main/.secrets.baseline",
+    "justification": "Secret scanning and push protection are on, so a push carrying a recognised credential is refused. The detect-private-key and detect-secrets hooks run in the required lint check. https://github.com/btclib-org/bip39-slip39/blob/main/.secrets.baseline",
     "status": "Met"
   },
   "OSPS-BR-07.02": {
@@ -76,27 +76,27 @@
     "status": "Met"
   },
   "OSPS-DO-01.01": {
-    "justification": "The user documentation is README.md's *A seed from a mnemonic, and a secret split into shares*, whose Python blocks tests/readme_test.py runs, and the API reference on Read the Docs. https://github.com/btclib-org/btclib-mnemonics/blob/main/README.md#a-seed-from-a-mnemonic-and-a-secret-split-into-shares https://btclib-mnemonics.readthedocs.io/",
+    "justification": "The user documentation is README.md's *A seed from a mnemonic, and a secret split into shares*, whose Python blocks tests/readme_test.py runs, and the API reference on Read the Docs. https://github.com/btclib-org/bip39-slip39/blob/main/README.md#a-seed-from-a-mnemonic-and-a-secret-split-into-shares https://bip39-slip39.readthedocs.io/",
     "status": "Met"
   },
   "OSPS-DO-02.01": {
-    "justification": "CONTRIBUTING.md says where a defect is filed, and the bug-report form asks for what a report needs. SECURITY.md sends a vulnerability to a private channel instead. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/ISSUE_TEMPLATE/bug_report.yml",
+    "justification": "CONTRIBUTING.md says where a defect is filed, and the bug-report form asks for what a report needs. SECURITY.md sends a vulnerability to a private channel instead. https://github.com/btclib-org/bip39-slip39/blob/main/.github/ISSUE_TEMPLATE/bug_report.yml",
     "status": "Met"
   },
   "OSPS-DO-03.01": {
-    "justification": "SECURITY.md gives the gh attestation verify command for the release assets, and RELEASING.md the check that rebuilds the sdist from its tag. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md",
+    "justification": "SECURITY.md gives the gh attestation verify command for the release assets, and RELEASING.md the check that rebuilds the sdist from its tag. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "The verify command pins the signer: --repo names this repository, --signer-workflow the organization's reusable-build.yml (reusable-attest.yml for earlier releases) and --source-ref the release tag. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md",
+    "justification": "The verify command pins the signer: --repo names this repository, --signer-workflow the organization's reusable-build.yml (reusable-attest.yml for earlier releases) and --source-ref the release tag. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-04.01": {
-    "justification": "SECURITY.md's *Supported versions*: only the latest release is supported, a fix ships as a new release, and nothing is backported. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md",
+    "justification": "SECURITY.md's *Supported versions*: only the latest release is supported, a fix ships as a new release, and nothing is backported. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-05.01": {
-    "justification": "SECURITY.md: only the latest release is supported, so a release stops receiving security updates when the next one is published. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md",
+    "justification": "SECURITY.md: only the latest release is supported, so a release stops receiving security updates when the next one is published. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-06.01": {
@@ -104,7 +104,7 @@
     "status": "Met"
   },
   "OSPS-DO-07.01": {
-    "justification": "CONTRIBUTING.md gives the build: uv is the only prerequisite, uv sync builds the environment from uv.lock, and uv build produces the sdist and wheel. https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md gives the build: uv is the only prerequisite, uv sync builds the environment from uv.lock, and uv build produces the sdist and wheel. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "OSPS-GV-01.01": {
@@ -116,15 +116,15 @@
     "status": "Met"
   },
   "OSPS-GV-02.01": {
-    "justification": "Proposed changes and usage obstacles are discussed publicly in the repository's GitHub issues (with a question form) and pull requests; cross-repository questions go to btclib-org/.github's tracker. https://github.com/btclib-org/btclib-mnemonics/issues",
+    "justification": "Proposed changes and usage obstacles are discussed publicly in the repository's GitHub issues (with a question form) and pull requests; cross-repository questions go to btclib-org/.github's tracker. https://github.com/btclib-org/bip39-slip39/issues",
     "status": "Met"
   },
   "OSPS-GV-03.01": {
-    "justification": "CONTRIBUTING.md explains the contribution process: one subject per pull request, the local gates, the review and the landing. https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md explains the contribution process: one subject per pull request, the local gates, the review and the landing. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "OSPS-GV-03.02": {
-    "justification": "CONTRIBUTING.md states what a contribution must meet: one subject, a Signed-off-by trailer on every commit, the gates CI runs, 100% line and branch coverage, and a review against REVIEWING.md. https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md states what a contribution must meet: one subject, a Signed-off-by trailer on every commit, the gates CI runs, 100% line and branch coverage, and a review against REVIEWING.md. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "OSPS-GV-04.01": {
@@ -136,35 +136,35 @@
     "status": "Met"
   },
   "OSPS-LE-02.01": {
-    "justification": "The source code is under the MIT license, which the OSI approves. https://github.com/btclib-org/btclib-mnemonics/blob/main/LICENSE",
+    "justification": "The source code is under the MIT license, which the OSI approves. https://github.com/btclib-org/bip39-slip39/blob/main/LICENSE",
     "status": "Met"
   },
   "OSPS-LE-02.02": {
-    "justification": "The released wheels and sdist declare License-Expression: MIT, the same OSI-approved license as the source. https://pypi.org/project/btclib-mnemonics/",
+    "justification": "The released wheels and sdist declare License-Expression: MIT, the same OSI-approved license as the source. https://pypi.org/project/bip39-slip39/",
     "status": "Met"
   },
   "OSPS-LE-03.01": {
-    "justification": "The license text is the repository's root LICENSE file. https://github.com/btclib-org/btclib-mnemonics/blob/main/LICENSE",
+    "justification": "The license text is the repository's root LICENSE file. https://github.com/btclib-org/bip39-slip39/blob/main/LICENSE",
     "status": "Met"
   },
   "OSPS-LE-03.02": {
-    "justification": "The LICENSE file ships inside every release asset: the sdist root and the wheel's .dist-info/licenses/. https://github.com/btclib-org/btclib-mnemonics/blob/main/LICENSE",
+    "justification": "The LICENSE file ships inside every release asset: the sdist root and the wheel's .dist-info/licenses/. https://github.com/btclib-org/bip39-slip39/blob/main/LICENSE",
     "status": "Met"
   },
   "OSPS-QA-01.01": {
-    "justification": "The repository is public on GitHub at a static URL. https://github.com/btclib-org/btclib-mnemonics",
+    "justification": "The repository is public on GitHub at a static URL. https://github.com/btclib-org/bip39-slip39",
     "status": "Met"
   },
   "OSPS-QA-01.02": {
-    "justification": "Git history on GitHub records every change with its author, committer, date and signature; linear history and no force-pushes on main keep that record from being rewritten. https://github.com/btclib-org/btclib-mnemonics/commits/main",
+    "justification": "Git history on GitHub records every change with its author, committer, date and signature; linear history and no force-pushes on main keep that record from being rewritten. https://github.com/btclib-org/bip39-slip39/commits/main",
     "status": "Met"
   },
   "OSPS-QA-02.01": {
-    "justification": "pyproject.toml declares the direct dependencies, none at run time and the development tools in dependency groups, and the committed uv.lock pins them. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "pyproject.toml declares the direct dependencies, none at run time and the development tools in dependency groups, and the committed uv.lock pins them. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "Met"
   },
   "OSPS-QA-02.02": {
-    "justification": "The release is pure Python. Every GitHub release attaches a CycloneDX SBOM, generated from the built wheel and covered by the release attestation. https://github.com/btclib-org/btclib-mnemonics/releases/latest",
+    "justification": "The release is pure Python. Every GitHub release attaches a CycloneDX SBOM, generated from the built wheel and covered by the release attestation. https://github.com/btclib-org/bip39-slip39/releases/latest",
     "status": "Met"
   },
   "OSPS-QA-03.01": {
@@ -188,15 +188,15 @@
     "status": "Met"
   },
   "OSPS-QA-06.01": {
-    "justification": "test.yml's aggregate check ('test: every job passed') runs the test suite on every pull request and is a required status check on main. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml's aggregate check ('test: every job passed') runs the test suite on every pull request and is a required status check on main. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "OSPS-QA-06.02": {
-    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the command that runs the suite and which workflows run it on every pull request, on main and on a schedule, and which of them gate a merge. https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the command that runs the suite and which workflows run it on every pull request, on main and on a schedule, and which of them gate a merge. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "OSPS-QA-06.03": {
-    "justification": "The policy is 100% line and branch coverage (CONTRIBUTING.md, standard section 8). pyproject.toml sets fail_under = 100, so untested new code fails the required test check. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "The policy is 100% line and branch coverage (CONTRIBUTING.md, standard section 8). pyproject.toml sets fail_under = 100, so untested new code fails the required test check. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "Met"
   },
   "OSPS-QA-07.01": {
@@ -204,35 +204,35 @@
     "status": "Met"
   },
   "OSPS-SA-01.01": {
-    "justification": "ASSURANCE_CASE.md's Threat model names the adversaries, including holders of fewer shares than a SLIP-0039 threshold. Its Trust boundaries describe inputs crossing the public API, sentences and shares from outside, and caller-selected files. https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md#threat-model https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md#trust-boundaries",
+    "justification": "CLAUDE.md's Architecture gives the package's modules, their layers bottom-up and what each may import. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversary, and what each can do. https://github.com/btclib-org/bip39-slip39/blob/main/CLAUDE.md#architecture https://github.com/btclib-org/bip39-slip39/blob/main/ASSURANCE_CASE.md#trust-boundaries",
     "status": "Met"
   },
   "OSPS-SA-02.01": {
-    "justification": "The API reference at https://btclib-mnemonics.readthedocs.io/ is generated from the docstrings of every public module, and tests/docs_test.py fails when a shipped module is missing from it. CONTRIBUTING.md's The public surface states what is public.",
+    "justification": "The API reference at https://bip39-slip39.readthedocs.io/ is generated from the docstrings of every public module, and tests/docs_test.py fails when a shipped module is missing from it. CONTRIBUTING.md's The public surface states what is public.",
     "status": "Met"
   },
   "OSPS-SA-03.01": {
-    "justification": "ASSURANCE_CASE.md is the security assessment: what is claimed, the threat model, the trust boundaries and how each common implementation weakness is countered; SECURITY.md's limitations section records the known residual risks. https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md",
+    "justification": "ASSURANCE_CASE.md is the security assessment: what is claimed, the threat model, the trust boundaries and how each common implementation weakness is countered; SECURITY.md's limitations section records the known residual risks. https://github.com/btclib-org/bip39-slip39/blob/main/ASSURANCE_CASE.md",
     "status": "Met"
   },
   "OSPS-SA-03.02": {
-    "justification": "ASSURANCE_CASE.md's *Threat model* names the assets, adversaries and what is not defended, and *Trust boundaries* maps the attack surface where untrusted input enters, each argument naming the file, test or workflow behind it. https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md",
+    "justification": "ASSURANCE_CASE.md's *Threat model* names the assets, adversaries and what is not defended, and *Trust boundaries* maps the attack surface where untrusted input enters, each argument naming the file, test or workflow behind it. https://github.com/btclib-org/bip39-slip39/blob/main/ASSURANCE_CASE.md",
     "status": "Met"
   },
   "OSPS-VM-01.01": {
-    "justification": "SECURITY.md's *Reporting a vulnerability* gives the private channels, a GitHub security advisory or email, and the timeframes: a report is acknowledged within 7 days, and a fix or a published advisory follows within 90 days. A report triaged as easy to rediscover is fixed as soon as possible, and its advisory is published with the fix. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md#reporting-a-vulnerability",
+    "justification": "SECURITY.md's *Reporting a vulnerability* gives the private channels, a GitHub security advisory or email, and the timeframes: a report is acknowledged within 7 days, and a fix or a published advisory follows within 90 days. A report triaged as easy to rediscover is fixed as soon as possible, and its advisory is published with the fix. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md#reporting-a-vulnerability",
     "status": "Met"
   },
   "OSPS-VM-02.01": {
-    "justification": "SECURITY.md names the security contacts: a private GitHub security advisory, or email to security at btclib dot org. GOVERNANCE.md's Roles says that address reaches every organization owner. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md#reporting-a-vulnerability https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "justification": "SECURITY.md names the security contacts: a private GitHub security advisory, or email to security at btclib dot org. GOVERNANCE.md's Roles says that address reaches every organization owner. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md#reporting-a-vulnerability https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
     "status": "Met"
   },
   "OSPS-VM-03.01": {
-    "justification": "Private vulnerability reporting is enabled, and SECURITY.md points to it (the Security tab's 'Report a vulnerability') and gives an email address as the alternative. https://github.com/btclib-org/btclib-mnemonics/security/advisories/new",
+    "justification": "Private vulnerability reporting is enabled, and SECURITY.md points to it (the Security tab's 'Report a vulnerability') and gives an email address as the alternative. https://github.com/btclib-org/bip39-slip39/security/advisories/new",
     "status": "Met"
   },
   "OSPS-VM-04.01": {
-    "justification": "Vulnerabilities are published as GitHub security advisories on this repository, each naming the release that fixes it. https://github.com/btclib-org/btclib-mnemonics/security/advisories",
+    "justification": "Vulnerabilities are published as GitHub security advisories on this repository, each naming the release that fixes it. https://github.com/btclib-org/bip39-slip39/security/advisories",
     "status": "Met"
   },
   "OSPS-VM-04.02": {
@@ -256,7 +256,7 @@
     "status": "Met"
   },
   "OSPS-VM-06.02": {
-    "justification": "The required lint check runs .pre-commit-config.yaml on every pull request (ruff with the S rules, strict mypy, zizmor, detect-secrets) and blocks the merge on any finding not suppressed in place with a reason. CodeQL also runs on every pull request but is not a required check. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/lint.yml",
+    "justification": "The required lint check runs .pre-commit-config.yaml on every pull request (ruff with the S rules, strict mypy, zizmor, detect-secrets) and blocks the merge on any finding not suppressed in place with a reason. CodeQL also runs on every pull request but is not a required check. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/lint.yml",
     "status": "Met"
   },
   "access_continuity": {
@@ -264,7 +264,7 @@
     "status": "Met"
   },
   "accessibility_best_practices": {
-    "justification": "The only user interface is entropy.collect_rolls, a dice prompt in the terminal built on input() and print(). Its prompts are plain text, with no colour, cursor movement or layout, so any screen reader the terminal supports reads them as written. There is no GUI and no web front end. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md#limitations-not-vulnerabilities",
+    "justification": "The only user interface is entropy.collect_rolls, a dice prompt in the terminal built on input() and print(). Its prompts are plain text, with no colour, cursor movement or layout, so any screen reader the terminal supports reads them as written. There is no GUI and no web front end. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md#limitations-not-vulnerabilities",
     "status": "Met"
   },
   "achieve_passing": {
@@ -276,47 +276,47 @@
     "status": "Met"
   },
   "assurance_case": {
-    "justification": "ASSURANCE_CASE.md gives the threat model (what is defended, the adversaries, what is not defended), the trust boundaries, the secure design principles and the common implementation weaknesses with what counters each, naming the file, test or workflow behind every argument. https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md",
+    "justification": "ASSURANCE_CASE.md gives the threat model (what is defended, the adversaries, what is not defended), the trust boundaries, the secure design principles and the common implementation weaknesses with what counters each, naming the file, test or workflow behind every argument. https://github.com/btclib-org/bip39-slip39/blob/main/ASSURANCE_CASE.md",
     "status": "Met"
   },
   "automated_integration_testing": {
-    "justification": "test.yml runs the test suite, on every supported interpreter, on every push to main and every pull request, and its aggregate job `test: every job passed` is a required check. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the test suite, on every supported interpreter, on every push to main and every pull request, and its aggregate job `test: every job passed` is a required check. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "build": {
-    "justification": "explained here: https://github.com/btclib-org/btclib-mnemonics?tab=contributing-ov-file",
+    "justification": "explained here: https://github.com/btclib-org/bip39-slip39?tab=contributing-ov-file",
     "status": "Met"
   },
   "build_common_tools": {
-    "justification": "https://github.com/btclib-org/btclib-mnemonics?tab=contributing-ov-file",
+    "justification": "https://github.com/btclib-org/bip39-slip39?tab=contributing-ov-file",
     "status": "Met"
   },
   "build_floss_tools": {
-    "justification": "https://github.com/btclib-org/btclib-mnemonics?tab=contributing-ov-file",
+    "justification": "https://github.com/btclib-org/bip39-slip39?tab=contributing-ov-file",
     "status": "Met"
   },
   "build_non_recursive": {
-    "justification": "This tree builds no native binaries, so there is no recursive-build question to answer. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "This tree builds no native binaries, so there is no recursive-build question to answer. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "N/A"
   },
   "build_preserve_debug": {
-    "justification": "No native build or installation step exists to strip or preserve debugging information. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "No native build or installation step exists to strip or preserve debugging information. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "N/A"
   },
   "build_repeatable": {
-    "justification": "Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag. It passes only if the rebuilt file matches the release's attested digest byte for byte. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/sdist-rebuild.yml",
+    "justification": "Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag. It passes only if the rebuilt file matches the release's attested digest byte for byte. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/sdist-rebuild.yml",
     "status": "Met"
   },
   "build_reproducible": {
-    "justification": "The sdist is built with SOURCE_DATE_EPOCH from the commit and normalized by .github/scripts/normalize_sdist.py. sdist-rebuild.yml rebuilds the latest release's sdist from its tag every week and verifies it against the release's build-provenance attestation. https://github.com/btclib-org/btclib-mnemonics/actions/workflows/sdist-rebuild.yml",
+    "justification": "The sdist is built with SOURCE_DATE_EPOCH from the commit and normalized by .github/scripts/normalize_sdist.py. sdist-rebuild.yml rebuilds the latest release's sdist from its tag every week and verifies it against the release's build-provenance attestation. https://github.com/btclib-org/bip39-slip39/actions/workflows/sdist-rebuild.yml",
     "status": "Met"
   },
   "build_standard_variables": {
-    "justification": "This tree builds no native binaries -- it is pure Python on the uv_build backend -- so there is no compiler or linker invocation for CC/CFLAGS/LDFLAGS to reach. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "This tree builds no native binaries -- it is pure Python on the uv_build backend -- so there is no compiler or linker invocation for CC/CFLAGS/LDFLAGS to reach. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "N/A"
   },
   "bus_factor": {
-    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review but has made no commit to this repository. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/btclib-mnemonics/graphs/contributors",
+    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review but has made no commit to this repository. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/bip39-slip39/graphs/contributors",
     "status": "Unmet"
   },
   "code_of_conduct": {
@@ -324,23 +324,23 @@
     "status": "Met"
   },
   "code_review_standards": {
-    "justification": "REVIEWING.md states what a review checks, how a finding is written and what clears a pull request; the part shared by every repository is followed by what this tree checks in particular. https://github.com/btclib-org/btclib-mnemonics/blob/main/REVIEWING.md",
+    "justification": "REVIEWING.md states what a review checks, how a finding is written and what clears a pull request; the part shared by every repository is followed by what this tree checks in particular. https://github.com/btclib-org/bip39-slip39/blob/main/REVIEWING.md",
     "status": "Met"
   },
   "coding_standards": {
-    "justification": "pyproject.toml selects every ruff rule (select = [\"ALL\"]) with a documented ignore list, and runs mypy in strict mode. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "pyproject.toml selects every ruff rule (select = [\"ALL\"]) with a documented ignore list, and runs mypy in strict mode. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "Met"
   },
   "coding_standards_enforced": {
-    "justification": "ruff-check, ruff-format and mypy run as pre-commit hooks, and lint.yml runs the same .pre-commit-config.yaml in CI as a required check, so the style is enforced automatically rather than by review alone. https://github.com/btclib-org/btclib-mnemonics/blob/main/.pre-commit-config.yaml",
+    "justification": "ruff-check, ruff-format and mypy run as pre-commit hooks, and lint.yml runs the same .pre-commit-config.yaml in CI as a required check, so the style is enforced automatically rather than by review alone. https://github.com/btclib-org/bip39-slip39/blob/main/.pre-commit-config.yaml",
     "status": "Met"
   },
   "contribution": {
-    "justification": "Non-trivial contribution file in repository: <https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md>.",
+    "justification": "Non-trivial contribution file in repository: <https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md>.",
     "status": "Met"
   },
   "contribution_requirements": {
-    "justification": "CONTRIBUTING.md states the public-surface, input-validation, lint-gate and 100%-coverage requirements a contribution must meet before it can land. https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md states the public-surface, input-validation, lint-gate and 100%-coverage requirements a contribution must meet before it can land. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "contributors_unassociated": {
@@ -348,23 +348,23 @@
     "status": "Unmet"
   },
   "copyright_per_file": {
-    "justification": "Every Python file opens with \"Copyright (c) The btclib developers\", and ruff's flake8-copyright rule (CPY001) keeps it there, e.g. https://github.com/btclib-org/btclib-mnemonics/blob/main/src/btclib_mnemonics/__init__.py",
+    "justification": "Every Python file opens with \"Copyright (c) The btclib developers\", and ruff's flake8-copyright rule (CPY001) keeps it there, e.g. https://github.com/btclib-org/bip39-slip39/blob/main/src/bip39_slip39/__init__.py",
     "status": "Met"
   },
   "crypto_algorithm_agility": {
-    "justification": "The algorithms are fixed by the specifications the package implements -- a BIP39, SLIP-0039 or Electrum sentence has to stretch to the seed every other implementation computes -- so there is no alternative algorithm a user could switch to without leaving the standard. https://github.com/btclib-org/btclib-mnemonics/blob/main/README.md",
+    "justification": "The algorithms are fixed by the specifications the package implements -- a BIP39, SLIP-0039 or Electrum sentence has to stretch to the seed every other implementation computes -- so there is no alternative algorithm a user could switch to without leaving the standard. https://github.com/btclib-org/bip39-slip39/blob/main/README.md",
     "status": "Unmet"
   },
   "crypto_call": {
-    "justification": "Every primitive is called from the standard library -- hashlib's sha256, sha512 and pbkdf2_hmac, hmac, secrets and os.urandom -- and none is reimplemented. What the package writes itself is only what the specifications define above those primitives: SLIP-0039's GF(256) interpolation and its Feistel structure, and the mnemonic encodings. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
+    "justification": "Every primitive is called from the standard library -- hashlib's sha256, sha512 and pbkdf2_hmac, hmac, secrets and os.urandom -- and none is reimplemented. What the package writes itself is only what the specifications define above those primitives: SLIP-0039's GF(256) interpolation and its Feistel structure, and the mnemonic encodings. https://github.com/btclib-org/bip39-slip39/tree/main/src/bip39_slip39",
     "status": "Met"
   },
   "crypto_certificate_verification": {
-    "justification": "btclib-mnemonics performs no network communications -- nothing under src/ imports socket, ssl, http or urllib -- and so uses no TLS. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
+    "justification": "bip39-slip39 performs no network communications -- nothing under src/ imports socket, ssl, http or urllib -- and so uses no TLS. https://github.com/btclib-org/bip39-slip39/tree/main/src/bip39_slip39",
     "status": "N/A"
   },
   "crypto_credential_agility": {
-    "justification": "btclib-mnemonics is a library with no configuration file or credential store: entropy, mnemonics, passphrases and shares are caller-supplied function parameters, never read from or written to a file this project owns. https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md",
+    "justification": "bip39-slip39 is a library with no configuration file or credential store: entropy, mnemonics, passphrases and shares are caller-supplied function parameters, never read from or written to a file this project owns. https://github.com/btclib-org/bip39-slip39/blob/main/ASSURANCE_CASE.md",
     "status": "N/A"
   },
   "crypto_floss": {
@@ -372,7 +372,7 @@
     "status": "Met"
   },
   "crypto_keylength": {
-    "justification": "Every default meets 112 bits: bip39.mnemonic_from_entropy draws 128 bits when given none, electrum's generator draws 132 bits rounded up to whole words, and slip39 refuses a master secret under 128 bits. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
+    "justification": "Every default meets 112 bits: bip39.mnemonic_from_entropy draws 128 bits when given none, electrum's generator draws 132 bits rounded up to whole words, and slip39 refuses a master secret under 128 bits. https://github.com/btclib-org/bip39-slip39/tree/main/src/bip39_slip39",
     "status": "Met"
   },
   "crypto_password_storage": {
@@ -384,27 +384,27 @@
     "status": "N/A"
   },
   "crypto_published": {
-    "justification": "Every mechanism is a published one: BIP39 (PBKDF2-HMAC-SHA512, SHA-256 checksum), SLIP-0039 (Shamir sharing over GF(256), an HMAC-SHA256 digest share, a four-round Feistel network whose round function is PBKDF2-HMAC-SHA256) and Electrum's seed schemes (HMAC-SHA512 version prefix, PBKDF2-HMAC-SHA512, and the pre-2.0 iterated SHA-256), each checked against the vectors its authors publish. https://github.com/btclib-org/btclib-mnemonics/blob/main/README.md",
+    "justification": "Every mechanism is a published one: BIP39 (PBKDF2-HMAC-SHA512, SHA-256 checksum), SLIP-0039 (Shamir sharing over GF(256), an HMAC-SHA256 digest share, a four-round Feistel network whose round function is PBKDF2-HMAC-SHA256) and Electrum's seed schemes (HMAC-SHA512 version prefix, PBKDF2-HMAC-SHA512, and the pre-2.0 iterated SHA-256), each checked against the vectors its authors publish. https://github.com/btclib-org/bip39-slip39/blob/main/README.md",
     "status": "Met"
   },
   "crypto_random": {
-    "justification": "Every random draw comes from the operating system's CSPRNG: secrets for BIP39's and Electrum's default entropy and the simulated dice, and os.urandom for SLIP-0039's default entropy_source. Nothing under src/ uses the random module. https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md",
+    "justification": "Every random draw comes from the operating system's CSPRNG: secrets for BIP39's and Electrum's default entropy and the simulated dice, and os.urandom for SLIP-0039's default entropy_source. Nothing under src/ uses the random module. https://github.com/btclib-org/bip39-slip39/blob/main/ASSURANCE_CASE.md",
     "status": "Met"
   },
   "crypto_tls12": {
-    "justification": "btclib-mnemonics performs no network communications and so uses no TLS. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
+    "justification": "bip39-slip39 performs no network communications and so uses no TLS. https://github.com/btclib-org/bip39-slip39/tree/main/src/bip39_slip39",
     "status": "N/A"
   },
   "crypto_used_network": {
-    "justification": "btclib-mnemonics does not use the network: nothing under src/ imports socket, ssl, http or urllib. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
+    "justification": "bip39-slip39 does not use the network: nothing under src/ imports socket, ssl, http or urllib. https://github.com/btclib-org/bip39-slip39/tree/main/src/bip39_slip39",
     "status": "N/A"
   },
   "crypto_verification_private": {
-    "justification": "btclib-mnemonics performs no network communications and so uses no TLS. https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
+    "justification": "bip39-slip39 performs no network communications and so uses no TLS. https://github.com/btclib-org/bip39-slip39/tree/main/src/bip39_slip39",
     "status": "N/A"
   },
   "crypto_weaknesses": {
-    "justification": "No SHA-1 or MD5 appears under src/: the hashes are SHA-256 and SHA-512, alone, in HMAC or in PBKDF2, with the iteration counts the specifications fix (BIP39's and Electrum's 2048, SLIP-0039's 10000 * 2^e, the pre-2.0 Electrum scheme's 100000). https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics",
+    "justification": "No SHA-1 or MD5 appears under src/: the hashes are SHA-256 and SHA-512, alone, in HMAC or in PBKDF2, with the iteration counts the specifications fix (BIP39's and Electrum's 2048, SLIP-0039's 10000 * 2^e, the pre-2.0 Electrum scheme's 100000). https://github.com/btclib-org/bip39-slip39/tree/main/src/bip39_slip39",
     "status": "Met"
   },
   "crypto_working": {
@@ -420,15 +420,15 @@
     "status": "Met"
   },
   "delivery_unsigned": {
-    "justification": "Releases are published to PyPI and GitHub Releases and installed with pip from PyPI, all over HTTPS. No package or hash is fetched over plain HTTP. https://pypi.org/project/btclib-mnemonics/ https://github.com/btclib-org/btclib-mnemonics/releases",
+    "justification": "Releases are published to PyPI and GitHub Releases and installed with pip from PyPI, all over HTTPS. No package or hash is fetched over plain HTTP. https://pypi.org/project/bip39-slip39/ https://github.com/btclib-org/bip39-slip39/releases",
     "status": "Met"
   },
   "dependency_monitoring": {
-    "justification": "Dependabot version updates cover uv, github-actions and docker, and Dependabot security updates are on. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/dependabot.yml",
+    "justification": "Dependabot version updates cover uv, github-actions and docker, and Dependabot security updates are on. https://github.com/btclib-org/bip39-slip39/blob/main/.github/dependabot.yml",
     "status": "Met"
   },
   "description_good": {
-    "justification": "btclib-mnemonics implements the mnemonic schemes of bitcoin wallets, BIP39, SLIP-0039 and Electrum's, from the entropy to the seed, in typed Python. https://btclib.org/btclib-mnemonics/",
+    "justification": "bip39-slip39 implements the mnemonic schemes of bitcoin wallets, BIP39, SLIP-0039 and Electrum's, from the entropy to the seed, in typed Python. https://btclib.org/bip39-slip39/",
     "status": "Met"
   },
   "discussion": {
@@ -436,27 +436,27 @@
     "status": "Met"
   },
   "documentation_achievements": {
-    "justification": "README.md links the OpenSSF Scorecard, Best Practices and Baseline badges on the lines the organization standard reserves for them. https://github.com/btclib-org/btclib-mnemonics/blob/main/README.md",
+    "justification": "README.md links the OpenSSF Scorecard, Best Practices and Baseline badges on the lines the organization standard reserves for them. https://github.com/btclib-org/bip39-slip39/blob/main/README.md",
     "status": "Met"
   },
   "documentation_architecture": {
-    "justification": "README.md's What is here maps BIP39, SLIP-0039, Electrum, dispatch, entropy and mnemonic to their modules, and says that a seed's BIP32 key, address and wallet are outside this library. https://github.com/btclib-org/btclib-mnemonics/blob/main/README.md#what-is-here",
+    "justification": "CLAUDE.md's Architecture gives the layers bottom-up (exceptions and _utils, entropy and mnemonic, the schemes bip39, electrum and slip39, none importing another, and dispatch), and states that the package imports only the standard library and stops at the seed. https://github.com/btclib-org/bip39-slip39/blob/main/CLAUDE.md#architecture",
     "status": "Met"
   },
   "documentation_basics": {
-    "justification": "README.md says what the package holds and what it does not, how to install it, and gives a first use that tests/readme_test.py runs; CONTRIBUTING.md, SECURITY.md and ASSURANCE_CASE.md cover the rest. https://github.com/btclib-org/btclib-mnemonics/blob/main/README.md",
+    "justification": "README.md says what the package holds and what it does not, how to install it, and gives a first use that tests/readme_test.py runs; CONTRIBUTING.md, SECURITY.md and ASSURANCE_CASE.md cover the rest. https://github.com/btclib-org/bip39-slip39/blob/main/README.md",
     "status": "Met"
   },
   "documentation_current": {
-    "justification": "The docs build is gated in CI as a required check (docs.yml, `-n -W`), tests/docs_test.py fails when a shipped module has no API page, and tests/readme_test.py runs every Python block of README.md, so neither the reference generated from the docstrings nor the README's example can drift from the code. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/docs.yml",
+    "justification": "The docs build is gated in CI as a required check (docs.yml, `-n -W`), tests/docs_test.py fails when a shipped module has no API page, and tests/readme_test.py runs every Python block of README.md, so neither the reference generated from the docstrings nor the README's example can drift from the code. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/docs.yml",
     "status": "Met"
   },
   "documentation_interface": {
-    "justification": "Every public module and function carries a docstring, gated by ruff's pydocstyle rules and pydoclint, and docs/source's automodule pages render them into the API reference published at https://btclib-mnemonics.readthedocs.io/; tests/docs_test.py fails when a shipped module is missing from them.",
+    "justification": "Every public module and function carries a docstring, gated by ruff's pydocstyle rules and pydoclint, and docs/source's automodule pages render them into the API reference published at https://bip39-slip39.readthedocs.io/; tests/docs_test.py fails when a shipped module is missing from them.",
     "status": "Met"
   },
   "documentation_quick_start": {
-    "justification": "README.md's *A seed from a mnemonic, and a secret split into shares* is a first use -- a BIP39 sentence from entropy, its seed, its scheme recognized, and a SLIP-0039 2-of-3 split recombined -- and tests/readme_test.py runs it, so it is the one the suite checks. https://github.com/btclib-org/btclib-mnemonics/blob/main/README.md",
+    "justification": "README.md's *A seed from a mnemonic, and a secret split into shares* is a first use -- a BIP39 sentence from entropy, its seed, its scheme recognized, and a SLIP-0039 2-of-3 split recombined -- and tests/readme_test.py runs it, so it is the one the suite checks. https://github.com/btclib-org/bip39-slip39/blob/main/README.md",
     "status": "Met"
   },
   "documentation_roadmap": {
@@ -464,35 +464,35 @@
     "status": "Met"
   },
   "documentation_security": {
-    "justification": "SECURITY.md's Limitations, not vulnerabilities states the known limits: secret material is not zeroized, nothing is constant-time, randomness comes from the operating system, and the dice collector is interactive. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md",
+    "justification": "SECURITY.md's Limitations, not vulnerabilities states the known limits: secret material is not zeroized, nothing is constant-time, randomness comes from the operating system, and the dice collector is interactive. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md",
     "status": "Met"
   },
   "dynamic_analysis": {
-    "justification": "Every release runs the test suite before it is published. release.yml calls test.yml, and the PyPI upload runs only if it passes. The suite fails below 100% coverage, branches included. ClusterFuzzLite fuzzing and cosmic-ray mutation testing also run every week. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/release.yml https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/fuzz.yml",
+    "justification": "Every release runs the test suite before it is published. release.yml calls test.yml, and the PyPI upload runs only if it passes. The suite fails below 100% coverage, branches included. ClusterFuzzLite fuzzing and cosmic-ray mutation testing also run every week. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/release.yml https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/fuzz.yml",
     "status": "Met"
   },
   "dynamic_analysis_enable_assertions": {
-    "justification": "pytest, the mutation runs and the ClusterFuzzLite targets run Python without -O, so every assert is checked. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/fuzz.yml",
+    "justification": "pytest, the mutation runs and the ClusterFuzzLite targets run Python without -O, so every assert is checked. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/fuzz.yml",
     "status": "Met"
   },
   "dynamic_analysis_fixed": {
-    "justification": "No fuzzing or mutation-testing finding is open, and the weekly fuzz and mutation runs on main pass. https://github.com/btclib-org/btclib-mnemonics/actions/workflows/fuzz.yml https://github.com/btclib-org/btclib-mnemonics/actions/workflows/mutation.yml",
+    "justification": "No fuzzing or mutation-testing finding is open, and the weekly fuzz and mutation runs on main pass. https://github.com/btclib-org/bip39-slip39/actions/workflows/fuzz.yml https://github.com/btclib-org/bip39-slip39/actions/workflows/mutation.yml",
     "status": "Met"
   },
   "dynamic_analysis_unsafe": {
-    "justification": "This tree ships pure Python, a memory-safe language; it produces no software written in a memory-unsafe language for a dynamic memory-safety tool to run against. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "This tree ships pure Python, a memory-safe language; it produces no software written in a memory-unsafe language for a dynamic memory-safety tool to run against. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "N/A"
   },
   "english": {
-    "justification": "https://github.com/btclib-org/btclib-mnemonics/issues",
+    "justification": "https://github.com/btclib-org/bip39-slip39/issues",
     "status": "Met"
   },
   "enhancement_responses": {
-    "justification": "Contributions are answered and merged: https://github.com/btclib-org/btclib-mnemonics/pull/28, an outside contributor's fix, was merged the day it was opened.",
+    "justification": "Contributions are answered and merged: https://github.com/btclib-org/bip39-slip39/pull/28, an outside contributor's fix, was merged the day it was opened.",
     "status": "Met"
   },
   "external_dependencies": {
-    "justification": "pyproject.toml declares `dependencies = []` -- the package imports the standard library alone, which tests/imports_test.py asserts of every module -- and the test and tooling dependencies in its dependency-groups, resolved and pinned in the committed uv.lock. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "pyproject.toml declares `dependencies = []` -- the package imports the standard library alone, which tests/imports_test.py asserts of every module -- and the test and tooling dependencies in its dependency-groups, resolved and pinned in the committed uv.lock. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "Met"
   },
   "floss_license": {
@@ -508,11 +508,11 @@
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "https://btclib.org/btclib-mnemonics/ is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security.",
-    "status": "Met"
+    "justification": "Required security hardening headers missing: https://bip39-slip39.readthedocs.io: content-security-policy, x-frame-options",
+    "status": "Unmet"
   },
   "hardening": {
-    "justification": "ruff's select = [\"ALL\"] includes the bandit S rules, so a hardening defect such as unsafe deserialization or shell injection fails the lint gate. CodeQL also runs on every pull request and every push to main. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/codeql.yml",
+    "justification": "ruff's select = [\"ALL\"] includes the bandit S rules, so a hardening defect such as unsafe deserialization or shell injection fails the lint gate. CodeQL also runs on every pull request and every push to main. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/codeql.yml",
     "status": "Met"
   },
   "homepage_url": {
@@ -520,75 +520,75 @@
     "status": "?"
   },
   "implement_secure_design": {
-    "justification": "ASSURANCE_CASE.md's *Secure design principles* applies Saltzer and Schroeder's principles one by one -- economy of mechanism, fail-safe defaults, complete mediation, open design, least privilege, psychological acceptability -- each to the file or test that carries it. https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md",
+    "justification": "ASSURANCE_CASE.md's *Secure design principles* applies Saltzer and Schroeder's principles one by one -- economy of mechanism, fail-safe defaults, complete mediation, open design, least privilege, psychological acceptability -- each to the file or test that carries it. https://github.com/btclib-org/bip39-slip39/blob/main/ASSURANCE_CASE.md",
     "status": "Met"
   },
   "input_validation": {
-    "justification": "Every public function validates its inputs and refuses what is invalid with a BTClibMnemonicsTypeError or BTClibMnemonicsValueError, as CONTRIBUTING.md's *The public surface* requires; tests/input_validation_test.py drives the rule over every public function, and tests/fuzz_test.py holds every decoder to it on hostile sentences. https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md",
+    "justification": "Every public function validates its inputs and refuses what is invalid with a Bip39Slip39TypeError or Bip39Slip39ValueError, as CONTRIBUTING.md's *The public surface* requires; tests/input_validation_test.py drives the rule over every public function, and tests/fuzz_test.py holds every decoder to it on hostile sentences. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "installation_common": {
-    "justification": "`python -m pip install --upgrade btclib-mnemonics` installs it from PyPI, as README.md says, and pypi-install.yml installs the published version on Ubuntu, macOS and Windows after each release and weekly. https://pypi.org/project/btclib-mnemonics/",
+    "justification": "`python -m pip install --upgrade bip39-slip39` installs it from PyPI, as README.md says, and pypi-install.yml installs the published version on Ubuntu, macOS and Windows after each release and weekly. https://pypi.org/project/bip39-slip39/",
     "status": "Met"
   },
   "installation_development_quick": {
-    "justification": "`uv sync` installs the whole development environment in one command, uv being the only tool to install first; CONTRIBUTING.md's *The environment and the gates* section gives it beside `uv run pytest` and the lint gate. https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md",
+    "justification": "`uv sync` installs the whole development environment in one command, uv being the only tool to install first; CONTRIBUTING.md's *The environment and the gates* section gives it beside `uv run pytest` and the lint gate. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "installation_standard_variables": {
-    "justification": "Installation is `pip install`, which follows pip's and the interpreter's own install-location conventions; there is no project-specific installer that could diverge from that convention. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "Installation is `pip install`, which follows pip's and the interpreter's own install-location conventions; there is no project-specific installer that could diverge from that convention. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "N/A"
   },
   "interact": {
-    "justification": "https://github.com/btclib-org/btclib-mnemonics",
+    "justification": "https://github.com/btclib-org/bip39-slip39",
     "status": "Met"
   },
   "interfaces_current": {
-    "justification": "ruff's UP and FA rules flag deprecated constructs, and pytest turns every warning into an error. deps-latest and deps-oldest run the suite weekly at the newest and the floor versions. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "ruff's UP and FA rules flag deprecated constructs, and pytest turns every warning into an error. deps-latest and deps-oldest run the suite weekly at the newest and the floor versions. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "Met"
   },
   "internationalization": {
-    "justification": "The mnemonic sentence comes in every language the specifications give a word list for: BIP39's reference lists, with Japanese joined by the ideographic space BIP39 requires, and Electrum's own. The language is read back off the words. SLIP-0039 defines English alone. The dice prompt of entropy.collect_rolls is in English only, and issue #94 weighs offering it in those languages. https://github.com/btclib-org/btclib-mnemonics/issues/94 https://github.com/btclib-org/btclib-mnemonics/tree/main/src/btclib_mnemonics/_data",
+    "justification": "The mnemonic sentence comes in every language the specifications give a word list for: BIP39's reference lists, with Japanese joined by the ideographic space BIP39 requires, and Electrum's own. The language is read back off the words. SLIP-0039 defines English alone. The dice prompt of entropy.collect_rolls is in English only, and issue #94 weighs offering it in those languages. https://github.com/btclib-org/bip39-slip39/issues/94 https://github.com/btclib-org/bip39-slip39/tree/main/src/bip39_slip39/_data",
     "status": "Unmet"
   },
   "know_common_errors": {
-    "justification": "ASSURANCE_CASE.md lists the common implementation weaknesses, such as CWE-209 and CWE-330, and what counters each: https://github.com/btclib-org/btclib-mnemonics/blob/main/ASSURANCE_CASE.md",
+    "justification": "ASSURANCE_CASE.md lists the common implementation weaknesses, such as CWE-209 and CWE-330, and what counters each: https://github.com/btclib-org/bip39-slip39/blob/main/ASSURANCE_CASE.md",
     "status": "Met"
   },
   "know_secure_design": {
-    "justification": "The maintainer wrote ASSURANCE_CASE.md, which applies Saltzer and Schroeder's principles to the code one by one. It was reviewed by another owner in https://github.com/btclib-org/btclib-mnemonics/issues/26.",
+    "justification": "The maintainer wrote ASSURANCE_CASE.md, which applies Saltzer and Schroeder's principles to the code one by one. It was reviewed by another owner in https://github.com/btclib-org/bip39-slip39/issues/26.",
     "status": "Met"
   },
   "license_location": {
-    "justification": "Non-trivial license location file in repository: <https://github.com/btclib-org/btclib-mnemonics/blob/main/LICENSE>.",
+    "justification": "Non-trivial license location file in repository: <https://github.com/btclib-org/bip39-slip39/blob/main/LICENSE>.",
     "status": "Met"
   },
   "license_per_file": {
-    "justification": "Every Python file states \"Distributed under the MIT software license, see the accompanying LICENSE file or https://opensource.org/license/mit\", e.g. https://github.com/btclib-org/btclib-mnemonics/blob/main/src/btclib_mnemonics/__init__.py",
+    "justification": "Every Python file states \"Distributed under the MIT software license, see the accompanying LICENSE file or https://opensource.org/license/mit\", e.g. https://github.com/btclib-org/bip39-slip39/blob/main/src/bip39_slip39/__init__.py",
     "status": "Met"
   },
   "maintained": {
-    "justification": "Pull requests merge every week, and fixes ship in tagged releases. https://github.com/btclib-org/btclib-mnemonics/pulls?q=is%3Apr+is%3Amerged https://github.com/btclib-org/btclib-mnemonics/releases",
+    "justification": "Pull requests merge every week, and fixes ship in tagged releases. https://github.com/btclib-org/bip39-slip39/pulls?q=is%3Apr+is%3Amerged https://github.com/btclib-org/bip39-slip39/releases",
     "status": "Met"
   },
   "maintenance_or_update": {
-    "justification": "Only the latest release is supported and nothing is backported (SECURITY.md). RELEASING.md runs griffe check against the previous tag, and RELEASE_NOTES.md lists what a user must act on to upgrade. https://github.com/btclib-org/btclib-mnemonics/blob/main/RELEASE_NOTES.md",
+    "justification": "Only the latest release is supported and nothing is backported (SECURITY.md). RELEASING.md runs griffe check against the previous tag, and RELEASE_NOTES.md lists what a user must act on to upgrade. https://github.com/btclib-org/bip39-slip39/blob/main/RELEASE_NOTES.md",
     "status": "Met"
   },
   "no_leaked_credentials": {
-    "justification": "detect-secrets baseline gated by pre-commit, and GitHub secret scanning with push protection enabled on the repository: https://github.com/btclib-org/btclib-mnemonics/blob/main/.secrets.baseline",
+    "justification": "detect-secrets baseline gated by pre-commit, and GitHub secret scanning with push protection enabled on the repository: https://github.com/btclib-org/bip39-slip39/blob/main/.secrets.baseline",
     "status": "Met"
   },
   "regression_tests_added50": {
-    "justification": "A merged pull request that changes code under src/ also changes tests/, unless it leaves behaviour as it was: a docstring, a comment, a move, a removal or a refactor. The 100% line and branch coverage gate also fails a fix whose new code no test runs. https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "justification": "A merged pull request that changes code under src/ also changes tests/, unless it leaves behaviour as it was: a docstring, a comment, a move, a removal or a refactor. The 100% line and branch coverage gate also fails a fix whose new code no test runs. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
     "status": "Met"
   },
   "release_notes": {
-    "justification": "RELEASE_NOTES.md holds each release's notes, and release.yml publishes the tag's section as the GitHub release body. https://github.com/btclib-org/btclib-mnemonics/releases/tag/v2026.10.8",
+    "justification": "RELEASE_NOTES.md holds each release's notes, and release.yml publishes the tag's section as the GitHub release body. https://github.com/btclib-org/bip39-slip39/releases/tag/v2026.10.8",
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "The release notes name each advisory the release fixes: v2026.10.8 names GHSA-qjpp-8mp6-7744. https://github.com/btclib-org/btclib-mnemonics/releases/tag/v2026.10.8",
+    "justification": "The release notes name each advisory the release fixes: v2026.10.8 names GHSA-qjpp-8mp6-7744. https://github.com/btclib-org/bip39-slip39/releases/tag/v2026.10.8",
     "status": "Met"
   },
   "repo_distributed": {
@@ -596,7 +596,7 @@
     "status": "Met"
   },
   "repo_interim": {
-    "justification": "development is on the main branch of https://github.com/btclib-org/btclib-mnemonics",
+    "justification": "development is on the main branch of https://github.com/btclib-org/bip39-slip39",
     "status": "Met"
   },
   "repo_public": {
@@ -608,19 +608,19 @@
     "status": "Met"
   },
   "report_archive": {
-    "justification": "https://github.com/btclib-org/btclib-mnemonics/pulls?q=is%3Apr+is%3Aclosed\r\nhttps://github.com/btclib-org/btclib-mnemonics/issues?q=is%3Aissue%20state%3Aclosed\r\n",
+    "justification": "https://github.com/btclib-org/bip39-slip39/pulls?q=is%3Apr+is%3Aclosed\r\nhttps://github.com/btclib-org/bip39-slip39/issues?q=is%3Aissue%20state%3Aclosed\r\n",
     "status": "Met"
   },
   "report_process": {
-    "justification": "Bugs are reported on the GitHub issue tracker, through the issue forms under .github/ISSUE_TEMPLATE/, as CONTRIBUTING.md's *The issue tracker* describes: <https://github.com/btclib-org/btclib-mnemonics/issues>. Vulnerabilities go through SECURITY.md instead: <https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md>.",
+    "justification": "Bugs are reported on the GitHub issue tracker, through the issue forms under .github/ISSUE_TEMPLATE/, as CONTRIBUTING.md's *The issue tracker* describes: <https://github.com/btclib-org/bip39-slip39/issues>. Vulnerabilities go through SECURITY.md instead: <https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md>.",
     "status": "Met"
   },
   "report_responses": {
-    "justification": "Issues #15 to #24, filed by pmazzocchi on 2026-09-30, were all answered and closed by 2026-10-02. https://github.com/btclib-org/btclib-mnemonics/issues?q=is%3Aissue+is%3Aclosed",
+    "justification": "Issues #15 to #24, filed by pmazzocchi on 2026-09-30, were all answered and closed by 2026-10-02. https://github.com/btclib-org/bip39-slip39/issues?q=is%3Aissue+is%3Aclosed",
     "status": "Met"
   },
   "report_tracker": {
-    "justification": "Each repository uses its own GitHub Issues tracker for individual issues, with issue forms under .github/ISSUE_TEMPLATE/, and an organization-wide tracker in btclib-org/.github for cross-repository findings. https://github.com/btclib-org/btclib-mnemonics/issues",
+    "justification": "Each repository uses its own GitHub Issues tracker for individual issues, with issue forms under .github/ISSUE_TEMPLATE/, and an organization-wide tracker in btclib-org/.github for cross-repository findings. https://github.com/btclib-org/bip39-slip39/issues",
     "status": "Met"
   },
   "report_url": {
@@ -640,11 +640,11 @@
     "status": "Met"
   },
   "security_review": {
-    "justification": "pmazzocchi, an owner other than the maintainer, reviewed the project on 2026-09-30: https://github.com/btclib-org/btclib-mnemonics/issues/26 . The review pins its scope to a commit, checks each claim of ASSURANCE_CASE.md, states what it did not cover and files each finding as an issue.",
+    "justification": "pmazzocchi, an owner other than the maintainer, reviewed the project on 2026-09-30: https://github.com/btclib-org/bip39-slip39/issues/26 . The review pins its scope to a commit, checks each claim of ASSURANCE_CASE.md, states what it did not cover and files each finding as an issue.",
     "status": "Met"
   },
   "signed_releases": {
-    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing, and each GitHub release a Sigstore provenance bundle. SECURITY.md gives the gh attestation verify command. https://github.com/btclib-org/btclib-mnemonics/releases/latest",
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing, and each GitHub release a Sigstore provenance bundle. SECURITY.md gives the gh attestation verify command. https://github.com/btclib-org/bip39-slip39/releases/latest",
     "status": "Met"
   },
   "sites_https": {
@@ -652,11 +652,11 @@
     "status": "Met"
   },
   "sites_password_security": {
-    "justification": "Project sites are GitHub, PyPI and Read the Docs; this repository runs no site of its own that stores user passwords -- authentication is GitHub's and PyPI's, not this project's. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md",
+    "justification": "Project sites are GitHub, PyPI and Read the Docs; this repository runs no site of its own that stores user passwords -- authentication is GitHub's and PyPI's, not this project's. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md",
     "status": "N/A"
   },
   "small_tasks": {
-    "justification": "Small tasks for new contributors carry the label \"good first issue\", which CONTRIBUTING.md sets aside for a first contribution. https://github.com/btclib-org/btclib-mnemonics/issues?q=label%3A%22good+first+issue%22",
+    "justification": "Small tasks for new contributors carry the label \"good first issue\", which CONTRIBUTING.md sets aside for a first contribution. https://github.com/btclib-org/bip39-slip39/issues?q=label%3A%22good+first+issue%22",
     "status": "Met"
   },
   "static_analysis": {
@@ -664,31 +664,31 @@
     "status": "Met"
   },
   "static_analysis_common_vulnerabilities": {
-    "justification": "CodeQL's python analysis (codeql.yml) runs on a schedule, on every pull request and on every push to main, and ruff's `select = [\"ALL\"]` includes the bandit-derived S rules, both FLOSS static-analysis tools looking for common vulnerabilities. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/codeql.yml",
+    "justification": "CodeQL's python analysis (codeql.yml) runs on a schedule, on every pull request and on every push to main, and ruff's `select = [\"ALL\"]` includes the bandit-derived S rules, both FLOSS static-analysis tools looking for common vulnerabilities. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/codeql.yml",
     "status": "Met"
   },
   "static_analysis_fixed": {
-    "justification": "No static-analysis finding is open: CodeQL has no open alert, and ruff and mypy findings fail the required lint check. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/codeql.yml",
+    "justification": "No static-analysis finding is open: CodeQL has no open alert, and ruff and mypy findings fail the required lint check. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/codeql.yml",
     "status": "Met"
   },
   "static_analysis_often": {
-    "justification": "on every push and pull request: https://github.com/btclib-org/btclib-mnemonics/actions/workflows/lint.yml, https://github.com/btclib-org/btclib-mnemonics/actions/workflows/codeql.yml",
+    "justification": "on every push and pull request: https://github.com/btclib-org/bip39-slip39/actions/workflows/lint.yml, https://github.com/btclib-org/bip39-slip39/actions/workflows/codeql.yml",
     "status": "Met"
   },
   "test": {
-    "justification": "test.yml runs the suite, gated at 100% line and branch coverage, against vectors their authors publish: BIP39's reference implementation's and the Japanese ones BIP39 cites, SLIP-0039's and Electrum's. tests/_data/README.md pins each vendored file to its upstream commit. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the suite, gated at 100% line and branch coverage, against vectors their authors publish: BIP39's reference implementation's and the Japanese ones BIP39 cites, SLIP-0039's and Electrum's. tests/_data/README.md pins each vendored file to its upstream commit. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "test_branch_coverage80": {
-    "justification": "pyproject.toml sets branch = true under [tool.coverage.run], and the 100% fail_under gate includes branches: https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "pyproject.toml sets branch = true under [tool.coverage.run], and the 100% fail_under gate includes branches: https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "Met"
   },
   "test_continuous_integration": {
-    "justification": "test.yml runs the suite on every pull request and on every push to main that changes more than Markdown files. Its aggregate job, test: every job passed, is a required check on main. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the suite on every pull request and on every push to main that changes more than Markdown files. Its aggregate job, test: every job passed, is a required check on main. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "test_invocation": {
-    "justification": "https://github.com/btclib-org/btclib-mnemonics?tab=contributing-ov-file",
+    "justification": "https://github.com/btclib-org/bip39-slip39?tab=contributing-ov-file",
     "status": "Met"
   },
   "test_most": {
@@ -696,27 +696,27 @@
     "status": "Met"
   },
   "test_policy": {
-    "justification": "CONTRIBUTING.md makes 100% coverage a gate every change must pass, so new functionality comes with its tests. https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "justification": "CONTRIBUTING.md makes 100% coverage a gate every change must pass, so new functionality comes with its tests. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
     "status": "Met"
   },
   "test_policy_mandated": {
-    "justification": "CONTRIBUTING.md requires 100% line and branch coverage, and fail_under = 100.0 fails the CI gate on any new code without a test. https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md requires 100% line and branch coverage, and fail_under = 100.0 fails the CI gate on any new code without a test. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "test_statement_coverage80": {
-    "justification": "pyproject.toml sets fail_under = 100.0, gated on every pull request by test.yml. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "pyproject.toml sets fail_under = 100.0, gated on every pull request by test.yml. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "Met"
   },
   "test_statement_coverage90": {
-    "justification": "pyproject.toml sets fail_under = 100.0 under [tool.coverage.report], and the required test check enforces it on every pull request: https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "pyproject.toml sets fail_under = 100.0 under [tool.coverage.report], and the required test check enforces it on every pull request: https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "Met"
   },
   "tests_are_added": {
-    "justification": "The required check test: every job passed fails any pull request that leaves a line or branch untested. The merged pull requests show recent changes landing with their tests. https://github.com/btclib-org/btclib-mnemonics/pulls?q=is%3Apr+is%3Amerged",
+    "justification": "The required check test: every job passed fails any pull request that leaves a line or branch untested. The merged pull requests show recent changes landing with their tests. https://github.com/btclib-org/bip39-slip39/pulls?q=is%3Apr+is%3Amerged",
     "status": "Met"
   },
   "tests_documented_added": {
-    "justification": "CONTRIBUTING.md documents the 100% coverage gate, so new functionality is not accepted without a test. https://github.com/btclib-org/btclib-mnemonics/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md documents the 100% coverage gate, so new functionality is not accepted without a test. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "two_person_review": {
@@ -724,63 +724,63 @@
     "status": "Unmet"
   },
   "updateable_reused_components": {
-    "justification": "At runtime the package reuses only the standard library. The test and tooling components are PyPI packages pinned in uv.lock and bumped by Dependabot, and the deps-latest sentinel runs the full suite against the upgraded set every week. https://github.com/btclib-org/btclib-mnemonics/blob/main/.github/workflows/deps-latest.yml",
+    "justification": "At runtime the package reuses only the standard library. The test and tooling components are PyPI packages pinned in uv.lock and bumped by Dependabot, and the deps-latest sentinel runs the full suite against the upgraded set every week. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/deps-latest.yml",
     "status": "Met"
   },
   "version_semver": {
-    "justification": "CalVer, YYYY.M.D, declared in pyproject.toml and explained in RELEASE_NOTES.md: the number says when a release was cut and promises nothing about compatibility, so a breaking change is announced in RELEASE_NOTES.md. https://github.com/btclib-org/btclib-mnemonics/blob/main/RELEASE_NOTES.md",
+    "justification": "CalVer, YYYY.M.D, declared in pyproject.toml and explained in RELEASE_NOTES.md: the number says when a release was cut and promises nothing about compatibility, so a breaking change is announced in RELEASE_NOTES.md. https://github.com/btclib-org/bip39-slip39/blob/main/RELEASE_NOTES.md",
     "status": "Met"
   },
   "version_tags": {
-    "justification": "Each release is tagged v<version> on the release commit, as RELEASING.md requires. https://github.com/btclib-org/btclib-mnemonics/tags",
+    "justification": "Each release is tagged v<version> on the release commit, as RELEASING.md requires. https://github.com/btclib-org/bip39-slip39/tags",
     "status": "Met"
   },
   "version_tags_signed": {
-    "justification": "Every release tag is signed, and RELEASING.md reads each signature back. https://github.com/btclib-org/btclib-mnemonics/tags",
+    "justification": "Every release tag is signed, and RELEASING.md reads each signature back. https://github.com/btclib-org/bip39-slip39/tags",
     "status": "Met"
   },
   "version_unique": {
-    "justification": "Each release carries a unique calendar version, YYYY.M.D, declared once in pyproject.toml and tagged v<version>. https://github.com/btclib-org/btclib-mnemonics/releases",
+    "justification": "Each release carries a unique calendar version, YYYY.M.D, declared once in pyproject.toml and tagged v<version>. https://github.com/btclib-org/bip39-slip39/releases",
     "status": "Met"
   },
   "vulnerabilities_critical_fixed": {
-    "justification": "No publicly known vulnerability is left unfixed: each published advisory names the release that fixes it. https://github.com/btclib-org/btclib-mnemonics/security/advisories",
+    "justification": "No publicly known vulnerability is left unfixed: each published advisory names the release that fixes it. https://github.com/btclib-org/bip39-slip39/security/advisories",
     "status": "Met"
   },
   "vulnerabilities_fixed_60_days": {
-    "justification": "Every published advisory names the release that fixes it, and no Dependabot alert is open. https://github.com/btclib-org/btclib-mnemonics/security/advisories",
+    "justification": "Every published advisory names the release that fixes it, and no Dependabot alert is open. https://github.com/btclib-org/bip39-slip39/security/advisories",
     "status": "Met"
   },
   "vulnerability_report_credit": {
-    "justification": "An advisory credits its reporter as finder. fametrano, the maintainer, filed GHSA-qjpp-8mp6-7744, so it has no outside reporter to credit. SECURITY.md's Security review credits the 2026-09-30 review to pmazzocchi. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md#security-review https://github.com/btclib-org/btclib-mnemonics/security/advisories",
+    "justification": "An advisory credits its reporter as finder. fametrano, the maintainer, filed GHSA-qjpp-8mp6-7744, so it has no outside reporter to credit. SECURITY.md's Security review credits the 2026-09-30 review to pmazzocchi. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md#security-review https://github.com/btclib-org/bip39-slip39/security/advisories",
     "status": "Met"
   },
   "vulnerability_report_private": {
-    "justification": "https://github.com/btclib-org/btclib-mnemonics?tab=security-ov-file",
+    "justification": "https://github.com/btclib-org/bip39-slip39?tab=security-ov-file",
     "status": "Met"
   },
   "vulnerability_report_process": {
-    "justification": "https://github.com/btclib-org/btclib-mnemonics?tab=security-ov-file",
+    "justification": "https://github.com/btclib-org/bip39-slip39?tab=security-ov-file",
     "status": "Met"
   },
   "vulnerability_report_response": {
-    "justification": "pmazzocchi's security review, filed on 2026-09-30, was answered on 2026-10-01 and closed on 2026-10-03. GHSA-qjpp-8mp6-7744 was published with its fix, v2026.10.8, the day it was opened. https://github.com/btclib-org/btclib-mnemonics/issues/26 https://github.com/btclib-org/btclib-mnemonics/security/advisories",
+    "justification": "pmazzocchi's security review, filed on 2026-09-30, was answered on 2026-10-01 and closed on 2026-10-03. GHSA-qjpp-8mp6-7744 was published with its fix, v2026.10.8, the day it was opened. https://github.com/btclib-org/bip39-slip39/issues/26 https://github.com/btclib-org/bip39-slip39/security/advisories",
     "status": "Met"
   },
   "vulnerability_response_process": {
-    "justification": "SECURITY.md's Reporting a vulnerability gives the private channels (a GitHub security advisory, or security at btclib dot org), who can see a report, and how a CVE is requested. Private vulnerability reporting is enabled. https://github.com/btclib-org/btclib-mnemonics/blob/main/SECURITY.md",
+    "justification": "SECURITY.md's Reporting a vulnerability gives the private channels (a GitHub security advisory, or security at btclib dot org), who can see a report, and how a CVE is requested. Private vulnerability reporting is enabled. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md",
     "status": "Met"
   },
   "warnings": {
-    "justification": "mypy strict with all relevant extra checks activated, see https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "mypy strict with all relevant extra checks activated, see https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "Met"
   },
   "warnings_fixed": {
-    "justification": "Warnings are not tolerated: ruff, strict mypy and pytest's filterwarnings = [\"error\"] fail the required checks. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "Warnings are not tolerated: ruff, strict mypy and pytest's filterwarnings = [\"error\"] fail the required checks. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "Met"
   },
   "warnings_strict": {
-    "justification": "ruff runs with `select = [\"ALL\"]` (every rule family) and mypy runs with `strict = true`; both are zero-finding pre-commit hooks enforced again by the required lint workflow. https://github.com/btclib-org/btclib-mnemonics/blob/main/pyproject.toml",
+    "justification": "ruff runs with `select = [\"ALL\"]` (every rule family) and mypy runs with `strict = true`; both are zero-finding pre-commit hooks enforced again by the required lint workflow. https://github.com/btclib-org/bip39-slip39/blob/main/pyproject.toml",
     "status": "Met"
   }
 }
