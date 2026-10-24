@@ -575,6 +575,25 @@ done
 `1` from each is the answer; a `0` is a repository short of what its
 tier binds, filed here.
 
+**Every repository's `README.md` has a `## Contributing` section opening
+with this paragraph**, above the supported-by line where there is one:
+
+```markdown
+## Contributing
+
+Development is LLM-based: humans are welcome, as long as they are
+comfortable with agentic development ;-). A contribution must have been
+read and understood by the person who submits it.
+[`CONTRIBUTING.md`](./CONTRIBUTING.md#working-with-an-llm) has the rules.
+```
+
+A newcomer reads the `README.md` first, and may never open
+`CONTRIBUTING.md`. The words are the same everywhere, so a test may read
+them despite the preamble: the text is fixed, compared as a string, and
+nothing in it is interpreted. `profile/README.md` carries it too, with
+the link absolute: the organization's page resolves a relative link
+against `profile/`.
+
 Dotfiles, each owed by the tiers that owe the section reading it:
 `.pre-commit-config.yaml`, `.python-version`, `.gitignore`,
 `.markdownlint.jsonc`, `.taplo.toml`, `.yamllint.yaml`, `.readthedocs.yaml`,
@@ -4673,3 +4692,10 @@ runs over the whole tree rather than over what its own step added.
 1. **The prose pass** — 80 columns, the reasoning and its negative
    results in the configuration comments, no stated counts, and history
    moved to the two files that carry it.
+
+## Contributing
+
+Development is LLM-based: humans are welcome, as long as they are
+comfortable with agentic development ;-). A contribution must have been
+read and understood by the person who submits it.
+[`CONTRIBUTING.md`](./CONTRIBUTING.md#working-with-an-llm) has the rules.
