@@ -38,7 +38,7 @@ not deadlines.
   its intentions beyond that.
 - **`btclib` splits along Bitcoin Core's line between consensus and
   wallet** (btclib-org/btclib#2129). `btclib-wallet` takes the wallet
-  side, `btclib-mnemonics` the mnemonic schemes up to the seed, and
+  side, `bip39-slip39` the mnemonic schemes up to the seed, and
   `btclib-ecc` `curves/` and the parts of `ecc/` the issue does not
   keep in `btclib`, which stays the protocol package a node consumes. The
   issue holds the steps, in that order, and what each is done when.
@@ -47,9 +47,6 @@ not deadlines.
   (btclib-org/btclib#2712).
 - **`btclib-ecc` becomes `ecc`** once PyPI transfers the name
   (btclib-org/btclib-ecc#306).
-- **`btclib-mnemonics` becomes `bip39-slip39`**: the repository has the
-  new name, and the distribution and the import package, `bip39_slip39`,
-  follow (btclib-org/bip39-slip39#106).
 - **tf2, one conformance suite for any bitcoin node**
   (btclib-org/btclib#2220): Bitcoin Core's functional tests rewritten on
   `btclib`, in a repository of its own, `bitcoin-node-tests`, reaching a
