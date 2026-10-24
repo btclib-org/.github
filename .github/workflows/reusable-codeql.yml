@@ -14,8 +14,7 @@ name: reusable-codeql
 # both pass nothing.
 # It is owed to `portanode`, which holds no Python: CodeQL fails a
 # language it finds no source for. A difference one tree has is not the
-# copy in disguise btclib-org/.github#35 refuses, and
-# btclib-org/.github#1842 adds the input.
+# copy in disguise btclib-org/.github#35 refuses.
 #
 # The calling job declares the token the analysis needs. README.md
 # section 11 has the mechanism: the bound refuses rather than trims, so
