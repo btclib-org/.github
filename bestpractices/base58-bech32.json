@@ -32,7 +32,7 @@
     "status": 0
   },
   "OSPS-BR-01.03": {
-    "justification": "Pull-request runs use the pull_request and pull_request_review_comment triggers, which give a fork no secrets and a read-only token. The review job, which holds a secret, runs only when the head repository is this one. The mention job holds a secret on any pull request's issue comment, and there checks out the default branch. It answers only users with write access, and its tools exclude Bash, edits, writes and file reads. https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-claude-review.yml",
+    "justification": "Pull-request runs use the pull_request and pull_request_review_comment triggers, which give a fork no secrets and a read-only token. The review job, which holds a secret, runs only when the head repository is this one. The mention job holds a secret on any pull request's issue comment, and there checks out the default branch. It answers only a comment whose author is an owner, a member or a collaborator, and its tools exclude Bash, edits, writes, file reads and every tool that runs code. https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-claude-review.yml",
     "status": "Met"
   },
   "OSPS-BR-01.04": {
@@ -44,7 +44,7 @@
     "status": "Met"
   },
   "OSPS-BR-02.02": {
-    "justification": "Every release asset carries the version in its file name: the sdist, the wheel, the CycloneDX SBOM (base58_bech32-2026.10.18.cdx.json) and the attestation bundle (v2026.10.18.intoto.jsonl). The attestation binds each asset to its digest. https://github.com/btclib-org/base58-bech32/releases/latest",
+    "justification": "Every release asset carries the version in its file name: the sdist, the wheel, the CycloneDX SBOM (base58_bech32-2026.10.23.cdx.json) and the attestation bundle (v2026.10.23.intoto.jsonl). The attestation binds each asset to its digest. https://github.com/btclib-org/base58-bech32/releases/latest",
     "status": "Met"
   },
   "OSPS-BR-03.01": {
@@ -88,7 +88,7 @@
     "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "The verify command pins the signer: --repo names this repository, --signer-workflow the organization's reusable-build.yml and --source-ref the release tag. It passed on the v2026.10.18 wheel. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md",
+    "justification": "The verify command pins the signer: --repo names this repository, --signer-workflow the organization's reusable-build.yml and --source-ref the release tag. It passed on the v2026.10.23 wheel. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-04.01": {
@@ -204,7 +204,7 @@
     "status": "Unmet"
   },
   "OSPS-SA-01.01": {
-    "justification": "ASSURANCE_CASE.md's Threat model names the adversaries. Its Trust boundaries describe inputs crossing the public API and strings from outside. https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md#threat-model https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md#trust-boundaries",
+    "justification": "ARCHITECTURE.md gives the modules, their layers bottom-up and what each may import, which tests/imports_test.py holds. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversary, and what each can do. https://github.com/btclib-org/base58-bech32/blob/main/ARCHITECTURE.md https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md#trust-boundaries",
     "status": "Met"
   },
   "OSPS-SA-02.01": {
@@ -304,11 +304,11 @@
     "status": "N/A"
   },
   "build_repeatable": {
-    "justification": "Rebuilt from the tag v2026.10.18 with the uv named in the wheel, the sdist and the wheel are byte-identical to the released files (SHA-256 compared on 2026-10-18). Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag and passes only if it matches the release's attested digest. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/sdist-rebuild.yml",
+    "justification": "Rebuilt from the tag v2026.10.23 with the uv named in the wheel, the sdist and the wheel are byte-identical to the released files (SHA-256 compared on 2026-10-23). Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag and passes only if it matches the release's attested digest; it has run by hand, and its first scheduled run is Sunday 2026-10-25. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/sdist-rebuild.yml",
     "status": "Met"
   },
   "build_reproducible": {
-    "justification": "The sdist is built with SOURCE_DATE_EPOCH from the commit and normalized by .github/scripts/normalize_sdist.py. A rebuild of v2026.10.18 gave the same SHA-256 as the released sdist and wheel, and RELEASING.md's *Rebuild a release from its tag* gives the command. https://github.com/btclib-org/base58-bech32/blob/main/RELEASING.md#rebuild-a-release-from-its-tag",
+    "justification": "The sdist is built with SOURCE_DATE_EPOCH from the commit and normalized by .github/scripts/normalize_sdist.py. A rebuild of v2026.10.23 gave the same SHA-256 as the released sdist and wheel, and RELEASING.md's Rebuild a release from its tag gives the command. https://github.com/btclib-org/base58-bech32/blob/main/RELEASING.md#rebuild-a-release-from-its-tag",
     "status": "Met"
   },
   "build_standard_variables": {
@@ -316,7 +316,7 @@
     "status": "N/A"
   },
   "bus_factor": {
-    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. This repository opened on 2026-10-17 with the Base58 and bech32 code moved from btclib and new SS58 and CashAddr codecs. Its commits are fametrano's and Dependabot's, and git log --follow at btclib 8e87317b4 shows fametrano made 109 of 111 commits to base58.py and 62 of 64 to bech32.py. The claude account in the contributors graph comes from Co-Authored-By trailers on AI-assisted commits. pmazzocchi and giacomocaironi, also organization owners, have made no commit here. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/base58-bech32/graphs/contributors",
+    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. This repository opened on 2026-10-17 with the Base58 and bech32 code moved from btclib and new SS58 and CashAddr codecs. Since 2026-10-17, 16 of the 31 commits are fametrano's and 10 are pmazzocchi's, an organization owner, whose changes fametrano approved; 3 are Dependabot's, 1 is pre-commit.ci's and 1 is an outside contributor's. git log --follow at btclib 8e87317b4 shows fametrano made 109 of 111 commits to base58.py and 62 of 64 to bech32.py. The claude account in the contributors graph comes from Co-Authored-By trailers on AI-assisted commits. giacomocaironi, also an organization owner, has made no commit here. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/base58-bech32/graphs/contributors",
     "status": "Unmet"
   },
   "code_of_conduct": {
@@ -344,7 +344,7 @@
     "status": "Met"
   },
   "contributors_unassociated": {
-    "justification": "fametrano is the only significant contributor. No person outside the organization owners has committed here. pmazzocchi and giacomocaironi, organization owners, have made no commit here. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. https://github.com/fametrano https://github.com/pmazzocchi",
+    "justification": "fametrano is the only significant contributor. pmazzocchi, an organization owner, has made 10 commits; pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. One outside contributor, harshith7002, has made one commit (pull request 45, convertbits' width limit). giacomocaironi, also an organization owner, has made no commit here. https://github.com/fametrano https://github.com/pmazzocchi",
     "status": "Unmet"
   },
   "copyright_per_file": {
@@ -440,7 +440,7 @@
     "status": "Met"
   },
   "documentation_architecture": {
-    "justification": "README.md's What is here maps Base58 and Base58Check to base58, bech32 and bech32m to bech32, SS58 to ss58, and CashAddr to cashaddr; it also names the shared Base58Bech32Exception. https://github.com/btclib-org/base58-bech32/blob/main/README.md#what-is-here",
+    "justification": "ARCHITECTURE.md gives the modules bottom-up and what each may import, read from the import statements in src/. tests/imports_test.py holds the rule: it checks every file's imports against that table and refuses a module that reaches sideways or up, a bare import of the root included. https://github.com/btclib-org/base58-bech32/blob/main/ARCHITECTURE.md",
     "status": "Met"
   },
   "documentation_basics": {
@@ -464,11 +464,11 @@
     "status": "Met"
   },
   "documentation_security": {
-    "justification": "SECURITY.md's *Limitations, not vulnerabilities* states the known limits: secret material is not zeroized, nothing is constant-time, and b58decode_check quotes both checksums unless its secret argument is true. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md#limitations-not-vulnerabilities",
+    "justification": "SECURITY.md's Limitations, not vulnerabilities states the known limits: secret material is not zeroized and nothing is constant-time. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md#limitations-not-vulnerabilities",
     "status": "Met"
   },
   "dynamic_analysis": {
-    "justification": "Every release runs the test suite before it is published: release.yml calls test.yml, and the PyPI upload runs only if it passes. The suite fails below 100% coverage, branches included. ClusterFuzzLite fuzzing ran by hand on 2026-10-18 and passes, and it and cosmic-ray mutation testing are scheduled weekly. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/release.yml https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/fuzz.yml",
+    "justification": "Every release runs the test suite before it is published: release.yml calls test.yml, and the PyPI upload runs only if it passes. The suite fails below 100% coverage, branches included. ClusterFuzzLite fuzzing ran by hand on 2026-10-18 and on schedule on 2026-10-20 and passes, and it and cosmic-ray mutation testing are scheduled weekly. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/release.yml https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/fuzz.yml",
     "status": "Met"
   },
   "dynamic_analysis_enable_assertions": {
@@ -476,7 +476,7 @@
     "status": "Met"
   },
   "dynamic_analysis_fixed": {
-    "justification": "No fuzzing or mutation-testing finding is open. The one fuzz run, by hand on 2026-10-18, passed, and the weekly fuzz and mutation schedules have not yet run. https://github.com/btclib-org/base58-bech32/actions/workflows/fuzz.yml https://github.com/btclib-org/base58-bech32/actions/workflows/mutation.yml",
+    "justification": "No fuzzing or mutation-testing finding is open. The scheduled fuzz run of 2026-10-20 and the scheduled mutation run of 2026-10-19 passed. https://github.com/btclib-org/base58-bech32/actions/workflows/fuzz.yml https://github.com/btclib-org/base58-bech32/actions/workflows/mutation.yml",
     "status": "Met"
   },
   "dynamic_analysis_unsafe": {
@@ -488,7 +488,7 @@
     "status": "Met"
   },
   "enhancement_responses": {
-    "justification": "No enhancement request has been filed since the repository opened on 2026-10-17, so none is unanswered. https://github.com/btclib-org/base58-bech32/issues",
+    "justification": "Every enhancement request filed since the repository opened on 2026-10-17, such as issues 19 to 25, is the maintainer's own, and all are closed. Nobody else has filed one, so none is unanswered. https://github.com/btclib-org/base58-bech32/issues",
     "status": "Met"
   },
   "external_dependencies": {
@@ -508,7 +508,7 @@
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "The project page https://btclib.org/base58-bech32/ sends Content-Security-Policy (default-src 'self', frame-ancestors 'none'), Strict-Transport-Security, X-Frame-Options DENY and X-Content-Type-Options nosniff (curl -sI, 2026-10-18). The repository on github.com sends all four. PyPI's project page sends the last three and no CSP; that is PyPI's to set.",
+    "justification": "The project page https://btclib.org/base58-bech32/ sends Content-Security-Policy (default-src 'self', frame-ancestors 'none'), Strict-Transport-Security, X-Frame-Options DENY and X-Content-Type-Options nosniff (curl -sI, 2026-10-23). The repository on github.com sends all four. PyPI's project page sends the last three and no CSP; that is PyPI's to set.",
     "status": "Met"
   },
   "hardening": {
@@ -568,11 +568,11 @@
     "status": "Met"
   },
   "maintained": {
-    "justification": "The first release, v2026.10.18, was published on 2026-10-18, a day after the repository opened. Four pull requests merged that day, two of them Dependabot's weekly updates. https://github.com/btclib-org/base58-bech32/pulls?q=is%3Apr+is%3Amerged https://github.com/btclib-org/base58-bech32/releases",
+    "justification": "The first release, v2026.10.18, was published on 2026-10-18, a day after the repository opened. The second, v2026.10.23, followed on 2026-10-23, after 22 pull requests merged between the two. https://github.com/btclib-org/base58-bech32/pulls?q=is%3Apr+is%3Amerged https://github.com/btclib-org/base58-bech32/releases",
     "status": "Met"
   },
   "maintenance_or_update": {
-    "justification": "Only the latest release is supported and nothing is backported (SECURITY.md). release.yml compares each release's public API with the previous tag's using griffe; v2026.10.18, the first release, had no previous tag. RELEASE_NOTES.md lists what a user must act on to upgrade. https://github.com/btclib-org/base58-bech32/blob/main/RELEASE_NOTES.md",
+    "justification": "Only the latest release is supported and nothing is backported (SECURITY.md). release.yml compares each release's public API with the previous tag's using griffe; v2026.10.23 is the first release with a previous tag, and RELEASE_NOTES.md lists what a user must act on to upgrade, four breaking changes in v2026.10.23. https://github.com/btclib-org/base58-bech32/blob/main/RELEASE_NOTES.md",
     "status": "Met"
   },
   "no_leaked_credentials": {
@@ -580,7 +580,7 @@
     "status": "Met"
   },
   "regression_tests_added50": {
-    "justification": "No bug fix has been merged yet. REVIEWING.md asks of every change whether what it adds is tested, and the 100% line and branch coverage gate fails a fix whose new code no test runs. https://github.com/btclib-org/base58-bech32/blob/main/REVIEWING.md https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "justification": "Bug fixes merged since 2026-10-17 each add a test: pull request 45 (convertbits width, closes 38) changes tests/bech32_test.py, 39 (closes 37) is a test fix, and 33 (b58decode_check, closes 28) changes eight test files. REVIEWING.md asks of every change whether what it adds is tested, and the 100% line and branch coverage gate fails a fix whose new code no test runs. https://github.com/btclib-org/base58-bech32/blob/main/REVIEWING.md https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
     "status": "Met"
   },
   "release_notes": {
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "v2026.10.18 is the first release and fixes no vulnerability, and no advisory exists, so the notes name none. https://github.com/btclib-org/base58-bech32/releases/tag/v2026.10.18",
+    "justification": "v2026.10.23 fixes no published vulnerability and no advisory exists. It fixes three issues the maintainer labelled security: the missing length limits of bech32 and b58decode (issues 8 and 9) and the checksum quoted by b58decode_check (issue 28), and RELEASE_NOTES.md names the limit and the quoting. https://github.com/btclib-org/base58-bech32/releases/tag/v2026.10.23",
     "status": "Met"
   },
   "repo_distributed": {
@@ -616,7 +616,7 @@
     "status": "Met"
   },
   "report_responses": {
-    "justification": "No bug report has been filed since the repository opened on 2026-10-17, so none is unanswered. The only issue, 4, is the maintainer's own task. https://github.com/btclib-org/base58-bech32/issues",
+    "justification": "Five bug reports have been filed since the repository opened on 2026-10-17, issues 37, 38, 40, 41 and 42, all by pmazzocchi on 2026-10-19. Each got a comment or a linked change within the day and all are closed by 2026-10-21. Issues 54 and 57 are the maintainer's own tasks. https://github.com/btclib-org/base58-bech32/issues",
     "status": "Met"
   },
   "report_tracker": {
@@ -656,7 +656,7 @@
     "status": "N/A"
   },
   "small_tasks": {
-    "justification": "The label good first issue marks a small task for a first contribution, as CONTRIBUTING.md says, and one search lists the open ones across the organization. No issue in this repository carries it yet. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md#the-issue-tracker https://github.com/search?q=org%3Abtclib-org+label%3A%22good+first+issue%22+is%3Aopen&type=issues",
+    "justification": "The label good first issue marks a small task for a first contribution, as CONTRIBUTING.md says, and one search lists the open ones across the organization. Issue 38 carried it and an outside contributor fixed it; no open issue in this repository carries it now. https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md#the-issue-tracker https://github.com/search?q=org%3Abtclib-org+label%3A%22good+first+issue%22+is%3Aopen&type=issues",
     "status": "Met"
   },
   "static_analysis": {
@@ -668,7 +668,7 @@
     "status": "Met"
   },
   "static_analysis_fixed": {
-    "justification": "No static-analysis finding is open: CodeQL has no open alert, and ruff and mypy findings fail the required lint check. The 30 open code-scanning alerts are OpenSSF Scorecard's scores for pinning, code review, maintenance, branch protection and the Best Practices badge. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/codeql.yml",
+    "justification": "No static-analysis finding is open: CodeQL has no open alert, and ruff and mypy findings fail the required lint check. The 29 open code-scanning alerts are OpenSSF Scorecard's scores for pinning (26), code review, maintenance and branch protection. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/codeql.yml",
     "status": "Met"
   },
   "static_analysis_often": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.18 shipped 0 of 4 pull requests approved by somebody other than the author and other than fametrano. Dependabot's 1 and 2 were approved by fametrano, and 3 and 5 merged with no approving review. main's ruleset requires one approving review from somebody other than the author, and carries a temporary maintainer bypass that issue 4 removes. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets https://github.com/btclib-org/base58-bech32/issues/4",
+    "justification": "v2026.10.23 shipped 5 of 22 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {
@@ -748,7 +748,7 @@
     "status": "Met"
   },
   "vulnerabilities_fixed_60_days": {
-    "justification": "No vulnerability has been reported or published, and no Dependabot alert is open. Each advisory would name the release that fixes it. https://github.com/btclib-org/base58-bech32/security/advisories",
+    "justification": "No vulnerability has been reported or published, and no Dependabot alert is open. Three issues labelled security, 8, 9 and 28, are hardening, not exploitable vulnerabilities, and v2026.10.23 fixes them. Each advisory would name the release that fixes it. https://github.com/btclib-org/base58-bech32/security/advisories",
     "status": "Met"
   },
   "vulnerability_report_credit": {

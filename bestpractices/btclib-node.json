@@ -36,7 +36,7 @@
     "status": "Met"
   },
   "OSPS-BR-01.04": {
-    "justification": "No workflow takes a workflow_dispatch input. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/release.yml",
+    "justification": "The only workflow_dispatch input is verified-signatures.yml's before and after, which the called workflow reads through env: and refuses unless they are commit shas. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/release.yml",
     "status": "Met"
   },
   "OSPS-BR-02.01": {
@@ -316,7 +316,7 @@
     "status": "N/A"
   },
   "bus_factor": {
-    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review but has made no commit to this repository. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, wrote early parts of the code but has made no commit since 2023. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/btclib-node/graphs/contributors",
+    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review and has since made five commits, on 2026-10-16. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, wrote early parts of the code but has made no commit since 2023. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/btclib-node/graphs/contributors",
     "status": "Unmet"
   },
   "code_of_conduct": {
@@ -344,7 +344,7 @@
     "status": "Met"
   },
   "contributors_unassociated": {
-    "justification": "fametrano is the only significant contributor. In the last year, outside contributors have made only small changes. pmazzocchi, an organization owner, has made no commit to this repository. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. giacomocaironi, also an organization owner, wrote early parts of the code but has made no commit since 2023. https://github.com/fametrano https://github.com/pmazzocchi",
+    "justification": "fametrano is the only significant contributor. In the last year, outside contributors have made only small changes. pmazzocchi, an organization owner, has made five commits, on 2026-10-16; pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. giacomocaironi, also an organization owner, wrote early parts of the code but has made no commit since 2023. https://github.com/fametrano https://github.com/pmazzocchi",
     "status": "Unmet"
   },
   "copyright_per_file": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.8 shipped 0 of 86 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "v2026.10.18 shipped 32 of 74 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {
