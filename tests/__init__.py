@@ -338,33 +338,8 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("btclib-wallet",),
     ),
     (
-        1789,
-        "test_the_name_normalizes_to_the_repository",
-        ("bip39-slip39",),
-    ),
-    (
         1808,
         "test_a_repository_carries_the_verbatim_files_owed_of_it",
-        ("portanode",),
-    ),
-    (
-        1808,
-        "test_a_repository_carries_the_root_files_its_tier_owes",
-        (
-            "btclib",
-            "btclib-node",
-            "btclib-secp256k1",
-            "portanode",
-            "bitcoin-core-rpc",
-            "btclib-wallet",
-            "ecc",
-            "bip39-slip39",
-            "base58-bech32",
-        ),
-    ),
-    (
-        1842,
-        "test_a_tree_carries_the_sentinels_its_entries_give_it",
         ("portanode",),
     ),
 )
