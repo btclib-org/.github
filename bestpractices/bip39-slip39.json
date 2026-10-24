@@ -508,8 +508,8 @@
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "Required security hardening headers missing: https://bip39-slip39.readthedocs.io: content-security-policy, x-frame-options",
-    "status": "Unmet"
+    "justification": "https://btclib.org/bip39-slip39/ is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security.",
+    "status": "Met"
   },
   "hardening": {
     "justification": "ruff's select = [\"ALL\"] includes the bandit S rules, so a hardening defect such as unsafe deserialization or shell injection fails the lint gate. CodeQL also runs on every pull request and every push to main. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/codeql.yml",
