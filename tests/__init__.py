@@ -366,7 +366,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         1870,
         "test_every_action_is_pinned_to_a_commit",
         (
-            "btclib",
             "btclib-node",
             "bbt",
             "btclib-org.github.io",
@@ -379,7 +378,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         1870,
         "test_zizmor_asks_every_uses_for_a_commit",
         (
-            "btclib",
             "btclib-node",
             "bbt",
             "btclib-org.github.io",
@@ -392,7 +390,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         1870,
         "test_dependabot_cools_down_no_tag_of_this_repository",
         (
-            "btclib",
             "btclib-node",
             "bbt",
             "btclib-org.github.io",
@@ -405,7 +402,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         1870,
         "test_check_changelog_is_frozen_at_a_tag",
         (
-            "btclib",
             "btclib-node",
             "bbt",
             "btclib-org.github.io",
