@@ -2253,8 +2253,8 @@ by that row.
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`,
   `bip39-slip39`, `base58-bech32`;
 - `qa-assets` — `btclib`, `btclib-wallet`;
-- `fuzz` — `btclib`, `btclib-secp256k1`, `btclib-node`, `btclib-wallet`,
-  `ecc`, `bip39-slip39`, `base58-bech32`;
+- `fuzz` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `btclib-node`,
+  `btclib-wallet`, `ecc`, `bip39-slip39`, `base58-bech32`;
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`,
   `btclib-wallet`;
 - `btcd-oracle` — `btclib`;
@@ -2335,7 +2335,6 @@ and the badge land together.
       rulesets* records; Code-Review, held down by a bot's review not
       counting, as section 11's *Review* says, and by merges through the
       bypass in the trees that keep it; and Fuzzing on
-      `bitcoin-core-rpc`, which the `fuzz` entry below already answers, and on
       `portanode`, whose launchers are shell, batch and PowerShell, which no
       fuzzer Scorecard recognises runs; adversarial tests of the updaters'
       parsing are to stand in for one (btclib-org/portanode#715).
@@ -2385,17 +2384,18 @@ and the badge land together.
   between the parser and an adversary choosing the bytes. `btclib` reads
   transactions, scripts and signatures off the wire, `btclib-secp256k1` reads
   signatures, public keys and MuSig2 nonces and partial signatures,
-  `btclib-node` speaks the peer-to-peer protocol, `btclib-wallet` parses PSBTs,
-  output descriptors and BIP32/BIP322 data a counterparty hands it,
+  `bitcoin-core-rpc` decodes the replies of an endpoint that may be a host on
+  the internet rather than the node beside the process, so a stranger can
+  choose them, `btclib-node` speaks the peer-to-peer protocol, `btclib-wallet`
+  parses PSBTs, output descriptors and BIP32/BIP322 data a counterparty hands it,
   `ecc` decodes the DER and BIP340 signatures and the ECIES envelopes a
   sender writes, `bip39-slip39` decodes the SLIP39 shares their
   holders hand back, a few of whom SLIP39 allows to be compromised, and
   `base58-bech32` decodes the base58, bech32, SS58 and CashAddr strings
   of the addresses and keys a stranger hands over;
-  `bitcoin-core-rpc` reads an instance its own operator runs, which the property
-  does not reach, and `portanode` is answered by the `scorecard` entry's third
-  exception. `btclib-secp256k1`'s targets reach the vendored C on purpose:
-  what they exercise is this tree's own length checks in front of it
+  `portanode` is answered by the `scorecard` entry's Fuzzing exception.
+  `btclib-secp256k1`'s targets reach the vendored C on purpose: what they
+  exercise is this tree's own length checks in front of it
   (btclib-org/.github#342). Section 7's *Property tests* has how a fuzzer and
   the property layer stand to each other. A crash the sentinel finds is an issue
   against the parser, never a suppression, and its regression is an ordinary
