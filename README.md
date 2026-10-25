@@ -1084,13 +1084,20 @@ No `autoupdate_branch`: the default branch is the only branch.
 - **`check-changelog`** — `btclib-org/.github`'s hook, that repository
   serving `.github/scripts/check_changelog.py` through its own
   `.pre-commit-hooks.yaml` rather than every tree carrying a copy. The
-  stanza names that repository under `repo:`, a 40-hex commit under
-  `rev:`, and `args: [--grandfathered, N]`, where N is the number of
-  entries the file's first `##` section held above the length rule's own
-  entry on the day this check reached the tree. The `rev:` is a sha
-  because this repository cuts no tag, and `autoupdate` moves a sha by
-  `git rev-parse FETCH_HEAD` where `git describe --tags` answers
-  nothing; `pinned-rev` accepts forty hex characters for that reason.
+  stanza names that repository under `repo:`, a frozen tag under `rev:`,
+  `rev: <sha> # frozen: vYYYY.M.D`, and `args: [--grandfathered, N]`,
+  where N is the number of entries the file's first `##` section held
+  above the length rule's own entry on the day this check reached the
+  tree. The `rev:` is frozen because this repository tags (section 12):
+  `autoupdate` without `--freeze` rewrites a sha to the newest tag
+  `git describe --tags --abbrev=0` finds from `main`, a name and not a
+  commit, and an older commit than the pin where `main` is past that tag.
+  With `--freeze` it writes the sha `git rev-parse` gives for the tag, the
+  annotated tag's own object, and the `# frozen:` comment, which
+  pre-commit.ci keeps on its weekly bump. `pinned-rev` accepts forty hex
+  characters for that reason. One space comes before the `#`, the form
+  `prettier` writes: pre-commit writes two, so a bump fails `prettier`
+  until a commit removes one.
   The hook repository declares `language: script`,
   `pass_filenames: false`, `always_run:
   true` and `verbose: true`, and the gate orders it ahead of
@@ -1833,11 +1840,12 @@ without adding to it is deleted.
 - **80 columns everywhere prose lives** — markdown by MD013, tables
   included; a Python docstring and a whole-line comment by ruff's
   `max-doc-length`; a toml comment by a pygrep hook. Code is 88, the
-  width `ruff format` produces; yaml is 100, because an action pinned to
-  a commit SHA with its tag in a trailing comment is past 80 before
-  anything else is said. A Python comment following code on its line is
-  outside the number: nothing rewraps it, and a reason that will not fit
-  goes into the comment above the line.
+  width `ruff format` produces; yaml is 140, because a call into
+  `btclib-org/.github` pinned to a commit SHA with its tag in a trailing
+  comment (section 10) is past 100 before anything else is said. A Python
+  comment following code on its line is outside the number: nothing
+  rewraps it, and a reason that will not fit goes into the comment above
+  the line.
 - **A placeholder is bare, and last.** `<` and `>` are the shell's
   redirections, so a paste made before `<org>` is filled in fails at the
   parse where the placeholder stands bare and last, and reaches the tool
@@ -1896,17 +1904,26 @@ without adding to it is deleted.
 - **Every action is pinned to a commit SHA**, with the tag in a comment beside
   the pin: trailing it, or above it where a trailing one would take the line
   past the width `.yamllint.yaml` sets. A tag is a name its owner can move, and
-  these run in a job that can read the workflow token. A call to a reusable
-  workflow of `btclib-org/.github` names `@main` instead, its `main` being held
-  by section 11's rulesets as the caller's is; zizmor is told so,
-  `btclib-org/.github/*: ref-pin` under `unpinned-uses`. **OpenSSF Scorecard's
-  Pinned-Dependencies check and CodeQL's `actions/unpinned-tag` query flag
-  every one of these calls regardless** — the `scorecard` entry further down
-  disposes of both alerts.
-- **A tree pins an action at one commit throughout its own workflows**, so
-  a new workflow takes the pin the tree already carries rather than the
-  newest release: two commits of one action are two versions in effect at
-  once, with nothing in either file saying so.
+  these run in a job that can read the workflow token.
+- **A call to a reusable workflow of `btclib-org/.github` is pinned the same
+  way, to a commit one of its `v*` tags names**, and the comment trailing the
+  pin names that tag, since Dependabot rewrites a comment on the pin's own
+  line and no other. A change merged there to a reusable workflow then reaches
+  a tree only through a pull request in that tree; the scripts those workflows
+  check out at `main` are btclib-org/.github#1871's. Dependabot's
+  `github-actions` updates move such a pin to the newest tag, and move a pin at
+  an untagged commit of `main` to the head of `main` instead
+  (btclib-org/.github#1870); section 12 says when a tag is cut.
+  zizmor's default `unpinned-uses` policy asks every `uses:` for a commit, so
+  a tree's zizmor configuration sets no policy of its own there. The rejected
+  alternative is a call naming `@main`, held by section 11's rulesets: every
+  change merged in `btclib-org/.github` runs in every tree at once, reviewed
+  in none of them, and OpenSSF Scorecard's Pinned-Dependencies check and
+  CodeQL's `actions/unpinned-tag` query flag each such call.
+- **A tree pins an action, and `btclib-org/.github`, at one commit throughout
+  its own workflows**, so a new workflow takes the pin the tree already
+  carries rather than the newest release: two commits of one action are two
+  versions in effect at once, with nothing in either file saying so.
 - **An aggregate waits on the jobs of its own file, so a gate the trees do
   not run job for job alike is copied rather than called, and what becomes
   a call is a cell of it.** An aggregate written into a shared workflow would
@@ -2317,15 +2334,10 @@ and the badge land together.
   and `ossf/scorecard-action`'s README does not support a fork, which
   `gh api repos/<org>/<repo> --jq .fork` answers. The badge is what the row is
   kept for. **A check scoring below its maximum is an issue against what it
-  found**, never a sentence in section 14 explaining the score — with three
-  named exceptions, each dismissed with reason `won't fix` instead of filed,
+  found**, never a sentence in section 14 explaining the score — except the
+  classes below, each dismissed with reason `won't fix` instead of filed,
   because the standard has already decided them:
 
-    - **Pinned-Dependencies, or CodeQL's `actions/unpinned-tag`, against a
-      reusable-workflow call naming `@main`.**
-      **Every action is pinned to a commit SHA** above requires that name for
-      every call into `btclib-org/.github`, so each alert is that bullet's own
-      consequence rather than an oversight; its dismissal cites it.
     - **Pinned-Dependencies against an index install a job makes with no pin,
       on purpose, to reproduce what a user's own install does.** The
       dismissal cites the comment the workflow gives for it.
@@ -2339,7 +2351,7 @@ and the badge land together.
       fuzzer Scorecard recognises runs; adversarial tests of the updaters'
       parsing are to stand in for one (btclib-org/portanode#715).
 
-    A sub-maximum score outside these three classes is still an issue.
+    A sub-maximum score outside these classes is still an issue.
 
     The badge and the published score want `publish_results: true`, and the job
     wants `id-token: write` for the transparency-log entry,
@@ -3090,9 +3102,9 @@ shape it has is in the workflow's own header.
 
 **The prompt is `reusable-claude-review.yml`'s, and a port adapts no
 part of it.** What a port adapts is the `uses:` reference — a path where
-the callee is the calling tree's own file, `@main` from anywhere else —
-the inputs the call passes, an `extra-prompt` paragraph about what the
-receiving tree ships and the `extra-allowed-tools` its own commands
+the callee is the calling tree's own file, section 10's pin from anywhere
+else — the inputs the call passes, an `extra-prompt` paragraph about what
+the receiving tree ships and the `extra-allowed-tools` its own commands
 need, and the header saying why that tree runs a review at all.
 
 **A citation of this standard names it rather than a `README.md`**,
@@ -3282,6 +3294,15 @@ request runs the whole matrix. The `uv` ecosystem's group is named
 usually yanked within days. None declares a `target-branch`: one naming a
 missing branch fails nowhere and proposes nothing.
 
+**The `github-actions` cooldown excludes `btclib-org/.github/*`**, so a tag
+of this repository (section 12) is offered at the next weekly run. Its tags
+are the organization's own, cut by the maintainer, where the cooldown waits
+out a stranger's compromised release. dependabot-core dates a tag for the
+cooldown and matches the exclude with `File.fnmatch?` against the
+dependency's name, `btclib-org/.github/.github/workflows/<file>` for a call
+(btclib-org/.github#1870). The entry is in every tree, this one included,
+where nothing calls this repository by name and the line excludes nothing.
+
 **A Dependabot pull request reads a different secret store.** A
 `pull_request` run whose actor is `dependabot[bot]` gets the Dependabot
 secrets rather than the Actions secrets, so a secret a workflow needs
@@ -3394,6 +3415,21 @@ A label means what its description says. Who applies and removes it:
   meaning a rewrap: `btclib-secp256k1` releases `M.N.P` for the libsecp256k1
   `vM.N.P` inside it, so that no caller reads a changelog to answer *which
   upstream is this*.
+- **`btclib-org/.github` tags the commits the trees pin** (section 10), and
+  a tag there is no release: nothing is published with it, no changelog
+  section is written for it, and its placeholder version is not compared with
+  it. The tag is `vYYYY.M.D`, signed and annotated, and names a commit of
+  `main`. It is cut within a day of a landing that changes a
+  `.github/workflows/reusable-*.yml`. A day has one tag at most, since no
+  tag has a fourth component: Dependabot moves a pin only to a tag with no
+  more components than the one it sits at (btclib-org/.github#1870). The
+  maintainer cuts it, signed as section 11's *Signatures* asks of a tag:
+
+    ```shell
+    git -C <checkout of main> tag -s vYYYY.M.D -m vYYYY.M.D <commit>
+    git -C <checkout of main> push origin vYYYY.M.D
+    ```
+
 - **A rehearsal on TestPyPI** uses `.dev<run number>`, patched in by the
   workflow rather than typed, so it is unique per run and sorts below the
   release it rehearses.
@@ -3443,13 +3479,19 @@ A label means what its description says. Who applies and removes it:
 
     ```shell
     gh attestation verify <file> --owner btclib-org \
-      --signer-workflow "${signer:?}@refs/heads/main" \
+      --signer-workflow "${signer:?}" \
       --source-ref refs/tags/v<version> --format json \
       --jq "${cert:?}.sourceRepositoryIdentifier" | grep -qx "${id:?}"
     ```
 
     The exit code is `0` only where a verified attestation names that
     repository.
+
+    The signer is named without a ref. The certificate names the ref the
+    tree's call gave, `refs/heads/main` or the commit section 10's pin names,
+    and `gh attestation verify` matches a signer named without a ref at any
+    ref. That gives up a check: an attestation `reusable-build.yml` made at
+    any branch or commit of `btclib-org/.github` verifies.
 
     The signature is made before the environment's approval, so a release whose
     gates fail afterwards leaves an attestation for files that never reached an
@@ -3866,7 +3908,7 @@ The paths are what that test compares:
   which asks each file to agree with itself and therefore lets two files
   disagree.
 - `.yamllint.yaml` — owed by every repository; the default set, extended rather
-  than listed, with `line-length` raised to 100 and two rules disabled, and
+  than listed, with `line-length` raised to 140 and two rules disabled, and
   `document-start` raised from the default's warning to an error because the
   hook runs no `--strict` and a warning exits 0. Extending is what makes it a
   rule set at all, yamllint enabling no rule a configuration does not name. The

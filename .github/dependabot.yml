@@ -49,6 +49,8 @@ updates:
         patterns: ["*"]
     cooldown:
       default-days: 7
+      # section 11's exclude for this repository's own tags
+      exclude: ["btclib-org/.github/*"]
 
   # uv.lock is committed, and the gate and the suite's workflow install
   # from it with --locked, while the dependency groups declare no

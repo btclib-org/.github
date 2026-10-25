@@ -153,11 +153,12 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
 - `main-self-merge` — a pull request, an approving review, stale reviews
   dismissed on push, conversations resolved, and `squash` as the only
   merge method it accepts — with **no bypass actor at all**, the
-  maintainer's included. The other trees call this repository's
-  reusable workflows at `@main`, as the standard requires, and some of
-  those jobs hold write permissions, such as `pull-requests: write` in
-  `reusable-claude-review.yml`. A change merged here runs in them at
-  once, so another person's approval stands before it
+  maintainer's included. The other trees run this repository's
+  reusable workflows, and some of those jobs hold write permissions,
+  such as `pull-requests: write` in `reusable-claude-review.yml`. A
+  change merged here runs in them at once where a tree calls `@main`,
+  and wherever it changes a script those workflows check out at
+  `main`, so another person's approval stands before it
   (btclib-org/.github#1794).
 - `tag-integrity` — required signatures and nothing else, over
   `refs/tags/v*` rather than over a branch, with **no bypass actor**.
@@ -472,7 +473,7 @@ at 2026-09-22T22:21:50Z.
 
 - **No publishing, and no release workflow.** `CONTRIBUTING.md`'s *A
   version, and no release* is the whole of that answer. There is no
-  `pypi` environment, no OIDC trusted publisher and nothing tagged:
+  `pypi` environment and no OIDC trusted publisher:
   `gh api repos/btclib-org/.github/environments --jq .total_count`
   answers `0`.
 - **No CodeQL**, and GitHub's default setup off with it:

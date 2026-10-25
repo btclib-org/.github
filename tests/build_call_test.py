@@ -18,15 +18,15 @@ import pytest
 
 from . import Tier, by_hand
 from .release_test import released
-from .workflows_test import document
+from .workflows_test import calls_here, document
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 pytestmark = pytest.mark.integration
 
-# the build, called at section 10's `@main`
-CALL = "btclib-org/.github/.github/workflows/reusable-build.yml@main"
+CALLED = "reusable-build.yml"
+"""The workflow of this repository that builds and signs."""
 
 
 @pytest.mark.tier(Tier.PUBLISHER)
@@ -40,7 +40,11 @@ def test_the_release_calls_the_signing_build(
     :param trees: the checkouts.
     """
     jobs = document(released(trees[repository])).get("jobs") or {}
-    calling = [job_id for job_id, job in jobs.items() if job.get("uses") == CALL]
-    assert calling, "no job of release.yml calls reusable-build.yml; " + by_hand(
-        repository, "grep -n reusable-build.yml@main .github/workflows/release.yml"
+    calling = [
+        job_id
+        for job_id, job in jobs.items()
+        if calls_here(str(job.get("uses", "")), CALLED)
+    ]
+    assert calling, f"no job of release.yml calls {CALLED}; " + by_hand(
+        repository, f"grep -n {CALLED}@ .github/workflows/release.yml"
     )

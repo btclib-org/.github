@@ -101,6 +101,9 @@ name: reusable-sdist-rebuild
 # fails the job. `gh attestation verify` does not say which signer it
 # found or which was asked for, so the step prints which one passed.
 #
+# reusable-build.yml is named without a ref, for the reason section 12
+# of README.md gives.
+#
 # **The source repository is pinned by its id, not its name.** A rename
 # keeps the id and changes the name, so `--repo` refuses every release
 # signed before a rename (btclib-org/.github#1798). The step reads the
@@ -288,7 +291,7 @@ jobs:
               --format json --jq \
               '.[].verificationResult.signature.certificate.sourceRepositoryIdentifier'
           }
-          if ids "$workflows/reusable-build.yml@refs/heads/main" \
+          if ids "$workflows/reusable-build.yml" \
             --source-ref "refs/tags/$TAG" | grep -qx "$GITHUB_REPOSITORY_ID"; then
             echo "signed by reusable-build.yml"
           elif ids "$workflows/reusable-attest.yml@refs/heads/main" |

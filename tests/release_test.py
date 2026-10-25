@@ -39,8 +39,9 @@ from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any
 
 import pytest
+import yaml
 
-from . import ORG, ROOT, SELF, Tier, by_hand
+from . import ORG, ROOT, SELF, Tier, by_hand, output
 from .workflows_test import REMOTE_CALL, document, workflows
 
 if TYPE_CHECKING:
@@ -74,6 +75,9 @@ A comment above a step belongs to the YAML and is gone by the time
 a comment naming `CREATE` is not a call of it.
 """
 
+COMMIT = re.compile(r"[0-9a-f]{40}")
+"""The ref section 10 pins a call into this repository to."""
+
 SOURCE = "__source__"
 """The key `jobs` stashes on a resolved job, naming where its steps live.
 
@@ -104,13 +108,12 @@ def jobs(workflow: Path) -> dict[str, dict[str, Any]]:
     into a call on one of this repository's own reusable workflows
     (btclib-org/.github#35), and a job that delegates carries `uses:`
     and no `steps:` of its own. Such a job is resolved: the callee is
-    read out of `ROOT` -- this working tree, which is what a `uses:`
-    pinned at `@main` (section 10) actually runs -- and its own steps
-    are put in the delegating job's place, `SOURCE` naming the file
-    they came from. A `uses:` naming a repository other than this one's
-    own, or naming this one at a ref other than `main`, is refused
-    rather than guessed at: the object such a call would run is not the
-    file `ROOT` holds.
+    read at the ref the call names -- out of `ROOT`, this working tree,
+    for `main`, and from the API for a commit section 10's pin names --
+    and its own steps are put in the delegating job's place, `SOURCE`
+    naming the file they came from. A `uses:` naming a repository other
+    than this one's own, or naming this one at any other ref, is refused
+    rather than guessed at.
 
     A job with a local `./`-call (`test`, `lint`, `docs` and the like in
     a caller's own `release.yml`) is left as it is, with no steps: it is
@@ -125,7 +128,8 @@ def jobs(workflow: Path) -> dict[str, dict[str, Any]]:
     :param workflow: the file to read.
     :returns: each job id against its own mapping.
     :raises LookupError: where a job delegates to a `uses:` naming a ref
-        other than `main`, or a repository other than this one's own.
+        other than `main` or a commit, or a repository other than this
+        one's own.
     """
     found = document(workflow).get("jobs") or {}
     out: dict[str, dict[str, Any]] = {}
@@ -149,16 +153,27 @@ def jobs(workflow: Path) -> dict[str, dict[str, Any]]:
             )
             raise LookupError(msg)
         ref = value[matched.end() :]
-        if ref != "main":
+        path = f".github/workflows/{matched['file']}"
+        if ref == "main":
+            called = document(ROOT / path)
+        elif COMMIT.fullmatch(ref):
+            text = output(
+                "gh",
+                "api",
+                "-H",
+                "Accept: application/vnd.github.raw",
+                f"repos/{ORG}/{SELF}/contents/{path}?ref={ref}",
+            )
+            called = yaml.safe_load(text) or {}
+        else:
             msg = (
-                f"{job_id} delegates to {value!r} at {ref!r}, not main, "
-                "so this tree does not hold the object it runs"
+                f"{job_id} delegates to {value!r} at {ref!r}, neither main "
+                "nor a commit, so this suite does not read the object it runs"
             )
             raise LookupError(msg)
-        callee = ROOT / ".github" / "workflows" / matched["file"]
         steps = [
             step
-            for callee_job in (document(callee).get("jobs") or {}).values()
+            for callee_job in (called.get("jobs") or {}).values()
             for step in (callee_job.get("steps") or [])
         ]
         out[job_id] = {**job, "steps": steps, SOURCE: (SELF, matched["file"])}

@@ -107,6 +107,9 @@ UV_GROUP = "dev-tooling"
 COOLDOWN_DAYS = 7
 """Section 11's cooldown, in days, before an update is offered."""
 
+UNCOOLED = "btclib-org/.github/*"
+"""What section 11's `github-actions` cooldown excludes."""
+
 
 def updates(repository: str, trees: dict[str, Path]) -> list[dict[str, Any]]:
     """Return every `updates:` entry a repository's file declares.
@@ -318,6 +321,30 @@ def test_dependabot_ecosystems_are_grouped_weekly_with_a_cooldown(
         if "target-branch" in entry:
             wrong.append(f"{ecosystem}: target-branch {entry['target-branch']!r}")
     assert not wrong, f"{'; '.join(wrong)}; " + by_hand(repository, f"cat {CONFIG}")
+
+
+def test_dependabot_cools_down_no_tag_of_this_repository(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """The `github-actions` cooldown excludes `UNCOOLED`.
+
+    Section 11: a tag of this repository is offered at the next weekly
+    run, its tags being the organization's own.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    excluded = [
+        (entry.get("cooldown") or {}).get("exclude") or []
+        for entry in updates(repository, trees)
+        if entry["package-ecosystem"] == "github-actions"
+    ]
+    assert excluded, f"{repository} declares no github-actions ecosystem"
+    assert all(UNCOOLED in found for found in excluded), (
+        f"github-actions cooldown excludes {excluded}, not {UNCOOLED!r}; "
+        + by_hand(repository, f"grep -n -A4 'cooldown:' {CONFIG}")
+    )
 
 
 def test_dependabot_the_uv_ecosystem_names_its_group_dev_tooling(

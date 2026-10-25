@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 import pytest
 
 from . import ORG, ROOT, SELF, by_hand, tracked
-from .workflows_test import document, steps
+from .workflows_test import calls_here, document, steps
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -41,8 +41,8 @@ LOCAL = f"./.github/workflows/{REUSABLE}"
 SELF_REPOSITORY = f"$/.github/workflows/{REUSABLE}"
 """`LOCAL` in the self-repository form zizmor recommends."""
 
-REMOTE = f"{ORG}/{SELF}/.github/workflows/{REUSABLE}@main"
-"""A call to this repository's `REUSABLE`, at section 10's `@main`."""
+REMOTE = f"{ORG}/{SELF}/.github/workflows/{REUSABLE}@{'0' * 40}"
+"""A call to this repository's `REUSABLE`, pinned as section 10 asks."""
 
 TARGETS = "${{ inputs.targets }}"
 """Where `REUSABLE`'s `args:` takes the caller's paths."""
@@ -89,8 +89,9 @@ def lychee(
 
     A job calling `REUSABLE` runs that file's steps, so they are read
     from the tree the call names -- the calling tree's own for `LOCAL`,
-    this repository's for `REMOTE` -- with the job's `targets` put where
-    `args:` takes them: the step returned is the one the call runs.
+    this repository's for a remote call, read at this checkout's commit
+    whatever ref the call names -- with the job's `targets` put where
+    `args:` takes them.
 
     :param repository: the repository's name.
     :param trees: the checkouts.
@@ -106,9 +107,7 @@ def lychee(
     for job in (document(workflow).get("jobs") or {}).values():
         if not isinstance(job, dict):
             continue
-        owner = {LOCAL: repository, SELF_REPOSITORY: repository, REMOTE: SELF}.get(
-            job.get("uses", "")
-        )
+        owner = holder(str(job.get("uses", "")), repository)
         if owner is None:
             found.extend(
                 Call(step, workflow, repository, "")
@@ -137,6 +136,19 @@ def lychee(
     return found[0]
 
 
+def holder(value: str, repository: str) -> str | None:
+    """Name the tree holding the `REUSABLE` a job's `uses:` calls.
+
+    :param value: the job's `uses:` value.
+    :param repository: the calling tree's own name.
+    :returns: the calling tree for a call by path, this repository for a
+        remote call, and None where the job does not call `REUSABLE`.
+    """
+    if value in {LOCAL, SELF_REPOSITORY}:
+        return repository
+    return SELF if calls_here(value, REUSABLE) else None
+
+
 def relative(workflow: Path) -> str:
     """Name a workflow file the way a command in its checkout does.
 
@@ -147,7 +159,7 @@ def relative(workflow: Path) -> str:
 
 
 def test_a_call_is_read_from_the_tree_it_names(tmp_path: Path) -> None:
-    """A call by path reads the caller's own copy, and `@main` this one's.
+    """A call by path reads the caller's own copy, and a remote one this one's.
 
     A sibling calling `LOCAL` runs a file its own runner checks out, so
     this repository's copy answering for it would pass a tree whose run
@@ -164,14 +176,15 @@ def test_a_call_is_read_from_the_tree_it_names(tmp_path: Path) -> None:
     sibling.mkdir(parents=True)
     trees = {SELF: tmp_path / SELF, "sibling": tmp_path / "sibling"}
     call = "jobs:\n  links:\n    uses: {}\n    with:\n      targets: docs\n"
-    (sibling / "links.yml").write_text(call.format(REMOTE), encoding="utf-8")
-    read = lychee("sibling", trees)
-    assert (read.owner, read.workflow, read.targets, arguments(read.step)[-1]) == (
-        SELF,
-        here / REUSABLE,
-        "docs",
-        "docs",
-    )
+    for remote in (REMOTE, REMOTE.rpartition("@")[0] + "@main"):
+        (sibling / "links.yml").write_text(call.format(remote), encoding="utf-8")
+        read = lychee("sibling", trees)
+        assert (read.owner, read.workflow, read.targets, arguments(read.step)[-1]) == (
+            SELF,
+            here / REUSABLE,
+            "docs",
+            "docs",
+        )
     for local in (LOCAL, SELF_REPOSITORY):
         (sibling / "links.yml").write_text(call.format(local), encoding="utf-8")
         with pytest.raises(LookupError, match="sibling has none"):

@@ -26,11 +26,12 @@ name: reusable-build
 #     sha256sum dist/* | LC_ALL=C sort -k2 \
 #       | diff - <(printf '%s\n' "$DIGESTS" | grep -F '  dist/')
 #
-# The signer a verifier names is this file at `main`, and the repository
+# The signer a verifier names is this file at any ref, since a tree
+# calls it at `main` or at the commit its pin names, and the repository
 # is compared by id, which a rename keeps (README.md, section 12):
 #
 #     gh attestation verify <file> --owner <owner> \
-#       --signer-workflow btclib-org/.github/.github/workflows/reusable-build.yml@refs/heads/main \
+#       --signer-workflow btclib-org/.github/.github/workflows/reusable-build.yml \
 #       --source-ref refs/tags/v<version> --format json --jq \
 #       '.[].verificationResult.signature.certificate.sourceRepositoryIdentifier' \
 #       | grep -qx "$(gh api repos/<owner>/<tree> --jq .id)"

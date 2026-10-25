@@ -19,6 +19,7 @@ which stops matching is an error rather than a run over nothing.
 
 from __future__ import annotations
 
+import functools
 import re
 import shlex
 from collections import Counter
@@ -27,7 +28,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 import pytest
 import yaml
 
-from . import ORG, ROOT, SELF, by_hand
+from . import ORG, ROOT, SELF, by_hand, gh
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -44,11 +45,6 @@ LOCAL = ("./", "$/")
 recommends. A composite action or a reusable workflow called either way
 runs at the calling commit, so there is nothing its owner could move.
 """
-
-REUSABLE = re.compile(
-    rf"^{re.escape(ORG)}/{re.escape(SELF)}/\.github/workflows/reusable-[\w-]+\.yml@main$"
-)
-"""A call to a reusable workflow of this repository, at section 10's `@main`."""
 
 
 def workflows(root: Path) -> list[Path]:
@@ -159,11 +155,29 @@ REMOTE_CALL = re.compile(
 )
 """A `uses:` naming a reusable workflow of some repository, owner/repo open.
 
-What `REUSABLE` narrows to this organization's own workflows at `@main`,
-this reads for any owner, any repository and any ref: the callee a
-`uses:` names can be anybody's, and resolving it against `trees` is what
-decides whether it can be checked at all.
+Read for any owner, any repository and any ref: the callee a `uses:`
+names can be anybody's, and resolving it against `trees` is what decides
+whether it can be checked at all.
 """
+
+
+def calls_here(value: str, name: str) -> bool:
+    """Say whether a `uses:` calls a reusable workflow of this repository.
+
+    At any ref: which ref section 10 allows is
+    `test_every_action_is_pinned_to_a_commit`'s question, and this is
+    whether a job runs the workflow at all.
+
+    :param value: a job's `uses:` value.
+    :param name: the called file's own name, `reusable-lint.yml` and the like.
+    :returns: whether the value names that file of this repository.
+    """
+    found = REMOTE_CALL.match(value)
+    return found is not None and (found["owner"], found["repo"], found["file"]) == (
+        ORG,
+        SELF,
+        name,
+    )
 
 
 def callee(
@@ -324,24 +338,20 @@ def unpinned(value: str) -> bool:
     """Say whether a `uses:` value breaks section 10's pin rule.
 
     :param value: a job's or step's `uses:` value.
-    :returns: False for a path into this tree, a commit pin, or a call
-        `REUSABLE` matches.
+    :returns: False for a path into this tree or a commit pin.
     """
-    return not (
-        value.startswith(LOCAL) or PINNED.search(value) or REUSABLE.match(value)
-    )
+    return not (value.startswith(LOCAL) or PINNED.search(value))
 
 
 def test_every_action_is_pinned_to_a_commit(
     repository: str,
     trees: dict[str, Path],
 ) -> None:
-    """Section 10: every action is pinned to a commit SHA.
+    """Section 10: every action, and every call into this repository, is pinned.
 
     A `uses:` naming a tag or a branch is a name its owner can move, in
-    a job that can read the workflow token. A path into this tree is
-    not one, for the reason `LOCAL` gives, and a call `REUSABLE` matches
-    is section 10's exception.
+    a job that can read the workflow token, and `@main` is one. A path
+    into this tree is not one, for the reason `LOCAL` gives.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -578,6 +588,93 @@ def test_a_tree_pins_an_action_at_one_commit(
         "grep -hoE 'uses: [^ ]+@[0-9a-f]{40}' .github/workflows/*.yml"
         " | sed -E 's|uses: ([^/]+/[^/@]+)[^@]*@|\\1 |'"
         " | sort -u | cut -d' ' -f1 | uniq -d",
+    )
+
+
+@functools.cache
+def tagged() -> dict[str, str]:
+    """Read this repository's `v*` tags, each against the commit it names.
+
+    The endpoint answers the commit an annotated tag points at, not the
+    tag object, which is what a pin names.
+
+    :returns: each tag's name against its commit.
+    """
+    lines = gh(
+        f"repos/{ORG}/{SELF}/tags?per_page=100",
+        '.[] | select(.name | startswith("v")) | "\\(.name) \\(.commit.sha)"',
+    )
+    return dict(line.split(" ", 1) for line in lines)
+
+
+def test_a_call_into_this_repository_pins_a_tag(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10: a pin into this repository names a commit a tag names.
+
+    Dependabot moves a pin at a tagged commit to the newest tag, and a
+    pin at an untagged commit of `main` to the head of `main`
+    (btclib-org/.github#1870), so an untagged pin follows every landing
+    here as `@main` does. The comment trailing the pin names that tag:
+    Dependabot rewrites that comment, and not one on the line above.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    here = f"{ORG}/{SELF}/"
+    read = [
+        pin
+        for workflow in gated(repository, trees)
+        for pin in pinned(workflow)
+        if pin.value.startswith(here)
+    ]
+    if not read:
+        pytest.skip(f"{repository} pins no call into {ORG}/{SELF}")
+    wrong = [
+        f"{pin.where}: {pin.trailing}"
+        for pin in read
+        if tagged().get(str(pin.trailing)) != pin.value.rpartition("@")[2]
+    ]
+    assert not wrong, f"pins at no commit their tag names: {wrong}; " + by_hand(
+        repository,
+        f"grep -n -B1 'uses: {here}' .github/workflows/*.yml;"
+        f" gh api repos/{ORG}/{SELF}/tags"
+        " --jq '.[] | \"\\(.name) \\(.commit.sha)\"'",
+    )
+
+
+ZIZMOR = (".github/zizmor.yml", ".github/zizmor.yaml", "zizmor.yml", "zizmor.yaml")
+"""Where zizmor finds a tree's configuration, at its root."""
+
+
+def test_zizmor_asks_every_uses_for_a_commit(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10: no `unpinned-uses` policy accepts less than a commit.
+
+    zizmor applies `hash-pin` to whatever no policy names, so a tree
+    with no configuration passes.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    weaker: list[str] = []
+    for name in ZIZMOR:
+        path = trees[repository] / name
+        if not path.is_file():
+            continue
+        parsed = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        rule = (parsed.get("rules") or {}).get("unpinned-uses") or {}
+        policies = (rule.get("config") or {}).get("policies") or {}
+        weaker.extend(
+            f"{name}: {pattern}: {policy}"
+            for pattern, policy in policies.items()
+            if policy != "hash-pin"
+        )
+    assert not weaker, f"policies short of a commit: {weaker}; " + by_hand(
+        repository, "grep -rn -A4 unpinned-uses .github/zizmor.yml zizmor.yml"
     )
 
 

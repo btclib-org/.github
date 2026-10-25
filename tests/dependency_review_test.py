@@ -27,7 +27,7 @@ import pytest
 import yaml
 
 from . import ORG, ROOT, SELF, Refused, by_hand, gh_json
-from .workflows_test import jobs
+from .workflows_test import calls_here, jobs
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -144,7 +144,10 @@ def test_the_lint_gate_reviews_added_dependencies(
     """
     path = trees[repository] / ".github" / "workflows" / "lint.yml"
     text = path.read_text(encoding="utf-8") if path.is_file() else ""
-    called = f"{ORG}/{SELF}/.github/workflows/reusable-lint.yml@main" in text
+    called = path.is_file() and any(
+        calls_here(str(job.get("uses", "")), "reusable-lint.yml")
+        for job in jobs(path).values()
+    )
     carried = bool(ACTION.search(text)) and READ_AS in text
     assert called or carried, (
         "lint.yml neither calls reusable-lint.yml nor runs the action on "
