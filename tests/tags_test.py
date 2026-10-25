@@ -23,7 +23,7 @@ from fnmatch import fnmatch
 
 import pytest
 
-from . import ORG, SELF, by_hand, gh, gh_json
+from . import ORG, ROOT, SELF, by_hand, gh, gh_json, tracked
 
 pytestmark = pytest.mark.integration
 
@@ -75,12 +75,50 @@ def test_the_newest_release_tag_is_verified(repository: str) -> None:
 CALENDAR = re.compile(r"^v(\d{4})\.(\d{1,2})\.(\d{1,2})$")
 """Section 12's tag of this repository, `vYYYY.M.D` and nothing after."""
 
-CALLED = ".github/workflows/reusable-*.yml"
-"""The files a tree's pin into this repository runs."""
+CALLED = (
+    ".github/workflows/reusable-*.yml",
+    ".github/scripts/*",
+    ".github/dependency-review.yml",
+)
+"""What a tree's pin into this repository runs: the reusable workflows,
+the scripts they serve and the config file the lint job reads."""
+
+
+def called(name: str) -> bool:
+    """Say whether a path is one a tree's pin runs.
+
+    :param name: a path relative to the root.
+    :returns: whether it matches a pattern of `CALLED`.
+    """
+    return any(fnmatch(name, pattern) for pattern in CALLED)
+
+
+def test_called_names_what_a_pinned_tree_runs_and_nothing_else() -> None:
+    """A workflow, a script, a nested script and the config file; not prose.
+
+    Each pattern also matches a file this tree tracks, so one that stops
+    matching anything fails here and not silently.
+    """
+    for name in (
+        ".github/workflows/reusable-lint.yml",
+        ".github/scripts/check_audit.py",
+        ".github/scripts/sub/x.py",
+        ".github/dependency-review.yml",
+    ):
+        assert called(name), name
+    for name in (
+        "README.md",
+        ".github/workflows/lint.yml",
+        ".github/workflows/reusable-lint.txt",
+        ".github/dependabot.yml",
+    ):
+        assert not called(name), name
+    for pattern in CALLED:
+        assert tracked(ROOT, pattern), f"{pattern} matches no tracked file"
 
 
 def test_this_repository_tags_what_it_changes_for_the_trees() -> None:
-    """Section 12: a tag on `main` within a day of a reusable workflow changing.
+    """Section 12: a tag on `main` within a day of a `CALLED` file changing.
 
     Skipped until the first tag, which is where the rule starts to be
     kept. The landing is dated by the commit on `main` that changed a
@@ -102,9 +140,7 @@ def test_this_repository_tags_what_it_changes_for_the_trees() -> None:
         f"{newest} names no commit of main; {command}"
     )
     after = {commit["sha"] for commit in compare["commits"]}
-    changed = [
-        f["filename"] for f in compare["files"] if fnmatch(f["filename"], CALLED)
-    ]
+    changed = [f["filename"] for f in compare["files"] if called(f["filename"])]
     landed = [
         datetime.fromisoformat(line.split(" ", 1)[1])
         for name in changed
@@ -115,7 +151,9 @@ def test_this_repository_tags_what_it_changes_for_the_trees() -> None:
         if line.split(" ", 1)[0] in after
     ]
     waiting = datetime.now(UTC) - min(landed, default=datetime.now(UTC))
+    paths = " ".join(CALLED)
+    log = f"git log --format=%cI {newest}..origin/main -- {paths}"
     assert waiting <= timedelta(days=1), (
         f"{sorted(changed)} changed on main {waiting} ago and {newest} predates it;"
-        f" {by_hand(SELF, f'git log --format=%cI {newest}..origin/main -- {CALLED}')}"
+        f" {by_hand(SELF, log)}"
     )

@@ -97,16 +97,15 @@ jobs:
         with:
           enable-cache: false
       # the notes are read by a script served from this repository the way
-      # reusable-version-check.yml serves its own, `ref: main` being the
-      # same trust the caller already extends by naming this workflow
-      # `@main`. The script takes the standard library alone, which is
-      # why the run below is --no-project
+      # reusable-version-check.yml serves its own, `job.workflow_sha`
+      # being this workflow's own commit. The script takes the standard
+      # library alone, which is why the run below is --no-project
       - name: Check out the notes script
         if: steps.previous.outputs.has-previous == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: btclib-org/.github
-          ref: main
+          ref: ${{ job.workflow_sha }}
           path: standard
           persist-credentials: false
           sparse-checkout: .github/scripts

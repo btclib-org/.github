@@ -21,10 +21,9 @@ name: reusable-documented
 # repository's tree by default, `actions/checkout` reading
 # `github.repository` from the run it is a step of rather than from
 # where the workflow file lives, so `repository:` and `ref:` are what
-# name this one instead. `main` is the same trust a caller already
-# extends by naming this workflow `@main`. So this job builds nothing
-# and installs nothing of the calling tree, and a caller owes no copy of
-# wait_for_readthedocs_build.py.
+# name this one instead, at this workflow's commit. So this job builds
+# nothing and installs nothing of the calling tree, and a caller owes no
+# copy of wait_for_readthedocs_build.py.
 
 on:
   workflow_call:
@@ -54,12 +53,13 @@ jobs:
       # .github/scripts plus this repository's root, cone mode being the
       # default and root files always being in the cone. This job builds
       # nothing and installs nothing, and the root's pyproject.toml is
-      # inert besides, --no-project ignoring it
+      # inert besides, --no-project ignoring it. `ref:` is this
+      # workflow's own commit, `job.workflow_sha`
       - name: Check out the wait script
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: btclib-org/.github
-          ref: main
+          ref: ${{ job.workflow_sha }}
           persist-credentials: false
           sparse-checkout: .github/scripts
       # caching off, as in reusable-version-check.yml and for the same

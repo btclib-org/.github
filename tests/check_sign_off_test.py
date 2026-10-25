@@ -236,8 +236,9 @@ def _run(job: dict[str, Any]) -> str:
 def test_the_job_reads_the_whole_branch(workflow: str, path: str) -> None:
     """Each job runs the script on the range, over a checkout of all history.
 
-    The reusable job runs this repository's copy, checked out at `main`
-    beside the caller's tree; this repository's own job runs the branch's.
+    The reusable job runs this repository's copy, checked out at the
+    workflow's own commit beside the caller's tree; this repository's own job
+    runs the branch's.
     """
     job = jobs(WORKFLOWS / workflow)["sign-off"]
     checkout = job["steps"][0]

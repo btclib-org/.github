@@ -209,13 +209,14 @@ jobs:
           enable-cache: false
       # `path:` puts it beside the caller's checkout instead of over it;
       # sparse, so what lands is .github/scripts and this repository's
-      # root files. `ref: main` is the trust the caller extends by naming
-      # this workflow `@main`
+      # root files. `ref:` is this workflow's own commit,
+      # `job.workflow_sha`, so the script is the one of the workflow that
+      # runs it
       - name: Check out the audit script
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: btclib-org/.github
-          ref: main
+          ref: ${{ job.workflow_sha }}
           path: standard
           persist-credentials: false
           sparse-checkout: .github/scripts
@@ -256,10 +257,10 @@ jobs:
         # every action is pinned to a commit SHA, the tag in the comment
         uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
-          # the organization's one file, at main like a call of this
-          # repository's reusable workflows: a change to the threshold
-          # reaches every tree in one landing
-          config-file: btclib-org/.github/.github/dependency-review.yml@main
+          # the organization's one file, at this workflow's own commit,
+          # `job.workflow_sha`: the threshold is the one of the workflow
+          # that applies it
+          config-file: btclib-org/.github/.github/dependency-review.yml@${{ job.workflow_sha }}
           # a remote config file is read without credentials unless this
           # input carries one, and GitHub limits an unauthenticated request
           # by the address it comes from, which a runner shares. The file is
@@ -295,13 +296,13 @@ jobs:
           fetch-depth: 0
       # `path:` puts it beside the caller's checkout instead of over it;
       # sparse, so what lands is .github/scripts and this repository's root
-      # files. `ref: main` is the trust the caller extends by naming this
-      # workflow `@main`
+      # files. `ref:` is this workflow's own commit, `job.workflow_sha`,
+      # so the script is the one of the workflow that runs it
       - name: Check out the sign-off script
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: btclib-org/.github
-          ref: main
+          ref: ${{ job.workflow_sha }}
           path: standard
           persist-credentials: false
           sparse-checkout: .github/scripts

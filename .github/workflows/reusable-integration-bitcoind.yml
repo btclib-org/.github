@@ -11,10 +11,10 @@ name: reusable-integration-bitcoind
 # to open regardless.
 #
 # The node is installed by .github/scripts/install_bitcoind.py, served
-# from this repository at main and sparse-checked-out into the job
-# alongside the caller's own tree, exactly as reusable-wait-for-index.yml
-# already serves wait_for_pypi_release.py: a caller owes no copy of it
-# (section 10 of README.md).
+# from this repository at this workflow's commit and sparse-checked-out
+# into the job alongside the caller's own tree, exactly as
+# reusable-wait-for-index.yml already serves wait_for_pypi_release.py: a
+# caller owes no copy of it (section 10 of README.md).
 #
 # The required inputs are the ordinary shape: which Core release and
 # which published sha256 to install -- a tree's own claim about the node
@@ -112,15 +112,15 @@ jobs:
       # tree above rather than over it: `actions/checkout` defaults to
       # the tree the run belongs to, so `repository:` and `ref:` are what
       # name this one, and `path:` is what keeps the two checkouts apart.
-      # `main` is the same trust the caller already extends by naming
-      # this workflow `@main`. Sparse, so what lands is .github/scripts
-      # and this repository's root files, nothing of which either script
-      # below reads besides itself
+      # `job.workflow_sha` is this workflow's own commit, so the scripts
+      # are those of the workflow that runs them. Sparse, so what lands
+      # is .github/scripts and this repository's root files, nothing of
+      # which either script below reads besides itself
       - name: Check out this repository's scripts
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: btclib-org/.github
-          ref: main
+          ref: ${{ job.workflow_sha }}
           path: standard
           persist-credentials: false
           sparse-checkout: .github/scripts

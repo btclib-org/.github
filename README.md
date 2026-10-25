@@ -1908,9 +1908,10 @@ without adding to it is deleted.
 - **A call to a reusable workflow of `btclib-org/.github` is pinned the same
   way, to a commit one of its `v*` tags names**, and the comment trailing the
   pin names that tag, since Dependabot rewrites a comment on the pin's own
-  line and no other. A change merged there to a reusable workflow then reaches
-  a tree only through a pull request in that tree; the scripts those workflows
-  check out at `main` are btclib-org/.github#1871's. Dependabot's
+  line and no other. A change merged there to a reusable workflow, or to a
+  script it serves, then reaches a tree only through a pull request in that
+  tree, the bullet on a script run out of `btclib-org/.github` saying which
+  jobs that leaves out. Dependabot's
   `github-actions` updates move such a pin to the newest tag, and move a pin at
   an untagged commit of `main` to the head of `main` instead
   (btclib-org/.github#1870); section 12 says when a tag is cut.
@@ -2007,11 +2008,20 @@ without adding to it is deleted.
   (btclib-org/btclib#1165). The wait counts against a deadline rather than
   against attempts, and its test substitutes the transport and the clock.
 - **A workflow, reusable or a tree's own, runs a script out of
-  `btclib-org/.github` at `main`, sparse on `.github/scripts`, and no tree owes
-  a copy of it**; a wait served this way is the script the bullet above asks
-  for. `actions/checkout` reads `github.repository` from the run it is a step
-  of rather than from where the workflow file lives, so `repository:` and
-  `ref:` are what name the tree a script is served from; a workflow that needs
+  `btclib-org/.github`, sparse on `.github/scripts`, and no tree owes a copy
+  of it**; a wait served this way is the script the bullet above asks for.
+  A reusable workflow checks out at `ref: ${{ job.workflow_sha }}`, its own
+  commit, so a script is the one of the workflow that runs it, and a tree that
+  pins the call runs the scripts of that commit. A tree's own job reads
+  `main`: `job.workflow_sha` there is the tree's own commit, so the job would
+  have to name the commit its calls pin. Dependabot's reading in
+  btclib-org/.github#1870 covers a `uses:` pin and the comment on its line,
+  not a `ref:` or `config-file:` value, which would be moved by hand and drift
+  from the pins. The cost is that a change to a script reaches such a job when
+  it lands.
+  `actions/checkout` reads `github.repository` from the run it is a step of
+  rather than from where the workflow file lives, so `repository:` and `ref:`
+  are what name the tree a script is served from; a workflow that needs
   the caller's tree as well takes the second checkout under a `path:`. A tree's
   own job takes it under a `path:` even where it takes none of its own source,
   cone mode adding the root files, and the checkout is admitted there because
@@ -3194,12 +3204,14 @@ such a finding only through a further push or a `close`/`reopen`.
   check: its context is `lint / Dependency review` in a tree that calls
   `reusable-lint.yml`, and `Dependency review` in a tree that keeps its own
   `lint.yml`. Its settings are one file, this repository's
-  `.github/dependency-review.yml`, read at `main` so that a change reaches every
-  tree in one landing. `allow-licenses` holds permissive single SPDX
-  identifiers, and a package whose concluded licence carries a copyleft or a
-  `LicenseRef` term is named by its purl in `allow-dependencies-licenses`, with
-  its reason, so that a new one is a decision taken in a pull request. Only what
-  a pull request adds or changes is compared; a package already locked is
+  `.github/dependency-review.yml`, read by `reusable-lint.yml` at its own
+  commit, `job.workflow_sha`, as section 10 says of its scripts, so that a tree
+  pinning the call takes a change to the threshold in a pull request of its own;
+  a tree's own job reads it at `main`. `allow-licenses` holds permissive single
+  SPDX identifiers, and a package whose concluded licence carries a copyleft or
+  a `LicenseRef` term is named by its purl in `allow-dependencies-licenses`,
+  with its reason, so that a new one is a decision taken in a pull request. Only
+  what a pull request adds or changes is compared; a package already locked is
   audited by section 12's lint-job step, which also reads OSV's `MAL-` entries
   that the compare does not.
   **`allow-ghsas` is not used**: an advisory allowed there owes a
@@ -3420,7 +3432,9 @@ A label means what its description says. Who applies and removes it:
   section is written for it, and its placeholder version is not compared with
   it. The tag is `vYYYY.M.D`, signed and annotated, and names a commit of
   `main`. It is cut within a day of a landing that changes a
-  `.github/workflows/reusable-*.yml`. A day has one tag at most, since no
+  `.github/workflows/reusable-*.yml`, a script under `.github/scripts/` or
+  `.github/dependency-review.yml`, which a pinned tree runs at its pin
+  (section 10). A day has one tag at most, since no
   tag has a fourth component: Dependabot moves a pin only to a tag with no
   more components than the one it sits at (btclib-org/.github#1870). The
   maintainer cuts it, signed as section 11's *Signatures* asks of a tag:
@@ -3522,7 +3536,7 @@ A label means what its description says. Who applies and removes it:
   archives. An exemption for a wrapper does not follow from
   `Requires-Dist` naming only its `cffi`: the vendored library is a component
   too, at the commit its submodule pins. `generate_sbom.py` of this
-  repository writes it for every tree, served from `main` as section 10 says.
+  repository writes it for every tree, served as section 10 says.
 - **What a release is not affected by is stated in the same document**, which
   is what `OSPS-VM-04.02` asks of a project: a reader of the release learns
   that a known vulnerability does not affect it from the release itself. The

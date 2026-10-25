@@ -112,9 +112,9 @@ jobs:
       # this repository and not the caller's, `actions/checkout`
       # defaulting to the tree the run belongs to rather than to the one
       # the workflow file lives in: the script is the organization's and
-      # is served from here. `ref: main` is the same trust the caller
-      # already extends by naming this workflow `@main`, section 11's
-      # rulesets holding that branch.
+      # is served from here. `ref:` is this workflow's own commit,
+      # `job.workflow_sha`, so the script is the one of the workflow that
+      # runs it.
       #
       # sparse, and that is the whole reason this checkout is admissible
       # in a job that installs nothing of any calling tree's own
@@ -127,7 +127,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: btclib-org/.github
-          ref: main
+          ref: ${{ job.workflow_sha }}
           persist-credentials: false
           sparse-checkout: .github/scripts
       - name: Setup uv
