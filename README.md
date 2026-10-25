@@ -1912,8 +1912,8 @@ without adding to it is deleted.
   a tree only through a pull request in that tree; the scripts those workflows
   check out at `main` are btclib-org/.github#1871's. Dependabot's
   `github-actions` updates move such a pin to the newest tag, and move a pin at
-  an untagged commit to the head of `main` instead (btclib-org/.github#1870);
-  section 12 says when a tag is cut.
+  an untagged commit of `main` to the head of `main` instead
+  (btclib-org/.github#1870); section 12 says when a tag is cut.
   zizmor's default `unpinned-uses` policy asks every `uses:` for a commit, so
   a tree's zizmor configuration sets no policy of its own there. The rejected
   alternative is a call naming `@main`, held by section 11's rulesets: every
@@ -3490,7 +3490,8 @@ A label means what its description says. Who applies and removes it:
     The signer is named without a ref. The certificate names the ref the
     tree's call gave, `refs/heads/main` or the commit section 10's pin names,
     and `gh attestation verify` matches a signer named without a ref at any
-    ref.
+    ref. That gives up a check: an attestation `reusable-build.yml` made at
+    any branch or commit of `btclib-org/.github` verifies.
 
     The signature is made before the environment's approval, so a release whose
     gates fail afterwards leaves an attestation for files that never reached an

@@ -614,10 +614,10 @@ def test_a_call_into_this_repository_pins_a_tag(
     """Section 10: a pin into this repository names a commit a tag names.
 
     Dependabot moves a pin at a tagged commit to the newest tag, and a
-    pin at any other commit to the head of `main` (btclib-org/.github#1870),
-    so an untagged pin follows every landing here as `@main` does. The
-    comment trailing the pin names that tag: Dependabot rewrites that
-    comment, and not one on the line above.
+    pin at an untagged commit of `main` to the head of `main`
+    (btclib-org/.github#1870), so an untagged pin follows every landing
+    here as `@main` does. The comment trailing the pin names that tag:
+    Dependabot rewrites that comment, and not one on the line above.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
