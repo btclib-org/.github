@@ -7,10 +7,11 @@
 Three questions of this tree and two of every tree. Of this tree: that the
 organization's file holds only keys the action reads and states the policy
 the section gives, and that `reusable-lint.yml`'s job reads that file at
-`main`, with the action pinned and the token no wider than read access.
-Of every tree: that the forge's dependency graph is on, which is what the
-action reads, and that the lint gate runs the job, either by calling
-`reusable-lint.yml` or by carrying the action in its own `lint.yml`.
+the workflow's own commit, with the action pinned and the token no wider
+than read access. Of every tree: that the forge's dependency graph is on,
+which is what the action reads, and that the lint gate runs the job, either
+by calling `reusable-lint.yml` or by carrying the action in its own
+`lint.yml`.
 
 What is not read is the action's behaviour. A config file the action
 refuses, or a licence it would fail on, is found by running the action's
@@ -38,8 +39,11 @@ CONFIG = ROOT / ".github" / "dependency-review.yml"
 REUSABLE = ROOT / ".github" / "workflows" / "reusable-lint.yml"
 """The workflow whose `dependency-review` job reads it."""
 
-READ_AS = f"{ORG}/{SELF}/.github/dependency-review.yml@main"
-"""How a workflow names the file: at `main`, as a reusable call does."""
+READ_AS = f"{ORG}/{SELF}/.github/dependency-review.yml@${{{{ job.workflow_sha }}}}"
+"""How the reusable workflow names the file: at its own commit."""
+
+TREE_READ_AS = f"{ORG}/{SELF}/.github/dependency-review.yml@main"
+"""How a tree's own job names it, `job.workflow_sha` being the tree's."""
 
 KEYS = frozenset(
     {
@@ -101,7 +105,7 @@ def test_the_organization_file_states_the_policy() -> None:
 
 
 def test_the_reusable_job_reads_the_organization_file() -> None:
-    """The job pins the action, reads the file at `main`, and reads contents."""
+    """The job pins the action, reads the file at its commit, reads contents."""
     job = jobs(REUSABLE)["dependency-review"]
     assert job["name"] == "Dependency review"
     assert job["permissions"] == {"contents": "read"}
@@ -148,9 +152,9 @@ def test_the_lint_gate_reviews_added_dependencies(
         calls_here(str(job.get("uses", "")), "reusable-lint.yml")
         for job in jobs(path).values()
     )
-    carried = bool(ACTION.search(text)) and READ_AS in text
+    carried = bool(ACTION.search(text)) and TREE_READ_AS in text
     assert called or carried, (
         "lint.yml neither calls reusable-lint.yml nor runs the action on "
-        f"{READ_AS}; "
+        f"{TREE_READ_AS}; "
         + by_hand(repository, "grep -c dependency-review .github/workflows/lint.yml")
     )

@@ -29,9 +29,10 @@ name: reusable-audit
 # preview flag is spelled as uv's own warning spells it.
 #
 # No input: the tree is the caller's checkout and the script is this
-# repository's, served from `main` the way reusable-version-check.yml
-# serves its own. The calling job's `if:` and `needs:` stay in the caller,
-# whose `publish-*` jobs name this job in theirs.
+# repository's, served at this workflow's commit the way
+# reusable-version-check.yml serves its own. The calling job's `if:` and
+# `needs:` stay in the caller, whose `publish-*` jobs name this job in
+# theirs.
 
 on:
   workflow_call:
@@ -54,13 +55,14 @@ jobs:
           persist-credentials: false
       # `path:` puts it beside the caller's checkout instead of over it;
       # sparse, so what lands is .github/scripts and this repository's
-      # root files. `ref: main` is the trust the caller extends by naming
-      # this workflow `@main`
+      # root files. `ref:` is this workflow's own commit,
+      # `job.workflow_sha`, so the script is the one of the workflow that
+      # runs it
       - name: Check out the audit script
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: btclib-org/.github
-          ref: main
+          ref: ${{ job.workflow_sha }}
           path: standard
           persist-credentials: false
           sparse-checkout: .github/scripts

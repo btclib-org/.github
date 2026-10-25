@@ -184,19 +184,18 @@ jobs:
       # questions of two scripts, served from this repository the way
       # reusable-wait-for-index.yml serves its own: their docstrings say
       # what each compares the version with and why, and a test module
-      # under tests/ named after each drives it. `ref: main` is the same
-      # trust the caller already extends by naming this workflow
-      # `@main`; `path:` puts it beside the caller's checkout instead of
-      # over it; sparse, so what lands is .github/scripts and this
-      # repository's root files. Skipped on a rehearsal, whose upload
-      # goes to TestPyPI under a .dev suffix rather than to the index an
-      # installer resolves from
+      # under tests/ named after each drives it. `ref:` is this
+      # workflow's own commit, `job.workflow_sha`; `path:` puts it beside
+      # the caller's checkout instead of over it; sparse, so what lands
+      # is .github/scripts and this repository's root files. Skipped on a
+      # rehearsal, whose upload goes to TestPyPI under a .dev suffix
+      # rather than to the index an installer resolves from
       - name: Check out the version scripts (release only)
         if: github.event_name == 'push'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: btclib-org/.github
-          ref: main
+          ref: ${{ job.workflow_sha }}
           path: standard
           persist-credentials: false
           sparse-checkout: .github/scripts

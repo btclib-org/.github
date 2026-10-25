@@ -377,7 +377,7 @@ STEPS: list[dict[str, Any]] = [
         "uses": CHECKOUT,
         "with": {
             "repository": "btclib-org/.github",
-            "ref": "main",
+            "ref": "${{ job.workflow_sha }}",
             "path": "standard",
             "persist-credentials": False,
             "sparse-checkout": ".github/scripts",

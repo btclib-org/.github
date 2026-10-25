@@ -171,16 +171,16 @@ jobs:
       # caller: `actions/checkout` defaults to the tree the run belongs
       # to, so `repository:` and `ref:` are what name this one, and
       # `path:` puts it beside the caller's checkout instead of over it.
-      # `main` is the same trust the caller already extends by naming
-      # this workflow `@main`. Sparse, so what lands is .github/scripts
-      # and this repository's root files, nothing of which any step here
-      # reads besides the script itself
+      # `job.workflow_sha` is this workflow's own commit, so the script
+      # is the one of the workflow that runs it. Sparse, so what lands
+      # is .github/scripts and this repository's root files, nothing of
+      # which any step here reads besides the script itself
       - name: Check out the counts script
         if: env.SELECTED == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: btclib-org/.github
-          ref: main
+          ref: ${{ job.workflow_sha }}
           path: standard
           persist-credentials: false
           sparse-checkout: .github/scripts

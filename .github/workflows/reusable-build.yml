@@ -41,7 +41,8 @@ name: reusable-build
 #
 # The checkout is the calling tree's: its `.github/scripts/normalize_sdist.py`
 # and its `.github/actions/dev-version` run here, and the script that
-# writes the bill of materials is this repository's, from `main`.
+# writes the bill of materials is this repository's, at this workflow's
+# commit.
 #
 # A tree's calling job carries `permissions: contents: read,
 # id-token: write, attestations: write`, a called workflow's own block
@@ -195,11 +196,12 @@ jobs:
         env:
           PYTHON: ${{ inputs.python }}
         run: uv run --no-project --python "$PYTHON" .github/scripts/normalize_sdist.py dist/
+      # at this workflow's own commit, `job.workflow_sha`
       - name: Check out the script that writes the bill of materials
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: btclib-org/.github
-          ref: main
+          ref: ${{ job.workflow_sha }}
           path: btclib-org-github
           persist-credentials: false
           sparse-checkout: .github/scripts

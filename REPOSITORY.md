@@ -157,9 +157,8 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
   reusable workflows, and some of those jobs hold write permissions,
   such as `pull-requests: write` in `reusable-claude-review.yml`. A
   change merged here runs in them at once where a tree calls `@main`,
-  and wherever it changes a script those workflows check out at
-  `main`, so another person's approval stands before it
-  (btclib-org/.github#1794).
+  and in a tree's own job that checks out a script at `main`, so another
+  person's approval stands before it (btclib-org/.github#1794).
 - `tag-integrity` — required signatures and nothing else, over
   `refs/tags/v*` rather than over a branch, with **no bypass actor**.
 

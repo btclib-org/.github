@@ -62,12 +62,13 @@ jobs:
         with:
           enable-cache: false
       # the script that reads griffe's answer is served from this
-      # repository, as reusable-public-api.yml serves its own
+      # repository, as reusable-public-api.yml serves its own, at this
+      # workflow's own commit, `job.workflow_sha`
       - name: Check out the script
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: btclib-org/.github
-          ref: main
+          ref: ${{ job.workflow_sha }}
           path: standard
           persist-credentials: false
           sparse-checkout: .github/scripts

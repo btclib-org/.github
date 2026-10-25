@@ -1,10 +1,11 @@
 ---
 # What `actions/dependency-review-action` holds a pull request's added
 # dependencies to, in every repository of the organization: one file read
-# through `config-file: btclib-org/.github/.github/dependency-review.yml@main`
-# by `reusable-lint.yml`'s `Dependency review` job, and by the `lint.yml` of a
-# tree that keeps its own. README.md section 11 states the rule; what is
-# here is the numbers it leaves to a file, and the reason beside each.
+# through `config-file: btclib-org/.github/.github/dependency-review.yml@<ref>`
+# by `reusable-lint.yml`'s `Dependency review` job, which names its own commit
+# as `<ref>`, and by the `lint.yml` of a tree that keeps its own.
+# README.md section 11 states the rule; what is here is the numbers it
+# leaves to a file, and the reason beside each.
 #
 # Not here, and on purpose: `allow-ghsas`. An advisory this check let
 # through would be a judgement that a release is not affected by it, and
