@@ -923,9 +923,6 @@ names are PyPI's, `https://pypi.org/pypi/<name>/json` answering for each.
 EXPECTED_RETIRED: dict[tuple[str, str], str] = {
     ("bbt", "btclib-ecc"): "btclib-org/bbt#199",
     ("bip39-slip39", "btclib-ecc"): "btclib-org/bip39-slip39#165",
-    ("bitcoin-node-tests", "btclib-ecc"): "btclib-org/bitcoin-node-tests#513",
-    ("btclib-benchmarks", "btclib-ecc"): "btclib-org/btclib-benchmarks#504",
-    ("btclib-node", "btclib-ecc"): "btclib-org/btclib-node#2041",
 }
 """Each tree known to require a retired name, against what moves it.
 
