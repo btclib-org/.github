@@ -368,7 +368,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         (
             "btclib",
             "btclib-node",
-            "btclib-secp256k1",
             "bbt",
             "btclib-org.github.io",
             "btclib-wallet",
@@ -382,7 +381,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         (
             "btclib",
             "btclib-node",
-            "btclib-secp256k1",
             "bbt",
             "btclib-org.github.io",
             "btclib-wallet",
@@ -396,7 +394,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         (
             "btclib",
             "btclib-node",
-            "btclib-secp256k1",
             "bbt",
             "btclib-org.github.io",
             "btclib-wallet",
@@ -410,7 +407,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         (
             "btclib",
             "btclib-node",
-            "btclib-secp256k1",
             "bbt",
             "btclib-org.github.io",
             "btclib-wallet",
