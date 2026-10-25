@@ -82,11 +82,11 @@ jobs:
   # `if:` of the review's: the switch, the draft check, the closed check
   # and the fork check are the callee's.
   #
-  # By path, as links.yml calls reusable-links.yml, rather than the
-  # `@main` a caller in another repository writes: the callee is this
-  # tree's own file, so a path runs the copy at the commit under review,
-  # where `@main` would review a branch that changes the callee with the
-  # callee as `main` already holds it. zizmor's self-repository finding
+  # By path, as links.yml calls reusable-links.yml, rather than the commit
+  # pin section 10 asks of a caller in another repository: the callee is
+  # this tree's own file, so a path runs the copy at the commit under
+  # review, where a pin would review a branch that changes the callee with
+  # the callee as the pin holds it. zizmor's self-repository finding
   # is declined on the line, which is the form btclib-org/.github#1144
   # settled, this repository holding no zizmor.yml to state it in.
   #
