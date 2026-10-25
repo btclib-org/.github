@@ -138,12 +138,16 @@ def test_the_files_hashed_are_the_files_signed(jobs: dict[str, Any]) -> None:
 
 
 def test_the_rebuild_verifies_the_signer_and_the_tag() -> None:
-    """Assert the weekly rebuild names reusable-build.yml and its tag."""
+    """Assert the weekly rebuild names reusable-build.yml and its tag.
+
+    reusable-build.yml with no ref (section 12), and reusable-attest.yml
+    at `main`, the ref its attestations name.
+    """
     steps = _jobs("reusable-sdist-rebuild.yml")["rebuild"]["steps"]
     run = next(s["run"] for s in steps if "gh attestation verify" in s.get("run", ""))
     assert '--source-ref "refs/tags/$TAG"' in run
-    build = "reusable-build.yml@refs/heads/main"
-    attest = "reusable-attest.yml@refs/heads/main"
+    build = '"$workflows/reusable-build.yml" '
+    attest = '"$workflows/reusable-attest.yml@refs/heads/main"'
     assert build in run
     assert attest in run, "the fallback for earlier releases"
     assert run.index(build) < run.index(attest)
@@ -161,7 +165,7 @@ def test_the_rebuild_pins_the_source_repository_by_its_id() -> None:
     assert "--repo" not in verify
     assert '--owner "$GITHUB_REPOSITORY_OWNER"' in verify
     assert "sourceRepositoryIdentifier" in verify
-    _, build, attest = run.split("@refs/heads/main")
+    build, attest = run[run.index("if ids ") :].split("elif ids ")
     for signer in (build, attest):
         assert 'grep -qx "$GITHUB_REPOSITORY_ID"' in signer
 

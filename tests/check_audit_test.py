@@ -26,7 +26,8 @@ from typing import TYPE_CHECKING, Any
 import pytest
 import yaml
 
-from . import ORG, ROOT, SELF, by_hand
+from . import ROOT, by_hand
+from .workflows_test import calls_here
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -456,10 +457,13 @@ def test_the_lint_gate_audits_the_whole_lock(
         pytest.skip(f"{repository} has no uv.lock")
     path = trees[repository] / ".github" / "workflows" / "lint.yml"
     text = path.read_text(encoding="utf-8") if path.is_file() else ""
-    if f"{ORG}/{SELF}/.github/workflows/reusable-lint.yml@main" in text:
-        return
     hint = by_hand(repository, "grep -c check_audit .github/workflows/lint.yml")
     jobs = yaml.safe_load(text).get("jobs", {}) if text else {}
+    if any(
+        calls_here(str(job.get("uses", "")), "reusable-lint.yml")
+        for job in jobs.values()
+    ):
+        return
     assert "lint" in jobs, (
         f"lint.yml neither calls reusable-lint.yml nor has a lint job; {hint}"
     )

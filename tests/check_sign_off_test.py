@@ -23,8 +23,8 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import ORG, ROOT, SELF, by_hand
-from .workflows_test import jobs
+from . import ROOT, by_hand
+from .workflows_test import calls_here, jobs
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -261,7 +261,10 @@ def test_the_lint_gate_checks_the_sign_off(
     """
     path = trees[repository] / ".github" / "workflows" / "lint.yml"
     text = path.read_text(encoding="utf-8") if path.is_file() else ""
-    called = f"{ORG}/{SELF}/.github/workflows/reusable-lint.yml@main" in text
+    called = path.is_file() and any(
+        calls_here(str(job.get("uses", "")), "reusable-lint.yml")
+        for job in jobs(path).values()
+    )
     assert called or SCRIPT.name in text, (
         f"lint.yml neither calls reusable-lint.yml nor runs {SCRIPT.name}; "
         + by_hand(repository, f"grep -c {SCRIPT.name} .github/workflows/lint.yml")

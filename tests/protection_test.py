@@ -44,10 +44,10 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import ORG, SELF, by_hand, gh_json, still_open
+from . import ORG, by_hand, gh_json, still_open
 from .check_sign_off_test import SCRIPT
 from .dependency_review_test import ACTION, READ_AS, REUSABLE
-from .workflows_test import jobs
+from .workflows_test import calls_here, jobs
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -78,8 +78,8 @@ Empty is where this returns rather than where it always is: the table
 stands for the next departure the maintainer accepts.
 """
 
-CALL = f"{ORG}/{SELF}/.github/workflows/reusable-lint.yml@main"
-"""How a tree's `lint.yml` calls the workflow that holds the review job."""
+CALLED = "reusable-lint.yml"
+"""The workflow of this repository holding the review job a tree calls."""
 
 
 @pytest.fixture(scope="session")
@@ -229,7 +229,7 @@ def lint_context(
         return None
     for job_id, job in jobs(lint).items():
         name = job.get("name", job_id)
-        if job.get("uses") == CALL:
+        if calls_here(str(job.get("uses", "")), CALLED):
             return f"{name} / {jobs(REUSABLE)[called]['name']}"
         if any(carries(step) for step in job.get("steps") or []):
             return str(name)

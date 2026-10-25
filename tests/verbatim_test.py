@@ -103,6 +103,7 @@ rather than the entry's.
 """
 
 EXPECTED_DRIFT: dict[str, str] = {
+    ".yamllint.yaml": "btclib-org/.github#1870",
     "CONTRIBUTING.md": "btclib-org/.github#1740",
     "REVIEWING.md": "btclib-org/.github#1846",
     "tests/secret_free/__init__.py": "btclib-org/.github#1697",

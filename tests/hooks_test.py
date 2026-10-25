@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 import yaml
 
-from . import ORG, SELF, Tier, by_hand, tracked
+from . import ORG, SELF, Tier, by_hand, gh_json, tracked
 from .pyproject_test import FLOOR, parsed
 
 if TYPE_CHECKING:
@@ -162,12 +162,24 @@ branch, which is why section 4 leaves `.github`'s own copy `local`.
 PIN = re.compile(r"^[0-9a-f]{40}$")
 """The `rev:` shape section 4 asks of `check-changelog` and of `ACTIONLINT`.
 
-A sha and not a tag name: a commit where the hook repository cuts no
-tag, the annotated tag's own object where `autoupdate --freeze` writes
-one, as for `ACTIONLINT`. Forty hex characters is what `pinned-rev`
-accepts, and what `autoupdate` writes: `git rev-parse FETCH_HEAD` where
-no tag is cut, `git rev-parse <tag>` under `--freeze`.
+A sha and not a tag name: the annotated tag's own object, which
+`autoupdate --freeze` writes as `git rev-parse <tag>`. Forty hex
+characters is what `pinned-rev` accepts.
 """
+
+FROZEN = re.compile(
+    r"^\s*rev: (?P<sha>[0-9a-f]{40}) # frozen: "
+    r"(?P<tag>v\d{4}\.\d{1,2}\.\d{1,2})$"
+)
+"""The `rev:` line section 4 asks of a stanza taking `check-changelog`.
+
+Read off the text: the `# frozen:` comment is YAML's, and the parser has
+dropped it by the time `hooks()` returns. One space before the `#`, the
+form prettier writes, where pre-commit writes two.
+"""
+
+REPO_LINE = re.compile(r"^\s*-\s*repo:\s*(?P<repo>\S+)\s*$")
+"""The line that opens a block of the gate, naming its repository."""
 
 COUNT = "--grandfathered"
 """The flag section 4 says the stanza's `args:` opens with.
@@ -761,6 +773,86 @@ def test_check_changelog_says_what_section_4_says(
         f"{CHANGELOG_HOOK} says what section 4 does not: {drifted}; "
         + by_hand(repository, f"grep -n -A6 '^ *- id: {CHANGELOG_HOOK}' {CONFIG}")
     )
+
+
+def unfrozen(text: str) -> list[str]:
+    """List the `rev:` lines of `SERVED` blocks not frozen at a tag.
+
+    :param text: a gate, as its file holds it.
+    :returns: each such block's line number with its `rev:` line, or
+        with None where the block has none.
+    """
+    lines = text.splitlines()
+    found: list[str] = []
+    for number, line in enumerate(lines, start=1):
+        opened = REPO_LINE.match(line)
+        if opened is None or opened["repo"] != SERVED:
+            continue
+        rev = None
+        for following in lines[number:]:
+            if REPO_LINE.match(following):
+                break
+            if following.strip().startswith("rev:"):
+                rev = following
+                break
+        if rev is None or FROZEN.match(rev) is None:
+            found.append(f"{number}: {rev!r}")
+    return found
+
+
+def test_check_changelog_is_frozen_at_a_tag(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 4: a stanza taking `check-changelog` is frozen at a tag.
+
+    The sha is the one `SELF`'s tag names, the annotated tag's own
+    object, which `autoupdate --freeze` writes.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    if repository == SELF:
+        pytest.skip(f"{SELF} keeps its own {CHANGELOG_HOOK} stanza local")
+    path = trees[repository] / CONFIG
+    text = path.read_text(encoding="utf-8") if path.is_file() else ""
+    if not any(
+        (opened := REPO_LINE.match(line)) and opened["repo"] == SERVED
+        for line in text.splitlines()
+    ):
+        pytest.skip(f"{repository}'s gate takes nothing from {SERVED}")
+    hint = by_hand(repository, f"grep -n -A1 'repo: {SERVED}$' {CONFIG}")
+    wrong = unfrozen(text)
+    assert not wrong, f"rev: lines not frozen at a tag: {wrong}; {hint}"
+    for line in text.splitlines():
+        frozen = FROZEN.match(line)
+        if frozen is None:
+            continue
+        ref = gh_json(f"repos/{ORG}/{SELF}/git/ref/tags/{frozen['tag']}")
+        assert ref["object"]["sha"] == frozen["sha"], (
+            f"{frozen['tag']} names {ref['object']['sha']}, not {frozen['sha']}; "
+            + hint
+        )
+
+
+def test_an_unfrozen_stanza_would_be_reported() -> None:
+    """A bare sha, a tag name or no `rev:` is reported, a frozen line not."""
+    block = f"  - repo: {SERVED}\n    {{}}\n    hooks:\n      - id: x\n"
+    sha = "0" * 40
+    for rev in (
+        f"rev: {sha}",
+        "rev: v2026.10.25",
+        "hooks: []",
+        f"rev: {sha}  # frozen: v2026.10.25",
+    ):
+        assert unfrozen(block.format(rev)), f"{rev!r} read as frozen"
+    for rev in (
+        f"rev: {sha} # frozen: v2026.10.25",
+        f"rev: {sha} # frozen: v2026.1.2",
+    ):
+        assert unfrozen(block.format(rev)) == [], f"{rev!r} read as unfrozen"
+    other = "  - repo: https://example.com/x\n    rev: v1\n"
+    assert unfrozen(other) == [], "a block of another repository is read"
 
 
 def test_a_gate_that_had_drifted_would_be_reported() -> None:

@@ -370,9 +370,11 @@ placeholder version — there is no artifact for a version to name. So
 this tree carries no `RELEASING.md` and no `RELEASE_NOTES.md` — section
 2 of `README.md` has why a tier-2 repository carries neither — and a
 file whose content is its own absence is this section instead. Measured
-rather than asserted, and re-derivable, each answering `0`:
+rather than asserted, and re-derivable, answering `0`:
 
 ```shell
 gh api repos/btclib-org/.github/releases --jq 'length'
-gh api repos/btclib-org/.github/tags --jq 'length'
 ```
+
+It is tagged all the same, for the trees that pin its reusable workflows:
+section 12 of `README.md` says when, and why such a tag is no release.
