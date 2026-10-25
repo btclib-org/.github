@@ -573,8 +573,8 @@ jobs:
             `mcp__github_inline_comment__create_inline_comment` (with
             `confirmed: true`) for a finding about one line.
           # folded rather than literal: the flag has to reach the CLI as
-          # one line, and the list is past the width yamllint holds this
-          # file to. The fold joins its lines with a space, so each
+          # one line, and the list is past the 100 columns yamllint holds
+          # this file to. The fold joins its lines with a space, so each
           # tool is a quoted word of its own, which the action reads as
           # one list after the flag. The last word carries the caller's
           # tools behind a comma written here.
