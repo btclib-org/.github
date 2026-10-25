@@ -369,7 +369,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib",
             "btclib-node",
             "btclib-secp256k1",
-            "btclib-benchmarks",
             "bbt",
             "btclib-org.github.io",
             "btclib-wallet",
@@ -377,7 +376,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "ecc",
             "bip39-slip39",
             "claude-process",
-            "base58-bech32",
         ),
     ),
     (
@@ -387,7 +385,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib",
             "btclib-node",
             "btclib-secp256k1",
-            "btclib-benchmarks",
             "bbt",
             "btclib-org.github.io",
             "btclib-wallet",
@@ -395,7 +392,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "ecc",
             "bip39-slip39",
             "claude-process",
-            "base58-bech32",
         ),
     ),
     (
@@ -405,7 +401,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib",
             "btclib-node",
             "btclib-secp256k1",
-            "btclib-benchmarks",
             "bbt",
             "btclib-org.github.io",
             "btclib-wallet",
@@ -413,7 +408,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "ecc",
             "bip39-slip39",
             "claude-process",
-            "base58-bech32",
         ),
     ),
     (
@@ -423,7 +417,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib",
             "btclib-node",
             "btclib-secp256k1",
-            "btclib-benchmarks",
             "bbt",
             "btclib-org.github.io",
             "btclib-wallet",
@@ -431,7 +424,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "ecc",
             "bip39-slip39",
             "claude-process",
-            "base58-bech32",
         ),
     ),
 )
