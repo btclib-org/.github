@@ -46,7 +46,7 @@ import pytest
 
 from . import ORG, by_hand, gh_json, still_open
 from .check_sign_off_test import SCRIPT
-from .dependency_review_test import ACTION, READ_AS, REUSABLE
+from .dependency_review_test import ACTION, REUSABLE, TREE_READ_AS
 from .workflows_test import calls_here, jobs
 
 if TYPE_CHECKING:
@@ -240,7 +240,7 @@ def reviews(step: dict[str, Any]) -> bool:
     """Say whether a step runs the dependency review on the shared config."""
     return bool(
         ACTION.search(step.get("uses", ""))
-        and step.get("with", {}).get("config-file") == READ_AS
+        and step.get("with", {}).get("config-file") == TREE_READ_AS
     )
 
 
