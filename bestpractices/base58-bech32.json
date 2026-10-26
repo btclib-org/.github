@@ -200,7 +200,7 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author, but it carries a temporary bypass for the maintainer, and pull requests 3 and 5 merged through it with no approving review. Issue 4 removes the bypass after the first release. https://github.com/btclib-org/base58-bech32/issues/4 https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "main-self-merge requires one approving review from somebody other than the author before a merge. Of the 17 pull requests merged since 2026-10-20, 10 had no approving review, so the control is not met in practice. https://github.com/btclib-org/base58-bech32/blob/main/REPOSITORY.md",
     "status": "Unmet"
   },
   "OSPS-SA-01.01": {

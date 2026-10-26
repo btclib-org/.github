@@ -356,7 +356,7 @@
     "status": "Unmet"
   },
   "crypto_call": {
-    "justification": "Cryptography is delegated to btclib-ecc and btclib, not reimplemented.",
+    "justification": "Cryptography is delegated to ecc and btclib, not reimplemented.",
     "status": "Met"
   },
   "crypto_certificate_verification": {
@@ -384,11 +384,11 @@
     "status": "Met"
   },
   "crypto_published": {
-    "justification": "Cryptography is delegated to btclib-ecc and btclib, which implement published algorithms. btclib-ecc calls Bitcoin Core's libsecp256k1 through btclib-secp256k1 when installed.",
+    "justification": "Cryptography is delegated to ecc and btclib, which implement published algorithms. ecc calls Bitcoin Core's libsecp256k1 through btclib-secp256k1 when installed.",
     "status": "Met"
   },
   "crypto_random": {
-    "justification": "BIP38 salts and seeds come from Python's secrets module, and mnemonic entropy from bip39-slip39, which uses secrets or os.urandom. Signing is btclib-ecc's: RFC 6979 nonces, and BIP340 auxiliary randomness from secrets. The only random.Random is coin selection's UTXO shuffle, which makes no key or nonce. https://github.com/btclib-org/btclib-wallet/tree/main/src/btclib_wallet",
+    "justification": "BIP38 salts and seeds come from Python's secrets module, and mnemonic entropy from bip39-slip39, which uses secrets or os.urandom. Signing is ecc's: RFC 6979 nonces, and BIP340 auxiliary randomness from secrets. The only random.Random is coin selection's UTXO shuffle, which makes no key or nonce. https://github.com/btclib-org/btclib-wallet/tree/main/src/btclib_wallet",
     "status": "Met"
   },
   "crypto_tls12": {
@@ -404,7 +404,7 @@
     "status": "Met"
   },
   "crypto_weaknesses": {
-    "justification": "Signing runs through btclib-ecc, on SHA-256 (RFC 6979, BIP340). BIP38's AES-256 is supplied by the caller, and SECURITY.md says that BIP38 has no MAC by its own specification. https://github.com/btclib-org/btclib-wallet/blob/main/SECURITY.md",
+    "justification": "Signing runs through ecc, on SHA-256 (RFC 6979, BIP340). BIP38's AES-256 is supplied by the caller, and SECURITY.md says that BIP38 has no MAC by its own specification. https://github.com/btclib-org/btclib-wallet/blob/main/SECURITY.md",
     "status": "Met"
   },
   "crypto_working": {
@@ -440,7 +440,7 @@
     "status": "Met"
   },
   "documentation_architecture": {
-    "justification": "ARCHITECTURE.md documents which module holds what, the dependencies (btclib, btclib-ecc, bip39-slip39, bitcoin-core-rpc) and why each, and every place a module reaches outside the process: HWI's subprocess and the fetch backends' sockets. https://github.com/btclib-org/btclib-wallet/blob/main/ARCHITECTURE.md",
+    "justification": "ARCHITECTURE.md documents which module holds what, the dependencies (btclib, ecc, bip39-slip39, bitcoin-core-rpc) and why each, and every place a module reaches outside the process: HWI's subprocess and the fetch backends' sockets. https://github.com/btclib-org/btclib-wallet/blob/main/ARCHITECTURE.md",
     "status": "Met"
   },
   "documentation_basics": {
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "The release notes name the GHSA id of each advisory published by the time of the release: v2026.10.4 names GHSA-qq38-77mp-j6wr and GHSA-v4gq-j2v2-c4jp, and v2026.10.9 names GHSA-8qrf-j8jh-cx23. v2026.10.16 describes the fix of GHSA-4x2v-6p43-cq6x and links its issue, but not the id: the advisory was published 86 minutes after the release. https://github.com/btclib-org/btclib-wallet/blob/main/RELEASE_NOTES.md",
+    "justification": "The release notes name the GHSA id of each advisory published by the time of the release: v2026.10.4 names GHSA-qq38-77mp-j6wr and GHSA-v4gq-j2v2-c4jp, v2026.10.8 names GHSA-62jf-v327-86h5, and v2026.10.9 names GHSA-8qrf-j8jh-cx23. v2026.10.16 describes the fix of GHSA-4x2v-6p43-cq6x and links its issue, but not the id: the advisory was published 86 minutes after the release. https://github.com/btclib-org/btclib-wallet/blob/main/RELEASE_NOTES.md",
     "status": "Met"
   },
   "repo_distributed": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.18 shipped 12 of 19 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. That is 63%, above the 50% the criterion asks. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Met"
+    "justification": "v2026.10.26 shipped 4 pull requests, 1 of them approved by somebody other than the author, 25%, below the 50% the criterion asks; none was approved by somebody other than fametrano. main's ruleset requires one approving review from somebody other than the author, and admins can bypass it. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Unmet"
   },
   "updateable_reused_components": {
     "justification": "Reused components are standard-library modules or PyPI packages pinned in uv.lock. Dependabot updates them weekly, and deps-latest runs the suite weekly against their latest releases. https://github.com/btclib-org/btclib-wallet/blob/main/.github/workflows/deps-latest.yml",
