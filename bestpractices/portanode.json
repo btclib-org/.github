@@ -44,7 +44,7 @@
     "status": "Met"
   },
   "OSPS-BR-02.02": {
-    "justification": "The only asset of a release is GitHub's source archive, named after the tag: portanode-2026.10.17.zip for v2026.10.17. https://github.com/btclib-org/portanode/releases/latest",
+    "justification": "The only asset of a release is GitHub's source archive, named after the tag: portanode-2026.10.26.zip for v2026.10.26. https://github.com/btclib-org/portanode/releases/latest",
     "status": "Met"
   },
   "OSPS-BR-03.01": {
@@ -84,12 +84,12 @@
     "status": "Met"
   },
   "OSPS-DO-03.01": {
-    "justification": "VERIFYING.md tells a user how to check a release: import the maintainer's key from GitHub, compare its fingerprint, then run git verify-tag on a clone. It names a key revoked on 2026-10-19, so its commands do not exit 0 for v2026.10.17 (ISS 724); the answer stays Unmet until it is fixed. https://github.com/btclib-org/portanode/blob/main/VERIFYING.md",
-    "status": "Unmet"
+    "justification": "VERIFYING.md tells a user how to check a release: import the maintainer's key from GitHub, compare its fingerprint, then run git verify-tag on a clone. https://github.com/btclib-org/portanode/blob/main/VERIFYING.md",
+    "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "VERIFYING.md names the key a release tag is expected to be signed by, by fingerprint. The fingerprint is of a key revoked on 2026-10-19 (ISS 724); the answer stays Unmet until the file names the keys that sign now. https://github.com/btclib-org/portanode/blob/main/VERIFYING.md",
-    "status": "Unmet"
+    "justification": "VERIFYING.md names the key a release tag is signed by, by fingerprint, and the earlier, revoked key apart. https://github.com/btclib-org/portanode/blob/main/VERIFYING.md",
+    "status": "Met"
   },
   "OSPS-DO-04.01": {
     "justification": "The security policy's Supported versions says that only the latest release is supported, nothing is backported, and a fix is a new release. https://github.com/btclib-org/.github/blob/main/SECURITY.md#supported-versions",
@@ -392,8 +392,8 @@
     "status": "N/A"
   },
   "crypto_tls12": {
-    "justification": "Downloads use curl and PowerShell's Invoke-WebRequest, and no script sets the TLS version. Whether Windows PowerShell 5.1 offers TLS 1.2 by default on every supported Windows was not measured. https://github.com/btclib-org/portanode/blob/main/README.md#updating-binaries",
-    "status": "?"
+    "justification": "On Windows, every download raises the session to TLS 1.2 where the protocol is not the system default (#730); curl on macOS and Linux supports TLS 1.2 and is restricted to HTTPS. https://github.com/btclib-org/portanode/pull/730",
+    "status": "Met"
   },
   "crypto_used_network": {
     "justification": "Every download URL is HTTPS, and the Electrum local-server launcher connects over TLS. On macOS and Linux curl is called through curl_https, which restricts the protocol and every redirect to HTTPS. Whether the Windows updaters' Invoke-WebRequest calls follow a redirect to plain HTTP is not known (ISS 695). https://github.com/btclib-org/portanode/blob/main/shared/utilities/lib.sh",
@@ -580,7 +580,7 @@
     "status": "Met"
   },
   "regression_tests_added50": {
-    "justification": "No regression test is added for a fix: the tree has no automated test suite. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "justification": "Recent fixes add a test in tests/ (#732, #736), but the share over six months is not measured. https://github.com/btclib-org/portanode/blob/main/tests/README.md",
     "status": "Unmet"
   },
   "release_notes": {
@@ -644,8 +644,8 @@
     "status": "Unmet"
   },
   "signed_releases": {
-    "justification": "Each release tag is signed, and VERIFYING.md tells a user how to get the signing key and verify a release. The key it names was revoked on 2026-10-19 (ISS 724), so the answer stays Unmet until it is fixed. https://github.com/btclib-org/portanode/blob/main/VERIFYING.md",
-    "status": "Unmet"
+    "justification": "Each release tag is signed with the maintainer's current key, and VERIFYING.md tells a user how to get the key and check a tag. https://github.com/btclib-org/portanode/blob/main/VERIFYING.md",
+    "status": "Met"
   },
   "sites_https": {
     "justification": "The project site is the GitHub repository, served over HTTPS only. https://github.com/btclib-org/portanode",
@@ -680,7 +680,7 @@
     "status": "Met"
   },
   "test_branch_coverage80": {
-    "justification": "There is no automated test suite, so no coverage. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "justification": "The suite in tests/ runs in CI, but its coverage is not measured. https://github.com/btclib-org/portanode/blob/main/tests/README.md",
     "status": "Unmet"
   },
   "test_continuous_integration": {
@@ -692,7 +692,7 @@
     "status": "Met"
   },
   "test_most": {
-    "justification": "There is no automated test suite. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "justification": "tests/run.sh and the PowerShell tests that need no cmd.exe run on Ubuntu in CI; the rest run under tests/run.ps1 on Windows by hand. How much of the code they reach is not measured. https://github.com/btclib-org/portanode/blob/main/tests/README.md",
     "status": "Unmet"
   },
   "test_policy": {
@@ -704,11 +704,11 @@
     "status": "Met"
   },
   "test_statement_coverage80": {
-    "justification": "There is no automated test suite, so no coverage. FLOSS coverage tools exist for bash, such as kcov. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "justification": "The suite in tests/ runs in CI, but its coverage is not measured. FLOSS coverage tools exist for bash, such as kcov. https://github.com/btclib-org/portanode/blob/main/tests/README.md",
     "status": "Unmet"
   },
   "test_statement_coverage90": {
-    "justification": "There is no automated test suite, so no coverage. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "justification": "The suite in tests/ runs in CI, but its coverage is not measured. https://github.com/btclib-org/portanode/blob/main/tests/README.md",
     "status": "Unmet"
   },
   "tests_are_added": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.17 shipped 86 pull requests, 8 of them approved by somebody other than the author and other than fametrano. The maintainer merges through the bypass, which main-self-merge keeps in pull_request mode. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
+    "justification": "v2026.10.26 shipped 11 pull requests, none of them approved by somebody other than the author. The maintainer merges through the bypass, which main-self-merge keeps in pull_request mode. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {
@@ -736,8 +736,8 @@
     "status": "Met"
   },
   "version_tags_signed": {
-    "justification": "Every release tag is signed, and GitHub verifies each. VERIFYING.md tells a user how to verify one, with a key revoked on 2026-10-19 (ISS 724); the answer stays Unmet until it is fixed. https://github.com/btclib-org/portanode/tags",
-    "status": "Unmet"
+    "justification": "Every release tag is signed, and GitHub verifies each. VERIFYING.md names the current signing key by fingerprint and says how to verify a tag. https://github.com/btclib-org/portanode/blob/main/VERIFYING.md",
+    "status": "Met"
   },
   "version_unique": {
     "justification": "Each release has its own YYYY.M.D version and v-prefixed tag. https://github.com/btclib-org/portanode/releases",
@@ -776,11 +776,11 @@
     "status": "Met"
   },
   "warnings_fixed": {
-    "justification": "shellcheck findings fail the required Lint check, so none is open on the .sh and .command scripts. The required Script security check fails on a Blinter Error or Security finding or a PSScriptAnalyzer security finding outside its baseline. Blinter's other warnings on the .bat scripts are not addressed. https://github.com/btclib-org/portanode/blob/main/.github/workflows/script-security.yml",
+    "justification": "shellcheck findings fail the required Lint check. Script security runs every Blinter Warning rule, and each finding is fixed or accepted with its reason in .github/blinter-reasons.md. PSScriptAnalyzer's Warning findings on the .ps1 scripts are neither fixed nor recorded yet: ISS 739. https://github.com/btclib-org/portanode/issues/739",
     "status": "Unmet"
   },
   "warnings_strict": {
-    "justification": "shellcheck runs at its default severity with none of its optional checks enabled. Blinter's Error and Security rules and PSScriptAnalyzer's security rules run in the required Script security check; their other rules are run by hand. https://github.com/btclib-org/portanode/blob/main/.github/workflows/script-security.yml",
+    "justification": "shellcheck runs at its default severity with none of its optional checks enabled. The required Script security check runs Blinter's Error, Security and Warning rules and PSScriptAnalyzer's security rules; PSScriptAnalyzer's other rules are run by hand. https://github.com/btclib-org/portanode/blob/main/.github/workflows/script-security.yml",
     "status": "Unmet"
   }
 }

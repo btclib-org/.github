@@ -352,11 +352,11 @@
     "status": "Met"
   },
   "crypto_algorithm_agility": {
-    "justification": "btclib implements the Bitcoin protocol, whose consensus rules fix secp256k1, SHA-256 and the signature schemes; another algorithm needs a soft fork first, and the project follows one when it activates. The curve and hash agility is in btclib-ecc, which btclib depends on. https://github.com/btclib-org/btclib/blob/main/README.md",
+    "justification": "btclib implements the Bitcoin protocol, whose consensus rules fix secp256k1, SHA-256 and the signature schemes; another algorithm needs a soft fork first, and the project follows one when it activates. The curve and hash agility is in ecc, which btclib depends on. https://github.com/btclib-org/btclib/blob/main/README.md",
     "status": "Unmet"
   },
   "crypto_call": {
-    "justification": "btclib calls libraries for its primitives: curve arithmetic and signature schemes from btclib-ecc, BIP324's ChaCha20 and ChaCha20-Poly1305 from cryptography, hashes from hashlib. It writes only what Bitcoin's specifications build on them (MuHash3072, the BIP324 key schedule). Its RIPEMD-160 is Bitcoin Core's own Python copy, used only where hashlib has none. https://github.com/btclib-org/btclib/tree/main/src/btclib",
+    "justification": "btclib calls libraries for its primitives: curve arithmetic and signature schemes from ecc, BIP324's ChaCha20 and ChaCha20-Poly1305 from cryptography, hashes from hashlib. It writes only what Bitcoin's specifications build on them (MuHash3072, the BIP324 key schedule). Its RIPEMD-160 is Bitcoin Core's own Python copy, used only where hashlib has none. https://github.com/btclib-org/btclib/tree/main/src/btclib",
     "status": "Met"
   },
   "crypto_certificate_verification": {
@@ -384,11 +384,11 @@
     "status": "Met"
   },
   "crypto_published": {
-    "justification": "btclib imports its curve arithmetic from btclib_ecc, which calls btclib-secp256k1 (bindings to Bitcoin Core's libsecp256k1) wherever a call can use them and otherwise runs Python arithmetic; SECURITY.md states when each applies and `btclib_ecc.curves.is_libsecp256k1_serving()` tells a caller which. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
+    "justification": "btclib imports its curve arithmetic from ecc, which calls btclib-secp256k1 (bindings to Bitcoin Core's libsecp256k1) wherever a call can use them and otherwise runs Python arithmetic; SECURITY.md states when each applies and `ecc.curves.is_libsecp256k1_serving()` tells a caller which. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
     "status": "Met"
   },
   "crypto_random": {
-    "justification": "btclib draws randomness only from Python's `secrets` module (the BMS nonce, the transaction input and output shuffle); ECDSA nonces are deterministic (RFC 6979). Key, mnemonic and nonce generation is in btclib_ecc and btclib-wallet, which hold their own entries. https://github.com/btclib-org/btclib/tree/main/src/btclib",
+    "justification": "btclib draws randomness only from Python's `secrets` module (the BMS nonce, the transaction input and output shuffle); ECDSA nonces are deterministic (RFC 6979). Key, mnemonic and nonce generation is in ecc and btclib-wallet, which hold their own entries. https://github.com/btclib-org/btclib/tree/main/src/btclib",
     "status": "Met"
   },
   "crypto_tls12": {
@@ -404,7 +404,7 @@
     "status": "N/A"
   },
   "crypto_weaknesses": {
-    "justification": "btclib's only SHA-1 is Bitcoin script's OP_SHA1, which the protocol requires and which runs with usedforsecurity=False. The curve schemes and ECIES are btclib_ecc's. SECURITY.md documents where a secret reaches the Python fallback. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
+    "justification": "btclib's only SHA-1 is Bitcoin script's OP_SHA1, which the protocol requires and which runs with usedforsecurity=False. The curve schemes and ECIES are ecc's. SECURITY.md documents where a secret reaches the Python fallback. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
     "status": "Met"
   },
   "crypto_working": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.17 shipped 7 of 10 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. That is 70%, above the 50% the criterion asks. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Met"
+    "justification": "v2026.10.24 shipped 13 of 27 pull requests approved by somebody other than the author, 48%, below the 50% the criterion asks; 8 were approved by somebody other than fametrano. main's ruleset requires one approving review from somebody other than the author, and admins can bypass it. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Unmet"
   },
   "updateable_reused_components": {
     "justification": "Reused components are standard-library modules or PyPI packages pinned in uv.lock. Dependabot updates them weekly through pull requests that run the full suite. https://github.com/btclib-org/btclib/blob/main/.github/dependabot.yml",
