@@ -35,14 +35,13 @@ repository. A rule changes by a pull request like any other change.
   signature), and nobody can push to `main` directly. A pull request lands
   with an approving review from somebody other than its author. In a
   repository whose `README.md` carries the OpenSSF Best Practices badge
-  (section 2's badge row), and in this repository, the ruleset has no
-  bypass actor, so nobody merges without that approval; in an emergency
-  the maintainer adds the bypass back and removes it after the merge.
-  The badge's `two_person_review` criterion asks that at least half of
-  the changes a release ships were reviewed by another person. In any
-  other repository the maintainer is the only bypass actor, in
-  `pull_request` mode, and can merge without that approval wherever it
-  helps.
+  (section 2's badge row), the ruleset has no bypass actor, so nobody
+  merges without that approval; in an emergency the maintainer adds the
+  bypass back and removes it after the merge. The badge's
+  `two_person_review` criterion asks that at least half of the changes a
+  release ships were reviewed by another person. In any other repository
+  the maintainer is the only bypass actor, in `pull_request` mode, and
+  can merge without that approval wherever it helps.
   `CONTRIBUTING.md`'s *The review* and *Landing it* are the exchange and
   the landing.
 - **A disagreement goes to the maintainer.** One that survives a second
