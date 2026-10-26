@@ -357,42 +357,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "base58-bech32",
         ),
     ),
-    (
-        1870,
-        "test_every_action_is_pinned_to_a_commit",
-        (
-            "bbt",
-            "btclib-org.github.io",
-            "claude-process",
-        ),
-    ),
-    (
-        1870,
-        "test_zizmor_asks_every_uses_for_a_commit",
-        (
-            "bbt",
-            "btclib-org.github.io",
-            "claude-process",
-        ),
-    ),
-    (
-        1870,
-        "test_dependabot_cools_down_no_tag_of_this_repository",
-        (
-            "bbt",
-            "btclib-org.github.io",
-            "claude-process",
-        ),
-    ),
-    (
-        1870,
-        "test_check_changelog_is_frozen_at_a_tag",
-        (
-            "bbt",
-            "btclib-org.github.io",
-            "claude-process",
-        ),
-    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
