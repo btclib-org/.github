@@ -101,9 +101,9 @@ JSON
 `enforce_admins: false` exempts an administrator from this classic
 protection, the required checks included, so an administrator's
 `--admin` merge waits for none of them. `main-self-merge` also requires
-the review, with no bypass actor, so no account merges without an
-approving review from somebody other than the author. `strict` is off
-for [the reason section 11 gives][s11-branch].
+the review, and its one bypass actor is the maintainer, so no other
+account merges without an approving review from somebody other than the
+author. `strict` is off for [the reason section 11 gives][s11-branch].
 
 The `checks` array and a JSON body on stdin, never `contexts` and never
 `-f`, and a later change to the list is a `PATCH` of
@@ -140,7 +140,7 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
 #  "refs":["refs/heads/main"],
 #  "rules":["required_linear_history","non_fast_forward","deletion"],
 #  "target":"branch"}
-# {"bypass":[],"enforcement":"active",
+# {"bypass":["pull_request"],"enforcement":"active",
 #  "name":"main-self-merge","refs":["refs/heads/main"],
 #  "rules":["pull_request"],"target":"branch"}
 # {"bypass":[],"enforcement":"active","name":"tag-integrity",
@@ -152,13 +152,14 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
   what makes every one of those true of an administrator too.
 - `main-self-merge` — a pull request, an approving review, stale reviews
   dismissed on push, conversations resolved, and `squash` as the only
-  merge method it accepts — with **no bypass actor at all**, the
-  maintainer's included. The other trees run this repository's
-  reusable workflows, and some of those jobs hold write permissions,
-  such as `pull-requests: write` in `reusable-claude-review.yml`. A
-  change merged here runs in them at once where a tree calls `@main`,
-  and in a tree's own job that checks out a script at `main`, so another
-  person's approval stands before it (btclib-org/.github#1794).
+  merge method it accepts — bypassed by the maintainer in
+  **`pull_request` mode**. This repository's `README.md` carries no
+  OpenSSF Best Practices badge, and [section 11 gives the bypass to every
+  tree without one][s11-branch]. A change merged through it, with nobody
+  else's approval, reaches another tree at once wherever a job of that
+  tree's own checks this repository out at `main` or reads its
+  `dependency-review.yml` at `@main`: [section 10][s10-every] and
+  [section 11][s11-tokens] say which jobs read `main`.
 - `tag-integrity` — required signatures and nothing else, over
   `refs/tags/v*` rather than over a branch, with **no bypass actor**.
 
@@ -175,20 +176,23 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
 #  "required_review_thread_resolution":true,"required_reviewers":[]}
 ```
 
-No bypass reaches that block, so `dismiss_stale_reviews_on_push`, which
-is on, applies to every landing.
+The bypass reaches that whole block and not the approving review alone,
+so `dismiss_stale_reviews_on_push`, which is on, reaches no landing made
+through it. [Section 11 has what stands in for it][s11-branch].
 
 `main-self-merge`'s `bypass` is one of the fields the first call above
-is read for. It answers `[]`: an entry would be an account merging
-without an approving review from somebody other than the author, or, in
-`always` mode, pushing to `main` directly, which is a drift the call is
-there to catch. That call reads `[]` too where the endpoint omits
-`bypass_actors`, which it does for a token without push access, so the
-actors themselves are read from the ruleset:
+is read for. It answers `["pull_request"]`, and [that mode against
+`always` is the whole of the design][s11-branch]: `always` would let its
+holder push to `main` directly, which is a drift the call is there to
+catch. That call reads `[]` where the endpoint omits `bypass_actors`,
+which it does for a token without push access, so the actors themselves
+are read from the ruleset, and `3296421` is the maintainer's account:
 
 ```shell
 gh api repos/btclib-org/.github/rulesets/21142971 --jq .bypass_actors
-# []
+# [{"actor_id":3296421,"actor_type":"User","bypass_mode":"pull_request"}]
+gh api users/fametrano --jq .id
+# 3296421
 ```
 
 `tag-integrity` matches no ref: `CONTRIBUTING.md`'s *A version, and no
@@ -260,11 +264,18 @@ gh api repos/btclib-org/.github \
 ```
 
 [Squash is the only method the standard enables][s11-merge], and
-`allowed_merge_methods` above holds it for every account, the ruleset
-having no bypass actor. `main-integrity`'s `required_linear_history`
-refuses a merge commit for everybody too. Rebase-and-merge is linear, so
-that rule does not reach it, and [the reason it is not enabled is section
+`allowed_merge_methods` above holds it for every account the
+`main-self-merge` bypass does not cover. For the maintainer, who is
+covered, what stands against this setting being flipped is
+`main-integrity`'s `required_linear_history`: no bypass actor, and a
+merge commit refused for everybody. Rebase-and-merge is linear, so that
+rule does not reach it, and [the reason it is not enabled is section
 11's][s11-merge].
+
+Whether a bypass holder is offered a merge method `allowed_merge_methods`
+excludes is not read back here: measuring it means flipping
+`allow_rebase_merge` and pressing the button on a live pull request,
+which is a settings change and a landing rather than a call.
 
 `COMMIT_OR_PR_TITLE` with `COMMIT_MESSAGES` is the pair
 [Merge method][s11-merge] asks for, and which of the two titles lands is
@@ -570,6 +581,7 @@ running a command.
 [s3]: ./README.md#3-pyprojecttoml-is-the-configuration
 [s8]: ./README.md#8-coverage-at-100
 [s10-carries]: ./README.md#which-trees-carry-which-sentinel
+[s10-every]: ./README.md#what-every-workflow-does
 [s10-set]: ./README.md#the-set-and-its-cadence
 [s11-bots]: ./README.md#dependabot-and-pre-commitci
 [s11-branch]: ./README.md#branch-protection-and-rulesets
