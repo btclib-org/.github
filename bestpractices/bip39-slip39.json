@@ -584,7 +584,7 @@
     "status": "Met"
   },
   "release_notes": {
-    "justification": "RELEASE_NOTES.md holds each release's notes, and release.yml publishes the tag's section as the GitHub release body. https://github.com/btclib-org/bip39-slip39/releases/tag/v2026.10.8",
+    "justification": "RELEASE_NOTES.md holds each release's notes, and release.yml publishes the tag's section as the GitHub release body. https://github.com/btclib-org/bip39-slip39/releases/latest",
     "status": "Met"
   },
   "release_notes_vulns": {
@@ -616,7 +616,7 @@
     "status": "Met"
   },
   "report_responses": {
-    "justification": "Issues #15 to #24, filed by pmazzocchi on 2026-09-30, were all answered and closed by 2026-10-02. https://github.com/btclib-org/bip39-slip39/issues?q=is%3Aissue+is%3Aclosed",
+    "justification": "Issues #15 to #24, filed by pmazzocchi on 2026-09-30, were all answered and closed by 2026-10-02. Issue #142, filed by pmazzocchi on 2026-10-19, was closed the same day. https://github.com/btclib-org/bip39-slip39/issues?q=is%3Aissue+is%3Aclosed",
     "status": "Met"
   },
   "report_tracker": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.8 shipped 0 of 27 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "v2026.10.24 shipped 32 pull requests, 20 of them approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {

@@ -476,7 +476,7 @@
     "status": "Met"
   },
   "dynamic_analysis_fixed": {
-    "justification": "No fuzzing or mutation-testing finding is open. The scheduled fuzz run of 2026-10-20 and the scheduled mutation run of 2026-10-19 passed. https://github.com/btclib-org/base58-bech32/actions/workflows/fuzz.yml https://github.com/btclib-org/base58-bech32/actions/workflows/mutation.yml",
+    "justification": "No fuzzing or mutation-testing finding is open. The scheduled fuzz run of 2026-10-20 and the scheduled mutation run of 2026-10-26 passed. https://github.com/btclib-org/base58-bech32/actions/workflows/fuzz.yml https://github.com/btclib-org/base58-bech32/actions/workflows/mutation.yml",
     "status": "Met"
   },
   "dynamic_analysis_unsafe": {
@@ -584,7 +584,7 @@
     "status": "Met"
   },
   "release_notes": {
-    "justification": "RELEASE_NOTES.md holds each release's notes, and release.yml publishes the tag's section as the GitHub release body. https://github.com/btclib-org/base58-bech32/releases/tag/v2026.10.18",
+    "justification": "RELEASE_NOTES.md holds each release's notes, and release.yml publishes the tag's section as the GitHub release body. https://github.com/btclib-org/base58-bech32/releases/latest",
     "status": "Met"
   },
   "release_notes_vulns": {
