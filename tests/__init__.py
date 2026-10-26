@@ -351,7 +351,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-secp256k1",
             "portanode",
             "bitcoin-core-rpc",
-            "btclib-benchmarks",
             "bbt",
             "btclib-org.github.io",
             "btclib-wallet",
@@ -368,7 +367,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         (
             "bbt",
             "btclib-org.github.io",
-            "bitcoin-node-tests",
             "claude-process",
         ),
     ),
@@ -378,7 +376,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         (
             "bbt",
             "btclib-org.github.io",
-            "bitcoin-node-tests",
             "claude-process",
         ),
     ),
@@ -388,7 +385,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         (
             "bbt",
             "btclib-org.github.io",
-            "bitcoin-node-tests",
             "claude-process",
         ),
     ),
@@ -398,7 +394,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         (
             "bbt",
             "btclib-org.github.io",
-            "bitcoin-node-tests",
             "claude-process",
         ),
     ),
