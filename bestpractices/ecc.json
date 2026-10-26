@@ -316,7 +316,7 @@
     "status": "N/A"
   },
   "bus_factor": {
-    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review and has since made five commits, on 2026-10-19. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/ecc/graphs/contributors",
+    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review and has since made five commits, on 2026-10-18 and 2026-10-19. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/ecc/graphs/contributors",
     "status": "Unmet"
   },
   "code_of_conduct": {
@@ -344,7 +344,7 @@
     "status": "Met"
   },
   "contributors_unassociated": {
-    "justification": "fametrano is the only significant contributor. In the last year, outside contributors have made only small changes. pmazzocchi, an organization owner, has made five commits, on 2026-10-19; pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. giacomocaironi, also an organization owner, has made no commit to this repository. https://github.com/fametrano https://github.com/pmazzocchi",
+    "justification": "fametrano is the only significant contributor. In the last year, outside contributors have made only small changes. pmazzocchi, an organization owner, has made five commits, on 2026-10-18 and 2026-10-19; pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. giacomocaironi, also an organization owner, has made no commit to this repository. https://github.com/fametrano https://github.com/pmazzocchi",
     "status": "Unmet"
   },
   "copyright_per_file": {

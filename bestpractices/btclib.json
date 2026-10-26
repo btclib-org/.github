@@ -764,7 +764,7 @@
     "status": "Met"
   },
   "vulnerability_report_response": {
-    "justification": "GHSA-9fr5-46w5-5f9r, reported privately by pmazzocchi on 2026-09-30, was fixed in v2026.10.4 and published on 2026-10-03. GHSA-9r97-9x22-2pp4, found by fametrano, was published with its fix the day it was opened. GHSA-47wq-xh8q-pfxj, found by fametrano, was published on 2026-10-16. btclib has no fix for it: 2026.9.29 had already removed the function, and the advisory points to btclib-wallet 2026.10.16. https://github.com/btclib-org/btclib/security/advisories",
+    "justification": "GHSA-9fr5-46w5-5f9r, reported privately by pmazzocchi on 2026-09-30, was fixed in v2026.10.4 and published on 2026-10-03. GHSA-9r97-9x22-2pp4 and GHSA-rw95-w37r-537w, found by fametrano, were each published with its fix the day it was opened. GHSA-47wq-xh8q-pfxj, found by fametrano, was published on 2026-10-16. btclib has no fix for it: 2026.9.29 had already removed the function, and the advisory points to btclib-wallet 2026.10.16. https://github.com/btclib-org/btclib/security/advisories",
     "status": "Met"
   },
   "vulnerability_response_process": {
