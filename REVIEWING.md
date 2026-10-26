@@ -246,6 +246,12 @@ more": each is one command's worth of evidence, and each is the reason
 the change is offered as safe. Settle it. Where it is false, the finding
 is not the code but the reason given for it.
 
+**One case is the reviewer's to build.** Where a pull request adds a
+test together with rows excusing its failure, such as `BACKLOG` in
+`tests/__init__.py` of btclib-org/.github, run the assertion by hand
+against one tree in the shape the rows wait for. A row cannot tell a
+tree that has not converged from a wrong test.
+
 What this is not:
 
 - **A run of the gates.** They run what the rest of the tree already
