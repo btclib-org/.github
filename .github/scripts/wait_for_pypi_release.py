@@ -132,14 +132,6 @@ def served(url: str, version: str, timeout: float) -> bool:
     # connection refused or timed out is an OSError, a truncated answer is
     # an HTTPException and a body that is not JSON is a ValueError. None
     # of them is this script's verdict, which the deadline alone decides.
-    #
-    # Separate clauses and not one parenthesised tuple, this file being
-    # shared: `ruff-format` rewrites `except (OSError, HTTPException):`
-    # into PEP 758's unparenthesised form wherever `requires-python` is
-    # 3.14, and that form is a syntax error to mypy and to the
-    # interpreter wherever it is 3.10 -- so the tuple cannot hold still
-    # in all four trees at once and separate clauses can
-    # (btclib-org/.github#1160)
     except OSError:
         return False
     except HTTPException:

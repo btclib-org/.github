@@ -8,9 +8,9 @@ name: reusable-scorecard
 # workflow-level `permissions:` and the concurrency group stay in the
 # caller, whose run this job joins.
 #
-# No inputs at all: the trees carrying scorecard.yml ask the same
-# question of themselves, comments and blanks stripped, and differ only
-# in the cron minute (btclib-org/.github#35).
+# No inputs at all: nothing in the analysis job is chosen per tree.
+# What a caller varies stays in the caller, as the paragraph above says
+# (btclib-org/.github#35).
 #
 # What the row asks is a third-party, external audit of the calling
 # tree's supply-chain posture, run independently rather than by
