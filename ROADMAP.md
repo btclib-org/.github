@@ -6,6 +6,11 @@ records the intention or the decision; the issue, and not this file, holds
 how far the work has gone. How a decision is taken is
 [`GOVERNANCE.md`](./GOVERNANCE.md).
 
+An entry under *Intended* cites an open issue, and goes once that issue
+closes: the work it names is then done or dropped.
+`tests/roadmap_test.py` fails on an entry there that cites no issue, or
+a closed one.
+
 This roadmap covers the period until 2027-09-30 and is reviewed every
 September. Its entries carry no dates, because they state intentions and
 not deadlines.
@@ -32,38 +37,24 @@ not deadlines.
 
 ## Intended
 
-- **`.github`, the organization's standard, changes as its own tracker
-  decides**: an issue there proposes a rule and every repository the rule
-  reaches takes it up. The entries below that cite btclib-org/.github are
-  its intentions beyond that.
-- **`btclib` splits along Bitcoin Core's line between consensus and
-  wallet** (btclib-org/btclib#2129). `btclib-wallet` takes the wallet
-  side, `bip39-slip39` the mnemonic schemes up to the seed, and
-  `btclib-ecc` `curves/` and the parts of `ecc/` the issue does not
-  keep in `btclib`, which stays the protocol package a node consumes. The
-  issue holds the steps, in that order, and what each is done when.
-- **The codecs leave `btclib`**: `base58` and `bech32` move to a package
-  of their own, `base58-bech32`, which `btclib` depends on
-  (btclib-org/btclib#2712).
-- **`btclib-ecc` becomes `ecc`** once PyPI transfers the name
-  (btclib-org/btclib-ecc#306).
-- **tf2, one conformance suite for any bitcoin node**
-  (btclib-org/btclib#2220): Bitcoin Core's functional tests rewritten on
-  `btclib`, in a repository of its own, `bitcoin-node-tests`, reaching a
-  node only through a process it starts and the node's RPC and p2p
-  sockets, with `bitcoind` as the reference and `btclib-node` the first
-  target.
-- **`btclib-node` reaches conformance with tf2**
-  (btclib-org/btclib#2220), BIP324's encrypted v2 transport included, with
-  v1 off by default (btclib-org/btclib-node#1190).
-- **FROST key generation in `ecc/`**, a trusted-dealer split and then
+`.github`, the organization's standard, changes as its own tracker
+decides: an issue there proposes a rule and every repository the rule
+reaches takes it up. The entries below that cite btclib-org/.github are
+its intentions beyond that.
+
+- **The codecs leave `btclib`** for `base58-bech32`, a package of their
+  own that `btclib` is to depend on (btclib-org/btclib#2712).
+- **One repository, `test-vectors`, holds the test vector files the trees
+  share**, each once with its pin, and the trees read them from there
+  (btclib-org/.github#1812).
+- **FROST key generation in `ecc`**, a trusted-dealer split and then
   ChillDKG, once BIP445 and the ChillDKG draft settle
   (btclib-org/btclib#2200).
-- **A Bulletproofs++ range proof in `ecc/`**, beside the Borromean one,
+- **A Bulletproofs++ range proof in `ecc`**, beside the Borromean one,
   following secp256k1-zkp's `bppp` module as it lands upstream
   (btclib-org/btclib#1908).
 - **Gold at bestpractices.dev** for the repositories section 10's
-  `scorecard` entry names (btclib-org/.github#1362).
+  `scorecard` entry names (btclib-org/.github#1761).
 
 ## Not intended
 
@@ -74,13 +65,14 @@ not deadlines.
   in-process HWI adapter** beside the subprocess one
   (btclib-org/btclib#469).
 - **A package of their own for the hashes, `p2p` or the shared
-  substrate**, and any split of `btclib` other than those under
+  substrate**, and any split of `btclib` beyond the codecs' under
   *Intended* (btclib-org/btclib#2129).
 - **A cipher of `btclib`'s own, and code in `btclib` or `btclib-node`
-  written for tf2 alone** (btclib-org/btclib#2220).
+  written for tf2 (`bitcoin-node-tests`) alone**
+  (btclib-org/btclib#2220).
 - **A pinned toolchain for the macOS and Windows wheels of
   `btclib-secp256k1`** (btclib-org/btclib-secp256k1#554): section 12's
   *The compiled wheels are outside that property* says why.
 - **Removing the maintainer's bypass from the branch rules of the trees
   without the Best Practices badge**, other than this repository's,
-  until the maintainer decides otherwise.
+  until the maintainer decides otherwise (btclib-org/.github#1740).
