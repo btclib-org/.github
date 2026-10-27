@@ -2115,13 +2115,14 @@ before.
 **A rewrite owes a dispatch.** A schedule-only workflow keeps the previous
 file's verdict as its newest run until its cron comes round, so a landing that
 changes its steps dispatches it from `main` and reads the badge after that run;
-a comment-only change owes nothing. Whatever triggered the newest run, it is
-stale unless its `head_sha` descends from the file's last edit:
+a comment-only change owes nothing. Whatever triggered the newest run on `main`,
+it is stale unless its `head_sha` descends from the file's last edit:
 
 ```shell
-gh api repos/<owner>/<repo>/actions/workflows/<name>.yml/runs \
-  --jq '.workflow_runs[0].head_sha'
-git log -1 --format=%H -- .github/workflows/<name>.yml
+git merge-base --is-ancestor \
+  "$(git log -1 --format=%H -- .github/workflows/<name>.yml)" \
+  "$(gh api --jq '.workflow_runs[0].head_sha' \
+    'repos/<owner>/<repo>/actions/workflows/<name>.yml/runs?branch=main')"
 ```
 
 This is a person's check rather than a gate's, which would cost an API call per
