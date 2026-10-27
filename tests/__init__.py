@@ -333,11 +333,6 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
-        1763,
-        "test_pyroma_says_what_section_4_says",
-        ("btclib-wallet",),
-    ),
-    (
         1808,
         "test_a_repository_carries_the_verbatim_files_owed_of_it",
         ("portanode",),
