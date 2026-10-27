@@ -4646,6 +4646,9 @@ No tool checks them.
 1. Read each setting back with the commands `REPOSITORY.md` records, and
    write the answers into it — the topics included, that being the one
    of them a tree with no `pyproject.toml` records nowhere else.
+1. Dispatch `alignment.yml` once the root has landed, and fix what it
+   finds in later pull requests. Its suite reads a new tree at the tip of
+   its default branch, and an empty repository has no branch.
 
 ### Normalizing an existing repository
 
