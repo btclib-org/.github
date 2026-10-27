@@ -84,7 +84,7 @@ repos:
             |tests/(__init__|conftest)\.py
             |tests/(backlog|build_call|changelog|citations|classifiers|contributing
               |conventions|copyright|coverage|dependabot|dependencies|dependency_review
-              |dockerfile|grid|homepage|hooks
+              |deprecation|dockerfile|grid|homepage|hooks
               |interpreters|issue_template|layout|links|names|per_subject|pins
               |protection|pull_request_template|pyproject|release|roadmap
               |root_files|scope|security|surface|tags|topics|verbatim
