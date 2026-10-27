@@ -448,18 +448,31 @@ jobs:
             contents: read
             issues: read
           # the action refuses a run a bot initiated unless that bot is
-          # named -- "Workflow initiated by non-human actor" -- so a
-          # pull request Dependabot opens would otherwise never carry
-          # the ack of record. Named rather than `*`, which the input's
-          # own description warns against on a public repository: with
-          # it an external App could invoke this action carrying a
-          # prompt it wrote. The credential for such a run is a second
-          # fact a port has to know: a Dependabot-initiated run reads
-          # the organization's *Dependabot* secret store, not the
+          # named -- "Workflow initiated by non-human actor" -- so the
+          # review of a pull request Dependabot or pre-commit.ci opens
+          # would otherwise fail, and run only once a person pushes to
+          # it or reopens it. The input is a comma-separated list of
+          # actor logins, compared ignoring case and the "[bot]" suffix
+          # (`isAllowedBot` in the action's
+          # `src/github/validation/actor.ts`). Named rather than `*`,
+          # which the input's own description warns against on a public
+          # repository: with it an external App could invoke this action
+          # carrying a prompt it wrote. The credential for such a run is
+          # a second fact a port has to know: a Dependabot-initiated run
+          # reads the organization's *Dependabot* secret store, not the
           # Actions one, and section 11 of the organization's standard
-          # has both. The mention job below takes no such input,
-          # deliberately -- what triggers it is somebody writing @claude
-          allowed_bots: "dependabot[bot]"
+          # has both. A run pre-commit.ci initiates reads the Actions
+          # store, its branch being in the repository itself. Naming
+          # pre-commit.ci gives it nothing it lacks: its App already
+          # holds contents and workflows write on every repository of
+          # the organization, which this reads back:
+          #   gh api orgs/btclib-org/installations --jq '.installations[]
+          #     | select(.app_slug == "pre-commit-ci")
+          #     | [.repository_selection, .permissions.contents,
+          #     .permissions.workflows]'
+          # The mention job below takes no such input, deliberately --
+          # what triggers it is somebody writing @claude
+          allowed_bots: "dependabot[bot],pre-commit-ci[bot]"
           # the App's token stays out of the checkout's `.git/config`.
           # Without this input the action writes it into origin's URL,
           # where the review can read it; with any value, git gets it

@@ -3326,7 +3326,7 @@ for that actor instead of registering a copy to fail loudly against,
 its own header carrying the reason.
 
 An action may refuse a bot besides. The review action does, unless the
-bot is named in `allowed_bots` — name the one that opens pull requests
+bot is named in `allowed_bots` — name each bot that opens pull requests
 here rather than passing `*`, which on a public repository lets any App
 permitted to comment start a run carrying a prompt it wrote.
 
