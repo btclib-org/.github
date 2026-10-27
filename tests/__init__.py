@@ -333,29 +333,9 @@ def names() -> list[str]:
 
 BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
-        1763,
-        "test_pyroma_says_what_section_4_says",
-        ("btclib-wallet",),
-    ),
-    (
         1808,
         "test_a_repository_carries_the_verbatim_files_owed_of_it",
         ("portanode",),
-    ),
-    (
-        1846,
-        "test_a_readme_opens_its_contributing_section_with_the_paragraph",
-        (
-            "btclib",
-            "btclib-node",
-            "btclib-secp256k1",
-            "portanode",
-            "bitcoin-core-rpc",
-            "btclib-wallet",
-            "ecc",
-            "bip39-slip39",
-            "base58-bech32",
-        ),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.

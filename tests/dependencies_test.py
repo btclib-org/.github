@@ -920,9 +920,7 @@ A requirement on one installs a release nothing updates any more. The
 names are PyPI's, `https://pypi.org/pypi/<name>/json` answering for each.
 """
 
-EXPECTED_RETIRED: dict[tuple[str, str], str] = {
-    ("bip39-slip39", "btclib-ecc"): "btclib-org/bip39-slip39#165",
-}
+EXPECTED_RETIRED: dict[tuple[str, str], str] = {}
 """Each tree known to require a retired name, against what moves it.
 
 An entry goes the day its tree no longer requires the name, and the
