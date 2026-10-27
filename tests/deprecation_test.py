@@ -186,15 +186,42 @@ def test_window_reads_a_definition_on_its_own() -> None:
         "from deprecated import sphinx\n",
         "try: ...\nexcept E as deprecated: ...\n",
         "match x:\n    case deprecated: ...\n",
+        "global deprecated\n",
+        "def g():\n    deprecated = 1\n    def h():\n        nonlocal deprecated\n",
+        "match x:\n    case C(deprecated=1): ...\n",
+        "match x:\n    case {**deprecated}: ...\n",
+        "match x:\n    case [*deprecated]: ...\n",
+        "def f[deprecated](): ...\n",
+        "def f[**deprecated](): ...\n",
+        "def f[*deprecated](): ...\n",
     ],
-    ids=["parameter", "keyword", "asname", "dotted", "module", "except", "match"],
+    ids=[
+        "parameter",
+        "keyword",
+        "asname",
+        "dotted",
+        "module",
+        "except",
+        "match",
+        "global",
+        "nonlocal",
+        "match keyword",
+        "match rest",
+        "match star",
+        "type variable",
+        "parameter specification",
+        "variadic type variable",
+    ],
 )
 def test_window_reads_any_identifier(source: str) -> None:
     """`deprecated` is found as each kind of identifier.
 
+    A `nonlocal` needs a binding in an enclosing function, which is a
+    second identifier, so what is asked is the set of names found.
+
     :param source: a module holding it as one kind of identifier.
     """
-    assert window(source) == ["deprecated"]
+    assert set(window(source)) == {"deprecated"}
 
 
 @pytest.mark.parametrize(
