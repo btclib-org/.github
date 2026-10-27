@@ -3704,12 +3704,20 @@ A label means what its description says. Who applies and removes it:
 
     **The release path and not the merge gate.** Before 1.0 a package breaks its
     surface deliberately, so a gate comparing the branch against the last
-    release ends every run in a human deciding which breaks are allowed. It
-    becomes a gate the day btclib-org/btclib#651 settles a deprecation policy,
-    the question then being *did the surface change without the release of
-    warning the policy owes*, which a command can answer on its own; so the
-    invocation takes a second reference pair rather than being replaced by
-    one.
+    release ends every run in a human deciding which breaks are allowed.
+
+    **No published btclib-org package keeps a deprecation window.**
+    btclib-org/btclib#651 decided it for btclib, and btclib-org/.github#1909 for
+    every package that publishes. A warn-then-remove window is the rejected
+    alternative: a checkout of `main` promises nothing, and the breaking-changes
+    list of `RELEASE_NOTES.md` is the contract a caller reads. A step, a
+    parameter or a name that adds nothing is removed outright, not kept as a
+    default, an alias or a `DeprecationWarning`: the break's entry in that list
+    and the `api-break` label below are the whole of the warning.
+    `tests/deprecation_test.py` refuses a module of a published package whose
+    code holds `FutureWarning`, `deprecated`, or a name ending in
+    `DeprecationWarning`, as a name, an attribute, an imported name, a class or
+    a function.
 
     **A pull request is told of a break by a label, not by a check.**
     `reusable-api-break.yml` walks the surface against the pull request's
