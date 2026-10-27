@@ -3716,7 +3716,9 @@ A label means what its description says. Who applies and removes it:
     `tests/deprecation_test.py` refuses a module of a published package whose
     code holds `FutureWarning`, `deprecated`, or a name ending in
     `DeprecationWarning` as any identifier; string literals and docstrings are
-    not read.
+    not read. Every identifier is read, rather than a list of node kinds, so no
+    kind of identifier can be left out. Code that only handles a dependency's
+    warning, such as `except DeprecationWarning:`, is refused too.
 
     **A pull request is told of a break by a label, not by a check.**
     `reusable-api-break.yml` walks the surface against the pull request's
