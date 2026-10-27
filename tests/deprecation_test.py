@@ -4,11 +4,11 @@
 
 """Section 12: no published package keeps a deprecation window.
 
-What is refused here is a name a window is written with:
+What is refused here is an identifier a window is written with:
 `FutureWarning`, `deprecated`, and any name ending in
 `DeprecationWarning`. The module's syntax tree is parsed rather than
-grepped, so a comment or a message that mentions the words is not read
-as code.
+grepped, so a comment, a string literal or a docstring that mentions
+the words is not read as code.
 """
 
 from __future__ import annotations
@@ -32,6 +32,24 @@ SUFFIX = "DeprecationWarning"
 project's own categories.
 """
 
+NOT_IDENTIFIERS = frozenset(
+    {
+        ("Constant", "kind"),
+        ("Constant", "value"),
+        ("Interpolation", "str"),
+        ("TypeIgnore", "tag"),
+    }
+)
+"""The string fields that hold text rather than an identifier.
+
+A literal or a docstring is a `Constant`'s value, and its `u` prefix is
+its kind. A template string keeps each interpolation's source text, and
+a `# type: ignore` comment keeps its tag.
+"""
+
+TYPE_COMMENT = "type_comment"
+"""The field a node keeps its `# type:` comment in."""
+
 
 def keeps_a_window(name: str) -> bool:
     """Say whether a name is one a deprecation window is written with.
@@ -42,26 +60,75 @@ def keeps_a_window(name: str) -> bool:
     return name in WINDOW or name.endswith(SUFFIX)
 
 
-def window(source: str) -> list[str]:
-    """List the names `keeps_a_window` refuses that a module's code holds.
+def identifiers(source: str) -> list[str]:
+    """List every identifier a module's code holds.
 
-    A name is read as a name, an attribute, an imported name, a class or
-    a function; the name an import binds with `as` is not read.
+    Every string field of every node is read, and every string in a list
+    field, except the fields `NOT_IDENTIFIERS` and `TYPE_COMMENT` name.
+    A dotted import counts once per part.
 
     :param source: the module's text.
-    :returns: each name, in the order the tree is walked.
+    :returns: each identifier, in the order the tree is walked.
     """
     found = []
     for node in ast.walk(ast.parse(source)):
-        if isinstance(node, ast.Name):
-            found.append(node.id)
-        elif isinstance(node, ast.Attribute):
-            found.append(node.attr)
-        elif isinstance(
-            node, ast.alias | ast.ClassDef | ast.FunctionDef | ast.AsyncFunctionDef
-        ):
-            found.append(node.name)
-    return [name for name in found if keeps_a_window(name)]
+        kind = type(node).__name__
+        for field, value in ast.iter_fields(node):
+            if field == TYPE_COMMENT or (kind, field) in NOT_IDENTIFIERS:
+                continue
+            for item in value if isinstance(value, list) else [value]:
+                if isinstance(item, str):
+                    found.extend(item.split("."))
+    return found
+
+
+def window(source: str) -> list[str]:
+    """List the identifiers `keeps_a_window` refuses in a module's code.
+
+    :param source: the module's text.
+    :returns: each identifier, in the order the tree is walked.
+    """
+    return [name for name in identifiers(source) if keeps_a_window(name)]
+
+
+def test_only_identifier_fields_are_read() -> None:
+    """The string fields `identifiers` reads are this `ast`'s identifiers.
+
+    A string field a later Python adds is read until it is left out, so
+    a new kind of identifier is not missed, and a new kind of text fails
+    here before it is read as code.
+    """
+    read = {
+        (kind.__name__, field)
+        for kind in vars(ast).values()
+        if isinstance(kind, type) and issubclass(kind, ast.AST)
+        for field, annotation in getattr(kind, "_field_types", {}).items()
+        if "str" in repr(annotation)
+        and field != TYPE_COMMENT
+        and (kind.__name__, field) not in NOT_IDENTIFIERS
+    }
+    assert read == {
+        ("AsyncFunctionDef", "name"),
+        ("Attribute", "attr"),
+        ("ClassDef", "name"),
+        ("ExceptHandler", "name"),
+        ("FunctionDef", "name"),
+        ("Global", "names"),
+        ("ImportFrom", "module"),
+        ("MatchAs", "name"),
+        ("MatchClass", "kwd_attrs"),
+        ("MatchMapping", "rest"),
+        ("MatchStar", "name"),
+        ("Name", "id"),
+        ("Nonlocal", "names"),
+        ("ParamSpec", "name"),
+        ("TypeVar", "name"),
+        ("TypeVarTuple", "name"),
+        ("alias", "asname"),
+        ("alias", "name"),
+        ("arg", "arg"),
+        ("keyword", "arg"),
+    }
 
 
 def test_window_reads_code_and_not_prose() -> None:
@@ -99,6 +166,46 @@ def test_window_reads_a_definition_on_its_own() -> None:
         "OwnDeprecationWarning",
         "deprecated",
     ]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "def f(*, deprecated=None): ...\n",
+        "p.add_argument('--old', deprecated=True)\n",
+        "import foo as deprecated\n",
+        "import deprecated.sphinx\n",
+        "from deprecated import sphinx\n",
+        "try: ...\nexcept E as deprecated: ...\n",
+        "match x:\n    case deprecated: ...\n",
+    ],
+    ids=["parameter", "keyword", "asname", "dotted", "module", "except", "match"],
+)
+def test_window_reads_any_identifier(source: str) -> None:
+    """`deprecated` is found as each kind of identifier.
+
+    :param source: a module holding it as one kind of identifier.
+    """
+    assert window(source) == ["deprecated"]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "MESSAGE = 'deprecated'\n",
+        '"""The deprecated API is gone."""\n',
+        'def f():\n    """Return what is deprecated."""\n',
+        "x = t'{y!r} deprecated'\n",
+        "x = 1  # type: ignore[deprecated]\n",
+    ],
+    ids=["string", "module docstring", "docstring", "template", "type ignore"],
+)
+def test_window_reads_no_text(source: str) -> None:
+    """`deprecated` in a literal, a docstring or a comment is not read.
+
+    :param source: a module holding the word as text only.
+    """
+    assert window(source) == []
 
 
 @pytest.mark.tier(Tier.PUBLISHER)
