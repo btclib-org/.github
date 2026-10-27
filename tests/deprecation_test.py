@@ -44,11 +44,19 @@ NOT_IDENTIFIERS = frozenset(
 
 A literal or a docstring is a `Constant`'s value, and its `u` prefix is
 its kind. A template string keeps each interpolation's source text, and
-a `# type: ignore` comment keeps its tag.
+a `# type: ignore` comment keeps its tag. `window` parses without
+`type_comments=True`, so `TypeIgnore.tag` and `TYPE_COMMENT` are never
+filled there: they are listed for `test_only_identifier_fields_are_read`.
 """
 
 TYPE_COMMENT = "type_comment"
 """The field a node keeps its `# type:` comment in."""
+
+NEVER_STR = frozenset({("MatchSingleton", "value")})
+"""The `object` fields that never hold a string.
+
+A `MatchSingleton` holds `True`, `False` or `None`.
+"""
 
 
 def keeps_a_window(name: str) -> bool:
@@ -92,20 +100,20 @@ def window(source: str) -> list[str]:
 
 
 def test_only_identifier_fields_are_read() -> None:
-    """The string fields `identifiers` reads are this `ast`'s identifiers.
+    """The fields `identifiers` reads are this `ast`'s identifier fields.
 
-    A string field a later Python adds is read until it is left out, so
-    a new kind of identifier is not missed, and a new kind of text fails
-    here before it is read as code.
+    Every field annotated with `str` or `object` is asked, so one that a
+    later Python adds fails here until it is listed as an identifier or
+    left out.
     """
     read = {
         (kind.__name__, field)
         for kind in vars(ast).values()
         if isinstance(kind, type) and issubclass(kind, ast.AST)
         for field, annotation in getattr(kind, "_field_types", {}).items()
-        if "str" in repr(annotation)
+        if ("str" in repr(annotation) or annotation is object)
         and field != TYPE_COMMENT
-        and (kind.__name__, field) not in NOT_IDENTIFIERS
+        and (kind.__name__, field) not in NOT_IDENTIFIERS | NEVER_STR
     }
     assert read == {
         ("AsyncFunctionDef", "name"),
@@ -196,12 +204,12 @@ def test_window_reads_any_identifier(source: str) -> None:
         '"""The deprecated API is gone."""\n',
         'def f():\n    """Return what is deprecated."""\n',
         "x = t'{y!r} deprecated'\n",
-        "x = 1  # type: ignore[deprecated]\n",
+        "x = t'{\"a.deprecated.b\"}'\n",
     ],
-    ids=["string", "module docstring", "docstring", "template", "type ignore"],
+    ids=["string", "module docstring", "docstring", "template", "interpolation"],
 )
 def test_window_reads_no_text(source: str) -> None:
-    """`deprecated` in a literal, a docstring or a comment is not read.
+    """`deprecated` in a literal, a docstring or a template is not read.
 
     :param source: a module holding the word as text only.
     """
