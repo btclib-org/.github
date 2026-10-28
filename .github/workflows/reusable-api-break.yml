@@ -76,11 +76,10 @@ jobs:
       # griffe's version and interpreter are named for the reason
       # reusable-public-api.yml gives, and are the same there. -X keeps
       # griffe from importing the checkout's code where it cannot read
-      # it as source. The base is HEAD^1, the merge's first parent, and
-      # not `pull_request.base.sha`, which can be an older commit of the
-      # base branch: walked against that, what the base branch gained
-      # since is read as the pull request's break
-      # (btclib-org/.github#1911)
+      # it as source. The base is not `pull_request.base.sha`, which can
+      # be an older commit of the base branch than the merge's first
+      # parent: walked against that, what the base branch gained since
+      # is read as the pull request's break (btclib-org/.github#1911)
       - name: Compare the public API with the base
         id: compare
         env:

@@ -282,9 +282,7 @@ def test_the_comparison_is_against_the_first_parent_without_importing() -> None:
     """
     step = _step("Compare the public API with the base")
     assert " -a HEAD^1 " in step["run"]
-    assert all(
-        "pull_request.base" not in str(each.get("env", {})) for each in _job()["steps"]
-    )
+    assert "pull_request.base" not in str(_job()["steps"])
     assert " -X " in step["run"]
     assert "${{" not in step["run"]
 
