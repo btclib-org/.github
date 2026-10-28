@@ -4094,11 +4094,11 @@ parts those are.
 reads the declaration its own tree keeps, so its rows are that tree's, and so is
 the `tests/` root it resolves a declared module against — `btclib-node` keeps
 its copy at `tests/unit/conventions_test.py`, a different path and not only
-different bytes. The condition is section 7's module naming, because the module
-runs in a Python suite, and a copy itself satisfies it. The rejected
-`tests/README.md` owes it to a shell suite such as `portanode`'s, and
-`pyproject.toml` to `bbt`, which has no suite. What the copies hold in common is
-a job rather than a text: read the declaration section 7 asks for and assert
+different bytes. The condition is section 7's module naming, since the module is
+Python, and a copy itself satisfies it. The rejected `tests/README.md` owes it
+to a shell suite such as `portanode`'s, and `pyproject.toml` to a tree with
+none, which section 10's `mutation` entry names. What the copies hold in common
+is a job rather than a text: read the declaration section 7 asks for and assert
 that every convention it names has a module holding a test for it. A copy owes a
 header sentence saying what it reads and which of its departures are decided
 rather than accidental. This repository's copy reads section 7's list of
