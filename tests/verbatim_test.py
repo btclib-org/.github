@@ -103,7 +103,6 @@ rather than the entry's.
 """
 
 EXPECTED_DRIFT: dict[str, str] = {
-    "REVIEWING.md": "btclib-org/.github#1846",
     "tests/secret_free/__init__.py": "btclib-org/.github#1697",
 }
 """A path section 14 names whose copies are known not to agree yet.
