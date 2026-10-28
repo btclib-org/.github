@@ -2,10 +2,10 @@
 name: reusable-api-break
 
 # The pull-request counterpart of reusable-public-api.yml: its griffe
-# walk against the pull request's base commit, the answer a label,
-# `api-break` (btclib-org/.github#1674). README section 12 has why, and
-# what a fork's pull request gets. The job is no required check, so no
-# merge waits on it.
+# walk of the pull request's merge commit against its first parent, the
+# answer a label, `api-break` (btclib-org/.github#1674). README section
+# 12 has why, and what a fork's pull request gets. The job is no
+# required check, so no merge waits on it.
 #
 # One input, the package griffe walks, with no default, for the reason
 # reusable-public-api.yml gives. The trigger, its types and the
@@ -52,7 +52,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          # the base commit has to be reachable for griffe to walk it
+          # HEAD is the pull request's merge commit, and its first
+          # parent has to be reachable for griffe to walk it
           fetch-depth: 0
       # caching off: the job installs one pinned package, griffe, and
       # setup-uv's default, `auto`, saves uv's cache after a successful
@@ -75,17 +76,20 @@ jobs:
       # griffe's version and interpreter are named for the reason
       # reusable-public-api.yml gives, and are the same there. -X keeps
       # griffe from importing the checkout's code where it cannot read
-      # it as source
+      # it as source. The base is HEAD^1, the merge's first parent, and
+      # not `pull_request.base.sha`, which can be an older commit of the
+      # base branch: walked against that, what the base branch gained
+      # since is read as the pull request's break
+      # (btclib-org/.github#1911)
       - name: Compare the public API with the base
         id: compare
         env:
           PACKAGE: ${{ inputs.package }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           findings="$RUNNER_TEMP/griffe-findings.txt"
           status=0
           uvx --quiet --python 3.15 griffe==2.2.0 check "$PACKAGE" -s . -s src \
-            -a "$BASE_SHA" -f oneline -X > "$findings" 2>&1 || status=$?
+            -a HEAD^1 -f oneline -X > "$findings" 2>&1 || status=$?
           echo "findings=$findings" >> "$GITHUB_OUTPUT"
           uv run --no-project --python 3.15 \
             standard/.github/scripts/api_break.py classify "$status" "$findings" \
