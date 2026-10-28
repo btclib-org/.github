@@ -331,13 +331,7 @@ def names() -> list[str]:
     ]
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
-    (
-        1808,
-        "test_a_repository_carries_the_verbatim_files_owed_of_it",
-        ("portanode",),
-    ),
-)
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what

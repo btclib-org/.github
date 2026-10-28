@@ -4094,23 +4094,23 @@ is carried to every copy in the same campaign, the header being what says which
 parts those are.
 
 `tests/conventions_test.py` is per repository by subject, owed where
-`tests/README.md`, and outside the compared list for the same reason: each copy
+`tests/*_test.py`, and outside the compared list for the same reason: each copy
 reads the declaration its own tree keeps, so its rows are that tree's, and so is
 the `tests/` root it resolves a declared module against — `btclib-node` keeps
 its copy at `tests/unit/conventions_test.py`, a different path and not only
-different bytes. That file is where section 7 asks a suite to declare which of
-its conventions it tests, so a tree that declares nothing has nothing for this
-module to read. What the copies hold in common is a job rather than a text: read
-the declaration section 7 asks for and assert that every convention it names has
-a module holding a test for it. The header sentence a copy owes is about this
-module: what it reads, and which of its departures are decided rather than
-accidental. This repository's copy reads section 7's list of conventions off
-`README.md` rather than transcribing it — which a sibling cannot, the standard
-being in another repository — and says so. Its failure mode is why the sentence
-is owed: a defect in the parsing that shared job needs sits in every copy
-carrying it and turns nothing red anywhere, so a fix that is not about one
-tree's rows or its root is carried to every copy in the same campaign, which is
-what `btclib-org/.github#651` records.
+different bytes. The condition is section 7's module naming, since the module is
+Python, and a copy itself satisfies it. The rejected `tests/README.md` owes it
+to a shell suite such as `portanode`'s, and `pyproject.toml` to a tree with
+none, which section 10's `mutation` entry names. What the copies hold in common
+is a job rather than a text: read the declaration section 7 asks for and assert
+that every convention it names has a module holding a test for it. A copy owes a
+header sentence saying what it reads and which of its departures are decided
+rather than accidental. This repository's copy reads section 7's list of
+conventions off `README.md` — which a sibling cannot, the standard being in
+another repository — and says so. Its failure mode is why the sentence is owed:
+a defect in the parsing that shared job needs sits in every copy carrying it and
+turns nothing red, so a fix that is not about one tree's rows or its root is
+carried to every copy in the same campaign, as `btclib-org/.github#651` records.
 
 ## 15. Auditing a repository against this file
 

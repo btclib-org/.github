@@ -633,6 +633,44 @@ def test_a_condition_stated_as_a_pathspec_reddens_a_tree_either_way(
     assert unbidden(root, {PLANTED: clause}) == spare
 
 
+CONVENTIONS = "tests/conventions_test.py"
+"""The per-subject file section 14 owes a Python suite alone."""
+
+
+@pytest.mark.parametrize(
+    ("sows", "short"),
+    [
+        pytest.param(["tests/README.md", "tests/run.sh"], [], id="shell-suite"),
+        pytest.param(["pyproject.toml"], [], id="python-without-suite"),
+        pytest.param(
+            ["tests/README.md", "tests/unit/probe_test.py"],
+            [CONVENTIONS],
+            id="python-suite",
+        ),
+    ],
+)
+def test_the_convention_test_is_owed_by_a_python_suite_alone(
+    tmp_path: Path,
+    sows: list[str],
+    short: list[str],
+) -> None:
+    """Section 14's own clause for the convention test, against planted trees.
+
+    A shell suite that keeps a `tests/README.md`, as `portanode`'s does,
+    owes no Python module, and neither does a Python project with no suite.
+    A suite named as section 7 names its modules owes one, a directory down
+    included, where `btclib-node` keeps its suite. The clause is read off
+    `README.md`, so a condition widened back to `tests/README.md` turns the
+    first row red.
+
+    :param tmp_path: where the tree is built.
+    :param sows: what the tree tracks.
+    :param short: the answer `unowed` owes for it.
+    """
+    clause = per_subject()[CONVENTIONS]
+    assert unowed(sown(tmp_path, sows), {CONVENTIONS: clause}) == short
+
+
 def test_a_clause_this_cannot_read_raises_rather_than_answering(
     tmp_path: Path,
 ) -> None:
