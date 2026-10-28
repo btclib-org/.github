@@ -200,8 +200,8 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author, but the maintainer bypasses it in pull_request mode and can merge without one. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
-    "status": "Unmet"
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
   },
   "OSPS-SA-01.01": {
     "justification": "README.md names the actors and actions: the user and the launchers, the per-platform scripts they reach, Bitcoin Core and Electrum, the publishers' download sites, gpg and the user's keyring. Updating Binaries and Limitations, not vulnerabilities say what each update, verification and rollback does and whom it trusts. https://github.com/btclib-org/portanode/blob/main/README.md#folder-structure https://github.com/btclib-org/portanode/blob/main/README.md#limitations-not-vulnerabilities",

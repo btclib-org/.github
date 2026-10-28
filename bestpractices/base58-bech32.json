@@ -200,8 +200,8 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "main-self-merge requires one approving review from somebody other than the author before a merge. Of the 17 pull requests merged since 2026-10-20, 10 had no approving review, so the control is not met in practice. https://github.com/btclib-org/base58-bech32/blob/main/REPOSITORY.md",
-    "status": "Unmet"
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
   },
   "OSPS-SA-01.01": {
     "justification": "ARCHITECTURE.md gives the modules, their layers bottom-up and what each may import, which tests/imports_test.py holds. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversary, and what each can do. https://github.com/btclib-org/base58-bech32/blob/main/ARCHITECTURE.md https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md#trust-boundaries",
