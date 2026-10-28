@@ -655,14 +655,14 @@ def test_the_convention_test_is_owed_by_a_python_suite_alone(
     sows: list[str],
     short: list[str],
 ) -> None:
-    """Section 14's own clause for the convention test, against three trees.
+    """Section 14's own clause for the convention test, against planted trees.
 
-    A shell suite declaring its conventions in `tests/README.md`, as
-    `portanode`'s does, owes no Python module, and neither does a Python
-    project with no suite. A suite named as section 7 names its modules
-    owes one, a directory down included, where `btclib-node` keeps its
-    suite. The clause is read off `README.md`, so a condition widened
-    back to `tests/README.md` turns the first row red.
+    A shell suite that keeps a `tests/README.md`, as `portanode`'s does,
+    owes no Python module, and neither does a Python project with no suite.
+    A suite named as section 7 names its modules owes one, a directory down
+    included, where `btclib-node` keeps its suite. The clause is read off
+    `README.md`, so a condition widened back to `tests/README.md` turns the
+    first row red.
 
     :param tmp_path: where the tree is built.
     :param sows: what the tree tracks.

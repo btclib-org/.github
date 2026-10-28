@@ -4094,19 +4094,19 @@ parts those are.
 reads the declaration its own tree keeps, so its rows are that tree's, and so is
 the `tests/` root it resolves a declared module against — `btclib-node` keeps
 its copy at `tests/unit/conventions_test.py`, a different path and not only
-different bytes. The condition is a Python suite, in section 7's naming, because
-the module runs in that suite; the rejected `tests/README.md` owes it to
-`portanode` too, whose suite is shell. What the copies hold in common is a job
-rather than a text: read the declaration section 7 asks for and assert that
-every convention it names has a module holding a test for it. The header
-sentence a copy owes is about this module: what it reads, and which of its
-departures are decided rather than accidental. This repository's copy reads
-section 7's list of conventions off `README.md` rather than transcribing it —
-which a sibling cannot, the standard being in another repository — and says so.
-Its failure mode is why the sentence is owed: a defect in the parsing that
-shared job needs sits in every copy carrying it and turns nothing red anywhere,
-so a fix that is not about one tree's rows or its root is carried to every copy
-in the same campaign, which is what `btclib-org/.github#651` records.
+different bytes. The condition is section 7's module naming, because the module
+runs in a Python suite, and a copy itself satisfies it. The rejected
+`tests/README.md` owes it to a shell suite such as `portanode`'s, and
+`pyproject.toml` to `bbt`, which has no suite. What the copies hold in common is
+a job rather than a text: read the declaration section 7 asks for and assert
+that every convention it names has a module holding a test for it. A copy owes a
+header sentence saying what it reads and which of its departures are decided
+rather than accidental. This repository's copy reads section 7's list of
+conventions off `README.md` — which a sibling cannot, the standard being in
+another repository — and says so. Its failure mode is why the sentence is owed:
+a defect in the parsing that shared job needs sits in every copy carrying it and
+turns nothing red, so a fix that is not about one tree's rows or its root is
+carried to every copy in the same campaign, as `btclib-org/.github#651` records.
 
 ## 15. Auditing a repository against this file
 
