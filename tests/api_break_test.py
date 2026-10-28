@@ -274,11 +274,15 @@ def test_the_history_is_fetched_and_a_failed_griffe_is_caught() -> None:
     assert "|| status=$?" in _step("Compare the public API with the base")["run"]
 
 
-def test_the_comparison_is_against_the_base_without_importing() -> None:
-    """The base is the pull request's, through `env:`; `-X` imports nothing."""
+def test_the_comparison_is_against_the_first_parent_without_importing() -> None:
+    """The base is the merge's first parent; `-X` imports nothing.
+
+    No step reads `pull_request.base.sha`, the stale base the workflow's
+    comment names (btclib-org/.github#1911).
+    """
     step = _step("Compare the public API with the base")
-    assert step["env"]["BASE_SHA"] == "${{ github.event.pull_request.base.sha }}"
-    assert '-a "$BASE_SHA"' in step["run"]
+    assert " -a HEAD^1 " in step["run"]
+    assert "pull_request.base" not in str(_job()["steps"])
     assert " -X " in step["run"]
     assert "${{" not in step["run"]
 
@@ -388,12 +392,11 @@ STEPS: list[dict[str, Any]] = [
         "id": "compare",
         "env": {
             "PACKAGE": "${{ inputs.package }}",
-            "BASE_SHA": "${{ github.event.pull_request.base.sha }}",
         },
         "run": (
             'findings="$RUNNER_TEMP/griffe-findings.txt" status=0 '
             "uvx --quiet --python 3.15 griffe==2.2.0 "
-            'check "$PACKAGE" -s . -s src -a "$BASE_SHA" -f oneline -X '
+            'check "$PACKAGE" -s . -s src -a HEAD^1 -f oneline -X '
             '> "$findings" 2>&1 || status=$? '
             'echo "findings=$findings" >> "$GITHUB_OUTPUT" '
             "uv run --no-project --python 3.15 "
