@@ -1318,7 +1318,11 @@ check the same code where no source is conditional on the version.
   `local-link-prefix`'s reason, and the hook's default is which.
 - Shared test code lives in a package `__init__.py` — vector loaders,
   helpers — never in a module whose name says "test" and holds none.
-- `tests/_data/` holds the data the suite reads, under the rule below.
+- `tests/_data/` holds the data the suite reads, under *Test data is
+  vendored, never fetched*. A file under any `_data` directory of
+  `tests/` is data, not a test module, so a vendored module keeps its
+  upstream name: the modules vendored with it import it by that name,
+  and their bytes are pinned.
 
 ### pytest configuration
 
