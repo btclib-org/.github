@@ -29,6 +29,10 @@ __all__ = [
 #: as many bytes.
 WINDOW = 12
 
+#: What `repr` writes for a tab, a newline and a carriage return, dropped from
+#: the text with its whitespace.
+ESCAPES = ("\\t", "\\n", "\\r")
+
 
 def chained(exc: BaseException) -> Iterator[BaseException]:
     """Yield an exception and every one reached through its cause and context.
@@ -121,7 +125,7 @@ def windows(secret: str | bytes | bytearray) -> list[str | bytes | bytearray]:
 def assert_secret_free(
     exc: BaseException, secrets: Iterable[str | bytes | bytearray]
 ) -> None:
-    """Assert that no piece of a secret, in any spelling, is in the chain.
+    r"""Assert that no piece of a secret, in any spelling, is in the chain.
 
     A piece is what `windows` returns, so a refusal quoting less of a
     secret than a piece passes: a mnemonic is passed word by word, and a
@@ -134,11 +138,14 @@ def assert_secret_free(
     a mnemonic's words are not words of the refusal's own text.
 
     Whitespace a refusal puts inside a piece that has none of its own does
-    not hide it where the text holds that whitespace as itself. `repr` writes
-    a tab or a newline as an escape, so one that a refusal shows only through
-    `repr`, as a `KeyError` shows its key, does hide it. A piece with
-    whitespace of its own is looked for as given, so a refusal that changes
-    that whitespace does not match it.
+    not hide it, whether the text holds that whitespace as itself or as the
+    `\t`, `\n` or `\r` escape that `repr` writes. A piece whose own spelling
+    holds one of those escapes, as the `repr` of bytes holding a tab does, is
+    hidden by whitespace put inside it. Other whitespace, such as `\x0b` or
+    `\u2003`, does hide a piece where the text holds it only as the escape
+    `repr` writes, as a `KeyError` shows its key. A piece with whitespace of
+    its own is looked for as given, so a refusal that changes that whitespace
+    does not match it.
 
     :param exc: the exception raised.
     :param secrets: the secret fed, as bytes, as a bytearray, or in each
@@ -154,6 +161,8 @@ def assert_secret_free(
     for e in chained(exc):
         text = text_of(e)
         compact_text = "".join(text.split())
+        for escape in ESCAPES:
+            compact_text = compact_text.replace(escape, "")
         for piece in pieces:
             assert piece not in text
             assert piece not in compact_text
