@@ -42,6 +42,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from . import ROOT, SELF, by_hand, tracked
+from .names_test import BOUNDARY
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -69,14 +70,14 @@ first number in it.
 """
 
 DOCUMENT = re.compile(
-    r"""(?<![A-Za-z0-9_.-])`?(?P<document>[A-Za-z0-9_.-]+\.md)`?'s """ + QUOTED
+    BOUNDARY + r"""`?(?P<document>[A-Za-z0-9_.-]+\.md)`?'s """ + QUOTED
 )
 """A section of a document of the tree the citation is written in.
 
-The lookbehind tries a file name only where a run of the characters a
-name is made of starts. Without it the scan tries every position inside
-the run, and each try reads to the end of the run looking for `.md`, so
-the hex of a vendored test vector costs the square of its length.
+`BOUNDARY` tries a file name only where a run of the characters a name
+is made of starts. Without it the scan tries every position inside the
+run, and each try reads to the end of the run looking for `.md`, so the
+hex of a vendored test vector costs the square of its length.
 """
 
 OPENING = re.compile(r"(?m)^## (\d+)\. ")
