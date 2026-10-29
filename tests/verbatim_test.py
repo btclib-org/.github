@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from . import ORG, ROOT, still_open, subjects, tracked
+from . import ORG, ROOT, SELF, still_open, subjects, tracked
 from .per_subject_test import declared, per_subject, sown
 
 if TYPE_CHECKING:
@@ -92,6 +92,16 @@ heading's own text lives in the bullet, in `README.md`, rather than in a
 second constant here that a rename of the section would leave stale.
 """
 
+SOURCE = re.compile(r"the source is this repository's `([^`]+)`")
+"""How a bullet names where this repository keeps its copy of the subject.
+
+`RELEASING.md` is owed of a tree that publishes, and section 2 keeps it
+out of this one, which publishes nothing. So the copy the others are
+copied from sits at another path, and the bullet says which: read off
+the bullet for the reason `SECTION` is, and compared in this
+repository's place.
+"""
+
 COMMIT = re.compile(r"(?P<repository>[A-Za-z0-9._-]+)@[0-9a-f]{7,40}")
 """The form of the field behind an `EXPECTED_DRIFT` value's comma.
 
@@ -104,6 +114,7 @@ rather than the entry's.
 
 EXPECTED_DRIFT: dict[str, str] = {
     "tests/secret_free/__init__.py": "btclib-org/.github#1697",
+    "RELEASING.md": "btclib-org/.github#1855",
 }
 """A path section 14 names whose copies are known not to agree yet.
 
@@ -374,17 +385,46 @@ def test_section_14_names_files(trees: dict[str, Path]) -> None:
     assert not unknown, f"section 14 names paths no repository has: {unknown}"
 
 
-def copies(trees: dict[str, Path], path: str) -> dict[bytes, list[str]]:
+def source(clause: str) -> str | None:
+    """Read the path a bullet gives this repository's copy, where it gives one.
+
+    :param clause: what the bullet says after its subject.
+    :returns: the path, relative to this repository's root, or ``None``
+        where the bullet names no source.
+    :raises LookupError: where the bullet names a path this repository
+        does not carry, which would leave its copy out of the comparison.
+    """
+    found = SOURCE.search(clause)
+    if found is None:
+        return None
+    if not (ROOT / found.group(1)).is_file():
+        msg = f"section 14 names {found.group(1)} as a source, and it is not here"
+        raise LookupError(msg)
+    return found.group(1)
+
+
+def copies(
+    trees: dict[str, Path], path: str, clause: str | None = None
+) -> dict[bytes, list[str]]:
     """Group the repositories carrying a file by the shared half they carry.
+
+    This repository's copy is read at the source the bullet names, where
+    it names one.
 
     :param trees: the checkouts.
     :param path: the file, relative to a repository root.
+    :param clause: the bullet's clause, section 14's own unless a control
+        passes another.
     :returns: each distinct content against the repositories holding it.
     """
-    clause = verbatim()[path]
+    if clause is None:
+        clause = verbatim()[path]
+    named = source(clause)
     out: dict[bytes, list[str]] = {}
     for repository, root in sorted(trees.items()):
         here = root / path
+        if repository == SELF and named is not None:
+            here = ROOT / named
         if here.is_file():
             out.setdefault(shared(here, clause), []).append(repository)
     return out
@@ -559,6 +599,51 @@ MATCHED = "deep/probe.probe"
 `WATCHED` names no such file, so the rows below asking the glob turn on
 the pathspec being read as one.
 """
+
+
+RELEASING = "RELEASING.md"
+"""The subject whose bullet names a source."""
+
+
+def verbatim_source() -> str:
+    """Read the source section 14 names for `RELEASING`.
+
+    :returns: its path in this repository.
+    :raises LookupError: where the bullet names none.
+    """
+    named = source(verbatim()[RELEASING])
+    if named is None:
+        msg = f"section 14 names no source for {RELEASING}"
+        raise LookupError(msg)
+    return named
+
+
+def test_a_named_source_is_compared_in_this_repository_s_place(
+    tmp_path: Path,
+) -> None:
+    """A source stands for this repository's copy, cut at `MARKER`.
+
+    The planted tree carries the subject at its root: the source's
+    shared part, then a section of its own. The first answer is one
+    group only where the source is read and cut at the marker. The same
+    trees against a bullet naming no source leave this repository out,
+    which says the first answer is not one the root path gave. A source
+    that is not there raises rather than leaving the copy out.
+
+    :param tmp_path: where the tree is built.
+    """
+    named = verbatim_source()
+    common = shared(ROOT / named)
+    other = tmp_path / "other"
+    other.mkdir()
+    (other / RELEASING).write_bytes(common + MARKER + b"\nrepo=other\n")
+    trees = {SELF: ROOT, "other": other}
+    stated = f"{CONDITIONAL}`x.yml`, and the source is this repository's `{named}`."
+    assert copies(trees, RELEASING, stated) == {common: [SELF, "other"]}
+    silent = f"{CONDITIONAL}`x.yml`, and nothing else."
+    assert copies(trees, RELEASING, silent) == {common: ["other"]}
+    with pytest.raises(LookupError, match="as a source, and it is not here"):
+        source(f"the source is this repository's `{PLANTED}`")
 
 
 def test_a_departure_answers_a_paragraph_and_dropping_it_reddens_the_tree(

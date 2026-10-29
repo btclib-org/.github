@@ -331,7 +331,13 @@ def names() -> list[str]:
     ]
 
 
-BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = ()
+BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    (
+        1937,
+        "test_a_repository_carries_no_copy_a_condition_does_not_reach",
+        ("portanode",),
+    ),
+)
 """What the tracker already knows, read by `conftest.py` at collection.
 
 The number is an issue of this repository's own tracker, which is what
