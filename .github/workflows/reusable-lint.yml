@@ -130,7 +130,7 @@ jobs:
       # environment the mypy hook type checks against; the hook
       # environments are the step below
       - name: Setup uv
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           enable-cache: true
       # ImageOS is set by the runner image ("ubuntu24"), not by this
@@ -203,7 +203,7 @@ jobs:
       # default uv; the version is reusable-audit.yml's, `audit` being a
       # preview feature, and tests/check_audit_test.py holds the two equal
       - name: Install the uv the audit is pinned to
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: "0.13.5"
           enable-cache: false
@@ -309,7 +309,7 @@ jobs:
       # caching off: the job installs no dependency, so a cache has nothing
       # to hold
       - name: Setup uv
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           enable-cache: false
       # --no-project and the interpreter named, the script being this
