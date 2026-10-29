@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "The release notes name the GHSA id of each advisory published by the time of the release: v2026.10.4 names GHSA-qq38-77mp-j6wr and GHSA-v4gq-j2v2-c4jp, v2026.10.8 names GHSA-62jf-v327-86h5, and v2026.10.9 names GHSA-8qrf-j8jh-cx23. v2026.10.16 describes the fix of GHSA-4x2v-6p43-cq6x and links its issue, but not the id: the advisory was published 86 minutes after the release. https://github.com/btclib-org/btclib-wallet/blob/main/RELEASE_NOTES.md",
+    "justification": "The release notes name the GHSA id of each advisory published by the time of the release: v2026.10.29 fixes none and names none; v2026.10.4 names GHSA-qq38-77mp-j6wr and GHSA-v4gq-j2v2-c4jp, v2026.10.8 names GHSA-62jf-v327-86h5, and v2026.10.9 names GHSA-8qrf-j8jh-cx23. v2026.10.16 describes the fix of GHSA-4x2v-6p43-cq6x and links its issue, but not the id: the advisory was published 86 minutes after the release. https://github.com/btclib-org/btclib-wallet/releases/tag/v2026.10.29",
     "status": "Met"
   },
   "repo_distributed": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.26 shipped 4 pull requests, 1 of them approved by somebody other than the author, 25%, below the 50% the criterion asks; none was approved by somebody other than fametrano. main's ruleset requires one approving review from somebody other than the author, and admins can bypass it. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "v2026.10.29 shipped 20 pull requests, 10 of them approved by somebody other than the author; 5 were approved by somebody other than fametrano, 25%, below the 50% the criterion asks. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {

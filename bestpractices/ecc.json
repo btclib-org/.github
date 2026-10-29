@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "The release notes name each vulnerability the release fixes or asks for a fix of: v2026.10.23 names GHSA-8h6f-34jj-7p6c, fixed in btclib-secp256k1 0.8.0.10 (the secp256k1 extra asks for 0.8.0.12 or later); v2026.10.10 names the share leak of FROST's deterministic_sign (issue #168) as its first entry, and v2026.10.8 names GHSA-2wgq-4cfh-5gqh. https://github.com/btclib-org/ecc/releases/tag/v2026.10.23",
+    "justification": "The release notes name each vulnerability the release fixes or asks for a fix of: v2026.10.28 fixes none and names none; v2026.10.23 names GHSA-8h6f-34jj-7p6c, fixed in btclib-secp256k1 0.8.0.10 (the secp256k1 extra asks for 0.8.0.12 or later); v2026.10.10 names the share leak of FROST's deterministic_sign (issue #168) as its first entry, and v2026.10.8 names GHSA-2wgq-4cfh-5gqh. https://github.com/btclib-org/ecc/releases/tag/v2026.10.28",
     "status": "Met"
   },
   "repo_distributed": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.23 shipped 1 of 10 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "v2026.10.28 shipped 9 of 29 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {

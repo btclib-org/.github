@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "The release notes name each advisory a release fixes by its GHSA id; for example, v2026.10.8 names GHSA-c6h8-5hv5-3gv7. GHSA-47wq-xh8q-pfxj names 2026.9.29, which removed the function; that release's notes tell users the module moved to btclib-wallet. https://github.com/btclib-org/btclib/blob/main/RELEASE_NOTES.md",
+    "justification": "The release notes name each advisory a release fixes by its GHSA id: v2026.10.28 fixes none and names none; v2026.10.8 names GHSA-c6h8-5hv5-3gv7. GHSA-47wq-xh8q-pfxj names 2026.9.29, which removed the function; that release's notes tell users the module moved to btclib-wallet. https://github.com/btclib-org/btclib/releases/tag/v2026.10.28",
     "status": "Met"
   },
   "repo_distributed": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.24 shipped 13 of 27 pull requests approved by somebody other than the author, 48%, below the 50% the criterion asks; 8 were approved by somebody other than fametrano. main's ruleset requires one approving review from somebody other than the author, and admins can bypass it. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "v2026.10.28 shipped 17 of 37 pull requests approved by somebody other than the author, 46%, below the 50% the criterion asks; 12 were approved by somebody other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {
