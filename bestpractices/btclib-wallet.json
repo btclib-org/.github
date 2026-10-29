@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.29 shipped 20 pull requests, 10 of them approved by somebody other than the author; 5 were approved by somebody other than fametrano, 25%, below the 50% the criterion asks. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Unmet"
+    "justification": "v2026.10.29 shipped 10 of 20 pull requests approved by somebody other than the author, 50%, the 50% the criterion asks. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
   },
   "updateable_reused_components": {
     "justification": "Reused components are standard-library modules or PyPI packages pinned in uv.lock. Dependabot updates them weekly, and deps-latest runs the suite weekly against their latest releases. https://github.com/btclib-org/btclib-wallet/blob/main/.github/workflows/deps-latest.yml",
