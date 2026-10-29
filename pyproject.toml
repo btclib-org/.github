@@ -50,8 +50,8 @@ keywords = [
 # says so for a developer running this by hand.
 test = [
     # what `.github/scripts/api_gaps.py` imports, at the version both
-    # api workflows run it with: tests/api_gaps_test.py holds the three
-    # equal
+    # api workflows run it with: tests/api_gaps_test.py keeps this pin,
+    # theirs and uv.lock's equal
     "griffe==2.2.0",
     "pytest",
     # section 7's default, taken rather than declined: tests/README.md

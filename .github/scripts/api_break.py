@@ -40,10 +40,11 @@ _NOT_FOUND = "HTTP 404"
 
 
 def classify(status: int, output: str) -> str:
-    """Say whether the output of `griffe check` is a break.
+    """Say whether the output of the comparison is a break.
 
-    :param status: griffe's exit code.
-    :param output: what it printed, standard output and error together.
+    :param status: the higher of griffe's and `api_gaps.py`'s exit codes.
+    :param output: what both printed, griffe's standard output and error
+        and the script's standard output.
     :returns: `true` for a break, `false` for none, `unknown` otherwise.
     """
     if status == 0:
