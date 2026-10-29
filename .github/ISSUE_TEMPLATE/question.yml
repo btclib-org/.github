@@ -36,7 +36,7 @@ body:
       value: >
         **Sign-off.** Whoever takes this issue signs off every commit
         (`git commit -s`). The required `Sign-off` check refuses a pull
-        request whose commits lack the `Signed-off-by:` trailer;
-        [`CONTRIBUTING.md`'s *Pull
+        request whose commits lack the `Signed-off-by:` trailer, and only
+        an administrator can merge past it; [`CONTRIBUTING.md`'s *Pull
         requests*](https://github.com/btclib-org/.github/blob/main/CONTRIBUTING.md#pull-requests)
         says why.
