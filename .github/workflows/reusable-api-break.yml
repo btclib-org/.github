@@ -80,10 +80,10 @@ jobs:
       # be an older commit of the base branch than the merge's first
       # parent: walked against that, what the base branch gained since
       # is read as the pull request's break (btclib-org/.github#1911).
-      # api_gaps.py adds two kinds of break griffe does not compare, in
-      # griffe's format and on standard output alone, its own warnings
-      # staying in the log; its docstring names them. The higher of the
-      # two exit codes is the one classified
+      # api_gaps.py adds breaks of the kinds its docstring names, which
+      # griffe does not compare, in griffe's format and on standard
+      # output alone, its own warnings staying in the log. The higher of
+      # the two exit codes is the one classified
       - name: Compare the public API with the base
         id: compare
         env:

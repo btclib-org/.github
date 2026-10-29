@@ -3697,19 +3697,19 @@ A label means what its description says. Who applies and removes it:
     no such test. Pinning `uv` on the hook instead leaves even that first half
     silent.
 - **A release is checked against the last one for a break in the public
-  surface**, by `griffe check` in the release path, comparing the tag being cut
-  against the tag before it. Section 7's census answers *is this module's
-  surface stated* and never *did this release take something the last one gave*,
-  and `RELEASE_NOTES.md` is written by hand, so nothing else can tell that an
-  entry is missing. `griffe check` walks the public API of two git references,
-  names each break by the kind of break it is, and exits non-zero having found
-  any. `.github/scripts/api_gaps.py` reports, in the same format and the same
-  job, two kinds of break griffe does not compare, which its docstring names. No
-  griffe release up to 2.4.1 compares either, so no pin up to it reports them,
-  and leaving them for the release's author to list would leave the hand-written
-  notes unchecked for them. What the two report is either a `RELEASE_NOTES.md`
-  entry or a reason for not being one, written where the release is being
-  written.
+  surface**, by `griffe check` and a script beside it in the release path,
+  comparing the tag being cut against the tag before it. Section 7's census
+  answers *is this module's surface stated* and never *did this release take
+  something the last one gave*, and `RELEASE_NOTES.md` is written by hand, so
+  nothing else can tell that an entry is missing. `griffe check` walks the
+  public API of two git references, names each break by the kind of break it is,
+  and exits non-zero having found any. `.github/scripts/api_gaps.py` reports, in
+  the same format and the same job, breaks of the kinds its docstring names,
+  which griffe does not compare. No griffe release up to 2.4.1 compares them, so
+  moving the pin up to it would not replace the script, and leaving them for the
+  release's author to list would leave the hand-written notes unchecked for
+  them. What the two report is either a `RELEASE_NOTES.md` entry or a reason for
+  not being one, written where the release is being written.
 
     **The release path and not the merge gate.** Before 1.0 a package breaks its
     surface deliberately, so a gate comparing the branch against the last

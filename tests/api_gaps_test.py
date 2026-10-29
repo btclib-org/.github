@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Tests for `.github/scripts/api_gaps.py`, two breaks griffe does not compare.
+"""Tests for `.github/scripts/api_gaps.py` and the breaks it reports.
 
 Each case writes two versions of a package `pkg` under `src/` and runs
 the script's `main` on them, `griffe.load_git` replaced by a load of the
