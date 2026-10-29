@@ -7,18 +7,21 @@
 `griffe check` reads a dataclass field turned into a property as a name
 still present, and compares no field list (btclib-org/.github#1934).
 Where `@dataclass` writes `__init__`, griffe compares the `__init__` it
-generates, so a field change that breaks that signature is reported
-twice. griffe calls any two return annotations compatible, so a changed
-one is no finding either (btclib-org/.github#1796). This script loads
-the same two versions with griffe's API, and reports these:
+generates, so griffe reports a field change that breaks that signature
+as well as this script. griffe calls any two return annotations
+compatible, so a changed one is no finding either
+(btclib-org/.github#1796). This script loads the same two versions with
+griffe's API, and reports these:
 
 - a public dataclass whose fields changed: their names, their order, or
   `init` or `kw_only` of one of them. `dataclasses.fields`, `replace`,
   `asdict`, `astuple` and `__match_args__` all read that list. A class
   that stops being a dataclass is reported too.
 - a public function, method or property whose return annotation changed.
-  An annotation added, or one that was `None`, is no break; one removed
-  is a break `griffe check` reports itself.
+  An annotation added, or one that was `None`, is no break. One removed
+  from a function or a method is a break `griffe check` reports itself;
+  one removed from a property, which griffe models as an attribute, this
+  script reports.
 
 The annotations are compared as griffe renders them, so a change of
 spelling alone, `Optional[int]` to `int | None`, is reported as well.
@@ -43,7 +46,7 @@ import functools
 import sys
 import traceback
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING, TypeIs, override
 
 import griffe
 
@@ -246,22 +249,36 @@ def _shown(found: tuple[Field, ...] | None) -> str:
     return "(" + ", ".join(str(field) for field in found) + ")"
 
 
+def _is_property(obj: griffe.Object) -> TypeIs[griffe.Attribute]:
+    """Say whether griffe models an object as a property."""
+    return isinstance(obj, griffe.Attribute) and "property" in obj.labels
+
+
 def _returns(obj: griffe.Object) -> str | griffe.Expr | None:
     """Return what a function or a property is annotated to return."""
     if isinstance(obj, griffe.Function):
         return obj.returns
-    if isinstance(obj, griffe.Attribute) and "property" in obj.labels:
+    if _is_property(obj):
         return obj.annotation
     return None
 
 
 def _returns_changed(
-    old: str | griffe.Expr | None, new: str | griffe.Expr | None
+    old: str | griffe.Expr | None,
+    new: str | griffe.Expr | None,
+    *,
+    removed_is_a_change: bool,
 ) -> bool:
-    """Say whether a return annotation changed, an added one being no change."""
-    if old is None or new is None:
+    """Say whether a return annotation changed, an added one being no change.
+
+    One removed is a change only where the caller asks, for the reason the
+    module docstring gives.
+    """
+    if old is None or str(old) == "None":
         return False
-    return str(old) not in {"None", str(new)}
+    if new is None:
+        return removed_is_a_change
+    return str(old) != str(new)
 
 
 def _line(obj: griffe.Object, kind: str, old: str, new: str) -> str:
@@ -283,7 +300,9 @@ def breaks(
                 yield _line(after, FIELDS_CHANGED, _shown(was), _shown(now))
             continue
         was_returning, now_returning = _returns(before), _returns(after)
-        if _returns_changed(was_returning, now_returning):
+        if _returns_changed(
+            was_returning, now_returning, removed_is_a_change=_is_property(after)
+        ):
             yield _line(after, RETURNS_CHANGED, str(was_returning), str(now_returning))
 
 

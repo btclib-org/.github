@@ -270,8 +270,8 @@ def test_griffe_reports_a_field_moved_only_through_the_generated_init(
 ) -> None:
     """Griffe reports a moved field only where `@dataclass` writes `__init__`.
 
-    The script reports it either way, so there the change is reported
-    twice.
+    The script reports it either way, so there griffe reports the change
+    as well as this script.
     """
     body = ("x: int", "y: int", *([init, "    pass"] if init else []))
     moved = ("y: int", "x: int", *body[2:])
@@ -534,13 +534,35 @@ def test_a_change_of_spelling_alone_is_reported(
 def test_a_return_annotation_removed_is_left_to_griffe(
     pair: Pair,
 ) -> None:
-    """Griffe reports it, so this script does not report it twice."""
+    """Griffe reports it for a function, so this script does not."""
     body = "\n    return 1\n"
 
     found = pair.compare("def f(x) -> int:" + body, "def f(x):" + body)
 
     assert found == (0, [])
     assert pair.griffe() == ["Return types are incompatible"]
+
+
+def test_a_return_annotation_removed_from_a_property_is_reported(
+    pair: Pair,
+) -> None:
+    """Griffe models a property as an attribute, and reports no removal."""
+    before = '''
+        class Key:
+            """A key."""
+
+            @property
+            def size(self) -> int:
+                return 0
+    '''
+
+    found = pair.compare(before, before.replace(" -> int", ""))
+
+    assert found == (
+        1,
+        ["src/pkg/__init__.py:6: Key.size: Return types are incompatible: int -> None"],
+    )
+    assert pair.griffe() == []
 
 
 def test_a_method_and_a_property_are_named_by_their_class(
