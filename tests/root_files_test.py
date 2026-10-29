@@ -38,8 +38,8 @@ CEILING = "A tier-2 repository carries neither"
 
 The rule is a ceiling where the table states floors, so no cell of it
 answers for one: the two files it names are the table's tier-1 rows, and
-`portanode` carries both at tier 3 without contradicting either
-statement. It is read out of the section rather than copied here, for
+`portanode` carries `RELEASE_NOTES.md` at tier 3 without contradicting
+either statement. It is read out of the section rather than copied here, for
 the reason `fenced` in `tests/__init__.py` gives -- a transcription is
 the copy that goes stale.
 """
@@ -92,12 +92,10 @@ def test_a_repository_carries_the_root_files_its_tier_owes(
 
     That direction and not the other. A tier is a floor rather than a
     ceiling, so a row that does not reach a repository says nothing
-    about whether it may carry the file anyway: `portanode` is tier 3
-    and carries the `RELEASING.md` and `RELEASE_NOTES.md` its own
-    practice needs, and this repository is tier 2 and carries the
-    `SECURITY.md` GitHub shows for a repository of the organization with
-    none of its own. Section 2 states both, and a test reading the table
-    in reverse would report them as findings.
+    about whether it may carry the file anyway: this repository is tier 2
+    and carries the `SECURITY.md` GitHub shows for a repository of the
+    organization with none of its own. Section 2 states it, and a test
+    reading the table in reverse would report it as a finding.
 
     A publisher with no `SECURITY.md` fails here and in
     `security_test.py`, which needs the file before it can read the

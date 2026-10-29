@@ -383,6 +383,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "base58-bech32",
         ),
     ),
+    (
+        1937,
+        "test_a_repository_carries_no_copy_a_condition_does_not_reach",
+        ("portanode",),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
