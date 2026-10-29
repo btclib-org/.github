@@ -269,7 +269,7 @@
   },
   "achieve_passing": {
     "justification": null,
-    "status": "Unmet"
+    "status": "Met"
   },
   "achieve_silver": {
     "justification": null,
@@ -776,8 +776,8 @@
     "status": "Met"
   },
   "warnings_fixed": {
-    "justification": "shellcheck findings fail the required Lint check. Script security runs every Blinter Warning rule, and each finding is fixed or accepted with its reason in .github/blinter-reasons.md. PSScriptAnalyzer's Warning findings on the .ps1 scripts are neither fixed nor recorded yet: ISS 739. https://github.com/btclib-org/portanode/issues/739",
-    "status": "Unmet"
+    "justification": "shellcheck findings fail the required Lint check. Script security runs every Blinter Warning rule, and each finding is fixed or accepted with its reason in .github/blinter-reasons.md. PSScriptAnalyzer, run with every rule as CONTRIBUTING.md says, reports no Warning finding: each is fixed or suppressed in the script with its reason (ISS 739). CI runs only its security rules; running the rest there is ISS 755. https://github.com/btclib-org/portanode/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Met"
   },
   "warnings_strict": {
     "justification": "shellcheck runs at its default severity with none of its optional checks enabled. The required Script security check runs Blinter's Error, Security and Warning rules and PSScriptAnalyzer's security rules; PSScriptAnalyzer's other rules are run by hand. https://github.com/btclib-org/portanode/blob/main/.github/workflows/script-security.yml",
