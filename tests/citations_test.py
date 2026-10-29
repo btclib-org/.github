@@ -68,8 +68,16 @@ another is read as the citation in it rather than as a citation of the
 first number in it.
 """
 
-DOCUMENT = re.compile(r"""`?(?P<document>[A-Za-z0-9_.-]+\.md)`?'s """ + QUOTED)
-"""A section of a document of the tree the citation is written in."""
+DOCUMENT = re.compile(
+    r"""(?<![A-Za-z0-9_.-])`?(?P<document>[A-Za-z0-9_.-]+\.md)`?'s """ + QUOTED
+)
+"""A section of a document of the tree the citation is written in.
+
+The lookbehind tries a file name only where a run of the characters a
+name is made of starts. Without it the scan tries every position inside
+the run, and each try reads to the end of the run looking for `.md`, so
+the hex of a vendored test vector costs the square of its length.
+"""
 
 OPENING = re.compile(r"(?m)^## (\d+)\. ")
 """How the standard opens a numbered section."""
@@ -223,6 +231,18 @@ def test_a_sentence_naming_two_sections_is_read_as_citing_the_second() -> None:
     assert [found["cited"] for found in NUMBERED.finditer(both)] == [
         "Measure, don't assert"
     ]
+
+
+def test_a_file_name_is_tried_only_where_its_run_starts() -> None:
+    """`DOCUMENT` refuses to start inside a run of name characters.
+
+    That refusal is what keeps the scan linear over a long run. A scan
+    finds the match from the start of the run first in any case, so the
+    citations found are the same.
+    """
+    text = f"xREADME.md{POSSESSIVE} *a heading*"
+    assert DOCUMENT.match(text, 1) is None
+    assert [found["document"] for found in DOCUMENT.finditer(text)] == ["xREADME.md"]
 
 
 def test_a_citation_of_words_the_standard_does_not_hold_is_named() -> None:
