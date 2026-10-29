@@ -371,6 +371,18 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "bitcoin-node-tests",
         ),
     ),
+    (
+        1928,
+        "test_the_suite_runs_each_harness",
+        (
+            "btclib-secp256k1",
+            "bitcoin-core-rpc",
+            "btclib-node",
+            "ecc",
+            "bip39-slip39",
+            "base58-bech32",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
