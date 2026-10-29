@@ -1520,6 +1520,25 @@ repeat it. A tree that answers the property with hand-rolled properties over the
 same domain declares that in `tests/README.md`, and a suite whose subject is a
 measurement rather than a parser does not owe the layer at all.
 
+### A fuzz harness runs on its seeds
+
+A tree that section 10's record names under `fuzz` runs every harness's
+`fuzz_target` on every seed of its corpus, in the suite. A change under `src/`
+alone dispatches no `fuzz` run (section 10's `fuzz` entry) and breaks a harness
+all the same: it renames what the harness imports, changes a signature it calls,
+or breaks a round trip it asserts.
+
+The test imports each harness with an empty stand-in module `atheris` in
+`sys.modules`, whether or not `atheris` is installed, so it runs alike where
+`atheris` is absent, as under the `test` group a gate's job installs, or off
+Linux, and where it is installed. A harness calls `atheris` only from `main()`
+or from a custom mutator, never at import and never in `fuzz_target`. The
+stand-in is empty so that a call at import fails with an `AttributeError`,
+rather than being served by the stand-in or by the real engine. A test that
+reads a harness with `ast` and tries its seeds on the entry points it names does
+not stand in for this one: it never runs the harness's own body, asserts
+included.
+
 ### Convention tests
 
 The distinguishing feature of the suite, and the part an older repository
@@ -2055,10 +2074,10 @@ A gate runs on a pull request and on a push:
 `.python-version`, and nothing a gate runs varies further: the plan puts a
 ceiling on an organization's concurrent jobs, and at that ceiling a second image
 before a review buys a rarer answer at the price of every review. Everything
-else answers weekly and before a release. The ceiling's figure lives in
-`REPOSITORY.md`'s *Plan-gated settings*, beside the command that re-derives it,
-and a workflow header or `CONTRIBUTING.md` gives the reasoning with the ceiling
-unnumbered.
+else answers weekly, and at release too where `release.yml` calls it. The
+ceiling's figure lives in `REPOSITORY.md`'s *Plan-gated settings*, beside the
+command that re-derives it, and a workflow header or `CONTRIBUTING.md` gives the
+reasoning with the ceiling unnumbered.
 
 **An interpreter axis is a gate cell rather than a sentinel row exactly where
 the extra cell runs in parallel with the cells already gating the review, and
@@ -2131,7 +2150,8 @@ git merge-base --is-ancestor \
 
 This is a person's check rather than a gate's, which would cost an API call per
 scheduled workflow of every tree on every run. `workflow_dispatch` also runs a
-sentinel too new to have runs, or by hand before a release.
+sentinel too new to have runs, and `fuzz` on a branch that changes its files
+(*Which trees carry which sentinel*).
 
 Two tables make the calendar, and they are the calendar — the workflow owns a
 day and an hour, the repository owns the minute:
@@ -2424,14 +2444,23 @@ and the badge land together.
   `btclib-secp256k1`'s targets reach the vendored C on purpose: what they
   exercise is this tree's own length checks in front of it
   (btclib-org/.github#342). Section 7's *Property tests* has how a fuzzer and
-  the property layer stand to each other. A crash the sentinel finds is an issue
-  against the parser, never a suppression, and its regression is an ordinary
-  test naming the input and what the parser now does with it; it does not go in
-  `fuzz/corpus/`, a *seed* corpus that `btclib`'s `tests/fuzz_corpus_test.py`
-  requires to stay valid input. What fills the workflow is the tree's — which
-  entry points are targets and which harness runs them, `atheris` under
-  ClusterFuzzLite in Actions or under OSS-Fuzz. What is fixed here is the name
-  the calendar keys on and which trees owe one.
+  the property layer stand to each other. `fuzz` runs weekly on `main`, from the
+  calendar. A pull request that changes `fuzz/`, `.clusterfuzzlite/` or
+  `fuzz.yml`, a Dependabot bump of the image or of an action included,
+  dispatches it on its own branch before it lands. A run takes minutes as a
+  script, and over an hour under ClusterFuzzLite with `fuzz-seconds: 3600`, an
+  hour of fuzzing, so this is a dispatch and not a `pull_request` trigger (*What
+  decides is the clock, not the trigger*). That the pull request dispatched it
+  is a person's check rather than a gate's: a gate would ask the API for a run
+  on every pull request's branch, and would hold the pull request for as long as
+  the run takes. A crash the sentinel finds is an issue against the parser,
+  never a suppression, and its regression is an ordinary test naming the input
+  and what the parser now does with it; it does not go in `fuzz/corpus/`, a
+  *seed* corpus that `btclib`'s `tests/fuzz_corpus_test.py` requires to stay
+  valid input. What fills the workflow is the tree's — which entry points are
+  targets and which engine runs them: `atheris` under ClusterFuzzLite in
+  Actions, under OSS-Fuzz, or run as a script. What is fixed here is the name
+  the calendar keys on, which trees owe one, and when it runs.
 - **`deps-oldest` follows a tree that builds a distribution.** Its
   `requires-python` and its dependency specifiers are a claim made to whoever
   installs it; a tree that installs nothing makes none, so `bbt` and this
@@ -3453,6 +3482,14 @@ A label means what its description says. Who applies and removes it:
   release it rehearses.
 - **The tag is signed**, is checked to be an ancestor of `main`, and is checked
   to say what `pyproject.toml` says.
+- **A release dispatches no `fuzz` run**, and `fuzz` is not among the sentinels
+  its `release.yml` calls. A crash `fuzz` finds is an issue against the parser
+  (section 10's `fuzz` entry), and this section asks a release to do nothing
+  with one, so a dispatched run would be waited on for an answer that decides
+  nothing. That a release dispatches none is a person's check rather than a
+  gate's: a gate reading the API would find the run only after it was waited on,
+  which is the cost the rule saves. `tests/fuzz_test.py` reads the tree's half,
+  that `release.yml` does not call `fuzz`.
 - **The release pull request writes the release's sections.** It adds
   `## v<version>`, the tag's own heading, above the previous release in
   `CHANGELOG.md` and in `RELEASE_NOTES.md`, where the repository has one. The

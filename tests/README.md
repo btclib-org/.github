@@ -78,6 +78,9 @@ table and the *Not tested here* line account for each of them once.
   and an adversary, and says a suite whose subject is a measurement does
   not owe it. Every question here is a reading of a tree or of an API
   answer against `README.md`.
+- **No fuzz harness**: section 7's *A fuzz harness runs on its seeds*
+  binds a tree section 10's record names under `fuzz`, and the `fuzz`
+  entry does not name this tree.
 - **Nothing is vendored, and the suite fetches by design.** Section 7
   says a test never reaches the network and every test here that asks
   about another repository does, for the reason `__init__.py`'s docstring
