@@ -360,7 +360,7 @@ def test_the_label_is_owed_by_the_publishing_trees_alone() -> None:
 
 
 CHECKOUT = "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
-SETUP_UV = "astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884"
+SETUP_UV = "astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e"
 # Every step of the job, as written: its condition, its environment and
 # each token of its command, so that no line can change without a test
 # saying so. Whitespace is normalized, a command's lines read as one,
