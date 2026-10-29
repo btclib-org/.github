@@ -10,7 +10,8 @@ exception exits 1 too, with a traceback in place of findings: a package
 absent at the base and a base that is no commit both do. So the exit
 code alone cannot say there is a break. `classify` calls it one only
 where every line of the output is a finding, and anything else is
-`unknown`, which leaves the label as it is.
+`unknown`, which leaves the label as it is. `reusable-api-break.yml`
+adds the findings of `api_gaps.py` to the output, in the same format.
 
     uv run --no-project --python 3.15 .github/scripts/api_break.py \
         classify "$status" "$findings" >> "$GITHUB_OUTPUT"

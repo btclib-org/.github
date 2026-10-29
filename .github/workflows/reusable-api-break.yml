@@ -79,7 +79,11 @@ jobs:
       # it as source. The base is not `pull_request.base.sha`, which can
       # be an older commit of the base branch than the merge's first
       # parent: walked against that, what the base branch gained since
-      # is read as the pull request's break (btclib-org/.github#1911)
+      # is read as the pull request's break (btclib-org/.github#1911).
+      # api_gaps.py adds what griffe does not compare, in griffe's format
+      # and on standard output alone, its own warnings staying in the
+      # log; its docstring says what it compares. The higher of the two
+      # exit codes is the one classified
       - name: Compare the public API with the base
         id: compare
         env:
@@ -89,6 +93,11 @@ jobs:
           status=0
           uvx --quiet --python 3.15 griffe==2.2.0 check "$PACKAGE" -s . -s src \
             -a HEAD^1 -f oneline -X > "$findings" 2>&1 || status=$?
+          gaps=0
+          uv run --quiet --no-project --python 3.15 --with griffe==2.2.0 \
+            standard/.github/scripts/api_gaps.py "$PACKAGE" HEAD^1 \
+            >> "$findings" || gaps=$?
+          if [ "$gaps" -gt "$status" ]; then status=$gaps; fi
           echo "findings=$findings" >> "$GITHUB_OUTPUT"
           uv run --no-project --python 3.15 \
             standard/.github/scripts/api_break.py classify "$status" "$findings" \
@@ -99,7 +108,7 @@ jobs:
           FINDINGS: ${{ steps.compare.outputs.findings }}
         run: |
           cat "$FINDINGS"
-          echo "::warning::griffe did not compare; the label stays as it is"
+          echo "::warning::the comparison did not complete; the label stays as it is"
       - name: Report the finding
         if: steps.compare.outputs.broken == 'true'
         env:

@@ -3703,8 +3703,11 @@ A label means what its description says. Who applies and removes it:
   and `RELEASE_NOTES.md` is written by hand, so nothing else can tell that an
   entry is missing. `griffe check` walks the public API of two git references,
   names each break by the kind of break it is, and exits non-zero having found
-  any. What it reports is either a `RELEASE_NOTES.md` entry or a reason for not
-  being one, written where the release is being written.
+  any. It compares no dataclass field list and calls any two return annotations
+  compatible, so `.github/scripts/api_gaps.py` reports those two, in the same
+  format, in the same job. What the two report is either a `RELEASE_NOTES.md`
+  entry or a reason for not being one, written where the release is being
+  written.
 
     **The release path and not the merge gate.** Before 1.0 a package breaks its
     surface deliberately, so a gate comparing the branch against the last

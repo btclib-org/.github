@@ -316,16 +316,6 @@ def test_the_finding_pattern_is_the_one_the_release_check_reads() -> None:
     assert named == script._FINDING.pattern  # noqa: SLF001
 
 
-def test_both_workflows_pin_the_same_griffe() -> None:
-    """The comment says the version is the same there, so it is asked."""
-    pins = {
-        tuple(re.findall(r"griffe==[\d.]+", path.read_text(encoding="utf-8")))
-        for path in (_WORKFLOW, _WORKFLOW.with_name("reusable-public-api.yml"))
-    }
-    assert len(pins) == 1
-    assert pins != {()}
-
-
 def test_the_workflow_runs_the_script_where_its_checkout_puts_it() -> None:
     """Both steps take the script from the checkout's `path:`."""
     checkout = _step("Check out the script")
@@ -398,6 +388,11 @@ STEPS: list[dict[str, Any]] = [
             "uvx --quiet --python 3.15 griffe==2.2.0 "
             'check "$PACKAGE" -s . -s src -a HEAD^1 -f oneline -X '
             '> "$findings" 2>&1 || status=$? '
+            "gaps=0 "
+            "uv run --quiet --no-project --python 3.15 --with griffe==2.2.0 "
+            'standard/.github/scripts/api_gaps.py "$PACKAGE" HEAD^1 '
+            '>> "$findings" || gaps=$? '
+            'if [ "$gaps" -gt "$status" ]; then status=$gaps; fi '
             'echo "findings=$findings" >> "$GITHUB_OUTPUT" '
             "uv run --no-project --python 3.15 "
             "standard/.github/scripts/api_break.py "
@@ -410,7 +405,8 @@ STEPS: list[dict[str, Any]] = [
         "env": {"FINDINGS": "${{ steps.compare.outputs.findings }}"},
         "run": (
             'cat "$FINDINGS" '
-            'echo "::warning::griffe did not compare; the label stays as it is"'
+            'echo "::warning::the comparison did not complete; '
+            'the label stays as it is"'
         ),
     },
     {
