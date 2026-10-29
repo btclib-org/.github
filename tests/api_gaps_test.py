@@ -259,6 +259,33 @@ def _point(*lines: str) -> str:
 
 
 @pytest.mark.parametrize(
+    ("init", "from_griffe"),
+    [
+        ("", ["Positional parameter was moved"] * 2),
+        ("def __init__(self, x: int, y: int) -> None:", []),
+    ],
+)
+def test_griffe_reports_a_field_moved_only_through_the_generated_init(
+    pair: Pair, init: str, from_griffe: list[str]
+) -> None:
+    """Griffe reports a moved field only where `@dataclass` writes `__init__`.
+
+    The script reports it either way, so there the change is reported
+    twice.
+    """
+    body = ("x: int", "y: int", *([init, "    pass"] if init else []))
+    moved = ("y: int", "x: int", *body[2:])
+
+    code, lines = pair.compare(_point(*body), _point(*moved))
+
+    assert (code, [line.split(": ", 3)[-1] for line in lines]) == (
+        1,
+        ["(x, y) -> (y, x)"],
+    )
+    assert pair.griffe() == from_griffe
+
+
+@pytest.mark.parametrize(
     ("before", "after", "change"),
     [
         (("x: int", "y: int"), ("y: int", "x: int"), "(x, y) -> (y, x)"),

@@ -6,12 +6,11 @@
 
 `griffe check` reads a dataclass field turned into a property as a name
 still present, and compares no field list (btclib-org/.github#1934).
-Where `@dataclass` writes `__init__`, griffe reports a renamed `init`
-field, or a positional one that moved, as a change of `__init__`'s
-parameters, so that change is reported twice. griffe calls any two
-return annotations compatible, so a changed one is no finding either
-(btclib-org/.github#1796). This script loads the same two versions with
-griffe's API, and reports these:
+Where `@dataclass` writes `__init__`, griffe compares the `__init__` it
+generates, so a field change that breaks that signature is reported
+twice. griffe calls any two return annotations compatible, so a changed
+one is no finding either (btclib-org/.github#1796). This script loads
+the same two versions with griffe's API, and reports these:
 
 - a public dataclass whose fields changed: their names, their order, or
   `init` or `kw_only` of one of them. `dataclasses.fields`, `replace`,
