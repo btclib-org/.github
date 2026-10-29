@@ -2,13 +2,15 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Report the breaks of the public API that `griffe check` does not compare.
+"""Report two kinds of break that `griffe check` does not compare.
 
 `griffe check` reads a dataclass field turned into a property as a name
-still present, and compares no field list (btclib-org/.github#1934). It
-calls any two return annotations compatible, so a changed one is no
-finding either (btclib-org/.github#1796). This script loads the same
-two versions with griffe's API, and reports both:
+still present, and compares no field list (btclib-org/.github#1934).
+Where `@dataclass` writes `__init__`, griffe reports a renamed or
+reordered `init` field as a change of its parameters, so that change is
+reported twice. griffe calls any two return annotations compatible, so
+a changed one is no finding either (btclib-org/.github#1796). This
+script loads the same two versions with griffe's API, and reports both:
 
 - a public dataclass whose fields changed: their names, their order, or
   `init` or `kw_only` of one of them. `dataclasses.fields`, `replace`,
@@ -272,7 +274,7 @@ def _line(obj: griffe.Object, kind: str, old: str, new: str) -> str:
 def breaks(
     old: griffe.Object | griffe.Alias, new: griffe.Object | griffe.Alias
 ) -> Iterator[str]:
-    """Yield each break between two versions that `griffe check` misses."""
+    """Yield each break of the two kinds the module docstring names."""
     for before, after in pairs(old, new):
         if isinstance(before, griffe.Class) and isinstance(after, griffe.Class):
             was = fields(before)
