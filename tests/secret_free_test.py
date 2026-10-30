@@ -250,6 +250,40 @@ def test_a_tab_or_line_break_inside_a_piece_does_not_hide_it(
         assert_secret_free(SHOWN[shown](split), [PHRASE])
 
 
+@pytest.mark.parametrize("letter", ["t", "n", "r"])
+@pytest.mark.parametrize("shown", SHOWN)
+def test_a_backslash_before_a_split_piece_does_not_hide_it(
+    shown: str, letter: str
+) -> None:
+    r"""A split piece starting with `t`, `n` or `r` is found after a backslash.
+
+    With the backslash before it, the piece's first letter spells the `\t`,
+    `\n` or `\r` escape that is dropped from the text.
+
+    :param shown: how the refusal shows the split passphrase, by name.
+    :param letter: the passphrase's first letter.
+    """
+    secret = letter + PHRASE[:-2]
+    split = "path\\" + secret[:6] + " " + secret[6:]
+    with pytest.raises(AssertionError):
+        assert_secret_free(SHOWN[shown](split), [secret])
+
+
+@pytest.mark.parametrize("separator", [" ", "\t", "\n", "\r"])
+def test_whitespace_inside_a_piece_holding_an_escape_does_not_hide_it(
+    separator: str,
+) -> None:
+    r"""Whitespace a message puts inside a piece spelled with `\t` is found.
+
+    :param separator: the whitespace that splits it.
+    """
+    secret = b"vel\tvet"
+    spelled = repr(secret)[2:-1]
+    split = spelled[:3] + separator + spelled[3:]
+    with pytest.raises(AssertionError):
+        assert_secret_free(raised(ValueError, f"bad key {split}"), [secret])
+
+
 @pytest.mark.parametrize(
     "secret", ["vel vet orbit", b"vel vet orbit", bytearray(b"vel vet orbit")]
 )
