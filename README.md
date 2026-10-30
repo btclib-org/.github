@@ -416,6 +416,14 @@ spelled out rather than as a `mailto:` or with an `@`, the forms a
 harvester lifts. It is one address for the organization, a reporter
 being unable to check whether a mailbox is read.
 
+**Where `SECURITY.md` has a *Security review* section, it names the
+latest review**: the date, the reviewer's GitHub profile, the issue
+recording it, which may be in any of the organization's repositories,
+and the commit it read, with a link comparing it with `main`. The link
+shows what the review did not cover and stays true until the next
+review; a list of the changes since would need an edit at every landing.
+Before any review, the section says *No security review has been done*.
+
 **The badges at a `README.md`'s head are never curated.** A curated list
 has no answer to *should this tree carry that badge*: where a property
 of the repository decides a badge the answer is read off the tree, and
