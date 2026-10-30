@@ -20,6 +20,9 @@ not deadlines.
 - **`bbt`** is maintained as it is: fixes, dependency updates and the
   organization's standards, with no new features planned
   (btclib-org/.github#1330).
+- **`bip39-slip39`** is maintained as it is: fixes, dependency updates
+  and the organization's standards, with no new features planned
+  (btclib-org/.github#1892).
 - **`bitcoin-core-rpc`** follows the RPCs of each Bitcoin Core release
   (btclib-org/.github#1330).
 - **`btclib-benchmarks`** is maintained as it is: fixes, dependency
@@ -31,6 +34,11 @@ not deadlines.
 - **`btclib-secp256k1`** follows libsecp256k1's releases, and
   secp256k1-zkp, which cuts none, for the modules it exposes
   (btclib-org/.github#1330).
+- **`btclib-wallet`** is maintained: fixes, dependency updates and the
+  organization's standards (btclib-org/.github#1892).
+- **`ecc`** is maintained: fixes, dependency updates and the
+  organization's standards, and the work *Intended* below names
+  (btclib-org/.github#1892).
 - **`portanode`** is maintained as it is: fixes, dependency updates and
   the organization's standards, with no new features planned
   (btclib-org/.github#1330).
