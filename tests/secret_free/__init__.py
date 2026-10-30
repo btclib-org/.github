@@ -11,6 +11,7 @@ made in btclib-org/.github and carried to every copy.
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -32,6 +33,13 @@ WINDOW = 12
 #: What `repr` writes for a tab, a newline and a carriage return, dropped from
 #: the text with its whitespace.
 ESCAPES = ("\\t", "\\n", "\\r")
+
+#: A backslash as `repr` writes it, doubled.
+BACKSLASH = "\\\\"
+
+#: A doubled backslash or one of `ESCAPES`. The doubled backslash is matched
+#: whole, so that its second half starts no escape.
+ESCAPE_OR_BACKSLASH = re.compile("|".join(map(re.escape, (BACKSLASH, *ESCAPES))))
 
 
 def chained(exc: BaseException) -> Iterator[BaseException]:
@@ -137,15 +145,16 @@ def assert_secret_free(
     secret fed is a fixed random value, not a run such as all zeros, and
     a mnemonic's words are not words of the refusal's own text.
 
-    Whitespace a refusal puts inside a piece that has none of its own does not
-    hide it, whether the text holds that whitespace as itself or as the `\t`,
-    `\n` or `\r` escape that `repr` writes. Those escapes are dropped from the
-    text, never from a piece, and the text is also searched with them kept, so
-    a piece whose own spelling holds one, as the `repr` of bytes holding a tab
-    does, is not hidden by whitespace a message puts inside it. Dropping the
-    escapes from each piece too is the rejected alternative: a piece spelled
-    with them but for one letter, as the `repr` of bytes that are tabs but for
-    that letter is, shrinks to the letter, which is inside many clean messages.
+    A piece with no whitespace of its own, found where a refusal shows it
+    whole, is still found where the refusal puts whitespace inside it, whether
+    the text holds that whitespace as itself or as the `\t`, `\n` or `\r`
+    escape that `repr` writes. Those escapes are dropped from the text, never
+    from a piece, and the text is also searched with them kept, so a piece
+    whose own spelling holds one, as the `repr` of bytes holding a tab does, is
+    not hidden by whitespace a message puts inside it. Dropping the escapes
+    from each piece too is the rejected alternative: a piece spelled with them
+    but for one letter, as the `repr` of bytes that are tabs but for that
+    letter is, shrinks to the letter, which is inside many clean messages.
     Other whitespace, such as `\x0b` or `\u2003`, does hide a piece where the
     text holds it only as the escape `repr` writes, as a `KeyError` shows its
     key. A piece with whitespace of its own is looked for as given, so a
@@ -165,9 +174,9 @@ def assert_secret_free(
     for e in chained(exc):
         text = text_of(e)
         compact_text = "".join(text.split())
-        unescaped_text = compact_text
-        for escape in ESCAPES:
-            unescaped_text = unescaped_text.replace(escape, "")
+        unescaped_text = ESCAPE_OR_BACKSLASH.sub(
+            lambda m: BACKSLASH if m[0] == BACKSLASH else "", compact_text
+        )
         for piece in pieces:
             assert piece not in text
             assert piece not in compact_text

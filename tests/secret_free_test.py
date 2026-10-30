@@ -250,21 +250,24 @@ def test_a_tab_or_line_break_inside_a_piece_does_not_hide_it(
         assert_secret_free(SHOWN[shown](split), [PHRASE])
 
 
+@pytest.mark.parametrize("separator", [" ", "\t", "\n", "\r"])
 @pytest.mark.parametrize("letter", ["t", "n", "r"])
 @pytest.mark.parametrize("shown", SHOWN)
 def test_a_backslash_before_a_split_piece_does_not_hide_it(
-    shown: str, letter: str
+    shown: str, letter: str, separator: str
 ) -> None:
     r"""A split piece starting with `t`, `n` or `r` is found after a backslash.
 
     With the backslash before it, the piece's first letter spells the `\t`,
-    `\n` or `\r` escape that is dropped from the text.
+    `\n` or `\r` escape. A message holds that backslash as itself, and
+    `repr` writes it doubled: neither hides the piece.
 
     :param shown: how the refusal shows the split passphrase, by name.
     :param letter: the passphrase's first letter.
+    :param separator: the whitespace that splits it.
     """
     secret = letter + PHRASE[:-2]
-    split = "path\\" + secret[:6] + " " + secret[6:]
+    split = "path\\" + secret[:6] + separator + secret[6:]
     with pytest.raises(AssertionError):
         assert_secret_free(SHOWN[shown](split), [secret])
 
