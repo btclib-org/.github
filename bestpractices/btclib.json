@@ -88,7 +88,7 @@
     "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "The verify command pins the signer: --repo names this repository and --signer-workflow the workflow that signed, so an attestation from any other repository or workflow is refused. SECURITY.md names the signer of each release. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
+    "justification": "The verify command pins the signer and the source: --owner btclib-org and --signer-workflow the workflow that signed, and it compares the certificate's sourceRepositoryIdentifier with this repository's id, which a rename keeps, so an attestation from any other repository or workflow is refused. SECURITY.md names the signer of each release. https://github.com/btclib-org/btclib/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-04.01": {
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "The release notes name each advisory a release fixes by its GHSA id: v2026.10.28 fixes none and names none; v2026.10.8 names GHSA-c6h8-5hv5-3gv7. GHSA-47wq-xh8q-pfxj names 2026.9.29, which removed the function; that release's notes tell users the module moved to btclib-wallet. https://github.com/btclib-org/btclib/releases/tag/v2026.10.28",
+    "justification": "The release notes name each advisory a release fixes by its GHSA id: v2026.10.30 and v2026.10.28 fix none and name none; v2026.10.8 names GHSA-c6h8-5hv5-3gv7. GHSA-47wq-xh8q-pfxj names 2026.9.29, which removed the function; that release's notes tell users the module moved to btclib-wallet. https://github.com/btclib-org/btclib/releases/tag/v2026.10.30",
     "status": "Met"
   },
   "repo_distributed": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.28 shipped 17 of 37 pull requests approved by somebody other than the author, 46%, below the 50% the criterion asks; 12 were approved by somebody other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Unmet"
+    "justification": "v2026.10.30 shipped 12 of 14 pull requests approved by somebody other than the author, 86%, above the 50% the criterion asks; 10 were approved by somebody other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
   },
   "updateable_reused_components": {
     "justification": "Reused components are standard-library modules or PyPI packages pinned in uv.lock. Dependabot updates them weekly through pull requests that run the full suite. https://github.com/btclib-org/btclib/blob/main/.github/dependabot.yml",

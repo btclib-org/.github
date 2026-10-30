@@ -44,7 +44,7 @@
     "status": "Met"
   },
   "OSPS-BR-02.02": {
-    "justification": "The only asset of a release is GitHub's source archive, named after the tag: portanode-2026.10.26.zip for v2026.10.26. https://github.com/btclib-org/portanode/releases/latest",
+    "justification": "The only asset of a release is GitHub's source archive, named after the tag: portanode-2026.10.30.zip for v2026.10.30. https://github.com/btclib-org/portanode/releases/latest",
     "status": "Met"
   },
   "OSPS-BR-03.01": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.26 shipped 11 pull requests, none of them approved by somebody other than the author. The maintainer merged each one through a bypass added to main-self-merge for that merge and removed after it; the ruleset has no standing bypass actor. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
+    "justification": "v2026.10.30 shipped 18 pull requests, 7 of them approved by somebody other than the author, 39%, below the 50% the criterion asks. The other 11 each landed while a bypass was on main-self-merge for a few seconds and then removed; one such window, at 18:02-18:03Z on 2026-10-27, held five of those merges. The ruleset has no standing bypass actor. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {

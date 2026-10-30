@@ -88,7 +88,7 @@
     "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "The verify command pins the signer: --repo names this repository, --signer-workflow the organization's reusable-build.yml (reusable-attest.yml for v2026.9.24, release.yml before it) and --source-ref the release tag. https://github.com/btclib-org/btclib-node/blob/main/SECURITY.md",
+    "justification": "The verify command pins the signer and the source: --owner btclib-org, --signer-workflow the organization's reusable-build.yml (reusable-attest.yml for v2026.9.24, release.yml before it) and --source-ref the release tag, and it compares the certificate's sourceRepositoryIdentifier with this repository's id, which a rename keeps. https://github.com/btclib-org/btclib-node/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-04.01": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.29 shipped 31 pull requests, 3 of them approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Unmet"
+    "justification": "v2026.10.30 shipped 9 of 12 pull requests approved by somebody other than the author, 75%, above the 50% the criterion asks; all 9 were approved by somebody other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
   },
   "updateable_reused_components": {
     "justification": "Reused components are either standard-library modules or PyPI packages pinned in uv.lock and bumped weekly by Dependabot, and the deps-latest sentinel runs the full suite against the upgraded set every week. https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/deps-latest.yml",
