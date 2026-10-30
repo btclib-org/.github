@@ -88,7 +88,7 @@
     "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "SECURITY.md gives the gh attestation verify command, with --repo and --signer-workflow naming the organization's reusable-build.yml and --source-ref the release tag. https://github.com/btclib-org/btclib-wallet/blob/main/SECURITY.md",
+    "justification": "SECURITY.md gives the gh attestation verify command, with --owner btclib-org, --signer-workflow naming the organization's reusable-build.yml and --source-ref the release tag, and a compare of the certificate's sourceRepositoryIdentifier with this repository's id, which a rename keeps. https://github.com/btclib-org/btclib-wallet/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-04.01": {

@@ -88,7 +88,7 @@
     "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "The verify command pins the signer: --repo names this repository, --signer-workflow the organization's reusable-build.yml and --source-ref the release tag. It passed on the v2026.10.23 wheel. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md",
+    "justification": "The verify command pins the signer and the source: --owner btclib-org, --signer-workflow the organization's reusable-build.yml and --source-ref the release tag, and it compares the certificate's sourceRepositoryIdentifier with this repository's id, which a rename keeps. It passes on the v2026.10.23 wheel. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-04.01": {

@@ -88,7 +88,7 @@
     "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "The verify command pins the signer: --repo names this repository, --signer-workflow the organization's reusable-build.yml and --source-ref the release tag. SECURITY.md names the signer of each earlier release. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/SECURITY.md",
+    "justification": "The verify command pins the signer and the source: --owner btclib-org, --signer-workflow the organization's reusable-build.yml and --source-ref the release tag, and it compares the certificate's sourceRepositoryIdentifier with this repository's id, which a rename keeps. SECURITY.md names the signer of each earlier release. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-04.01": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.23 shipped 8 of 16 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. That is 50%, the least the criterion asks. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "v2026.10.30 shipped 15 of 28 pull requests approved by somebody other than the author, 54%, above the 50% the criterion asks; 10 were approved by somebody other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Met"
   },
   "updateable_reused_components": {
