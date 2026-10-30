@@ -367,10 +367,10 @@ it, and `.github/workflows/` holds no `release.yml`. What this
 repository ships, it ships by being read on github.com and by being
 cloned, which is why `pyproject.toml` declares `package = false` and a
 placeholder version — there is no artifact for a version to name. So
-this tree carries no `RELEASING.md` and no `RELEASE_NOTES.md` — section
-2 of `README.md` has why a tier-2 repository carries neither — and a
-file whose content is its own absence is this section instead. Measured
-rather than asserted, and re-derivable, answering `0`:
+this tree carries no `RELEASING.md` and no `RELEASE_NOTES.md` at its
+root — section 2 of `README.md` has why a tier-2 repository carries
+neither — and a file whose content is its own absence is this section
+instead. Measured rather than asserted, and re-derivable, answering `0`:
 
 ```shell
 gh api repos/btclib-org/.github/releases --jq 'length'
