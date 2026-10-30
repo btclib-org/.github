@@ -107,7 +107,8 @@ def main(argv: list[str] | None = None) -> int:
             " this with that address as your git user.email, then force-push the"
             " branch:\n"
             f"    git rebase --signoff {fork_point(args.revisions)}\n"
-            "The pull request cannot merge until every commit above has one."
+            "Only an administrator can merge the pull request until every"
+            " commit above has one."
         )
         return 1
     print(f"every commit of {args.revisions} read is signed off by its author")
