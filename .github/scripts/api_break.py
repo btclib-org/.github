@@ -10,7 +10,8 @@ exception exits 1 too, with a traceback in place of findings: a package
 absent at the base and a base that is no commit both do. So the exit
 code alone cannot say there is a break. `classify` calls it one only
 where every line of the output is a finding, and anything else is
-`unknown`, which leaves the label as it is.
+`unknown`, which leaves the label as it is. `reusable-api-break.yml`
+adds the findings of `api_gaps.py` to the output, in the same format.
 
     uv run --no-project --python 3.15 .github/scripts/api_break.py \
         classify "$status" "$findings" >> "$GITHUB_OUTPUT"
@@ -39,10 +40,11 @@ _NOT_FOUND = "HTTP 404"
 
 
 def classify(status: int, output: str) -> str:
-    """Say whether the output of `griffe check` is a break.
+    """Say whether the output of the comparison is a break.
 
-    :param status: griffe's exit code.
-    :param output: what it printed, standard output and error together.
+    :param status: the higher of griffe's and `api_gaps.py`'s exit codes.
+    :param output: what both printed, griffe's standard output and error
+        and the script's standard output.
     :returns: `true` for a break, `false` for none, `unknown` otherwise.
     """
     if status == 0:
