@@ -2,13 +2,13 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""What section 2 says a tier's tree holds, and what it keeps out of one.
+"""What section 2 says a tier's tree holds, and what it keeps out of its root.
 
 The root-files table's last column is which tiers owe the row, and a
 tier is a floor: a row that stops short of a tier says nothing about a
 tree that carries the file anyway. So the table answers one direction,
 and the sentence keeping the release documents out of a tier-2
-repository is the other -- one rule, stated where the tier is decided
+tree's root is the other -- one rule, stated where the tier is decided
 rather than in a column, and read here as prose.
 
 `tiers_test.py` asks the other table of the same section, which tier a
@@ -116,7 +116,7 @@ def test_a_repository_carries_the_root_files_its_tier_owes(
 
 
 def forbidden() -> list[str]:
-    """Read the files section 2 keeps out of a tier-2 repository.
+    """Read the files section 2 keeps out of a tier-2 tree's root.
 
     The sentence is bold, so it runs from the phrase that opens it to
     the `.**` that closes the bold, and the files are what it names in
@@ -156,7 +156,7 @@ def test_a_tier_2_repository_carries_neither_release_document(
     trees: dict[str, Path],
     tiers: dict[str, Tier],
 ) -> None:
-    """What section 2 keeps out of a tier-2 tree is out of it.
+    """What section 2 keeps out of a tier-2 tree's root is out of it.
 
     A rule whose whole content is an absence, and an absence is what
     nothing notices. Asked of tier 2 alone, which is what the `tier`
@@ -175,11 +175,11 @@ def test_a_tier_2_repository_carries_neither_release_document(
         pytest.skip(f"{repository} is tier {here}, and this asks tier 2 alone")
     root = trees[repository]
     held = [path for path in forbidden() if (root / path).is_file()]
-    assert not held, f"a tier-2 tree carrying what section 2 keeps out of one: {held}"
+    assert not held, f"a tier-2 root carrying what section 2 keeps out of it: {held}"
 
 
 def test_the_ceiling_and_the_table_name_the_same_rows() -> None:
-    """What section 2 forbids a tier-2 tree, its table gives to tier 1.
+    """What section 2 forbids a tier-2 tree's root, its table gives to tier 1.
 
     The two statements are the same rule read from either side, and
     nothing but this makes them stay that way: a row moved to `1, 2`
