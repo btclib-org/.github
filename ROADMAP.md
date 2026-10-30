@@ -44,9 +44,6 @@ its intentions beyond that.
 
 - **The codecs leave `btclib`** for `base58-bech32`, a package of their
   own that `btclib` is to depend on (btclib-org/btclib#2712).
-- **One repository, `test-vectors`, holds the test vector files the trees
-  share**, each once with its pin, and the trees read them from there
-  (btclib-org/.github#1812).
 - **FROST key generation in `ecc`**, a trusted-dealer split and then
   ChillDKG, once BIP445 and the ChillDKG draft settle
   (btclib-org/btclib#2200).
