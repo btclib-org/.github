@@ -137,15 +137,17 @@ def assert_secret_free(
     secret fed is a fixed random value, not a run such as all zeros, and
     a mnemonic's words are not words of the refusal's own text.
 
-    Whitespace a refusal puts inside a piece that has none of its own does
-    not hide it, whether the text holds that whitespace as itself or as the
-    `\t`, `\n` or `\r` escape that `repr` writes. A piece whose own spelling
-    holds one of those escapes, as the `repr` of bytes holding a tab does, is
-    hidden by whitespace put inside it. Other whitespace, such as `\x0b` or
-    `\u2003`, does hide a piece where the text holds it only as the escape
-    `repr` writes, as a `KeyError` shows its key. A piece with whitespace of
-    its own is looked for as given, so a refusal that changes that whitespace
-    does not match it.
+    Whitespace a refusal puts inside a piece that has none of its own does not
+    hide it, whether the text holds that whitespace as itself or as the `\t`,
+    `\n` or `\r` escape that `repr` writes. A piece whose own spelling holds one
+    of those escapes, as the `repr` of bytes holding a tab does, is hidden by
+    whitespace put inside it. Dropping the escapes from each piece too is the
+    rejected alternative: it needs a guard, since a piece spelled only with
+    them, as the `repr` of bytes that are all tabs is, compacts to `""`, which
+    is in every text. Other whitespace, such as `\x0b` or `\u2003`, does hide a
+    piece where the text holds it only as the escape `repr` writes, as a
+    `KeyError` shows its key. A piece with whitespace of its own is looked for
+    as given, so a refusal that changes that whitespace does not match it.
 
     :param exc: the exception raised.
     :param secrets: the secret fed, as bytes, as a bytearray, or in each
