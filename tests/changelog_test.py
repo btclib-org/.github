@@ -132,12 +132,13 @@ FILES = tuple(ROOT / history for history in HISTORIES if (ROOT / history).is_fil
 """The history files this tree carries.
 
 Section 2 owes `CHANGELOG.md` of every tier and `RELEASE_NOTES.md` of
-tier 1, and keeps `RELEASE_NOTES.md` out of tier 2, which is this tree's
-tier. `root_files_test.py` checks both rules where `BTCLIB_INTEGRATION` is
-set: it fails a tree that lacks a file its tier owes, and a tier-2 tree that
-carries `RELEASE_NOTES.md`. Without the switch it is skipped, and this
-tree without `CHANGELOG.md` leaves this parametrization empty: its test
-skips with `got empty parameter set for (path)`.
+tier 1, and keeps `RELEASE_NOTES.md` out of a tier-2 tree's root; this
+tree is tier 2. `root_files_test.py` checks both rules where
+`BTCLIB_INTEGRATION` is set: it fails a tree that lacks a file its tier
+owes, and a tier-2 tree whose root carries `RELEASE_NOTES.md`. Without
+the switch it is skipped, and this tree without `CHANGELOG.md` leaves
+this parametrization empty: its test skips with `got empty parameter set
+for (path)`.
 """
 
 RESURRECTED = (
