@@ -103,7 +103,7 @@ rather than the entry's.
 """
 
 EXPECTED_DRIFT: dict[str, str] = {
-    "tests/secret_free/__init__.py": "btclib-org/.github#1697",
+    "tests/secret_free/__init__.py": "btclib-org/.github#1803",
 }
 """A path section 14 names whose copies are known not to agree yet.
 
@@ -415,8 +415,8 @@ def test_every_copy_of_a_verbatim_file_is_the_same_copy(
 HELPER = "tests/secret_free/__init__.py"
 """The one owed file whose presence a test of its own asks.
 
-It is split from the rest so that a `BACKLOG` row can excuse the trees
-that lack it, btclib-org/.github#1697, without excusing the others.
+A `BACKLOG` row names a test, so the split lets a row excuse a tree that
+lacks the helper without excusing it for any other owed file it lacks.
 """
 
 
