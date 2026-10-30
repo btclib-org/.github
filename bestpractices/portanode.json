@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.30 shipped 18 pull requests, 7 of them approved by somebody other than the author, 39%, below the 50% the criterion asks. The other 11 each landed while a bypass was on main-self-merge for a few seconds and then removed; one such window, at 18:02-18:03Z on 2026-10-27, held five of those merges. The ruleset has no standing bypass actor. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
+    "justification": "v2026.10.30 shipped 18 pull requests, 7 of them approved by somebody other than the author, 39%, below the 50% the criterion asks. The other 11 each landed while a bypass was on main-self-merge for under a minute and then removed; one such window, at 18:02-18:03Z on 2026-10-27, held five of those merges. The ruleset has no standing bypass actor. https://github.com/btclib-org/portanode/blob/main/REPOSITORY.md#rulesets",
     "status": "Unmet"
   },
   "updateable_reused_components": {
