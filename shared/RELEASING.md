@@ -15,11 +15,10 @@ against TestPyPI. A rehearsal is never tagged.
 last section.** Section 14 of the
 [organization standard](https://github.com/btclib-org/.github#14-copied-verbatim-and-decided-per-repository)
 says so, and `tests/verbatim_test.py` of that repository compares the
-copies. The steps name this tree through the shell variables its last
-section sets, `repo`, `dist`, `test_dist`, `pkg`, `rtd`, `bp` and `smoke`:
-run that block first, in the shell the steps run in. Prose and URLs write
-the same names as `<repo>`, `<dist>` and so on. What one tree does
-beyond these steps is under that section too.
+copies. The steps read this tree's names from shell variables, set by a
+block in its last section: run that block first, in the shell the steps
+run in. Prose and URLs write the same names as `<repo>`, `<dist>` and so
+on. What one tree does beyond these steps is under that section too.
 
 **A workflow GitHub has not registered cannot be dispatched, and it
 registers one only once its file has reached the default branch.** Any new
@@ -661,19 +660,16 @@ request, next to `deps-latest`'s own result.
    bundle.
 
    Each command is section 12's verifier. Section 12 of the organization
-   standard says what its exit code means, why the signer is named without
-   a ref, and why the repository is compared by its id. `--source-ref` names
-   the tag, which is what stops a rehearsal dispatched from a branch from
-   verifying as this release. A release made before this repository
-   called `reusable-build.yml` was signed by `reusable-attest.yml`, and
-   verifies with that workflow as the signer and the same `--source-ref`.
-   For a signer that is a reusable workflow, `gh attestation verify
-   --help` requires `--signer-workflow` or `--signer-repo`. `--owner`
-   alone does not pin the signer: without either flag, both forms verify
-   the release. Neither form is offline on its own — the Sigstore trusted
-   root comes over the network unless `gh attestation trusted-root >
-   trusted_root.jsonl` fetched it earlier and `--custom-trusted-root`
-   points at it.
+   standard says what its exit code means, why the signer is named without a
+   ref, why `--source-ref` names the tag, why the repository is compared by
+   its id, and which workflow signed a release made before this repository
+   called `reusable-build.yml`. For a signer that is a reusable workflow,
+   `gh attestation verify --help` requires `--signer-workflow` or
+   `--signer-repo`. `--owner` alone does not pin the signer: without either
+   flag, both forms verify the release. Neither form is offline on its own —
+   the Sigstore trusted root comes over the network unless `gh attestation
+   trusted-root > trusted_root.jsonl` fetched it earlier and
+   `--custom-trusted-root` points at it.
 
 1. **Review the bestpractices.dev answers.** Refresh the saved answers
    in btclib-org/.github with its `.github/scripts/bestpractices.py`,
@@ -770,9 +766,8 @@ gh attestation verify "sbom/${stem:?}.cdx.json" --owner btclib-org \
   --jq "${cert:?}.sourceRepositoryIdentifier" | grep -qx "${id:?}"
 ```
 
-A release made before this repository called `reusable-build.yml` names
-`reusable-attest.yml` as the signer instead, with the same
-`--source-ref`.
+Section 12 of the organization standard names the signer of a release
+made before this repository called `reusable-build.yml`.
 
 `python` is the interpreter the tag's own `.python-version` pins, its
 comment and blank lines dropped, and not the one `main` pins:
@@ -804,7 +799,7 @@ so the third command fails wherever the first two do.
 the tag, so once `main` changes what it writes the third command fails
 with the files unchanged.
 
-Three things bound that guarantee, and each is worth knowing before
+These things bound that guarantee, and each is worth knowing before
 reading a mismatch as tampering:
 
 - **the build reads the working directory, not git.** `uv_build` walks

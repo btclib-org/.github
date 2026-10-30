@@ -365,11 +365,12 @@ only an index reads — `REPOSITORY.md` and `pyproject.toml` give the reasons.
 `btclib-org.github.io`, the organization site served by Pages from its
 `main` (btclib-org/.github#530), is measured the same way.
 
-**A tier-2 repository carries neither `RELEASING.md` nor `RELEASE_NOTES.md`.**
-The first would only say there is no release, which every such tree states
-under its own `CONTRIBUTING.md`'s *A version, and no release*; the second is
-what a user acts on *at a release*. A release arrives with `release.yml`,
-which makes the repository tier 1, and the two files come with it.
+**A tier-2 repository carries neither `RELEASING.md` nor `RELEASE_NOTES.md` at
+its root.** The first would only say there is no release, which every such tree
+states under its own `CONTRIBUTING.md`'s *A version, and no release*; the
+second is what a user acts on *at a release*. A release arrives with
+`release.yml`, which makes the repository tier 1, and the two files come with
+it.
 
 ### Root files
 

@@ -96,9 +96,9 @@ SOURCE = re.compile(r"the source is this repository's `([^`]+)`")
 """How a bullet names where this repository keeps its copy of the subject.
 
 `RELEASING.md` is owed of a tree that publishes, and section 2 keeps it
-out of this one, which publishes nothing. So the copy the others are
-copied from sits at another path, and the bullet says which: read off
-the bullet for the reason `SECTION` is, and compared in this
+out of the root of this one, which publishes nothing. So the copy the
+others are copied from sits at another path, and the bullet says which:
+read off the bullet for the reason `SECTION` is, and compared in this
 repository's place.
 """
 
