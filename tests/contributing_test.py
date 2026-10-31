@@ -10,7 +10,7 @@ its fenced blocks dropped, so that the standard's own example of the
 paragraph does not answer for the section the standard owes. The
 heading is matched as a line, and the paragraph under it with its line
 breaks ignored, since markdown renders a paragraph the same however it
-wraps.
+wraps. The link's `<org>` and `<repo>` are filled in for the tree asked.
 """
 
 from __future__ import annotations
@@ -29,15 +29,8 @@ if TYPE_CHECKING:
 OPENING = "has a `## Contributing` section opening"
 """The line of section 2 that opens the rule and precedes the block."""
 
-LINK = "./CONTRIBUTING.md"
-"""The paragraph's link, relative to the root of the tree."""
-
-ABSOLUTE = f"https://github.com/{ORG}/{SELF}/blob/main/CONTRIBUTING.md"
-"""The same target from `profile/README.md`.
-
-The organization's page resolves a relative link against `profile/`,
-where no `CONTRIBUTING.md` is.
-"""
+LINK = "https://github.com/<org>/<repo>/blob/main/CONTRIBUTING.md"
+"""The paragraph's link, absolute as section 2 asks of the root `README.md`."""
 
 SUPPORTED = re.compile(r"actively\s+supported\s+by")
 """Words of section 2's supported-by line, which the paragraph is above."""
@@ -54,6 +47,16 @@ def paragraph() -> str:
     :returns: the block's text.
     """
     return fenced(ROOT / "README.md", OPENING, "markdown")
+
+
+def filled(block: str, repository: str) -> str:
+    """Put the organization and a repository in the paragraph's link.
+
+    :param block: the paragraph, as section 2 gives it.
+    :param repository: the tree whose `README.md` carries it.
+    :returns: the paragraph that tree owes.
+    """
+    return block.replace("<org>", ORG).replace("<repo>", repository)
 
 
 def flat(text: str) -> str:
@@ -99,15 +102,15 @@ def test_a_readme_opens_its_contributing_section_with_the_paragraph(
     :param trees: the checkouts.
     """
     readme = (trees[repository] / "README.md").read_text(encoding="utf-8")
-    problem = unmet(readme, paragraph())
+    problem = unmet(readme, filled(paragraph(), repository))
     assert problem is None, f"{problem}; " + by_hand(repository, ASKED)
 
 
 def test_the_organization_page_carries_the_paragraph() -> None:
-    """`profile/README.md` carries it, its link made absolute."""
+    """`profile/README.md` carries it, linking this tree's `CONTRIBUTING.md`."""
     block = paragraph()
     assert LINK in block, f"section 2's paragraph no longer links {LINK}"
-    problem = unmet(PAGE.read_text(encoding="utf-8"), block.replace(LINK, ABSOLUTE))
+    problem = unmet(PAGE.read_text(encoding="utf-8"), filled(block, SELF))
     assert problem is None, f"profile/README.md: {problem}"
 
 

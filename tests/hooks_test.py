@@ -73,6 +73,7 @@ LOCAL = (
     "decoded-subprocess-encoding",
     "reasonless-coverage-pragma",
     "local-link-prefix",
+    "readme-absolute-link",
     "no-hyphen-at-end-of-line",
     "unquoted-placeholder",
     "check-changelog",
@@ -317,7 +318,8 @@ def test_the_local_hooks_run(repository: str, trees: dict[str, Path]) -> None:
     by nothing, same as the hook above.
     `local-link-prefix` has one wherever there is a markdown file,
     `types: [markdown]`, and section 2's table owes every tier a
-    `README.md`.
+    `CONTRIBUTING.md`; `readme-absolute-link` has the root `README.md`
+    that hook excludes, which the table owes every tier as well.
     `no-hyphen-at-end-of-line` has one wherever there is a markdown file
     too, markdown being among the types every gate gives it; what else a
     gate gives it is btclib-org/.github#921's question and not this test's.

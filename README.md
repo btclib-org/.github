@@ -584,15 +584,23 @@ with this paragraph**, above the supported-by line where there is one:
 Development is LLM-based: humans are welcome, as long as they are
 comfortable with agentic development ;-). A contribution must have been
 read and understood by the person who submits it.
-[`CONTRIBUTING.md`](./CONTRIBUTING.md#working-with-an-llm) has the rules.
+[`CONTRIBUTING.md`](https://github.com/<org>/<repo>/blob/main/CONTRIBUTING.md#working-with-an-llm)
+has the rules.
 ```
 
 A newcomer reads the `README.md` first, and may never open
 `CONTRIBUTING.md`. The words are the same everywhere, so a test may read
-them despite the preamble: the text is fixed, compared as a string, and
-nothing in it is interpreted. `profile/README.md` carries it too, with
-the link absolute: the organization's page resolves a relative link
-against `profile/`.
+them despite the preamble: the text is fixed, compared as a string once
+`<org>` and `<repo>` are filled in, and nothing in it is interpreted.
+`profile/README.md` carries it too, `<repo>` being `.github`.
+
+**The root `README.md` links a file of its own tree absolutely**, at
+`https://github.com/<org>/<repo>/blob/main/<path>`. PyPI renders that
+file as the package's page and resolves a relative link against the
+page, where no file of the tree is. Section 4's `readme-absolute-link`
+refuses the relative form there, and every other markdown file keeps the
+form `local-link-prefix` asks for. The rule holds at every tier, so that
+the paragraph above and the hook are the same in every tree.
 
 Dotfiles, each owed by the tiers that owe the section reading it:
 `.pre-commit-config.yaml`, `.python-version`, `.gitignore`,
@@ -696,6 +704,16 @@ makes over `ignore` and section 8 over `exclude_also`.
 anchors, and a link into a root markdown file's heading fails `-W` under
 `-n`; six is every level markdown heads at, a fixed point rather than a
 depth re-derived from headings that move.
+
+**A page links a file the documentation renders as that page, never at
+`BLOB`.** A file is rendered where a `docs/source/*_link.md` shim
+includes it. `conf.py`'s `RootFileLinks` turns a link to it into the
+page, whether the link is relative or is `BLOB` plus the file's path,
+`BLOB` being `[project.urls] repository` and `/blob/main/`, the form the
+root `README.md` writes. A reader of the documentation stays on the
+version they are reading, where GitHub shows `main`.
+`reusable-docs.yml` refuses a built page that links such a file at
+`BLOB`.
 
 **`--keep-going` is not passed.** In the sphinx `uv.lock` resolves the
 flag is accepted, hidden from `--help` and unused: `-W` alone reports
@@ -1044,8 +1062,8 @@ No `autoupdate_branch`: the default branch is the only branch.
 - **`local-link-prefix`** — pygrep refusing a markdown link whose
   destination is local and is not explicitly relative, beginning
   neither `./` nor `../`, in every repository of the organization, this
-  one included: an explicit relative prefix is what lets a check
-  downstream key on one pattern.
+  one included, the root `README.md` excepted: an explicit relative
+  prefix is what lets a check downstream key on one pattern.
 
     Where documentation is built, `docs.yml` greps the built html for
     `href="#./` or `href="#../`, what MyST renders in place of a link
@@ -1055,6 +1073,9 @@ No `autoupdate_branch`: the default branch is the only branch.
     destination and a path into a subdirectory reaching that fallback
     too; whether a destination exists at all is section 10's `links`
     workflow's question. A `[` preceded by a backtick is exempt.
+- **`readme-absolute-link`** — the same pygrep over the root
+  `README.md` alone, `./` and `../` refused as well, so that a link to a
+  file of the tree is absolute there, for section 2's reason.
 - **`no-hyphen-at-end-of-line`** — pygrep refusing a line that ends
   inside a word, at that word's own hyphen, in the file types whose
   prose a build renders: markdown, reStructuredText and Python. Markdown
@@ -4769,4 +4790,5 @@ runs over the whole tree rather than over what its own step added.
 Development is LLM-based: humans are welcome, as long as they are
 comfortable with agentic development ;-). A contribution must have been
 read and understood by the person who submits it.
-[`CONTRIBUTING.md`](./CONTRIBUTING.md#working-with-an-llm) has the rules.
+[`CONTRIBUTING.md`](https://github.com/btclib-org/.github/blob/main/CONTRIBUTING.md#working-with-an-llm)
+has the rules.
