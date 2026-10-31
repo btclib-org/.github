@@ -52,6 +52,9 @@ its intentions beyond that.
 
 - **The codecs leave `btclib`** for `base58-bech32`, a package of their
   own that `btclib` is to depend on (btclib-org/btclib#2712).
+- **BIP32, miniscript and the descriptors leave `btclib-wallet`** for
+  `bip32-descriptors`, a package of their own that `btclib-node` is to
+  depend on in place of `btclib-wallet` (btclib-org/.github#1811).
 - **FROST key generation in `ecc`**, a trusted-dealer split and then
   ChillDKG, once BIP445 and the ChillDKG draft settle
   (btclib-org/btclib#2200).

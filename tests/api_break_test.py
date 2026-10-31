@@ -349,6 +349,7 @@ def test_the_label_is_owed_by_the_publishing_trees_alone() -> None:
     label = next(entry for entry in labels if entry["name"] == "api-break")
     assert sorted(label["repositories"]) == [
         "base58-bech32",
+        "bip32-descriptors",
         "bip39-slip39",
         "bitcoin-core-rpc",
         "btclib",
