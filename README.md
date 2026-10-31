@@ -111,8 +111,12 @@ they are applied per repository, which section 15 is how to verify.
   enter**: a rule only a reader enforces turns every landing into a
   finding. **What reads it reads configuration** — a file a tool parses,
   a workflow, the API — and not prose: a test over prose is a parser of
-  prose. This preamble is read by the review, `REVIEWING.md`'s *This
-  repository in particular*.
+  prose. **A test may still read in a tree's Markdown what this file or
+  the configuration fixes** — a string or a pattern this file gives and
+  where it stands, a name the configuration holds, or a form this file
+  defines, such as a citation or a link into it — and never how a tree
+  words its prose, so it parses none. This preamble is read by the
+  review, `REVIEWING.md`'s *This repository in particular*.
 - **This file does not grow by accretion.** What a rule costs in lines
   comes out of what its arrival makes redundant where it lands, and
   `git diff --numstat origin/main -- README.md` is the read; the file
