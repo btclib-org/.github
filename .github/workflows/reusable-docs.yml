@@ -10,9 +10,10 @@ name: reusable-docs
 # package compiled from a git submodule needs that submodule checked out,
 # and a tree may ask something of its own built pages that the standard
 # asks of nobody else. Everything else takes one answer here: the
-# interpreter is the one .python-version names, which section 10 leaves a
-# gate no choice about, and the timeout bounds a hung job rather than
-# budgeting the work. An input for either would be a copy in disguise
+# build's interpreter is the one .python-version names, which section 10
+# leaves a gate no choice about, the link script's is the one named on
+# its own step, and the timeout bounds a hung job rather than
+# budgeting the work. An input for any of them would be a copy in disguise
 # (btclib-org/.github#35).
 
 on:
@@ -116,6 +117,27 @@ jobs:
             echo "::error::the links above resolve to no page (unresolved relative path)"
             exit 1
           fi
+      # after the build, so that sphinx never reads it: `path:` puts the
+      # script inside the caller's checkout, as standard/ under the
+      # workspace, sparse, at this workflow's own commit,
+      # `job.workflow_sha`, so it is the script of the workflow that
+      # runs it
+      - name: Check out the link script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: btclib-org/.github
+          ref: ${{ job.workflow_sha }}
+          path: standard
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+      # section 2's *The documentation* is the rule, and the script's
+      # docstring says what it reads. --no-project, on an interpreter
+      # named here, the script being this repository's and not the
+      # caller's
+      - name: Check the built pages for included files linked at BLOB
+        run: >
+          uv run --no-project --python 3.15
+          standard/.github/scripts/check_included_links.py docs/build/html
       # what a tree asks of its own pages, in the job that already
       # installed the package and already wrote them: a second job would
       # pay for the install and the build again to read the same html.
