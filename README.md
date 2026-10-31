@@ -705,6 +705,16 @@ anchors, and a link into a root markdown file's heading fails `-W` under
 `-n`; six is every level markdown heads at, a fixed point rather than a
 depth re-derived from headings that move.
 
+**A page links a file the documentation renders as that page, never at
+`BLOB`.** A file is rendered where a `docs/source/*_link.md` shim
+includes it. `conf.py`'s `RootFileLinks` turns a link to it into the
+page, whether the link is relative or is `BLOB` plus the file's path,
+`BLOB` being `[project.urls] repository` and `/blob/main/`, the form the
+root `README.md` writes. A reader of the documentation stays on the
+version they are reading, where GitHub shows `main`.
+`reusable-docs.yml` refuses a built page that links such a file at
+`BLOB`.
+
 **`--keep-going` is not passed.** In the sphinx `uv.lock` resolves the
 flag is accepted, hidden from `--help` and unused: `-W` alone reports
 every warning a build raises and fails at the end.
