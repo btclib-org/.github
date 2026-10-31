@@ -76,7 +76,7 @@ its intentions beyond that.
   substrate**, and any split of `btclib` beyond the codecs' under
   *Intended* (btclib-org/btclib#2129).
 - **A cipher of `btclib`'s own, and code in `btclib` or `btclib-node`
-  written for tf2 (`bitcoin-node-tests`) alone**
+  written for tf2 (`btclib-functional-tests`) alone**
   (btclib-org/btclib#2220).
 - **A pinned toolchain for the macOS and Windows wheels of
   `btclib-secp256k1`** (btclib-org/btclib-secp256k1#554): section 12's

@@ -347,7 +347,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "bip32-descriptors",
             "btclib-benchmarks",
             "bbt",
-            "bitcoin-node-tests",
+            "btclib-functional-tests",
             "portanode",
             "btclib-org.github.io",
             "claude-process",
@@ -368,7 +368,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "bip32-descriptors",
             "btclib-benchmarks",
             "bbt",
-            "bitcoin-node-tests",
+            "btclib-functional-tests",
         ),
     ),
     (

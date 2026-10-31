@@ -47,9 +47,9 @@ whenever that makes them clearer.
 
 - **[btclib-node](https://github.com/btclib-org/btclib-node)** — a
   bitcoin full node in Python, built on btclib.
-- **[bitcoin-node-tests](https://github.com/btclib-org/bitcoin-node-tests)**
-  — Bitcoin Core's functional tests rewritten on btclib, to test any
-  node against bitcoind.
+- **[btclib-functional-tests](https://github.com/btclib-org/btclib-functional-tests)**
+  — Bitcoin Core's functional tests rewritten on btclib, with bitcoind
+  as the oracle.
 - **[bbt](https://github.com/btclib-org/bbt)** — the course material:
   spreadsheets, notebooks, scripts and a regtest lab.
 - **[portanode](https://github.com/btclib-org/portanode)** — Bitcoin

@@ -336,7 +336,7 @@ sentence that declines a rule and gives no reason is still a gap.
 | `btclib-benchmarks` | 2 |
 | `.github` | 2 |
 | `bbt` | 2 |
-| `bitcoin-node-tests` | 2 |
+| `btclib-functional-tests` | 2 |
 | `portanode` | 3 |
 | `btclib-org.github.io` | 3 |
 | `claude-process` | 3 |
@@ -2217,7 +2217,7 @@ day and an hour, the repository owns the minute:
 | `bbt` | 32 |
 | `btclib-org.github.io` | 36 |
 | `btclib-wallet` | 40 |
-| `bitcoin-node-tests` | 44 |
+| `btclib-functional-tests` | 44 |
 | `ecc` | 48 |
 | `bip39-slip39` | 52 |
 | `bip32-descriptors` | 54 |
@@ -2321,8 +2321,8 @@ reading its sentinels from here; a tree an entry does not name is asked nothing
 by that row.
 
 - `vendored-vectors` — `btclib`, `btclib-secp256k1`, `btclib-benchmarks`,
-  `btclib-node`, `btclib-wallet`, `bitcoin-node-tests`, `ecc`, `bip39-slip39`,
-  `bip32-descriptors`, `base58-bech32`;
+  `btclib-node`, `btclib-wallet`, `btclib-functional-tests`, `ecc`,
+  `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
 - `bootstrap-dns` — `btclib-node`;
 - `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`,
