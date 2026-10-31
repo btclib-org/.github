@@ -30,6 +30,9 @@ whenever that makes them clearer.
 - **[bip39-slip39](https://github.com/btclib-org/bip39-slip39)** —
   BIP39, SLIP39 and Electrum mnemonics, from the entropy up to the seed,
   and nothing of bitcoin above it.
+- **[bip32-descriptors](https://github.com/btclib-org/bip32-descriptors)**
+  — BIP32 keys, output script descriptors and miniscript, on top of
+  btclib.
 - **[btclib-wallet](https://github.com/btclib-org/btclib-wallet)** —
   from a seed to a signed, broadcast transaction: BIP32 keys, BIP39 and
   SLIP39 mnemonics, descriptors, PSBT, coin selection.
