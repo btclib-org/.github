@@ -10,9 +10,10 @@ name: reusable-docs
 # package compiled from a git submodule needs that submodule checked out,
 # and a tree may ask something of its own built pages that the standard
 # asks of nobody else. Everything else takes one answer here: the
-# interpreter is the one .python-version names, which section 10 leaves a
-# gate no choice about, and the timeout bounds a hung job rather than
-# budgeting the work. An input for either would be a copy in disguise
+# build's interpreter is the one .python-version names, which section 10
+# leaves a gate no choice about, the link script's is the one named on
+# its own step, and the timeout bounds a hung job rather than
+# budgeting the work. An input for any of them would be a copy in disguise
 # (btclib-org/.github#35).
 
 on:
