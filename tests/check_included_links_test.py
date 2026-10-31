@@ -104,6 +104,22 @@ def test_a_built_page_linking_an_included_file_at_blob_is_refused(
     assert script.main([os.fspath(html)]) == (1 if refused else 0)
 
 
+def test_the_repository_key_is_read_whatever_its_case(
+    script: ModuleType,
+    tmp_path: Path,
+) -> None:
+    """Section 3's `[project.urls]` keys compare case-insensitively.
+
+    :param script: the module under test.
+    :param tmp_path: where the stand-in tree is written.
+    """
+    (tmp_path / "pyproject.toml").write_text(
+        f'[project]\nname = "stand-in"\n[project.urls]\nRepository = "{_REPOSITORY}"\n',
+        encoding="utf-8",
+    )
+    assert script.blob(tmp_path) == _BLOB
+
+
 def test_the_report_names_the_page_and_the_line(
     script: ModuleType,
     tmp_path: Path,

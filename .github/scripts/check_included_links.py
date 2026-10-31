@@ -36,11 +36,19 @@ INCLUDE = re.compile(r"^```\{include\}\s+(.+?)\s*$", re.MULTILINE)
 def blob(root: Path) -> str:
     """Return the url prefix of a file of the tree on its default branch.
 
+    The `[project.urls]` key is read as tests/pyproject_test.py compares
+    section 3's keys, case folded and a space read as an underscore, so
+    `Repository` is the same link as `repository`.
+
     :param root: the root of the tree.
     :returns: `<repository>/blob/main/`.
     """
     project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
-    return f"{project['project']['urls']['repository'].rstrip('/')}/blob/main/"
+    urls = {
+        key.lower().replace(" ", "_"): url
+        for key, url in project["project"]["urls"].items()
+    }
+    return f"{urls['repository'].rstrip('/')}/blob/main/"
 
 
 def included(root: Path) -> set[str]:
