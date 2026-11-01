@@ -139,10 +139,10 @@ jobs:
       # findings, so any other non-zero code is griffe failing rather
       # than finding.
       # api_gaps.py adds breaks of the kinds its docstring names, which
-      # griffe does not compare, in the same format, on standard output
-      # alone, exiting 1 with findings and 2 where it fails. It reads the
-      # working tree, which on a release is the tag, and the higher of
-      # the two exit codes is the one read
+      # griffe does not compare or can skip, in the same format, on
+      # standard output alone, exiting 1 with findings and 2 where it
+      # fails. It reads the working tree, which on a release is the tag,
+      # and the higher of the two exit codes is the one read
       - name: Check the public API against the previous release
         if: steps.previous.outputs.has-previous == 'true'
         env:
