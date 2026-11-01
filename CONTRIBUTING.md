@@ -64,8 +64,8 @@ explain, is closed without review.
 **Write plainly**, in the tree and on the forge: the point first, plain
 words, one fact per sentence. On the forge, the title and the first
 sentence carry the point; a body is at most two short paragraphs before
-any code block or template section; a comment is about 200 words, and
-never more than 250, with no list and no heading; a review's summary
+any code block or template section; a comment is about 250 words, and
+never more than 300, with no list and no heading; a review's summary
 takes the shape `REVIEWING.md`'s *The verdict* gives it.
 
 ## Pull requests
