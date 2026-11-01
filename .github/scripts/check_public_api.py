@@ -57,7 +57,7 @@ _MODULE = "<module>"
 
 @dataclass(frozen=True)
 class Finding:
-    """One line of griffe's output, or a line that is not one."""
+    """A finding in griffe's `oneline` format, or a line that is not one."""
 
     text: str
     name: str
@@ -84,7 +84,7 @@ def _dotted(path: str, package: str) -> str:
 
 
 def findings(output: str, package: str) -> list[Finding]:
-    """Read griffe's `oneline` output, a line it cannot read being a finding."""
+    """Read griffe's `oneline` format, a line it cannot read being a finding."""
     found = []
     for raw in output.splitlines():
         text = raw.strip()
@@ -189,7 +189,9 @@ def main(argv: list[str] | None = None) -> int:
     """Print each finding as covered or not, and refuse the uncovered ones."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("package", help="the package griffe walked")
-    parser.add_argument("findings", help="griffe's `-f oneline` output")
+    parser.add_argument(
+        "findings", help="the findings, in griffe's `-f oneline` format"
+    )
     parser.add_argument("notes", help="RELEASE_NOTES.md")
     parser.add_argument("--tag", help="the tag being released, absent on a rehearsal")
     args = parser.parse_args(argv)

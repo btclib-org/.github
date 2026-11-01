@@ -299,7 +299,7 @@ def test_the_answer_reaches_the_label_step() -> None:
 
 
 def test_the_finding_pattern_is_the_one_the_release_check_reads() -> None:
-    """One format of griffe's output, the same text where it is read twice.
+    """One format, griffe's `oneline`, the same text where it is read twice.
 
     The release check names its groups and this script does not, so the
     names are the only difference allowed.
@@ -318,7 +318,7 @@ def test_the_finding_pattern_is_the_one_the_release_check_reads() -> None:
 
 def test_the_workflow_runs_the_script_where_its_checkout_puts_it() -> None:
     """Both steps take the script from the checkout's `path:`."""
-    checkout = _step("Check out the script")
+    checkout = _step("Check out the scripts")
     assert checkout["with"]["path"] == "standard"
     assert checkout["with"]["sparse-checkout"] == ".github/scripts"
     path = f"standard/{_SCRIPT.relative_to(ROOT).as_posix()}"
@@ -368,7 +368,7 @@ STEPS: list[dict[str, Any]] = [
         "with": {"enable-cache": False},
     },
     {
-        "name": "Check out the script",
+        "name": "Check out the scripts",
         "uses": CHECKOUT,
         "with": {
             "repository": "btclib-org/.github",

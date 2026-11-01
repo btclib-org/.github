@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Decide whether `griffe check` found a break, and set the label from it.
+"""Decide whether the API comparison found a break, and set the label from it.
 
 `griffe check -f oneline` prints one finding per line, which
 `check_public_api.py` reads, and exits 1 with findings. An uncaught
