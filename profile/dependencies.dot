@@ -57,11 +57,11 @@ digraph dependencies {
     "btclib-secp256k1" [pos="290,460"];
     "ecc"              [pos="290,360"];
     "btclib"           [pos="290,260"];
-    "btclib-wallet"      [pos="0,160"];
-    "bip32-descriptors"  [pos="145,160"];
-    "bitcoin-node-tests" [pos="145,60"];
-    "btclib-benchmarks"  [pos="435,60"];
-    "btclib-node"        [pos="290,60"];
+    "btclib-wallet"           [pos="0,160"];
+    "bip32-descriptors"       [pos="145,160"];
+    "btclib-functional-tests" [pos="145,60"];
+    "btclib-benchmarks"       [pos="435,60"];
+    "btclib-node"             [pos="290,60"];
 
     "btclib-secp256k1" -> "libsecp256k1" [style=dotted, arrowhead=none, label="bundled", lp="262,510",
         pos="290,478 290,478 290,542 290,542"];
@@ -72,9 +72,9 @@ digraph dependencies {
     "btclib" -> "ecc" [pos="e,290,342 290,278 290,278 290,335 290,335"];
     "btclib-wallet" -> "btclib"
         [pos="e,290,242 20,178 20,178 20,210 20,210 20,210 290,210 290,210 290,210 290,235 290,235"];
-    "bitcoin-node-tests" -> "btclib-wallet"
+    "btclib-functional-tests" -> "btclib-wallet"
         [pos="e,-20,142 125,78 125,78 125,92 125,92 125,92 -20,92 -20,92 -20,92 -20,135 -20,135"];
-    "bitcoin-node-tests" -> "btclib"
+    "btclib-functional-tests" -> "btclib"
         [pos="e,250,242 165,78 165,78 165,92 165,92 165,92 250,92 250,92 250,92 250,235 250,235"];
     "bip32-descriptors" -> "btclib"
         [pos="e,229,260 145,178 145,178 145,260 145,260 145,260 222,260 222,260"];
