@@ -612,6 +612,459 @@ def test_a_re_exported_object_is_reported_once(
     )
 
 
+def _class(name: str, method: str, parent: str = "") -> str:
+    """Return a class with this source for its body, a method or `pass`."""
+    bases = f"({parent})" if parent else ""
+    return f"class {name}{bases}:\n    {method}\n\n"
+
+
+def _method(signature: str) -> str:
+    """Return a method of this signature, the whole of a class's body."""
+    return f"def m{signature}:\n        return 1"
+
+
+def _changes(lines: list[str]) -> list[str]:
+    """Return each finding without its location, sorted."""
+    return sorted(line.split(": ", 1)[1] for line in lines)
+
+
+def test_an_override_a_subclass_gains_is_compared_with_the_inherited_method(
+    pair: Pair,
+) -> None:
+    """The pair of mkdocstrings/griffe#510, griffe having seen `Base.m`."""
+    base = _class("Base", _method("(self, a: int) -> int"))
+    found = pair.compare(
+        base + _class("Sub", "pass", "Base"),
+        base + _class("Sub", _method("(self) -> str"), "Base"),
+    )
+
+    assert found == (
+        1,
+        [
+            "src/pkg/__init__.py:6: Sub.m: Return types are incompatible: int -> str",
+            "src/pkg/__init__.py:6: Sub.m(a): Parameter was removed",
+        ],
+    )
+    assert pair.griffe() == []
+
+
+@pytest.mark.parametrize("sub_first", [False, True], ids=["base-first", "sub-first"])
+def test_a_change_to_a_method_and_to_the_override_gained_are_both_reported(
+    pair: Pair, *, sub_first: bool
+) -> None:
+    """Keyed on the old path alone, one is lost, by declaration order."""
+    classes = (
+        _class("Base", _method("(self) -> int")),
+        _class("Sub", "pass", "Base"),
+    )
+    changed = (
+        _class("Base", _method("(self) -> bytes")),
+        _class("Sub", _method("(self) -> str"), "Base"),
+    )
+    before, after = (
+        "".join(reversed(side) if sub_first else side) for side in (classes, changed)
+    )
+
+    code, lines = pair.compare(before, after)
+
+    assert (code, _changes(lines)) == (
+        1,
+        [
+            "Base.m: Return types are incompatible: int -> bytes",
+            "Sub.m: Return types are incompatible: int -> str",
+        ],
+    )
+
+
+def test_an_override_dropped_is_compared_with_the_method_then_inherited(
+    pair: Pair,
+) -> None:
+    """The method gains a required parameter, and griffe says nothing.
+
+    The finding names the method called from now on, `Base.m`.
+    """
+    base = _class("Base", _method("(self, a: int)"))
+    found = pair.compare(
+        base + _class("Sub", _method("(self)"), "Base"),
+        base + _class("Sub", "pass", "Base"),
+    )
+
+    assert found == (
+        1,
+        ["src/pkg/__init__.py:2: Base.m(a): Parameter was added as required"],
+    )
+    assert pair.griffe() == []
+
+
+def test_griffe_s_comparison_of_a_skipped_pair_passes_a_swallowed_parameter(
+    pair: Pair,
+) -> None:
+    """Its rules are griffe's: `**kwargs` accepts a keyword-only parameter."""
+    base = _class("Base", _method("(self, *, a: int)"))
+    found = pair.compare(
+        base + _class("Sub", "pass", "Base"),
+        base + _class("Sub", _method("(self, **kwargs)"), "Base"),
+    )
+
+    assert found == (0, [])
+
+
+def test_an_inherited_method_unchanged_is_no_break(pair: Pair) -> None:
+    """The same pair on both sides is compared once, and finds nothing."""
+    source = _class("Base", _method("(self, a: int) -> int")) + _class(
+        "Sub", "pass", "Base"
+    )
+
+    assert pair.compare(source, source) == (0, [])
+
+
+def test_griffe_s_finding_on_a_pair_it_reaches_is_also_reported(
+    pair: Pair,
+) -> None:
+    """Declared first, the subclass's alias is what griffe follows."""
+    base = _class("Base", _method("(self, a: int) -> int"))
+    found = pair.compare(
+        _class("Sub", "pass", "Base") + base,
+        _class("Sub", _method("(self) -> int"), "Base") + base,
+    )
+
+    assert found == (
+        1,
+        ["src/pkg/__init__.py:2: Sub.m(a): Parameter was removed"],
+    )
+    assert pair.griffe() == ["Parameter was removed"]
+
+
+@pytest.mark.parametrize("sub_first", [False, True], ids=["base-first", "sub-first"])
+@pytest.mark.parametrize(
+    ("member", "kind"),
+    [
+        ("m: int = 1", "attribute"),
+        ("@property\n    def m(self) -> int:\n        return 1", "attribute"),
+        ("class m:\n        pass", "class"),
+    ],
+    ids=["attribute", "property", "class"],
+)
+def test_an_override_of_another_kind_is_reported_in_either_order(
+    pair: Pair, member: str, kind: str, *, sub_first: bool
+) -> None:
+    """Griffe reports it only where the subclass comes first."""
+    base = _class("Base", _method("(self, a: int) -> int"))
+    sides = [(base, _class("Sub", body, "Base")) for body in ("pass", member)]
+    before, after = ("".join(reversed(side) if sub_first else side) for side in sides)
+
+    code, lines = pair.compare(before, after)
+
+    assert (code, _changes(lines)) == (
+        1,
+        [f"Sub.m: {script.KIND_CHANGED}: function -> {kind}"],
+    )
+    assert pair.griffe() == ([script.KIND_CHANGED] if sub_first else [])
+
+
+def test_griffe_is_left_a_kind_changed_on_one_path(pair: Pair) -> None:
+    """The same object changing kind is griffe's, and printed once."""
+    found = pair.compare("def f():\n    pass\n", "f = 1\n")
+
+    assert found == (0, [])
+    assert pair.griffe() == [script.KIND_CHANGED]
+
+
+def _package(pair: Pair, side: str, files: dict[str, str]) -> None:
+    """Write a version of `pkg` as several modules."""
+    package = pair.root / side / "src" / "pkg"
+    package.mkdir(parents=True)
+    for name, source in files.items():
+        (package / f"{name}.py").write_text(source, encoding="utf-8")
+
+
+def _exported_from(module: str, source: str) -> dict[str, str]:
+    """Return a package re-exporting `f` from a module with this source."""
+    return {
+        "__init__": f'from pkg.{module} import f\n\n__all__ = ["f"]\n',
+        module: f'__all__ = ["f"]\n\n{source}',
+    }
+
+
+def test_a_re_export_moved_to_another_module_unchanged_is_no_break(
+    pair: Pair,
+) -> None:
+    """Two paths, one kind and one signature: no finding."""
+    source = "def f(a: int) -> int:\n    return a\n"
+    _package(pair, "old", _exported_from("codec", source))
+    _package(pair, "new", _exported_from("store", source))
+
+    assert pair.run() == (0, [])
+
+
+def test_a_function_moved_and_changed_is_reported_by_both(pair: Pair) -> None:
+    """Griffe reaches a moved function through its re-export."""
+    _package(
+        pair, "old", _exported_from("codec", "def f(a: int) -> int:\n    return a\n")
+    )
+    _package(pair, "new", _exported_from("store", "def f() -> int:\n    return 1\n"))
+
+    assert pair.run() == (1, ["src/pkg/store.py:3: f(a): Parameter was removed"])
+    assert "Parameter was removed" in pair.griffe()
+
+
+def test_a_re_export_gaining_an_alias_step_hides_a_change_from_both(
+    pair: Pair,
+) -> None:
+    """The limit the module docstring states, pinned so that it stays known."""
+    _package(pair, "old", _exported_from("codec", "def f(a: int):\n    pass\n"))
+    _package(
+        pair,
+        "new",
+        {
+            **_exported_from("store", "from pkg.codec import f\n"),
+            "codec": "def f():\n    pass\n",
+        },
+    )
+
+    # `f(a)` is gone, yet griffe skips the pair and this reads it as griffe's
+    assert pair.run() == (0, [])
+    assert "Parameter was removed" not in pair.griffe()
+
+
+def test_a_module_turned_into_a_class_is_not_walked(pair: Pair) -> None:
+    """Griffe's kind finding covers it: no function is walked as a method."""
+    _package(
+        pair,
+        "old",
+        {"__init__": "from pkg import x\n", "x": "def f() -> int:\n    return 1\n"},
+    )
+    _package(
+        pair,
+        "new",
+        {"__init__": _class("x", 'def f(self) -> str:\n        return ""')},
+    )
+
+    assert pair.run() == (0, [])
+    assert script.KIND_CHANGED in pair.griffe()
+
+
+def test_griffe_s_rule_on_none_applies_on_a_pair_it_skips(pair: Pair) -> None:
+    """`-> None` dropped is griffe's break, though none to this comparison."""
+    base = _class("Base", _method("(self) -> None"))
+    found = pair.compare(
+        base + _class("Sub", "pass", "Base"),
+        base + _class("Sub", _method("(self)"), "Base"),
+    )
+
+    assert found == (
+        1,
+        ["src/pkg/__init__.py:6: Sub.m: Return types are incompatible"],
+    )
+    assert pair.griffe() == []
+
+
+@pytest.mark.parametrize(
+    ("imported", "module"),
+    [
+        ("_f as f", "def _f(a):\n    pass\n"),
+        ("f", '__all__ = ["g"]\n\ndef f(a):\n    pass\n\ndef g():\n    pass\n'),
+    ],
+    ids=["private-name", "not-in-all"],
+)
+def test_griffe_compares_a_function_public_only_through_its_alias(
+    pair: Pair, imported: str, module: str
+) -> None:
+    """Its walk drops a member that is not public under its own name."""
+    exported = '\n\n__all__ = ["f"]\n'
+    _package(
+        pair,
+        "old",
+        {"__init__": f"from pkg._a import {imported}{exported}", "_a": module},
+    )
+    _package(
+        pair,
+        "new",
+        {
+            "__init__": f"from pkg._b import f{exported}",
+            "_b": "from pkg._c import f\n",
+            "_c": "def f():\n    pass\n",
+        },
+    )
+
+    assert pair.run() == (1, ["src/pkg/_c.py:1: f(a): Parameter was removed"])
+    assert pair.griffe() == []
+
+
+def test_a_method_griffe_skips_on_its_own_path_is_compared(pair: Pair) -> None:
+    """Declared first, the override takes griffe's one look at `Base.m`."""
+    before = _class("Sub", "pass", "Base") + _class(
+        "Base", _method("(self, a: int) -> int")
+    )
+    after = _class("Sub", _method("(self, a: int) -> int"), "Base") + _class(
+        "Base", _method("(self) -> int")
+    )
+
+    code, lines = pair.compare(before, after)
+
+    assert (code, _changes(lines)) == (1, ["Base.m(a): Parameter was removed"])
+    assert pair.griffe() == []
+
+
+def test_a_parameter_annotation_changed_is_a_break(pair: Pair) -> None:
+    """The first pair of btclib-org/.github#1946, which griffe passes."""
+    found = pair.compare(
+        "def f(x: int) -> int:\n    return 1\n",
+        "def f(x: str) -> int:\n    return 1\n",
+    )
+
+    assert found == (
+        1,
+        ["src/pkg/__init__.py:1: f(x): Parameter types are incompatible: int -> str"],
+    )
+    assert pair.griffe() == []
+
+
+@pytest.mark.parametrize(
+    ("before", "after"),
+    [
+        ("x", "x: int"),
+        ("x: int", "x"),
+        ("x: dict[str,int]", "x: dict[str, int]"),
+    ],
+    ids=["added", "removed", "spacing"],
+)
+def test_a_parameter_annotation_widened_or_respaced_is_no_break(
+    pair: Pair, before: str, after: str
+) -> None:
+    """Added, removed, or written with other spacing."""
+    found = pair.compare(
+        f"def f({before}):\n    pass\n", f"def f({after}):\n    pass\n"
+    )
+
+    assert found == (0, [])
+
+
+OVERLOADS = """
+@overload
+def f(x: int) -> int: ...
+@overload
+def f(x: {other}) -> {other}: ...
+def f(x):
+    return x
+"""
+
+
+def test_a_parameter_annotated_none_that_changes_is_a_break(pair: Pair) -> None:
+    """Unlike a return's `None`, it accepted `None`, which `f(None)` passes."""
+    _, lines = pair.compare("def f(x: None):\n    pass\n", "def f(x: int):\n    pass\n")
+
+    assert _changes(lines) == ["f(x): Parameter types are incompatible: None -> int"]
+
+
+@pytest.mark.parametrize(
+    ("before", "after"),
+    [
+        (
+            OVERLOADS.format(other="str"),
+            OVERLOADS.format(other="bytes"),
+        ),
+        (
+            _class(
+                "Key",
+                "@property\n    def p(self) -> int:\n        return 1\n\n"
+                "    @p.setter\n    def p(self, v: int) -> None:\n        pass",
+            ),
+            _class(
+                "Key",
+                "@property\n    def p(self) -> int:\n        return 1\n\n"
+                "    @p.setter\n    def p(self, v: str) -> None:\n        pass",
+            ),
+        ),
+    ],
+    ids=["overload", "setter"],
+)
+def test_overloads_and_a_setter_are_not_compared(
+    pair: Pair, before: str, after: str
+) -> None:
+    """The module docstring says so, of griffe and of this script."""
+    imports = "from typing import overload\n"
+
+    assert pair.compare(imports + before, imports + after) == (0, [])
+    assert pair.griffe() == []
+
+
+def test_griffe_is_left_a_parameter_removed_or_added(pair: Pair) -> None:
+    """A parameter on one side only has no annotation to compare."""
+    found = pair.compare("def f(x: int):\n    pass\n", "def f(y: str):\n    pass\n")
+
+    assert found == (0, [])
+    assert pair.griffe() == [
+        "Parameter was removed",
+        "Parameter was added as required",
+    ]
+
+
+def test_a_method_parameter_annotation_is_named_by_class_and_parameter(
+    pair: Pair,
+) -> None:
+    """The object is what griffe prints for a parameter, read as its class."""
+    code, lines = pair.compare(
+        _class("Key", _method("(self, x: int)")),
+        _class("Key", _method("(self, x: bytes)")),
+    )
+
+    assert (code, _changes(lines)) == (
+        1,
+        ["Key.m(x): Parameter types are incompatible: int -> bytes"],
+    )
+    [finding] = _load("check_public_api").findings("\n".join(lines), "pkg")
+    assert finding.key == "Key"
+
+
+def test_an_attribute_annotation_changed_is_a_break(pair: Pair) -> None:
+    """The second pair of btclib-org/.github#1946: a value at most to griffe."""
+    found = pair.compare("LIMIT: int = 3\n", 'LIMIT: str = "3"\n')
+
+    assert found == (
+        1,
+        ["src/pkg/__init__.py:1: LIMIT: Attribute types are incompatible: int -> str"],
+    )
+    assert "Attribute types are incompatible" not in pair.griffe()
+
+
+@pytest.mark.parametrize(
+    ("before", "after", "change"),
+    [
+        ("LIMIT = 3\n", "LIMIT: int = 3\n", None),
+        ("LIMIT: None = None\n", "LIMIT: int = 3\n", None),
+        ("LIMIT: int = 3\n", "LIMIT: int = 4\n", None),
+        ("_LIMIT: int = 3\n", "_LIMIT: str = '3'\n", None),
+        ("LIMIT: int = 3\n", "LIMIT = 3\n", "int -> None"),
+    ],
+    ids=["added", "was-none", "value", "private", "removed"],
+)
+def test_an_attribute_annotation_removed_is_a_break_and_gained_is_not(
+    pair: Pair, before: str, after: str, change: str | None
+) -> None:
+    """As for a property, griffe modelling both as attributes."""
+    code, lines = pair.compare(before, after)
+
+    assert (code, [line.split(": ", 3)[-1] for line in lines]) == (
+        (1, [change]) if change else (0, [])
+    )
+
+
+def test_a_dataclass_field_retyped_is_reported_on_it_and_on_init(
+    pair: Pair,
+) -> None:
+    """Griffe generates `__init__` from the fields, so a field shows in both."""
+    code, lines = pair.compare(_point("x: int"), _point("x: str"))
+
+    assert (code, _changes(lines)) == (
+        1,
+        [
+            "Point.__init__(x): Parameter types are incompatible: int -> str",
+            "Point.x: Attribute types are incompatible: int -> str",
+        ],
+    )
+
+
 def test_a_failed_comparison_exits_2_with_its_traceback(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
