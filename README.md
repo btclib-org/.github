@@ -4588,6 +4588,54 @@ for r in <every publisher>; do
 done
 ```
 
+Section 3's `[project]` dependencies against what the tree imports. deptry reads
+which modules a distribution installs from its installed metadata, and guesses
+where it is not installed, so it runs in the tree's own environment. A
+pre-commit hook runs in an environment of its own, which is why this is no hook.
+deptry's default exclusions exclude `tests/`, so nothing under it is read; the
+`--exclude` pair replaces them. It also turns off deptry's reading of
+`.gitignore`, so the run reads gitignored files and belongs in a fresh clone:
+
+```shell
+uv sync --locked --all-extras --all-groups
+uv run --locked --with deptry==0.25.1 deptry . \
+  --known-first-party <package> --ignore DEP004 \
+  --exclude '\.venv' --exclude '\.git/'
+```
+
+Where the tree's C extension cannot build, as in a clone without its submodule,
+the sync takes `--no-install-project` and the second command `--no-sync`, as
+`uv run` otherwise syncs again and builds. A compiled module of the package's
+own, as btclib-secp256k1's `_btclib_secp256k1`, is one more
+`--known-first-party`.
+
+DEP002, a declared distribution no module imports, is a finding, and so are
+DEP001 and DEP003, an imported module the tree does not declare. deptry fixes
+nothing: a person declared each dependency, so removing one is a change of its
+own. DEP004, a module imported from a dependency group, is left out: a group
+holds what a run uses, not what the package imports. Leaving it out also hides a
+package's own module importing a distribution that only a group declares.
+
+The version is the one these exceptions were read with. Each is a finding that
+stays:
+
+- bbt's `ipykernel`, declared and not imported: it is the kernel jupyter starts
+  a notebook in.
+- `atheris`, imported under `fuzz/` and not declared: section 1's `fuzz` group
+  says why.
+- `docutils`, imported by `docs/source/conf.py` and not declared: sphinx
+  depends on it, and `conf.py` imports it to extend sphinx.
+- `btclib_secp256k1`, imported in btclib's `tests/` and not declared: ecc's
+  `secp256k1` extra names the bindings, and btclib takes them through that
+  extra and its `bindings` group, which section 1's *Dependency groups* keeps
+  equal.
+- `artifacts` and `conftest`, imported in btclib-benchmarks' `tests/`: modules
+  of `scripts/` and `tests/`, which `tests/conftest.py` and pytest put on
+  `sys.path`.
+- `test_framework`, imported in btclib-node's
+  `tests/unit/_data/test_framework/`: part of Bitcoin Core's test framework,
+  copied into the tree, importing itself.
+
 ### Reading the workflow comments
 
 No tool checks them.
