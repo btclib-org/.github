@@ -62,7 +62,7 @@ labels:
     description: >-
       Core's python test framework reimplemented on btclib: btclib gets
       the primitives, tf2 only the tests
-    repositories: [btclib, bitcoin-node-tests]
+    repositories: [btclib, btclib-functional-tests]
   - name: api-break
     color: "e99695"
     description: Breaks the public API; set by a job, advisory

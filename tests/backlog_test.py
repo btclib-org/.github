@@ -218,7 +218,7 @@ def test_the_repository_list_drops_an_advisory_fork_and_keeps_every_tree(
         "bbt",
         "btclib-org.github.io",
         "btclib-wallet",
-        "bitcoin-node-tests",
+        "btclib-functional-tests",
         "btclib-ecc",
         "bip39-slip39",
         "claude-process",

@@ -80,7 +80,7 @@ it.
 A workflow with several `needs` jobs gives each job's id and result in
 turn, the pairs together and not split by an option, or `--results-env
 VAR` names an environment variable holding a line `ID RESULT` for each.
-The rows follow the options. `bitcoin-node-tests`' `test.yml` would be:
+The rows follow the options. `btclib-functional-tests`' `test.yml` would be:
 
     python3 btclib-org-github/.github/scripts/check_run_jobs.py \
         changes "${CHANGES_RESULT}" coverage "${COVERAGE_RESULT}" \
