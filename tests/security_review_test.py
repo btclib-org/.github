@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""What `SECURITY.md`'s *Security review* section names, in every tree.
+"""What the *Security review* section of `SECURITY.md` names, in every tree.
 
 Section 2 of README.md, in its *Root files*, says what the section
 holds and what a section written before any review says instead. This
@@ -119,7 +119,7 @@ def test_a_security_review_section_names_the_review(
         pytest.skip(f"{repository}'s SECURITY.md has no {HEADING!r}")
     lacking = missing(body, repository)
     assert not lacking, (
-        f"SECURITY.md's *Security review* section lacks {lacking}; "
+        f"the *Security review* section of SECURITY.md lacks {lacking}; "
         + by_hand(repository, "sed -n '/^## Security review$/,/^#/p' SECURITY.md")
     )
 
