@@ -388,6 +388,28 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_a_repository_carries_no_copy_a_condition_does_not_reach",
         ("portanode",),
     ),
+    (
+        1974,
+        "test_the_homepage_is_the_page_on_btclib_org",
+        (
+            "btclib",
+            "btclib-secp256k1",
+            "bitcoin-core-rpc",
+            "btclib-node",
+            "btclib-wallet",
+            "ecc",
+            "bip39-slip39",
+            "base58-bech32",
+            "bip32-descriptors",
+            "benchmarks",
+            "functional-tests",
+        ),
+    ),
+    (
+        1974,
+        "test_the_documentation_is_the_read_the_docs_site_serving_the_tree",
+        ("btclib-secp256k1", "btclib-node", "functional-tests"),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 

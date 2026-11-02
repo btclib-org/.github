@@ -34,7 +34,6 @@ RUNS = re.compile(r"[-_.]+")
 
 URLS = {
     "homepage",
-    "documentation",
     "download",
     "changelog",
     "repository",
@@ -43,10 +42,12 @@ URLS = {
 }
 """Section 3's `[project.urls]` list, spelled as the publishers declare it.
 
-The section names the seven in prose and not as keys, and
-btclib-org/.github#133 is where that spelling was settled; the set is
-compared case-insensitively with spaces read as underscores, so the one
-spelling the comparison refuses is a different name for the link.
+`documentation` is not in it: whether a tree carries one is
+`homepage_test.py`'s question. The section names the links in prose and
+not as keys, and btclib-org/.github#133 is where that spelling was
+settled; the set is compared case-insensitively with spaces read as
+underscores, so the one spelling the comparison refuses is a different
+name for the link.
 """
 
 DOC_WIDTH = 80
@@ -354,11 +355,11 @@ def test_the_uv_floor_is_not_above_what_dependabot_bundles(
 
 
 @pytest.mark.tier(Tier.PUBLISHER)
-def test_the_project_urls_are_the_seven_section_3_names(
+def test_the_project_urls_are_section_3s_names(
     repository: str,
     pyprojects: dict[str, dict[str, Any]],
 ) -> None:
-    """Section 3: `[project.urls]` carries seven links, by name.
+    """Section 3: `[project.urls]` carries its links, by name.
 
     PyPI renders the key as the link's label, so a key spelled another
     way is on the index as written, and a link absent from the table is
@@ -369,7 +370,7 @@ def test_the_project_urls_are_the_seven_section_3_names(
     :param pyprojects: the parsed files.
     """
     urls = parsed(repository, pyprojects).get("project", {}).get("urls", {})
-    spelled = {key.lower().replace(" ", "_") for key in urls}
+    spelled = {key.lower().replace(" ", "_") for key in urls} - {"documentation"}
     assert spelled == URLS, (
         f"missing {sorted(URLS - spelled)}, unexpected {sorted(spelled - URLS)}; "
         + by_hand(repository, "sed -n '/^\\[project.urls\\]/,/^\\[/p' pyproject.toml")

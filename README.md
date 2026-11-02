@@ -877,33 +877,36 @@ hook then passes no path to; section 14 names each of those files.
     `git ls-files`; where a tree publishes, section 12's
     `check-wheel-contents` verifies it once the package is named there.
     A tree short of tier 1 owes the marker with no gate over it.
-- **`[project.urls]`** carries homepage, documentation, download,
-  changelog, repository, issues and pull requests.
+- **`[project.urls]`** carries homepage, download, changelog,
+  repository, issues and pull requests, and documentation where the
+  last paragraph below says.
 
     **The names above are a publisher's, and a tree that declares the
     table and releases nothing carries the ones with a referent.**
-    `documentation` and `changelog` are the two such a tree has none
-    for: no site stands behind it, and `changelog` is the name each
+    `changelog` is the one such a tree has none for: it is the name each
     publisher here gives `RELEASE_NOTES.md`, which section 2 gives a
     tier-1 tree alone. Pointing it at the `CHANGELOG.md` every tier
     carries is the rejected alternative, one name serving two documents.
 
-    **A releasing tree's `homepage` is its own documentation site, in
-    both surfaces that carry the name**: this field, which an index
-    serves with the package, and the repository's `.homepage`, the
-    *About* link on its page. A project's home is what documents it and
-    not a project page. The two are read apart:
+    **`homepage` is the repository's page on btclib.org,
+    `https://btclib.org/<repository>/`, on both surfaces that carry the
+    name**: this field, which an index serves with the package, and the
+    repository's `.homepage`, the *About* link on its page. The
+    rejected alternative is the documentation site as the home
+    (btclib-org/.github#533): it leaves a tree with no documentation
+    site without a home of its own, and makes `documentation` repeat
+    `homepage`. The two surfaces are read apart:
 
     ```shell
     gh api repos/<org>/<repo> --jq '.homepage'
     sed -n '/^\[project.urls\]/,/^\[/p' pyproject.toml
     ```
 
-    Where they disagree, moving the setting to whatever `pyproject.toml`
-    declares consecrates the state rather than correcting it: the rule
-    sends both surfaces to the documentation the tree itself provides.
-    **`documentation` names that same URL, and stays**, being the field
-    indexes and tools read for documentation specifically.
+    **`documentation` is `https://<slug>.readthedocs.io/` exactly where
+    Read the Docs serves the tree, and is absent where it does not**:
+    it is the field indexes and tools read for documentation
+    specifically. The slug is the one section 11's *Pages and Read the
+    Docs* says serves the site.
 - **No upper bound on a sibling dependency.** Two projects developed
   together coordinate a break at release time, where a ceiling makes a
   published artifact refuse a version it works with.
@@ -2742,10 +2745,10 @@ says what falls outside that scope.**
 record, so `REPOSITORY.md` does not list them.
 
 **A copy does not claim that nothing it records has another form in the
-tree.** The topics are section 3's `keywords`, a releasing tree's
-`.homepage` is the `[project.urls]` field of that name — so where a
-tree holds one of those, the record is a second copy read back for
-comparison, and that copy's own section on it says so.
+tree.** The topics are section 3's `keywords`, and the `.homepage` is
+section 3's `homepage` field where the tree declares `[project.urls]` —
+so where a tree holds one of those, the record is a second copy read
+back for comparison, and that copy's own section on it says so.
 
 **`has_wiki` and `has_projects` are off, and a copy reads both back**,
 this sentence being what puts them inside the perimeter: an unused wiki
@@ -4732,8 +4735,8 @@ No tool checks them.
    labels `.github/labels.yml` gives the repository. Then the
    topics, which are the `keywords` of the `pyproject.toml` step above,
    and which nothing in the tree holds where there is no such file to
-   declare them in; and, where the tree releases, the `homepage`, the
-   same URL section 3's field of that name carries.
+   declare them in; and, where the tree declares `[project.urls]`, the
+   `homepage`, section 3's page on btclib.org.
 1. Read each setting back with the commands `REPOSITORY.md` records, and
    write the answers into it — the topics included, that being the one
    of them a tree with no `pyproject.toml` records nowhere else.

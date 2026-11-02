@@ -200,11 +200,11 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. It has no bypass actor at rest. The maintainer adds a pull_request-mode bypass around merges and removes it afterwards. GOVERNANCE.md reserves that bypass for an emergency, and it has also been used for ordinary work: 33 of the 75 merges to main from 2026-10-17 to 2026-10-30 landed that way. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
     "status": "Met"
   },
   "OSPS-SA-01.01": {
-    "justification": "CLAUDE.md's Architecture gives the package's modules, their layers bottom-up and what each may import. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversary, and what each can do. https://github.com/btclib-org/btclib-ecc/blob/main/CLAUDE.md#architecture https://github.com/btclib-org/btclib-ecc/blob/main/ASSURANCE_CASE.md#trust-boundaries",
+    "justification": "ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller, the adversary and the libsecp256k1 bindings, and what each can do. Its Layering paragraph says which part of the package may import which. https://github.com/btclib-org/ecc/blob/main/ASSURANCE_CASE.md#trust-boundaries",
     "status": "Met"
   },
   "OSPS-SA-02.01": {
@@ -280,7 +280,7 @@
     "status": "Met"
   },
   "automated_integration_testing": {
-    "justification": "test.yml runs the test suite, with and without the libsecp256k1 bindings, on every push to main and every pull request, and its aggregate job `test: every job passed` is a required check. https://github.com/btclib-org/ecc/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the test suite, with and without the libsecp256k1 bindings, on every pull request and on every push to main that changes more than Markdown files, and its aggregate job `test: every job passed` is a required check. https://github.com/btclib-org/ecc/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "build": {
@@ -384,7 +384,7 @@
     "status": "N/A"
   },
   "crypto_published": {
-    "justification": "The Python arithmetic implements published algorithms (SEC 1, RFC 6979, BIP340, BIP327, draft BIP445, BIP374, BIP324, and the DLC specification's ECDSA adaptor and oracle signatures) and is validated against the specifications' own vectors. The opt-in ecc.ecc.ssa_adaptor follows the proposal in BlockstreamResearch/secp256k1-zkp#299, which no published specification includes, and nothing else in the library calls it. On secp256k1, with the optional bindings installed, a call delegates to Bitcoin Core's libsecp256k1 wherever its guard admits it. https://github.com/btclib-org/ecc/blob/main/README.md",
+    "justification": "The Python arithmetic implements published algorithms (SEC 1, RFC 6979, BIP340, BIP327, draft BIP445, draft BIP458, BIP374, BIP324, and the DLC specification's ECDSA adaptor and oracle signatures) and is validated against the specifications' own vectors. The opt-in ecc.ecc.ssa_adaptor follows the proposal in BlockstreamResearch/secp256k1-zkp#299, which no published specification includes, and nothing else in the library calls it. On secp256k1, with the optional bindings installed, a call delegates to Bitcoin Core's libsecp256k1 wherever its guard admits it. https://github.com/btclib-org/ecc/blob/main/README.md",
     "status": "Met"
   },
   "crypto_random": {
@@ -428,7 +428,7 @@
     "status": "Met"
   },
   "description_good": {
-    "justification": "ecc is elliptic curve arithmetic, and the signature, key-agreement and commitment schemes built on it, in typed Python. It provides ECDSA, BIP340 Schnorr, MuSig2, FROST and Diffie-Hellman among others. https://btclib.org/btclib-ecc/",
+    "justification": "ecc is elliptic curve arithmetic, and the signature, key-agreement and commitment schemes built on it, in typed Python. It provides ECDSA, BIP340 Schnorr, MuSig2, FROST and Diffie-Hellman among others. https://btclib.org/ecc/",
     "status": "Met"
   },
   "discussion": {
@@ -440,7 +440,7 @@
     "status": "Met"
   },
   "documentation_architecture": {
-    "justification": "CLAUDE.md's Architecture gives the layers bottom-up (number_theory and hashes, curves/, ecc/), the rule that ecc imports curves and never the reverse, and the one module that imports the libsecp256k1 bindings. https://github.com/btclib-org/btclib-ecc/blob/main/CLAUDE.md#architecture",
+    "justification": "ARCHITECTURE.md describes how src/ecc/ layers, bottom-up, from the imports, and the test test_the_layers_import_only_downwards in tests/imports_test.py holds each module to the imports its table names. https://github.com/btclib-org/ecc/blob/main/ARCHITECTURE.md",
     "status": "Met"
   },
   "documentation_basics": {
@@ -472,7 +472,7 @@
     "status": "Met"
   },
   "dynamic_analysis_enable_assertions": {
-    "justification": "pytest runs the test suite and the fuzz targets without -O, so assert statements stay enabled during dynamic analysis.",
+    "justification": "pytest runs the test suite without -O, and nothing in the tree sets PYTHONOPTIMIZE, so assert statements stay enabled. The fuzz targets run under atheris through ClusterFuzzLite, built with no optimization flag. https://github.com/btclib-org/ecc/blob/main/.clusterfuzzlite/build.sh",
     "status": "Met"
   },
   "dynamic_analysis_fixed": {
@@ -508,7 +508,7 @@
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "https://btclib.org/btclib-ecc/ is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security.",
+    "justification": "https://btclib.org/ecc/ is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security. The repository on github.com sends all four. PyPI's project page https://pypi.org/project/ecc/ sends all but the CSP; that is PyPI's to set. The documentation site https://btclib-ecc.readthedocs.io/ is served by Read the Docs over HTTPS with Strict-Transport-Security and X-Content-Type-Options nosniff, and no Content-Security-Policy or X-Frame-Options; that is Read the Docs' to set. Measured with curl -sIL on 2026-11-01.",
     "status": "Met"
   },
   "hardening": {
@@ -672,7 +672,7 @@
     "status": "Met"
   },
   "static_analysis_often": {
-    "justification": "on every push and pull request: https://github.com/btclib-org/ecc/actions/workflows/lint.yml, https://github.com/btclib-org/ecc/actions/workflows/codeql.yml",
+    "justification": "on every push to main and every pull request: https://github.com/btclib-org/ecc/actions/workflows/lint.yml, https://github.com/btclib-org/ecc/actions/workflows/codeql.yml",
     "status": "Met"
   },
   "test": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.30 shipped 4 of 6 pull requests approved by somebody other than the author, 67%, above the 50% the criterion asks. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "Over the last two releases, v2026.10.28 and v2026.10.30, 18 of 35 pull requests were approved by somebody other than the author, 51%, above the 50% the criterion asks (v2026.10.30 4 of 6, v2026.10.28 14 of 29); 13 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Met"
   },
   "updateable_reused_components": {
