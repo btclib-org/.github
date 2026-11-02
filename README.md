@@ -2024,6 +2024,26 @@ without adding to it is deleted.
   job holds the OIDC token, checks the downloaded files against those digests and
   signs them. A tree publishes from its own `release.yml`, PyPI not accepting a
   reusable workflow as a Trusted Publisher.
+- **`reusable-claude-implement.yml` takes an issue as far as an open pull
+  request, and no further.** The agent is the pull request's author, and section
+  11's *Review* asks for an approval by somebody else; a release tag is signed
+  with a person's key, as section 11's *Signatures* says. So no token the
+  workflow asks for carries the `workflows` scope, and the agent holds no tool
+  that runs code or writes the repository's contents. The tree's gates run on
+  its edit in a job that asks for no secret and no OIDC token, which the action
+  trades for the App's token, and whose GITHUB_TOKEN is `contents: read`. That
+  job still holds the GITHUB_TOKEN and its artifact download's runtime token, in
+  the runner's own processes. A step there runs as a user with passwordless
+  sudo, who can read both, as CVE-2025-30066 read a runner's memory, and can
+  write a cache entry of the default branch, which `reusable-lint.yml` restores
+  by prefix. So the gates run as a user of their own, with no sudo, outside the
+  docker group and with none of the runner's variables.
+  `tests/claude_implement_test.py` reads each of these. Every issue it admits is
+  assessed first, and is implemented without a person's word only where the
+  assessment recommends it and the author is an owner or a member. Its header
+  says who admits an issue and what answers a `decision`. The rejected
+  alternative is the action's `allowed_non_write_users: "*"`, which runs
+  anybody's issue text as a prompt beside the credentials.
 - **`timeout-minutes` on every job that runs steps**, far above what the work
   needs: it bounds a hung job holding a runner. A called job's is the callee's,
   one number for every caller, which only a caller the bound would cut raises.
@@ -3522,6 +3542,9 @@ A label means what its description says. Who applies and removes it:
   is filed the issue closes, or takes `upstream-dependent` instead where
   the tree's code or tests wait on the outcome;
 - `plan` and `good first issue` — applied by whoever files the issue;
+- `agent` — applied by an administrator of the repository, admitting the
+  issue to section 10's `reusable-claude-implement.yml`, and removed by whoever
+  withdraws it;
 - `security` and `alignment` — applied by whoever finds it;
 - `api-break` — section 12.
 

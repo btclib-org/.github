@@ -51,6 +51,9 @@ labels:
   - name: good first issue
     color: "7057ff"
     description: Small and self-contained, left to outside contributors
+  - name: agent
+    color: "0052cc"
+    description: An administrator admits the issue to the cloud agent
   - name: security
     color: "b60205"
     description: Security-relevant finding
