@@ -339,13 +339,13 @@ a gap.
 | `bip39-slip39` | 1 |
 | `base58-bech32` | 1 |
 | `bip32-descriptors` | 1 |
-| `btclib-benchmarks` | 2 |
+| `benchmarks` | 2 |
 | `.github` | 2 |
 | `bbt` | 2 |
-| `btclib-functional-tests` | 2 |
+| `functional-tests` | 2 |
 | `portanode` | 3 |
 | `btclib-org.github.io` | 3 |
-| `claude-process` | 3 |
+| `ai-agents-process` | 3 |
 
 The loop below checks the table in both directions: a row it
 contradicts is a finding, and so is a repository it names that the
@@ -2225,18 +2225,18 @@ day and an hour, the repository owns the minute:
 | `btclib` | 04 |
 | `btclib-secp256k1` | 08 |
 | `bitcoin-core-rpc` | 12 |
-| `btclib-benchmarks` | 16 |
+| `benchmarks` | 16 |
 | `btclib-node` | 20 |
 | `.github` | 24 |
 | `portanode` | 28 |
 | `bbt` | 32 |
 | `btclib-org.github.io` | 36 |
 | `btclib-wallet` | 40 |
-| `btclib-functional-tests` | 44 |
+| `functional-tests` | 44 |
 | `ecc` | 48 |
 | `bip39-slip39` | 52 |
 | `bip32-descriptors` | 54 |
-| `claude-process` | 56 |
+| `ai-agents-process` | 56 |
 | `base58-bech32` | 58 |
 
 **The rows are in the order of what they ask about**, family by family. A new
@@ -2335,13 +2335,13 @@ A tree an entry names runs the workflow and shows its badge, section 2's row
 reading its sentinels from here; a tree an entry does not name is asked nothing
 by that row.
 
-- `vendored-vectors` — `btclib`, `btclib-secp256k1`, `btclib-benchmarks`,
-  `btclib-node`, `btclib-wallet`, `btclib-functional-tests`, `ecc`,
-  `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
-- `bootstrap-dns` — `btclib-node`;
-- `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`,
+- `vendored-vectors` — `btclib`, `btclib-secp256k1`, `benchmarks`,
+  `btclib-node`, `btclib-wallet`, `functional-tests`, `ecc`, `bip39-slip39`,
   `bip32-descriptors`, `base58-bech32`;
+- `bootstrap-dns` — `btclib-node`;
+- `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `benchmarks`,
+  `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`, `bip32-descriptors`,
+  `base58-bech32`;
 - `qa-assets` — `btclib`, `btclib-wallet`, `bip32-descriptors`;
 - `fuzz` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `btclib-node`,
   `btclib-wallet`, `ecc`, `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
@@ -2351,22 +2351,22 @@ by that row.
 - `zkp-oracle` — `ecc`;
 - `integration-hwi` — `btclib-wallet`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`,
+  `benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`,
   `bip32-descriptors`, `base58-bech32`;
 - `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`, `bip32-descriptors`,
   `base58-bech32`;
 - `deps-oldest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`,
+  `benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`,
   `bip32-descriptors`, `base58-bech32`;
 - `py-arm-authority` — `ecc`;
-- `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `portanode`, `btclib-wallet`, `ecc`,
-  `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
-- `slow` — `btclib-node`;
-- `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`,
+- `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `benchmarks`,
+  `btclib-node`, `portanode`, `btclib-wallet`, `ecc`, `bip39-slip39`,
   `bip32-descriptors`, `base58-bech32`;
+- `slow` — `btclib-node`;
+- `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `benchmarks`,
+  `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`, `bip32-descriptors`,
+  `base58-bech32`;
 - `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `portanode`, `btclib-wallet`, `ecc`, `bip39-slip39`, `bip32-descriptors`,
   `base58-bech32`;
@@ -2377,9 +2377,9 @@ by that row.
 - `sdist-rebuild` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`, `bip32-descriptors`,
   `base58-bech32`;
-- `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `portanode`, `btclib-wallet`, `ecc`,
-  `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
+- `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `benchmarks`,
+  `btclib-node`, `portanode`, `btclib-wallet`, `ecc`, `bip39-slip39`,
+  `bip32-descriptors`, `base58-bech32`;
 - `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `btclib-node`,
   `portanode`, `btclib-wallet`, `ecc`, `bip39-slip39`, `bip32-descriptors`,
   `base58-bech32`.
@@ -2648,7 +2648,7 @@ request and the rule follows.
   listing lagging behind that is the read being stale, not the run, and
   failing on it turns a green run red for no defect
   (btclib-org/.github#1395). A job outside `needs`, unfinished, is
-  refused — btclib-org/btclib-benchmarks#57's own point, which this does
+  refused — btclib-org/benchmarks#57's own point, which this does
   not loosen.
 - **Such a row is accepted only once the listing still shows it
   unfinished at a deadline, `check_run_jobs.py`'s `DEFAULT_TIMEOUT`, read

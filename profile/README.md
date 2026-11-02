@@ -39,7 +39,7 @@ whenever that makes them clearer.
 - **[bitcoin-core-rpc](https://github.com/btclib-org/bitcoin-core-rpc)**
   — a JSON-RPC client for Bitcoin Core, with nothing but the standard
   library behind it.
-- **[btclib-benchmarks](https://github.com/btclib-org/btclib-benchmarks)**
+- **[btclib-benchmarks](https://github.com/btclib-org/benchmarks)**
   — timings against comparable libraries, kept apart so btclib never
   depends on them.
 
@@ -47,7 +47,7 @@ whenever that makes them clearer.
 
 - **[btclib-node](https://github.com/btclib-org/btclib-node)** — a
   bitcoin full node in Python, built on btclib.
-- **[btclib-functional-tests](https://github.com/btclib-org/btclib-functional-tests)**
+- **[btclib-functional-tests](https://github.com/btclib-org/functional-tests)**
   — Bitcoin Core's functional tests rewritten on btclib, with bitcoind
   as the oracle.
 - **[bbt](https://github.com/btclib-org/bbt)** — the course material:
@@ -56,7 +56,7 @@ whenever that makes them clearer.
   Core and Electrum on a portable disk, for macOS, Windows and Linux.
 - **[.github](https://github.com/btclib-org/.github)** — this page, and
   the standard every repository here follows.
-- **[claude-process](https://github.com/btclib-org/claude-process)** —
+- **[ai-agents-process](https://github.com/btclib-org/ai-agents-process)** —
   the process the maintainers follow with Claude Code: the
   `/btclib-iss`, `/btclib-pr` and `/btclib-table` commands and the
   writer and reviewer agents.

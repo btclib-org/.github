@@ -345,12 +345,12 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "bip39-slip39",
             "base58-bech32",
             "bip32-descriptors",
-            "btclib-benchmarks",
+            "benchmarks",
             "bbt",
-            "btclib-functional-tests",
+            "functional-tests",
             "portanode",
             "btclib-org.github.io",
-            "claude-process",
+            "ai-agents-process",
         ),
     ),
     (
@@ -366,9 +366,9 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "bip39-slip39",
             "base58-bech32",
             "bip32-descriptors",
-            "btclib-benchmarks",
+            "benchmarks",
             "bbt",
-            "btclib-functional-tests",
+            "functional-tests",
         ),
     ),
     (
@@ -394,11 +394,9 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         (
             "btclib",
             "btclib-secp256k1",
-            "bitcoin-core-rpc",
             "btclib-node",
             "btclib-wallet",
             "ecc",
-            "bip39-slip39",
             "base58-bech32",
             "bip32-descriptors",
             "benchmarks",
@@ -424,6 +422,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "base58-bech32",
             "bip32-descriptors",
         ),
+    ),
+    (
+        1990,
+        "test_the_name_normalizes_to_the_repository",
+        ("benchmarks", "functional-tests"),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.

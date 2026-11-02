@@ -213,15 +213,15 @@ def test_the_repository_list_drops_an_advisory_fork_and_keeps_every_tree(
         "btclib-secp256k1",
         "portanode",
         "bitcoin-core-rpc",
-        "btclib-benchmarks",
+        "benchmarks",
         ".github",
         "bbt",
         "btclib-org.github.io",
         "btclib-wallet",
-        "btclib-functional-tests",
+        "functional-tests",
         "btclib-ecc",
         "bip39-slip39",
-        "claude-process",
+        "ai-agents-process",
     ]
     monkeypatch.setattr(tests, "gh", lambda _endpoint, _jq: [*trees, fork])
     assert tests.names.__wrapped__() == trees
