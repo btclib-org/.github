@@ -397,7 +397,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-node",
             "btclib-wallet",
             "ecc",
-            "base58-bech32",
             "bip32-descriptors",
             "benchmarks",
             "functional-tests",
@@ -412,11 +411,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         1982,
         "test_no_workflow_runs_on_an_x86_64_macos_image",
         ("btclib-secp256k1",),
-    ),
-    (
-        1990,
-        "test_the_name_normalizes_to_the_repository",
-        ("benchmarks", "functional-tests"),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.

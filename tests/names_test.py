@@ -61,10 +61,11 @@ specifier is only the evidence that a name is what was written.
 BOUNDARY = r"(?<![A-Za-z0-9_.-])"
 """What keeps a name from answering where it is the tail of a longer one.
 
-The family of `btclib` would otherwise find itself in
-`python_btclib>=1`, which is somebody else's distribution. No tree
-writes a requirement of that shape, so this selects nothing out and is a
-guard rather than a description.
+One name can be the tail of another: `ecc` is that of `electrum-ecc`,
+and a repository that drops the `btclib-` prefix is that of its own
+distribution. The trees write both shapes, so this selects matches out,
+and a longer name spelled another way is not reported against the
+shorter one.
 """
 
 REQUIREMENT = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)")
@@ -202,7 +203,9 @@ def canonical(
     distribution, so its `name` is its own and is left out -- the
     condition section 3's own bullet carries. The two kinds are one set
     because the question is the spelling and not which of them was
-    meant: they are the same string wherever both exist.
+    meant. They are the same string wherever both exist, except where
+    the repository drops the distribution's `btclib-` prefix, the case
+    `BOUNDARY` covers.
 
     :param repositories: the names the API answered with.
     :param pyprojects: the parsed files.

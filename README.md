@@ -811,6 +811,10 @@ hook then passes no path to; section 14 names each of those files.
     **The bullet has no subject where a tree builds no distribution**: a
     `package = false` tree's `[project].name` names none and is its own
     choice, PEP 503 folding `.github` to `-github` in any case.
+
+    **The repository's name may drop the distribution's `btclib-`
+    prefix**, which the organization's name already carries; a name on
+    an index carries no organization, so the distribution keeps it.
 - **PEP 639 licensing**: `license = "MIT"` as an SPDX string and
   `license-files`, not the deprecated table and not a `License ::`
   classifier. The floor that carries them is the backend's own, an

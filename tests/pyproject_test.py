@@ -384,6 +384,9 @@ def test_the_name_normalizes_to_the_repository(
 ) -> None:
     """Section 3: the repository is named after the distribution, hyphenated.
 
+    The repository's name may drop the distribution's `btclib-` prefix,
+    so a repository named either way passes.
+
     PEP 503 folds `-`, `_` and `.` in a distribution name to a single
     `-` before comparing, so a `name` spelled with an underscore
     compares equal to the repository's hyphenated spelling.
@@ -396,7 +399,8 @@ def test_the_name_normalizes_to_the_repository(
     declared = project.get("name")
     assert isinstance(declared, str), f"name is {declared!r}; " + command
     normalized = RUNS.sub("-", declared).lower()
-    assert normalized == repository, f"name normalizes to {normalized!r}; " + command
+    named = {normalized, normalized.removeprefix("btclib-")}
+    assert repository in named, f"name normalizes to {normalized!r}; " + command
 
 
 @pytest.mark.tier(Tier.PYTHON)
