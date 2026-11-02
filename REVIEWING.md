@@ -244,7 +244,11 @@ to cases built to break it:
 - **The shapes built to break it.** Inputs meant to make it answer
   wrong: the edges of the language the pattern or the script reads, such
   as an empty value, a quote, an escape, or a delimiter inside a name. A
-  case it answers wrong is the finding.
+  case it answers wrong is the finding. The first two cases hold the
+  inputs the author and the tree already offer; this one looks for the
+  input neither does. Inventing it does not reopen what the second case
+  closes: an example composed to be matched can only confirm a reading,
+  and an input built to break one counts only where it does.
 
 A claim the prose makes *about the tree* takes the same treatment.
 "Every link here is already `./`-prefixed", "nothing calls this any
