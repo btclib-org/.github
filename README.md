@@ -208,6 +208,7 @@ alone would leave `uv sync` resolving a project without it.
 | `bindings` | an optional native dependency that is also an extra |
 | `bip324` | the BIP324 transport's cipher, also an extra |
 | `gmpy2` | an optional arithmetic dependency that is also an extra |
+| `testing` | hypothesis, for the strategies the package ships, also an extra |
 | `build` | what builds a distribution, cibuildwheel included |
 | `build-requires` | `[build-system].requires`, copied for `uv.lock` to pin |
 | `check` | what inspects a distribution before it is published |
@@ -2360,14 +2361,15 @@ by that row.
   `bip32-descriptors`, `base58-bech32`;
 - `py-arm-authority` — `ecc`;
 - `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`,
-  `bip32-descriptors`, `base58-bech32`;
+  `btclib-benchmarks`, `btclib-node`, `portanode`, `btclib-wallet`, `ecc`,
+  `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
 - `slow` — `btclib-node`;
 - `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
   `btclib-benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`,
   `bip32-descriptors`, `base58-bech32`;
 - `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-wallet`, `ecc`, `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
+  `portanode`, `btclib-wallet`, `ecc`, `bip39-slip39`, `bip32-descriptors`,
+  `base58-bech32`;
 - `homepage` — `btclib-org.github.io`;
 - `links` — every repository;
 - `alignment` — `.github`;
