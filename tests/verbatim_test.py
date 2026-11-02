@@ -454,11 +454,21 @@ def test_every_copy_of_a_verbatim_file_is_the_same_copy(
 
 
 HELPER = "tests/secret_free/__init__.py"
-"""The one owed file whose presence a test of its own asks.
+"""An owed file whose presence a test of its own asks.
 
 A `BACKLOG` row names a test, so the split lets a row excuse a tree that
 lacks the helper without excusing it for any other owed file it lacks.
 """
+
+CODERABBIT = ".coderabbit.yaml"
+"""Another owed file whose presence a test of its own asks, for that reason.
+
+The trees take their copy one pull request at a time, and a `BACKLOG`
+row excuses each until it does.
+"""
+
+APART = (HELPER, CODERABBIT)
+"""The owed files the owed-files test leaves to a test of their own."""
 
 
 def absent(root: Path) -> list[str]:
@@ -489,12 +499,12 @@ def test_a_repository_carries_the_verbatim_files_owed_of_it(
     passes over. `EXPECTED_DRIFT` is not consulted: an entry there
     records copies that disagree, which is a different finding from a
     copy that is not there. The other direction is the test below.
-    `HELPER` is asked by the helper test further down.
+    `APART` is asked by the tests further down, one test per file.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    missing = [path for path in absent(trees[repository]) if path != HELPER]
+    missing = [path for path in absent(trees[repository]) if path not in APART]
     assert not missing, f"section 14 files this tree does not carry: {missing}"
 
 
@@ -540,11 +550,25 @@ def test_a_repository_carries_the_secret_free_helper_owed_of_it(
     )
 
 
-def test_the_helper_is_the_only_file_the_owed_files_test_leaves_out(
+def test_a_repository_carries_the_coderabbit_configuration_owed_of_it(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """The `.coderabbit.yaml` section 14 owes of every repository is there.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    assert CODERABBIT not in absent(trees[repository]), (
+        f"section 14 owes this tree {CODERABBIT}"
+    )
+
+
+def test_apart_are_the_only_files_the_owed_files_test_leaves_out(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    """A tree missing `LICENSE` and the helper still fails the owed-files test.
+    """A tree missing `LICENSE` and `APART` still fails the owed-files test.
 
     `test_a_repository_carries_the_verbatim_files_owed_of_it` is called
     as a function over a tree that `absent` is made to report.
@@ -553,11 +577,11 @@ def test_the_helper_is_the_only_file_the_owed_files_test_leaves_out(
     :param tmp_path: a directory standing for the checkout.
     """
     monkeypatch.setattr(
-        f"{__name__}.absent", lambda _root: [HELPER, "LICENSE", "COPYRIGHT"]
+        f"{__name__}.absent", lambda _root: [*APART, "LICENSE", "COPYRIGHT"]
     )
     with pytest.raises(AssertionError, match=r"LICENSE.*COPYRIGHT"):
         test_a_repository_carries_the_verbatim_files_owed_of_it("x", {"x": tmp_path})
-    monkeypatch.setattr(f"{__name__}.absent", lambda _root: [HELPER])
+    monkeypatch.setattr(f"{__name__}.absent", lambda _root: list(APART))
     test_a_repository_carries_the_verbatim_files_owed_of_it("x", {"x": tmp_path})
 
 

@@ -3130,6 +3130,36 @@ colour.
 It is **not a required check**, its own header saying why: it is what a
 person landing the pull request reads before pressing.
 
+**CodeRabbit is another reviewing bot, and its review is neither the ack
+of record nor a required check.** Its findings are a reading, answered as
+any reviewer's are (`CONTRIBUTING.md`'s *The review*). It reads
+`.coderabbit.yaml`, which section 14 owes of every repository, from the
+branch under review where that branch is in the repository itself ([*YAML
+configuration*](https://docs.coderabbit.ai/getting-started/yaml-configuration)),
+and from the target branch where the pull request comes from a fork
+([*Code
+guidelines*](https://docs.coderabbit.ai/knowledge-base/code-guidelines)).
+So a pull request from a branch of the repository that edits the file
+changes its own review, and is read for that.
+
+**CodeRabbit never approves.** An approval it posts counts as an approving
+review ([*Approval
+policies*](https://docs.coderabbit.ai/pr-reviews/approval-policies)), so
+it would meet the approval this section asks for with no person having
+read the change. `.coderabbit.yaml` turns its automatic approvals off, and
+refuses an author's `@coderabbitai approve`, which a branch's own
+configuration cannot turn back on. A branch of the repository can still
+turn the automatic approvals back on in its own copy; that edit is what
+the reading above looks for. `tests/coderabbit_test.py` reads both keys.
+
+**On a repository with fewer than ten stars, CodeRabbit reviews only when
+asked**, by a `@coderabbitai review` comment
+([*Plans*](https://docs.coderabbit.ai/management/plans)). The count is:
+
+```shell
+gh api repos/<org>/<repo> --jq .stargazers_count
+```
+
 `REVIEWING.md` is the standard a review measures a diff against.
 
 **A review pass runs locally against the branch before it is pushed**:
@@ -3983,6 +4013,14 @@ The paths are what that test compares:
 - `.claude/commands/review.md` — owed where `REVIEWING.md`: it is the
   invocation and not a second copy of the standard, and it stays a
   file of its own rather than being folded into `AGENTS.md`.
+- `.coderabbit.yaml` — owed by every repository: what CodeRabbit's
+  review reads and what it leaves out, each key with its reason beside
+  it, section 11's *Review* saying what that review is. The rejected
+  alternative is one central `.coderabbit.yaml` in a repository named
+  `coderabbit`, which CodeRabbit reads for a tree that has none of its
+  own ([*Configuration
+  inheritance*](https://docs.coderabbit.ai/configuration/configuration-inheritance)):
+  that is a repository this standard would govern whole, for one file.
 - `.github/scripts/generate_sbom.py` — owed where
   `.github/scripts/generate_sbom.py`: the file itself satisfies the condition,
   as it does `.taplo.toml`'s, the canonical copy being this repository's.
