@@ -113,7 +113,6 @@ rather than the entry's.
 """
 
 EXPECTED_DRIFT: dict[str, str] = {
-    "CONTRIBUTING.md": "btclib-org/.github#1935",
     "tests/secret_free/__init__.py": "btclib-org/.github#1803",
     "RELEASING.md": "btclib-org/.github#1855",
 }
