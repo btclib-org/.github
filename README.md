@@ -1111,7 +1111,8 @@ No `autoupdate_branch`: the default branch is the only branch.
 
     **`CHANGELOG.md` and `RELEASE_NOTES.md` are outside it**, by
     `exclude: ^(CHANGELOG|RELEASE_NOTES)\.md$`: section 9 rewrites
-    neither, so a refused shape in a landed entry has no repair.
+    neither, a `CHANGELOG.md` issue citation aside, so a refused shape
+    in a landed entry has no repair.
 
     **What separates an exempt quote from a refused one is a property of
     the line, not of the fence around it**: no shell puts a space around
@@ -1949,13 +1950,17 @@ without adding to it is deleted.
   such as `merge=union` resolves it without a word, the rebase exiting 0
   (btclib-org/.github#1582).
 - **Nothing already written is rewritten.** An entry speaks of its own
-  day, and a count in it that has since moved stays.
+  day, and a count in it that has since moved stays. The exception: a
+  release's pull request may correct which issues the body of a released
+  `CHANGELOG.md` entry cites, adding one it lacks, and nothing else in
+  the entry, since a wrong citation was false on its own day, where a
+  count that moved was true.
 - **A released section may leave `CHANGELOG.md` for its own
   `changelog/v<version>.md`**, that file holding one release and the
   index in `CHANGELOG.md`'s preamble linking it. Past a size ceiling
   GitHub's contents API answers a file with an empty `content` at HTTP
   200, and a file per release is what keeps each of them under it.
-  Nothing already written in an archived file is rewritten either.
+  An archived file takes the same rule and the same exception.
 
 ## 10. Workflows
 
@@ -2939,9 +2944,9 @@ is rejected, since a branch answering half an issue would then land with
 nothing in `git log` pointing at what it answered.
 
 A pull request that neither closes nor advances an issue carries no
-parentheses. Nothing already landed is rewritten, a title and a landed
-commit subject included: section 9's *Nothing already written is
-rewritten* is this same rule, read from the title's side of it.
+parentheses. A landed title or commit subject is not rewritten: section
+9's *Nothing already written is rewritten* is this same rule, read from
+the title's side of it.
 
 **A title citing several issues joins them for the reader, and the
 parser binds the verb to the first**: `(closes #319, #388)` closes only

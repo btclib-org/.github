@@ -29,9 +29,10 @@ citation, a bullet cited by its bold opening, as a defect.
 
 What this does not read is `CHANGELOG.md`, `RELEASE_NOTES.md` and an
 archived `changelog/`: section 9 has nothing already written in them
-rewritten, so an entry citing a heading that has since moved is a record
-of its own day, and no edit answers a failure here. Nor does it read
-`bestpractices/`, for the reason `SAVED` gives.
+rewritten, a `CHANGELOG.md` issue citation aside, so an entry citing a
+heading that has since moved is a record of its own day, and no edit
+answers a failure here. Nor does it read `bestpractices/`, for the
+reason `SAVED` gives.
 """
 
 from __future__ import annotations
@@ -84,7 +85,8 @@ OPENING = re.compile(r"(?m)^## (\d+)\. ")
 """How the standard opens a numbered section."""
 
 HISTORY = re.compile(r"^(CHANGELOG|RELEASE_NOTES)\.md$|^changelog/")
-"""What section 9 keeps as written, so a citation in it is a record."""
+"""What section 9 keeps as written, a `CHANGELOG.md` issue citation aside,
+so a citation of a heading in it is a record."""
 
 SAVED = re.compile(r"^bestpractices/")
 """bestpractices.dev's answers, which cite the documents of the tree each

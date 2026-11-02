@@ -80,7 +80,8 @@ one this module has no question about.
 """
 
 HISTORIES = ("CHANGELOG.md", "RELEASE_NOTES.md")
-"""The two files section 9 says nothing already written in is rewritten.
+"""The two files section 9 says nothing already written in is rewritten,
+a `CHANGELOG.md` issue citation aside.
 
 A rule they could keep only by editing an entry that has landed is no
 rule, so what they hold is out of the comparison rather than excused in
