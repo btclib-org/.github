@@ -116,6 +116,7 @@ EXPECTED_DRIFT: dict[str, str] = {
     "CONTRIBUTING.md": "btclib-org/.github#1935",
     "tests/secret_free/__init__.py": "btclib-org/.github#1803",
     "RELEASING.md": "btclib-org/.github#1855",
+    "REVIEWING.md": "btclib-org/.github#2004",
 }
 """A path section 14 names whose copies are known not to agree yet.
 
