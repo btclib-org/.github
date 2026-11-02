@@ -70,9 +70,11 @@ owes, rather than restating it.
 - **An owner** holds the organization role `admin`, which makes the
   holder an administrator of every repository of the organization. An
   administrator can change a repository's rules, so the role is a grant
-  of trust and not only of access; a bypass is the maintainer's
-  alone, and a repository's `RELEASING.md` names the three owners as the
-  reviewers of its publishing environments. The owners are
+  of trust and not only of access. The bypass over `main` is the
+  maintainer's alone. Every administrator bypasses section 11's
+  `tag-release-actors`, which is what lets an owner cut a release tag. A
+  repository's `RELEASING.md` names the three owners as the reviewers of
+  its publishing environments. The owners are
   [`fametrano`](https://github.com/fametrano),
   [`giacomocaironi`](https://github.com/giacomocaironi) and
   [`pmazzocchi`](https://github.com/pmazzocchi), read back with:

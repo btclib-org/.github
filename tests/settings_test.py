@@ -29,6 +29,8 @@ from . import ORG, by_hand, gh_json
 
 MAIN = "refs/heads/main"
 TAGS = "refs/tags/v*"
+# the id the rulesets endpoint gives the repository role `admin`
+ADMIN_ROLE = 5
 
 pytestmark = pytest.mark.integration
 
@@ -82,19 +84,35 @@ def covering(
     active: list[dict[str, Any]],
     target: str,
     ref: str,
+    *,
+    excluding: bool = False,
 ) -> list[dict[str, Any]]:
     """Return the active rulesets that apply to one ref pattern.
+
+    GitHub applies a ruleset to no ref that an exclude pattern matches,
+    even where an include pattern matches it too. Whether one pattern
+    spares a ref another matches is a question for GitHub's matcher, not
+    this suite, so each caller takes the reading that cannot pass wrongly.
+
+    A caller asking that a rule be present leaves `excluding` off: a
+    ruleset that excludes any ref then does not count, whatever the
+    exclusion names, so an exclusion fails the test. A caller asking that
+    a rule be absent, or carried once, sets it: every ruleset whose
+    include list matches then counts, since an exclusion may spare
+    another ref and still leave the rule on this one.
 
     :param active: the repository's rulesets.
     :param target: `branch` or `tag`.
     :param ref: the pattern the ruleset must include.
+    :param excluding: count a ruleset that excludes a ref.
     :returns: those that match, in the order the API gave them.
     """
     return [
         ruleset
         for ruleset in active
         if ruleset["target"] == target
-        and ref in (ruleset["conditions"]["ref_name"]["include"])
+        and ref in ruleset["conditions"]["ref_name"]["include"]
+        and (excluding or not ruleset["conditions"]["ref_name"].get("exclude"))
     ]
 
 
@@ -173,7 +191,10 @@ def test_main_refuses_a_rewritten_commit(
         repository
         for repository, active in rulesets.items()
         if any(
-            enforcing(covering(active, "branch", ref), "required_signatures")
+            enforcing(
+                covering(active, "branch", ref, excluding=True),
+                "required_signatures",
+            )
             for ref in (MAIN, "~DEFAULT_BRANCH", "~ALL")
         )
     )
@@ -218,7 +239,8 @@ def test_a_merge_needs_one_review_and_a_badge_tree_has_no_bypass(
         if not carried:
             wrong[repository] = "no pull_request rule on main"
             continue
-        if len(carried) > 1:
+        every = covering(active, "branch", MAIN, excluding=True)
+        if len(enforcing(every, "pull_request")) > 1:
             wrong[repository] = "several rulesets carry the review rule on main"
             continue
         rule = carried[0]
@@ -266,6 +288,74 @@ def test_a_repository_with_tags_refuses_an_unsigned_one(
         )
     ]
     assert not unprotected, f"repositories whose tags need no signature: {unprotected}"
+
+
+def test_only_an_administrator_moves_a_release_tag(
+    repositories: list[str],
+    rulesets: dict[str, list[dict[str, Any]]],
+) -> None:
+    """A release tag is created, moved and deleted by an administrator alone.
+
+    `creation`, `update` and `deletion` are each carried on `refs/tags/v*`,
+    and every ruleset carrying one excuses the repository's admin role in
+    `always` mode and nobody else, so a GitHub App, an Actions token or a
+    deploy key cannot push or remove a release tag, and an administrator
+    can. Asked only of repositories that have a tag, as the test above is.
+
+    Who is excused is not public, for the reason
+    `test_main_refuses_a_rewritten_commit` gives, and the run reports
+    itself skipped where it could not be read.
+
+    :param repositories: the names to ask about.
+    :param rulesets: the active rulesets of each repository.
+    """
+    wanted = ("creation", "update", "deletion")
+    admin = {"actor_type": "RepositoryRole", "actor_id": ADMIN_ROLE}
+    missing: dict[str, list[str]] = {}
+    excused: dict[str, list[str]] = {}
+    not_always: list[str] = []
+    unseen: list[str] = []
+    for repository in sorted(repositories):
+        if not gh_json(f"repos/{ORG}/{repository}/tags?per_page=1"):
+            continue
+        covers = covering(rulesets[repository], "tag", TAGS)
+        found = {rule: enforcing(covers, rule) for rule in wanted}
+        absent = sorted(rule for rule, carried in found.items() if not carried)
+        if absent:
+            missing[repository] = absent
+        present = [entry for carried in found.values() for entry in carried]
+        if any(entry["bypass_actors"] is None for entry in present):
+            unseen.append(repository)
+            continue
+        others = sorted(
+            {
+                f"{actor['actor_type']} {actor['actor_id']}"
+                for entry in present
+                for actor in entry["bypass_actors"]
+                if {key: actor.get(key) for key in admin} != admin
+            }
+        )
+        if others:
+            excused[repository] = others
+        if not all(
+            any(
+                {key: actor.get(key) for key in admin} == admin
+                and actor["bypass_mode"] == "always"
+                for actor in entry["bypass_actors"]
+            )
+            for entry in present
+        ):
+            not_always.append(repository)
+    assert not missing, f"release tags not restricted by: {missing}"
+    assert not excused, f"release tags another actor may push: {excused}"
+    assert not not_always, (
+        f"release tags whose admin role bypass is not always: {not_always}"
+    )
+    if unseen:
+        pytest.skip(
+            "this run's token cannot see who bypasses a tag rule on"
+            f" {', '.join(unseen)}: bypass_actors needs push access to read"
+        )
 
 
 def test_squash_is_the_only_button(settings: dict[str, dict[str, Any]]) -> None:

@@ -145,23 +145,19 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
 #  "rules":["pull_request"],"target":"branch"}
 # {"bypass":[],"enforcement":"active","name":"tag-integrity",
 #  "refs":["refs/tags/v*"],"rules":["required_signatures"],"target":"tag"}
+# {"bypass":["always"],"enforcement":"active",
+#  "name":"tag-release-actors","refs":["refs/tags/v*"],
+#  "rules":["creation","update","deletion"],"target":"tag"}
 ```
 
-- `main-integrity` — required linear history, no
-  force pushes, no deletions — with **no bypass actor at all**, which is
-  what makes every one of those true of an administrator too.
-- `main-self-merge` — a pull request, an approving review, stale reviews
-  dismissed on push, conversations resolved, and `squash` as the only
-  merge method it accepts — bypassed by the maintainer in
-  **`pull_request` mode**. This repository's `README.md` carries no
-  OpenSSF Best Practices badge, and [section 11 gives the bypass to every
-  tree without one][s11-branch]. A change merged through it, with nobody
-  else's approval, reaches another tree at once wherever a job of that
-  tree's own checks this repository out at `main` or reads its
-  `dependency-review.yml` at `@main`: [section 10][s10-every] and
-  [section 11][s11-tokens] say which jobs read `main`.
-- `tag-integrity` — required signatures and nothing else, over
-  `refs/tags/v*` rather than over a branch, with **no bypass actor**.
+[Section 11][s11-branch] says what each of these rulesets holds and who
+bypasses it. What is this repository's own: its `README.md` carries no
+OpenSSF Best Practices badge, so `main-self-merge` is bypassed by the
+maintainer in **`pull_request` mode**. A change merged through that
+bypass, with nobody else's approval, reaches another tree at once
+wherever a job of that tree's own checks this repository out at `main`
+or reads its `dependency-review.yml` at `@main`: [section 10][s10-every]
+and [section 11][s11-tokens] say which jobs read `main`.
 
 ```shell
 gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
@@ -195,14 +191,13 @@ gh api users/fametrano --jq .id
 # 3296421
 ```
 
-`tag-integrity` matches no ref: `CONTRIBUTING.md`'s *A version, and no
-release* is where nothing being tagged is measured. It stands ahead
-of any tag rather than being created alongside one, so a `v*` pushed to
-this repository meets it.
+`tag-integrity` and `tag-release-actors` hold for this repository's own
+`v*` tags, which `CONTRIBUTING.md`'s *A version, and no release* says are
+cut for the trees that pin its reusable workflows and are no release.
 
 A `v*` tag push that brings an unsigned commit is refused. A tag on a
 commit already on `main` is accepted whether it is signed, unsigned or
-lightweight, so the rule does not make a release tag signed
+lightweight, so `tag-integrity` does not make a release tag signed
 (btclib-org/.github#1635). That rests on `git tag -s` in the release
 steps and on reading the signature back:
 

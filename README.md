@@ -2911,7 +2911,7 @@ maintainer judges that break too rare to pay that cost for
 `push` trigger. The rejected merge queue keeps the guarantee without the
 rebases, for a second CI run per pull request (btclib-org/.github#1619).
 
-Three rulesets sit beside it, additive — rules aggregate across rulesets
+These rulesets sit beside it, additive — rules aggregate across rulesets
 and classic protection, taking the most restrictive combination:
 
 - **`main-integrity`** — linear history, no force
@@ -2922,8 +2922,16 @@ and classic protection, taking the most restrictive combination:
   `README.md` carries the OpenSSF Best Practices badge; in any other
   tree, the maintainer, in **`pull_request` mode**.
 - **`tag-integrity`**, target `tag`, `refs/tags/v*` — required
-  signatures and nothing else, so the recovery path that deletes and
-  re-tags a failed release still works.
+  signatures and nothing else. **No bypass actor.**
+- **`tag-release-actors`**, target `tag`, `refs/tags/v*` — restrict
+  creations, updates and deletions, bypassed by the repository `admin`
+  role in **`always`** mode, so only an administrator creates, moves or
+  deletes a release tag. A GitHub App is an `Integration`, the Actions
+  token included, and a deploy key a `DeployKey`: actor types the list
+  does not name. The mode is `always` because `pull_request` mode
+  applies to branch rulesets only, and a tag is pushed, never merged.
+  `exempt` would excuse the same role and record no bypass in the audit
+  log ([GitHub's ruleset API](https://docs.github.com/en/rest/repos/rules#create-a-repository-ruleset)).
 
 `GOVERNANCE.md`'s *How a decision is made* says what a tree with no
 bypass does in an emergency.
@@ -4268,10 +4276,11 @@ outside it is correct where the reason is beside it.
 
 The settings: squash the only method, the `main-integrity` rules held with an
 **empty** bypass list, `required_signatures` **off** in classic protection and
-in every ruleset over `main`, the `main-self-merge`
-bypass list empty in a tree with the badge and, in any other, one actor
-in `pull_request` mode and never `always`, a token that is `read`,
-and `allowed_actions: all` with `sha_pinning_required: true`:
+in every ruleset over `main`, the `main-self-merge` bypass list empty in a tree
+with the badge and, in any other, one actor in `pull_request` mode and never
+`always`, the `tag-release-actors` bypass list the `admin` role alone
+(`RepositoryRole 5`), in `always` mode for the reason section 11 gives, a token
+that is `read`, and `allowed_actions: all` with `sha_pinning_required: true`:
 
 ```shell
 R=<org>/<repo>
@@ -4282,7 +4291,8 @@ gh api repos/$R/actions/permissions \
   --jq '{allowed_actions, sha_pinning_required}'
 gh api repos/$R/rulesets --jq '.[].id' | xargs -I{} \
   gh api repos/$R/rulesets/{} --jq '{name, target,
-    rules: [.rules[].type], bypass: [.bypass_actors[]?.bypass_mode]}'
+    rules: [.rules[].type], bypass: [.bypass_actors[]?
+      | "\(.actor_type) \(.actor_id) \(.bypass_mode)"]}'
 gh api repos/$R/branches/main/protection \
   --jq '{sigs: .required_signatures.enabled,
          checks: [.required_status_checks.checks[]?.context]}'
@@ -4826,19 +4836,19 @@ No tool checks them.
    an empty repository's first pushed branch becomes the default
    whatever it is named, and a tree built on a branch of its own pushes
    that branch first;
-   squash-only, with auto-merge; `delete_branch_on_merge`; the three
+   squash-only, with auto-merge; `delete_branch_on_merge`; section 11's
    rulesets — only after that push, since section 11's bypass mode
    refuses a direct one once `main-self-merge` is active, and the root
-   commit is necessarily one; the bypass is the maintainer's until the
-   `README.md` carries the badge; classic protection with the required
-   checks bound to the Actions app; the publishing environments; the
-   read-only default token; secret scanning, its push protection and
-   Dependabot security updates; private vulnerability reporting; the
-   labels `.github/labels.yml` gives the repository. Then the
-   topics, which are the `keywords` of the `pyproject.toml` step above,
-   and which nothing in the tree holds where there is no such file to
-   declare them in; and, where the tree declares `[project.urls]`, the
-   `homepage`, section 3's page on btclib.org.
+   commit is necessarily one; `main-self-merge`'s bypass is the
+   maintainer's until the `README.md` carries the badge; classic
+   protection with the required checks bound to the Actions app; the
+   publishing environments; the read-only default token; secret scanning,
+   its push protection and Dependabot security updates; private
+   vulnerability reporting; the labels `.github/labels.yml` gives the
+   repository. Then the topics, which are the `keywords` of the
+   `pyproject.toml` step above, and which nothing in the tree holds where
+   there is no such file to declare them in; and, where the tree declares
+   `[project.urls]`, the `homepage`, section 3's page on btclib.org.
 1. Read each setting back with the commands `REPOSITORY.md` records, and
    write the answers into it — the topics included, that being the one
    of them a tree with no `pyproject.toml` records nowhere else.
