@@ -63,9 +63,8 @@ BOUNDARY = r"(?<![A-Za-z0-9_.-])"
 
 One name can be the tail of another: `ecc` is that of `electrum-ecc`,
 and a repository that drops the `btclib-` prefix is that of its own
-distribution. The trees write both shapes, so this selects matches out,
-and a longer name spelled another way is not reported against the
-shorter one.
+distribution. This selects such a match out, so a longer name spelled
+another way is not reported against the shorter one.
 """
 
 REQUIREMENT = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)")
