@@ -84,7 +84,7 @@ OPENING = re.compile(r"(?m)^## (\d+)\. ")
 """How the standard opens a numbered section."""
 
 HISTORY = re.compile(r"^(CHANGELOG|RELEASE_NOTES)\.md$|^changelog/")
-"""What section 9 keeps as written, so a citation in it is a record."""
+"""Where section 9 keeps a citation of a heading as written: it is a record."""
 
 SAVED = re.compile(r"^bestpractices/")
 """bestpractices.dev's answers, which cite the documents of the tree each
