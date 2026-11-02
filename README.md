@@ -1110,9 +1110,8 @@ No `autoupdate_branch`: the default branch is the only branch.
   the placeholder as its value instead of failing at the shell.
 
     **`CHANGELOG.md` and `RELEASE_NOTES.md` are outside it**, by
-    `exclude: ^(CHANGELOG|RELEASE_NOTES)\.md$`: section 9 rewrites
-    neither, a `CHANGELOG.md` issue citation aside, so a refused shape
-    in a landed entry has no repair.
+    `exclude: ^(CHANGELOG|RELEASE_NOTES)\.md$`: section 9 keeps a
+    refused shape in a landed entry as written, so it has no repair.
 
     **What separates an exempt quote from a refused one is a property of
     the line, not of the fence around it**: no shell puts a space around
@@ -2944,9 +2943,8 @@ is rejected, since a branch answering half an issue would then land with
 nothing in `git log` pointing at what it answered.
 
 A pull request that neither closes nor advances an issue carries no
-parentheses. A landed title or commit subject is not rewritten: section
-9's *Nothing already written is rewritten* is this same rule, read from
-the title's side of it.
+parentheses. A landed title is not rewritten: it is a commit subject in
+`main`'s history, which nothing rewrites.
 
 **A title citing several issues joins them for the reader, and the
 parser binds the verb to the first**: `(closes #319, #388)` closes only
