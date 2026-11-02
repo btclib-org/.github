@@ -431,6 +431,25 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "ai-agents-process",
         ),
     ),
+    (
+        2005,
+        "test_the_gate_runs_sourcery_with_section_4s_rules_off",
+        (
+            ".github",
+            "btclib",
+            "btclib-secp256k1",
+            "bitcoin-core-rpc",
+            "btclib-node",
+            "btclib-wallet",
+            "ecc",
+            "bip39-slip39",
+            "base58-bech32",
+            "bip32-descriptors",
+            "benchmarks",
+            "bbt",
+            "functional-tests",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 

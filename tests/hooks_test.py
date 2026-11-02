@@ -17,6 +17,8 @@ pin answers to.
 
 from __future__ import annotations
 
+import copy
+import fnmatch
 import json
 import re
 from typing import TYPE_CHECKING, Any
@@ -24,8 +26,8 @@ from typing import TYPE_CHECKING, Any
 import pytest
 import yaml
 
-from . import ORG, SELF, Tier, by_hand, gh_json, tracked
-from .pyproject_test import FLOOR, parsed
+from . import ORG, ROOT, SELF, Tier, by_hand, gh_json, tracked
+from .pyproject_test import FLOOR, FLOOR_BOUND, parsed
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -80,8 +82,10 @@ LOCAL = (
 )
 """Section 4's *The local hooks*, each with a subject in any Python tree.
 
-mypy is the one bullet of that list not named here: it is
-`test_the_gate_runs_mypy`'s subject below, section 6 asking for it by name.
+mypy and `bare-sourcery-skip` are the bullets of that list not named
+here: mypy is `test_the_gate_runs_mypy`'s subject below, section 6 asking
+for it by name, and `bare-sourcery-skip` is held with the `sourcery` hook
+it guards, by `hook_departures`.
 """
 
 MYPY = ("mypy", "mirrors-mypy")
@@ -211,13 +215,12 @@ and there is no `args:`. `name:` is left out as a key nothing here reads.
 """
 
 
-def hooks(repository: str, trees: dict[str, Path]) -> list[dict[str, Any]]:
-    """Every hook a repository's lint gate names, in file order.
+def gate(repository: str, trees: dict[str, Path]) -> dict[str, Any]:
+    """Read and parse a repository's lint gate.
 
     :param repository: the repository's name.
     :param trees: the checkouts.
-    :returns: the hook mappings, each with the url and the pin of the
-        block it was read out of, under `repo` and `rev`.
+    :returns: the document, its `ci:` block and its `repos:` both.
     :raises FileNotFoundError: where the tree has no lint gate at all,
         section 4 naming the file as every repository's.
     """
@@ -225,12 +228,32 @@ def hooks(repository: str, trees: dict[str, Path]) -> list[dict[str, Any]]:
     if not path.is_file():
         msg = f"{repository} has no {CONFIG}; " + by_hand(repository, f"ls {CONFIG}")
         raise FileNotFoundError(msg)
-    parsed = yaml.safe_load(path.read_text(encoding="utf-8"))
+    document: dict[str, Any] = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return document
+
+
+def flattened(document: dict[str, Any]) -> list[dict[str, Any]]:
+    """Every hook a parsed gate names, in file order.
+
+    :param document: the gate, as `gate()` returns it.
+    :returns: the hook mappings, each with the url and the pin of the
+        block it was read out of, under `repo` and `rev`.
+    """
     return [
         {**hook, "repo": entry["repo"], "rev": entry.get("rev")}
-        for entry in parsed.get("repos", [])
+        for entry in document.get("repos", [])
         for hook in entry.get("hooks", [])
     ]
+
+
+def hooks(repository: str, trees: dict[str, Path]) -> list[dict[str, Any]]:
+    """Every hook a repository's lint gate names, in file order.
+
+    :param repository: the repository's name.
+    :param trees: the checkouts.
+    :returns: the hook mappings, as `flattened()` gives them.
+    """
+    return flattened(gate(repository, trees))
 
 
 def ids(repository: str, trees: dict[str, Path]) -> set[str]:
@@ -359,6 +382,606 @@ def test_the_gate_runs_mypy(repository: str, trees: dict[str, Path]) -> None:
     assert runs, "no hook runs mypy; " + by_hand(
         repository, f"grep -n 'mirrors-mypy\\|id: mypy' {CONFIG}"
     )
+
+
+SOURCERY = "https://github.com/sourcery-ai/sourcery"
+"""The repository section 4's *Python* bullet takes the `sourcery` hook from."""
+
+SOURCERY_CONFIG = ".sourcery.yaml"
+"""The file that hook reads, at the root of a tree."""
+
+TURNED_OFF = {
+    "reintroduce-else": "undoes superfluous-else-return",
+    "use-fstring-for-concatenation": "folds a by_hand hint into the f-string it joins",
+    "dont-import-test-modules": "refuses `from tests import`, the shared helpers' path",
+    "assign-if-exp": "if-else-block-instead-of-if-exp",
+    "comprehension-to-generator": "unnecessary-comprehension-in-call",
+    "de-morgan": "negate-equal-op, negate-not-equal-op, double-negation, not-in-test",
+    "equality-identity": "comparison-with-itself",
+    "for-append-to-extend": "manual-list-copy, manual-list-comprehension",
+    "identity-comprehension": "unnecessary-comprehension",
+    "list-comprehension": "manual-list-comprehension",
+    "merge-comparisons": "repeated-equality-comparison",
+    "merge-duplicate-blocks": "if-with-same-arms",
+    "merge-else-if-into-elif": "collapsible-else-if",
+    "remove-redundant-fstring": "f-string-missing-placeholders",
+    "remove-unnecessary-else": "superfluous-else-return",
+    "simplify-boolean-comparison": "true-false-comparison",
+}
+"""The rules section 4 says `.sourcery.yaml` turns off, against the reason.
+
+The reason is the ruff rule that turns each off, or another reason in
+words. A rule ruff ships only in preview is no reason. A literal, for
+the reason `STATED` above is one: the trees' copies agree with each
+other while all of them are wrong.
+"""
+
+RULE_TYPES = ("comment", "refactoring", "suggestion")
+"""Every `rule_types:` value, which the file leaves at its default.
+
+Sourcery's own template lists the three. Section 4 has the key left
+at its default; in Sourcery 1.46.0, `rule_types: [comment]` reports what
+no `rule_types:` does.
+"""
+
+
+SOURCERY_ID = "sourcery"
+"""The id of the hook section 4 takes from `SOURCERY`."""
+
+STANZA_KEYS = ("id", "args")
+"""The keys section 4 lets a `sourcery` hook set, besides its block's.
+
+An allow-list, as `FIX` is for the arguments: every other key changes
+what the hook reads, or when or how it runs. `pass_filenames: false`
+leaves it no file to read; `additional_dependencies`, `language` and
+`language_version` change the Sourcery that runs. `repo` and `rev` are
+the block's, which `flattened()` adds.
+"""
+
+BARE_SKIP = "bare-sourcery-skip"
+"""The local hook section 4 puts beside `sourcery`."""
+
+BARE_SKIP_STANZA: dict[str, Any] = {
+    "repo": "local",
+    "id": BARE_SKIP,
+    "name": "a sourcery skip names rules, and no tag",
+    "language": "pygrep",
+    "entry": (
+        r"#\W*sourcery\W+skip(?!:)"
+        r"|#\W*sourcery\W+skip:[^#]*"
+        r"(?<![\w-])(?:default|refactoring|suggestion|comment)(?![\w-])"
+    ),
+    "types": ["python"],
+}
+r"""Section 4's `bare-sourcery-skip`, whole: a tree's has these keys alone.
+
+What the entry refuses and why is section 4's bullet; `spelled()`'s
+cases below are the forms measured. pygrep reads the file and the
+pattern as bytes, where `\s` and `\w` are ASCII, so `\W` is what takes
+in a non-breaking space.
+"""
+
+SKIP_WORDS = ("sourcery", "skip")
+"""The two words of Sourcery's skip comment, kept apart for `spelled()`."""
+
+FIX = "--fix"
+"""The one argument section 4 lets a `sourcery` hook take.
+
+An allow-list and not a list of refused options: `sourcery review`
+takes options its `--help` does not print, such as `--config-path`,
+which the parser names only in its refusal of an unknown option, and
+`--disable` takes a tag as readily as a rule, `default` turning every
+rule off. A tree turns rules off in `.sourcery.yaml`, which
+`config_departures` reads.
+"""
+
+
+def unexpected_arguments(args: list[str]) -> list[str]:
+    """Return the arguments of a `sourcery` hook other than `--fix`.
+
+    :param args: the hook's `args:`, as strings.
+    :returns: the other arguments, in the order given.
+    """
+    return [argument for argument in args if argument != FIX]
+
+
+TOP_LEVEL = ("files", "exclude", "default_stages", "default_language_version")
+"""The top-level keys of a gate that change what every hook reads or runs.
+
+`default_stages: [manual]` takes every hook out of CI's run.
+"""
+
+RUFF_HOOKS = ("ruff-check", "ruff-format")
+"""The hooks section 4 puts after `sourcery`, to format what it rewrites."""
+
+RELEASE_XY = re.compile(r"^(?P<major>[0-9]+)\.(?P<minor>[0-9]+)$")
+"""The `X.Y` shape a `python_version` of `.sourcery.yaml` takes."""
+
+
+def python_floor(pyproject: dict[str, Any]) -> tuple[int, int] | None:
+    """Return the `X.Y` floor `requires-python` declares with `>=`.
+
+    Another form reads as none, and the finding names the `>=` it looks for.
+
+    :param pyproject: the parsed `pyproject.toml`.
+    :returns: the floor, or `None` where no `>=` bound is found.
+    """
+    declared = str(pyproject.get("project", {}).get("requires-python", ""))
+    found = FLOOR_BOUND.search(declared)
+    if found is None:
+        return None
+    parts = [int(part) for part in found["version"].split(".")]
+    return (parts[0], parts[1] if len(parts) > 1 else 0)
+
+
+def ignored(patterns: list[Any], python: list[str]) -> list[str]:
+    """Return the tracked Python files an `ignore:` entry covers.
+
+    An entry is read as a path, a directory holding the file, or a glob,
+    matched against the path from every depth, as Sourcery matches it:
+    `conftest.py` covers `tests/conftest.py`. A leading `./` or `**/` is
+    dropped. Where Sourcery reads one more narrowly, this over-reports,
+    which a tree answers by naming no tracked Python file there at all.
+
+    :param patterns: the `ignore:` list of `.sourcery.yaml`.
+    :param python: the tracked Python files, relative to the root.
+    :returns: the files covered, in the order given.
+    """
+    out: list[str] = []
+    wanted = [
+        str(raw).rstrip("/").removeprefix("./").removeprefix("**/") for raw in patterns
+    ]
+    for path in python:
+        parts = path.split("/")
+        tails = ["/".join(parts[depth:]) for depth in range(len(parts))]
+        if any(
+            tail == pattern
+            or tail.startswith(pattern + "/")
+            or fnmatch.fnmatch(tail, pattern)
+            for tail in tails
+            for pattern in wanted
+        ):
+            out.append(path)
+    return out
+
+
+def hook_departures(document: dict[str, Any]) -> list[str]:
+    """Report where a parsed gate runs `sourcery` otherwise than section 4.
+
+    :param document: the gate, as `gate()` returns it.
+    :returns: one finding per departure, empty where there is none.
+    """
+    found = flattened(document)
+    ours = [index for index, hook in enumerate(found) if hook["repo"] == SOURCERY]
+    out = [] if ours else [f"no hook is taken from {SOURCERY}"]
+    for hook in (found[index] for index in ours):
+        if hook["id"] != SOURCERY_ID:
+            out.append(f"{hook['id']} is the hook, not {SOURCERY_ID}")
+        args = [str(argument) for argument in hook.get("args", [])]
+        if FIX not in args:
+            out.append(f"{hook['id']} runs without {FIX}: {args!r}")
+        extra = unexpected_arguments(args)
+        if extra:
+            out.append(f"{hook['id']} takes arguments other than {FIX}: {extra!r}")
+        out.extend(
+            f"{hook['id']} sets {key}: {hook[key]!r}"
+            for key in sorted(set(hook) - {*STANZA_KEYS, "repo", "rev"})
+        )
+    guards = [hook for hook in found if hook["id"] == BARE_SKIP]
+    if not guards:
+        out.append(f"no hook {BARE_SKIP} refuses a skip naming no rule")
+    for hook in guards:
+        stanza = {key: value for key, value in hook.items() if key != "rev"}
+        if stanza != BARE_SKIP_STANZA:
+            out.append(f"{BARE_SKIP} is not section 4's: {stanza!r}")
+    ruff = [index for index, hook in enumerate(found) if hook["id"] in RUFF_HOOKS]
+    out.extend(
+        f"{SOURCERY_ID} runs after {found[min(ruff)]['id']}"
+        for index in ours
+        if ruff and min(ruff) < index
+    )
+    out.extend(
+        f"the gate sets {key}: {document[key]!r}, which reaches every hook"
+        for key in TOP_LEVEL
+        if key in document
+    )
+    skip = (document.get("ci") or {}).get("skip") or []
+    if not isinstance(skip, list) or SOURCERY_ID not in skip:
+        out.append(f"ci: skip does not name {SOURCERY_ID}: {skip!r}")
+    return out
+
+
+def config_departures(
+    config: dict[str, Any] | None,
+    python: list[str],
+    floor: tuple[int, int] | None,
+) -> list[str]:
+    """Report where a `.sourcery.yaml` departs from section 4.
+
+    :param config: the parsed file, or `None` where the tree has none.
+    :param python: the tracked Python files, relative to the root.
+    :param floor: the `requires-python` floor, as `python_floor()` reads it.
+    :returns: one finding per departure, empty where there is none.
+    """
+    if config is None:
+        return [f"there is no {SOURCERY_CONFIG}"]
+    out: list[str] = []
+    settings = config.get("rule_settings") or {}
+    disabled = {str(rule) for rule in settings.get("disable") or []}
+    left_on = sorted(set(TURNED_OFF) - disabled)
+    if left_on:
+        out.append(f"{SOURCERY_CONFIG} leaves on {left_on}")
+    also = sorted(disabled - set(TURNED_OFF))
+    if also:
+        out.append(f"{SOURCERY_CONFIG} also turns off {also}")
+    if "enable" in settings and settings["enable"] != ["default"]:
+        out.append(f"{SOURCERY_CONFIG} sets enable: {settings['enable']!r}")
+    if "rule_types" in settings and sorted(settings["rule_types"] or []) != list(
+        RULE_TYPES
+    ):
+        out.append(f"{SOURCERY_CONFIG} sets rule_types: {settings['rule_types']!r}")
+    hidden = ignored(config.get("ignore") or [], python)
+    if hidden:
+        out.append(f"{SOURCERY_CONFIG} ignores {hidden}")
+    declared = settings.get("python_version")
+    release = RELEASE_XY.match(declared) if isinstance(declared, str) else None
+    if release is None:
+        out.append(f"{SOURCERY_CONFIG} python_version is {declared!r}, no X.Y")
+    elif floor is None:
+        out.append("pyproject.toml's requires-python names no >= floor to hold it to")
+    elif (int(release["major"]), int(release["minor"])) > floor:
+        out.append(
+            f"{SOURCERY_CONFIG} python_version {declared} is above the"
+            f" requires-python floor {floor[0]}.{floor[1]}"
+        )
+    return out
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_the_gate_runs_sourcery_with_section_4s_rules_off(
+    repository: str,
+    trees: dict[str, Path],
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 4's *Python* bullet: the `sourcery` hook and its configuration.
+
+    Asked only of a tree that tracks a Python file: the hook is
+    `types: [python]`, and `check-hooks-apply` refuses it elsewhere.
+    `python_version` is held to at most the `requires-python` floor and
+    not to it exactly: section 4 asks for the lowest interpreter the
+    code runs on, which a script served to other trees can put lower.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    :param pyprojects: the parsed files.
+    """
+    root = trees[repository]
+    python = tracked(root, "*.py")
+    if not python:
+        pytest.skip(f"{repository} tracks no Python file")
+    path = root / SOURCERY_CONFIG
+    config = (
+        (yaml.safe_load(path.read_text(encoding="utf-8")) or {})
+        if path.is_file()
+        else None
+    )
+    found = hook_departures(gate(repository, trees)) + config_departures(
+        config, python, python_floor(parsed(repository, pyprojects))
+    )
+    assert not found, f"{found}; " + by_hand(
+        repository,
+        f"grep -n -A4 'repo: {SOURCERY}' {CONFIG}; grep -n -A1 '^ci:' {CONFIG};"
+        f" cat {SOURCERY_CONFIG}; grep -n requires-python pyproject.toml",
+    )
+
+
+AGREEING_GATE: dict[str, Any] = {
+    "ci": {"skip": ["mypy", SOURCERY_ID]},
+    "repos": [
+        {
+            "repo": SOURCERY,
+            "rev": "v1.46.0",
+            "hooks": [{"id": SOURCERY_ID, "args": ["--fix"]}],
+        },
+        {
+            "repo": "local",
+            "hooks": [
+                {key: value for key, value in BARE_SKIP_STANZA.items() if key != "repo"}
+            ],
+        },
+        {
+            "repo": "https://github.com/astral-sh/ruff-pre-commit",
+            "rev": "v0.17.2",
+            "hooks": [{"id": "ruff-check", "args": ["--fix"]}, {"id": "ruff-format"}],
+        },
+    ],
+}
+"""A gate section 4's *Python* bullet reads as agreeing, for the controls."""
+
+
+def _sourcery_hook(document: dict[str, Any]) -> dict[str, Any]:
+    hook: dict[str, Any] = document["repos"][0]["hooks"][0]
+    return hook
+
+
+def test_a_gate_off_section_4s_sourcery_would_be_reported() -> None:
+    """`hook_departures` reports each way a gate can leave section 4.
+
+    Each control changes one thing in `AGREEING_GATE` and asks for the
+    finding naming it: a check that reads nothing stays green on these.
+    """
+    assert hook_departures(AGREEING_GATE) == []
+    assert hook_departures({"repos": [], "ci": {"skip": [SOURCERY_ID]}}) == [
+        f"no hook is taken from {SOURCERY}",
+        f"no hook {BARE_SKIP} refuses a skip naming no rule",
+    ]
+    for key, value in (
+        ("entry", "NEVERMATCH"),
+        ("exclude", "^tests/"),
+        ("stages", ["manual"]),
+        ("language", "system"),
+        ("name", "bare-sourcery-skip"),
+        ("types", ["markdown"]),
+    ):
+        guard = copy.deepcopy(AGREEING_GATE)
+        guard["repos"][1]["hooks"][0][key] = value
+        assert any(
+            line.startswith(f"{BARE_SKIP} is not section 4's")
+            for line in hook_departures(guard)
+        ), f"{BARE_SKIP} with {key}: {value!r} is read as agreeing"
+    unguarded = copy.deepcopy(AGREEING_GATE)
+    del unguarded["repos"][1]
+    assert hook_departures(unguarded) == [
+        f"no hook {BARE_SKIP} refuses a skip naming no rule"
+    ]
+    changes: list[tuple[str, Any, str]] = [
+        ("args", [], "runs without --fix"),
+        ("args", ["--fix", "--diff=git diff HEAD"], "other than --fix"),
+        ("args", ["--fix", "--config", "other.yaml"], "other than --fix"),
+        ("args", ["--fix", "--config=other.yaml"], "other than --fix"),
+        ("args", ["--fix", "--config-path", "other.yaml"], "other than --fix"),
+        ("args", ["--fix", "--config-path=other.yaml"], "other than --fix"),
+        ("args", ["--fix", "--enable", "use-next"], "other than --fix"),
+        ("args", ["--fix", "--enable=use-next"], "other than --fix"),
+        ("args", ["--fix", "--no-such-flag"], "other than --fix"),
+        ("args", ["--fix", "--disable"], "other than --fix"),
+        ("args", ["--fix", "--disable="], "other than --fix"),
+        ("args", ["--fix", "--disable", "default"], "other than --fix"),
+        ("args", ["--fix", "--disable=default"], "other than --fix"),
+        ("args", ["--fix", "--disable", "use-next"], "other than --fix"),
+        ("args", ["--fix", "--disable=use-next"], "other than --fix"),
+        ("id", "not-sourcery", "is the hook, not"),
+        ("entry", "true", "sets entry"),
+        ("files", "^src/", "sets files"),
+        ("exclude", "^tests/", "sets exclude"),
+        ("types", ["pyi"], "sets types"),
+        ("stages", ["manual"], "sets stages"),
+        ("pass_filenames", False, "sets pass_filenames"),
+        ("additional_dependencies", ["sourcery==1.0.0"], "sets additional_dep"),
+        ("language", "system", "sets language"),
+        ("language_version", "3.11", "sets language_version"),
+        ("name", "sourcery", "sets name"),
+    ]
+    for key, value, finding in changes:
+        document = copy.deepcopy(AGREEING_GATE)
+        _sourcery_hook(document)[key] = value
+        assert any(finding in line for line in hook_departures(document)), (
+            f"{key}: {value!r} is read as agreeing"
+        )
+    after = copy.deepcopy(AGREEING_GATE)
+    after["repos"].reverse()
+    assert hook_departures(after) == [f"{SOURCERY_ID} runs after ruff-check"]
+    again = copy.deepcopy(AGREEING_GATE)
+    again["repos"].append(copy.deepcopy(AGREEING_GATE["repos"][0]))
+    assert hook_departures(again) == [f"{SOURCERY_ID} runs after ruff-check"], (
+        "a second sourcery hook after the ruff hooks is read as agreeing"
+    )
+    fixing = copy.deepcopy(AGREEING_GATE)
+    _sourcery_hook(fixing)["args"] = ["--fix"]
+    assert hook_departures(fixing) == [], "args: ['--fix'] is refused"
+    unskipped = copy.deepcopy(AGREEING_GATE)
+    unskipped["ci"]["skip"] = []
+    assert hook_departures(unskipped) == [f"ci: skip does not name {SOURCERY_ID}: []"]
+    assert hook_departures({k: v for k, v in AGREEING_GATE.items() if k != "ci"}) == [
+        f"ci: skip does not name {SOURCERY_ID}: []"
+    ]
+    a_string = copy.deepcopy(AGREEING_GATE)
+    a_string["ci"]["skip"] = "mypy-sourcery"
+    assert hook_departures(a_string) == [
+        f"ci: skip does not name {SOURCERY_ID}: 'mypy-sourcery'"
+    ]
+    reaching: list[tuple[str, Any]] = [
+        ("files", "^src/"),
+        ("exclude", "^tests/"),
+        ("default_stages", ["manual"]),
+        ("default_language_version", {"python": "python3.11"}),
+    ]
+    for key, value in reaching:
+        narrowed = {**copy.deepcopy(AGREEING_GATE), key: value}
+        assert hook_departures(narrowed) == [
+            f"the gate sets {key}: {value!r}, which reaches every hook"
+        ]
+
+
+def test_this_trees_bare_sourcery_skip_is_section_4s() -> None:
+    """This tree's gate carries `BARE_SKIP_STANZA` as written."""
+    found = [
+        {key: value for key, value in hook.items() if key != "rev"}
+        for hook in flattened(yaml.safe_load((ROOT / CONFIG).read_text("utf-8")))
+        if hook["id"] == BARE_SKIP
+    ]
+    assert found == [BARE_SKIP_STANZA]
+
+
+def spelled(
+    after: str = "",
+    between: str = " ",
+    before: str = " ",
+    words: tuple[str, str] = SKIP_WORDS,
+) -> str:
+    """Spell Sourcery's skip comment on a `def` line, from its parts.
+
+    Built and not written out, so that `BARE_SKIP` reads no such comment
+    in this file.
+
+    :param after: what follows the second word.
+    :param between: what separates the two words.
+    :param before: what separates the hash from the first word.
+    :param words: the two words.
+    :returns: the line.
+    """
+    first, second = words
+    return f"def f(d):  #{before}{first}{between}{second}{after}"
+
+
+@pytest.mark.parametrize(
+    ("line", "refused"),
+    [
+        pytest.param(spelled(), True, id="bare"),
+        pytest.param(spelled(before=""), True, id="no-space"),
+        pytest.param(spelled("  # reason"), True, id="hash-reason"),
+        pytest.param(spelled(" - reason"), True, id="dash-reason"),
+        pytest.param(spelled(" -"), True, id="dash"),
+        pytest.param(spelled("  # noqa: ANN001"), True, id="noqa"),
+        pytest.param(spelled(" : a"), True, id="space-colon"),
+        pytest.param(spelled(": default"), True, id="default"),
+        pytest.param(spelled(": refactoring"), True, id="refactor"),
+        pytest.param(spelled(": suggestion"), True, id="suggestion"),
+        pytest.param(spelled(": comment"), True, id="comment"),
+        pytest.param(spelled(": switch, default"), True, id="in-list"),
+        pytest.param(spelled(between="  "), True, id="two-spaces"),
+        pytest.param(spelled(between="\t"), True, id="tab"),
+        pytest.param(spelled(between="\u00a0"), True, id="nbsp"),
+        pytest.param(spelled(between="\u2003"), True, id="em-space"),
+        pytest.param(spelled(before="\t"), True, id="tab-after-hash"),
+        pytest.param(spelled(before="\u00a0"), True, id="nbsp-after-hash"),
+        pytest.param(spelled("\t: a"), True, id="tab-colon"),
+        pytest.param(spelled("\u00a0: a"), True, id="nbsp-colon"),
+        pytest.param(spelled("\u00a0"), True, id="nbsp-after"),
+        pytest.param(spelled(":\tdefault"), True, id="tab-tag"),
+        pytest.param(spelled(":\u00a0default"), True, id="nbsp-tag"),
+        pytest.param(spelled(": switch,\tdefault"), True, id="tab-in-list"),
+        pytest.param(spelled(": default", between="\t"), True, id="tab-word-tag"),
+        pytest.param(spelled(between=":"), True, id="colon-between"),
+        pytest.param(spelled(": switch"), False, id="named"),
+        pytest.param(spelled(":\ta"), False, id="tab-named"),
+        pytest.param(spelled(":\u00a0a"), False, id="nbsp-named"),
+        pytest.param(spelled(": a", between="  "), False, id="spaces-named"),
+        pytest.param(spelled(": a", between="\u00a0"), False, id="nbsp-words-named"),
+        pytest.param(spelled(": DEFAULT"), False, id="tag-case"),
+        pytest.param(spelled(words=("SOURCERY", "skip")), False, id="upper"),
+        pytest.param(spelled(words=("sourcery", "Skip")), False, id="skip-case"),
+        pytest.param(spelled(words=("Sourcery", "skip")), False, id="capital"),
+        pytest.param(spelled(": a, b"), False, id="two-named"),
+        pytest.param(spelled(":"), False, id="empty-list"),
+        pytest.param(spelled(":\u00a0"), False, id="nbsp-empty"),
+        pytest.param(spelled(": a  # a comment"), False, id="reason"),
+        pytest.param(spelled(": no-comment"), False, id="suffix"),
+    ],
+)
+def test_bare_sourcery_skip_refuses_a_skip_naming_no_rule(
+    line: str,
+    refused: bool,  # noqa: FBT001
+) -> None:
+    r"""`BARE_SKIP_STANZA`'s entry, compiled as pygrep compiles it.
+
+    The pattern and the line as bytes, which is how pygrep reads both, so
+    `\s` and `\w` read ASCII alone. `colon-between` is refused though
+    Sourcery read it as no skip: `\W+` between the words is the shape
+    that takes in every space it reads.
+
+    :param line: a line of a Python file.
+    :param refused: whether the hook reports it.
+    """
+    entry: str = BARE_SKIP_STANZA["entry"]
+    found = re.search(entry.encode(), line.encode())
+    assert bool(found) is refused, f"{entry!r} on {line!r}"
+
+
+def test_a_sourcery_yaml_off_section_4_would_be_reported() -> None:
+    """`config_departures` reports each way a `.sourcery.yaml` can leave it.
+
+    The floor is 3.11 and the tree tracks one module at the root and three
+    under `tests/`, one of them a level further down: an entry naming a
+    file or a directory reaches it at any depth, as Sourcery's does.
+    """
+    python = [
+        "example.py",
+        "tests/conftest.py",
+        "tests/helpers/one.py",
+        "tests/one_test.py",
+    ]
+    under_tests = python[1:]
+    floor = (3, 11)
+    agreeing: dict[str, Any] = {
+        "ignore": [".venv", "node_modules"],
+        "rule_settings": {
+            "enable": ["default"],
+            "disable": list(TURNED_OFF),
+            "rule_types": list(RULE_TYPES),
+            "python_version": "3.11",
+        },
+    }
+    assert config_departures(agreeing, python, floor) == []
+    lower = copy.deepcopy(agreeing)
+    lower["rule_settings"]["python_version"] = "3.10"
+    assert config_departures(lower, python, floor) == [], "a lower version is refused"
+    assert config_departures(None, python, floor) == [f"there is no {SOURCERY_CONFIG}"]
+    left = copy.deepcopy(agreeing)
+    left["rule_settings"]["disable"].remove("assign-if-exp")
+    assert config_departures(left, python, floor) == [
+        f"{SOURCERY_CONFIG} leaves on ['assign-if-exp']"
+    ]
+    for extra in ("default", "refactoring", "use-next", "switch"):
+        more = copy.deepcopy(agreeing)
+        more["rule_settings"]["disable"].append(extra)
+        assert config_departures(more, python, floor) == [
+            f"{SOURCERY_CONFIG} also turns off ['{extra}']"
+        ]
+    for enable in (["reintroduce-else"], [], ["default", "use-next"]):
+        enabled = copy.deepcopy(agreeing)
+        enabled["rule_settings"]["enable"] = enable
+        assert config_departures(enabled, python, floor) == [
+            f"{SOURCERY_CONFIG} sets enable: {enable!r}"
+        ]
+    for types in (["comment"], [], ["refactoring", "suggestion"]):
+        typed = copy.deepcopy(agreeing)
+        typed["rule_settings"]["rule_types"] = types
+        assert config_departures(typed, python, floor) == [
+            f"{SOURCERY_CONFIG} sets rule_types: {types!r}"
+        ]
+    defaults = copy.deepcopy(agreeing)
+    del defaults["rule_settings"]["enable"], defaults["rule_settings"]["rule_types"]
+    assert config_departures(defaults, python, floor) == [], "defaults are refused"
+    for pattern, hidden in (
+        ("**/*.py", python),
+        ("tests", under_tests),
+        ("tests/", under_tests),
+        ("example.py", ["example.py"]),
+        ("./tests", under_tests),
+        ("helpers", ["tests/helpers/one.py"]),
+        ("conftest.py", ["tests/conftest.py"]),
+        ("helpers/one.py", ["tests/helpers/one.py"]),
+        ("*/one.py", ["tests/helpers/one.py"]),
+    ):
+        ignoring = copy.deepcopy(agreeing)
+        ignoring["ignore"].append(pattern)
+        assert config_departures(ignoring, python, floor) == [
+            f"{SOURCERY_CONFIG} ignores {hidden}"
+        ], f"ignore: {pattern!r}"
+    for version in ("3.15", "", "not-a-version", 3.11):
+        wrong = copy.deepcopy(agreeing)
+        wrong["rule_settings"]["python_version"] = version
+        assert config_departures(wrong, python, floor), (
+            f"python_version {version!r} is read as agreeing"
+        )
+    assert config_departures(agreeing, python, None) == [
+        "pyproject.toml's requires-python names no >= floor to hold it to"
+    ]
+    assert python_floor({"project": {"requires-python": ">=3.11"}}) == (3, 11)
+    assert python_floor({"project": {"requires-python": ">=3.12.1,<4"}}) == (3, 12)
+    assert python_floor({"project": {"requires-python": ">=3"}}) == (3, 0)
+    assert python_floor({}) is None
 
 
 ACTIONLINT = "https://github.com/kjanat/actionlint"

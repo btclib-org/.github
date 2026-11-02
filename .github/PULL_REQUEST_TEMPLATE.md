@@ -28,7 +28,9 @@
      its own; this one is what GitHub shows where there is none. -->
 
 - [ ] the lint gate is clean: `uv run --locked --only-group lint
-      pre-commit run --all-files`
+      pre-commit run --all-files`, in a worktree as the standard's
+      [section 4](https://github.com/btclib-org/.github#4-the-lint-gate-is-pre-commit-configyaml)
+      says
 - [ ] `uv run --locked --no-default-groups --group test pytest` passes —
       required as written; `alignment.yml` sets `BTCLIB_INTEGRATION` and
       runs the rest, which is not a gate

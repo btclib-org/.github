@@ -344,6 +344,16 @@ repos:
         language: pygrep
         entry: '#\s*pragma: no (cover|branch)$'
         types: [python]
+      # section 4's bare-sourcery-skip is the rule. pygrep reads bytes, so
+      # \s and \w are ASCII there and \W takes in a non-breaking space; a
+      # block scalar with no literal space, as local-link-prefix's, for the
+      # same reason
+      - id: bare-sourcery-skip
+        name: a sourcery skip names rules, and no tag
+        language: pygrep
+        entry: |-
+          #\W*sourcery\W+skip(?!:)|#\W*sourcery\W+skip:[^#]*(?<![\w-])(?:default|refactoring|suggestion|comment)(?![\w-])
+        types: [python]
   # .github/dependabot.yml is validated by nothing else here: check-yaml
   # above asks whether it is yaml and nothing reads it as what it is. A
   # typo in a package-ecosystem or a directory is not an error to GitHub
