@@ -1508,9 +1508,7 @@ seconds is the rejected alternative: the same code runs many times slower
 on one runner than on another. Seconds are asserted only where the bound
 is a timeout the code under test is given, and then by the name it is
 given under. `tests/timing_test.py` refuses `clock() - start`, or a
-name or function holding it, compared with a literal number. A pull
-request adding a timing test dispatches `os-macos.yml` on its branch
-where the tree has one, for its `macos-26-intel` runner.
+name or function holding it, compared with a literal number.
 
 ### Integration tests
 
@@ -2167,17 +2165,12 @@ reason, a job reading the pull request's files deciding which builds run;
 and `codeql`, whose result the OpenSSF Scorecard reads off a merged pull
 request's own commits.
 
-**x86_64 macOS runs on the calendar and at release, and never as an ordinary
-check on a pull request.** Its runner fails on network steps far more often than
-the others (btclib-org/btclib-secp256k1#1191). Two cases stay: a calendar
-workflow's `pull_request` trigger filtered to its own configuration (*What
-decides is the clock, not the trigger*), and the timing-test dispatch of
-`os-macos.yml` (section 7's *A test that bounds time bounds a ratio*). The rule
-ends when GitHub Actions drops its x86_64 macOS runners, announced for August
-2027 (actions/runner-images#13045), or at any earlier date GitHub announces.
-Then the Intel runner leaves every workflow, and `btclib-secp256k1` stops
-publishing a `macosx` x86_64 wheel, announced in the release notes one release
-before.
+**macOS is supported on arm64 alone, and no workflow runs on an x86_64 macOS
+image.** An x86_64 macOS cell can hang until the job's timeout and hold up a
+release (btclib-org/btclib-wallet#650), and its runner fails on network steps
+far more often than the others (btclib-org/btclib-secp256k1#1191). A tree stops
+publishing a `macosx` x86_64 wheel one release after its release notes announce
+it. `tests/macos_test.py` refuses an x86_64 macOS image in any tree's workflows.
 
 **A rewrite owes a dispatch.** A schedule-only workflow keeps the previous
 file's verdict as its newest run until its cron comes round, so a landing that

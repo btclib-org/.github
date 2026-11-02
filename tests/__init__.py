@@ -410,6 +410,21 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_the_documentation_is_the_read_the_docs_site_serving_the_tree",
         ("btclib-secp256k1", "btclib-node", "functional-tests"),
     ),
+    (
+        1982,
+        "test_no_workflow_runs_on_an_x86_64_macos_image",
+        (
+            "btclib",
+            "btclib-secp256k1",
+            "bitcoin-core-rpc",
+            "btclib-node",
+            "btclib-wallet",
+            "ecc",
+            "bip39-slip39",
+            "base58-bech32",
+            "bip32-descriptors",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
