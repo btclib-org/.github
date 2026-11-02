@@ -57,9 +57,9 @@ whenever that makes them clearer.
 - **[.github](https://github.com/btclib-org/.github)** — this page, and
   the standard every repository here follows.
 - **[ai-agents-process](https://github.com/btclib-org/ai-agents-process)** —
-  the process the maintainers follow with Claude Code: the
-  `/btclib-iss`, `/btclib-pr` and `/btclib-table` commands and the
-  writer and reviewer agents.
+  the process the maintainers follow with LLM coding agents: the
+  `/btclib-iss`, `/btclib-pr` and `/btclib-table` skills and the writer
+  and reviewer agents.
 - **[btclib-org.github.io](https://github.com/btclib-org/btclib-org.github.io)**
   — the site serving this page at btclib.org.
 
