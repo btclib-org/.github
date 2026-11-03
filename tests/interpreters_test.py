@@ -262,6 +262,7 @@ NAMES_ONE = (
     ".github/workflows/reusable-integration-bitcoind.yml",
     ".github/workflows/reusable-lint.yml",
     ".github/workflows/reusable-public-api.yml",
+    ".github/workflows/reusable-sourcery.yml",
     ".github/workflows/reusable-version-check.yml",
     ".github/workflows/reusable-wait-for-index.yml",
 )

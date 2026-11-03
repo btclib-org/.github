@@ -87,7 +87,7 @@ repos:
               |deprecation|dockerfile|grid|homepage|hooks
               |interpreters|issue_template|layout|links|names|per_subject|pins
               |protection|pull_request_template|pyproject|readme_link|release|roadmap
-              |root_files|scope|security|surface|tags|topics|verbatim
+              |root_files|scope|security|sourcery|surface|tags|topics|verbatim
               |workflows)_test\.py)$
       - id: check-yaml
       # `.vscode` is jsonc, which prettier below parses and formats

@@ -132,7 +132,7 @@ they are applied per repository, which section 15 is how to verify.
 `uv` fetches interpreters, linters and packaging tools itself, so a
 contributor installs one thing and CI installs nothing. The commands are
 the environment with all groups, the suite gated at 100%, and the whole
-lint gate, which section 4's *Python* bullet narrows in a worktree:
+lint gate:
 
 ```shell
 uv sync
@@ -920,10 +920,10 @@ hook then passes no path to; section 14 names each of those files.
 
 ## 4. The lint gate is `.pre-commit-config.yaml`
 
-**The lint workflow runs this very file.** There is never a second list of the
-same tools in a workflow: what CI enforces is what a local run of it enforces, a
-worktree's run skipping the one hook *Python* below names, and a hook cannot be
-gated by pre-commit.ci alone.
+**The lint workflow runs this very file.** There is never a second list
+of the same tools in a workflow: what CI enforces is exactly what a
+local run of it enforces, and a hook cannot be gated by pre-commit.ci
+alone.
 
 **Every hook that has a fix mode runs with it turned on**, a check-only
 hook spending a human round on a finding a flag would have applied. A
@@ -936,15 +936,14 @@ ci:
   autofix_prs: false
   autoupdate_commit_msg: "Update the pinned pre-commit hook revisions"
   autoupdate_schedule: weekly
-  skip: [mypy, actionlint-shellcheck, sourcery]
+  skip: [mypy, actionlint-shellcheck]
 ```
 
-`autofix_prs: false` because a bot committing to a branch is at odds with a
-setup where no workflow token can write; a failing hook is fixed by its author.
-`skip` names what pre-commit.ci cannot run: mypy needs uv,
-`actionlint-shellcheck` outlasts its time limit, and `sourcery` needs a network
-it lacks (btclib-org/.github#1348). No `autoupdate_branch`: the default branch
-is the only branch.
+`autofix_prs: false` because a bot committing to a branch is at odds with
+a setup where no workflow token can write; a failing hook is fixed by its
+author. `skip` names mypy, which needs uv, absent on pre-commit.ci, and
+`actionlint-shellcheck`, whose run outlasts pre-commit.ci's time limit.
+No `autoupdate_branch`: the default branch is the only branch.
 
 ### What the hooks cover
 
@@ -1028,34 +1027,7 @@ is the only branch.
   `self-repository` audit recommends, which upstream does not parse. It
   costs a Go build in pre-commit. Its `rev` is a sha, so a moved tag
   cannot change what runs.
-- **Python** — `ruff-check --fix` and `ruff-format`, and ahead of both every
-  `sourcery` hook of `https://github.com/sourcery-ai/sourcery`, with `args:
-  [--fix]`, so that they format what its fixes rewrite. It proposes refactorings
-  ruff does not, such as `use-named-expression`. It reads every Python file:
-  reading the diff alone would leave a file the branch did not touch unread. The
-  stanza sets no key but `id` and `args:`, and `--fix` is all `args:` holds:
-  `pass_filenames: false` leaves it no file to read, and another option can
-  narrow or replace what `.sourcery.yaml` sets. The gate sets no top-level
-  `files:`, `exclude:`, `default_stages:` or `default_language_version:`, each
-  reaching every hook, and no `ignore:` entry of `.sourcery.yaml`, matched at
-  any depth, covers a tracked Python file.
-
-    **`.sourcery.yaml` sets `python_version` to the lowest interpreter the
-    tree's code runs on, never above the `requires-python` floor, and turns off
-    the rules `TURNED_OFF` in `tests/hooks_test.py` names and no others**, the
-    reason beside each: the trees' own style, or the stable ruff rule that reads
-    the same code, whose reading stands where Sourcery reads more widely.
-    `enable:` and `rule_types:` stay at their defaults, and `disable:` can name
-    a tag: `disable: [default]` turns every rule off. A finding wrong at one
-    site is skipped there, with `# sourcery skip: <rule>` on the line Sourcery
-    reports or on the `def` line of the function holding it, in the form
-    `bare-sourcery-skip` below admits.
-
-    **It runs only in a clone whose `origin` is public**: it asks Sourcery's
-    service about that remote first, and in a git worktree, whose `.git` is a
-    file, it exits 1 having read nothing. So in a worktree the local gate is the
-    gate command with `SKIP=sourcery` before it, and CI, whose checkout is a
-    clone with a public `origin`, is the run that reads Sourcery.
+- **Python** — `ruff-check --fix` and `ruff-format`.
 - **docstrings against signatures** — `pydoclint` over the package: the
   `D` family checks that a docstring *exists*, this that it describes
   the parameters and the return the signature declares.
@@ -1111,9 +1083,11 @@ is the only branch.
   wants a `#` immediately before `pragma`, so a docstring quoting the
   rule is not refused.
 - **`bare-sourcery-skip`** — pygrep refusing a `# sourcery skip` that names no
-  rule or names a tag, in every tree whose gate runs `sourcery`, its stanza
-  `BARE_SKIP_STANZA` in `tests/hooks_test.py` whole. Sourcery reads a skip
-  followed by anything but a colon, whatever spaces part its two words, as
+  rule or names a tag, in every tree calling section 10's
+  `reusable-sourcery.yml`, its stanza `BARE_SKIP_STANZA` in
+  `tests/hooks_test.py` whole, and no top-level `files:`, `exclude:`,
+  `default_stages:` or `default_language_version:` reaching it. Sourcery reads a
+  skip followed by anything but a colon, whatever spaces part its two words, as
   naming no rule, and turns every rule off for the function whose `def` line
   carries it; a tag in its list, `default` or `refactoring`, turns off every
   rule of the tag. `suggestion` and `comment`, the other tags `rule_types:`
@@ -2225,6 +2199,28 @@ reason, a job reading the pull request's files deciding which builds run;
 and `codeql`, whose result the OpenSSF Scorecard reads off a merged pull
 request's own commits.
 
+**`sourcery` is a pull request's check and not a gate.** A tree tracking Python
+carries a `sourcery.yml` calling `reusable-sourcery.yml` on `pull_request`,
+paths-filtered to its Python, its `.sourcery.yaml` and its own file, so a pull
+request touching none waits on nothing; section 11 requires no context of it. It
+reads the Python files the pull request changes, whole, and the whole tree where
+it changes `.sourcery.yaml` or the version, as the callee's header says. It has
+no `push` trigger and no `workflow_dispatch`, against *What every workflow
+does*: what it reads is a pull request's files against its base branch, which
+neither event carries. A finding fails that job alone, and is applied, or
+skipped at its site with `# sourcery skip: <rule>` on the line Sourcery reports
+or on the `def` line of the function holding it, in the form section 4's
+`bare-sourcery-skip` admits.
+
+**`.sourcery.yaml` sets `python_version` to the lowest interpreter the tree's
+code runs on, never above the `requires-python` floor, and turns off the rules
+`TURNED_OFF` in `tests/hooks_test.py` names and no others**, the reason beside
+each: the trees' own style, or the stable ruff rule that reads the same code,
+whose reading stands where Sourcery reads more widely. `enable:` and
+`rule_types:` stay at their defaults, and `disable:` can name a tag: `disable:
+[default]` turns every rule off. No `ignore:` entry, matched at any depth,
+covers a tracked Python file.
+
 **macOS is supported on arm64 alone, and no workflow runs on an x86_64 macOS
 image.** An x86_64 macOS cell can hang until the job's timeout and hold up a
 release (btclib-org/btclib-wallet#650), and its runner fails on network steps
@@ -2493,10 +2489,10 @@ and the badge land together.
     `security-events: write` to file code scanning alerts, and `actions: read`
     with `contents: read`.
 
-    **Its triggers are the action's and not this section's**, the one exception
-    to *`workflow_dispatch` on everything* above: that README supports `push`
-    and `schedule` on the default branch and calls `workflow_dispatch`
-    experimental.
+    **Its triggers are the action's and not this section's**, an exception to
+    *`workflow_dispatch` on everything* above, as `claude-review.yml` and
+    `sourcery.yml` are: that README supports `push` and `schedule` on the
+    default branch and calls `workflow_dispatch` experimental.
 
     **The trees this entry names owe a registration at bestpractices.dev**,
     whose badges section 2's row carries: `CII-Best-Practices` is the check
@@ -4189,9 +4185,9 @@ stops being one.
 breadth; which optional workflows exist past those section 10 keys on a property
 of the tree; the ruff `ignore` list's entries a tree declines on its own merits
 and its `per-file-ignores`; `.sourcery.yaml`'s `python_version` and `ignore:`,
-inside the bounds section 4 sets them; what a publishing repository checks about
-its package contents past section 12's floor — the sdist allowlist, and the
-script a wheel that is not one package tree needs — which is settled by
+inside the bounds section 10 sets them; what a publishing repository checks
+about its package contents past section 12's floor — the sdist allowlist, and
+the script a wheel that is not one package tree needs — which is settled by
 measuring that project's own distribution rather than by copying what a sibling
 does; the convention tests, which each project chooses on section 7's terms; and
 the `[tool.uv.sources]` table, which exists only while a dependency is not on
@@ -4307,7 +4303,7 @@ grep -n 'check-sdist' .pre-commit-config.yaml
 sed -nE '/^\[tool\.check-wheel-contents\]/,/^\[/{/^[a-z]/p;}' pyproject.toml
 sed -nE '/^\[.*(targets\.sdist|uv\.build-backend)\]/,/^\[/{/^[a-z]/p;}' \
     pyproject.toml
-uv run pre-commit run --all-files  # in a worktree, as section 4's Python says
+uv run pre-commit run --all-files
 cat tests/README.md
 ```
 
@@ -4791,10 +4787,8 @@ No tool checks them.
    not in `pyproject.toml`. `.python-version` and `.gitignore` are
    written rather than copied, section 14 deciding both per repository.
 1. `.pre-commit-config.yaml`, including the mypy hook section 4's
-   criterion chooses and the `pinned-rev` guard, and, where the tree
-   tracks Python, section 4's `sourcery` hook with its `.sourcery.yaml`;
-   `uv run pre-commit run --all-files` until clean, in a worktree as that
-   hook's bullet says; generate `.secrets.baseline` and add section 4's
+   criterion chooses and the `pinned-rev` guard; `uv run pre-commit run
+   --all-files` until clean; generate `.secrets.baseline` and add section 4's
    `rev:` line filter.
 1. `.vscode/settings.json` and `.vscode/extensions.json`,
    `mypy-type-checker.importStrategy` taking section 13's value for the
@@ -4813,7 +4807,8 @@ No tool checks them.
    backend declares it in and building through the installer section 12
    names. A `dist` job that inspects what would be published.
 1. Workflows: `test` (with its aggregate and its `changes` job), `lint`,
-   `docs`, `claude-review`, then the periodic ones the project earns.
+   `docs`, `claude-review`, `sourcery` with its `.sourcery.yaml` where the
+   tree tracks Python, then the periodic ones the project earns.
 1. `.github/dependabot.yml`, `ISSUE_TEMPLATE/`,
    `PULL_REQUEST_TEMPLATE.md`.
 1. `CONTRIBUTING.md`, `REVIEWING.md` with the

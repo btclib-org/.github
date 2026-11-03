@@ -197,6 +197,50 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
     )
 
 
+def required_sourcery(document: dict[str, Any]) -> list[str]:
+    """List the required contexts naming Sourcery in a classic protection.
+
+    :param document: the classic protection, possibly empty.
+    :returns: the contexts, in the order the document gives them.
+    """
+    checks = document.get("required_status_checks") or {}
+    return [
+        str(check.get("context", ""))
+        for check in checks.get("checks") or []
+        if "sourcery" in str(check.get("context", "")).lower()
+    ]
+
+
+def test_a_required_sourcery_context_would_be_reported() -> None:
+    """`required_sourcery` finds the caller's context, and nothing else."""
+    contexts = ["lint / Sign-off", "sourcery / Sourcery", "test"]
+    document = {
+        "required_status_checks": {"checks": [{"context": c} for c in contexts]}
+    }
+    assert required_sourcery(document) == ["sourcery / Sourcery"]
+    assert required_sourcery({}) == []
+
+
+def test_no_tree_requires_the_sourcery_check(
+    repository: str,
+    protections: dict[str, dict[str, Any] | str | None],
+) -> None:
+    """Section 10: `sourcery` is a pull request's check and not a gate.
+
+    :param repository: the repository asked about.
+    :param protections: the classic protection of each repository.
+    """
+    document = protections[repository]
+    if not isinstance(document, dict):
+        pytest.skip(f"no classic protection of {repository} to read")
+    found = required_sourcery(document)
+    assert not found, f"required: {found}; " + by_hand(
+        repository,
+        f"gh api repos/{ORG}/{repository}/{ENDPOINT} --jq "
+        "'[.required_status_checks.checks[]?.context]'",
+    )
+
+
 @pytest.mark.parametrize(
     "entry",
     list(EXPECTED_DEPARTURE),

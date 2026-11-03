@@ -28,6 +28,8 @@ import yaml
 
 from . import ORG, ROOT, SELF, Tier, by_hand, gh_json, tracked
 from .pyproject_test import FLOOR, FLOOR_BOUND, parsed
+from .workflows_test import LOCAL as LOCAL_PREFIXES
+from .workflows_test import calls_here, jobs, triggers, workflows
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -84,8 +86,8 @@ LOCAL = (
 
 mypy and `bare-sourcery-skip` are the bullets of that list not named
 here: mypy is `test_the_gate_runs_mypy`'s subject below, section 6 asking
-for it by name, and `bare-sourcery-skip` is held with the `sourcery` hook
-it guards, by `hook_departures`.
+for it by name, and `bare-sourcery-skip` is held with the `sourcery` job
+it guards, by `guard_departures`.
 """
 
 MYPY = ("mypy", "mirrors-mypy")
@@ -384,11 +386,11 @@ def test_the_gate_runs_mypy(repository: str, trees: dict[str, Path]) -> None:
     )
 
 
-SOURCERY = "https://github.com/sourcery-ai/sourcery"
-"""The repository section 4's *Python* bullet takes the `sourcery` hook from."""
-
 SOURCERY_CONFIG = ".sourcery.yaml"
-"""The file that hook reads, at the root of a tree."""
+"""The file Sourcery reads, at the root of a tree."""
+
+SOURCERY_CALLED = "reusable-sourcery.yml"
+"""The workflow of this repository section 10 has a Python tree call."""
 
 TURNED_OFF = {
     "reintroduce-else": "undoes superfluous-else-return",
@@ -408,7 +410,7 @@ TURNED_OFF = {
     "remove-unnecessary-else": "superfluous-else-return",
     "simplify-boolean-comparison": "true-false-comparison",
 }
-"""The rules section 4 says `.sourcery.yaml` turns off, against the reason.
+"""The rules section 10 says `.sourcery.yaml` turns off, against the reason.
 
 The reason is the ruff rule that turns each off, or another reason in
 words. A rule ruff ships only in preview is no reason. A literal, for
@@ -419,27 +421,14 @@ other while all of them are wrong.
 RULE_TYPES = ("comment", "refactoring", "suggestion")
 """Every `rule_types:` value, which the file leaves at its default.
 
-Sourcery's own template lists the three. Section 4 has the key left
+Sourcery's own template lists the three. Section 10 has the key left
 at its default; in Sourcery 1.46.0, `rule_types: [comment]` reports what
 no `rule_types:` does.
 """
 
 
-SOURCERY_ID = "sourcery"
-"""The id of the hook section 4 takes from `SOURCERY`."""
-
-STANZA_KEYS = ("id", "args")
-"""The keys section 4 lets a `sourcery` hook set, besides its block's.
-
-An allow-list, as `FIX` is for the arguments: every other key changes
-what the hook reads, or when or how it runs. `pass_filenames: false`
-leaves it no file to read; `additional_dependencies`, `language` and
-`language_version` change the Sourcery that runs. `repo` and `rev` are
-the block's, which `flattened()` adds.
-"""
-
 BARE_SKIP = "bare-sourcery-skip"
-"""The local hook section 4 puts beside `sourcery`."""
+"""The local hook section 4 puts in every tree that calls `SOURCERY_CALLED`."""
 
 BARE_SKIP_STANZA: dict[str, Any] = {
     "repo": "local",
@@ -464,35 +453,12 @@ in a non-breaking space.
 SKIP_WORDS = ("sourcery", "skip")
 """The two words of Sourcery's skip comment, kept apart for `spelled()`."""
 
-FIX = "--fix"
-"""The one argument section 4 lets a `sourcery` hook take.
-
-An allow-list and not a list of refused options: `sourcery review`
-takes options its `--help` does not print, such as `--config-path`,
-which the parser names only in its refusal of an unknown option, and
-`--disable` takes a tag as readily as a rule, `default` turning every
-rule off. A tree turns rules off in `.sourcery.yaml`, which
-`config_departures` reads.
-"""
-
-
-def unexpected_arguments(args: list[str]) -> list[str]:
-    """Return the arguments of a `sourcery` hook other than `--fix`.
-
-    :param args: the hook's `args:`, as strings.
-    :returns: the other arguments, in the order given.
-    """
-    return [argument for argument in args if argument != FIX]
-
-
 TOP_LEVEL = ("files", "exclude", "default_stages", "default_language_version")
 """The top-level keys of a gate that change what every hook reads or runs.
 
-`default_stages: [manual]` takes every hook out of CI's run.
+`default_stages: [manual]` takes every hook out of CI's run,
+`bare-sourcery-skip` with them.
 """
-
-RUFF_HOOKS = ("ruff-check", "ruff-format")
-"""The hooks section 4 puts after `sourcery`, to format what it rewrites."""
 
 RELEASE_XY = re.compile(r"^(?P<major>[0-9]+)\.(?P<minor>[0-9]+)$")
 """The `X.Y` shape a `python_version` of `.sourcery.yaml` takes."""
@@ -545,49 +511,64 @@ def ignored(patterns: list[Any], python: list[str]) -> list[str]:
     return out
 
 
-def hook_departures(document: dict[str, Any]) -> list[str]:
-    """Report where a parsed gate runs `sourcery` otherwise than section 4.
+def guard_departures(document: dict[str, Any]) -> list[str]:
+    """Report where a parsed gate guards a Sourcery skip unlike section 4.
 
     :param document: the gate, as `gate()` returns it.
     :returns: one finding per departure, empty where there is none.
     """
     found = flattened(document)
-    ours = [index for index, hook in enumerate(found) if hook["repo"] == SOURCERY]
-    out = [] if ours else [f"no hook is taken from {SOURCERY}"]
-    for hook in (found[index] for index in ours):
-        if hook["id"] != SOURCERY_ID:
-            out.append(f"{hook['id']} is the hook, not {SOURCERY_ID}")
-        args = [str(argument) for argument in hook.get("args", [])]
-        if FIX not in args:
-            out.append(f"{hook['id']} runs without {FIX}: {args!r}")
-        extra = unexpected_arguments(args)
-        if extra:
-            out.append(f"{hook['id']} takes arguments other than {FIX}: {extra!r}")
-        out.extend(
-            f"{hook['id']} sets {key}: {hook[key]!r}"
-            for key in sorted(set(hook) - {*STANZA_KEYS, "repo", "rev"})
-        )
     guards = [hook for hook in found if hook["id"] == BARE_SKIP]
-    if not guards:
-        out.append(f"no hook {BARE_SKIP} refuses a skip naming no rule")
+    out = [] if guards else [f"no hook {BARE_SKIP} refuses a skip naming no rule"]
     for hook in guards:
         stanza = {key: value for key, value in hook.items() if key != "rev"}
         if stanza != BARE_SKIP_STANZA:
             out.append(f"{BARE_SKIP} is not section 4's: {stanza!r}")
-    ruff = [index for index, hook in enumerate(found) if hook["id"] in RUFF_HOOKS]
-    out.extend(
-        f"{SOURCERY_ID} runs after {found[min(ruff)]['id']}"
-        for index in ours
-        if ruff and min(ruff) < index
-    )
     out.extend(
         f"the gate sets {key}: {document[key]!r}, which reaches every hook"
         for key in TOP_LEVEL
         if key in document
     )
-    skip = (document.get("ci") or {}).get("skip") or []
-    if not isinstance(skip, list) or SOURCERY_ID not in skip:
-        out.append(f"ci: skip does not name {SOURCERY_ID}: {skip!r}")
+    return out
+
+
+FILTERED = ("**.py", SOURCERY_CONFIG)
+"""What a caller's `pull_request` filter names besides its own file."""
+
+
+def caller_departures(root: Path) -> list[str]:
+    """Report where a tree calls `SOURCERY_CALLED` otherwise than section 10.
+
+    A call is a job whose `uses:` names it, in this repository at any
+    ref or as a local path, in a workflow triggered on `pull_request`
+    whose `paths:` names the tree's Python, its `.sourcery.yaml` and
+    the workflow's own file.
+
+    :param root: the root of the checkout.
+    :returns: one finding per departure, empty where there is none.
+    """
+    local = {
+        f"{prefix}.github/workflows/{SOURCERY_CALLED}" for prefix in LOCAL_PREFIXES
+    }
+    calling = [
+        workflow
+        for workflow in workflows(root)
+        for job in jobs(workflow).values()
+        if str(job.get("uses", "")) in local
+        or calls_here(str(job.get("uses", "")), SOURCERY_CALLED)
+    ]
+    if not calling:
+        return [f"no workflow calls {SOURCERY_CALLED}"]
+    out: list[str] = []
+    for workflow in calling:
+        if "pull_request" not in triggers(workflow):
+            out.append(f"{workflow.name} calls {SOURCERY_CALLED} on no pull_request")
+            continue
+        trigger = triggers(workflow)["pull_request"] or {}
+        named = set(trigger.get("paths") or [])
+        wanted = {*FILTERED, f".github/workflows/{workflow.name}"}
+        if not wanted <= named:
+            out.append(f"{workflow.name}'s paths: name no {sorted(wanted - named)}")
     return out
 
 
@@ -596,7 +577,7 @@ def config_departures(
     python: list[str],
     floor: tuple[int, int] | None,
 ) -> list[str]:
-    """Report where a `.sourcery.yaml` departs from section 4.
+    """Report where a `.sourcery.yaml` departs from section 10.
 
     :param config: the parsed file, or `None` where the tree has none.
     :param python: the tracked Python files, relative to the root.
@@ -638,18 +619,18 @@ def config_departures(
 
 
 @pytest.mark.tier(Tier.PYTHON)
-def test_the_gate_runs_sourcery_with_section_4s_rules_off(
+def test_a_python_tree_calls_sourcery_with_its_rules_off(
     repository: str,
     trees: dict[str, Path],
     pyprojects: dict[str, dict[str, Any]],
 ) -> None:
-    """Section 4's *Python* bullet: the `sourcery` hook and its configuration.
+    """Section 10's `sourcery` job, its configuration, and section 4's guard.
 
-    Asked only of a tree that tracks a Python file: the hook is
-    `types: [python]`, and `check-hooks-apply` refuses it elsewhere.
-    `python_version` is held to at most the `requires-python` floor and
-    not to it exactly: section 4 asks for the lowest interpreter the
-    code runs on, which a script served to other trees can put lower.
+    Asked only of a tree that tracks a Python file, which is what the
+    job reads. `python_version` is held to at most the `requires-python`
+    floor and not to it exactly: section 10 asks for the lowest
+    interpreter the code runs on, which a script served to other trees
+    can put lower.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -665,55 +646,43 @@ def test_the_gate_runs_sourcery_with_section_4s_rules_off(
         if path.is_file()
         else None
     )
-    found = hook_departures(gate(repository, trees)) + config_departures(
-        config, python, python_floor(parsed(repository, pyprojects))
+    found = (
+        caller_departures(root)
+        + guard_departures(gate(repository, trees))
+        + config_departures(
+            config, python, python_floor(parsed(repository, pyprojects))
+        )
     )
     assert not found, f"{found}; " + by_hand(
         repository,
-        f"grep -n -A4 'repo: {SOURCERY}' {CONFIG}; grep -n -A1 '^ci:' {CONFIG};"
-        f" cat {SOURCERY_CONFIG}; grep -n requires-python pyproject.toml",
+        f"grep -ln {SOURCERY_CALLED} .github/workflows/*.yml;"
+        f" grep -n -A6 'id: {BARE_SKIP}' {CONFIG}; cat {SOURCERY_CONFIG};"
+        " grep -n requires-python pyproject.toml",
     )
 
 
 AGREEING_GATE: dict[str, Any] = {
-    "ci": {"skip": ["mypy", SOURCERY_ID]},
     "repos": [
-        {
-            "repo": SOURCERY,
-            "rev": "v1.46.0",
-            "hooks": [{"id": SOURCERY_ID, "args": ["--fix"]}],
-        },
         {
             "repo": "local",
             "hooks": [
                 {key: value for key, value in BARE_SKIP_STANZA.items() if key != "repo"}
             ],
         },
-        {
-            "repo": "https://github.com/astral-sh/ruff-pre-commit",
-            "rev": "v0.17.2",
-            "hooks": [{"id": "ruff-check", "args": ["--fix"]}, {"id": "ruff-format"}],
-        },
     ],
 }
-"""A gate section 4's *Python* bullet reads as agreeing, for the controls."""
+"""A gate section 4's `bare-sourcery-skip` reads as agreeing, for controls."""
 
 
-def _sourcery_hook(document: dict[str, Any]) -> dict[str, Any]:
-    hook: dict[str, Any] = document["repos"][0]["hooks"][0]
-    return hook
-
-
-def test_a_gate_off_section_4s_sourcery_would_be_reported() -> None:
-    """`hook_departures` reports each way a gate can leave section 4.
+def test_a_gate_off_section_4s_guard_would_be_reported() -> None:
+    """`guard_departures` reports each way a gate can leave section 4.
 
     Each control changes one thing in `AGREEING_GATE` and asks for the
     finding naming it: a check that reads nothing stays green on these.
     """
-    assert hook_departures(AGREEING_GATE) == []
-    assert hook_departures({"repos": [], "ci": {"skip": [SOURCERY_ID]}}) == [
-        f"no hook is taken from {SOURCERY}",
-        f"no hook {BARE_SKIP} refuses a skip naming no rule",
+    assert guard_departures(AGREEING_GATE) == []
+    assert guard_departures({"repos": []}) == [
+        f"no hook {BARE_SKIP} refuses a skip naming no rule"
     ]
     for key, value in (
         ("entry", "NEVERMATCH"),
@@ -724,72 +693,11 @@ def test_a_gate_off_section_4s_sourcery_would_be_reported() -> None:
         ("types", ["markdown"]),
     ):
         guard = copy.deepcopy(AGREEING_GATE)
-        guard["repos"][1]["hooks"][0][key] = value
+        guard["repos"][0]["hooks"][0][key] = value
         assert any(
             line.startswith(f"{BARE_SKIP} is not section 4's")
-            for line in hook_departures(guard)
+            for line in guard_departures(guard)
         ), f"{BARE_SKIP} with {key}: {value!r} is read as agreeing"
-    unguarded = copy.deepcopy(AGREEING_GATE)
-    del unguarded["repos"][1]
-    assert hook_departures(unguarded) == [
-        f"no hook {BARE_SKIP} refuses a skip naming no rule"
-    ]
-    changes: list[tuple[str, Any, str]] = [
-        ("args", [], "runs without --fix"),
-        ("args", ["--fix", "--diff=git diff HEAD"], "other than --fix"),
-        ("args", ["--fix", "--config", "other.yaml"], "other than --fix"),
-        ("args", ["--fix", "--config=other.yaml"], "other than --fix"),
-        ("args", ["--fix", "--config-path", "other.yaml"], "other than --fix"),
-        ("args", ["--fix", "--config-path=other.yaml"], "other than --fix"),
-        ("args", ["--fix", "--enable", "use-next"], "other than --fix"),
-        ("args", ["--fix", "--enable=use-next"], "other than --fix"),
-        ("args", ["--fix", "--no-such-flag"], "other than --fix"),
-        ("args", ["--fix", "--disable"], "other than --fix"),
-        ("args", ["--fix", "--disable="], "other than --fix"),
-        ("args", ["--fix", "--disable", "default"], "other than --fix"),
-        ("args", ["--fix", "--disable=default"], "other than --fix"),
-        ("args", ["--fix", "--disable", "use-next"], "other than --fix"),
-        ("args", ["--fix", "--disable=use-next"], "other than --fix"),
-        ("id", "not-sourcery", "is the hook, not"),
-        ("entry", "true", "sets entry"),
-        ("files", "^src/", "sets files"),
-        ("exclude", "^tests/", "sets exclude"),
-        ("types", ["pyi"], "sets types"),
-        ("stages", ["manual"], "sets stages"),
-        ("pass_filenames", False, "sets pass_filenames"),
-        ("additional_dependencies", ["sourcery==1.0.0"], "sets additional_dep"),
-        ("language", "system", "sets language"),
-        ("language_version", "3.11", "sets language_version"),
-        ("name", "sourcery", "sets name"),
-    ]
-    for key, value, finding in changes:
-        document = copy.deepcopy(AGREEING_GATE)
-        _sourcery_hook(document)[key] = value
-        assert any(finding in line for line in hook_departures(document)), (
-            f"{key}: {value!r} is read as agreeing"
-        )
-    after = copy.deepcopy(AGREEING_GATE)
-    after["repos"].reverse()
-    assert hook_departures(after) == [f"{SOURCERY_ID} runs after ruff-check"]
-    again = copy.deepcopy(AGREEING_GATE)
-    again["repos"].append(copy.deepcopy(AGREEING_GATE["repos"][0]))
-    assert hook_departures(again) == [f"{SOURCERY_ID} runs after ruff-check"], (
-        "a second sourcery hook after the ruff hooks is read as agreeing"
-    )
-    fixing = copy.deepcopy(AGREEING_GATE)
-    _sourcery_hook(fixing)["args"] = ["--fix"]
-    assert hook_departures(fixing) == [], "args: ['--fix'] is refused"
-    unskipped = copy.deepcopy(AGREEING_GATE)
-    unskipped["ci"]["skip"] = []
-    assert hook_departures(unskipped) == [f"ci: skip does not name {SOURCERY_ID}: []"]
-    assert hook_departures({k: v for k, v in AGREEING_GATE.items() if k != "ci"}) == [
-        f"ci: skip does not name {SOURCERY_ID}: []"
-    ]
-    a_string = copy.deepcopy(AGREEING_GATE)
-    a_string["ci"]["skip"] = "mypy-sourcery"
-    assert hook_departures(a_string) == [
-        f"ci: skip does not name {SOURCERY_ID}: 'mypy-sourcery'"
-    ]
     reaching: list[tuple[str, Any]] = [
         ("files", "^src/"),
         ("exclude", "^tests/"),
@@ -798,9 +706,75 @@ def test_a_gate_off_section_4s_sourcery_would_be_reported() -> None:
     ]
     for key, value in reaching:
         narrowed = {**copy.deepcopy(AGREEING_GATE), key: value}
-        assert hook_departures(narrowed) == [
+        assert guard_departures(narrowed) == [
             f"the gate sets {key}: {value!r}, which reaches every hook"
         ]
+
+
+def _workflow(root: Path, name: str, text: str) -> None:
+    folder = root / ".github" / "workflows"
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / name).write_text(text, encoding="utf-8")
+
+
+def test_a_tree_off_section_10s_caller_would_be_reported(tmp_path: Path) -> None:
+    """`caller_departures` reads a call, local or remote, on `pull_request`.
+
+    :param tmp_path: where the trees are built.
+    """
+    remote = f"{ORG}/{SELF}/.github/workflows/{SOURCERY_CALLED}@v1"
+    cases: list[tuple[str, str, list[str]]] = [
+        ("pull_request", remote, []),
+        ("pull_request", f"./.github/workflows/{SOURCERY_CALLED}", []),
+        ("push", remote, [f"sourcery.yml calls {SOURCERY_CALLED} on no pull_request"]),
+        (
+            "pull_request",
+            f"{ORG}/other/.github/workflows/{SOURCERY_CALLED}@v1",
+            [f"no workflow calls {SOURCERY_CALLED}"],
+        ),
+        (
+            "pull_request",
+            f"{ORG}/{SELF}/.github/workflows/reusable-lint.yml@v1",
+            [f"no workflow calls {SOURCERY_CALLED}"],
+        ),
+    ]
+    paths = "".join(
+        f"\n      - {path!r}" for path in (*FILTERED, ".github/workflows/sourcery.yml")
+    )
+    for index, (trigger, called, wanted) in enumerate(cases):
+        root = tmp_path / str(index)
+        _workflow(
+            root,
+            "sourcery.yml",
+            f"on:\n  {trigger}:\n    paths:{paths}\n"
+            f"jobs:\n  sourcery:\n    uses: {called}\n",
+        )
+        assert caller_departures(root) == wanted, f"{trigger}, {called}"
+    for dropped in (*FILTERED, ".github/workflows/sourcery.yml", None):
+        root = tmp_path / f"without-{dropped}"
+        kept = [
+            path
+            for path in (*FILTERED, ".github/workflows/sourcery.yml")
+            if dropped is not None and path != dropped
+        ]
+        block = "".join(f"\n      - {path!r}" for path in kept)
+        filtered = f"\n    paths:{block}" if kept else ""
+        _workflow(
+            root,
+            "sourcery.yml",
+            f"on:\n  pull_request:{filtered}\njobs:\n  sourcery:\n    uses: {remote}\n",
+        )
+        missing = (
+            [dropped]
+            if dropped is not None
+            else sorted((*FILTERED, ".github/workflows/sourcery.yml"))
+        )
+        assert caller_departures(root) == [
+            f"sourcery.yml's paths: name no {sorted(missing)}"
+        ], f"paths without {dropped}"
+    assert caller_departures(tmp_path / "none") == [
+        f"no workflow calls {SOURCERY_CALLED}"
+    ]
 
 
 def test_this_trees_bare_sourcery_skip_is_section_4s() -> None:

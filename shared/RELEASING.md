@@ -383,11 +383,8 @@ request, next to `deps-latest`'s own result.
    than a screenshot — it is a step nothing else enforces, and a pull
    request that never mentions it reads exactly like one that skipped it.
 
-1. Run `uv run pre-commit run --all-files`, in a worktree as the
-   standard's
-   [section 4](https://github.com/btclib-org/.github#4-the-lint-gate-is-pre-commit-configyaml)
-   says, and `uv run pytest --cov` before pressing anything, then verify the
-   Read the Docs build renders,
+1. Run `uv run pre-commit run --all-files` and `uv run pytest --cov`
+   before pressing anything, then verify the Read the Docs build renders,
    on `https://app.readthedocs.org/projects/<rtd>/builds/`. Read the
    *builds* page and not only the rendered one: a site that answers 200
    may be serving the last build that succeeded, the webhook having
