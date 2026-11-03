@@ -15,18 +15,19 @@ a stand-in `gh`, so what is asked is what the runner writes.
 
 from __future__ import annotations
 
+import itertools
 import json
 import os
 import re
 import shlex
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 import pytest
 
 from . import ROOT
-from .workflows_test import jobs
+from .workflows_test import document, jobs
 
 # the reusable workflow, which holds the jobs and their scripts
 WORKFLOW = ROOT / ".github/workflows/reusable-claude-implement.yml"
@@ -151,14 +152,91 @@ def test_the_job_running_the_edit_asks_for_no_secret_and_no_oidc_token() -> None
     ]
 
 
+def conjuncts(condition: str) -> list[str]:
+    """Cut a condition at its top-level `&&`, its spaces collapsed.
+
+    :param condition: a job's `if:`, inside `${{ }}` or bare.
+    :returns: the conjuncts, none where a top-level `||` makes it a
+        disjunction.
+    """
+    text = condition.strip().removeprefix("${{").removesuffix("}}")
+    parts: list[str] = []
+    depth, start, quoted = 0, 0, False
+    for index, char in enumerate(text):
+        if char == "'":
+            quoted = not quoted
+        elif quoted:
+            continue
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+        elif depth == 0 and text.startswith("||", index):
+            return []
+        elif depth == 0 and text.startswith("&&", index):
+            parts.append(text[start:index])
+            start = index + 2
+    parts.append(text[start:])
+    return [" ".join(part.split()) for part in parts]
+
+
+def re_runnable(workflow: Path) -> list[str]:
+    """Name each job that no top-level conjunct holds to the first attempt.
+
+    :param workflow: the file to read.
+    :returns: the jobs' ids.
+    """
+    return [
+        name
+        for name, job in jobs(workflow).items()
+        if "github.run_attempt == 1" not in conjuncts(job.get("if", ""))
+    ]
+
+
 def test_no_job_runs_again_on_a_re_run() -> None:
-    """Each job's condition holds `github.run_attempt == 1`.
+    """Each job's condition is `github.run_attempt == 1 && ...`, in some order.
 
     The header says a re-run is refused, and "Re-run failed jobs" can re-run
     any job.
     """
-    for name, job in jobs(WORKFLOW).items():
-        assert "github.run_attempt == 1" in job["if"], name
+    assert re_runnable(WORKFLOW) == []
+
+
+@pytest.mark.parametrize(
+    ("old", "new"),
+    [
+        pytest.param(
+            "github.run_attempt == 1\n",
+            "github.run_attempt == 10\n",
+            id="another attempt",
+        ),
+        pytest.param(
+            "github.run_attempt == 1\n",
+            "github.run_attempt == 1 || github.event_name == 'issues'\n",
+            id="an alternative",
+        ),
+        pytest.param("&& github.run_attempt == 1\n", "\n", id="dropped"),
+        pytest.param(
+            "&& github.run_attempt == 1\n",
+            "&& (github.run_attempt == 1 || true)\n",
+            id="inside an alternative",
+        ),
+    ],
+)
+def test_the_re_run_check_sees_a_weakened_condition(
+    tmp_path: Path, old: str, new: str
+) -> None:
+    """A copy of the workflow with the conjunct weakened in the first job.
+
+    :param tmp_path: a directory of this test's own.
+    :param old: the text the copy replaces, the first time it occurs.
+    :param new: what it puts there.
+    """
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert old in text
+    mutant = tmp_path / "mutant.yml"
+    mutant.write_text(text.replace(old, new, 1), encoding="utf-8")
+    assert re_runnable(mutant) == [next(iter(jobs(WORKFLOW)))]
 
 
 def test_a_job_behind_a_skipped_one_still_runs() -> None:
@@ -174,20 +252,855 @@ def test_a_job_behind_a_skipped_one_still_runs() -> None:
             assert f"needs.{needed}.result" in job["if"], (name, needed)
 
 
-def test_no_step_hides_a_failed_gh_call_in_a_pipe() -> None:
-    """A `gh` or `curl` call is never piped on or excused with `|| true`.
+# a word naming `gh` or `curl`, a path to either included
+CALL = re.compile(r"(\S*/)?(gh|curl)")
 
-    The steps run without `pipefail`, so a pipe would carry on past a
-    failed call with an empty answer.
+# where a substitution cut out of a script stands, by its unit's number
+PLACEHOLDER = "\x01{}\x01"
+
+# an assignment of one substitution and nothing else
+ASSIGNMENT = re.compile(r"\w+=\x01(\d+)\x01")
+
+# a flag of `set` that turns `errexit` off, `+o errexit` aside
+ERREXIT_OFF = re.compile(r"\+[a-zA-Z]*e[a-zA-Z]*")
+
+# the pieces a script is read in, each named for what becomes of it
+PIECE = re.compile(
+    r"(?P<join>\\\n)|(?P<escape>\\.)|(?P<ansi>\$'(\\.|[^\\'])*')"
+    r"|(?P<single>'[^']*')|(?P<unclosed>')"
+    r'|(?P<double>")|(?P<comment>(?<![^\s;(])#[^\n]*)'
+    r"|(?P<substitution>\$\(|<\(|>\(|`)|(?P<string><<<)"
+    r"""|(?P<heredoc><<(?P<dash>-?)\s*(?P<quote>['"]?)(?P<backslash>\\?)"""
+    r"(?P<tag>\w+)(?P=quote))"
+    r"|(?P<opening>\()|(?P<closing>\))|(?P<newline>\n)"
+    r"""|(?P<other>[^\\'"#$<>()`\n]+|.)""",
+    re.DOTALL,
+)
+
+# what a piece leaves in the skeleton, where that is not its own text
+LEFT = {"join": " ", "escape": "x", "ansi": "''", "single": "''", "comment": ""}
+
+# the pieces of a double-quoted string, and of a heredoc body that expands
+QUOTED = re.compile(r'(?P<end>")|\\.|(?P<substitution>\$\(|`)|[^"\\$`]+|.', re.DOTALL)
+EXPANDED = re.compile(r"\\.|(?P<substitution>\$\(|`)|[^\\$`]+|.", re.DOTALL)
+
+# the tokens of a skeleton
+TOKEN = re.compile(
+    r"(?P<space>[ \t\r]+)|(?P<newline>\n)"
+    r"|(?P<redirect>[0-9]*(&>>?|>>|>&|<&|<<<|<<-?|<>|>\||[<>]))"
+    r"|(?P<operator>;;&?|;&|\|\||&&|\|&|[;|&()])"
+    r"|(?P<word>[^\s;&|()<>]+)"
+)
+
+
+class Reader:
+    """Read a shell script as its commands, nothing quoted left in them.
+
+    A comment goes, a continuation joins its lines, and a quoted string
+    keeps its quotes and only the substitutions inside it. Each
+    substitution, `$(...)`, `<(...)`, `>(...)` or backticks, is cut out
+    into a unit of its own and stands as a placeholder naming the unit. A
+    heredoc's body is a unit of its own: a script where its word is quoted
+    and its body starts with `#!`, the substitutions it expands where its
+    word is not quoted, and nothing otherwise.
     """
+
+    def __init__(self, text: str, units: list[tuple[str, str]]) -> None:
+        """Take the script, and where its units go.
+
+        :param text: the script.
+        :param units: where each unit is added, as its kind and its skeleton.
+        """
+        self.text = text
+        self.units = units
+
+    def read(self, index: int = 0, *, closing: bool = False) -> tuple[str, int]:
+        """Read from `index` to the end, or to a substitution's closing `)`.
+
+        :param index: where to start.
+        :param closing: whether a `)` of this level ends the reading.
+        :returns: the skeleton, and where the reading stopped.
+        :raises ValueError: where a quote, a substitution or a heredoc is
+            left open.
+        """
+        out: list[str] = []
+        depth = 0
+        heredocs: list[tuple[str, bool, bool]] = []
+        while index < len(self.text):
+            piece = PIECE.match(self.text, index)
+            assert piece
+            kind, index = piece.lastgroup, piece.end()
+            if kind == "closing" and closing and not depth:
+                return "".join(out), index
+            if kind in {"double", "substitution", "unclosed"}:
+                text, index = getattr(self, str(kind))(piece[0], index)
+                out.append(text)
+                continue
+            if kind == "heredoc":
+                quoted = bool(piece["quote"] or piece["backslash"])
+                heredocs.append((piece["tag"], quoted, bool(piece["dash"])))
+            elif kind == "newline" and heredocs:
+                index = self.heredocs(heredocs, index)
+                heredocs = []
+            depth = max(depth + {"opening": 1, "closing": -1}.get(str(kind), 0), 0)
+            out.append(LEFT.get(str(kind), piece[0]))
+        if closing or heredocs:
+            message = "a substitution or a heredoc is left open"
+            raise ValueError(message)
+        return "".join(out), index
+
+    def unclosed(self, _: str, index: int) -> tuple[str, int]:
+        """Refuse a single quote left open.
+
+        :param _: the quote.
+        :param index: where the string would start.
+        :raises ValueError: always.
+        """
+        message = f"a single quote is left open at {index}"
+        raise ValueError(message)
+
+    def double(self, _: str, index: int) -> tuple[str, int]:
+        """Read a double-quoted string, keeping only its substitutions.
+
+        :param _: the opening quote.
+        :param index: where the string starts.
+        :returns: its skeleton, and where the text goes on after it.
+        :raises ValueError: where the string is left open.
+        """
+        out = ['"']
+        while index < len(self.text):
+            piece = QUOTED.match(self.text, index)
+            assert piece
+            index = piece.end()
+            if piece["end"]:
+                return "".join([*out, '"']), index
+            if piece["substitution"]:
+                text, index = self.substitution(piece[0], index)
+                out.append(text)
+        message = "a double quote is left open"
+        raise ValueError(message)
+
+    def expanded(self) -> str:
+        """Read a heredoc body that expands, keeping only its substitutions.
+
+        :returns: their placeholders.
+        """
+        out: list[str] = []
+        index = 0
+        while index < len(self.text):
+            piece = EXPANDED.match(self.text, index)
+            assert piece
+            index = piece.end()
+            if piece["substitution"]:
+                text, index = self.substitution(piece[0], index)
+                out.append(text)
+        return " ".join(out)
+
+    def substitution(self, opening: str, index: int) -> tuple[str, int]:
+        """Cut a substitution out into a unit of its own.
+
+        :param opening: `$(`, `<(`, `>(` or a backtick.
+        :param index: where its text starts.
+        :returns: its placeholder, and where the text goes on after it.
+        """
+        if opening == "`":
+            end = self.text.index("`", index)
+            unit, _ = Reader(self.text[index:end], self.units).read()
+            index = end + 1
+        else:
+            unit, index = self.read(index, closing=True)
+        self.units.append((opening, unit))
+        return PLACEHOLDER.format(len(self.units) - 1), index
+
+    def heredocs(self, tags: list[tuple[str, bool, bool]], index: int) -> int:
+        """Read the bodies of the heredocs a line opened, from the next line.
+
+        A body that expands is read for its substitutions, which run as it
+        is written; one that opens with `#!` is read as a script too, its
+        leading tabs gone after `<<-`.
+
+        :param tags: the words that end them, in order, each with whether
+            it is quoted and whether it follows `<<-`.
+        :param index: where the first body starts.
+        :returns: where the text goes on after the last.
+        :raises ValueError: where a body is left open.
+        """
+        for tag, quoted, dash in tags:
+            # the tag ends the body in the first column, or after tabs
+            # under `<<-`
+            indent = r"\t*" if dash else ""
+            ended = re.compile(rf"^{indent}{tag}$", re.MULTILINE)
+            end = ended.search(self.text, index)
+            if end is None:
+                message = f"the heredoc {tag} is left open"
+                raise ValueError(message)
+            text = self.text[index : end.start()]
+            body = Reader(re.sub(r"(?m)^\t+", "", text) if dash else text, self.units)
+            if not quoted:
+                self.units.append(("text", body.expanded()))
+            if body.text.startswith("#!"):
+                # the script runs with `errexit` only where its `#!` says so
+                shebang = body.text.split("\n", 1)[0]
+                kind = "script -e" if re.search(r"\s-\w*e", shebang) else "script"
+                self.units.append((kind, body.read()[0]))
+            index = end.end()
+        return index
+
+
+class Simple(NamedTuple):
+    """A simple command: its words, then its redirections."""
+
+    words: list[str]
+    redirects: list[str]
+
+
+class Compound(NamedTuple):
+    """A compound command, each part with its role.
+
+    The role is `condition`, `body`, `function` or `words`, the last for
+    the words of `for` and `case`.
+    """
+
+    parts: list[tuple[str, list[AndOr]]]
+    redirects: list[str]
+
+
+class Pipeline(NamedTuple):
+    """Commands joined by `|`, negated by `!` or not."""
+
+    negated: bool
+    commands: list[Simple | Compound]
+
+
+class AndOr(NamedTuple):
+    """Pipelines joined by `&&` and `||`, run in the background or not."""
+
+    pipelines: list[Pipeline]
+    operators: list[str]
+    background: bool
+
+
+# the words that open a compound command, and the method reading each
+OPENERS = {
+    "if": "conditional",
+    "while": "loop",
+    "until": "loop",
+    "for": "iteration",
+    "case": "choice",
+    "{": "group",
+    "(": "group",
+}
+
+
+def wrapped(words: list[str]) -> list[AndOr]:
+    """Wrap words as one simple command, for the walk to read them.
+
+    :param words: the words.
+    :returns: the command, as a list.
+    """
+    command = Pipeline(negated=False, commands=[Simple(words, [])])
+    return [AndOr(pipelines=[command], operators=[], background=False)]
+
+
+class Parser:
+    """Parse a skeleton into the commands the check walks."""
+
+    def __init__(self, skeleton: str) -> None:
+        """Cut the skeleton into its tokens.
+
+        :param skeleton: what `Reader` left of a script.
+        """
+        self.tokens = [
+            (str(token.lastgroup), token[0])
+            for token in TOKEN.finditer(skeleton)
+            if token.lastgroup != "space"
+        ]
+        self.at = 0
+
+    def peek(self, ahead: int = 0) -> str | None:
+        """Read a token without taking it.
+
+        :param ahead: how far past the next one.
+        :returns: its text, None past the end.
+        """
+        at = self.at + ahead
+        return self.tokens[at][1] if at < len(self.tokens) else None
+
+    def kind(self) -> str | None:
+        """Read the next token's kind.
+
+        :returns: the kind, None past the end.
+        """
+        return self.tokens[self.at][0] if self.at < len(self.tokens) else None
+
+    def take(self, expected: str | None = None) -> str:
+        """Take the next token.
+
+        :param expected: the text it must have, any where None.
+        :returns: its text.
+        :raises ValueError: where there is none, or another.
+        """
+        found = self.peek()
+        if found is None or expected not in {None, found}:
+            message = f"{expected!r} expected at token {self.at}, not {found!r}"
+            raise ValueError(message)
+        self.at += 1
+        return found
+
+    def skip(self, separators: frozenset[str] = frozenset({"\n"})) -> None:
+        """Skip separators.
+
+        :param separators: the tokens skipped.
+        """
+        while self.peek() in separators:
+            self.at += 1
+
+    def script(self) -> list[AndOr]:
+        """Parse the whole skeleton.
+
+        :returns: its commands.
+        :raises ValueError: where tokens are left over.
+        """
+        found = self.items(frozenset())
+        if self.peek() is not None:
+            message = f"{self.peek()!r} unexpected at token {self.at}"
+            raise ValueError(message)
+        return found
+
+    def items(self, stops: frozenset[str]) -> list[AndOr]:
+        """Parse a list of commands, up to a word that ends it.
+
+        :param stops: the words that end it.
+        :returns: the commands.
+        """
+        found: list[AndOr] = []
+        while True:
+            self.skip(frozenset({"\n", ";"}))
+            if self.peek() is None or self.peek() in stops:
+                return found
+            found.append(self.and_or())
+
+    def and_or(self) -> AndOr:
+        """Parse pipelines joined by `&&` and `||`.
+
+        :returns: the list.
+        """
+        pipelines = [self.pipeline()]
+        operators = []
+        while self.peek() in {"&&", "||"}:
+            operators.append(self.take())
+            self.skip()
+            pipelines.append(self.pipeline())
+        background = self.peek() == "&"
+        self.at += background
+        return AndOr(pipelines, operators, background)
+
+    def pipeline(self) -> Pipeline:
+        """Parse commands joined by `|`, `!` before them or not.
+
+        :returns: the pipeline.
+        """
+        negated = self.peek() == "!"
+        self.at += negated
+        commands = [self.command()]
+        while self.peek() in {"|", "|&"}:
+            self.at += 1
+            self.skip()
+            commands.append(self.command())
+        return Pipeline(negated, commands)
+
+    def command(self) -> Simple | Compound:
+        """Parse one command, simple or compound.
+
+        :returns: the command.
+        """
+        opener = self.peek()
+        if opener in OPENERS:
+            parts = getattr(self, OPENERS[str(opener)])()
+        elif opener == "function" or (self.peek(1), self.peek(2)) == ("(", ")"):
+            parts = self.function()
+        else:
+            return self.simple()
+        return Compound(parts, self.redirects())
+
+    def redirects(self) -> list[str]:
+        """Parse the redirections after a command.
+
+        :returns: each, with its target.
+        """
+        found = []
+        while self.kind() == "redirect":
+            found.append(self.take() + self.take())
+        return found
+
+    def simple(self) -> Simple:
+        """Parse a simple command.
+
+        :returns: the command.
+        :raises ValueError: where it has no word.
+        """
+        words: list[str] = []
+        redirects: list[str] = []
+        while self.kind() in {"word", "redirect"}:
+            if self.kind() == "redirect":
+                redirects += self.redirects()
+            else:
+                words.append(self.take())
+        if not words and not redirects:
+            message = f"a command expected at token {self.at}, not {self.peek()!r}"
+            raise ValueError(message)
+        return Simple(words, redirects)
+
+    def conditional(self) -> list[tuple[str, list[AndOr]]]:
+        """Parse `if`, its `elif`s and its `else`.
+
+        :returns: the conditions and the bodies.
+        """
+        parts = []
+        keyword = self.take("if")
+        while keyword in {"if", "elif"}:
+            parts.append(("condition", self.items(frozenset({"then"}))))
+            self.take("then")
+            parts.append(("body", self.items(frozenset({"elif", "else", "fi"}))))
+            keyword = self.take()
+        if keyword == "else":
+            parts.append(("body", self.items(frozenset({"fi"}))))
+            keyword = self.take()
+        if keyword != "fi":
+            message = f"'fi' expected at token {self.at}, not {keyword!r}"
+            raise ValueError(message)
+        return parts
+
+    def loop(self) -> list[tuple[str, list[AndOr]]]:
+        """Parse `while` or `until`.
+
+        :returns: the condition and the body.
+        """
+        self.take()
+        condition = self.items(frozenset({"do"}))
+        self.take("do")
+        body = self.items(frozenset({"done"}))
+        self.take("done")
+        return [("condition", condition), ("body", body)]
+
+    def iteration(self) -> list[tuple[str, list[AndOr]]]:
+        """Parse `for`.
+
+        :returns: its words and its body.
+        """
+        self.take("for")
+        words = [self.take()]
+        self.skip()
+        if self.peek() == "in":
+            while self.kind() == "word":
+                words.append(self.take())
+        self.skip(frozenset({"\n", ";"}))
+        self.take("do")
+        body = self.items(frozenset({"done"}))
+        self.take("done")
+        return [("words", wrapped(words)), ("body", body)]
+
+    def choice(self) -> list[tuple[str, list[AndOr]]]:
+        """Parse `case`.
+
+        :returns: its word and its arms' bodies.
+        """
+        self.take("case")
+        parts = [("words", wrapped([self.take()]))]
+        self.skip()
+        self.take("in")
+        while True:
+            self.skip()
+            if self.peek() == "esac":
+                self.take()
+                return parts
+            while self.peek() not in {")", None}:
+                self.take()
+            self.take(")")
+            ends = frozenset({";;", ";&", ";;&", "esac"})
+            parts.append(("body", self.items(ends)))
+            self.at += self.peek() in ends - {"esac"}
+
+    def group(self) -> list[tuple[str, list[AndOr]]]:
+        """Parse `{ ... }` or `( ... )`.
+
+        :returns: the body.
+        """
+        closer = "}" if self.take() == "{" else ")"
+        body = self.items(frozenset({closer}))
+        self.take(closer)
+        return [("body" if closer == "}" else "subshell", body)]
+
+    def function(self) -> list[tuple[str, list[AndOr]]]:
+        """Parse a function's definition.
+
+        :returns: its body.
+        """
+        if self.take() == "function":
+            self.take()
+        if self.peek() == "(":
+            self.take("(")
+            self.take(")")
+        self.skip()
+        command = self.command()
+        pipeline = Pipeline(negated=False, commands=[command])
+        body = AndOr(pipelines=[pipeline], operators=[], background=False)
+        return [("function", [body])]
+
+
+def single_call(unit: str) -> bool:
+    """Say whether a substitution's text is one `gh` or `curl` call alone.
+
+    :param unit: the substitution's skeleton.
+    :returns: whether it is the call, on one line, with no redirection.
+    """
+    if "\n" in unit.strip():
+        return False
+    try:
+        (and_or,) = Parser(unit).script()
+    except ValueError:
+        return False
+    (pipeline,) = and_or.pipelines
+    command = pipeline.commands[0]
+    return (
+        not and_or.background
+        and not pipeline.negated
+        and len(pipeline.commands) == 1
+        and isinstance(command, Simple)
+        and not command.redirects
+        and bool(CALL.fullmatch(command.words[0]))
+    )
+
+
+class Check:
+    """Walk a step's scripts, keeping what could carry on past a failed call.
+
+    A command is held to its result where it is a pipeline of its own, not
+    negated, not in the background, not beside `&&` or `||`, not in a
+    condition or a function's body, and inside nothing that is not held
+    too. A simple command followed by `|| exit`, `|| exit $?` or `|| exit`
+    with a literal non-zero status is held as well. A subshell's body is
+    held only where the script has `errexit`, since an `exit` inside it
+    ends the subshell alone.
+    """
+
+    def __init__(self, units: list[tuple[str, str]]) -> None:
+        """Take the step's units.
+
+        :param units: each unit's kind and skeleton.
+        """
+        self.units = units
+        self.calls = {
+            number
+            for number, (_, unit) in enumerate(units)
+            if any(
+                token.lastgroup == "word" and CALL.fullmatch(token[0])
+                for token in TOKEN.finditer(unit)
+            )
+        }
+        self.accepted: set[int] = set()
+        self.found: list[str] = []
+        self.errexit = True
+
+    def script(self, unit: str, *, errexit: bool) -> None:
+        """Walk one script.
+
+        :param unit: its skeleton.
+        :param errexit: whether it runs with `errexit`.
+        """
+        self.errexit = errexit
+        try:
+            self.items(Parser(unit).script(), held=True)
+        except ValueError as error:
+            self.found.append(f"not read: {error}")
+
+    def items(self, items: list[AndOr], *, held: bool) -> None:
+        """Walk a list of commands.
+
+        :param items: the commands.
+        :param held: whether the list is held to its result.
+        """
+        for and_or in items:
+            first = and_or.pipelines[0].commands
+            exits = (
+                and_or.operators == ["||"]
+                and is_exit(and_or.pipelines[1])
+                and len(first) == 1
+                and isinstance(first[0], Simple)
+            )
+            alone = len(and_or.pipelines) == 1 or exits
+            for index, pipeline in enumerate(and_or.pipelines):
+                self.pipeline(
+                    pipeline,
+                    held=held and alone and not and_or.background,
+                    exits=exits and index == 0,
+                )
+
+    def pipeline(self, pipeline: Pipeline, *, held: bool, exits: bool) -> None:
+        """Walk a pipeline.
+
+        :param pipeline: the pipeline.
+        :param held: whether its list holds it to its result.
+        :param exits: whether `|| exit` follows it.
+        """
+        held = held and not pipeline.negated and len(pipeline.commands) == 1
+        for command in pipeline.commands:
+            if isinstance(command, Compound):
+                for role, items in command.parts:
+                    # an `exit` in a subshell ends the subshell alone
+                    body = role == "body" or (role == "subshell" and self.errexit)
+                    self.items(items, held=held and body)
+            else:
+                self.simple(command, held=held, exits=exits)
+
+    def simple(self, command: Simple, *, held: bool, exits: bool) -> None:
+        """Walk a simple command: accept its call, or keep it.
+
+        :param command: the command.
+        :param held: whether it is held to its result.
+        :param exits: whether `|| exit` follows it.
+        """
+        words = command.words
+        if errexit_off(words):
+            self.found.append(" ".join(words))
+        assigned = ASSIGNMENT.fullmatch(words[0]) if len(words) == 1 else None
+        if assigned and int(assigned[1]) in self.calls:
+            kind, unit = self.units[int(assigned[1])]
+            if held and (self.errexit or exits) and kind in {"$(", "`"}:
+                self.accepted.update([int(assigned[1])] if single_call(unit) else [])
+            return
+        if not any(CALL.fullmatch(word) for word in words):
+            return
+        rest = list(itertools.dropwhile(re.compile(r"\w+=\S*").fullmatch, words))
+        executed = rest[:1] == ["exec"]
+        rest = rest[executed:]
+        direct = bool(rest) and bool(CALL.fullmatch(rest[0]))
+        if not (held and direct and (self.errexit or executed)):
+            self.found.append(" ".join(words))
+
+
+def errexit_off(words: list[str]) -> bool:
+    """Say whether a command turns `errexit` off, or hides an error from it.
+
+    :param words: the command's words.
+    :returns: whether it is `set +e` or `+o errexit`, through `command` or
+        `builtin` or not, `shopt -u -o errexit`, or `trap ... ERR`.
+    """
+    words = list(itertools.dropwhile({"command", "builtin"}.__contains__, words))
+    head = words[:1]
+    return (
+        (head == ["set"] and any(ERREXIT_OFF.fullmatch(word) for word in words))
+        or (head == ["set"] and "+o errexit" in " ".join(words))
+        or (
+            head == ["shopt"]
+            and "errexit" in words
+            and any(re.fullmatch(r"-\w*u\w*", word) for word in words)
+        )
+        or (head == ["trap"] and "ERR" in words)
+    )
+
+
+# what `exit` may take to fail: nothing, `$?`, or a status of 1 to 255,
+# since bash keeps the status modulo 256
+STATUS = re.compile(r"(\$\?|0*([1-9][0-9]?|1[0-9]{2}|2[0-4][0-9]|25[0-5]))?")
+
+
+def is_exit(pipeline: Pipeline) -> bool:
+    """Say whether a pipeline is `exit` with a status other than 0.
+
+    :param pipeline: the pipeline.
+    :returns: whether it is bare `exit`, `exit $?` or a literal non-zero
+        status.
+    """
+    (command, *others) = pipeline.commands
+    return (
+        not others
+        and not pipeline.negated
+        and isinstance(command, Simple)
+        and command.words[:1] == ["exit"]
+        and not command.words[2:]
+        and bool(STATUS.fullmatch("".join(command.words[1:])))
+    )
+
+
+def hidden_calls(run: str) -> list[str]:
+    r"""List what in a step could carry on past a failed `gh` or `curl` call.
+
+    The step's script runs under `bash -e`, which
+    `test_no_step_hides_a_failed_gh_call` asserts by finding no `shell:`
+    or `defaults:`. A script the step writes in a heredoc runs with
+    `errexit` only where its `#!` line has `-e`; a `set -e` inside it is
+    not read. A call passes as the whole of an assignment, `x=$(gh ...)` or
+    its backtick form alone, with no redirection inside the substitution,
+    and followed by `|| exit` where the script has no `errexit`. It passes
+    as a direct call too, after variables and with any redirection, after
+    `exec` where the script has no `errexit`. Either is held to its result,
+    as `Check` says. Anything else is kept, and so are `set +e` and
+    `set +o errexit`, through `command` or `builtin` or not,
+    `shopt -u -o errexit`, its flags joined or not, and `trap ... ERR`.
+
+    The check reads a call by its name, as a word: it does not follow a
+    name quoted or escaped (`"gh"`, `\gh`) or held in a variable, nor a
+    call run by `eval`, `bash -c` or `sh -c`, nor one in a quoted heredoc
+    that does not open with `#!` but is run all the same (`bash <<'EOF'`).
+    A heredoc body that opens with `#!` is read as a script, quoted or
+    not. A call inside a function is kept, whatever calls the function. A
+    script it cannot read is kept whole.
+
+    :param run: the step's script.
+    :returns: each command kept, a substitution as its unit.
+    """
+    units: list[tuple[str, str]] = []
+    try:
+        units.append(("script -e", Reader(run, units).read()[0]))
+    except ValueError as error:
+        return [f"not read: {error}"]
+    check = Check(units)
+    for kind, unit in units:
+        if kind.startswith("script"):
+            check.script(unit, errexit=kind == "script -e")
+    found = check.found + [
+        f"{units[number][0]}{units[number][1].strip()})"
+        for number in sorted(check.calls - check.accepted)
+        if not units[number][0].startswith("script")
+    ]
+    return [re.sub("\x01(\\d+)\x01", r"$(#\1)", line) for line in found]
+
+
+def test_no_step_hides_a_failed_gh_call() -> None:
+    """Each `gh` or `curl` call is an assignment's whole or a direct call.
+
+    The steps run under `bash -e` without `pipefail`, so a pipe, an `if`,
+    an argument, a test, `local`, an `||` or a `set +e` would carry on past
+    a failed call with an empty answer. `hidden_calls` says what the check
+    does not follow.
+    """
+    assert "defaults" not in document(WORKFLOW)
     for name, job in jobs(WORKFLOW).items():
+        assert "defaults" not in job, name
         for step in job["steps"]:
-            for line in commands(step.get("run", "")):
-                unquoted = re.sub(r"'[^']*'", "''", line)
-                for call in re.finditer(r"(^|[\s(])(gh|curl)\s", unquoted):
-                    rest = unquoted[call.end() :]
-                    assert not re.search(r"(?<!\|)\|(?!\|)", rest), (name, line)
-                    assert "|| true" not in rest, (name, line)
+            assert "shell" not in step, (name, step.get("name"))
+            assert hidden_calls(step.get("run", "")) == [], (name, step.get("name"))
+
+
+# a line of the workflow most mutants rewrite, the call it holds, and the
+# indentation of the step's script
+LABELS = """labels=$(gh api "repos/$REPO/issues/$NUMBER/labels" --jq '.[].name')"""
+CALLED = """gh api "repos/$REPO/issues/$NUMBER/labels" --jq '.[].name'"""
+INDENT = "\n" + " " * 10
+
+# a call of check-admission, which runs without `errexit`
+ADMISSION = """labels=$(gh api "repos/$1/issues/$2/labels" --jq '.[].name') || exit 1"""
+
+# check-admission's loop over the label's events, and that loop in a pipe
+LOOP = """admitted=
+          while read -r kind actor at; do"""
+PIPED = """admitted=$(printf '%s\\n' "$agent" \\
+            | while read -r kind actor at; do"""
+
+
+@pytest.mark.parametrize(
+    ("old", "new"),
+    [
+        pytest.param(LABELS, f"labels=$({CALLED} | sort)", id="a pipe"),
+        pytest.param(LABELS, f"labels=$({CALLED}) || :", id="|| :"),
+        pytest.param(LABELS, f"labels=$({CALLED}) || true", id="|| true"),
+        pytest.param(LABELS, f"labels=$({CALLED}) || echo none", id="|| echo"),
+        pytest.param(LABELS, f"{CALLED} | sort", id="a direct call piped"),
+        pytest.param(LABELS, f"{CALLED} || :", id="a direct call excused"),
+        pytest.param(LABELS, f"read -r labels < <({CALLED})", id="< <(gh)"),
+        pytest.param(LABELS, f'echo "labels=$({CALLED})"', id="in an argument"),
+        pytest.param(LABELS, f'[ -z "$({CALLED})" ] || exit 1', id="in a test"),
+        pytest.param(LABELS, f"local labels=$({CALLED})", id="local"),
+        pytest.param(LABELS, f"if {CALLED}; then :; fi", id="if"),
+        pytest.param(
+            LABELS, f"labels=$({CALLED}{INDENT}  echo agent)", id="a second line"
+        ),
+        pytest.param(
+            LABELS, f"{{{INDENT}  {CALLED} > l{INDENT}}} || true", id="a group excused"
+        ),
+        pytest.param(
+            LABELS, f"({INDENT}  {CALLED} > l{INDENT}) || :", id="a subshell excused"
+        ),
+        pytest.param(
+            LABELS,
+            f"if{INDENT}  {CALLED} > l{INDENT}then :; fi",
+            id="an if over lines",
+        ),
+        pytest.param(
+            LABELS,
+            f"while{INDENT}  {CALLED} > l{INDENT}do break; done",
+            id="a while over lines",
+        ),
+        pytest.param(
+            LABELS,
+            f"f() {{{INDENT}  {CALLED}{INDENT}}}{INDENT}labels=$(f | sort)",
+            id="a function piped",
+        ),
+        pytest.param(
+            LABELS,
+            f"cat > l <<EOF{INDENT}$({CALLED} | sort){INDENT}EOF",
+            id="a heredoc that expands",
+        ),
+        pytest.param(LABELS, f"set +e{INDENT}{LABELS}", id="set +e"),
+        pytest.param(LABELS, f"set -u +e{INDENT}{LABELS}", id="set -u +e"),
+        pytest.param(LABELS, f"set -x +e{INDENT}{LABELS}", id="set -x +e"),
+        pytest.param(LABELS, f"set +o errexit{INDENT}{LABELS}", id="set +o errexit"),
+        pytest.param(LABELS, f"trap '' ERR{INDENT}{LABELS}", id="trap ERR"),
+        pytest.param(") || exit 1\n", ")\n", id="a script without errexit"),
+        pytest.param(LABELS, f"labels=$(cd /;{CALLED})", id="after a ;"),
+        pytest.param(LABELS, f"labels=$(true&&{CALLED}) || :", id="after &&"),
+        pytest.param(LABELS, f"labels=$( ({CALLED}) )", id="in a subshell"),
+        pytest.param(LABELS, f"labels=$({CALLED}|sort)", id="before a |"),
+        pytest.param(LABELS, f"{LABELS} || exit 0", id="|| exit 0"),
+        pytest.param(LABELS, f"{LABELS} || exit 256", id="|| exit 256"),
+        pytest.param(") || exit 1\n", ") || exit 0\n", id="a script's || exit 0"),
+        pytest.param(ADMISSION, f"( {ADMISSION} )", id="a script's subshell"),
+        pytest.param(
+            LABELS, f"{{{INDENT}  {LABELS}{INDENT}  :{INDENT}}} || exit 1", id="a group"
+        ),
+        pytest.param(
+            LABELS,
+            f"cat > s <<S{INDENT}#!/bin/sh{INDENT}{CALLED} | sort{INDENT}S",
+            id="a script in a heredoc that expands",
+        ),
+        pytest.param(
+            LABELS,
+            f"cat > s <<-'S'{INDENT}\t#!/bin/sh{INDENT}\t{CALLED} | sort{INDENT}\tS",
+            id="a script after <<-",
+        ),
+        pytest.param(LABELS, f"command set +e{INDENT}{LABELS}", id="command set +e"),
+        pytest.param(
+            LABELS, f"shopt -u -o errexit{INDENT}{LABELS}", id="shopt -u -o errexit"
+        ),
+        pytest.param(LABELS, f"shopt -uo errexit{INDENT}{LABELS}", id="shopt -uo"),
+        pytest.param(LOOP, PIPED, id="a loop in a pipe"),
+    ],
+)
+def test_the_hidden_call_check_sees_each_form(
+    tmp_path: Path, old: str, new: str
+) -> None:
+    """A copy of the workflow with the form in place of what it held.
+
+    :param tmp_path: a directory of this test's own.
+    :param old: the text the copy replaces, each time it occurs.
+    :param new: what it puts there.
+    """
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert old in text
+    if new == PIPED:
+        # the pipe's loop ends in `done)`, not in a here-string
+        text = text.replace('done <<< "$agent"', "done)")
+    mutant = tmp_path / "mutant.yml"
+    mutant.write_text(text.replace(old, new), encoding="utf-8")
+    found = [
+        line
+        for job in jobs(mutant).values()
+        for step in job["steps"]
+        for line in hidden_calls(step.get("run", ""))
+    ]
+    # the rule's own finding, not a script the check could not read
+    assert [line for line in found if not line.startswith("not read: ")], found
 
 
 def waiting() -> list[str]:
@@ -547,8 +1460,8 @@ def test_the_message_check_takes_a_number(bench: Path, number: str) -> None:
 
 
 # a stand-in `gh` for `check-admission`: the events, the labels and the
-# last edit from files beside it, and a permission for the logins it
-# names, any other answering as GitHub does for a bot or a deleted account
+# last edit from files beside it, an administrator and a writer by name,
+# and any other login's permission from a file
 ADMISSION_GH = """#!/bin/sh
 here=${0%/*}
 case $2 in
@@ -560,6 +1473,9 @@ case $2 in
     cat "$here/labels.txt" ;;
   repos/o/r/collaborators/admin1/permission) echo admin ;;
   repos/o/r/collaborators/writer/permission) echo write ;;
+  repos/o/r/collaborators/*/permission)
+    [ -f "$here/permission.txt" ] || { echo "gh: HTTP 502" >&2; exit 1; }
+    cat "$here/permission.txt" ;;
   graphql)
     [ -f "$here/edited.txt" ] || { echo "gh: HTTP 502" >&2; exit 1; }
     cat "$here/edited.txt" ;;
@@ -648,13 +1564,17 @@ def test_the_admission_covers_the_issue_until_withdrawn_or_edited(
     (tmp_path / "events.json").write_text(json.dumps([events]))
     (tmp_path / "labels.txt").write_text(labels + "\n" if labels else "")
     (tmp_path / "edited.txt").write_text(edited + "\n")
+    # what GitHub answers for a bot
+    (tmp_path / "permission.txt").write_text("none\n")
     done = admission(tmp_path)
     assert done.returncode == expected, done.stdout + done.stderr
     # a refusal is the script's own, with its reason, not a failed call
     assert ("::error::#7: " in done.stdout) == bool(expected), done.stdout
 
 
-@pytest.mark.parametrize("missing", ["events.json", "labels.txt", "edited.txt"])
+@pytest.mark.parametrize(
+    "missing", ["events.json", "labels.txt", "edited.txt", "permission.txt"]
+)
 def test_the_admission_fails_where_the_api_cannot_be_read(
     tmp_path: Path, missing: str
 ) -> None:
@@ -663,9 +1583,11 @@ def test_the_admission_fails_where_the_api_cannot_be_read(
     :param tmp_path: a directory of this test's own.
     :param missing: the answer the stand-in fails to give.
     """
-    (tmp_path / "events.json").write_text(json.dumps([[ADMIN]]))
+    bot = event("labeled", "claude[bot]", T1)
+    (tmp_path / "events.json").write_text(json.dumps([[ADMIN, bot]]))
     (tmp_path / "labels.txt").write_text("agent\n")
     (tmp_path / "edited.txt").write_text("\n")
+    (tmp_path / "permission.txt").write_text("none\n")
     (tmp_path / missing).unlink()
     done = admission(tmp_path)
     assert done.returncode == 1, done.stdout + done.stderr

@@ -272,23 +272,25 @@ jobs:
           [ "$#" -eq 2 ] || { echo "check-admission: takes the repository and the number" >&2; exit 2; }
           refuse() { echo "::error::#$2: $1"; exit 1; }
           events=$(gh api "repos/$1/issues/$2/events" --paginate --slurp) || exit 1
-          # an actor the permission endpoint does not answer for, a bot or a
-          # deleted account, is passed over; a removal ends the search
-          admitted=$(printf '%s\n' "$events" \
+          # the agent label's events, the newest first. One with no actor is
+          # passed over, and a removal ends the search. The loop reads a
+          # string, not a pipe, so that a failed call ends the script
+          agent=$(printf '%s\n' "$events" \
             | jq -r '[ .[][] | select((.event == "labeled" or .event == "unlabeled")
                                      and .label.name == "agent") ]
                      | reverse | .[]
-                     | "\(.event) \(.actor.login // "-") \(.created_at)"' \
-            | while read -r kind actor at; do
-                [ "$kind" = labeled ] || break
-                [ "$actor" != - ] || continue
-                permission=$(gh api "repos/$1/collaborators/$actor/permission" \
-                  --jq .permission 2>/dev/null) || continue
-                if [ "$permission" = admin ]; then
-                  echo "$at"
-                  break
-                fi
-              done)
+                     | "\(.event) \(.actor.login // "-") \(.created_at)"')
+          admitted=
+          while read -r kind actor at; do
+            [ "$kind" = labeled ] || break
+            [ "$actor" != - ] || continue
+            permission=$(gh api "repos/$1/collaborators/$actor/permission" \
+              --jq .permission) || exit 1
+            if [ "$permission" = admin ]; then
+              admitted=$at
+              break
+            fi
+          done <<< "$agent"
           [ -n "$admitted" ] || refuse "no administrator's agent label stands" "$2"
           labels=$(gh api "repos/$1/issues/$2/labels" --jq '.[].name') || exit 1
           grep -q -x agent <<< "$labels" || refuse "the issue no longer carries agent" "$2"
