@@ -1,0 +1,78 @@
+---
+name: reusable-sourcery
+
+# Sourcery's rules over a pull request, the job a tree's sourcery.yml
+# calls. Section 10's *Sourcery* is the rule (btclib-org/.github#2005);
+# this header is how the job keeps it.
+#
+# It reads what the pull request changes, `git diff origin/<base>...`,
+# the three dots naming the merge base with the base branch. Where the
+# pull request changes `.sourcery.yaml`, or a workflow whose file name
+# holds `sourcery`, it reads the whole tree: a rule or a version moved
+# is a new reading of every file. The version is set once, in the job's
+# env below; a tree's caller moves it by moving its pin of this file.
+#
+# A finding fails this job alone. No `--fix`: nothing here pushes, and
+# the author applies a finding or skips it at its site.
+#
+# No login and no secret. On a GitHub-hosted runner Sourcery reads a
+# clone whose origin is public without one (btclib-org/.github#2020).
+#
+# What only a live run shows:
+# - a pull request from a fork. actions/checkout clones the base
+#   repository and checks out the pull request's merge ref, so origin is
+#   the base's public URL and the job is expected to run as on a branch
+#   of the base. Not measured: a fork's run that fails asking for a
+#   login is the measurement, and the job is then red for that pull
+#   request alone.
+# - the base branch. `github.base_ref` is read through the environment,
+#   and an event without one, which no pull request is, fails the job
+#   naming it rather than reading against nothing.
+
+on:
+  workflow_call:
+
+# least privilege for the GITHUB_TOKEN: the job reads the tree and writes
+# nothing
+permissions:
+  contents: read
+
+jobs:
+  sourcery:
+    # the name the check context is keyed by, after the calling job's own
+    name: Sourcery
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SOURCERY_VERSION: 1.46.0
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the base branch's history, for the merge base the diff reads
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+
+      # the base branch arrives through the environment and not through an
+      # expression pasted into the script
+      - name: Review what the pull request changes
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -z "$BASE_REF" ]; then
+            echo "::error::no base branch: this job reads a pull request"
+            exit 1
+          fi
+          review=(uvx --from "sourcery==$SOURCERY_VERSION" sourcery review --check)
+          changed=$(git diff --name-only "origin/$BASE_REF...")
+          whole='^\.sourcery\.yaml$|^\.github/workflows/[^/]*sourcery[^/]*\.ya?ml$'
+          if grep -qE "$whole" <<< "$changed"; then
+            echo "Sourcery's configuration or version moved: reading the whole tree"
+            "${review[@]}" .
+          else
+            echo "reading what the pull request changes"
+            "${review[@]}" --diff "git diff origin/$BASE_REF..." .
+          fi

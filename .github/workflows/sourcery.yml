@@ -1,0 +1,33 @@
+---
+name: sourcery
+
+# Sourcery's rules over this pull request. The job, its pins and the
+# choice between the diff and the whole tree are reusable-sourcery.yml's;
+# what is this tree's is the trigger.
+#
+# Not a required check, and it must not become one: section 10 gives it
+# no place among the gates, and a finding fails this job alone.
+
+on:
+  pull_request:
+    # what the job reads, and what moves its rules or its version
+    paths:
+      - "**.py"
+      - .sourcery.yaml
+      - .github/workflows/sourcery.yml
+      - .github/workflows/reusable-sourcery.yml
+
+# least privilege for the GITHUB_TOKEN, which a called workflow cannot
+# widen: the job reads the tree and writes nothing
+permissions:
+  contents: read
+
+concurrency:
+  # named literally rather than through github.workflow, as everywhere
+  # else here. A newer push to the pull request answers for the older one
+  group: sourcery-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  sourcery:
+    uses: ./.github/workflows/reusable-sourcery.yml # zizmor: ignore[self-repository]
