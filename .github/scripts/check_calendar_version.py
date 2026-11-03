@@ -80,3 +80,4 @@ def main(argv: list[str] | None = None, now: datetime | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+# probe: one changed line, far from the finding in main()
