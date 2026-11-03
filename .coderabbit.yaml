@@ -65,16 +65,24 @@ reviews:
     github-checks:
       enabled: false
 knowledge_base:
-  # what a review reads a diff against, in every tree. AGENTS.md is
-  # among CodeRabbit's defaults already. The organization's standard is
-  # the README.md of btclib-org/.github, read from its default branch. In
-  # that repository itself CodeRabbit ignores an entry that names the
-  # repository it reviews, so there the entry loads nothing
+  # REVIEWING.md and CONTRIBUTING.md are what a review reads a diff
+  # against, in every tree. AGENTS.md is among CodeRabbit's defaults
+  # already.
+  #
+  # The organization's standard, the README.md of btclib-org/.github,
+  # is offered as guidelines to every review, read from that
+  # repository's default branch. applyTo "**" is what applies a
+  # guideline that names no files; such guidelines "get low priority",
+  # and over the review's guideline budget "CodeRabbit leaves these out
+  # first" (CodeRabbit's *Code guidelines*). In btclib-org/.github
+  # itself the entry names the repository under review, which
+  # CodeRabbit ignores, so there it selects nothing
   code_guidelines:
     filePatterns:
       - REVIEWING.md
       - CONTRIBUTING.md
-      - btclib-org/.github:README.md
+      - files: btclib-org/.github:README.md
+        applyTo: "**"
   # a convention shared between trees is decided once, in the standard
   # (section 14), and not learned from one tree and applied to another
   learnings:
