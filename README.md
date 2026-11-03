@@ -3148,9 +3148,11 @@ policies*](https://docs.coderabbit.ai/pr-reviews/approval-policies)), so
 it would meet the approval this section asks for with no person having
 read the change. `.coderabbit.yaml` turns its automatic approvals off, and
 refuses an author's `@coderabbitai approve`, which a branch's own
-configuration cannot turn back on. A branch of the repository can still
-turn the automatic approvals back on in its own copy; that edit is what
-the reading above looks for. `tests/coderabbit_test.py` reads both keys.
+configuration cannot turn back on ([*Automatic
+approvals*](https://docs.coderabbit.ai/pr-reviews/automatic-approvals)). A
+branch of the repository can still turn the automatic approvals back on in
+its own copy; that edit is what the reading above looks for.
+`tests/coderabbit_test.py` reads both keys.
 
 **On a repository with fewer than ten stars, CodeRabbit reviews only when
 asked**, by a `@coderabbitai review` comment

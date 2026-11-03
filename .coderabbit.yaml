@@ -66,11 +66,15 @@ reviews:
       enabled: false
 knowledge_base:
   # what a review reads a diff against, in every tree. AGENTS.md is
-  # among CodeRabbit's defaults already
+  # among CodeRabbit's defaults already. The organization's standard is
+  # the README.md of btclib-org/.github, read from its default branch. In
+  # that repository itself CodeRabbit ignores an entry that names the
+  # repository it reviews, so there the entry loads nothing
   code_guidelines:
     filePatterns:
       - REVIEWING.md
       - CONTRIBUTING.md
+      - btclib-org/.github:README.md
   # a convention shared between trees is decided once, in the standard
   # (section 14), and not learned from one tree and applied to another
   learnings:

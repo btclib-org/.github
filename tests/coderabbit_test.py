@@ -4,13 +4,8 @@
 
 """CodeRabbit never approves, as section 11's *Review* says.
 
-An approval the App posts counts as an approving review, so
-`.coderabbit.yaml` turns the automatic approval off. Section 11's
-*Review* says when a pull request's own copy can turn it back on, and
-the author could then have `@coderabbitai approve` approve; the file
-refuses that command to the author, and no branch can lift the refusal.
-Section 14 owes every tree this file byte for byte, which
-`verbatim_test.py` asks, so this copy is the one read here.
+The rule and its reason are there. Section 14 owes every tree this file,
+so this tree's copy is the one read here.
 """
 
 from __future__ import annotations
