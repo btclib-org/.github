@@ -1,0 +1,4 @@
+---
+version: "1"
+rule_settings:
+  python_version: "3.11"
