@@ -41,6 +41,7 @@ DEPENDABOT = "dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com
 PRE_COMMIT_CI = (
     "pre-commit-ci[bot] <66853113+pre-commit-ci[bot]@users.noreply.github.com>"
 )
+CLAUDE = "claude[bot] <209825114+claude[bot]@users.noreply.github.com>"
 
 
 @pytest.fixture
@@ -170,12 +171,46 @@ def test_a_trailer_outside_the_last_paragraph_is_refused(script: ModuleType) -> 
 
 
 @pytest.mark.usefixtures("repo")
-@pytest.mark.parametrize("bot", [DEPENDABOT, PRE_COMMIT_CI])
+@pytest.mark.parametrize("bot", [DEPENDABOT, PRE_COMMIT_CI, CLAUDE])
 def test_a_bot_commit_is_not_read(script: ModuleType, bot: str) -> None:
-    """Dependabot's and pre-commit.ci's commits pass with no trailer."""
+    """A commit authored by an address of `BOTS` passes with no trailer."""
     _commit("Bump a dependency", bot)
 
     assert script.refused("main~1..main") == []
+
+
+@pytest.mark.usefixtures("repo")
+def test_the_agents_commit_passes_with_no_trailer(
+    script: ModuleType, tmp_path: Path
+) -> None:
+    """The implement workflow's commit, with no trailer, passes the check.
+
+    The step runs as the workflow holds it, on a staged edit and the tree
+    the gates would have recorded for it, so the address is the one the
+    workflow commits under rather than one written here.
+    """
+    (step,) = [
+        step
+        for step in jobs(WORKFLOWS / "reusable-claude-implement.yml")["publish"][
+            "steps"
+        ]
+        if step.get("name") == "Commit the edit"
+    ]
+    message = tmp_path / "in"
+    message.mkdir()
+    (message / "message").write_text("Do it (closes #7)\n\nThe edit.\n")
+    (tmp_path / "edit.txt").write_text("an edit\n")
+    _git("add", "edit.txt")
+    gated = _git("write-tree").strip()
+    subprocess.run(
+        ["bash", "-e", "-c", step["run"]],
+        env={**os.environ, "IN": str(message), "BRANCH": "topic", "GATED": gated},
+        check=True,
+    )
+
+    assert _git("show", "-s", "--format=%(trailers)", "topic").strip() == ""
+    assert _git("show", "-s", "--format=%an <%ae>", "topic").strip() == CLAUDE
+    assert script.refused("main..topic") == []
 
 
 @pytest.mark.usefixtures("repo")

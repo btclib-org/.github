@@ -640,10 +640,10 @@ no module to build — owes none of the three, and may still keep `tests/`
 above the floor, as `.github`'s own suite over the organization does.
 
 **Every issue form ends with a `type: markdown` block on sign-off**, the
-one in this repository's own forms: whoever takes the issue signs off
-every commit, the required `Sign-off` check refuses a pull request
-without the trailer, and `CONTRIBUTING.md`'s *Pull requests* says why.
-A first contributor reads the issue before `CONTRIBUTING.md`, and a pull
+one in this repository's own forms: a person who takes the issue signs
+off every commit, the required `Sign-off` check refuses their commits
+without the trailer, and `CONTRIBUTING.md`'s *Pull requests* says why. A
+first contributor reads the issue before `CONTRIBUTING.md`, and a pull
 request opened without the trailer waits on them for a fix only they can
 make. `tests/labels_test.py` reads each form's last `body` item.
 
@@ -2875,17 +2875,17 @@ gh api repos/<owner>/<repo>/git/tags/<sha> --jq .verification
 ```
 
 **Every commit a pull request adds carries a `Signed-off-by:` trailer
-naming its author**, by which the author certifies the
-[Developer Certificate of Origin](https://developercertificate.org/). A
-signature attests who made a commit and the trailer the right to
-contribute it, so neither stands in for the other. A `Sign-off` job
-checks it: `reusable-lint.yml`'s, or the same job in a tree that keeps
-its own `lint.yml`, both running this repository's
+naming its author**, by which the author certifies the [Developer
+Certificate of Origin](https://developercertificate.org/). A signature
+attests who made a commit and the trailer the right to contribute it, so
+neither stands in for the other. A `Sign-off` job checks it:
+`reusable-lint.yml`'s, or the same job in a tree that keeps its own
+`lint.yml`, both running this repository's
 `.github/scripts/check_sign_off.py`. The trailer has to carry the
 author's own address: one from anyone else is not the author's
-attestation. The script skips merge commits and the commits of
-Dependabot and pre-commit.ci, and its docstring says why. The rejected
-alternative is the `dcoapp` GitHub App: one more party installed on the
+attestation. The script skips merge commits and the commits of the bots
+its `BOTS` names, and its docstring says why. The rejected alternative
+is the `dcoapp` GitHub App: one more party installed on the
 organization, where the job is code these trees hold.
 
 **The `Sign-off` job is a required check**, for the OpenSSF Baseline's

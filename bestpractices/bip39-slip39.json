@@ -132,7 +132,7 @@
     "status": "Met"
   },
   "OSPS-LE-01.01": {
-    "justification": "main requires the lint / Sign-off check, which refuses a commit that lacks its author's Signed-off-by: trailer, Dependabot's and pre-commit.ci's aside. Web commits are signed off automatically. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
+    "justification": "main requires the lint / Sign-off check, which refuses a commit that lacks its author's Signed-off-by: trailer, Dependabot's, pre-commit.ci's and claude[bot]'s aside. Web commits are signed off automatically. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
     "status": "Met"
   },
   "OSPS-LE-02.01": {
@@ -412,7 +412,7 @@
     "status": "Met"
   },
   "dco": {
-    "justification": "main requires the lint / Sign-off check, which refuses a pull request with a commit that lacks its author's Signed-off-by: trailer. Dependabot's and pre-commit.ci's commits are exempt. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
+    "justification": "main requires the lint / Sign-off check, which refuses a pull request with a commit that lacks its author's Signed-off-by: trailer. Dependabot's, pre-commit.ci's and claude[bot]'s commits are exempt. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
     "status": "Met"
   },
   "delivery_mitm": {

@@ -1681,7 +1681,7 @@ def test_publish_commits_only_the_tree_the_gates_ran_on() -> None:
     (step,) = [
         step
         for step in jobs(WORKFLOW)["publish"]["steps"]
-        if "commit -q -s" in step.get("run", "")
+        if step.get("name") == "Commit the edit"
     ]
     assert step["env"]["GATED"] == "${{ needs.gates.outputs.tree }}"
     assert '"$(git write-tree)" != "$GATED"' in step["run"]
@@ -1710,7 +1710,7 @@ def committed(
     (step,) = [
         step
         for step in jobs(WORKFLOW)["publish"]["steps"]
-        if "commit -q -s" in step.get("run", "")
+        if step.get("name") == "Commit the edit"
     ]
     run = step["run"].split("git -c user.name=", 1)[0] + "echo committed\n"
     return subprocess.run(

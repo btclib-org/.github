@@ -104,9 +104,10 @@ name: reusable-claude-implement
 # be approved by no person.
 #
 # The commit is authored by claude[bot], 209825114+claude[bot] at
-# users.noreply.github.com (`gh api 'users/claude[bot]' --jq .id`), and
-# signed off by `git commit -s`, which the Sign-off check reads. It is
-# not signed, which section 11's *Signatures* asks only of what lands.
+# users.noreply.github.com (`gh api 'users/claude[bot]' --jq .id`). It
+# carries no `Signed-off-by:` trailer, for the reason the docstring of
+# .github/scripts/check_sign_off.py gives. It is not signed, which
+# section 11's *Signatures* asks only of what lands.
 #
 # The bounds. Each job has `timeout-minutes`, each agent step a smaller
 # one and `--max-turns`, each far above what one issue should need; the
@@ -580,8 +581,8 @@ jobs:
             with `(closes #${{ github.event.issue.number }})`, a blank
             line, then at most two short paragraphs on what the change
             does and why, with no @-mention, no other closing reference
-            and no trailer: the sign-off is the workflow's. The pull
-            request takes its title and body from it.
+            and no trailer. The pull request takes its title and body
+            from it.
 
             Where the work needs what this job lacks, edit nothing and
             write no message: apply with the label script the label that
@@ -859,8 +860,9 @@ jobs:
             && { echo "check-message: a closing reference" >&2; exit 1; }
           printf '%s\n' "$text" | LC_ALL=C grep -E '(^|[^[:alnum:]])@[[:alnum:]]' \
             && { echo "check-message: a mention" >&2; exit 1; }
-          # a `-by:` trailer is the workflow's to add, the sign-off
-          # included; indented too, since what GitHub credits is not known
+          # no `-by:` trailer, since the agent can neither certify nor
+          # credit in a person's name; indented too, since what GitHub
+          # credits is not known
           printf '%s\n' "$text" \
             | LC_ALL=C grep -i -E '^[[:space:]]*[[:alnum:]-]+-by[[:space:]]*:' \
             && { echo "check-message: a -by: trailer" >&2; exit 1; }
@@ -894,7 +896,7 @@ jobs:
           fi
           git -c user.name='claude[bot]' \
             -c user.email='209825114+claude[bot]@users.noreply.github.com' \
-            commit -q -s -F "$IN/message"
+            commit -q -F "$IN/message"
       - name: Push and open the pull request
         env:
           REPO: ${{ github.repository }}
