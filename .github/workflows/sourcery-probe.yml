@@ -1,0 +1,56 @@
+---
+# Temporary: measures Sourcery 1.46.0 on a GitHub-hosted runner with no
+# login, for decision 20 on btclib-org/.github#2005. Never merged.
+name: Sourcery probe
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+
+      - name: (d) sourcery --version
+        run: |
+          set +e
+          uvx --from sourcery==1.46.0 sourcery --version
+          echo "EXIT_D=$?"
+
+      - name: (a) the whole tree
+        run: |
+          set +e
+          uvx --from sourcery==1.46.0 sourcery review --check --csv . > a.csv
+          e=$?
+          cat a.csv
+          echo "EXIT_A=$e ROWS_A=$(($(wc -l < a.csv) - 1))"
+
+      - name: (b) the diff, without the probe file
+        run: |
+          set +e
+          uvx --from sourcery==1.46.0 sourcery review --check --csv \
+            --diff "git diff origin/main... -- . :!probe" . > b.csv
+          e=$?
+          cat b.csv
+          echo "EXIT_B=$e ROWS_B=$(($(wc -l < b.csv) - 1))"
+
+      - name: (c) the diff, with the probe file
+        run: |
+          set +e
+          uvx --from sourcery==1.46.0 sourcery review --check --csv \
+            --diff "git diff origin/main..." . > c.csv
+          e=$?
+          cat c.csv
+          echo "EXIT_C=$e ROWS_C=$(($(wc -l < c.csv) - 1))"
