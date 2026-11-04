@@ -2205,29 +2205,29 @@ tier that has the CLI and exits 1 having read nothing, so a local gate never
 read it; on a GitHub-hosted runner, whose checkout is a clone with a public
 `origin`, it reads with no login (btclib-org/.github#2005). A tree that tracks
 Python carries a `sourcery.yml` calling `reusable-sourcery.yml` on
-`pull_request`. It reads the Python files the pull request changes, whole, and
-the whole tree where it changes `.sourcery.yaml` or the version; otherwise,
-where it changes no Python file, it reads nothing and passes. It has no `push`
-trigger and no `workflow_dispatch`, against *What every workflow does*: neither
-event carries the pull request it reads. A finding fails that job alone, and its
-skip is `# sourcery skip: <rule>` on the line Sourcery reports or on the `def`
-line of the function holding it, in the form section 4's `bare-sourcery-skip`
-admits.
+`pull_request` with no `paths` filter, so that its protection can gain the check
+with no change to the caller, for the reason *`paths-ignore` only on `push`*
+gives. It reads the Python files the pull request changes, whole, and the whole
+tree where it changes `.sourcery.yaml` or the version; otherwise, where it
+changes no Python file, it reads nothing and passes. It has no `push` trigger
+and no `workflow_dispatch`, against *What every workflow does*: neither event
+carries the pull request it reads. A finding fails that job alone, and its skip
+is `# sourcery skip: <rule>` on the line Sourcery reports or on the `def` line
+of the function holding it, in the form section 4's `bare-sourcery-skip` admits.
 
-**`sourcery` is a required check in a tree whose clean-up has landed and whose
-caller, `.sourcery.yaml` and `bare-sourcery-skip` are as this section and
-section 4 ask, and in no other** (btclib-org/.github#2005). A tree's protection
-gains it once both hold and its `sourcery` check is green, tree by tree. Until
-its clean-up a pull request touching a Python file for another reason can fail
-on findings it did not write. The trees not yet there are the `BACKLOG` row of
-btclib-org/.github#2005 in `tests/__init__.py`, keyed on the test that asks for
-the caller, the configuration and the guard. `protection_test.py` reads that
-row both ways: a tree out of it whose caller is in place requires the context,
-and a tree in it does not. The context is the caller's job name, then the
-callee's, `sourcery / Sourcery`, bound to the Actions app.
-
-**The caller's `pull_request` carries no `paths` filter**, for the reason
-*`paths-ignore` only on `push`* gives.
+**`sourcery` is a required check in a tree whose caller is in place and that is
+out of the `BACKLOG` row of btclib-org/.github#2005 in `tests/__init__.py`, and
+in no other.** The row lists the trees that are Python, as section 2 says, whose
+caller, `.sourcery.yaml` or section 4's `bare-sourcery-skip` is not yet as its
+test asks. A tree's caller lands with or after its clean-up: before it, a pull
+request touching a Python file for another reason can fail on findings it did
+not write. Per tree, the protection gains the check first and is read back; then
+the tree's Sourcery pull request lands, its own run turning the check green and
+its `REPOSITORY.md` recording the read-back; then the pull request here that
+drops the tree from the row. In between, its `protection_test.py` cell fails,
+and once its Sourcery pull request lands so does its row's cell; until it lands,
+no other pull request on that tree merges without the bypass. The context is the
+caller's job name then the callee's, `sourcery / Sourcery`.
 
 **`.sourcery.yaml` sets `python_version` to the lowest interpreter the tree's
 code runs on, never above the `requires-python` floor, and turns off the rules

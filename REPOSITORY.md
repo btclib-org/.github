@@ -64,9 +64,7 @@ protection needs the whole object rather than the answer above.
 | `Sign-off` | `lint.yml`'s third job |
 | `sourcery / Sourcery` | `sourcery.yml`, calling `reusable-sourcery.yml` |
 
-`sourcery / Sourcery` is required because this tree's clean-up has
-landed (btclib-org/.github#2030), its caller is section 10's and its
-check is green: [section 10][s10-set] says when a tree requires it.
+`sourcery / Sourcery` is required here, as [section 10][s10-set] says.
 
 The name `Lint` is not the sibling repositories' `Lint and type-check`,
 though the hook config it runs carries a mypy hook as theirs do: a context is

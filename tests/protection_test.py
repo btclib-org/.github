@@ -198,7 +198,7 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
 
 
 SOURCERY_ROW = "test_a_python_tree_calls_sourcery_with_its_rules_off"
-"""The test whose `BACKLOG` row lists the trees not yet requiring Sourcery."""
+"""The test whose `BACKLOG` row section 10 describes."""
 
 
 def sourcery_context(root: Path) -> str | None:
@@ -294,13 +294,11 @@ def test_main_requires_sourcery_once_out_of_its_row(
     trees: dict[str, Path],
     protections: dict[str, dict[str, Any] | str | None],
 ) -> None:
-    """Section 10: `sourcery` is required once a tree is out of its row.
+    """Section 10: `sourcery` is required with a caller and out of its row.
 
-    The trees whose clean-up has not landed, or whose caller,
-    `.sourcery.yaml` or guard is not section 10's and section 4's, are
-    the `BACKLOG` row of `SOURCERY_ROW`. A tree out of that row whose
-    caller is in place requires the context the caller reports; a tree
-    in the row, or with no caller, requires none naming Sourcery.
+    A tree out of the `BACKLOG` row of `SOURCERY_ROW` whose caller is in
+    place requires the context the caller reports; a tree in the row, or
+    with no caller, requires none naming Sourcery.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.

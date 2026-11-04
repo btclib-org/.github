@@ -5,9 +5,8 @@ name: sourcery
 # pins and the choice between those files and the whole tree are
 # reusable-sourcery.yml's; what is this tree's is the trigger.
 #
-# A required check of this tree, and so with no paths filter: section
-# 10 says which trees require it and why their caller is unfiltered
-# (btclib-org/.github#2005).
+# No paths filter: section 10 gives no tree's caller one, and says
+# which trees require the check (btclib-org/.github#2005).
 #
 # No push trigger and no workflow_dispatch, departures section 10's
 # paragraph on this job states: what it reads is a pull request's
