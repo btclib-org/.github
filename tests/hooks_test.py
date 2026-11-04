@@ -532,31 +532,41 @@ def guard_departures(document: dict[str, Any]) -> list[str]:
     return out
 
 
-FILTERED = ("**.py", SOURCERY_CONFIG)
-"""What a caller's `pull_request` filter names besides its own file."""
+FILTERS = ("paths", "paths-ignore")
+"""The `pull_request` filters a caller carries neither of."""
+
+
+def sourcery_calls(root: Path) -> list[tuple[Path, str]]:
+    """List the jobs of a tree that call `SOURCERY_CALLED`.
+
+    A call is a job whose `uses:` names it, in this repository at any
+    ref or as a local path.
+
+    :param root: the root of the checkout.
+    :returns: each calling workflow with the calling job's id.
+    """
+    local = {
+        f"{prefix}.github/workflows/{SOURCERY_CALLED}" for prefix in LOCAL_PREFIXES
+    }
+    return [
+        (workflow, job_id)
+        for workflow in workflows(root)
+        for job_id, job in jobs(workflow).items()
+        if str(job.get("uses", "")) in local
+        or calls_here(str(job.get("uses", "")), SOURCERY_CALLED)
+    ]
 
 
 def caller_departures(root: Path) -> list[str]:
     """Report where a tree calls `SOURCERY_CALLED` otherwise than section 10.
 
-    A call is a job whose `uses:` names it, in this repository at any
-    ref or as a local path, in a workflow triggered on `pull_request`
-    whose `paths:` names the tree's Python, its `.sourcery.yaml` and
-    the workflow's own file.
+    Each call `sourcery_calls` finds is in a workflow triggered on
+    `pull_request` with no `FILTERS` entry.
 
     :param root: the root of the checkout.
     :returns: one finding per departure, empty where there is none.
     """
-    local = {
-        f"{prefix}.github/workflows/{SOURCERY_CALLED}" for prefix in LOCAL_PREFIXES
-    }
-    calling = [
-        workflow
-        for workflow in workflows(root)
-        for job in jobs(workflow).values()
-        if str(job.get("uses", "")) in local
-        or calls_here(str(job.get("uses", "")), SOURCERY_CALLED)
-    ]
+    calling = list(dict.fromkeys(workflow for workflow, _ in sourcery_calls(root)))
     if not calling:
         return [f"no workflow calls {SOURCERY_CALLED}"]
     out: list[str] = []
@@ -565,10 +575,8 @@ def caller_departures(root: Path) -> list[str]:
             out.append(f"{workflow.name} calls {SOURCERY_CALLED} on no pull_request")
             continue
         trigger = triggers(workflow)["pull_request"] or {}
-        named = set(trigger.get("paths") or [])
-        wanted = {*FILTERED, f".github/workflows/{workflow.name}"}
-        if not wanted <= named:
-            out.append(f"{workflow.name}'s paths: name no {sorted(wanted - named)}")
+        if found := [name for name in FILTERS if name in trigger]:
+            out.append(f"{workflow.name}'s pull_request filters on {found}")
     return out
 
 
@@ -715,7 +723,7 @@ def _workflow(root: Path, name: str, text: str) -> None:
 
 
 def test_a_tree_off_section_10s_caller_would_be_reported(tmp_path: Path) -> None:
-    """`caller_departures` reads a call, local or remote, on `pull_request`.
+    """`caller_departures` wants a call on an unfiltered `pull_request`.
 
     :param tmp_path: where the trees are built.
     """
@@ -735,40 +743,31 @@ def test_a_tree_off_section_10s_caller_would_be_reported(tmp_path: Path) -> None
             [f"no workflow calls {SOURCERY_CALLED}"],
         ),
     ]
-    paths = "".join(
-        f"\n      - {path!r}" for path in (*FILTERED, ".github/workflows/sourcery.yml")
-    )
     for index, (trigger, called, wanted) in enumerate(cases):
         root = tmp_path / str(index)
         _workflow(
             root,
             "sourcery.yml",
-            f"on:\n  {trigger}:\n    paths:{paths}\n"
+            f"on:\n  {trigger}:\n    types: [opened]\n"
             f"jobs:\n  sourcery:\n    uses: {called}\n",
         )
         assert caller_departures(root) == wanted, f"{trigger}, {called}"
-    for dropped in (*FILTERED, ".github/workflows/sourcery.yml", None):
-        root = tmp_path / f"without-{dropped}"
-        kept = [
-            path
-            for path in (*FILTERED, ".github/workflows/sourcery.yml")
-            if dropped is not None and path != dropped
-        ]
-        block = "".join(f"\n      - {path!r}" for path in kept)
-        filtered = f"\n    paths:{block}" if kept else ""
+    bare = tmp_path / "bare"
+    _workflow(
+        bare, "sourcery.yml", f"on:\n  pull_request:\njobs:\n  s:\n    uses: {remote}\n"
+    )
+    assert caller_departures(bare) == []
+    for name in ("paths", "paths-ignore"):
+        root = tmp_path / f"with-{name}"
         _workflow(
             root,
             "sourcery.yml",
-            f"on:\n  pull_request:{filtered}\njobs:\n  sourcery:\n    uses: {remote}\n",
-        )
-        missing = (
-            [dropped]
-            if dropped is not None
-            else sorted((*FILTERED, ".github/workflows/sourcery.yml"))
+            f"on:\n  pull_request:\n    {name}:\n      - '**.py'\n"
+            f"jobs:\n  sourcery:\n    uses: {remote}\n",
         )
         assert caller_departures(root) == [
-            f"sourcery.yml's paths: name no {sorted(missing)}"
-        ], f"paths without {dropped}"
+            f"sourcery.yml's pull_request filters on {[name]}"
+        ], name
     assert caller_departures(tmp_path / "none") == [
         f"no workflow calls {SOURCERY_CALLED}"
     ]

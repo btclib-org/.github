@@ -352,9 +352,11 @@ that goes stale first.
 
 ### What gates a merge, and what only reports
 
-`lint.yml`'s `Lint`, `Dependency review` and `Sign-off` jobs are the
-required checks and the whole of what a merge is gated on; `REPOSITORY.md`
-reads the rule back from the endpoint rather than restating it.
+`lint.yml`'s `Lint`, `Dependency review` and `Sign-off` jobs and
+`sourcery.yml`'s `sourcery / Sourcery` are the required checks and the
+whole of what a merge is gated on; `REPOSITORY.md` reads the rule back
+from the endpoint rather than restating it. Section 10's *The set, and
+its cadence* says in which trees `sourcery` is one.
 
 Everything else reports.
 `alignment.yml` is a sentinel: what it finds is drift that happened days
@@ -366,9 +368,6 @@ commit pushed is `verified`; section 11's *Signatures* has the rule.
 `claude-review.yml`'s own header says it must not become a required
 check — requiring it would make a review a gate to satisfy rather than a
 reading to answer.
-`sourcery.yml` is not a required check either — a finding is applied
-or skipped at its site as the author judges; section 10's *The set, and
-its cadence* has the rest.
 
 ### A version, and no release
 

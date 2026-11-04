@@ -47,7 +47,7 @@ the answer the sibling repositories give.
 ```shell
 gh api repos/btclib-org/.github/branches/main/protection \
   --jq '.required_status_checks | {strict, checks: [.checks[].context]}'
-# {"checks":["Lint","Dependency review","Sign-off"],"strict":false}
+# {"checks":["Lint","Dependency review","Sign-off","sourcery / Sourcery"],"strict":false}
 ```
 
 The rulesets below enforce the signatures and the review, and [classic
@@ -62,6 +62,11 @@ protection needs the whole object rather than the answer above.
 | `Lint` | `lint.yml` |
 | `Dependency review` | `lint.yml`'s second job |
 | `Sign-off` | `lint.yml`'s third job |
+| `sourcery / Sourcery` | `sourcery.yml`, calling `reusable-sourcery.yml` |
+
+`sourcery / Sourcery` is required because this tree's clean-up has
+landed (btclib-org/.github#2030), its caller is section 10's and its
+check is green: [section 10][s10-set] says when a tree requires it.
 
 The name `Lint` is not the sibling repositories' `Lint and type-check`,
 though the hook config it runs carries a mypy hook as theirs do: a context is
@@ -86,7 +91,8 @@ gh api -X PUT repos/btclib-org/.github/branches/main/protection \
 {"required_status_checks": {"strict": false,
    "checks": [{"context": "Lint", "app_id": 15368},
               {"context": "Dependency review", "app_id": 15368},
-              {"context": "Sign-off", "app_id": 15368}]},
+              {"context": "Sign-off", "app_id": 15368},
+              {"context": "sourcery / Sourcery", "app_id": 15368}]},
  "enforce_admins": false,
  "required_pull_request_reviews": {"dismiss_stale_reviews": true,
    "required_approving_review_count": 1},
@@ -125,10 +131,9 @@ Everything reaches it through a pull request. Rules [aggregate rather
 than replace each other][s11-branch], so what holds on `main` is what the
 call below answers for that target **together with** the classic
 protection two headings up: that one requires a review, a linear history,
-resolved conversations and the `Lint`, `Dependency review` and `Sign-off`
-checks, and refuses a force push or a deletion — under the exemption above,
-which these rulesets do not carry. Where the two overlap, the stricter answer
-is the one that applies:
+resolved conversations and the checks its table lists, and refuses a force
+push or a deletion — under the exemption above, which these rulesets do not
+carry. Where the two overlap, the stricter answer is the one that applies:
 
 ```shell
 gh api repos/btclib-org/.github/rulesets --jq '.[].id' \

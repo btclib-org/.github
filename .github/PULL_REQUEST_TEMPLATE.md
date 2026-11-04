@@ -12,18 +12,16 @@
 
 ## Checks
 
-<!-- The gates below are required checks: both run in
-     `Lint`, which with `Dependency review` and `Sign-off` is the whole
-     of what a merge here is gated on. The three jobs decline a draft
-     pull request, so a draft gets no report from any of them.
+<!-- The gates below run in `Lint`, one of the required checks
+     CONTRIBUTING.md's *What gates a merge, and what only reports*
+     lists. Those jobs decline a draft pull request.
      Running them before pushing is how you find out before the run
      does. `alignment.yml` runs on every pull request and gates
      nothing, so a red run from it shows on the pull request and holds
      nothing. What a squash writes to `main` is the commit GitHub
      composes and signs, not the branch's own, so a branch's commits need
      not be signed. `verified-signatures.yml` checks what lands, after the
-     push. CONTRIBUTING.md's *What gates a merge, and what only reports*
-     is where the division is stated.
+     push.
      A repository whose commands differ from these carries a template of
      its own; this one is what GitHub shows where there is none. -->
 

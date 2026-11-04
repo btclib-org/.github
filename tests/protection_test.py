@@ -44,9 +44,10 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import ORG, by_hand, gh_json, still_open
+from . import ORG, ROOT, by_hand, filed, gh_json, still_open
 from .check_sign_off_test import SCRIPT
 from .dependency_review_test import ACTION, REUSABLE, TREE_READ_AS
+from .hooks_test import SOURCERY_CALLED, sourcery_calls
 from .workflows_test import calls_here, jobs
 
 if TYPE_CHECKING:
@@ -196,47 +197,127 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
     )
 
 
-def required_sourcery(document: dict[str, Any]) -> list[str]:
-    """List the required contexts naming Sourcery in a classic protection.
+SOURCERY_ROW = "test_a_python_tree_calls_sourcery_with_its_rules_off"
+"""The test whose `BACKLOG` row lists the trees not yet requiring Sourcery."""
+
+
+def sourcery_context(root: Path) -> str | None:
+    """Name the check context a tree's call of `SOURCERY_CALLED` reports.
+
+    The calling job's name, or its id where it has none, then the called
+    job's name, as a job calling a reusable workflow reports.
+
+    :param root: the root of the checkout.
+    :returns: the context, or `None` where no job calls the workflow.
+    """
+    calls = sourcery_calls(root)
+    if not calls:
+        return None
+    workflow, job_id = calls[0]
+    name = jobs(workflow)[job_id].get("name", job_id)
+    (called,) = jobs(ROOT / ".github" / "workflows" / SOURCERY_CALLED).values()
+    return f"{name} / {called['name']}"
+
+
+def sourcery_departures(
+    document: dict[str, Any], context: str | None, *, waiting: bool
+) -> list[str]:
+    """Report where a classic protection departs from section 10 on Sourcery.
+
+    A tree whose call reports `context`, and that is not `waiting` in the
+    row, requires that context from the Actions app and no other naming
+    Sourcery. Any other tree requires no context naming Sourcery.
 
     :param document: the classic protection, possibly empty.
-    :returns: the contexts, in the order the document gives them.
+    :param context: what `sourcery_context` names, `None` where no job calls
+        the workflow.
+    :param waiting: whether the tree is in the `BACKLOG` row of `SOURCERY_ROW`.
+    :returns: one finding, or none.
     """
-    checks = document.get("required_status_checks") or {}
-    return [
-        str(check.get("context", ""))
-        for check in checks.get("checks") or []
+    checks = (document.get("required_status_checks") or {}).get("checks") or []
+    named = [
+        (str(check.get("context", "")), check.get("app_id"))
+        for check in checks
         if "sourcery" in str(check.get("context", "")).lower()
     ]
+    wanted = [] if context is None or waiting else [(context, ACTIONS_APP)]
+    if named == wanted:
+        return []
+    return [f"requires {named}, where section 10 wants {wanted}"]
 
 
-def test_a_required_sourcery_context_would_be_reported() -> None:
-    """`required_sourcery` finds the caller's context, and nothing else."""
-    contexts = ["lint / Sign-off", "sourcery / Sourcery", "test"]
-    document = {
-        "required_status_checks": {"checks": [{"context": c} for c in contexts]}
-    }
-    assert required_sourcery(document) == ["sourcery / Sourcery"]
-    assert required_sourcery({}) == []
+def test_a_sourcery_departure_would_be_reported(tmp_path: Path) -> None:
+    """`sourcery_departures` and `sourcery_context` each way they can answer.
+
+    :param tmp_path: where the trees are built.
+    """
+    context = "sourcery / Sourcery"
+    assert sourcery_context(ROOT) == context
+
+    def document(*checks: tuple[str, int]) -> dict[str, Any]:
+        return {
+            "required_status_checks": {
+                "checks": [{"context": c, "app_id": a} for c, a in checks]
+            }
+        }
+
+    others = [("Lint", ACTIONS_APP), ("Sign-off", ACTIONS_APP)]
+    required = document(*others, (context, ACTIONS_APP))
+    assert sourcery_departures(required, context, waiting=False) == []
+    assert sourcery_departures(document(*others), None, waiting=False) == []
+    assert sourcery_departures(document(*others), context, waiting=True) == []
+    assert sourcery_departures({}, None, waiting=True) == []
+    wrong = [
+        (document(*others), context, False),
+        (required, context, True),
+        (required, None, False),
+        (document((context, 1)), context, False),
+        (document(("sourcery", ACTIONS_APP)), context, False),
+        (document(("sourcery", ACTIONS_APP), (context, ACTIONS_APP)), context, False),
+        ({}, context, False),
+    ]
+    for doc, called, waiting in wrong:
+        assert sourcery_departures(doc, called, waiting=waiting), (doc, called, waiting)
+    root = tmp_path / "named"
+    (root / ".github" / "workflows").mkdir(parents=True)
+    (root / ".github" / "workflows" / "python.yml").write_text(
+        "on:\n  pull_request:\njobs:\n  check:\n    name: Python\n"
+        f"    uses: ./.github/workflows/{SOURCERY_CALLED}\n",
+        encoding="utf-8",
+    )
+    assert sourcery_context(root) == "Python / Sourcery"
+    assert sourcery_context(tmp_path / "none") is None
 
 
-def test_no_tree_requires_the_sourcery_check(
+def test_main_requires_sourcery_once_out_of_its_row(
     repository: str,
+    trees: dict[str, Path],
     protections: dict[str, dict[str, Any] | str | None],
 ) -> None:
-    """Section 10: `sourcery` is a pull request's check and not a gate.
+    """Section 10: `sourcery` is required once a tree is out of its row.
+
+    The trees whose clean-up has not landed, or whose caller,
+    `.sourcery.yaml` or guard is not section 10's and section 4's, are
+    the `BACKLOG` row of `SOURCERY_ROW`. A tree out of that row whose
+    caller is in place requires the context the caller reports; a tree
+    in the row, or with no caller, requires none naming Sourcery.
 
     :param repository: the repository asked about.
+    :param trees: the checkouts.
     :param protections: the classic protection of each repository.
     """
     document = protections[repository]
     if not isinstance(document, dict):
         pytest.skip(f"no classic protection of {repository} to read")
-    found = required_sourcery(document)
-    assert not found, f"required: {found}; " + by_hand(
+    found = sourcery_departures(
+        document,
+        sourcery_context(trees[repository]),
+        waiting=bool(filed(SOURCERY_ROW, repository)),
+    )
+    assert not found, f"{found}; " + by_hand(
         repository,
         f"gh api repos/{ORG}/{repository}/{ENDPOINT} --jq "
-        "'[.required_status_checks.checks[]?.context]'",
+        "'[.required_status_checks.checks[]? | [.context, .app_id]]'",
     )
 
 

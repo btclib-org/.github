@@ -2199,23 +2199,35 @@ reason, a job reading the pull request's files deciding which builds run;
 and `codeql`, whose result the OpenSSF Scorecard reads off a merged pull
 request's own commits.
 
-**`sourcery` is a pull request's check and not a gate.** It is no section 4 hook
-because in a git worktree Sourcery refuses to run without a login or a tier that
-has the CLI and exits 1 having read nothing, so a local gate never read it; on a
-GitHub-hosted runner, whose checkout is a clone with a public `origin`, it reads
-with no login (btclib-org/.github#2005). It is not required
-(btclib-org/.github#2005): a finding is applied or skipped at its site as the
-author judges, and until a tree's clean-up a pull request touching a Python file
-for another reason can fail on findings it did not write. A tree that tracks
+**`sourcery` is a pull request's check and not a local gate.** It is no section
+4 hook because in a git worktree Sourcery refuses to run without a login or a
+tier that has the CLI and exits 1 having read nothing, so a local gate never
+read it; on a GitHub-hosted runner, whose checkout is a clone with a public
+`origin`, it reads with no login (btclib-org/.github#2005). A tree that tracks
 Python carries a `sourcery.yml` calling `reusable-sourcery.yml` on
-`pull_request`, paths-filtered to its Python, its `.sourcery.yaml` and its own
-file, so a pull request touching none waits on nothing. It reads the Python
-files the pull request changes, whole, and the whole tree where it changes
-`.sourcery.yaml` or the version. It has no `push` trigger and no
-`workflow_dispatch`, against *What every workflow does*: neither event carries
-the pull request it reads. A finding fails that job alone, and its skip is `#
-sourcery skip: <rule>` on the line Sourcery reports or on the `def` line of the
-function holding it, in the form section 4's `bare-sourcery-skip` admits.
+`pull_request`. It reads the Python files the pull request changes, whole, and
+the whole tree where it changes `.sourcery.yaml` or the version; otherwise,
+where it changes no Python file, it reads nothing and passes. It has no `push`
+trigger and no `workflow_dispatch`, against *What every workflow does*: neither
+event carries the pull request it reads. A finding fails that job alone, and its
+skip is `# sourcery skip: <rule>` on the line Sourcery reports or on the `def`
+line of the function holding it, in the form section 4's `bare-sourcery-skip`
+admits.
+
+**`sourcery` is a required check in a tree whose clean-up has landed and whose
+caller, `.sourcery.yaml` and `bare-sourcery-skip` are as this section and
+section 4 ask, and in no other** (btclib-org/.github#2005). A tree's protection
+gains it once both hold and its `sourcery` check is green, tree by tree. Until
+its clean-up a pull request touching a Python file for another reason can fail
+on findings it did not write. The trees not yet there are the `BACKLOG` row of
+btclib-org/.github#2005 in `tests/__init__.py`, keyed on the test that asks for
+the caller, the configuration and the guard. `protection_test.py` reads that
+row both ways: a tree out of it whose caller is in place requires the context,
+and a tree in it does not. The context is the caller's job name, then the
+callee's, `sourcery / Sourcery`, bound to the Actions app.
+
+**The caller's `pull_request` carries no `paths` filter**, for the reason
+*`paths-ignore` only on `push`* gives.
 
 **`.sourcery.yaml` sets `python_version` to the lowest interpreter the tree's
 code runs on, never above the `requires-python` floor, and turns off the rules
