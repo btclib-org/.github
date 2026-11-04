@@ -21,11 +21,14 @@ from __future__ import annotations
 import importlib.util
 import sys
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from . import ORG, by_hand, gh_json
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 MAIN = "refs/heads/main"
 TAGS = "refs/tags/v*"
@@ -144,6 +147,20 @@ def enforcing(rulesets_of_ref: list[dict[str, Any]], rule: str) -> list[dict[str
     ]
 
 
+def unreadable(entries: Iterable[dict[str, Any]]) -> bool:
+    """Say whether any of these rules hides who bypasses it.
+
+    A caller asks it only once the bypass lists it could read show no
+    violation. GitHub returns `bypass_actors` only to a caller with
+    write access to that ruleset, so one list can be read and another
+    not, and a violation seen is a failure whatever is unseen beside it.
+
+    :param entries: rules as `enforcing` returns them.
+    :returns: whether one of them came back without `bypass_actors`.
+    """
+    return any(entry["bypass_actors"] is None for entry in entries)
+
+
 def test_main_refuses_a_rewritten_commit(
     rulesets: dict[str, list[dict[str, Any]]],
 ) -> None:
@@ -177,16 +194,14 @@ def test_main_refuses_a_rewritten_commit(
         found = {rule: enforcing(covers, rule) for rule in wanted}
         if absent := sorted(rule for rule, carried in found.items() if not carried):
             missing[repository] = absent
-        present = [entry for carried in found.values() for entry in carried]
-        if any(entry["bypass_actors"] is None for entry in present):
-            unseen.append(repository)
-            continue
         if bypassed := sorted(
             rule
             for rule, carried in found.items()
             if any(entry["bypass_actors"] for entry in carried)
         ):
             excused[repository] = bypassed
+        elif unreadable(entry for carried in found.values() for entry in carried):
+            unseen.append(repository)
     refusing = sorted(
         repository
         for repository, active in rulesets.items()
@@ -297,10 +312,10 @@ def test_a_repository_with_tags_refuses_an_unsigned_one(
         every = enforcing(
             covering(active, "tag", TAGS, excluding=True), "required_signatures"
         )
-        if any(entry["bypass_actors"] is None for entry in every):
-            unseen.append(repository)
-        elif any(entry["bypass_actors"] for entry in every):
+        if any(entry["bypass_actors"] for entry in every):
             excused.append(repository)
+        elif unreadable(every):
+            unseen.append(repository)
     assert not unprotected, f"repositories whose tags need no signature: {unprotected}"
     assert not excused, f"repositories whose tag signatures are bypassed: {excused}"
     if unseen:
@@ -348,13 +363,11 @@ def test_only_an_administrator_moves_a_release_tag(
             missing[repository] = absent
         every = covering(active, "tag", TAGS, excluding=True)
         present = [entry for rule in wanted for entry in enforcing(every, rule)]
-        if any(entry["bypass_actors"] is None for entry in present):
-            unseen.append(repository)
-            continue
+        visible = [entry for entry in present if entry["bypass_actors"] is not None]
         if others := sorted(
             {
                 f"{actor['actor_type']} {actor['actor_id']}"
-                for entry in present
+                for entry in visible
                 for actor in entry["bypass_actors"]
                 if {key: actor.get(key) for key in admin} != admin
             }
@@ -366,9 +379,11 @@ def test_only_an_administrator_moves_a_release_tag(
                 and actor["bypass_mode"] == "always"
                 for actor in entry["bypass_actors"]
             )
-            for entry in present
+            for entry in visible
         ):
             not_always.append(repository)
+        if not others and repository not in not_always and unreadable(present):
+            unseen.append(repository)
     assert not missing, f"release tags not restricted by: {missing}"
     assert not excused, f"release tags another actor may push: {excused}"
     assert not not_always, (

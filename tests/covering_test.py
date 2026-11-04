@@ -11,12 +11,16 @@ where every run reaches it.
 
 from __future__ import annotations
 
-from typing import Any
+from contextlib import contextmanager
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from . import settings_test
 from .settings_test import MAIN, TAGS, covering
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 # named without the `test_` prefix, so that this module does not collect them
 refuses_a_rewrite = settings_test.test_main_refuses_a_rewritten_commit
@@ -193,3 +197,80 @@ def test_a_bypassed_signature_rule_fails() -> None:
     combined = {**moves, "rules": [*signed["rules"], *moves["rules"]]}
     with pytest.raises(AssertionError, match="tag signatures are bypassed"):
         refuses_an_unsigned_tag(["tree"], {"tree": [combined]})
+
+
+# an actor other than the admin role, excused always
+SOMEBODY = {"actor_type": "User", "actor_id": 1, "bypass_mode": "always"}
+
+
+@contextmanager
+def fails(match: str) -> Iterator[None]:
+    """Expect an assertion naming `match`, and fail where the test skips.
+
+    A skip is what an unread bypass list asks for, so a case whose
+    violation is in plain sight has to tell it from the failure.
+
+    :param match: what the assertion says.
+    :yields: to the block under test.
+    """
+    try:
+        with pytest.raises(AssertionError, match=match):
+            yield
+    except pytest.skip.Exception as skipped:
+        pytest.fail(f"skipped beside a visible violation: {skipped}")
+
+
+def unread(rules: dict[str, Any]) -> dict[str, Any]:
+    """Return a ruleset as a token without write access to it reads it.
+
+    :param rules: the ruleset.
+    :returns: the ruleset without its `bypass_actors`.
+    """
+    return {key: value for key, value in rules.items() if key != "bypass_actors"}
+
+
+def test_a_bypass_beside_an_unread_main_ruleset_fails() -> None:
+    """One integrity ruleset unread does not hide another one's bypass."""
+    integrity, reviewed = main_as_designed()
+    first, *rest = integrity["rules"]
+    hidden = unread({**integrity, "rules": [first]})
+    bypassed = {**integrity, "rules": rest, "bypass_actors": [SOMEBODY]}
+    with fails("integrity rules somebody may bypass"):
+        refuses_a_rewrite({"tree": [hidden, bypassed, reviewed]})
+
+
+@pytest.mark.usefixtures("tagged")
+def test_a_bypassed_signature_beside_an_unread_one_fails() -> None:
+    """One signature ruleset unread does not hide another one's bypass."""
+    signed, moves = tags_as_designed()
+    bypassed = {**signed, "bypass_actors": [ADMIN]}
+    with fails("tag signatures are bypassed"):
+        refuses_an_unsigned_tag(["tree"], {"tree": [unread(signed), bypassed, moves]})
+
+
+@pytest.mark.usefixtures("tagged")
+def test_an_unread_signature_ruleset_alone_skips() -> None:
+    """Where nothing read is wrong, an unread list is a skip, not a pass."""
+    signed, moves = tags_as_designed()
+    with pytest.raises(pytest.skip.Exception, match="cannot see"):
+        refuses_an_unsigned_tag(["tree"], {"tree": [unread(signed), moves]})
+
+
+@pytest.mark.parametrize(
+    ("actors", "match"),
+    [([SOMEBODY], "another actor may push"), ([], "admin role bypass is not always")],
+    ids=["another-actor", "nobody"],
+)
+@pytest.mark.usefixtures("tagged")
+def test_a_wrong_restriction_beside_an_unread_one_fails(
+    actors: list[dict[str, Any]], match: str
+) -> None:
+    """One restricting ruleset unread does not hide another one's bypass.
+
+    :param actors: who the read ruleset excuses.
+    :param match: the failure that names it.
+    """
+    signed, moves = tags_as_designed()
+    wrong = {**moves, "bypass_actors": actors}
+    with fails(match):
+        admin_moves_a_tag(["tree"], {"tree": [signed, unread(moves), wrong]})
