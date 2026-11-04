@@ -40,9 +40,9 @@ name: reusable-sourcery
 # - a pull request from a fork. actions/checkout clones the base
 #   repository and checks out the pull request's merge ref, so origin is
 #   the base's public URL and the job is expected to run as on a branch
-#   of the base. Not measured: a fork's run that fails asking for a
-#   login is the measurement, and the job is then red for that pull
-#   request alone.
+#   of the base. Not measured: a fork's run that refuses to run without
+#   a login or a tier that has the CLI is the measurement, and the job
+#   is then red for that pull request alone.
 # - the base branch. `github.base_ref` is read through the environment,
 #   and an event without one, which no pull request is, fails the job
 #   naming it rather than reading against nothing.

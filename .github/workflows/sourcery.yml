@@ -5,8 +5,9 @@ name: sourcery
 # pins and the choice between those files and the whole tree are
 # reusable-sourcery.yml's; what is this tree's is the trigger.
 #
-# Not a required check, and it must not become one: section 10 gives it
-# no place among the gates, and a finding fails this job alone.
+# Not a required check, as decided on btclib-org/.github#2005: section
+# 10 gives it no place among the gates, and a finding fails this job
+# alone.
 #
 # No push trigger and no workflow_dispatch, departures section 10's
 # paragraph on this job states: what it reads is a pull request's
