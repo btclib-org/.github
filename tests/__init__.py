@@ -435,7 +435,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         2005,
         "test_a_python_tree_calls_sourcery_with_its_rules_off",
         (
-            ".github",
             "btclib",
             "btclib-secp256k1",
             "bitcoin-core-rpc",
@@ -653,8 +652,7 @@ def subjects(
     read: list[tuple[str, str]] = []
     unread: list[str] = []
     for bullet in bulleted(document, opening, closing):
-        found = pattern.match(bullet)
-        if found:
+        if found := pattern.match(bullet):
             read.append((found.group(1), found.group(2)))
         else:
             unread.append(bullet)

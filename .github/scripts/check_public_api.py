@@ -114,9 +114,7 @@ def section(notes: str, tag: str | None) -> str | None:
     release notes reads it, so `## v2026.9.29` and
     `## v2026.9.29 (patch)` are the tag's and `## v2026.9.290` is not.
     """
-    heading = (
-        re.compile(r"## ") if not tag else re.compile(rf"## {re.escape(tag)}( |$)")
-    )
+    heading = re.compile(rf"## {re.escape(tag)}( |$)") if tag else re.compile(r"## ")
     lines = notes.splitlines()
     start = next((n for n, line in enumerate(lines) if heading.match(line)), None)
     if start is None:
@@ -134,11 +132,20 @@ def rehearsal_tag(notes: Path) -> str | None:
 
     A missing or malformed file, or one with no version, gives None.
     """
-    try:
+    # one clause each, so Sourcery reads it (btclib-org/.github#2028)
+    try:  # sourcery skip: merge-except-handler
         with (notes.parent / "pyproject.toml").open("rb") as stream:
             version = tomllib.load(stream)["project"]["version"]
-    except OSError, UnicodeDecodeError, tomllib.TOMLDecodeError, KeyError, TypeError:
-        return None
+    except OSError:
+        version = None
+    except UnicodeDecodeError:
+        version = None
+    except tomllib.TOMLDecodeError:
+        version = None
+    except KeyError:
+        version = None
+    except TypeError:
+        version = None
     if not isinstance(version, str):
         return None
     return "v" + version

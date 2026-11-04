@@ -589,11 +589,9 @@ def config_departures(
     out: list[str] = []
     settings = config.get("rule_settings") or {}
     disabled = {str(rule) for rule in settings.get("disable") or []}
-    left_on = sorted(set(TURNED_OFF) - disabled)
-    if left_on:
+    if left_on := sorted(set(TURNED_OFF) - disabled):
         out.append(f"{SOURCERY_CONFIG} leaves on {left_on}")
-    also = sorted(disabled - set(TURNED_OFF))
-    if also:
+    if also := sorted(disabled - set(TURNED_OFF)):
         out.append(f"{SOURCERY_CONFIG} also turns off {also}")
     if "enable" in settings and settings["enable"] != ["default"]:
         out.append(f"{SOURCERY_CONFIG} sets enable: {settings['enable']!r}")
@@ -601,8 +599,7 @@ def config_departures(
         RULE_TYPES
     ):
         out.append(f"{SOURCERY_CONFIG} sets rule_types: {settings['rule_types']!r}")
-    hidden = ignored(config.get("ignore") or [], python)
-    if hidden:
+    if hidden := ignored(config.get("ignore") or [], python):
         out.append(f"{SOURCERY_CONFIG} ignores {hidden}")
     declared = settings.get("python_version")
     release = RELEASE_XY.match(declared) if isinstance(declared, str) else None

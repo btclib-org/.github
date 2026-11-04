@@ -174,11 +174,10 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
     }
     excused = {field for name, field in EXPECTED_DEPARTURE if name == repository}
     back = sorted(field for field in excused if wanted[field])
-    off = sorted(
-        field for field, held in wanted.items() if not held and field not in excused
-    )
     problems: list[str] = []
-    if off:
+    if off := sorted(
+        field for field, held in wanted.items() if not held and field not in excused
+    ):
         problems.append(f"classic protection does not hold: {off}")
     if back:
         problems.append(

@@ -131,11 +131,14 @@ def prose(root: Path, paths: list[str]) -> Iterator[tuple[str, str]]:
     for path in paths:
         if HISTORY.search(path) or SAVED.search(path):
             continue
-        try:
+        # a submodule's gitlink, which `git ls-files` names and the clones
+        # here leave unfetched, and a file that is not text
+        # one clause each, so Sourcery reads it (btclib-org/.github#2028)
+        try:  # sourcery skip: merge-except-handler
             text = (root / path).read_text(encoding="utf-8")
-        except OSError, UnicodeDecodeError:
-            # a submodule's gitlink, which `git ls-files` names and the
-            # clones here leave unfetched, and a file that is not text
+        except OSError:
+            continue
+        except UnicodeDecodeError:
             continue
         if "'s" not in text:
             continue

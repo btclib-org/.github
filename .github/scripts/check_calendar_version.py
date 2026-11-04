@@ -70,8 +70,7 @@ def main(argv: list[str] | None = None, now: datetime | None = None) -> int:
     parser.add_argument("version", help="the declared version, without the v")
     args = parser.parse_args(argv)
 
-    refused = check(args.version, now or datetime.now(UTC))
-    if refused:
+    if refused := check(args.version, now or datetime.now(UTC)):
         print(f"::error::{refused}")
         return 1
     print(f"{args.version} is not dated in the future")

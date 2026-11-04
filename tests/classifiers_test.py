@@ -71,12 +71,11 @@ def test_every_classifier_is_a_classifier(
     unknown: dict[str, list[str]] = {}
     for repository, parsed in sorted(pyprojects.items()):
         declared = parsed.get("project", {}).get("classifiers", [])
-        wrong = [
+        if wrong := [
             classifier
             for classifier in declared
             if classifier not in classifiers and not classifier.startswith(PRIVATE)
-        ]
-        if wrong:
+        ]:
             unknown[repository] = wrong
     assert not unknown, f"classifiers PyPI does not know: {unknown}"
 

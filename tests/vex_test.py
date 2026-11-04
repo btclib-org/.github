@@ -108,10 +108,9 @@ def declared(project: dict[str, Any]) -> set[str]:
     :returns: the names, normalized.
     :raises ValueError: where `dynamic` names either requirement key.
     """
-    dynamic = {"dependencies", "optional-dependencies"} & set(
+    if dynamic := {"dependencies", "optional-dependencies"} & set(
         project.get("dynamic", [])
-    )
-    if dynamic:
+    ):
         msg = f"[project] declares {sorted(dynamic)} dynamic: not in pyproject.toml"
         raise ValueError(msg)
     requirements = list(project.get("dependencies", []))

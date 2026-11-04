@@ -249,8 +249,7 @@ def test_a_per_subject_copy_sits_where_section_14_puts_it(
     for subject, clause in subjects.items():
         here = departures(clause).get(repository, subject)
         copies = carried(root, declared(subject, clause))
-        found = [path for path in copies if path != here]
-        if found:
+        if found := [path for path in copies if path != here]:
             astray[here] = found
     assert not astray, (
         "section 14 gives each of these subjects one path in this tree, and"

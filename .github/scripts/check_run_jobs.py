@@ -227,8 +227,7 @@ def judge(rows: list[Row], needs: list[Needs]) -> int:
     # is the one that has to be able to say what it saw
     print("\n".join(row.line() for row in rows))
     for job in needs:
-        lagging = [row for row in rows if job.owns(row)]
-        if lagging:
+        if lagging := [row for row in rows if job.owns(row)]:
             print(f"still listed unfinished, accepted as {job.job}'s ({job.result}):")
             print("\n".join(row.line() for row in lagging))
     verdict = 0

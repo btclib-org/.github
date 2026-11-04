@@ -1029,10 +1029,10 @@ def shape(job: dict[str, Any]) -> str | None:
     blob = str(job)
     listing = LISTING in blob
     needs = NEEDS in blob
-    if listing and needs:
-        msg = f"an aggregate job's text carries both {LISTING!r} and {NEEDS!r}"
-        raise LookupError(msg)
     if listing:
+        if needs:
+            msg = f"an aggregate job's text carries both {LISTING!r} and {NEEDS!r}"
+            raise LookupError(msg)
         return "listing"
     if needs:
         return "needs"
