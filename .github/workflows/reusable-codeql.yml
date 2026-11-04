@@ -7,13 +7,19 @@ name: reusable-codeql
 # these jobs join.
 #
 # Two inputs. `queries` is the query suite, `security-extended` by
-# default, so a caller passes it only to run another. That suite is
-# wider than the default code-scanning one: `actions/unpinned-tag`, for
-# one, runs only in it. `languages` is the list of languages to analyse,
-# JSON-encoded because a workflow_call input is a string, a number or a
-# boolean, and fromJSON turns the string into the list the matrix takes.
-# Its default is both languages, so the trees that carry both pass
-# nothing.
+# default, so a caller passes it only to run another. That suite runs
+# queries the default code-scanning suite leaves out, such as
+# `actions/unpinned-tag`. Its trial, btclib-org/.github#1505, found no
+# noise: it added `actions/unpinned-tag` on calls at `@main`, which
+# README.md section 10 rejects, and a `py/overly-permissive-file` that
+# btclib-node fixed. No `query-filters` excludes `actions/unpinned-tag`:
+# every `uses:` is pinned to a commit (section 10), so it would have
+# nothing to filter.
+#
+# `languages` is the list of languages to analyse, JSON-encoded because
+# a workflow_call input is a string, a number or a boolean, and fromJSON
+# turns the string into the list the matrix takes. Its default is both
+# languages, so the trees that carry both pass nothing.
 # It is owed to `portanode`, which holds no Python: CodeQL fails a
 # language it finds no source for. A difference one tree has is not the
 # copy in disguise btclib-org/.github#35 refuses.
