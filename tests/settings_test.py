@@ -276,18 +276,38 @@ def test_a_repository_with_tags_refuses_an_unsigned_one(
     release has nothing to protect yet, and a rule about a shape of tag
     it does not use would be enforcing nothing.
 
+    Nobody bypasses the rule, an administrator included, in any ruleset
+    that carries it over `refs/tags/v*`, an excluding one included. Who
+    is excused is not public, for the reason
+    `test_main_refuses_a_rewritten_commit` gives, and the run reports
+    itself skipped where it could not be read.
+
     :param repositories: the names to ask about.
     :param rulesets: the active rulesets of each repository.
     """
-    unprotected = [
-        repository
-        for repository in sorted(repositories)
-        if gh_json(f"repos/{ORG}/{repository}/tags?per_page=1")
-        and not enforcing(
-            covering(rulesets[repository], "tag", TAGS), "required_signatures"
+    unprotected: list[str] = []
+    excused: list[str] = []
+    unseen: list[str] = []
+    for repository in sorted(repositories):
+        if not gh_json(f"repos/{ORG}/{repository}/tags?per_page=1"):
+            continue
+        active = rulesets[repository]
+        if not enforcing(covering(active, "tag", TAGS), "required_signatures"):
+            unprotected.append(repository)
+        every = enforcing(
+            covering(active, "tag", TAGS, excluding=True), "required_signatures"
         )
-    ]
+        if any(entry["bypass_actors"] is None for entry in every):
+            unseen.append(repository)
+        elif any(entry["bypass_actors"] for entry in every):
+            excused.append(repository)
     assert not unprotected, f"repositories whose tags need no signature: {unprotected}"
+    assert not excused, f"repositories whose tag signatures are bypassed: {excused}"
+    if unseen:
+        pytest.skip(
+            "this run's token cannot see who bypasses a tag signature on"
+            f" {', '.join(unseen)}: bypass_actors needs push access to read"
+        )
 
 
 def test_only_an_administrator_moves_a_release_tag(
@@ -296,11 +316,15 @@ def test_only_an_administrator_moves_a_release_tag(
 ) -> None:
     """A release tag is created, moved and deleted by an administrator alone.
 
-    `creation`, `update` and `deletion` are each carried on `refs/tags/v*`,
-    and every ruleset carrying one excuses the repository's admin role in
-    `always` mode and nobody else, so a GitHub App, an Actions token or a
-    deploy key cannot push or remove a release tag, and an administrator
-    can. Asked only of repositories that have a tag, as the test above is.
+    `creation`, `update` and `deletion` are each carried on `refs/tags/v*`
+    by a ruleset that excludes no ref. Every ruleset carrying one of them
+    over `refs/tags/v*`, an excluding one included, excuses the
+    repository's admin role in `always` mode and nobody else: a ruleset
+    that spares one tag and excuses nobody would still keep an
+    administrator from every other. So a GitHub App, an Actions token or
+    a deploy key cannot push or remove a release tag, and an
+    administrator can. Asked only of repositories that have a tag, as
+    the test above is.
 
     Who is excused is not public, for the reason
     `test_main_refuses_a_rewritten_commit` gives, and the run reports
@@ -318,24 +342,23 @@ def test_only_an_administrator_moves_a_release_tag(
     for repository in sorted(repositories):
         if not gh_json(f"repos/{ORG}/{repository}/tags?per_page=1"):
             continue
-        covers = covering(rulesets[repository], "tag", TAGS)
-        found = {rule: enforcing(covers, rule) for rule in wanted}
-        absent = sorted(rule for rule, carried in found.items() if not carried)
-        if absent:
+        active = rulesets[repository]
+        covers = covering(active, "tag", TAGS)
+        if absent := sorted(rule for rule in wanted if not enforcing(covers, rule)):
             missing[repository] = absent
-        present = [entry for carried in found.values() for entry in carried]
+        every = covering(active, "tag", TAGS, excluding=True)
+        present = [entry for rule in wanted for entry in enforcing(every, rule)]
         if any(entry["bypass_actors"] is None for entry in present):
             unseen.append(repository)
             continue
-        others = sorted(
+        if others := sorted(
             {
                 f"{actor['actor_type']} {actor['actor_id']}"
                 for entry in present
                 for actor in entry["bypass_actors"]
                 if {key: actor.get(key) for key in admin} != admin
             }
-        )
-        if others:
+        ):
             excused[repository] = others
         if not all(
             any(

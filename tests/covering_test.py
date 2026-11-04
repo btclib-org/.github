@@ -23,9 +23,19 @@ refuses_a_rewrite = settings_test.test_main_refuses_a_rewritten_commit
 needs_one_review = (
     settings_test.test_a_merge_needs_one_review_and_a_badge_tree_has_no_bypass
 )
+refuses_an_unsigned_tag = (
+    settings_test.test_a_repository_with_tags_refuses_an_unsigned_one
+)
+admin_moves_a_tag = settings_test.test_only_an_administrator_moves_a_release_tag
 
 # a branch an exclusion spares, which is not main
 SCRATCH = "refs/heads/scratch"
+# the repository role `admin`, excused always
+ADMIN = {
+    "actor_type": "RepositoryRole",
+    "actor_id": settings_test.ADMIN_ROLE,
+    "bypass_mode": "always",
+}
 
 
 def ruleset(
@@ -138,3 +148,48 @@ def test_an_excluding_second_review_ruleset_fails() -> None:
     second = ruleset("branch", [MAIN], [SCRATCH], [review(3)])
     with pytest.raises(AssertionError, match="several rulesets carry"):
         needs_one_review({"tree": [*main_as_designed(), second]}, {"tree"})
+
+
+def tags_as_designed() -> list[dict[str, Any]]:
+    """Write out the rulesets over `refs/tags/v*` every tree keeps.
+
+    :returns: the signature ruleset and the restricting one.
+    """
+    moves = [{"type": rule} for rule in ("creation", "update", "deletion")]
+    return [
+        ruleset("tag", [TAGS], [], [{"type": "required_signatures"}]),
+        {**ruleset("tag", [TAGS], [], moves), "bypass_actors": [ADMIN]},
+    ]
+
+
+@pytest.fixture
+def tagged(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Answer that every repository has a tag, without asking GitHub.
+
+    :param monkeypatch: what replaces the call.
+    """
+    monkeypatch.setattr(settings_test, "gh_json", lambda _: [{"name": "v1"}])
+
+
+@pytest.mark.usefixtures("tagged")
+def test_the_tag_rulesets_written_out_here_keep_the_design() -> None:
+    """The baseline the cases below change passes both tag tests."""
+    refuses_an_unsigned_tag(["tree"], {"tree": tags_as_designed()})
+    admin_moves_a_tag(["tree"], {"tree": tags_as_designed()})
+
+
+@pytest.mark.usefixtures("tagged")
+def test_an_excluding_restriction_nobody_bypasses_fails() -> None:
+    """Sparing one tag still keeps an administrator from every other."""
+    spare = ruleset("tag", [TAGS], ["refs/tags/v99"], [{"type": "creation"}])
+    with pytest.raises(AssertionError, match="admin role bypass is not always"):
+        admin_moves_a_tag(["tree"], {"tree": [*tags_as_designed(), spare]})
+
+
+@pytest.mark.usefixtures("tagged")
+def test_a_bypassed_signature_rule_fails() -> None:
+    """The admin role's bypass does not reach the signature rule."""
+    signed, moves = tags_as_designed()
+    combined = {**moves, "rules": [*signed["rules"], *moves["rules"]]}
+    with pytest.raises(AssertionError, match="tag signatures are bypassed"):
+        refuses_an_unsigned_tag(["tree"], {"tree": [combined]})

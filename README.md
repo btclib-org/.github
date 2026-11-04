@@ -2922,7 +2922,11 @@ and classic protection, taking the most restrictive combination:
   `README.md` carries the OpenSSF Best Practices badge; in any other
   tree, the maintainer, in **`pull_request` mode**.
 - **`tag-integrity`**, target `tag`, `refs/tags/v*` — required
-  signatures and nothing else. **No bypass actor.**
+  signatures and nothing else. **No bypass actor.** A bypass list
+  excuses its actors from every rule of its ruleset
+  ([GitHub's rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository#granting-bypass-permissions-for-your-branch-or-tag-ruleset)),
+  so the signature rule, which nobody bypasses, cannot share a ruleset
+  with the rules below, which the `admin` role bypasses.
 - **`tag-release-actors`**, target `tag`, `refs/tags/v*` — restrict
   creations, updates and deletions, bypassed by the repository `admin`
   role in **`always`** mode, so only an administrator creates, moves or
