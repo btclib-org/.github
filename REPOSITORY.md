@@ -199,8 +199,9 @@ gh api users/fametrano --jq .id
 ```
 
 `tag-integrity` and `tag-release-actors` hold for this repository's own
-`v*` tags, which `CONTRIBUTING.md`'s *A version, and no release* says are
-cut for the trees that pin its reusable workflows and are no release.
+`v*` tags. Such a tag names a commit that other trees pin. It is no
+release: nothing is published with it, as `CONTRIBUTING.md`'s *A
+version, and no release* says. [Section 12][s12] says when one is cut.
 
 A `v*` tag push that brings an unsigned commit is refused. A tag on a
 commit already on `main` is accepted whether it is signed, unsigned or
@@ -592,5 +593,6 @@ running a command.
 [s11-sigs]: ./README.md#signatures
 [s11-tokens]: ./README.md#tokens-publishing-scanning
 [s11]: ./README.md#11-github-settings
+[s12]: ./README.md#12-releasing
 [s15]: ./README.md#15-auditing-a-repository-against-this-file
 [s16]: ./README.md#16-checklists
