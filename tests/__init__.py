@@ -421,7 +421,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-wallet",
             "ecc",
             "bip39-slip39",
-            "base58-bech32",
             "bip32-descriptors",
             "benchmarks",
             "bbt",
