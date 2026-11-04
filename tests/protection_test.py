@@ -198,7 +198,7 @@ def test_main_requires_a_check_and_the_rest_of_classic_protection(
 
 
 SOURCERY_ROW = "test_a_python_tree_calls_sourcery_with_its_rules_off"
-"""The test whose `BACKLOG` row lists the trees waiting on their clean-up."""
+"""The test whose `BACKLOG` row lists the trees not yet requiring Sourcery."""
 
 
 def sourcery_context(root: Path) -> str | None:
@@ -224,9 +224,9 @@ def sourcery_departures(
 ) -> list[str]:
     """Report where a classic protection departs from section 10 on Sourcery.
 
-    A tree whose call reports `context`, and whose clean-up is not
-    `waiting`, requires that context from the Actions app and no other
-    naming Sourcery. Any other tree requires no context naming Sourcery.
+    A tree whose call reports `context`, and that is not `waiting` in the
+    row, requires that context from the Actions app and no other naming
+    Sourcery. Any other tree requires no context naming Sourcery.
 
     :param document: the classic protection, possibly empty.
     :param context: what `sourcery_context` names, `None` where no job calls
@@ -289,17 +289,18 @@ def test_a_sourcery_departure_would_be_reported(tmp_path: Path) -> None:
     assert sourcery_context(tmp_path / "none") is None
 
 
-def test_main_requires_sourcery_once_its_clean_up_has_landed(
+def test_main_requires_sourcery_once_out_of_its_row(
     repository: str,
     trees: dict[str, Path],
     protections: dict[str, dict[str, Any] | str | None],
 ) -> None:
-    """Section 10: `sourcery` is required where its clean-up has landed.
+    """Section 10: `sourcery` is required once a tree is out of its row.
 
-    The trees still waiting on their clean-up are the `BACKLOG` row of
-    `SOURCERY_ROW`. A tree out of that row whose caller is in place
-    requires the context the caller reports; a tree in the row, or with
-    no caller, requires none naming Sourcery.
+    The trees whose clean-up has not landed, or whose caller,
+    `.sourcery.yaml` or guard is not section 10's and section 4's, are
+    the `BACKLOG` row of `SOURCERY_ROW`. A tree out of that row whose
+    caller is in place requires the context the caller reports; a tree
+    in the row, or with no caller, requires none naming Sourcery.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
