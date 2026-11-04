@@ -424,6 +424,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "base58-bech32",
             "bip32-descriptors",
             "benchmarks",
+            "bbt",
             "functional-tests",
         ),
     ),
