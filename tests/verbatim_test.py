@@ -460,11 +460,7 @@ lacks the helper without excusing it for any other owed file it lacks.
 """
 
 CODERABBIT = ".coderabbit.yaml"
-"""Another owed file whose presence a test of its own asks, for that reason.
-
-The trees take their copy one pull request at a time, and a `BACKLOG`
-row excuses each until it does.
-"""
+"""Another owed file whose presence a test of its own asks, for that reason."""
 
 APART = (HELPER, CODERABBIT)
 """The owed files the owed-files test leaves to a test of their own."""

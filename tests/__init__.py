@@ -411,27 +411,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("btclib-secp256k1",),
     ),
     (
-        1998,
-        "test_a_repository_carries_the_coderabbit_configuration_owed_of_it",
-        (
-            "btclib",
-            "btclib-secp256k1",
-            "bitcoin-core-rpc",
-            "btclib-node",
-            "btclib-wallet",
-            "ecc",
-            "bip39-slip39",
-            "base58-bech32",
-            "bip32-descriptors",
-            "benchmarks",
-            "bbt",
-            "functional-tests",
-            "portanode",
-            "btclib-org.github.io",
-            "ai-agents-process",
-        ),
-    ),
-    (
         2005,
         "test_a_python_tree_calls_sourcery_with_its_rules_off",
         (
