@@ -366,6 +366,9 @@ commit pushed is `verified`; section 11's *Signatures* has the rule.
 `claude-review.yml`'s own header says it must not become a required
 check — requiring it would make a review a gate to satisfy rather than a
 reading to answer.
+`sourcery.yml` is not a required check either — a finding is applied
+or skipped at its site as the author judges; section 10's *The set, and
+its cadence* has the rest.
 
 ### A version, and no release
 

@@ -253,8 +253,7 @@ def main(
     )
     args = parser.parse_args(argv)
 
-    refused = refusals(args.root)
-    if refused:
+    if refused := refusals(args.root):
         for why in refused:
             print(f"::error::{why}")
         return 1

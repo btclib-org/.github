@@ -262,7 +262,7 @@ class Statements(NamedTuple):
     edges: list[tuple[int, str, str, dict[str, str]]]
 
 
-def sorted_statements(path: Path) -> Statements:  # noqa: C901
+def sorted_statements(path: Path) -> Statements:  # noqa: C901  # sourcery skip: low-code-quality
     """Read the defaults and the nodes, and set the edges aside.
 
     :param path: the `.dot` file.
@@ -349,13 +349,12 @@ def drawn(path: Path) -> Drawing:
             msg = f"{where} draws an edge to a node that is not drawn"
             raise ValueError(msg)
         style = attrs.get("style", "solid")
-        found = route_problem(
+        if found := route_problem(
             attrs["pos"],
             arrowhead=style != "dotted",
             ends=(centres[dependent], centres[target]),
             half=half,
-        )
-        if found:
+        ):
             msg = f"{where} draws {dependent} -> {target} where it is not: {found}"
             raise ValueError(msg)
         if style == "dotted":
@@ -583,15 +582,13 @@ def problems(
     """
     found = naming_problems(packages, libraries, drawing)
     kinds = styles(requirements)
-    undeclared = sorted(set(drawing.arrows) - set(kinds))
-    if undeclared:
+    if undeclared := sorted(set(drawing.arrows) - set(kinds)):
         found.append(f"drawn and declared by no tree: {undeclared}")
-    wrong = sorted(
+    if wrong := sorted(
         pair
         for pair, kind in drawing.arrows.items()
         if pair in kinds and kinds[pair] != kind
-    )
-    if wrong:
+    ):
         found.append(f"drawn in the style the tree does not declare: {wrong}")
     return found + reach_problems(
         packages, requirements, set(drawing.arrows) & set(kinds)

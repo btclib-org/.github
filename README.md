@@ -1082,6 +1082,16 @@ No `autoupdate_branch`: the default branch is the only branch.
   own line, narrower than section 8's own acceptance command: the match
   wants a `#` immediately before `pragma`, so a docstring quoting the
   rule is not refused.
+- **`bare-sourcery-skip`** — pygrep refusing a `# sourcery skip` that names no
+  rule or names a tag, in every tree calling section 10's
+  `reusable-sourcery.yml`, its stanza `BARE_SKIP_STANZA` in
+  `tests/hooks_test.py` whole, and no top-level `files:`, `exclude:`,
+  `default_stages:` or `default_language_version:` reaching it. Sourcery reads a
+  skip followed by anything but a colon, whatever spaces part its two words, as
+  naming no rule, and turns every rule off for the function whose `def` line
+  carries it; a tag in its list, `default` or `refactoring`, turns off every
+  rule of the tag. `suggestion` and `comment`, the other tags `rule_types:`
+  names, are refused with them.
 - **`local-link-prefix`** — pygrep refusing a markdown link whose
   destination is local and is not explicitly relative, beginning
   neither `./` nor `../`, in every repository of the organization, this
@@ -2024,6 +2034,26 @@ without adding to it is deleted.
   job holds the OIDC token, checks the downloaded files against those digests and
   signs them. A tree publishes from its own `release.yml`, PyPI not accepting a
   reusable workflow as a Trusted Publisher.
+- **`reusable-claude-implement.yml` takes an issue as far as an open pull
+  request, and no further.** The agent is the pull request's author, and section
+  11's *Review* asks for an approval by somebody else; a release tag is signed
+  with a person's key, as section 11's *Signatures* says. So no token the
+  workflow asks for carries the `workflows` scope, and the agent holds no tool
+  that runs code or writes the repository's contents. The tree's gates run on
+  its edit in a job that asks for no secret and no OIDC token, which the action
+  trades for the App's token, and whose GITHUB_TOKEN is `contents: read`. That
+  job still holds the GITHUB_TOKEN and its artifact download's runtime token, in
+  the runner's own processes. A step there runs as a user with passwordless
+  sudo, who can read both, as CVE-2025-30066 read a runner's memory, and can
+  write a cache entry of the default branch, which `reusable-lint.yml` restores
+  by prefix. So the gates run as a user of their own, with no sudo, outside the
+  docker group and with none of the runner's variables.
+  `tests/claude_implement_test.py` reads each of these. Every issue it admits is
+  assessed first, and is implemented without a person's word only where the
+  assessment recommends it and the author is an owner or a member. Its header
+  says who admits an issue and what answers a `decision`. The rejected
+  alternative is the action's `allowed_non_write_users: "*"`, which runs
+  anybody's issue text as a prompt beside the credentials.
 - **`timeout-minutes` on every job that runs steps**, far above what the work
   needs: it bounds a hung job holding a runner. A called job's is the callee's,
   one number for every caller, which only a caller the bound would cut raises.
@@ -2168,6 +2198,33 @@ whose aggregate is a required check in `btclib-secp256k1` for the same
 reason, a job reading the pull request's files deciding which builds run;
 and `codeql`, whose result the OpenSSF Scorecard reads off a merged pull
 request's own commits.
+
+**`sourcery` is a pull request's check and not a gate.** It is no section 4 hook
+because in a git worktree Sourcery refuses to run without a login or a tier that
+has the CLI and exits 1 having read nothing, so a local gate never read it; on a
+GitHub-hosted runner, whose checkout is a clone with a public `origin`, it reads
+with no login (btclib-org/.github#2005). It is not required
+(btclib-org/.github#2005): a finding is applied or skipped at its site as the
+author judges, and until a tree's clean-up a pull request touching a Python file
+for another reason can fail on findings it did not write. A tree that tracks
+Python carries a `sourcery.yml` calling `reusable-sourcery.yml` on
+`pull_request`, paths-filtered to its Python, its `.sourcery.yaml` and its own
+file, so a pull request touching none waits on nothing. It reads the Python
+files the pull request changes, whole, and the whole tree where it changes
+`.sourcery.yaml` or the version. It has no `push` trigger and no
+`workflow_dispatch`, against *What every workflow does*: neither event carries
+the pull request it reads. A finding fails that job alone, and its skip is `#
+sourcery skip: <rule>` on the line Sourcery reports or on the `def` line of the
+function holding it, in the form section 4's `bare-sourcery-skip` admits.
+
+**`.sourcery.yaml` sets `python_version` to the lowest interpreter the tree's
+code runs on, never above the `requires-python` floor, and turns off the rules
+`TURNED_OFF` in `tests/hooks_test.py` names and no others**, the reason beside
+each: the trees' own style, or the stable ruff rule that reads the same code,
+whose reading stands where Sourcery reads more widely. `enable:` and
+`rule_types:` stay at their defaults, and `disable:` can name a tag: `disable:
+[default]` turns every rule off. No `ignore:` entry, matched at any depth,
+covers a tracked Python file.
 
 **macOS is supported on arm64 alone, and no workflow runs on an x86_64 macOS
 image.** An x86_64 macOS cell can hang until the job's timeout and hold up a
@@ -2437,10 +2494,10 @@ and the badge land together.
     `security-events: write` to file code scanning alerts, and `actions: read`
     with `contents: read`.
 
-    **Its triggers are the action's and not this section's**, the one exception
-    to *`workflow_dispatch` on everything* above: that README supports `push`
-    and `schedule` on the default branch and calls `workflow_dispatch`
-    experimental.
+    **Its triggers are the action's and not this section's**, an exception to
+    *`workflow_dispatch` on everything* above, as `claude-review.yml` and
+    `sourcery.yml` are: that README supports `push` and `schedule` on the
+    default branch and calls `workflow_dispatch` experimental.
 
     **The trees this entry names owe a registration at bestpractices.dev**,
     whose badges section 2's row carries: `CII-Best-Practices` is the check
@@ -3130,6 +3187,38 @@ colour.
 It is **not a required check**, its own header saying why: it is what a
 person landing the pull request reads before pressing.
 
+**CodeRabbit is another reviewing bot, and its review is neither the ack
+of record nor a required check.** Its findings are a reading, answered as
+any reviewer's are (`CONTRIBUTING.md`'s *The review*). It reads
+`.coderabbit.yaml`, which section 14 owes of every repository, from the
+branch under review where that branch is in the repository itself ([*YAML
+configuration*](https://docs.coderabbit.ai/getting-started/yaml-configuration)),
+and from the target branch where the pull request comes from a fork
+([*Code
+guidelines*](https://docs.coderabbit.ai/knowledge-base/code-guidelines)).
+So a pull request from a branch of the repository that edits the file
+changes its own review, and is read for that.
+
+**CodeRabbit never approves.** An approval it posts counts as an approving
+review ([*Approval
+policies*](https://docs.coderabbit.ai/pr-reviews/approval-policies)), so
+it would meet the approval this section asks for with no person having
+read the change. `.coderabbit.yaml` turns its automatic approvals off, and
+refuses an author's `@coderabbitai approve`, which a branch's own
+configuration cannot turn back on ([*Automatic
+approvals*](https://docs.coderabbit.ai/pr-reviews/automatic-approvals)). A
+branch of the repository can still turn the automatic approvals back on in
+its own copy; that edit is what the reading above looks for.
+`tests/coderabbit_test.py` reads both keys.
+
+**On a repository with fewer than ten stars, CodeRabbit reviews only when
+asked**, by a `@coderabbitai review` comment
+([*Plans*](https://docs.coderabbit.ai/management/plans)). The count is:
+
+```shell
+gh api repos/<org>/<repo> --jq .stargazers_count
+```
+
 `REVIEWING.md` is the standard a review measures a diff against.
 
 **A review pass runs locally against the branch before it is pushed**:
@@ -3490,6 +3579,9 @@ A label means what its description says. Who applies and removes it:
   is filed the issue closes, or takes `upstream-dependent` instead where
   the tree's code or tests wait on the outcome;
 - `plan` and `good first issue` — applied by whoever files the issue;
+- `agent` — applied by an administrator of the repository, admitting the
+  issue to section 10's `reusable-claude-implement.yml`, and removed by whoever
+  withdraws it;
 - `security` and `alignment` — applied by whoever finds it;
 - `api-break` — section 12.
 
@@ -3983,6 +4075,14 @@ The paths are what that test compares:
 - `.claude/commands/review.md` — owed where `REVIEWING.md`: it is the
   invocation and not a second copy of the standard, and it stays a
   file of its own rather than being folded into `AGENTS.md`.
+- `.coderabbit.yaml` — owed by every repository: what CodeRabbit's
+  review reads and what it leaves out, each key with its reason beside
+  it, section 11's *Review* saying what that review is. The rejected
+  alternative is one central `.coderabbit.yaml` in a repository named
+  `coderabbit`, which CodeRabbit reads for a tree that has none of its
+  own ([*Configuration
+  inheritance*](https://docs.coderabbit.ai/configuration/configuration-inheritance)):
+  that is a repository this standard would govern whole, for one file.
 - `.github/scripts/generate_sbom.py` — owed where
   `.github/scripts/generate_sbom.py`: the file itself satisfies the condition,
   as it does `.taplo.toml`'s, the canonical copy being this repository's.
@@ -4089,13 +4189,14 @@ stops being one.
 **Decided per repository**: `requires-python` and `.python-version`; the matrix
 breadth; which optional workflows exist past those section 10 keys on a property
 of the tree; the ruff `ignore` list's entries a tree declines on its own merits
-and its `per-file-ignores`; what a publishing repository checks about its
-package contents past section 12's floor — the sdist allowlist, and the script a
-wheel that is not one package tree needs — which is settled by measuring that
-project's own distribution rather than by copying what a sibling does; the
-convention tests, which each project chooses on section 7's terms; and the
-`[tool.uv.sources]` table, which exists only while a dependency is not on the
-index and goes the day it is.
+and its `per-file-ignores`; `.sourcery.yaml`'s `python_version` and `ignore:`,
+inside the bounds section 10 sets them; what a publishing repository checks
+about its package contents past section 12's floor — the sdist allowlist, and
+the script a wheel that is not one package tree needs — which is settled by
+measuring that project's own distribution rather than by copying what a sibling
+does; the convention tests, which each project chooses on section 7's terms; and
+the `[tool.uv.sources]` table, which exists only while a dependency is not on
+the index and goes the day it is.
 
 `.gitignore` is decided per repository and so outside the compared list above:
 what a tree ignores is what its own build and tools write. A package that
@@ -4711,7 +4812,8 @@ No tool checks them.
    backend declares it in and building through the installer section 12
    names. A `dist` job that inspects what would be published.
 1. Workflows: `test` (with its aggregate and its `changes` job), `lint`,
-   `docs`, `claude-review`, then the periodic ones the project earns.
+   `docs`, `claude-review`, `sourcery` with its `.sourcery.yaml` where the
+   tree tracks Python, then the periodic ones the project earns.
 1. `.github/dependabot.yml`, `ISSUE_TEMPLATE/`,
    `PULL_REQUEST_TEMPLATE.md`.
 1. `CONTRIBUTING.md`, `REVIEWING.md` with the

@@ -114,7 +114,7 @@ def wait(
             print(f"{url} is served after {waited:.0f} s")
             return 0
         last_seen = seen
-        print(f"{url} answered {seen}")
+        print(f"{url} answered {last_seen}")
         time.sleep(min(interval, max(deadline - time.monotonic(), 0.0)))
     builds = BUILDS.format(project=project)
     print(

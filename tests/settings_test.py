@@ -157,19 +157,17 @@ def test_main_refuses_a_rewritten_commit(
     for repository, active in sorted(rulesets.items()):
         covers = covering(active, "branch", MAIN)
         found = {rule: enforcing(covers, rule) for rule in wanted}
-        absent = sorted(rule for rule, carried in found.items() if not carried)
-        if absent:
+        if absent := sorted(rule for rule, carried in found.items() if not carried):
             missing[repository] = absent
         present = [entry for carried in found.values() for entry in carried]
         if any(entry["bypass_actors"] is None for entry in present):
             unseen.append(repository)
             continue
-        bypassed = sorted(
+        if bypassed := sorted(
             rule
             for rule, carried in found.items()
             if any(entry["bypass_actors"] for entry in carried)
-        )
-        if bypassed:
+        ):
             excused[repository] = bypassed
     refusing = sorted(
         repository
@@ -297,14 +295,12 @@ def test_squash_is_the_only_button(settings: dict[str, dict[str, Any]]) -> None:
     wrong: dict[str, dict[str, bool]] = {}
     unseen: dict[str, list[str]] = {}
     for repository, document in sorted(settings.items()):
-        absent = [key for key in wanted if key not in document]
-        if absent:
+        if absent := [key for key in wanted if key not in document]:
             unseen[repository] = absent
             continue
-        off = {
+        if off := {
             key: document[key] for key, want in wanted.items() if document[key] != want
-        }
-        if off:
+        }:
             wrong[repository] = off
     assert not wrong, f"repositories whose merge button is not the design: {wrong}"
     if unseen:

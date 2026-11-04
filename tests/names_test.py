@@ -161,9 +161,12 @@ def written(root: Path, name: str, pattern: re.Pattern[str]) -> list[str]:
     for path in tracked(root):
         if path in HISTORIES or ARCHIVED.fullmatch(path) or path.endswith(".py"):
             continue
-        try:
+        # one clause each, so Sourcery reads it (btclib-org/.github#2028)
+        try:  # sourcery skip: merge-except-handler
             text = (root / path).read_text(encoding="utf-8")
-        except OSError, UnicodeDecodeError:
+        except OSError:
+            continue
+        except UnicodeDecodeError:
             continue
         for found in pattern.finditer(text):
             if found.group(0) != name:

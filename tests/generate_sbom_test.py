@@ -161,11 +161,11 @@ def write_sdist(
     with tarfile.open(path, "w:gz") as archive:
         if member is not None:
             info = tarfile.TarInfo(f"{stem}/{member}")
-            content = metadata.encode()
             if as_directory:
                 info.type = tarfile.DIRTYPE
                 archive.addfile(info)
             else:
+                content = metadata.encode()
                 info.size = len(content)
                 archive.addfile(info, io.BytesIO(content))
     return path

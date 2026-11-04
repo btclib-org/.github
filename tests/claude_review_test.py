@@ -9,9 +9,14 @@ of `reusable-claude-review.yml` answers a comment whose author the
 mention job's `if:` does not name. zizmor reads the decline and not the
 guard, so without these tests nothing turns red the day the guard goes
 (btclib-org/.github#1813).
+
+The review's `allowed_bots` is read here too, against the bot that
+`reusable-claude-implement.yml` opens its pull requests as.
 """
 
 from __future__ import annotations
+
+import re
 
 from . import ROOT
 from .workflows_test import jobs
@@ -21,6 +26,9 @@ WORKFLOW = ROOT / ".github/workflows/reusable-claude-review.yml"
 
 # the caller in this tree, which holds the trigger and its decline
 CALLER = ROOT / ".github/workflows/claude-review.yml"
+
+# the workflow whose pull requests a bot opens
+IMPLEMENT = ROOT / ".github/workflows/reusable-claude-implement.yml"
 
 # the mention job's condition on the commenter, spaced as one line
 GUARD = (
@@ -59,3 +67,29 @@ def test_the_decline_sits_on_the_trigger() -> None:
     lines = CALLER.read_text(encoding="utf-8").splitlines()
     declined = [line for line in lines if "ignore[dangerous-triggers]" in line]
     assert declined == ["  issue_comment: # zizmor: ignore[dangerous-triggers]"]
+
+
+def test_the_review_admits_the_agent_s_pull_requests() -> None:
+    """`allowed_bots` names the bot the implement workflow commits as.
+
+    `publish` opens the pull request with the App's token, so the bot its
+    commit names is the actor of the review's `pull_request` run, which
+    the action refuses unless the input names it. It is not `*`, for the
+    reason the input's comment gives.
+    """
+    (step,) = [
+        step
+        for step in jobs(WORKFLOW)["review"]["steps"]
+        if "allowed_bots" in step.get("with", {})
+    ]
+    named = step["with"]["allowed_bots"].split(",")
+    (commit,) = [
+        step["run"]
+        for step in jobs(IMPLEMENT)["publish"]["steps"]
+        if step.get("name") == "Commit the edit"
+    ]
+    bot = re.search(r"user\.name='([^']+)'", commit)
+
+    assert bot is not None
+    assert "*" not in named
+    assert bot[1] in named

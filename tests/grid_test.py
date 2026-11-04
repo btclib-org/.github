@@ -205,8 +205,7 @@ def schedules(root: Path) -> dict[str, list[str]]:
             assert "timezone" not in entry, (
                 f"{workflow}: a timezone beside a cron is off section 10's calendar"
             )
-        crons = [entry["cron"] for entry in entries]
-        if crons:
+        if crons := [entry["cron"] for entry in entries]:
             out.setdefault(workflow.stem, []).extend(crons)
     return out
 
@@ -609,7 +608,7 @@ def unfiltered(on: dict[str, Any]) -> bool:
     if "pull_request" not in on:
         return False
     trigger = on["pull_request"] or {}
-    return not any(key in trigger for key in FILTERS)
+    return all(key not in trigger for key in FILTERS)
 
 
 def test_an_unfiltered_pull_request_on_the_calendar_is_one_section_10_names(

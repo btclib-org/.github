@@ -112,6 +112,9 @@ owes, rather than restating it.
   runs only where the organization variable `CLAUDE_REVIEW_ENABLED` is
   `true`: section 11's *Review* has the rule and the command that reads
   the variable. It is not a required check.
+- **CodeRabbit** is another reviewing bot, configured by each
+  repository's `.coderabbit.yaml`. Section 11's *Review* says what its
+  review is.
 - **Dependabot** opens the pull requests that update each repository's
   dependencies, per that repository's `.github/dependabot.yml`, and they
   pass the same rule as anybody's. Section 11's *Dependabot and

@@ -1,0 +1,44 @@
+---
+name: sourcery
+
+# Sourcery's rules over this pull request's Python files. The job, its
+# pins and the choice between those files and the whole tree are
+# reusable-sourcery.yml's; what is this tree's is the trigger.
+#
+# Not a required check, as decided on btclib-org/.github#2005: section
+# 10 gives it no place among the gates, and a finding fails this job
+# alone.
+#
+# No push trigger and no workflow_dispatch, departures section 10's
+# paragraph on this job states: what it reads is a pull request's
+# files against its base branch, and neither event carries one.
+
+on:
+  pull_request:
+    # closed so the merge lands in the pull request's own concurrency
+    # group, as section 10 has every pull_request trigger do; the job's
+    # if declines it, and a draft
+    types: [opened, reopened, synchronize, ready_for_review, closed]
+    # what the job reads, and what moves its rules or its version
+    paths:
+      - "**.py"
+      - .sourcery.yaml
+      - .github/workflows/sourcery.yml
+      - .github/workflows/reusable-sourcery.yml
+
+# least privilege for the GITHUB_TOKEN, which a called workflow cannot
+# widen: the job reads the tree and writes nothing
+permissions:
+  contents: read
+
+concurrency:
+  # named literally rather than through github.workflow, as everywhere
+  # else here. No push trigger, so the merged run is not cancelled: it
+  # is the last reading the merged files get
+  group: sourcery-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !(github.event.action == 'closed' && github.event.pull_request.merged) }}
+
+jobs:
+  sourcery:
+    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    uses: ./.github/workflows/reusable-sourcery.yml # zizmor: ignore[self-repository]

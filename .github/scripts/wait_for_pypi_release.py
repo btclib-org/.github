@@ -122,7 +122,8 @@ def lists(document: dict[str, object], version: str) -> bool:
 def served(url: str, version: str, timeout: float) -> bool:
     """Return whether the index's page lists a file of this version."""
     request = Request(url, headers={"Accept": ACCEPT}, method="GET")  # noqa: S310
-    try:
+    # one clause each, so Sourcery reads it (btclib-org/.github#2028)
+    try:  # sourcery skip: merge-except-handler
         with urlopen(request, timeout=timeout) as answer:  # noqa: S310
             if answer.status != HTTPStatus.OK:
                 return False

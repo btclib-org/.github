@@ -6,12 +6,20 @@ name: reusable-codeql
 # concurrency group and the aggregate job stay in the caller, whose run
 # these jobs join.
 #
-# Two inputs. `queries` is the query suite, empty by default, for the
-# trial of btclib-org/.github#1505. `languages` is the list of languages
-# to analyse, JSON-encoded because a workflow_call input is a string, a
-# number or a boolean, and fromJSON turns the string into the list the
-# matrix takes. Its default is both languages, so the trees that carry
-# both pass nothing.
+# Two inputs. `queries` is the query suite, `security-extended` by
+# default, so a caller passes it only to run another. That suite runs
+# queries the default code-scanning suite leaves out, such as
+# `actions/unpinned-tag`. Its trial, btclib-org/.github#1505, found no
+# noise: it added `actions/unpinned-tag` on calls at `@main`, which
+# README.md section 10 rejects, and a `py/overly-permissive-file` that
+# btclib-node fixed. No `query-filters` excludes `actions/unpinned-tag`:
+# every `uses:` is pinned to a commit (section 10), so it would have
+# nothing to filter.
+#
+# `languages` is the list of languages to analyse, JSON-encoded because
+# a workflow_call input is a string, a number or a boolean, and fromJSON
+# turns the string into the list the matrix takes. Its default is both
+# languages, so the trees that carry both pass nothing.
 # It is owed to `portanode`, which holds no Python: CodeQL fails a
 # language it finds no source for. A difference one tree has is not the
 # copy in disguise btclib-org/.github#35 refuses.
@@ -33,10 +41,9 @@ on:
       queries:
         description: >-
           The CodeQL query suite, as the init action's `queries` input
-          takes it, `security-extended` for one. Empty runs the default
-          code-scanning suite.
+          takes it.
         type: string
-        default: ""
+        default: security-extended
       languages:
         description: >-
           The languages to analyse, JSON-encoded: '["actions"]'. A
@@ -75,8 +82,8 @@ jobs:
     # CodeQL action needs to read run metadata in a *private* one -- and
     # it is written down so that the file does not quietly stop working
     # the day a caller stops being public. No packages: read, which
-    # fetching a private CodeQL pack would want and the default query
-    # suite does not.
+    # fetching a private CodeQL pack would want and neither suite named
+    # above does.
     # The trailing comments below are not that paragraph again for its own
     # sake: zizmor's undocumented-permissions audit reads the line a
     # permission is on and not the prose above the block, so one word there
@@ -110,9 +117,7 @@ jobs:
           # would have to change first if a compiled language ever joined
           # the matrix
           build-mode: none
-          # no `packs` and no `config`: anything written there would
-          # widen the suite. `queries` is the caller's, empty for the
-          # default code-scanning suite
+          # no `packs` and no `config`: the suite is `queries` alone
           queries: ${{ inputs.queries }}
       - name: Analyze
         uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1

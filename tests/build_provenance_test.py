@@ -122,9 +122,8 @@ def _hashed(job: dict[str, Any]) -> set[str]:
     """Return the globs the `sha256sum` step of a job reads."""
     globs: set[str] = set()
     for step in job["steps"]:
-        found = re.search(r"sha256sum ((?:\S+/\* ?)+)", step.get("run", ""))
-        if found:
-            globs |= set(found.group(1).split())
+        if found := re.search(r"sha256sum ((?:\S+/\* ?)+)", step.get("run", "")):
+            globs |= set(found[1].split())
     return globs
 
 

@@ -1,0 +1,110 @@
+---
+name: reusable-sourcery
+
+# Sourcery's rules over a pull request, the job a tree's sourcery.yml
+# calls. Section 10's *The set, and its cadence* is the rule
+# (btclib-org/.github#2005); this header is how the job keeps it.
+#
+# It reads the Python files the pull request changes, whole: the paths
+# `git diff --name-only --no-renames --diff-filter=d` lists against the
+# merge base with the base branch, and not `sourcery review --diff`,
+# which reads the changed lines alone and leaves a finding in an
+# untouched function of a changed file unread. A pull request changing
+# no Python file is read as nothing, and passes. Where it changes
+# `.sourcery.yaml`, or a workflow whose file name holds `sourcery`,
+# which is where the version is set or pinned, it reads the whole tree:
+# a rule or a version moved is a new reading of every file.
+# `--no-renames` because a rename is otherwise listed under its new name
+# alone, and a `.sourcery.yaml` renamed away would read as no change to
+# it.
+#
+# The version is set once, in the job's env below; a tree's caller
+# moves it by moving its pin of this file. The interpreter uvx builds
+# Sourcery's environment with is named on the command line, as section
+# 10 has a job reading no lock do: uvx reads no `.python-version`.
+# Sourcery's analysis runs on the interpreter its wheel bundles, 3.11 in
+# 1.46.0's own warnings, which that name does not choose.
+#
+# The names are read NUL-separated, `-z`, so git prints a path as it is
+# and not quoted, and a name holding a space, a newline or a non-ASCII
+# letter reaches Sourcery whole. `--` comes before them, so a file
+# named like an option is read as a file.
+#
+# A finding fails this job alone. No `--fix`: nothing here pushes, and
+# the author applies a finding or skips it at its site.
+#
+# No login and no secret. On a GitHub-hosted runner Sourcery reads a
+# clone whose origin is public without one (btclib-org/.github#2020).
+#
+# What only a live run shows:
+# - a pull request from a fork. actions/checkout clones the base
+#   repository and checks out the pull request's merge ref, so origin is
+#   the base's public URL and the job is expected to run as on a branch
+#   of the base. Not measured: a fork's run that refuses to run without
+#   a login or a tier that has the CLI is the measurement, and the job
+#   is then red for that pull request alone.
+# - the base branch. `github.base_ref` is read through the environment,
+#   and an event without one, which no pull request is, fails the job
+#   naming it rather than reading against nothing.
+
+on:
+  workflow_call:
+
+# least privilege for the GITHUB_TOKEN: the job reads the tree and writes
+# nothing
+permissions:
+  contents: read
+
+jobs:
+  sourcery:
+    # the name the check context is keyed by, after the calling job's own
+    name: Sourcery
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SOURCERY_VERSION: 1.46.0
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the base branch's history, for the merge base the diff reads
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+
+      # the base branch arrives through the environment and not through an
+      # expression pasted into the script
+      - name: Review what the pull request changes
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -z "$BASE_REF" ]; then
+            echo "::error::no base branch: this job reads a pull request"
+            exit 1
+          fi
+          review=(uvx --python 3.15 --from "sourcery==$SOURCERY_VERSION" sourcery review --check)
+          # each list goes through a file, so that -e stops the step where
+          # git fails: a process substitution's exit status is lost
+          names="${RUNNER_TEMP:?}/sourcery-names"
+          git diff -z --name-only --no-renames "origin/$BASE_REF..." > "$names"
+          mapfile -d '' -t changed < "$names"
+          whole='^\.sourcery\.yaml$|^\.github/workflows/[^/]*sourcery[^/]*\.ya?ml$'
+          for name in "${changed[@]}"; do
+            if [[ $name =~ $whole ]]; then
+              echo "Sourcery's configuration or version moved: reading the whole tree"
+              "${review[@]}" .
+              exit 0
+            fi
+          done
+          git diff -z --name-only --no-renames --diff-filter=d \
+            "origin/$BASE_REF..." -- '*.py' > "$names"
+          mapfile -d '' -t python < "$names"
+          if [ "${#python[@]}" -eq 0 ]; then
+            echo "no Python file changed: nothing to read"
+            exit 0
+          fi
+          printf 'reading %q\n' "${python[@]}"
+          # -- so that a file named like an option is read as a file
+          "${review[@]}" -- "${python[@]}"

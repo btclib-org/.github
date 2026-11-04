@@ -108,7 +108,8 @@ def fetch(version: str, dest: Path, retries: int = RETRIES) -> None:
     opener = build_opener(_HTTPSOnly)
     request = Request(url, method="GET")  # noqa: S310
     for attempt in range(retries + 1):
-        try:
+        # one clause each, so Sourcery reads it (btclib-org/.github#2028)
+        try:  # sourcery skip: merge-except-handler
             _download_once(opener, request, dest)
         except HTTPError as error:
             if error.code < SERVER_ERROR_FLOOR or attempt == retries:
@@ -170,24 +171,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    # one clause per exception rather than a tuple: ruff-format rewrites a
-    # parenthesised tuple into PEP 758's unparenthesised form wherever
-    # requires-python is 3.14, which is a syntax error to an interpreter
-    # older than that (btclib-org/.github#1160). OSError and HTTPException
-    # are what a retry-exhausted fetch raises, tarfile.TarError and
-    # KeyError are what extract raises on a corrupt archive or a missing
-    # member, and ValueError is verify's checksum mismatch
+    # OSError and HTTPException are what a retry-exhausted fetch raises,
+    # tarfile.TarError and KeyError are what extract raises on a corrupt
+    # archive or a missing member, and ValueError is verify's checksum
+    # mismatch
     try:
         daemon = install(args.version, args.sha256, args.dest)
-    except OSError as error:
-        return _failed(error)
-    except HTTPException as error:
-        return _failed(error)
-    except tarfile.TarError as error:
-        return _failed(error)
-    except KeyError as error:
-        return _failed(error)
-    except ValueError as error:
+    except (OSError, HTTPException, tarfile.TarError, KeyError, ValueError) as error:
         return _failed(error)
     print(daemon.resolve())
     return 0

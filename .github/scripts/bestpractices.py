@@ -132,8 +132,7 @@ def stale(saved: Answers, tag: str, published: str) -> list[str]:
         ]
         dates = [each for each in DATE.findall(text) if each < day]
         words = [each.lower() for each in UNDATED.findall(text)]
-        named = dict.fromkeys([*versions, *dates, *words])
-        if named:
+        if named := dict.fromkeys([*versions, *dates, *words]):
             out.append(f"{criterion}: {', '.join(named)}")
     return out
 

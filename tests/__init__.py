@@ -393,10 +393,8 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_the_homepage_is_the_page_on_btclib_org",
         (
             "btclib",
-            "btclib-secp256k1",
             "btclib-node",
             "btclib-wallet",
-            "ecc",
             "bip32-descriptors",
             "benchmarks",
             "functional-tests",
@@ -405,12 +403,29 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         1974,
         "test_the_documentation_is_the_read_the_docs_site_serving_the_tree",
-        ("btclib-secp256k1", "btclib-node", "functional-tests"),
+        ("btclib-node", "functional-tests"),
     ),
     (
         1982,
         "test_no_workflow_runs_on_an_x86_64_macos_image",
         ("btclib-secp256k1",),
+    ),
+    (
+        2005,
+        "test_a_python_tree_calls_sourcery_with_its_rules_off",
+        (
+            "btclib",
+            "btclib-secp256k1",
+            "bitcoin-core-rpc",
+            "btclib-node",
+            "btclib-wallet",
+            "ecc",
+            "bip39-slip39",
+            "base58-bech32",
+            "bip32-descriptors",
+            "benchmarks",
+            "functional-tests",
+        ),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
@@ -615,8 +630,7 @@ def subjects(
     read: list[tuple[str, str]] = []
     unread: list[str] = []
     for bullet in bulleted(document, opening, closing):
-        found = pattern.match(bullet)
-        if found:
+        if found := pattern.match(bullet):
             read.append((found.group(1), found.group(2)))
         else:
             unread.append(bullet)
