@@ -135,17 +135,18 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
   | xargs -I{} gh api repos/btclib-org/.github/rulesets/{} \
     --jq '{name, target, enforcement, refs: .conditions.ref_name.include,
            rules: [.rules[].type],
-           bypass: [.bypass_actors[]?.bypass_mode]}'
+           bypass: [.bypass_actors[]?
+             | "\(.actor_type) \(.actor_id) \(.bypass_mode)"]}'
 # {"bypass":[],"enforcement":"active","name":"main-integrity",
 #  "refs":["refs/heads/main"],
 #  "rules":["required_linear_history","non_fast_forward","deletion"],
 #  "target":"branch"}
-# {"bypass":["pull_request"],"enforcement":"active",
+# {"bypass":["User 3296421 pull_request"],"enforcement":"active",
 #  "name":"main-self-merge","refs":["refs/heads/main"],
 #  "rules":["pull_request"],"target":"branch"}
 # {"bypass":[],"enforcement":"active","name":"tag-integrity",
 #  "refs":["refs/tags/v*"],"rules":["required_signatures"],"target":"tag"}
-# {"bypass":["always"],"enforcement":"active",
+# {"bypass":["RepositoryRole 5 always"],"enforcement":"active",
 #  "name":"tag-release-actors","refs":["refs/tags/v*"],
 #  "rules":["creation","update","deletion"],"target":"tag"}
 ```
@@ -177,16 +178,22 @@ so `dismiss_stale_reviews_on_push`, which is on, reaches no landing made
 through it. [Section 11 has what stands in for it][s11-branch].
 
 `main-self-merge`'s `bypass` is one of the fields the first call above
-is read for. It answers `["pull_request"]`, and [that mode against
-`always` is the whole of the design][s11-branch]: `always` would let its
-holder push to `main` directly, which is a drift the call is there to
-catch. That call reads `[]` where the endpoint omits `bypass_actors`,
-which it does for a token without push access, so the actors themselves
-are read from the ruleset, and `3296421` is the maintainer's account:
+is read for. It answers `["User 3296421 pull_request"]`, and [that mode
+against `always` is the whole of the design][s11-branch]: `always` would
+let its holder push to `main` directly, which is a drift the call is
+there to catch. That call reads `[]` where the endpoint omits
+`bypass_actors`, which it does for a token without push access.
+`RepositoryRole 5` is the `admin` role, and `3296421` is the
+maintainer's account:
 
 ```shell
-gh api repos/btclib-org/.github/rulesets/21142971 --jq .bypass_actors
-# [{"actor_id":3296421,"actor_type":"User","bypass_mode":"pull_request"}]
+gh api graphql -f query='{repository(owner: "btclib-org", name: ".github")
+  {rulesets(first: 10) {nodes {bypassActors(first: 5)
+  {nodes {repositoryRoleDatabaseId repositoryRoleName}}}}}}' \
+  --jq '.data.repository.rulesets.nodes[].bypassActors.nodes[]
+    | select(.repositoryRoleName)
+    | "\(.repositoryRoleDatabaseId) \(.repositoryRoleName)"'
+# 5 admin
 gh api users/fametrano --jq .id
 # 3296421
 ```
