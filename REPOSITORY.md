@@ -199,9 +199,8 @@ gh api users/fametrano --jq .id
 ```
 
 `tag-integrity` and `tag-release-actors` hold for this repository's own
-`v*` tags. Such a tag names a commit that other trees pin. It is no
-release: nothing is published with it, as `CONTRIBUTING.md`'s *A
-version, and no release* says. [Section 12][s12] says when one is cut.
+`v*` tags. [Section 12][s12] says what such a tag is, that it is no
+release, and when one is cut.
 
 A `v*` tag push that brings an unsigned commit is refused. A tag on a
 commit already on `main` is accepted whether it is signed, unsigned or
