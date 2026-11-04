@@ -366,9 +366,9 @@ commit pushed is `verified`; section 11's *Signatures* has the rule.
 `claude-review.yml`'s own header says it must not become a required
 check — requiring it would make a review a gate to satisfy rather than a
 reading to answer.
-`sourcery.yml` reads the Python files a pull request changes, and a
-finding fails that job alone; section 10's *The set, and its cadence*
-has the rule.
+`sourcery.yml` is not a required check either — its findings propose
+refactorings to apply or skip, not defects that bar a merge; section
+10's *The set, and its cadence* has the rest.
 
 ### A version, and no release
 
