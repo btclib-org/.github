@@ -757,7 +757,7 @@ def test_a_tree_off_section_10s_caller_would_be_reported(tmp_path: Path) -> None
         bare, "sourcery.yml", f"on:\n  pull_request:\njobs:\n  s:\n    uses: {remote}\n"
     )
     assert caller_departures(bare) == []
-    for name in FILTERS:
+    for name in ("paths", "paths-ignore"):
         root = tmp_path / f"with-{name}"
         _workflow(
             root,

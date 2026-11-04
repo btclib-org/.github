@@ -131,10 +131,9 @@ Everything reaches it through a pull request. Rules [aggregate rather
 than replace each other][s11-branch], so what holds on `main` is what the
 call below answers for that target **together with** the classic
 protection two headings up: that one requires a review, a linear history,
-resolved conversations and the `Lint`, `Dependency review` and `Sign-off`
-checks, and refuses a force push or a deletion — under the exemption above,
-which these rulesets do not carry. Where the two overlap, the stricter answer
-is the one that applies:
+resolved conversations and the checks its table lists, and refuses a force
+push or a deletion — under the exemption above, which these rulesets do not
+carry. Where the two overlap, the stricter answer is the one that applies:
 
 ```shell
 gh api repos/btclib-org/.github/rulesets --jq '.[].id' \

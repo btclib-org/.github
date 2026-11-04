@@ -2206,13 +2206,12 @@ read it; on a GitHub-hosted runner, whose checkout is a clone with a public
 `origin`, it reads with no login (btclib-org/.github#2005). A tree that tracks
 Python carries a `sourcery.yml` calling `reusable-sourcery.yml` on
 `pull_request`. It reads the Python files the pull request changes, whole, and
-the whole tree where it changes `.sourcery.yaml` or the version; a pull request
-changing no Python file runs it, and it reads nothing and passes. It has no
-`push` trigger and no `workflow_dispatch`, against *What every workflow does*:
-neither event carries the pull request it reads. A finding fails that job alone,
-and its skip is `# sourcery skip: <rule>` on the line Sourcery reports or on the
-`def` line of the function holding it, in the form section 4's
-`bare-sourcery-skip` admits.
+the whole tree where it changes `.sourcery.yaml` or the version, and otherwise
+nothing where no Python file changed, which passes. It has no `push` trigger and
+no `workflow_dispatch`, against *What every workflow does*: neither event
+carries the pull request it reads. A finding fails that job alone, and its skip
+is `# sourcery skip: <rule>` on the line Sourcery reports or on the `def` line
+of the function holding it, in the form section 4's `bare-sourcery-skip` admits.
 
 **`sourcery` is a required check in a tree whose clean-up has landed, and in no
 other** (btclib-org/.github#2005). A tree's protection gains it once that
@@ -2224,9 +2223,8 @@ reads it both ways: a tree out of that row whose caller is in place requires
 the context, and a tree in it does not. The context is the caller's job name,
 then the callee's, `sourcery / Sourcery`, bound to the Actions app.
 
-**The caller's `pull_request` carries no `paths` filter**, because a required
-check whose workflow a filter skips stays pending and blocks the merge
-([GitHub's *Skipping workflow runs*](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/skip-workflow-runs)).
+**The caller's `pull_request` carries no `paths` filter**, for the reason
+*`paths-ignore` only on `push`* gives.
 
 **`.sourcery.yaml` sets `python_version` to the lowest interpreter the tree's
 code runs on, never above the `requires-python` floor, and turns off the rules
