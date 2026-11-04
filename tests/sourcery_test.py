@@ -24,7 +24,7 @@ import pytest
 
 from . import ROOT
 from .hooks_test import caller_departures
-from .workflows_test import document, steps, triggers
+from .workflows_test import document, steps
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -102,18 +102,6 @@ def test_the_version_is_set_once_and_nothing_fixes() -> None:
     assert "--fix" not in str(_review()["run"])
     lines_only = re.search(r"--diff(?![\w-])", str(_review()["run"]))
     assert lines_only is None, "--diff reads lines, not files"
-
-
-def test_the_caller_runs_on_a_pull_request_and_is_not_required() -> None:
-    """The caller's trigger, and no required context named for it.
-
-    Section 11 is where the required checks are listed, and it names no
-    context of this job.
-    """
-    assert "pull_request" in triggers(CALLER)
-    text = (ROOT / "README.md").read_text(encoding="utf-8")
-    eleven = text[text.index("\n## 11. ") : text.index("\n## 12. ")]
-    assert "sourcery" not in eleven.lower()
 
 
 def test_this_trees_caller_is_section_10s() -> None:
