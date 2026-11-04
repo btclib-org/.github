@@ -300,9 +300,9 @@ class Reader:
     keeps its quotes and only the substitutions inside it. Each
     substitution, `$(...)`, `<(...)`, `>(...)` or backticks, is cut out
     into a unit of its own and stands as a placeholder naming the unit. A
-    heredoc's body is a unit of its own: a script where its word is quoted
-    and its body starts with `#!`, the substitutions it expands where its
-    word is not quoted, and nothing otherwise.
+    heredoc's body is a unit of its own: the substitutions it expands where
+    its word is not quoted, and a script where its body starts with `#!`,
+    its word quoted or not.
     """
 
     def __init__(self, text: str, units: list[tuple[str, str]]) -> None:
@@ -760,6 +760,8 @@ def single_call(unit: str) -> bool:
         (and_or,) = Parser(unit).script()
     except ValueError:
         return False
+    if len(and_or.pipelines) != 1:
+        return False
     (pipeline,) = and_or.pipelines
     command = pipeline.commands[0]
     return (
@@ -768,7 +770,7 @@ def single_call(unit: str) -> bool:
         and len(pipeline.commands) == 1
         and isinstance(command, Simple)
         and not command.redirects
-        and bool(CALL.fullmatch(command.words[0]))
+        and bool(CALL.fullmatch("".join(command.words[:1])))
     )
 
 
@@ -940,12 +942,13 @@ def hidden_calls(run: str) -> list[str]:
     `shopt -u -o errexit`, its flags joined or not, and `trap ... ERR`.
 
     The check reads a call by its name, as a word: it does not follow a
-    name quoted or escaped (`"gh"`, `\gh`) or held in a variable, nor a
-    call run by `eval`, `bash -c` or `sh -c`, nor one in a quoted heredoc
-    that does not open with `#!` but is run all the same (`bash <<'EOF'`).
-    A heredoc body that opens with `#!` is read as a script, quoted or
-    not. A call inside a function is kept, whatever calls the function. A
-    script it cannot read is kept whole.
+    name built by quoting, expansion or substitution (`"gh"`, `\gh`,
+    `''gh`, `$(true)gh`, `{gh,}`, `$GH`), nor a call run by `eval`,
+    `bash -c` or `sh -c`, nor one in a quoted heredoc that does not open
+    with `#!` but is run all the same (`bash <<'EOF'`). A heredoc body
+    that opens with `#!` is read as a script, quoted or not. A call inside
+    a function is kept, whatever calls the function. A script it cannot
+    read is kept whole.
 
     :param run: the step's script.
     :returns: each command kept, a substitution as its unit.
@@ -1101,6 +1104,16 @@ def test_the_hidden_call_check_sees_each_form(
     ]
     # the rule's own finding, not a script the check could not read
     assert [line for line in found if not line.startswith("not read: ")], found
+
+
+@pytest.mark.parametrize("substitution", ["$(gh api x||true)", "$(true && gh api x)"])
+def test_a_list_in_a_substitution_is_a_hidden_call(substitution: str) -> None:
+    """It is kept as the call it hides, and the script is read past it.
+
+    :param substitution: an assignment's substitution holding a list.
+    """
+    found = hidden_calls(f"labels={substitution}\ngh api y | sort\n")
+    assert sorted(found) == sorted([substitution, "gh api y"]), found
 
 
 def waiting() -> list[str]:
