@@ -1304,15 +1304,21 @@ def test_the_release_step_runs_api_gaps_after_griffe() -> None:
     """The hand step runs the script after griffe, on the same tag.
 
     The script reports the breaks griffe misses, which `public-api`
-    reports after the tag (btclib-org/.github#1940).
+    reports after the tag (btclib-org/.github#1940). It is fetched at
+    the commit `release.yml` pins `reusable-public-api.yml` to, which is
+    the copy the job runs.
     """
     commands = _release_commands()
     [check] = [i for i, c in enumerate(commands) if "griffe check" in c]
     [gaps] = [i for i, c in enumerate(commands) if "api_gaps.py" in c]
+    prefix = f"uv run --no-project --python 3.15 --with {_public_api_pin()} "
+    pinned = r"reusable-public-api\.yml@[0-9a-f]{40}' .github/workflows/release.yml"
 
     assert check < gaps
     assert '-a "${tag:?}"' in commands[check]
-    assert '"${pkg:?}" "${tag:?}"' in commands[gaps]
+    assert pinned in commands[gaps]
+    assert '-f "ref=${ref:?}" repos/btclib-org/.github/' in commands[gaps]
+    assert prefix + '"${gaps:?}/api_gaps.py" "${pkg:?}" "${tag:?}"' in commands[gaps]
 
 
 @pytest.mark.parametrize(

@@ -293,12 +293,19 @@ request, next to `deps-latest`'s own result.
 
    ```shell
    gaps=$(mktemp -d) &&
-   gh api -H 'Accept: application/vnd.github.raw' \
+   ref=$(grep -oE 'reusable-public-api\.yml@[0-9a-f]{40}' \
+       .github/workflows/release.yml | cut -d@ -f2) &&
+   gh api -X GET -H 'Accept: application/vnd.github.raw' -f "ref=${ref:?}" \
        repos/btclib-org/.github/contents/.github/scripts/api_gaps.py \
        > "${gaps:?}/api_gaps.py" &&
    uv run --no-project --python 3.15 --with griffe==2.2.0 \
        "${gaps:?}/api_gaps.py" "${pkg:?}" "${tag:?}"
    ```
+
+   The script is fetched at the commit `release.yml` pins
+   `reusable-public-api.yml` to, because the job runs the script at that
+   commit and `main`'s copy can differ from it. Where `release.yml` names
+   no such commit, `${ref:?}` stops the chain before the fetch.
 
    The script is written to a file before it runs, because a failed fetch
    piped into `uv run -` runs an empty script, which exits 0. An error
@@ -323,8 +330,12 @@ request, next to `deps-latest`'s own result.
    that reasoning stops holding — a cycle that means to break nothing —
    making the step a gate is a line per command.
 
-   Any other non-zero exit is the tool failing, which answers nothing: read
-   its error before going on.
+   griffe also exits 1 when it fails on an error it does not catch, such
+   as a tag the repository lacks: its output is then a Python traceback,
+   not findings. So an exit of 1 is read in the output before it is taken
+   for a finding. `api_gaps.py` exits 2 when it fails. Any other non-zero
+   exit is the tool failing, which answers nothing: read its error before
+   going on.
 
    `release.yml` asks the same question again as its `public-api` job. A
    red one there is a break `RELEASE_NOTES.md` does not name, or one of the
