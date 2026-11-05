@@ -413,16 +413,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         2005,
         "test_a_python_tree_calls_sourcery_with_its_rules_off",
-        (
-            "btclib",
-            "btclib-secp256k1",
-            "btclib-node",
-            "btclib-wallet",
-            "ecc",
-            "bip39-slip39",
-            "bip32-descriptors",
-            "functional-tests",
-        ),
+        ("btclib-node",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
