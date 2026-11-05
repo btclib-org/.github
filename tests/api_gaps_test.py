@@ -1151,8 +1151,7 @@ def _release_commands() -> list[str]:
     fences = re.findall(r"```shell\n(.*?)```", text, re.DOTALL)
     return [
         "\n".join(
-            " ".join(line.split())
-            for line in fence.replace("\\\n", " ").splitlines()
+            " ".join(line.split()) for line in fence.replace("\\\n", " ").splitlines()
         )
         for fence in fences
         if "griffe" in fence
