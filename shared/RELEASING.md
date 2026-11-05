@@ -286,31 +286,53 @@ request, next to `deps-latest`'s own result.
    of btclib-org/.github holds this step to it: two griffe releases can
    answer differently for the same two revisions (btclib-org/.github#1977).
 
+   Then run btclib-org/.github's `api_gaps.py`, against the same tag and
+   with the same griffe, as the job does after griffe. It reports, in
+   griffe's format, the breaks its docstring names, which griffe does not
+   compare or can skip:
+
+   ```shell
+   gaps=$(mktemp -d) &&
+   gh api -H 'Accept: application/vnd.github.raw' \
+       repos/btclib-org/.github/contents/.github/scripts/api_gaps.py \
+       > "${gaps:?}/api_gaps.py" &&
+   uv run --no-project --python 3.15 --with griffe==2.2.0 \
+       "${gaps:?}/api_gaps.py" "${pkg:?}" "${tag:?}"
+   ```
+
+   The script is written to a file before it runs, because a failed fetch
+   piped into `uv run -` runs an empty script, which exits 0.
+
    The first release has no previous tag, and there is nothing for this
    step to read; `release.yml`'s `public-api` job skips its check for the
    same reason.
 
-   It reports breakage only: a public object removed, a parameter that
+   The two report breakage only: a public object removed, a parameter that
    changed kind or default, an attribute whose value moved. An addition is
    silent, so the output is short and every line of it wants an entry —
-   what the step asks is that nothing it names is missing from RELEASE_NOTES.md.
-   The converse is not its to answer: an entry describing a break it did
-   not find is a claim about the prose, which review still has to read.
-   Not a hook and not a job of `lint.yml`, deliberately: the comparison is
-   against the previous *release*, so a break lands on `main` on purpose and
-   remains a finding until the release that announces it, leaving every
-   pull request in between red for something no branch introduced. It exits
-   1 on a finding, so the day that reasoning stops holding — a cycle that
-   means to break nothing — making it a gate is one line.
+   what the step asks is that nothing they name is missing from
+   RELEASE_NOTES.md. The converse is not theirs to answer: an entry
+   describing a break they did not find is a claim about the prose, which
+   review still has to read. Not a hook and not a job of `lint.yml`,
+   deliberately: the comparison is against the previous *release*, so a
+   break lands on `main` on purpose and remains a finding until the release
+   that announces it, leaving every pull request in between red for
+   something no branch introduced. Each exits 1 on a finding, so the day
+   that reasoning stops holding — a cycle that means to break nothing —
+   making the step a gate is a line per command.
 
-   `release.yml` asks the same question again as its `public-api` job,
-   and a red one there is a break `RELEASE_NOTES.md` does not name: the
-   job gates nothing, its own comment saying why, and
-   every job behind it opens its `if:` with `always()` and names the
-   results it does require, so a red `public-api` costs the release
-   nothing. What it costs is the run's own badge, red while every job
-   that matters is green, which is why the step after the approval below
-   reads the run job by job rather than as a whole.
+   Any other non-zero exit is the tool failing, which answers nothing: read
+   its error before going on.
+
+   `release.yml` asks the same question again as its `public-api` job. A
+   red one there is a break `RELEASE_NOTES.md` does not name, or one of the
+   two tools failing: read the job's log to tell which. The job gates
+   nothing, its own comment saying why, and every job behind it opens its
+   `if:` with `always()` and names the results it does require, so a red
+   `public-api` costs the release nothing. What it costs is the run's own
+   badge, red while every job that matters is green, which is why the step
+   after the approval below reads the run job by job rather than as a
+   whole.
 
 1. Name in RELEASE_NOTES.md every change to the release's assets or to how they
    are verified — a file name, a signer, a `--source-ref` — in the release that
@@ -383,9 +405,10 @@ request, next to `deps-latest`'s own result.
    discover at the button belongs there too.
 
    The section of RELEASE_NOTES.md written above is what that body is
-   written from. Griffe's result belongs in the body too, a line rather
-   than a screenshot — it is a step nothing else enforces, and a pull
-   request that never mentions it reads exactly like one that skipped it.
+   written from. The public API step's result belongs in the body too, a
+   line rather than a screenshot — it is a step nothing else enforces, and a
+   pull request that never mentions it reads exactly like one that skipped
+   it.
 
 1. Run `uv run pre-commit run --all-files` and `uv run pytest --cov`
    before pressing anything, then verify the Read the Docs build renders,
@@ -538,11 +561,11 @@ request, next to `deps-latest`'s own result.
    ```
 
    On a tag `Publish to TestPyPI` is `skipped`, its trigger being the
-   dispatch, and `public-api` is red for a break `RELEASE_NOTES.md` does not
-   name, being the griffe step above run again. `Run the lint workflow /
-   lint / Dependency review` and `Run the lint workflow / lint / Sign-off`
-   are `skipped` on every run, as they run only on a `pull_request`; a
-   tagged commit had both checks on its own pull request. Every other job
+   dispatch, and `public-api` is red as the public API step above says.
+   `Run the lint workflow / lint / Dependency review` and `Run the lint
+   workflow / lint / Sign-off` are `skipped` on every run, as they run only
+   on a `pull_request`; a tagged commit had both checks on its own pull
+   request. Every other job
    reads `success`, the ones behind `public-api` included: each of them
    opens its `if:` with `always()` and names the results it does require, so
    a red `public-api` costs the release nothing, and a `skipped` among them

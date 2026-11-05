@@ -1173,6 +1173,21 @@ def test_the_release_step_runs_the_griffe_the_workflows_pin() -> None:
     assert not [c for c in commands if "uvx" in c]
 
 
+def test_the_release_step_runs_api_gaps_after_griffe() -> None:
+    """The hand step runs the script after griffe, on the same tag.
+
+    The script reports the breaks griffe misses, which `public-api`
+    reports after the tag (btclib-org/.github#1940).
+    """
+    commands = _release_commands()
+    [check] = [i for i, c in enumerate(commands) if "griffe check" in c]
+    [gaps] = [i for i, c in enumerate(commands) if "api_gaps.py" in c]
+
+    assert check < gaps
+    assert '-a "${tag:?}"' in commands[check]
+    assert '"${pkg:?}" "${tag:?}"' in commands[gaps]
+
+
 @pytest.mark.parametrize(
     ("name", "job", "base"),
     [
