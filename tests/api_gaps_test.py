@@ -1158,7 +1158,8 @@ def _release_commands() -> list[str]:
 def _public_api_pin() -> str:
     """Return the one griffe requirement `reusable-public-api.yml` pins."""
     workflow = (_WORKFLOWS / "reusable-public-api.yml").read_text(encoding="utf-8")
-    [pin] = set(re.findall(r"griffe==[\d.]+", workflow))
+    pins: set[str] = set(re.findall(r"griffe==[\d.]+", workflow))
+    [pin] = pins
     return pin
 
 
@@ -1209,17 +1210,17 @@ def test_the_release_step_runs_the_griffe_the_workflows_pin() -> None:
         pytest.param('uv run -w griffe griffe check "$p"', id="short-with"),
         pytest.param('uvx --python 3.15 {pin} check "$p"', id="uvx"),
         pytest.param(
-            'uv run --no-project --python 3.15 --with {pin} --with griffe '
+            "uv run --no-project --python 3.15 --with {pin} --with griffe "
             'griffe check "$p"',
             id="a-second-with",
         ),
         pytest.param(
-            'uv run --no-project --python 3.15 --with {pin} -w griffe '
+            "uv run --no-project --python 3.15 --with {pin} -w griffe "
             'griffe check "$p"',
             id="a-second-short-with",
         ),
         pytest.param(
-            'x=1 && uv run --no-project --python 3.15 --with griffe x.py',
+            "x=1 && uv run --no-project --python 3.15 --with griffe x.py",
             id="after-a-chain",
         ),
     ],
