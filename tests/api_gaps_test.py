@@ -1155,22 +1155,83 @@ def _release_commands() -> list[str]:
     ]
 
 
+def _public_api_pin() -> str:
+    """Return the one griffe requirement `reusable-public-api.yml` pins."""
+    workflow = (_WORKFLOWS / "reusable-public-api.yml").read_text(encoding="utf-8")
+    [pin] = set(re.findall(r"griffe==[\d.]+", workflow))
+    return pin
+
+
+def _unpinned(commands: list[str], pin: str) -> list[str]:
+    """Return each part of the commands that may run a griffe other than `pin`.
+
+    A part is what `&&` or `|` separates. One naming griffe passes only
+    where it opens with `uv run --no-project --python 3.15 --with <pin>`
+    and names griffe nowhere after that but as the `griffe check` it runs.
+
+    :param commands: the commands, as `_release_commands` returns them.
+    :param pin: the griffe requirement every part has to install.
+    :returns: the parts that fail, in order.
+    """
+    prefix = f"uv run --no-project --python 3.15 --with {pin} "
+    parts = [p.strip() for c in commands for p in re.split(r"&&|\|", c)]
+    return [
+        part
+        for part in parts
+        if "griffe" in part
+        and not (
+            part.startswith(prefix)
+            and not re.search(r"griffe(?! check )", part.removeprefix(prefix))
+        )
+    ]
+
+
 def test_the_release_step_runs_the_griffe_the_workflows_pin() -> None:
-    """The hand step installs griffe only at the pin `public-api` runs.
+    """Every command of the hand step naming griffe runs it at the job's pin.
 
     A release's author reads the step before the tag, and an unpinned
     griffe there can miss a break the job then reports
     (btclib-org/.github#1977).
     """
-    workflow = (_WORKFLOWS / "reusable-public-api.yml").read_text(encoding="utf-8")
-    pins = set(re.findall(r"griffe==[\d.]+", workflow))
     commands = _release_commands()
-    specs = [spec for c in commands for spec in re.findall(r"--with (\S+)", c)]
 
-    assert len(pins) == 1
-    assert specs
-    assert set(specs) == pins
-    assert not [c for c in commands if "uvx" in c]
+    assert [c for c in commands if "griffe check" in c]
+    assert _unpinned(commands, _public_api_pin()) == []
+
+
+@pytest.mark.parametrize(
+    "planted",
+    [
+        pytest.param('uv run --locked --with griffe griffe check "$p"', id="bare"),
+        pytest.param('uv tool run griffe check "$p"', id="uv-tool-run"),
+        pytest.param('uv run --locked griffe check "$p"', id="the-lock"),
+        pytest.param('uv run --with=griffe griffe check "$p"', id="with-equals"),
+        pytest.param('uv run -w griffe griffe check "$p"', id="short-with"),
+        pytest.param('uvx --python 3.15 {pin} check "$p"', id="uvx"),
+        pytest.param(
+            'uv run --no-project --python 3.15 --with {pin} --with griffe '
+            'griffe check "$p"',
+            id="a-second-with",
+        ),
+        pytest.param(
+            'uv run --no-project --python 3.15 --with {pin} -w griffe '
+            'griffe check "$p"',
+            id="a-second-short-with",
+        ),
+        pytest.param(
+            'x=1 && uv run --no-project --python 3.15 --with griffe x.py',
+            id="after-a-chain",
+        ),
+    ],
+)
+def test_a_command_naming_another_griffe_is_unpinned(planted: str) -> None:
+    """Each planted command can run a griffe the job's pin does not decide.
+
+    :param planted: the command, `{pin}` standing for the job's pin.
+    """
+    pin = _public_api_pin()
+
+    assert _unpinned([planted.format(pin=pin)], pin)
 
 
 def test_the_release_step_runs_api_gaps_after_griffe() -> None:
