@@ -1171,8 +1171,10 @@ def _unpinned(commands: list[str], pin: str) -> list[str]:
 
     A part is what a newline, `;`, `&&`, `||` or `|` separates. One
     naming griffe passes only where it opens with
-    `uv run --no-project --python 3.15 --with <pin>` and names griffe
-    nowhere after that but as the `griffe check` it runs.
+    `uv run --no-project --python 3.15 --with <pin>` and, after that,
+    names griffe once, as the `griffe check` it starts with, or not at
+    all. A second griffe the part runs, by `&`, `$( )`, backticks or
+    `bash -c`, names griffe once more and fails.
 
     :param commands: the commands, as `_release_commands` returns them.
     :param pin: the griffe requirement every part has to install.
@@ -1180,15 +1182,20 @@ def _unpinned(commands: list[str], pin: str) -> list[str]:
     """
     prefix = f"uv run --no-project --python 3.15 --with {pin} "
     parts = [p.strip() for c in commands for p in re.split(r"\n|;|&&|\|\|?", c)]
-    return [
-        part
-        for part in parts
-        if "griffe" in part
-        and not (
-            part.startswith(prefix)
-            and not re.search(r"griffe(?! check )", part.removeprefix(prefix))
-        )
-    ]
+    return [part for part in parts if "griffe" in part and not _pinned(part, prefix)]
+
+
+def _pinned(part: str, prefix: str) -> bool:
+    """Say whether a part runs griffe only as `prefix` installs it.
+
+    :param part: one part, as `_unpinned` splits them.
+    :param prefix: the `uv run` that installs the pin.
+    :returns: whether the part opens with the prefix and names griffe
+        after it only as the `griffe check` it starts with.
+    """
+    rest = part.removeprefix(prefix)
+    once = 1 if rest.startswith("griffe check ") else 0
+    return part.startswith(prefix) and rest.count("griffe") == once
 
 
 def test_the_release_step_runs_the_griffe_the_workflows_pin() -> None:
@@ -1237,6 +1244,26 @@ def test_the_release_step_runs_the_griffe_the_workflows_pin() -> None:
             'uvx griffe check "$p"',
             id="after-a-semicolon",
         ),
+        pytest.param(
+            'uv run --no-project --python 3.15 --with {pin} griffe check "$p" & '
+            'uvx griffe check "$p"',
+            id="after-an-ampersand",
+        ),
+        pytest.param(
+            "uv run --no-project --python 3.15 --with {pin} griffe check "
+            '"$(uvx griffe check "$p")"',
+            id="in-a-substitution",
+        ),
+        pytest.param(
+            "uv run --no-project --python 3.15 --with {pin} griffe check "
+            '"`uvx griffe check x`"',
+            id="in-backticks",
+        ),
+        pytest.param(
+            "uv run --no-project --python 3.15 --with {pin} "
+            'bash -c "uvx griffe check x"',
+            id="in-bash-c",
+        ),
     ],
 )
 def test_a_command_naming_another_griffe_is_unpinned(planted: str) -> None:
@@ -1247,6 +1274,30 @@ def test_a_command_naming_another_griffe_is_unpinned(planted: str) -> None:
     pin = _public_api_pin()
 
     assert _unpinned([planted.format(pin=pin)], pin)
+
+
+@pytest.mark.parametrize(
+    "planted",
+    [
+        pytest.param(
+            'uv run --no-project --python 3.15 --with {pin} griffe check "$p"',
+            id="the-step-s-griffe",
+        ),
+        pytest.param(
+            "uv run --no-project --python 3.15 --with {pin} x.py p t",
+            id="the-step-s-script",
+        ),
+        pytest.param("gh api x > y && gaps=$(mktemp -d)", id="no-griffe"),
+    ],
+)
+def test_a_command_running_griffe_at_the_pin_or_none_is_pinned(planted: str) -> None:
+    """Each planted command runs griffe only at the job's pin, or not at all.
+
+    :param planted: the command, `{pin}` standing for the job's pin.
+    """
+    pin = _public_api_pin()
+
+    assert _unpinned([planted.format(pin=pin)], pin) == []
 
 
 def test_the_release_step_runs_api_gaps_after_griffe() -> None:
