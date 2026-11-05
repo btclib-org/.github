@@ -2215,19 +2215,20 @@ carries the pull request it reads. A finding fails that job alone, and its skip
 is `# sourcery skip: <rule>` on the line Sourcery reports or on the `def` line
 of the function holding it, in the form section 4's `bare-sourcery-skip` admits.
 
-**`sourcery` is a required check in a tree whose caller is in place and that is
-out of the `BACKLOG` row of btclib-org/.github#2005 in `tests/__init__.py`, and
-in no other.** The row lists the trees that are Python, as section 2 says, whose
-caller, `.sourcery.yaml` or section 4's `bare-sourcery-skip` is not yet as its
-test asks. A tree's caller lands with or after its clean-up: before it, a pull
-request touching a Python file for another reason can fail on findings it did
-not write. Per tree, the protection gains the check first and is read back; then
-the tree's Sourcery pull request lands, its own run turning the check green and
-its `REPOSITORY.md` recording the read-back; then the pull request here that
-drops the tree from the row. In between, its `protection_test.py` cell fails,
-and once its Sourcery pull request lands so does its row's cell; until it lands,
-no other pull request on that tree merges without the bypass. The context is the
-caller's job name then the callee's, `sourcery / Sourcery`.
+**`sourcery` is a required check in a tree whose caller is in place and that no
+`BACKLOG` row of `test_a_python_tree_calls_sourcery_with_its_rules_off` in
+`tests/__init__.py` lists, and in no other.** Such a row lists the trees that
+are Python, as section 2 says, whose caller, `.sourcery.yaml` or section 4's
+`bare-sourcery-skip` is not yet as that test asks. A tree's caller lands with or
+after its clean-up: before it, a pull request touching a Python file for another
+reason can fail on findings it did not write. Per tree, the protection gains the
+check first and is read back; then the tree's Sourcery pull request lands, its
+own run turning the check green and its `REPOSITORY.md` recording the read-back;
+then the pull request here that drops the tree from the row. In between, its
+`protection_test.py` cell fails, and once its Sourcery pull request lands so
+does its row's cell; until it lands, no other pull request on that tree merges
+without the bypass. The context is the caller's job name then the callee's,
+`sourcery / Sourcery`.
 
 **`.sourcery.yaml` sets `python_version` to the lowest interpreter the tree's
 code runs on, never above the `requires-python` floor, and turns off the rules

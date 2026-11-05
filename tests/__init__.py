@@ -403,11 +403,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_no_workflow_runs_on_an_x86_64_macos_image",
         ("btclib-secp256k1",),
     ),
-    (
-        2005,
-        "test_a_python_tree_calls_sourcery_with_its_rules_off",
-        ("btclib-node",),
-    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
