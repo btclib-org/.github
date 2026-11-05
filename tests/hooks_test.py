@@ -579,7 +579,7 @@ UPSTREAM_SHA = 'if type == "object" and .type == "file" then .sha else "" end'
 """The `--jq` filter reading a file's blob off the contents endpoint."""
 
 SEGMENT = re.compile(r"[A-Za-z0-9._-]+")
-"""A segment of a `repo` field: an owner or a name."""
+"""A segment of a `repo` field, an owner or a name, in GitHub's characters."""
 
 FULL_SHA = re.compile(r"[0-9a-f]{40}")
 """A `commit` field, the full SHA-1 section 7's pin records."""
@@ -600,6 +600,12 @@ def segments(text: str) -> list[str] | None:
 
 def sound(fields: dict[str, str]) -> bool:
     """Say whether a pin's fields name one file at one commit of one repository.
+
+    `repo` and `path` go into the endpoints `pinned()` asks, so a `repo`
+    outside `SEGMENT`'s characters, or a `.`, `..` or empty segment in
+    either, which GitHub resolves to another repository, is refused
+    rather than read; `encoded()` percent-encodes the rest. `commit` is
+    the full SHA-1 section 7's pin records, lowercase, never a branch.
 
     :param fields: the fields of the pin's block.
     :returns: whether `repo` is `owner/name`, `path` has no segment that
@@ -622,34 +628,6 @@ def encoded(path: str) -> str:
     :returns: the path as it goes into an endpoint.
     """
     return "/".join(quote(part, safe="") for part in path.split("/"))
-
-
-def holds(repository: str, commit: str) -> bool:
-    """Ask GitHub whether a repository of the organization holds a commit.
-
-    A commit it holds is the tree's own code, whichever repository a pin
-    names it in: a fork serves its parent's commits. It reaches the
-    network, so only an `integration` test calls it.
-
-    :param repository: the repository's name in the organization.
-    :param commit: a full SHA-1.
-    :returns: whether GitHub answers the commit there.
-    :raises Refused: where GitHub refuses for another reason than a 422,
-        its answer for a commit the repository does not hold. A 404 is
-        asked again of the repository itself, and raises where that is
-        missing: a misnamed tree holds nothing and proves nothing.
-    """
-    repo = f"repos/{ORG}/{quote(repository, safe='')}"
-    try:
-        output("gh", "api", f"{repo}/commits/{commit}", "--jq", ".sha")
-    except Refused as refused:
-        if "(HTTP 422)" in refused.stderr:
-            return False
-        if "(HTTP 404)" not in refused.stderr:
-            raise
-        output("gh", "api", repo, "--jq", ".full_name")
-        return False
-    return True
 
 
 MERGED = frozenset({"behind", "identical"})
@@ -679,6 +657,32 @@ def on_default(repo: str, commit: str) -> bool:
         ".status",
     ).strip()
     return status in MERGED
+
+
+def holds(repository: str, commit: str) -> bool:
+    """Ask GitHub whether a commit is on a tree's own default branch.
+
+    Such a commit is the tree's own code, whichever repository a pin names
+    it in: a fork serves its parent's commits. A commit merely pushed to a
+    fork of the tree is not asked about, because GitHub serves it through
+    the tree's own API too, and anyone could push upstream's commit there.
+    It reaches the network, so only an `integration` test calls it.
+
+    :param repository: the repository's name in the organization.
+    :param commit: a full SHA-1.
+    :returns: what `on_default()` answers for the tree, `False` where the
+        tree's network has no such commit.
+    :raises Refused: where GitHub refuses for another reason than a 404.
+        A 404 is asked again of the repository itself, and raises where
+        that is missing: a misnamed tree holds nothing and proves nothing.
+    """
+    try:
+        return on_default(f"{ORG}/{repository}", commit)
+    except Refused as refused:
+        if "(HTTP 404)" not in refused.stderr:
+            raise
+    output("gh", "api", f"repos/{ORG}/{quote(repository, safe='')}", "--jq", ".name")
+    return False
 
 
 def upstream_blob(repo: str, commit: str, path: str) -> str | None:
@@ -768,12 +772,16 @@ def pinned(
 
     A file is kept so where `PIN_WORKFLOW` `passes()` a `PIN_FILE` that
     pins it with a `repo`, a `path`, a `commit` and a `blob` that are
-    `sound()`; that `blob` is the file's own; the tree's own repository
-    does not hold `commit`; `repo` holds the same `blob` at `commit` and
-    `path`; and `commit` is on `repo`'s default branch. A copy a fixer or
-    a hand changed is not kept so, and neither is the tree's own code,
-    pinned at one of the tree's commits in the tree or in a fork of it,
-    nor a commit only a fork or a pull request of `repo` holds.
+    `sound()`; that `blob` is the file's own; `commit` is not on the
+    tree's own default branch, as `holds()` asks; `repo` holds the same
+    `blob` at `commit` and `path`; and `commit` is on `repo`'s default
+    branch. A copy changed by a fixer or by hand is not kept so, and
+    neither is the tree's own code, pinned at one of the tree's commits
+    in the tree or in a fork of it, nor a commit only a fork or a pull
+    request of `repo` holds. A pin to a repository outside the tree's
+    fork network is taken on trust: this catches a pin that is mistaken,
+    or that the copy no longer matches, not the tree's own file copied
+    into a new repository.
 
     The local half reads only the checkout. `asks` is the half that asks
     GitHub, and is asked only of the files the local half keeps.
@@ -995,13 +1003,17 @@ def test_upstream_blob_answers_what_github_holds() -> None:
 
 
 def test_holds_answers_whether_the_tree_has_the_commit() -> None:
-    """`holds()` finds a tree's own commit, and not upstream's.
+    """`holds()` finds a tree's own commit, and not upstream's or a fork's.
 
+    `54eecec2` is the head of a branch of a fork of btclib-node, which
+    btclib-node's own API serves though its `main` does not hold it.
     The half of `pinned()` that asks GitHub, run here because it reaches
     the network; `sourcery_test.py` stubs it.
     """
     node = "09be07c3b0ecabe0ed77cfbea85a095128b9f52c"
     assert holds("btclib-node", node), "btclib-node's own main"
+    fork = "54eecec21303f18f6379228692d812b080b5e1fa"
+    assert not holds("btclib-node", fork), "pushed to a fork only"
     assert not holds("btclib-node", COPYING[1]), "bitcoin/bitcoin's commit"
     assert not holds("btclib-node", "0" * 40), "no commit at all"
     with pytest.raises(Refused, match="HTTP 404"):

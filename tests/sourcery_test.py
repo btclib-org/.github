@@ -492,7 +492,7 @@ class GitHub:
     """The bytes each repository holds at a commit and path."""
 
     own: frozenset[str] = frozenset()
-    """The commits the tree's own repository holds."""
+    """The commits on the tree's own default branch."""
 
     unmerged: frozenset[str] = frozenset()
     """The commits upstream serves that are not on its default branch."""

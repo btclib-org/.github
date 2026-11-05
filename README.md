@@ -2235,27 +2235,12 @@ code runs on, never above the `requires-python` floor, and turns off the rules
 each: the trees' own style, or the stable ruff rule that reads the same code,
 whose reading stands where Sourcery reads more widely. `enable:` and
 `rule_types:` stay at their defaults, and `disable:` can name a tag: `disable:
-[default]` turns every rule off.
-
-**No `ignore:` entry covers a tracked Python file, read as Sourcery reads it,
-but one kept byte for byte to an upstream.** A finding there is one against
-upstream's code, and the `# sourcery skip` that would answer it would end the
-copy being byte for byte. Such a file is pinned as section 7's *Test data is
-vendored, never fetched* says, and more narrowly. The pin's `repo` is
-`owner/name`, each part ASCII letters, digits, `.`, `_` or `-` and neither `.`
-nor `..`; its `path` carries no `.`, `..` or empty segment; and its `commit` is
-40 lowercase hex digits. That commit is on the default branch of `repo`, and the
-tree's own repository does not hold it, so a pin to the tree, to a fork serving
-the tree's commits, or to a commit only a fork or a pull request of `repo` holds
-is refused. Its `blob` is the file's own and the one `repo` holds at `commit`
-and `path`. `vendored-vectors.yml` names the `README.md` holding the pin as a
-word of a step's `run:`, or as a `ledger` of the `reusable-vendored-vectors.yml`
-it calls; what the command does with it is not read. A pin to a repository
-outside the tree's fork network is taken on trust: the check catches a pin that
-is mistaken, or that the copy no longer matches, not an author who copies the
-tree's own file into a new repository. A copy a fixer or a hand changed is the
-tree's own code, and Sourcery reads it. `ignored()` and `pinned()` in
-`tests/hooks_test.py` are the two readings.
+[default]` turns every rule off. No `ignore:` entry, read as Sourcery reads it,
+covers a tracked Python file but one pinned byte for byte to an upstream as
+section 7's *Test data is vendored, never fetched* says: a finding there is
+upstream's, and a `# sourcery skip` would end the copy being byte for byte. A
+pin to a repository outside the tree's fork network is taken on trust.
+`ignored()` and `pinned()` in `tests/hooks_test.py` are the two readings.
 
 **macOS is supported on arm64 alone, and no workflow runs on an x86_64 macOS
 image.** An x86_64 macOS cell can hang until the job's timeout and hold up a
