@@ -264,8 +264,8 @@ request, next to `deps-latest`'s own result.
    promises that a breaking change is announced there, the calendar version
    promising nothing, and nothing else reads that promise: the suite judges the
    code, and a reviewer weighs what the prose says rather than what it leaves
-   out. griffe reads both revisions and answers that second question — not
-   whether the list is right, but whether it is complete:
+   out. griffe and `api_gaps.py` read both revisions and answer that second
+   question — not whether the list is right, but whether it is complete:
 
    ```shell
    tag=v<previous version>
@@ -301,19 +301,21 @@ request, next to `deps-latest`'s own result.
    ```
 
    The script is written to a file before it runs, because a failed fetch
-   piped into `uv run -` runs an empty script, which exits 0.
+   piped into `uv run -` runs an empty script, which exits 0. An error
+   starting `gh:` is the fetch failing, and the chain stops before the
+   script runs.
 
    The first release has no previous tag, and there is nothing for this
    step to read; `release.yml`'s `public-api` job skips its check for the
    same reason.
 
    The two report breakage only: a public object removed, a parameter that
-   changed kind or default, an attribute whose value moved. An addition is
-   silent, so the output is short and every line of it wants an entry —
-   what the step asks is that nothing they name is missing from
-   RELEASE_NOTES.md. The converse is not theirs to answer: an entry
-   describing a break they did not find is a claim about the prose, which
-   review still has to read. Not a hook and not a job of `lint.yml`,
+   changed kind or default, an attribute whose value moved, a changed return
+   annotation. An addition is silent, so the output is short and every line
+   of it wants an entry — what the step asks is that nothing they name is
+   missing from RELEASE_NOTES.md. The converse is not theirs to answer: an
+   entry describing a break they did not find is a claim about the prose,
+   which review still has to read. Not a hook and not a job of `lint.yml`,
    deliberately: the comparison is against the previous *release*, so a
    break lands on `main` on purpose and remains a finding until the release
    that announces it, leaving every pull request in between red for
@@ -561,21 +563,20 @@ request, next to `deps-latest`'s own result.
    ```
 
    On a tag `Publish to TestPyPI` is `skipped`, its trigger being the
-   dispatch, and `public-api` is red as the public API step above says.
-   `Run the lint workflow / lint / Dependency review` and `Run the lint
-   workflow / lint / Sign-off` are `skipped` on every run, as they run only
-   on a `pull_request`; a tagged commit had both checks on its own pull
-   request. Every other job
-   reads `success`, the ones behind `public-api` included: each of them
-   opens its `if:` with `always()` and names the results it does require, so
-   a red `public-api` costs the release nothing, and a `skipped` among them
-   is a defect in `release.yml` rather than a red to look past. A rehearsal
-   is the mirror image, `Publish to PyPI` skipped and with it whatever is
-   guarded on its success, and `documented` skipped on its own account, its
-   guard being the push. `gh run rerun` does not reach a skipped job,
-   `--failed` rerunning `failure` and `--job` refusing a skip outright, so
-   what recovers one is doing by hand what it would have done: for
-   `github-release` the script "If something goes wrong" gives, for
+   dispatch, and `public-api` is red as the public API step above says. `Run
+   the lint workflow / lint / Dependency review` and `Run the lint workflow
+   / lint / Sign-off` are `skipped` on every run, as they run only on a
+   `pull_request`; a tagged commit had both checks on its own pull request.
+   Every other job reads `success`, the ones behind `public-api` included:
+   each of them opens its `if:` with `always()` and names the results it
+   does require, so a red `public-api` costs the release nothing, and a
+   `skipped` among them is a defect in `release.yml` rather than a red to
+   look past. A rehearsal is the mirror image, `Publish to PyPI` skipped and
+   with it whatever is guarded on its success, and `documented` skipped on
+   its own account, its guard being the push. `gh run rerun` does not reach
+   a skipped job, `--failed` rerunning `failure` and `--job` refusing a skip
+   outright, so what recovers one is doing by hand what it would have done:
+   for `github-release` the script "If something goes wrong" gives, for
    `published` a dispatch of `pypi-install.yml`, which installs what the
    index serves at the time.
 
