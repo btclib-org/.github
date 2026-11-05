@@ -1144,12 +1144,16 @@ def test_the_tests_load_the_griffe_the_workflows_run() -> None:
 def _release_commands() -> list[str]:
     """Return the shell fences of `shared/RELEASING.md` that name griffe.
 
-    Each fence is one command, its continuation lines joined.
+    Each fence keeps its lines, its continuation lines joined and the
+    spaces within a line collapsed.
     """
     text = (ROOT / "shared" / "RELEASING.md").read_text(encoding="utf-8")
     fences = re.findall(r"```shell\n(.*?)```", text, re.DOTALL)
     return [
-        " ".join(fence.replace("\\\n", " ").split())
+        "\n".join(
+            " ".join(line.split())
+            for line in fence.replace("\\\n", " ").splitlines()
+        )
         for fence in fences
         if "griffe" in fence
     ]
@@ -1166,16 +1170,17 @@ def _public_api_pin() -> str:
 def _unpinned(commands: list[str], pin: str) -> list[str]:
     """Return each part of the commands that may run a griffe other than `pin`.
 
-    A part is what `&&` or `|` separates. One naming griffe passes only
-    where it opens with `uv run --no-project --python 3.15 --with <pin>`
-    and names griffe nowhere after that but as the `griffe check` it runs.
+    A part is what a newline, `;`, `&&`, `||` or `|` separates. One
+    naming griffe passes only where it opens with
+    `uv run --no-project --python 3.15 --with <pin>` and names griffe
+    nowhere after that but as the `griffe check` it runs.
 
     :param commands: the commands, as `_release_commands` returns them.
     :param pin: the griffe requirement every part has to install.
     :returns: the parts that fail, in order.
     """
     prefix = f"uv run --no-project --python 3.15 --with {pin} "
-    parts = [p.strip() for c in commands for p in re.split(r"&&|\|", c)]
+    parts = [p.strip() for c in commands for p in re.split(r"\n|;|&&|\|\|?", c)]
     return [
         part
         for part in parts
@@ -1222,6 +1227,16 @@ def test_the_release_step_runs_the_griffe_the_workflows_pin() -> None:
         pytest.param(
             "x=1 && uv run --no-project --python 3.15 --with griffe x.py",
             id="after-a-chain",
+        ),
+        pytest.param(
+            'uv run --no-project --python 3.15 --with {pin} griffe check "$p"\n'
+            'uvx griffe check "$p"',
+            id="on-the-next-line",
+        ),
+        pytest.param(
+            'uv run --no-project --python 3.15 --with {pin} griffe check "$p"; '
+            'uvx griffe check "$p"',
+            id="after-a-semicolon",
         ),
     ],
 )
