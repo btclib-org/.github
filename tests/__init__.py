@@ -422,7 +422,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "ecc",
             "bip39-slip39",
             "bip32-descriptors",
-            "benchmarks",
             "functional-tests",
         ),
     ),
