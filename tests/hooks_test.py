@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import copy
 import fnmatch
+import functools
 import hashlib
 import json
 import re
@@ -690,9 +691,9 @@ def network(repo: str) -> str:
     """Ask GitHub which repository a repository's fork network is rooted at.
 
     A fork's owner sets its default branch, so `on_default()` proves
-    nothing of a fork of the tree. An outsider cannot move upstream's
-    root, so refusing the tree's own network turns no pin red. It reaches
-    the network, so only an `integration` test calls it.
+    nothing of a repository in the tree's network. An outsider cannot
+    move upstream's root, so refusing the tree's own network turns no pin
+    red. It reaches the network, so only an `integration` test calls it.
 
     :param repo: the repository, `owner/name`, as `sound()` accepts it.
     :returns: the root's `owner/name`, the repository's own where it is
@@ -796,18 +797,19 @@ def pinned(
     pins it with a `repo`, a `path`, a `commit` and a `blob` that are
     `sound()`; that `blob` is the file's own; `commit` is not on the
     tree's own default branch, as `holds()` asks; `repo` holds the same
-    `blob` at `commit` and `path`; `repo`'s fork network is not rooted at
-    the tree, as `network()` asks, compared without case; and `commit` is
-    on `repo`'s default branch. A copy changed by a fixer or by hand is
-    not kept so, and neither is a pin to the tree or a fork of it, the
-    tree's own commit under any other name, nor a commit only a fork or a
-    pull request of `repo` holds. A pin to a repository outside the
-    tree's fork network is taken on trust: this catches a pin that is
-    mistaken, or that the copy no longer matches, not the tree's own file
-    copied into a new repository.
+    `blob` at `commit` and `path`; `repo`'s fork network has another root
+    than the tree's, as `network()` asks of both, compared without case;
+    and `commit` is on `repo`'s default branch. A copy changed by a fixer
+    or by hand is not kept so, and neither is a pin into the tree's own
+    network, the tree's own commit under any other name, nor a commit
+    only a fork or a pull request of `repo` holds. A pin to a repository
+    outside the tree's fork network is taken on trust: this catches a pin
+    that is mistaken, or that the copy no longer matches, not the tree's
+    own file copied into a new repository.
 
     The local half reads only the checkout. `asks` is the half that asks
-    GitHub, and is asked only of the files the local half keeps.
+    GitHub, and is asked only of the files the local half keeps; the
+    tree's root is asked at most once.
 
     :param root: the root of the checkout.
     :param repository: the tree's own name in the organization.
@@ -819,6 +821,7 @@ def pinned(
     if not workflow.is_file():
         return []
     files = tracked(root)
+    network_of = functools.cache(asks.root)
     out: list[str] = []
     for document in files:
         if document.rsplit("/", 1)[-1] != PIN_FILE or not passes(workflow, document):
@@ -833,8 +836,8 @@ def pinned(
                 and not asks.own(repository, fields["commit"])
                 and asks.blob(fields["repo"], fields["commit"], fields["path"])
                 == fields["blob"]
-                and asks.root(fields["repo"]).casefold()
-                != f"{ORG}/{repository}".casefold()
+                and network_of(fields["repo"]).casefold()
+                != network_of(f"{ORG}/{repository}").casefold()
                 and asks.merged(fields["repo"], fields["commit"])
             ):
                 out.append(path)

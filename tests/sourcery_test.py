@@ -561,6 +561,29 @@ def test_a_pin_file_handed_to_the_reusable_check_is_kept(tmp_path: Path) -> None
     assert _pinning(tmp_path, workflow=CALLS) == [PINNED]
 
 
+def test_words_after_a_pin_s_field_are_not_read(tmp_path: Path) -> None:
+    r"""A field is its first word, as btclib-node's own checker reads it.
+
+    Its `check_vendored_pin.py` reads `(\S+)` after the field's name, so
+    `pins()` does too, and a `blob` line with more after it keeps the file
+    it pins.
+
+    :param tmp_path: where the repository is built.
+    """
+    document = _pin_file(f"{git_blob(VENDORED)}  re-pulled")
+    assert _pinning(tmp_path, document=document) == [PINNED]
+
+
+def test_a_file_git_does_not_track_is_not_kept(tmp_path: Path) -> None:
+    """A pinned file on disk that git does not track is not kept.
+
+    :param tmp_path: where the repository is built.
+    """
+    assert _pinning(tmp_path) == [PINNED]
+    _git(tmp_path, "rm", "--cached", "--quiet", PINNED)
+    assert pinned(tmp_path, TREE, [PINNED], UPSTREAM_ONLY.asks()) == []
+
+
 def test_a_file_not_asked_about_is_not_kept(tmp_path: Path) -> None:
     """Only the files `among` names reach the half that asks GitHub.
 
@@ -595,6 +618,9 @@ FORK = "jaynarayan-yadav/btclib-node"
 FORK_ONLY = "54eecec21303f18f6379228692d812b080b5e1fa"
 """A commit on a branch of `FORK` changing btclib-node's own test."""
 
+HOME = f"btclib-org/{TREE}"
+"""The tree's own repository, the root of its fork network."""
+
 DOTTED = "../../../btclib-org/btclib-node/contents/README.md"
 """A `path` GitHub resolves out of the repository the pin names."""
 
@@ -605,7 +631,7 @@ def _own_code(
     commit: str = NODE,
     *,
     own: bool = False,
-    root: str | None = None,
+    roots: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     return {
         "data": MINE,
@@ -615,7 +641,7 @@ def _own_code(
         "github": GitHub(
             {(repo, commit, path): MINE},
             frozenset({commit}) if own else frozenset(),
-            roots={} if root is None else {repo: root},
+            roots=roots or {},
         ),
     }
 
@@ -645,7 +671,14 @@ def _own_code(
             "the callee handed another pin file",
             id="callee-names-another",
         ),
-        pytest.param({"document": _pin_file("0" * 40)}, "another blob", id="blob"),
+        pytest.param(
+            {
+                "document": _pin_file(MINE_BLOB),
+                "github": GitHub({(UPSTREAM[0], COMMIT, UPSTREAM[1]): MINE}),
+            },
+            "the pin and upstream hold another blob",
+            id="blob",
+        ),
         pytest.param(
             {"document": _pin_file(git_blob(VENDORED)).replace("commit  ", "pulled  ")},
             "no commit",
@@ -675,37 +708,36 @@ def _own_code(
             id="invented-fields",
         ),
         pytest.param(
-            {
-                "data": MINE,
-                "document": _pin_file(f"{MINE_BLOB}  extra", fields=INVENTED),
-            },
-            "a blob line with more after it",
-            id="blob-extra",
+            _own_code("someone/copy-of-btclib-node", PINNED, own=True),
+            "the tree's own commit, in a repository outside its network",
+            id="own-commit-elsewhere",
         ),
         pytest.param(
-            _own_code(f"btclib-org/{TREE}", PINNED, own=True),
-            "the tree's own code",
+            _own_code(HOME, PINNED, FORK_ONLY),
+            "the tree's own repository, at a commit its main lacks",
             id="self-repo",
         ),
         pytest.param(
-            _own_code(FORK, "README.md", own=True, root=f"btclib-org/{TREE}"),
-            "the tree's own code, through a fork",
-            id="fork",
-        ),
-        pytest.param(
             _own_code(
-                FORK,
-                "tests/unit/orphanage_test.py",
-                FORK_ONLY,
-                root=f"btclib-org/{TREE}",
+                FORK, "tests/unit/orphanage_test.py", FORK_ONLY, roots={FORK: HOME}
             ),
             "the tree's own code, at a commit only a fork of the tree holds",
             id="fork-of-tree-own-commit",
         ),
         pytest.param(
-            _own_code(FORK, "README.md", FORK_ONLY, root=f"BTCLIB-ORG/{TREE.upper()}"),
+            _own_code(FORK, "README.md", FORK_ONLY, roots={FORK: HOME.upper()}),
             "a fork of the tree, its root in another case",
             id="fork-of-tree-case",
+        ),
+        pytest.param(
+            _own_code(
+                "someone/node",
+                PINNED,
+                COMMIT,
+                roots={HOME: "upstream/node", "someone/node": "upstream/node"},
+            ),
+            "the tree a fork, and the pin to another fork of its upstream",
+            id="tree-is-a-fork",
         ),
         pytest.param(
             _own_code("bitcoin/bitcoin", DOTTED),
@@ -747,7 +779,8 @@ def test_a_file_not_pinned_byte_for_byte_is_not_kept(
 ) -> None:
     """Each condition `pinned()` reads, broken alone, leaves the file unkept.
 
-    The cases holding `MINE` pin the tree's own code.
+    Each case breaks one condition and holds every other. The cases
+    holding `MINE` pin the tree's own code.
 
     :param tmp_path: where the repository is built.
     :param changes: what differs from the kept case.
