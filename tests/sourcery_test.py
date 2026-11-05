@@ -10,7 +10,9 @@ what it pins, how the base branch reaches its script, and which files
 its script hands Sourcery. That last is asked by running the script in a
 repository built by the test, with `uvx` stubbed to write down what it
 was asked, so what is read is the script's own choice and not a reading
-of its text.
+of its text. It also holds `hooks_test.py`'s reading of an `ignore:` entry
+to what Sourcery skipped, and its reading of the pins that let one hide a
+vendored file.
 """
 
 from __future__ import annotations
@@ -18,15 +20,25 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from . import ROOT
-from .hooks_test import caller_departures
+from .hooks_test import (
+    PIN_WORKFLOW,
+    Asks,
+    caller_departures,
+    git_blob,
+    ignored,
+    pinned,
+    pins,
+)
 from .workflows_test import document, steps
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
 WORKFLOWS = ROOT / ".github" / "workflows"
@@ -321,3 +333,400 @@ def test_the_review_stops_where_git_cannot_read_the_base(tmp_path: Path) -> None
     code, asked = _reviewed(tmp_path, ("src/one.py",), base="nosuch")
     assert code != 0
     assert not asked
+
+
+LAYOUT = (
+    "a.py",
+    "pkg/conftest.py",
+    "pkg/helpers/one.py",
+    "tests/_data/z.py",
+    "tests/a_test.py",
+    "tests/unit/_data/sub/y.py",
+    "tests/unit/_data/x.py",
+)
+"""The tree Sourcery was asked about, each file holding one finding."""
+
+DATA = ["tests/_data/z.py", "tests/unit/_data/sub/y.py", "tests/unit/_data/x.py"]
+DEEPER = DATA[1:]
+TESTS = [path for path in LAYOUT if path.startswith("tests/")]
+
+
+@pytest.mark.parametrize(
+    ("entry", "skipped"),
+    [
+        pytest.param("tests/**/_data", DEEPER, id="double-star-directory"),
+        pytest.param("tests/*/_data", DEEPER, id="star-directory"),
+        pytest.param("tests/**/_data/", DEEPER, id="directory-glob-slash"),
+        pytest.param("tests/_data/", DATA[:1], id="directory-slash"),
+        pytest.param("unit/_data", DEEPER, id="directory-mid-path"),
+        pytest.param("_data", DATA, id="directory-name"),
+        pytest.param("**/_data/**", DATA, id="double-star-around"),
+        pytest.param("tests/**", TESTS, id="double-star-under"),
+        pytest.param("./tests", TESTS, id="dot-slash"),
+        pytest.param("**/*.py", list(LAYOUT[1:]), id="double-star-file"),
+        pytest.param("pkg/*.py", ["pkg/conftest.py"], id="star-file"),
+        pytest.param("*/one.py", ["pkg/helpers/one.py"], id="star-parent"),
+        pytest.param("*.py", list(LAYOUT), id="star-any-file"),
+        pytest.param("conftest.py/", ["pkg/conftest.py"], id="file-slash"),
+        pytest.param("pkg/**/conftest.py", [], id="double-star-not-empty"),
+        pytest.param(".", list(LAYOUT), id="root"),
+        pytest.param("./", list(LAYOUT), id="root-slash"),
+        pytest.param("tests/./_data", DATA[:1], id="dot-segment"),
+        pytest.param("pkg//helpers", ["pkg/helpers/one.py"], id="doubled-slash"),
+        pytest.param("/tests", [], id="absolute"),
+        pytest.param("TESTS", [], id="case"),
+        pytest.param("tests/../tests", [], id="dot-dot"),
+    ],
+)
+def test_ignored_reads_an_entry_as_sourcery_does(
+    entry: str, skipped: list[str]
+) -> None:
+    """`ignored()` covers what Sourcery 1.46.0 skipped for the same entry.
+
+    Each case was measured in a scratch repository holding `LAYOUT` and
+    an `origin` on github.com, with `ignore: [<entry>]` in its
+    `.sourcery.yaml` and the files Sourcery reported read off
+    `uvx --python 3.15 --from sourcery==1.46.0 sourcery review --check .`.
+
+    :param entry: the `ignore:` entry.
+    :param skipped: the files Sourcery reported no finding in.
+    """
+    assert ignored([entry], list(LAYOUT)) == skipped
+
+
+def test_a_git_blob_is_git_s_own(tmp_path: Path) -> None:
+    """`git_blob()` answers what `git hash-object` answers.
+
+    :param tmp_path: where the file is written.
+    """
+    data = b"print('hello')\n"
+    (tmp_path / "x.py").write_bytes(data)
+    answered = subprocess.run(
+        ["git", "hash-object", str(tmp_path / "x.py")],
+        capture_output=True,
+        encoding="utf-8",
+        check=True,
+        env={**os.environ, **QUIET},
+    ).stdout.strip()
+    assert git_blob(data) == answered
+
+
+PINNED = "tests/unit/_data/test_framework/v2_p2p.py"
+"""The vendored module of the tree a test builds, at btclib-node's path."""
+
+VENDORED = b"# Bitcoin Core's own code\n"
+"""Its bytes, as upstream holds them."""
+
+MINE = b"# mine, not upstream\n"
+"""Bytes no upstream holds, the tree's own code."""
+
+TREE = "btclib-node"
+"""The name the tree a test builds goes by in the organization."""
+
+UPSTREAM = ("bitcoin/bitcoin", "test/functional/test_framework/v2_p2p.py")
+"""The repository and path the pin of the tree a test builds names."""
+
+COMMIT = "6a129983c9bf8efa1081f9a8b462c3635d1cfb39"
+"""The commit that pin names."""
+
+
+def _steps(*lines: str) -> str:
+    return "jobs:\n  pins:\n    steps:\n" + "".join(
+        f"      - {line}\n" for line in lines
+    )
+
+
+RUNS = _steps("run: python3 check.py tests/_data/README.md")
+"""A workflow whose step passes the pin file to its command."""
+
+
+def _calling(owner: str, ledger: str) -> str:
+    return (
+        "jobs:\n  pins:\n"
+        f"    uses: {owner}/.github/workflows/reusable-vendored-vectors.yml@{COMMIT}\n"
+        "    with:\n      ledgers: >-\n"
+        f'        [{{"ledger": "{ledger}", "title": "Drift"}}]\n'
+    )
+
+
+CALLS = _calling("btclib-org/.github", "tests/_data/README.md")
+"""A workflow handing the pin file to the organization's reusable check."""
+
+
+def _pin_file(
+    blob: str,
+    *,
+    heading: str = f"## `{PINNED}`",
+    fields: str = f"repo    {UPSTREAM[0]}\npath    {UPSTREAM[1]}\ncommit  {COMMIT}",
+) -> str:
+    return (
+        "# Vendored test vectors\n\n"
+        f"{heading}\n\n"
+        "```text\n"
+        f"{fields}  2026-06-04\n"
+        f"blob    {blob}\n"
+        "pulled  2026-10-27\n"
+        "```\n"
+    )
+
+
+def _upstream(
+    held: dict[tuple[str, str, str], bytes],
+) -> Callable[[str, str, str], str | None]:
+    def answer(repo: str, commit: str, path: str) -> str | None:
+        data = held.get((repo, commit, path))
+        return None if data is None else git_blob(data)
+
+    return answer
+
+
+HELD = {(UPSTREAM[0], COMMIT, UPSTREAM[1]): VENDORED}
+"""What upstream holds, as the stub of `upstream_blob()` answers it."""
+
+
+@dataclass(frozen=True)
+class GitHub:
+    """What the stubs of `pinned()`'s half that asks GitHub answer."""
+
+    held: dict[tuple[str, str, str], bytes] = field(default_factory=lambda: HELD)
+    """The bytes each repository holds at a commit and path."""
+
+    own: frozenset[str] = frozenset()
+    """The commits the tree's own repository holds."""
+
+    unmerged: frozenset[str] = frozenset()
+    """The commits upstream serves that are not on its default branch."""
+
+    def asks(self) -> Asks:
+        """Answer as these stubs say, never reaching GitHub.
+
+        :returns: the questions `pinned()` puts, stubbed.
+        """
+        return Asks(
+            own=lambda _tree, commit: commit in self.own,
+            blob=_upstream(self.held),
+            merged=lambda _repo, commit: commit not in self.unmerged,
+        )
+
+
+UPSTREAM_ONLY = GitHub()
+"""Upstream merged the vendored bytes; the tree holds none of its commits."""
+
+
+def _pinning(
+    tree: Path,
+    *,
+    document: str | None = None,
+    workflow: str | None = RUNS,
+    data: bytes = VENDORED,
+    github: GitHub = UPSTREAM_ONLY,
+) -> list[str]:
+    files = {
+        PINNED: data,
+        "tests/_data/README.md": (document or _pin_file(git_blob(VENDORED))).encode(),
+    }
+    if workflow is not None:
+        files[PIN_WORKFLOW] = workflow.encode()
+    for name, content in files.items():
+        path = tree / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+    _git(tree, "init", "--quiet")
+    _git(tree, "add", "--all")
+    return pinned(tree, TREE, [PINNED], github.asks())
+
+
+def test_a_file_pinned_by_its_blob_and_re_checked_is_kept(tmp_path: Path) -> None:
+    """A pin whose blob is the file's and upstream's, handed over, keeps it.
+
+    `holds()`, `upstream_blob()` and `on_default()` are stubbed: this is
+    the local half of `pinned()`, which reads the checkout alone.
+    `hooks_test.py` runs the half that asks GitHub, under the
+    `integration` marker.
+
+    :param tmp_path: where the repository is built.
+    """
+    assert _pinning(tmp_path) == [PINNED]
+
+
+def test_a_pin_file_handed_to_the_reusable_check_is_kept(tmp_path: Path) -> None:
+    """A `ledger` of the organization's callee is handed over as a `run:` is.
+
+    :param tmp_path: where the repository is built.
+    """
+    assert _pinning(tmp_path, workflow=CALLS) == [PINNED]
+
+
+def test_a_file_not_asked_about_is_not_kept(tmp_path: Path) -> None:
+    """Only the files `among` names reach the half that asks GitHub.
+
+    :param tmp_path: where the repository is built.
+    """
+    _pinning(tmp_path)
+    asked: list[tuple[str, str, str]] = []
+
+    def answer(repo: str, commit: str, path: str) -> str | None:
+        asked.append((repo, commit, path))
+        return git_blob(VENDORED)
+
+    stubbed = Asks(own=lambda *_: False, blob=answer, merged=lambda *_: True)
+    assert pinned(tmp_path, TREE, [], stubbed) == []
+    assert not asked
+
+
+MINE_BLOB = git_blob(MINE)
+INVENTED = f"repo    nobody/nothing\npath    x\ncommit  {'0' * 40}"
+
+NODE = "09be07c3b0ecabe0ed77cfbea85a095128b9f52c"
+"""A commit of btclib-node's own `main`, which its forks serve too."""
+
+DOTTED = "../../../btclib-org/btclib-node/contents/README.md"
+"""A `path` GitHub resolves out of the repository the pin names."""
+
+
+def _own_code(
+    repo: str, path: str, commit: str = NODE, *, own: bool = False
+) -> dict[str, Any]:
+    return {
+        "data": MINE,
+        "document": _pin_file(
+            MINE_BLOB, fields=f"repo    {repo}\npath    {path}\ncommit  {commit}"
+        ),
+        "github": GitHub(
+            {(repo, commit, path): MINE}, frozenset({commit}) if own else frozenset()
+        ),
+    }
+
+
+@pytest.mark.parametrize(
+    ("changes", "why"),
+    [
+        pytest.param({"data": VENDORED + b"\n"}, "changed here", id="bytes"),
+        pytest.param({"workflow": None}, "no workflow", id="no-workflow"),
+        pytest.param(
+            {"workflow": _steps("run: check tests/README.md")},
+            "another pin file",
+            id="workflow-names-another",
+        ),
+        pytest.param(
+            {"workflow": _steps("run: check tests/_data/README.md.bak")},
+            "a longer path",
+            id="workflow-names-longer",
+        ),
+        pytest.param(
+            {"workflow": _calling("someone/.github", "tests/_data/README.md")},
+            "another owner's callee",
+            id="callee-elsewhere",
+        ),
+        pytest.param(
+            {"workflow": _calling("btclib-org/.github", "tests/README.md")},
+            "the callee handed another pin file",
+            id="callee-names-another",
+        ),
+        pytest.param({"document": _pin_file("0" * 40)}, "another blob", id="blob"),
+        pytest.param(
+            {"document": _pin_file(git_blob(VENDORED)).replace("commit  ", "pulled  ")},
+            "no commit",
+            id="no-commit",
+        ),
+        pytest.param(
+            {"document": _pin_file(git_blob(VENDORED), heading="## Bitcoin Core")},
+            "no path in the heading",
+            id="heading",
+        ),
+        pytest.param(
+            {"workflow": "# see tests/_data/README.md\n"},
+            "the pin file only in a comment",
+            id="comment-only",
+        ),
+        pytest.param(
+            {
+                "workflow": "on:\n  push:\n    paths: [tests/_data/README.md]\n"
+                + _steps("run: echo hello")
+            },
+            "the pin file only under on.push.paths",
+            id="paths-only",
+        ),
+        pytest.param(
+            {"data": MINE, "document": _pin_file(MINE_BLOB, fields=INVENTED)},
+            "invented fields under a real run: line",
+            id="invented-fields",
+        ),
+        pytest.param(
+            {
+                "data": MINE,
+                "document": _pin_file(f"{MINE_BLOB}  extra", fields=INVENTED),
+            },
+            "a blob line with more after it",
+            id="blob-extra",
+        ),
+        pytest.param(
+            _own_code(f"btclib-org/{TREE}", PINNED, own=True),
+            "the tree's own code",
+            id="self-repo",
+        ),
+        pytest.param(
+            _own_code("jaynarayan-yadav/btclib-node", "README.md", own=True),
+            "the tree's own code, through a fork",
+            id="fork",
+        ),
+        pytest.param(
+            _own_code("bitcoin/bitcoin", DOTTED),
+            "a path that leaves the repository",
+            id="dot-segments",
+        ),
+        pytest.param(
+            _own_code("bitcoin/..", "btclib-org/btclib-node/contents/README.md"),
+            "a repo with a dot segment",
+            id="repo-dot-segment",
+        ),
+        pytest.param(
+            _own_code("bitcoin/bitcoin", "x//y"),
+            "an empty path segment",
+            id="empty-segment",
+        ),
+        pytest.param(
+            _own_code("bitcoin/bitcoin", "README.md", "master"),
+            "a branch, not a commit",
+            id="commit-branch",
+        ),
+        pytest.param(
+            {"github": GitHub({(UPSTREAM[0], COMMIT, UPSTREAM[1]): MINE})},
+            "upstream holds other bytes",
+            id="wrong-upstream-blob",
+        ),
+        pytest.param(
+            {"github": GitHub(unmerged=frozenset({COMMIT}))},
+            "a commit only a fork of upstream or a pull request holds",
+            id="fork-of-upstream",
+        ),
+        pytest.param(
+            {"github": GitHub({})}, "upstream holds nothing there", id="no-upstream"
+        ),
+    ],
+)
+def test_a_file_not_pinned_byte_for_byte_is_not_kept(
+    tmp_path: Path, changes: dict[str, Any], why: str
+) -> None:
+    """Each condition `pinned()` reads, broken alone, leaves the file unkept.
+
+    The cases holding `MINE` pin the tree's own code.
+
+    :param tmp_path: where the repository is built.
+    :param changes: what differs from the kept case.
+    :param why: what the case breaks.
+    """
+    assert _pinning(tmp_path, **changes) == [], why
+
+
+def test_a_pin_is_read_under_any_heading_level() -> None:
+    """A pin is read under `###`, as in btclib, and `##`, as in btclib-node.
+
+    A heading naming no path ends the pin above it.
+    """
+    document = _pin_file("a" * 40, heading=f"### `{PINNED}`")
+    assert pins(document)[PINNED]["blob"] == "a" * 40
+    grouped = document.replace(
+        f"### `{PINNED}`", f"### `{PINNED}`\n\n## bitcoin/bitcoin"
+    )
+    assert pins(grouped) == {}

@@ -19,19 +19,25 @@ from __future__ import annotations
 
 import copy
 import fnmatch
+import hashlib
 import json
 import re
+import shlex
+from dataclasses import dataclass
+from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any
+from urllib.parse import quote
 
 import pytest
 import yaml
 
-from . import ORG, ROOT, SELF, Tier, by_hand, gh_json, tracked
+from . import ORG, ROOT, SELF, Refused, Tier, by_hand, gh_json, output, tracked
 from .pyproject_test import FLOOR, FLOOR_BOUND, parsed
 from .workflows_test import LOCAL as LOCAL_PREFIXES
 from .workflows_test import calls_here, jobs, triggers, workflows
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Collection
     from pathlib import Path
 
 pytestmark = pytest.mark.integration
@@ -481,33 +487,324 @@ def python_floor(pyproject: dict[str, Any]) -> tuple[int, int] | None:
 
 
 def ignored(patterns: list[Any], python: list[str]) -> list[str]:
-    """Return the tracked Python files an `ignore:` entry covers.
+    """Return the tracked Python files Sourcery skips for an `ignore:` list.
 
-    An entry is read as a path, a directory holding the file, or a glob,
-    matched against the path from every depth, as Sourcery matches it:
-    `conftest.py` covers `tests/conftest.py`. A leading `./` or `**/` is
-    dropped. Where Sourcery reads one more narrowly, this over-reports,
-    which a tree answers by naming no tracked Python file there at all.
+    An entry is cut into segments as `PurePosixPath` cuts it, which drops a
+    trailing `/`, a `.` segment and a doubled `/`. An entry with no segment
+    left, `.` or `./`, covers every file. Any other covers a file where a run
+    of consecutive segments of its path matches the entry's, one segment
+    against one under `fnmatchcase`. So `*` and `**` alike stay inside a
+    segment: `tests/*/_data` covers `tests/unit/_data/x.py`, and `**/*.py`
+    covers no module at the root. `sourcery_test.py` holds the cases
+    measured on Sourcery itself.
 
     :param patterns: the `ignore:` list of `.sourcery.yaml`.
     :param python: the tracked Python files, relative to the root.
     :returns: the files covered, in the order given.
     """
+    wanted = [PurePosixPath(str(raw)).parts for raw in patterns]
     out: list[str] = []
-    wanted = [
-        str(raw).rstrip("/").removeprefix("./").removeprefix("**/") for raw in patterns
-    ]
     for path in python:
         parts = path.split("/")
-        tails = ["/".join(parts[depth:]) for depth in range(len(parts))]
         if any(
-            tail == pattern
-            or tail.startswith(pattern + "/")
-            or fnmatch.fnmatch(tail, pattern)
-            for tail in tails
-            for pattern in wanted
+            all(
+                fnmatch.fnmatchcase(part, segment)
+                for part, segment in zip(
+                    parts[start : start + len(entry)], entry, strict=True
+                )
+            )
+            for entry in wanted
+            for start in range(len(parts) - len(entry) + 1)
         ):
             out.append(path)
+    return out
+
+
+PIN_WORKFLOW = ".github/workflows/vendored-vectors.yml"
+"""The workflow section 7 has re-check every pin, naming the file it reads."""
+
+PIN_FILE = "README.md"
+"""The name section 7 gives the file that holds a tree's pins."""
+
+NOT_KEPT = "which no pin keeps byte for byte"
+"""What a finding says of the tracked Python files an `ignore:` entry hides."""
+
+PIN_HEADING = re.compile(r"^#+ `([^`*<>]+)`$")
+"""A pin's heading: the path of the file it pins, in backticks."""
+
+PIN_FIELD = re.compile(r"^(repo|path|commit|blob)[ \t]+(\S+)")
+"""A line of a pin's block naming where the copy came from."""
+
+
+def git_blob(data: bytes) -> str:
+    """Return the git blob SHA-1 of some bytes, as `git hash-object` does.
+
+    :param data: the bytes of a file.
+    :returns: the forty hex digits.
+    """
+    header = b"blob %d\0" % len(data)
+    return hashlib.sha1(header + data, usedforsecurity=False).hexdigest()
+
+
+def pins(document: str) -> dict[str, dict[str, str]]:
+    """Read the pins of a pin file, as section 7 lays one out.
+
+    A pin is a heading naming a path, then the first `text` block before
+    the next heading.
+
+    :param document: the text of the pin file.
+    :returns: each pinned path against the fields of its block.
+    """
+    out: dict[str, dict[str, str]] = {}
+    heading: str | None = None
+    block: dict[str, str] | None = None
+    for line in document.splitlines():
+        if block is not None:
+            if line.startswith("```"):
+                if heading is not None:
+                    out[heading] = block
+                heading, block = None, None
+            elif found := PIN_FIELD.match(line):
+                block[found[1]] = found[2]
+        elif line == "```text":
+            block = {}
+        elif found := PIN_HEADING.match(line):
+            heading = found[1]
+        elif line.startswith("#"):
+            heading = None
+    return out
+
+
+UPSTREAM_SHA = 'if type == "object" and .type == "file" then .sha else "" end'
+"""The `--jq` filter reading a file's blob off the contents endpoint."""
+
+SEGMENT = re.compile(r"[A-Za-z0-9._-]+")
+"""A segment of a `repo` field: an owner or a name."""
+
+FULL_SHA = re.compile(r"[0-9a-f]{40}")
+"""A `commit` field, the full SHA-1 section 7's pin records."""
+
+
+def segments(text: str) -> list[str] | None:
+    """Cut a `repo` or `path` field into its `/` segments, or refuse it.
+
+    A `.`, `..` or empty segment is refused: GitHub resolves one, so it
+    would read another repository than the field names.
+
+    :param text: the field.
+    :returns: the segments, or `None` where one is refused.
+    """
+    parts = text.split("/")
+    return None if any(part in {"", ".", ".."} for part in parts) else parts
+
+
+def sound(fields: dict[str, str]) -> bool:
+    """Say whether a pin's fields name one file at one commit of one repository.
+
+    :param fields: the fields of the pin's block.
+    :returns: whether `repo` is `owner/name`, `path` has no segment that
+        GitHub would resolve, and `commit` is a full SHA-1.
+    """
+    repo = segments(fields["repo"])
+    return (
+        repo is not None
+        and len(repo) == 2  # noqa: PLR2004
+        and all(SEGMENT.fullmatch(part) for part in repo)
+        and segments(fields["path"]) is not None
+        and FULL_SHA.fullmatch(fields["commit"]) is not None
+    )
+
+
+def encoded(path: str) -> str:
+    """Percent-encode each segment of a path, keeping the `/` between them.
+
+    :param path: a path `segments()` accepts.
+    :returns: the path as it goes into an endpoint.
+    """
+    return "/".join(quote(part, safe="") for part in path.split("/"))
+
+
+def holds(repository: str, commit: str) -> bool:
+    """Ask GitHub whether a repository of the organization holds a commit.
+
+    A commit it holds is the tree's own code, whichever repository a pin
+    names it in: a fork serves its parent's commits. It reaches the
+    network, so only an `integration` test calls it.
+
+    :param repository: the repository's name in the organization.
+    :param commit: a full SHA-1.
+    :returns: whether GitHub answers the commit there.
+    :raises Refused: where GitHub refuses for another reason than a 422,
+        its answer for a commit the repository does not hold. A 404 is
+        asked again of the repository itself, and raises where that is
+        missing: a misnamed tree holds nothing and proves nothing.
+    """
+    repo = f"repos/{ORG}/{quote(repository, safe='')}"
+    try:
+        output("gh", "api", f"{repo}/commits/{commit}", "--jq", ".sha")
+    except Refused as refused:
+        if "(HTTP 422)" in refused.stderr:
+            return False
+        if "(HTTP 404)" not in refused.stderr:
+            raise
+        output("gh", "api", repo, "--jq", ".full_name")
+        return False
+    return True
+
+
+MERGED = frozenset({"behind", "identical"})
+"""What the compare endpoint answers for a commit on the branch it compares."""
+
+
+def on_default(repo: str, commit: str) -> bool:
+    """Ask GitHub whether a commit is on a repository's default branch.
+
+    A commit that is only on a fork, or only on a pull request's head, is
+    served through the repository's API all the same, and is no code the
+    repository holds. It reaches the network, so only an `integration`
+    test calls it.
+
+    :param repo: the repository, `owner/name`, as `sound()` accepts it.
+    :param commit: a full SHA-1 the repository serves.
+    :returns: whether the default branch's tip is the commit or follows it.
+    :raises Refused: where GitHub refuses either call.
+    """
+    base = f"repos/{encoded(repo)}"
+    branch = output("gh", "api", base, "--jq", ".default_branch").strip()
+    status = output(
+        "gh",
+        "api",
+        f"{base}/compare/{quote(branch, safe='')}...{commit}",
+        "--jq",
+        ".status",
+    ).strip()
+    return status in MERGED
+
+
+def upstream_blob(repo: str, commit: str, path: str) -> str | None:
+    """Ask GitHub for the blob a repository holds at a path, at a commit.
+
+    It reaches the network, so only an `integration` test calls it.
+
+    :param repo: the repository, `owner/name`, as `sound()` accepts it.
+    :param commit: the commit to read the path at, a full SHA-1.
+    :param path: the path in that repository, as `sound()` accepts it.
+    :returns: the blob's SHA-1, or `None` where nothing is a file there.
+    :raises Refused: where GitHub refuses for another reason than a 404.
+    """
+    endpoint = f"repos/{encoded(repo)}/contents/{encoded(path)}?ref={commit}"
+    try:
+        answer = output("gh", "api", endpoint, "--jq", UPSTREAM_SHA).strip()
+    except Refused as refused:
+        if "(HTTP 404)" in refused.stderr:
+            return None
+        raise
+    return answer or None
+
+
+PIN_CHECK = f"{ORG}/{SELF}/.github/workflows/reusable-vendored-vectors.yml"
+"""The callee a tree's `PIN_WORKFLOW` can hand its pin files to."""
+
+
+def passes(workflow: Path, document: str) -> bool:
+    """Say whether a workflow names a pin file where a command can read it.
+
+    It does where the file is a word of a step's `run:`, as the shell
+    splits it, or a `ledger` of the `ledgers` input of a job calling
+    `PIN_CHECK`. A comment, a `paths:` filter or a longer path naming the
+    file does not count. What the command does with the word, and whether
+    the job runs, is not read.
+
+    :param workflow: the workflow file.
+    :param document: the pin file's path, relative to the root.
+    :returns: whether some job names it so.
+    """
+    for job in jobs(workflow).values():
+        if str(job.get("uses") or "").partition("@")[0] == PIN_CHECK:
+            try:
+                ledgers = json.loads(str((job.get("with") or {}).get("ledgers")))
+            except ValueError:
+                ledgers = []
+            if isinstance(ledgers, list) and any(
+                isinstance(ledger, dict) and ledger.get("ledger") == document
+                for ledger in ledgers
+            ):
+                return True
+        for step in job.get("steps") or []:
+            try:
+                words = shlex.split(str(step.get("run") or ""), comments=True)
+            except ValueError:
+                continue
+            if document in words:
+                return True
+    return False
+
+
+@dataclass(frozen=True)
+class Asks:
+    """The half of `pinned()` that asks GitHub, one call per question."""
+
+    own: Callable[[str, str], bool] = holds
+    """Whether the tree's repository holds a commit, as `holds()` answers."""
+
+    blob: Callable[[str, str, str], str | None] = upstream_blob
+    """The blob a repository holds at a commit and path."""
+
+    merged: Callable[[str, str], bool] = on_default
+    """Whether a commit is on a repository's default branch."""
+
+
+GITHUB = Asks()
+"""The questions as GitHub answers them, which `integration` tests ask."""
+
+
+def pinned(
+    root: Path,
+    repository: str,
+    among: Collection[str],
+    asks: Asks = GITHUB,
+) -> list[str]:
+    """Return the files among some a tree keeps byte for byte to an upstream.
+
+    A file is kept so where `PIN_WORKFLOW` `passes()` a `PIN_FILE` that
+    pins it with a `repo`, a `path`, a `commit` and a `blob` that are
+    `sound()`; that `blob` is the file's own; the tree's own repository
+    does not hold `commit`; `repo` holds the same `blob` at `commit` and
+    `path`; and `commit` is on `repo`'s default branch. A copy a fixer or
+    a hand changed is not kept so, and neither is the tree's own code,
+    pinned at one of the tree's commits in the tree or in a fork of it,
+    nor a commit only a fork or a pull request of `repo` holds.
+
+    The local half reads only the checkout. `asks` is the half that asks
+    GitHub, and is asked only of the files the local half keeps.
+
+    :param root: the root of the checkout.
+    :param repository: the tree's own name in the organization.
+    :param among: the files asked about, relative to the root.
+    :param asks: the questions put to GitHub.
+    :returns: the files, in the order their pins are read.
+    """
+    workflow = root / PIN_WORKFLOW
+    if not workflow.is_file():
+        return []
+    files = tracked(root)
+    out: list[str] = []
+    for document in files:
+        if document.rsplit("/", 1)[-1] != PIN_FILE or not passes(workflow, document):
+            continue
+        for path, fields in pins((root / document).read_text(encoding="utf-8")).items():
+            if (
+                path in among
+                and path in files
+                and {"repo", "path", "commit", "blob"} <= fields.keys()
+                and sound(fields)
+                and fields["blob"] == git_blob((root / path).read_bytes())
+                and not asks.own(repository, fields["commit"])
+                and asks.blob(fields["repo"], fields["commit"], fields["path"])
+                == fields["blob"]
+                and asks.merged(fields["repo"], fields["commit"])
+            ):
+                out.append(path)
     return out
 
 
@@ -584,12 +881,14 @@ def config_departures(
     config: dict[str, Any] | None,
     python: list[str],
     floor: tuple[int, int] | None,
+    kept: Collection[str] = (),
 ) -> list[str]:
     """Report where a `.sourcery.yaml` departs from section 10.
 
     :param config: the parsed file, or `None` where the tree has none.
     :param python: the tracked Python files, relative to the root.
     :param floor: the `requires-python` floor, as `python_floor()` reads it.
+    :param kept: the files `pinned()` reads as kept byte for byte.
     :returns: one finding per departure, empty where there is none.
     """
     if config is None:
@@ -607,8 +906,10 @@ def config_departures(
         RULE_TYPES
     ):
         out.append(f"{SOURCERY_CONFIG} sets rule_types: {settings['rule_types']!r}")
-    if hidden := ignored(config.get("ignore") or [], python):
-        out.append(f"{SOURCERY_CONFIG} ignores {hidden}")
+    if hidden := [
+        path for path in ignored(config.get("ignore") or [], python) if path not in kept
+    ]:
+        out.append(f"{SOURCERY_CONFIG} ignores {hidden}, {NOT_KEPT}")
     declared = settings.get("python_version")
     release = RELEASE_XY.match(declared) if isinstance(declared, str) else None
     if release is None:
@@ -637,6 +938,11 @@ def test_a_python_tree_calls_sourcery_with_its_rules_off(
     interpreter the code runs on, which a script served to other trees
     can put lower.
 
+    A file an `ignore:` entry hides is asked of `pinned()` whole, the
+    half that asks GitHub included: this is where `holds()`,
+    `upstream_blob()` and `on_default()` run. `sourcery_test.py` runs the
+    local half, with all three stubbed.
+
     :param repository: the repository asked about.
     :param trees: the checkouts.
     :param pyprojects: the parsed files.
@@ -651,19 +957,69 @@ def test_a_python_tree_calls_sourcery_with_its_rules_off(
         if path.is_file()
         else None
     )
+    hidden = ignored((config or {}).get("ignore") or [], python)
     found = (
         caller_departures(root)
         + guard_departures(gate(repository, trees))
         + config_departures(
-            config, python, python_floor(parsed(repository, pyprojects))
+            config,
+            python,
+            python_floor(parsed(repository, pyprojects)),
+            pinned(root, repository, hidden),
         )
     )
     assert not found, f"{found}; " + by_hand(
         repository,
         f"grep -ln {SOURCERY_CALLED} .github/workflows/*.yml;"
         f" grep -n -A6 'id: {BARE_SKIP}' {CONFIG}; cat {SOURCERY_CONFIG};"
-        " grep -n requires-python pyproject.toml",
+        f" grep -n requires-python pyproject.toml; grep -n {PIN_FILE} {PIN_WORKFLOW}",
     )
+
+
+COPYING = ("bitcoin/bitcoin", "b23b901363c56043c536f32261ac8cb540624a84", "COPYING")
+"""A file upstream holds at a commit, as btclib-node pins its licence."""
+
+
+def test_upstream_blob_answers_what_github_holds() -> None:
+    """`upstream_blob()` reads a file's blob, and nothing where none is.
+
+    The half of `pinned()` that asks GitHub, run here because it reaches
+    the network; `sourcery_test.py` stubs it.
+    """
+    repo, commit, path = COPYING
+    assert upstream_blob(*COPYING) == "89960cbf2f221a29852ed162b25bda2afc0b2dd6"
+    assert upstream_blob(repo, commit, "test") is None, "a directory"
+    assert upstream_blob(repo, commit, "no-such-file") is None, "no path"
+    assert upstream_blob(repo, "0" * 40, path) is None, "no commit"
+    assert upstream_blob("btclib-org/no-such-repository", commit, path) is None
+
+
+def test_holds_answers_whether_the_tree_has_the_commit() -> None:
+    """`holds()` finds a tree's own commit, and not upstream's.
+
+    The half of `pinned()` that asks GitHub, run here because it reaches
+    the network; `sourcery_test.py` stubs it.
+    """
+    node = "09be07c3b0ecabe0ed77cfbea85a095128b9f52c"
+    assert holds("btclib-node", node), "btclib-node's own main"
+    assert not holds("btclib-node", COPYING[1]), "bitcoin/bitcoin's commit"
+    assert not holds("btclib-node", "0" * 40), "no commit at all"
+    with pytest.raises(Refused, match="HTTP 404"):
+        holds("no-such-repository", node)
+
+
+def test_on_default_answers_whether_upstream_merged_the_commit() -> None:
+    """`on_default()` finds a commit on the default branch, and not a fork's.
+
+    `db39029c` is only on a fork's branch and `ae015303` only on an
+    unmerged pull request's head, though bitcoin/bitcoin serves both.
+    The half of `pinned()` that asks GitHub, run here because it reaches
+    the network; `sourcery_test.py` stubs it.
+    """
+    repo, commit, _ = COPYING
+    assert on_default(repo, commit), "a commit master follows"
+    assert not on_default(repo, "db39029c2b376e0b72ac84ed9e45b2eb85dd0c92")
+    assert not on_default(repo, "ae015303c621747b0c102ddec7e67bcbc05352ab")
 
 
 AGREEING_GATE: dict[str, Any] = {
@@ -871,17 +1227,20 @@ def test_bare_sourcery_skip_refuses_a_skip_naming_no_rule(
 def test_a_sourcery_yaml_off_section_4_would_be_reported() -> None:
     """`config_departures` reports each way a `.sourcery.yaml` can leave it.
 
-    The floor is 3.11 and the tree tracks one module at the root and three
-    under `tests/`, one of them a level further down: an entry naming a
-    file or a directory reaches it at any depth, as Sourcery's does.
+    The floor is 3.11 and the tree tracks one module at the root and four
+    under `tests/`, two of them further down: an entry naming a file or a
+    directory reaches it at any depth, as Sourcery's does. The last is
+    vendored, and an entry may hide it once a pin keeps it byte for byte.
     """
     python = [
         "example.py",
         "tests/conftest.py",
         "tests/helpers/one.py",
         "tests/one_test.py",
+        "tests/unit/_data/v2_p2p.py",
     ]
     under_tests = python[1:]
+    vendored = python[-1:]
     floor = (3, 11)
     agreeing: dict[str, Any] = {
         "ignore": [".venv", "node_modules"],
@@ -924,7 +1283,7 @@ def test_a_sourcery_yaml_off_section_4_would_be_reported() -> None:
     del defaults["rule_settings"]["enable"], defaults["rule_settings"]["rule_types"]
     assert config_departures(defaults, python, floor) == [], "defaults are refused"
     for pattern, hidden in (
-        ("**/*.py", python),
+        ("**/*.py", under_tests),
         ("tests", under_tests),
         ("tests/", under_tests),
         ("example.py", ["example.py"]),
@@ -933,12 +1292,23 @@ def test_a_sourcery_yaml_off_section_4_would_be_reported() -> None:
         ("conftest.py", ["tests/conftest.py"]),
         ("helpers/one.py", ["tests/helpers/one.py"]),
         ("*/one.py", ["tests/helpers/one.py"]),
+        ("tests/*.py", ["tests/conftest.py", "tests/one_test.py"]),
+        ("tests/**/_data", vendored),
+        ("tests/*/_data", vendored),
+        ("tests/*/_data/", vendored),
+        ("_data", vendored),
     ):
         ignoring = copy.deepcopy(agreeing)
         ignoring["ignore"].append(pattern)
         assert config_departures(ignoring, python, floor) == [
-            f"{SOURCERY_CONFIG} ignores {hidden}"
+            f"{SOURCERY_CONFIG} ignores {hidden}, {NOT_KEPT}"
         ], f"ignore: {pattern!r}"
+    for pattern, hidden in (("tests/**/_data", []), ("tests", under_tests[:-1])):
+        ignoring = copy.deepcopy(agreeing)
+        ignoring["ignore"].append(pattern)
+        assert config_departures(ignoring, python, floor, vendored) == (
+            [f"{SOURCERY_CONFIG} ignores {hidden}, {NOT_KEPT}"] if hidden else []
+        ), f"ignore: {pattern!r} over a pinned file"
     for version in ("3.15", "", "not-a-version", 3.11):
         wrong = copy.deepcopy(agreeing)
         wrong["rule_settings"]["python_version"] = version
