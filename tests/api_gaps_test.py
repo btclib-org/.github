@@ -1141,6 +1141,38 @@ def test_the_tests_load_the_griffe_the_workflows_run() -> None:
     assert f"griffe=={_locked('griffe')}" in pyproject["dependency-groups"]["test"]
 
 
+def _release_commands() -> list[str]:
+    """Return the shell fences of `shared/RELEASING.md` that name griffe.
+
+    Each fence is one command, its continuation lines joined.
+    """
+    text = (ROOT / "shared" / "RELEASING.md").read_text(encoding="utf-8")
+    fences = re.findall(r"```shell\n(.*?)```", text, re.DOTALL)
+    return [
+        " ".join(fence.replace("\\\n", " ").split())
+        for fence in fences
+        if "griffe" in fence
+    ]
+
+
+def test_the_release_step_runs_the_griffe_the_workflows_pin() -> None:
+    """The hand step installs griffe only at the pin `public-api` runs.
+
+    A release's author reads the step before the tag, and an unpinned
+    griffe there can miss a break the job then reports
+    (btclib-org/.github#1977).
+    """
+    workflow = (_WORKFLOWS / "reusable-public-api.yml").read_text(encoding="utf-8")
+    pins = set(re.findall(r"griffe==[\d.]+", workflow))
+    commands = _release_commands()
+    specs = [spec for c in commands for spec in re.findall(r"--with (\S+)", c)]
+
+    assert len(pins) == 1
+    assert specs
+    assert set(specs) == pins
+    assert not [c for c in commands if "uvx" in c]
+
+
 @pytest.mark.parametrize(
     ("name", "job", "base"),
     [

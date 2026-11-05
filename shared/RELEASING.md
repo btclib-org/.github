@@ -272,8 +272,8 @@ request, next to `deps-latest`'s own result.
    ```
 
    ```shell
-   uv run --locked --with griffe griffe check "${pkg:?}" \
-       -s . -s src -a "${tag:?}"
+   uv run --no-project --python 3.15 --with griffe==2.2.0 \
+       griffe check "${pkg:?}" -s . -s src -a "${tag:?}"
    ```
 
    griffe reads the `-a` revision from a temporary git worktree and
@@ -281,6 +281,10 @@ request, next to `deps-latest`'s own result.
    the only path it searches when none is given, so without `-s src` it
    answers `ModuleNotFoundError` for a package under `src/`. The pair is
    the one `release.yml`'s `public-api` job passes.
+
+   The griffe version is the one that job pins, and `tests/api_gaps_test.py`
+   of btclib-org/.github holds this step to it: two griffe releases can
+   answer differently for the same two revisions (btclib-org/.github#1977).
 
    The first release has no previous tag, and there is nothing for this
    step to read; `release.yml`'s `public-api` job skips its check for the
