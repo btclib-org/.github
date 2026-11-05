@@ -391,19 +391,12 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         1974,
         "test_the_homepage_is_the_page_on_btclib_org",
-        (
-            "btclib",
-            "btclib-node",
-            "btclib-wallet",
-            "bip32-descriptors",
-            "benchmarks",
-            "functional-tests",
-        ),
+        ("benchmarks", "functional-tests"),
     ),
     (
         1974,
         "test_the_documentation_is_the_read_the_docs_site_serving_the_tree",
-        ("btclib-node", "functional-tests"),
+        ("functional-tests",),
     ),
     (
         1982,
