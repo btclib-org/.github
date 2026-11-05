@@ -2217,9 +2217,7 @@ of the function holding it, in the form section 4's `bare-sourcery-skip` admits.
 
 **`sourcery` is a required check in a tree whose caller is in place and that no
 `BACKLOG` row of `test_a_python_tree_calls_sourcery_with_its_rules_off` in
-`tests/__init__.py` lists, and in no other.** Such a row lists the trees that
-are Python, as section 2 says, whose caller, `.sourcery.yaml` or section 4's
-`bare-sourcery-skip` is not yet as that test asks. A tree's caller lands with or
+`tests/__init__.py` lists, and in no other.** A tree's caller lands with or
 after its clean-up: before it, a pull request touching a Python file for another
 reason can fail on findings it did not write. Per tree, the protection gains the
 check first and is read back; then the tree's Sourcery pull request lands, its
