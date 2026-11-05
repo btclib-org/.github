@@ -663,10 +663,11 @@ def holds(repository: str, commit: str) -> bool:
     """Ask GitHub whether a commit is on a tree's own default branch.
 
     Such a commit is the tree's own code, whichever repository a pin names
-    it in: a fork serves its parent's commits. A commit merely pushed to a
-    fork of the tree is not asked about, because GitHub serves it through
-    the tree's own API too, and anyone could push upstream's commit there.
-    It reaches the network, so only an `integration` test calls it.
+    it in. A commit merely pushed to a fork of the tree is not asked
+    about, because GitHub serves it through the tree's own API too, and
+    anyone could push upstream's commit there; `network()` refuses a pin
+    to a fork of the tree instead. It reaches the network, so only an
+    `integration` test calls it.
 
     :param repository: the repository's name in the organization.
     :param commit: a full SHA-1.
@@ -683,6 +684,24 @@ def holds(repository: str, commit: str) -> bool:
             raise
     output("gh", "api", f"repos/{ORG}/{quote(repository, safe='')}", "--jq", ".name")
     return False
+
+
+def network(repo: str) -> str:
+    """Ask GitHub which repository a repository's fork network is rooted at.
+
+    A fork's owner sets its default branch, so `on_default()` proves
+    nothing of a fork of the tree. An outsider cannot move upstream's
+    root, so refusing the tree's own network turns no pin red. It reaches
+    the network, so only an `integration` test calls it.
+
+    :param repo: the repository, `owner/name`, as `sound()` accepts it.
+    :returns: the root's `owner/name`, the repository's own where it is
+        no fork.
+    :raises Refused: where GitHub refuses.
+    """
+    return output(
+        "gh", "api", f"repos/{encoded(repo)}", "--jq", ".source.full_name // .full_name"
+    ).strip()
 
 
 def upstream_blob(repo: str, commit: str, path: str) -> str | None:
@@ -754,6 +773,9 @@ class Asks:
     blob: Callable[[str, str, str], str | None] = upstream_blob
     """The blob a repository holds at a commit and path."""
 
+    root: Callable[[str], str] = network
+    """The repository a repository's fork network is rooted at."""
+
     merged: Callable[[str, str], bool] = on_default
     """Whether a commit is on a repository's default branch."""
 
@@ -774,14 +796,15 @@ def pinned(
     pins it with a `repo`, a `path`, a `commit` and a `blob` that are
     `sound()`; that `blob` is the file's own; `commit` is not on the
     tree's own default branch, as `holds()` asks; `repo` holds the same
-    `blob` at `commit` and `path`; and `commit` is on `repo`'s default
-    branch. A copy changed by a fixer or by hand is not kept so, and
-    neither is the tree's own code, pinned at one of the tree's commits
-    in the tree or in a fork of it, nor a commit only a fork or a pull
-    request of `repo` holds. A pin to a repository outside the tree's
-    fork network is taken on trust: this catches a pin that is mistaken,
-    or that the copy no longer matches, not the tree's own file copied
-    into a new repository.
+    `blob` at `commit` and `path`; `repo`'s fork network is not rooted at
+    the tree, as `network()` asks, compared without case; and `commit` is
+    on `repo`'s default branch. A copy changed by a fixer or by hand is
+    not kept so, and neither is a pin to the tree or a fork of it, the
+    tree's own commit under any other name, nor a commit only a fork or a
+    pull request of `repo` holds. A pin to a repository outside the
+    tree's fork network is taken on trust: this catches a pin that is
+    mistaken, or that the copy no longer matches, not the tree's own file
+    copied into a new repository.
 
     The local half reads only the checkout. `asks` is the half that asks
     GitHub, and is asked only of the files the local half keeps.
@@ -810,6 +833,8 @@ def pinned(
                 and not asks.own(repository, fields["commit"])
                 and asks.blob(fields["repo"], fields["commit"], fields["path"])
                 == fields["blob"]
+                and asks.root(fields["repo"]).casefold()
+                != f"{ORG}/{repository}".casefold()
                 and asks.merged(fields["repo"], fields["commit"])
             ):
                 out.append(path)
@@ -947,9 +972,8 @@ def test_a_python_tree_calls_sourcery_with_its_rules_off(
     can put lower.
 
     A file an `ignore:` entry hides is asked of `pinned()` whole, the
-    half that asks GitHub included: this is where `holds()`,
-    `upstream_blob()` and `on_default()` run. `sourcery_test.py` runs the
-    local half, with all three stubbed.
+    half that asks GitHub included: this is where the questions of `Asks`
+    run. `sourcery_test.py` runs the local half, with them stubbed.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -1018,6 +1042,18 @@ def test_holds_answers_whether_the_tree_has_the_commit() -> None:
     assert not holds("btclib-node", "0" * 40), "no commit at all"
     with pytest.raises(Refused, match="HTTP 404"):
         holds("no-such-repository", node)
+
+
+def test_network_answers_the_root_of_a_fork_network() -> None:
+    """`network()` answers a fork's root, and a repository that is no fork.
+
+    The half of `pinned()` that asks GitHub, run here because it reaches
+    the network; `sourcery_test.py` stubs it.
+    """
+    for repo in ("jaynarayan-yadav/btclib-node", f"{ORG}/btclib-node"):
+        assert network(repo) == f"{ORG}/btclib-node", repo
+    for repo in ("ryanofsky/bitcoin", COPYING[0]):
+        assert network(repo) == COPYING[0], repo
 
 
 def test_on_default_answers_whether_upstream_merged_the_commit() -> None:

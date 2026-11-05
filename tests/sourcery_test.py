@@ -497,6 +497,9 @@ class GitHub:
     unmerged: frozenset[str] = frozenset()
     """The commits upstream serves that are not on its default branch."""
 
+    roots: dict[str, str] = field(default_factory=dict)
+    """The root of each fork's network; any other repository is its own."""
+
     def asks(self) -> Asks:
         """Answer as these stubs say, never reaching GitHub.
 
@@ -505,6 +508,7 @@ class GitHub:
         return Asks(
             own=lambda _tree, commit: commit in self.own,
             blob=_upstream(self.held),
+            root=lambda repo: self.roots.get(repo, repo),
             merged=lambda _repo, commit: commit not in self.unmerged,
         )
 
@@ -539,8 +543,8 @@ def _pinning(
 def test_a_file_pinned_by_its_blob_and_re_checked_is_kept(tmp_path: Path) -> None:
     """A pin whose blob is the file's and upstream's, handed over, keeps it.
 
-    `holds()`, `upstream_blob()` and `on_default()` are stubbed: this is
-    the local half of `pinned()`, which reads the checkout alone.
+    The questions of `Asks` are stubbed: this is the local half of
+    `pinned()`, which reads the checkout alone.
     `hooks_test.py` runs the half that asks GitHub, under the
     `integration` marker.
 
@@ -569,7 +573,12 @@ def test_a_file_not_asked_about_is_not_kept(tmp_path: Path) -> None:
         asked.append((repo, commit, path))
         return git_blob(VENDORED)
 
-    stubbed = Asks(own=lambda *_: False, blob=answer, merged=lambda *_: True)
+    stubbed = Asks(
+        own=lambda *_: False,
+        blob=answer,
+        root=lambda repo: repo,
+        merged=lambda *_: True,
+    )
     assert pinned(tmp_path, TREE, [], stubbed) == []
     assert not asked
 
@@ -580,12 +589,23 @@ INVENTED = f"repo    nobody/nothing\npath    x\ncommit  {'0' * 40}"
 NODE = "09be07c3b0ecabe0ed77cfbea85a095128b9f52c"
 """A commit of btclib-node's own `main`, which its forks serve too."""
 
+FORK = "jaynarayan-yadav/btclib-node"
+"""A fork of btclib-node, whose owner sets its default branch."""
+
+FORK_ONLY = "54eecec21303f18f6379228692d812b080b5e1fa"
+"""A commit on a branch of `FORK` changing btclib-node's own test."""
+
 DOTTED = "../../../btclib-org/btclib-node/contents/README.md"
 """A `path` GitHub resolves out of the repository the pin names."""
 
 
 def _own_code(
-    repo: str, path: str, commit: str = NODE, *, own: bool = False
+    repo: str,
+    path: str,
+    commit: str = NODE,
+    *,
+    own: bool = False,
+    root: str | None = None,
 ) -> dict[str, Any]:
     return {
         "data": MINE,
@@ -593,7 +613,9 @@ def _own_code(
             MINE_BLOB, fields=f"repo    {repo}\npath    {path}\ncommit  {commit}"
         ),
         "github": GitHub(
-            {(repo, commit, path): MINE}, frozenset({commit}) if own else frozenset()
+            {(repo, commit, path): MINE},
+            frozenset({commit}) if own else frozenset(),
+            roots={} if root is None else {repo: root},
         ),
     }
 
@@ -666,9 +688,24 @@ def _own_code(
             id="self-repo",
         ),
         pytest.param(
-            _own_code("jaynarayan-yadav/btclib-node", "README.md", own=True),
+            _own_code(FORK, "README.md", own=True, root=f"btclib-org/{TREE}"),
             "the tree's own code, through a fork",
             id="fork",
+        ),
+        pytest.param(
+            _own_code(
+                FORK,
+                "tests/unit/orphanage_test.py",
+                FORK_ONLY,
+                root=f"btclib-org/{TREE}",
+            ),
+            "the tree's own code, at a commit only a fork of the tree holds",
+            id="fork-of-tree-own-commit",
+        ),
+        pytest.param(
+            _own_code(FORK, "README.md", FORK_ONLY, root=f"BTCLIB-ORG/{TREE.upper()}"),
+            "a fork of the tree, its root in another case",
+            id="fork-of-tree-case",
         ),
         pytest.param(
             _own_code("bitcoin/bitcoin", DOTTED),
