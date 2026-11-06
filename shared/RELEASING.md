@@ -247,7 +247,7 @@ request, next to `deps-latest`'s own result.
    rot, so read it from the file itself:
 
    ```shell
-   grep -n 'uses: \./\.github/workflows/' .github/workflows/release.yml
+   grep -n 'uses: [.$]/\.github/workflows/' .github/workflows/release.yml
    ```
 
    It is not caught anywhere else: every one of those workflows is
@@ -941,8 +941,8 @@ reading a mismatch as tampering:
   while PyPI would refuse the existing file names rather than accept a
   duplicate, the attempt itself asks for a fresh approval of the `pypi`
   environment and gates the run on nothing this repository controls. Skip
-  the workflow entirely and do by hand exactly what the job's own script
-  does, from the artifacts already sitting on the run:
+  the workflow entirely and do by hand what the job's own script does,
+  from the artifacts already sitting on the run:
 
   ```shell
   run=<run id>
@@ -961,16 +961,27 @@ reading a mismatch as tampering:
     | python3 -c 'import json,sys; d=json.load(sys.stdin)
   [print(u["filename"], u["digests"]["sha256"]) for u in d["urls"]]' &&
 
-  git show "v${version:?}:RELEASE_NOTES.md" | awk -v tag="v${version:?}" '
+  git show "v${version:?}:RELEASE_NOTES.md" > tag-notes.md &&
+  awk -v tag="v${version:?}" '
     $0 ~ "^## " tag "( |$)" {found=1; next}
     /^## / && found {exit}
+    found && NF {text=1}
     found {print}
-  ' > notes.md &&
+    END {
+      if (!text) print "RELEASE_NOTES.md has no notes for " tag > "/dev/stderr"
+      exit !text
+    }
+  ' tag-notes.md > notes.md &&
   cp attestation/attestation.jsonl "v${version:?}.intoto.jsonl" &&
   gh release create "v${version:?}" dist/* sbom/* \
     "v${version:?}.intoto.jsonl" \
     --title "v${version:?}" --notes-file notes.md
   ```
+
+  Where the tag's `RELEASE_NOTES.md` has no notes for the release, the
+  script stops before the release exists, so that the notes are written
+  first. The job creates the release anyway, as the comment on its step
+  in `reusable-github-release.yml` says.
 
   The digest comparison is not optional: it is what stands in for the
   provenance a second, unwanted publish attempt would otherwise have to
