@@ -1021,8 +1021,8 @@ reading a mismatch as tampering:
   stop means the read failed: check `version` and the tag. The tag
   cannot change after the upload, so where its section is empty all the
   same, write `notes.md` by hand and run the commands after the awk. The
-  awk runs only once the Python step below has passed, so its message
-  means every file matched PyPI.
+  awk runs only once the Python step has passed, so its message means
+  every file matched PyPI.
 
   The Python step compares the files `gh release create` attaches from
   `dist/` with the files PyPI holds for `version`, by name and SHA-256,
