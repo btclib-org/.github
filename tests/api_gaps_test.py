@@ -1303,7 +1303,7 @@ def test_a_command_running_griffe_at_the_pin_or_none_is_pinned(planted: str) -> 
 def test_the_release_step_runs_api_gaps_after_griffe() -> None:
     """The hand step runs the script after griffe, on the same tag.
 
-    The script reports the breaks griffe misses, which `public-api`
+    The script reports some of the breaks griffe misses, which `public-api`
     reports after the tag (btclib-org/.github#1940). It is fetched at
     the commit `release.yml` pins `reusable-public-api.yml` to, which is
     the copy the job runs.

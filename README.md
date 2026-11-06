@@ -3906,14 +3906,16 @@ A label means what its description says. Who applies and removes it:
   answers *is this module's surface stated* and never *did this release take
   something the last one gave*, and `RELEASE_NOTES.md` is written by hand, so
   nothing else can tell that an entry is missing. `griffe check` walks the
-  public API of two git references, names each break by the kind of break it is,
-  and exits non-zero having found any. `.github/scripts/api_gaps.py` reports, in
-  the same format and the same job, breaks of the kinds its docstring names,
-  which griffe does not compare or can skip. No griffe release up to 2.4.1
-  closes that gap, so moving the pin up to it would not replace the script, and
-  leaving them for the release's author to list would leave the hand-written
-  notes unchecked for them. What the two report is either a `RELEASE_NOTES.md`
-  entry or a reason for not being one, written where the release is written.
+  public API of two git references, names each break it finds by the kind of
+  break it is, and exits non-zero having found any.
+  `.github/scripts/api_gaps.py` reports, in the same format and the same job,
+  breaks of the kinds its docstring names, which griffe does not compare or can
+  skip. No griffe release up to 2.4.1 closes that gap, so moving the pin up to
+  it would not replace the script, and leaving them for the release's author to
+  list would leave the hand-written notes unchecked for them. What the two
+  report is either a `RELEASE_NOTES.md` entry or a reason for not being one,
+  written where the release is written. A break neither reports is read by hand,
+  as the public API step of `shared/RELEASING.md` says.
 
     **The release path and not the merge gate.** Before 1.0 a package breaks its
     surface deliberately, so a gate comparing the branch against the last

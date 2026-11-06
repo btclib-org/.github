@@ -260,12 +260,13 @@ request, next to `deps-latest`'s own result.
    is what landed rather than what is nearly landed.
 
 1. Read the public API against the previous release, before the notes that
-   describe it are declared final. `RELEASE_NOTES.md`
-   promises that a breaking change is announced there, the calendar version
-   promising nothing, and nothing else reads that promise: the suite judges the
-   code, and a reviewer weighs what the prose says rather than what it leaves
-   out. griffe and `api_gaps.py` read both revisions and answer that second
-   question — not whether the list is right, but whether it is complete:
+   describe it are declared final. `RELEASE_NOTES.md` promises that a breaking
+   change is announced there, the calendar version promising nothing, and
+   nothing else reads that promise: the suite judges the code, and a reviewer
+   weighs what the prose says rather than what it leaves out. griffe and
+   `api_gaps.py` read both revisions and answer that second question for the
+   breaks they compare — not whether the list is right, but whether it is
+   complete:
 
    ```shell
    tag=v<previous version>
@@ -316,21 +317,26 @@ request, next to `deps-latest`'s own result.
    step to read; `release.yml`'s `public-api` job skips its check for the
    same reason.
 
-   The two report each break — a public object removed, a parameter that
-   changed kind or default, an attribute whose value moved, a changed return
-   annotation — and an annotation change that breaks nothing, such as a
+   The two report each break they compare — a public object removed, a parameter
+   that changed kind or default, an attribute whose value moved, a changed
+   return annotation — and an annotation change that breaks nothing, such as a
    parameter's widened or one only spelled anew (`Optional[int]` to `int |
    None`). An addition is silent, so the output is short and every line of it
-   wants an entry — what the step asks is that nothing they name is missing
-   from RELEASE_NOTES.md. The converse is not theirs to answer: an entry
-   describing a break they did not find is a claim about the prose, which
-   review still has to read. Not a hook and not a job of `lint.yml`,
-   deliberately: the comparison is against the previous *release*, so a break
-   lands on `main` on purpose and remains a finding until the release that
-   announces it, leaving every pull request in between red for something no
-   branch introduced. Each exits 1 on a finding, so the day that reasoning
-   stops holding — a cycle that means to break nothing — making the step a
-   gate is a line per command.
+   wants an entry — what the step asks is that nothing they name is missing from
+   RELEASE_NOTES.md. The converse is not theirs to answer: an entry describing a
+   break they did not find is a claim about the prose, which review still has to
+   read. Not a hook and not a job of `lint.yml`, deliberately: the comparison is
+   against the previous *release*, so a break lands on `main` on purpose and
+   remains a finding until the release that announces it, leaving every pull
+   request in between red for something no branch introduced. Each exits 1 on a
+   finding, so the day that reasoning stops holding — a cycle that means to
+   break nothing — making the step a gate is a line per command.
+
+   Some breaks neither reports: a kind neither compares, such as an
+   `@overload`'s signatures, and what griffe alone compares on a pair it skips.
+   The docstring of the `api_gaps.py` fetched above says what is known of both.
+   Read those changes since the previous tag by hand: a break among them wants
+   an entry too.
 
    griffe also exits 1 when it fails on an error it does not catch, such
    as a tag the repository lacks: its output is then a Python traceback,
