@@ -146,8 +146,8 @@ def ask(slug: str) -> dict[str, Any] | None:
         if asked == ATTEMPTS or wait > min(PAUSE, BUDGET - sum(WAITED)):
             pytest.skip(
                 f"Read the Docs answered {slug} with 429 Too Many Requests"
-                f" {asked} times, Retry-After {after!r}: a rate limit says"
-                " nothing about the tree"
+                f" (ask {asked} of {ATTEMPTS}, Retry-After {after!r}): a rate"
+                " limit says nothing about the tree"
             )
         WAITED.append(wait)
         sleep(wait)
@@ -297,6 +297,26 @@ def test_a_429_past_the_bounds_skips_at_once(
     with pytest.raises(pytest.skip.Exception, match="429 Too Many Requests"):
         ask("stub")
     assert (site.asked, slept) == (1, [])
+
+
+def test_the_waits_spend_the_budget_then_a_429_skips_at_once(
+    monkeypatch: pytest.MonkeyPatch, slept: list[float]
+) -> None:
+    """Each wait counts against `BUDGET`, and once it is spent none is slept."""
+    project: dict[str, Any] = {"repository": {}}
+    rounds = BUDGET // PAUSE
+    paid: list[tuple[int, str | None] | dict[str, Any]] = [
+        (THROTTLED, str(PAUSE)),
+        project,
+    ]
+    site = _Site(*paid * rounds, (THROTTLED, "1"), project)
+    monkeypatch.setattr(f"{__name__}.urlopen", site)
+    for _ in range(rounds):
+        assert ask("stub") == project
+    assert slept == [PAUSE] * rounds
+    with pytest.raises(pytest.skip.Exception, match="429 Too Many Requests"):
+        ask("stub")
+    assert (site.asked, slept) == (2 * rounds + 1, [PAUSE] * rounds)
 
 
 def test_a_429_without_retry_after_waits_the_pause(
