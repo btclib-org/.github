@@ -519,13 +519,13 @@ request, next to `deps-latest`'s own result.
    not exist stops it too: `git show` prints nothing on its output, and
    `grep` finds no line.
 
-   Once the chain stops, the tag `git tag -s` made is still in the local
-   repository: on the wrong commit, or under the wrong name where
-   `version` was the wrong value. Delete it with
-   `git tag -d "v${version:?}"` while `version` still holds the value it
-   was made with, then correct the values and run the fence again. A tag
-   left in place makes `git tag -s` refuse the same name, as *If
-   something goes wrong* says.
+   Where the chain stops at `grep`, which prints nothing, the tag
+   `git tag -s` made is still in the local repository: on the wrong
+   commit, or under the wrong name where `version` was the wrong value.
+   Delete it with `git tag -d "v${version:?}"` while `version` still
+   holds the value it was made with, then correct the values and run the
+   fence again. A tag left in place makes `git tag -s` refuse the same
+   name, as *If something goes wrong* says.
 
 1. Read the tag's signature back from the API, now that it is pushed. It
    answers `true`: an unsigned annotated tag answers `false`, and a
