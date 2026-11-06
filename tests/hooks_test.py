@@ -94,7 +94,7 @@ LOCAL = (
 mypy and `bare-sourcery-skip` are the bullets of that list not named
 here: mypy is `test_the_gate_runs_mypy`'s subject below, section 6 asking
 for it by name, and `bare-sourcery-skip` is held with the `sourcery` job
-it guards, by `guard_departures`.
+it guards, by `guard_departures` and `stanza_departures`.
 """
 
 MYPY = ("mypy", "mirrors-mypy")
@@ -443,7 +443,7 @@ BARE_SKIP_STANZA: dict[str, Any] = {
     "name": "a sourcery skip names rules, and no tag",
     "language": "pygrep",
     "entry": (
-        r"#\W*sourcery\W+skip(?!:)"
+        r"#\W*sourcery\W+skip\b(?!:[^#;\w]*\w)"
         r"|#\W*sourcery\W+skip:[^#]*"
         r"(?<![\w-])(?:default|refactoring|suggestion|comment)(?![\w-])"
     ),
@@ -845,23 +845,36 @@ def pinned(
 
 
 def guard_departures(document: dict[str, Any]) -> list[str]:
-    """Report where a parsed gate guards a Sourcery skip unlike section 4.
+    """Report where a gate lacks section 4's Sourcery guard, or narrows it.
+
+    `stanza_departures` compares the guard's stanza.
 
     :param document: the gate, as `gate()` returns it.
     :returns: one finding per departure, empty where there is none.
     """
-    found = flattened(document)
-    guards = [hook for hook in found if hook["id"] == BARE_SKIP]
+    guards = [hook for hook in flattened(document) if hook["id"] == BARE_SKIP]
     out = [] if guards else [f"no hook {BARE_SKIP} refuses a skip naming no rule"]
-    for hook in guards:
-        stanza = {key: value for key, value in hook.items() if key != "rev"}
-        if stanza != BARE_SKIP_STANZA:
-            out.append(f"{BARE_SKIP} is not section 4's: {stanza!r}")
     out.extend(
         f"the gate sets {key}: {document[key]!r}, which reaches every hook"
         for key in TOP_LEVEL
         if key in document
     )
+    return out
+
+
+def stanza_departures(document: dict[str, Any]) -> list[str]:
+    """Report each `BARE_SKIP` hook of a gate that is not `BARE_SKIP_STANZA`.
+
+    :param document: the gate, as `gate()` returns it.
+    :returns: one finding per departure, empty where there is none.
+    """
+    out: list[str] = []
+    for hook in flattened(document):
+        if hook["id"] != BARE_SKIP:
+            continue
+        stanza = {key: value for key, value in hook.items() if key != "rev"}
+        if stanza != BARE_SKIP_STANZA:
+            out.append(f"{BARE_SKIP} is not section 4's: {stanza!r}")
     return out
 
 
@@ -1011,6 +1024,28 @@ def test_a_python_tree_calls_sourcery_with_its_rules_off(
     )
 
 
+@pytest.mark.tier(Tier.PYTHON)
+def test_a_python_tree_guards_sourcery_skips_as_this_one_does(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 4's `bare-sourcery-skip`, as `BARE_SKIP_STANZA` writes it.
+
+    Apart from `test_a_python_tree_calls_sourcery_with_its_rules_off`,
+    which asks for the hook, so that a `BACKLOG` row on a new stanza
+    excuses this comparison alone.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    if not tracked(trees[repository], "*.py"):
+        pytest.skip(f"{repository} tracks no Python file")
+    found = stanza_departures(gate(repository, trees))
+    assert not found, f"{found}; " + by_hand(
+        repository, f"grep -n -A6 'id: {BARE_SKIP}' {CONFIG}"
+    )
+
+
 COPYING = ("bitcoin/bitcoin", "b23b901363c56043c536f32261ac8cb540624a84", "COPYING")
 """A file upstream holds at a commit, as btclib-node pins its licence."""
 
@@ -1087,12 +1122,14 @@ AGREEING_GATE: dict[str, Any] = {
 
 
 def test_a_gate_off_section_4s_guard_would_be_reported() -> None:
-    """`guard_departures` reports each way a gate can leave section 4.
+    """`guard_departures` and `stanza_departures` report each way off section 4.
 
     Each control changes one thing in `AGREEING_GATE` and asks for the
     finding naming it: a check that reads nothing stays green on these.
     """
     assert guard_departures(AGREEING_GATE) == []
+    assert stanza_departures(AGREEING_GATE) == []
+    assert stanza_departures({"repos": []}) == []
     assert guard_departures({"repos": []}) == [
         f"no hook {BARE_SKIP} refuses a skip naming no rule"
     ]
@@ -1108,8 +1145,9 @@ def test_a_gate_off_section_4s_guard_would_be_reported() -> None:
         guard["repos"][0]["hooks"][0][key] = value
         assert any(
             line.startswith(f"{BARE_SKIP} is not section 4's")
-            for line in guard_departures(guard)
+            for line in stanza_departures(guard)
         ), f"{BARE_SKIP} with {key}: {value!r} is read as agreeing"
+        assert guard_departures(guard) == [], f"{key} reaches guard_departures"
     reaching: list[tuple[str, Any]] = [
         ("files", "^src/"),
         ("exclude", "^tests/"),
@@ -1240,6 +1278,15 @@ def spelled(
         pytest.param(spelled(": switch,\tdefault"), True, id="tab-in-list"),
         pytest.param(spelled(": default", between="\t"), True, id="tab-word-tag"),
         pytest.param(spelled(between=":"), True, id="colon-between"),
+        pytest.param(spelled(":"), True, id="empty-list"),
+        pytest.param(spelled(":   "), True, id="empty-spaces"),
+        pytest.param(spelled(":\u00a0"), True, id="nbsp-empty"),
+        pytest.param(spelled(":  # reason"), True, id="empty-reason"),
+        pytest.param(spelled(": ; a"), True, id="empty-semicolon"),
+        pytest.param(spelled(": -"), True, id="dash-list"),
+        pytest.param(spelled("ped"), False, id="skipped"),
+        pytest.param(spelled("_x"), False, id="underscore"),
+        pytest.param(spelled("2"), False, id="digit"),
         pytest.param(spelled(": switch"), False, id="named"),
         pytest.param(spelled(":\ta"), False, id="tab-named"),
         pytest.param(spelled(":\u00a0a"), False, id="nbsp-named"),
@@ -1250,8 +1297,6 @@ def spelled(
         pytest.param(spelled(words=("sourcery", "Skip")), False, id="skip-case"),
         pytest.param(spelled(words=("Sourcery", "skip")), False, id="capital"),
         pytest.param(spelled(": a, b"), False, id="two-named"),
-        pytest.param(spelled(":"), False, id="empty-list"),
-        pytest.param(spelled(":\u00a0"), False, id="nbsp-empty"),
         pytest.param(spelled(": a  # a comment"), False, id="reason"),
         pytest.param(spelled(": no-comment"), False, id="suffix"),
     ],

@@ -1086,12 +1086,15 @@ No `autoupdate_branch`: the default branch is the only branch.
   rule or names a tag, in every tree calling section 10's
   `reusable-sourcery.yml`, its stanza `BARE_SKIP_STANZA` in
   `tests/hooks_test.py` whole, and no top-level `files:`, `exclude:`,
-  `default_stages:` or `default_language_version:` reaching it. Sourcery reads a
-  skip followed by anything but a colon, whatever spaces part its two words, as
-  naming no rule, and turns every rule off for the function whose `def` line
-  carries it; a tag in its list, `default` or `refactoring`, turns off every
-  rule of the tag. `suggestion` and `comment`, the other tags `rule_types:`
-  names, are refused with them.
+  `default_stages:` or `default_language_version:` reaching it. Sourcery reads
+  `skip` with a letter, digit or underscore right after it, as in `skipped`, as
+  no skip, and the hook admits it where that character is ASCII. Sourcery reads
+  a skip followed by anything else but a colon, whatever spaces part its two
+  words, as naming no rule, and turns every rule off for the function whose
+  `def` line carries it; a tag in its list, `default` or `refactoring`, turns
+  off every rule of the tag. `suggestion` and `comment`, the other tags
+  `rule_types:` names, are refused with them. A colon with no rule name after
+  it, before any `#` or `;`, names no rule, and is refused too.
 - **`local-link-prefix`** — pygrep refusing a markdown link whose
   destination is local and is not explicitly relative, beginning
   neither `./` nor `../`, in every repository of the organization, this

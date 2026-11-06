@@ -352,7 +352,7 @@ repos:
         name: a sourcery skip names rules, and no tag
         language: pygrep
         entry: |-
-          #\W*sourcery\W+skip(?!:)|#\W*sourcery\W+skip:[^#]*(?<![\w-])(?:default|refactoring|suggestion|comment)(?![\w-])
+          #\W*sourcery\W+skip\b(?!:[^#;\w]*\w)|#\W*sourcery\W+skip:[^#]*(?<![\w-])(?:default|refactoring|suggestion|comment)(?![\w-])
         types: [python]
   # .github/dependabot.yml is validated by nothing else here: check-yaml
   # above asks whether it is yaml and nothing reads it as what it is. A
