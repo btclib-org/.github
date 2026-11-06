@@ -387,10 +387,12 @@ request, next to `deps-latest`'s own result.
    release in the same month, built by appending the day to the
    placeholder, names a day of the next month — a date in the future,
    which sorts above every release that next month cuts before that day.
-   `version-check` compares the tag with the declared version and reads
-   the shape, never the calendar, so nothing downstream refuses it, and
-   PyPI never accepts that version's file names again, even once the
-   release is deleted.
+   On a tag push `version-check` refuses a version that names no
+   calendar date, such as `2026.11.31`, and one dated after the date at
+   UTC+14, the time zone furthest ahead, when the job runs, so it
+   refuses the version built that way. `build` needs `version-check`, so
+   nothing is uploaded. The cost is a failed run, and a new tag once the
+   version is fixed, as "If something goes wrong" below says.
 
    **If `main` moves while the gates run, throw the branch away and redo
    these edits on top of it — never rebase it, and never merge `main` into
