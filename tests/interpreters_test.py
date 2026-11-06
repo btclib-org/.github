@@ -15,13 +15,15 @@ what section 15 means by a repository answering for itself. It is a
 published tree's, which section 3 states where it states the convention
 and section 15 gives the reason for.
 
-Two questions are left here. The one no tree can ask: the libraries
+Three questions are left here. The one no tree can ask: the libraries
 name one window, so a tree that disagrees with the others is out of step
-with them. And the ends of that window,
-where the tree that would compare them holds no module of its own: they
-are declared in `pyproject.toml` and in `.python-version` whatever the
-tree is, and this reads them against one another. Which tree is a
-library is `library` below, section 1 giving the rule and the reason.
+with them. And the ends of that window, where the tree that would
+compare them holds no module of its own: they are declared in
+`pyproject.toml` and in `.python-version` whatever the tree is, and this
+reads them against one another. Which tree is a library is `library`
+below, section 1 giving the rule and the reason. And the pin against the
+interpreters a tree's `test.yml` names, for the same reason as the ends
+of the window.
 
 The calendar itself is asked of nothing here. What decides it is
 python.org's, a date in it is a date this suite would have to be told,
@@ -240,6 +242,80 @@ def test_the_pin_is_the_newest_interpreter_the_tree_declares(
         f".python-version is {pin!r} and the newest classifier is {newest}; "
         + by_hand(repository, "cat .python-version")
     )
+
+
+SUITE = ".github/workflows/test.yml"
+"""The workflow holding the coverage job, which section 1 runs on the pin."""
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_the_suite_workflow_names_only_the_interpreter_the_tree_pins(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 1: a local run measures what the coverage job measures.
+
+    That holds while `test.yml` names no interpreter but the one
+    `.python-version` pins. A literal there is a second copy of the pin,
+    and it stays behind when the pin moves. A `t` suffix is dropped, as
+    `pinned` drops it. Section 15 says why the other workflows are left
+    to a reading.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    root = trees[repository]
+    workflow = root / SUITE
+    if not workflow.is_file():
+        pytest.skip(f"{repository} has no {SUITE}")
+    pin = pinned(root)
+    other = sorted(
+        {
+            version.removesuffix("t")
+            for step in steps(workflow)
+            for version in named(step)
+        }
+        - {pin}
+    )
+    assert not other, (
+        f"{SUITE} names {', '.join(other)} and .python-version pins {pin!r}; "
+        + by_hand(repository, f"grep -n -- '--python \\|python-version:' {SUITE}")
+    )
+
+
+def test_a_suite_workflow_naming_another_interpreter_is_reported(
+    tmp_path: Path,
+) -> None:
+    """The cell above fails on a planted `test.yml` that names another version.
+
+    Over trees that agree, the cell is green whatever its reading does.
+    The free-threaded build of the pin is planted too, and agrees.
+
+    :param tmp_path: where the trees are planted.
+    """
+    cases: list[tuple[str, str, str]] = [
+        ("3.15t", "3.15", ""),
+        ("3.14", "3.15", "3.14"),
+        ("3.15", "3.13", "3.13"),
+    ]
+    for index, (setup, run, wanted) in enumerate(cases):
+        root = tmp_path / str(index)
+        folder = root / ".github" / "workflows"
+        folder.mkdir(parents=True)
+        (root / ".python-version").write_text("3.15\n", encoding="utf-8")
+        (folder / "test.yml").write_text(
+            "on: push\njobs:\n  coverage:\n    runs-on: ubuntu-latest\n"
+            "    steps:\n      - uses: astral-sh/setup-uv@v1\n"
+            f'        with:\n          python-version: "{setup}"\n'
+            f"      - run: uv run --python {run} pytest\n",
+            encoding="utf-8",
+        )
+        trees = {"x": root}
+        if not wanted:
+            test_the_suite_workflow_names_only_the_interpreter_the_tree_pins("x", trees)
+            continue
+        with pytest.raises(AssertionError, match=rf"names {re.escape(wanted)} and"):
+            test_the_suite_workflow_names_only_the_interpreter_the_tree_pins("x", trees)
 
 
 NAMED = re.compile(r"--python[= ](\d+(?:\.\d+)+t?)")

@@ -4290,8 +4290,8 @@ does not ask yet or cannot. A repository answers for itself where it can:
 rule that the classifiers name a tree's interpreters is `interpreters_test.py`
 where a tree publishes and the window sweep below where it does not: publishing
 decides, not being a library, because an index shows the classifiers of any
-distribution. A workflow's interpreters against the window stay a reading: one
-outside it is correct where the reason is beside it.
+distribution. The suite reads `test.yml` against the pin; other workflows stay a
+reading, an interpreter outside the window correct with its reason beside it.
 
 The settings: squash the only method, the `main-integrity` rules held with an
 **empty** bypass list, `required_signatures` **off** in classic protection and
