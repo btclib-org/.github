@@ -1020,7 +1020,9 @@ reading a mismatch as tampering:
   section is missing or empty before `build`, so after the upload the
   stop means the read failed: check `version` and the tag. The tag
   cannot change after the upload, so where its section is empty all the
-  same, write `notes.md` by hand and run the commands after the awk.
+  same, write `notes.md` by hand and run the commands after the awk. The
+  awk runs only once the Python step below has passed, so its message
+  means every file matched PyPI.
 
   The Python step compares the files `gh release create` attaches from
   `dist/` with the files PyPI holds for `version`, by name and SHA-256,
@@ -1028,6 +1030,14 @@ reading a mismatch as tampering:
   digest that differs, stops the script before the release exists: a
   wrong `run` would otherwise attach files PyPI never accepted. A failed
   fetch stops it too, `curl -f` exiting non-zero on an HTTP error.
+
+  A script that stopped leaves the downloaded artifacts behind, and `gh
+  run download` refuses to write a file that already exists. Remove them
+  before running the script again:
+
+  ```shell
+  rm -rf dist sbom attestation
+  ```
 
 ## This repository in particular
 
