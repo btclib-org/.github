@@ -40,6 +40,8 @@ _WORKFLOW = ROOT / ".github" / "workflows" / "reusable-api-break.yml"
 _SCRIPT = ROOT / ".github" / "scripts" / "api_break.py"
 _LABELS = ROOT / ".github" / "labels.yml"
 
+FULL_SHA = re.compile(r"[0-9a-f]{40}")
+
 _OUTPUTS = Path(__file__).parent / "griffe_output"
 BREAK = (_OUTPUTS / "break.txt").read_text(encoding="utf-8")
 ABSENT = (_OUTPUTS / "absent.txt").read_text(encoding="utf-8")
@@ -350,12 +352,14 @@ def test_the_label_is_owed_by_the_publishing_trees_alone() -> None:
     ]
 
 
-CHECKOUT = "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
-SETUP_UV = "astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e"
+CHECKOUT = "actions/checkout"
+SETUP_UV = "astral-sh/setup-uv"
 # Every step of the job, as written: its condition, its environment and
 # each token of its command, so that no line can change without a test
 # saying so. Whitespace is normalized, a command's lines read as one,
-# a backslash continuation included.
+# a backslash continuation included. An action is named without its
+# pin, which Dependabot moves in the workflow alone; `_unpinned` checks
+# the pin.
 STEPS: list[dict[str, Any]] = [
     {
         "name": "Checkout code",
@@ -454,10 +458,30 @@ def _squeezed(step: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _unpinned(steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return the steps with each `uses` cut to the action's name.
+
+    Each pin is a full commit sha, and the same for every step that uses
+    the action.
+    """
+    pins: dict[str, set[str]] = {}
+    unpinned = []
+    for step in steps:
+        if "uses" not in step:
+            unpinned.append(step)
+            continue
+        action, _, pin = step["uses"].partition("@")
+        assert FULL_SHA.fullmatch(pin), step["uses"]
+        pins.setdefault(action, set()).add(pin)
+        unpinned.append({**step, "uses": action})
+    assert all(len(shas) == 1 for shas in pins.values()), pins
+    return unpinned
+
+
 def test_every_step_is_as_written() -> None:
-    """The job's steps are exactly these, in this order."""
+    """The job's steps are exactly these, in this order, pins aside."""
     steps: list[dict[str, Any]] = _job()["steps"]
-    assert [_squeezed(step) for step in steps] == STEPS
+    assert _unpinned([_squeezed(step) for step in steps]) == STEPS
 
 
 def test_the_job_and_the_input_are_as_written() -> None:
