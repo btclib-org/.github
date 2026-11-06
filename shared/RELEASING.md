@@ -505,7 +505,8 @@ request, next to `deps-latest`'s own result.
 
    ```shell
    git tag -s "v${version:?}" -m "release v${version:?}" "${sha:?}" &&
-   git show "v${version:?}:pyproject.toml" | grep '^version' &&
+   git show "v${version:?}:pyproject.toml" |
+     grep -Fx "version = \"${version:?}\"" &&
    git push origin "v${version:?}"
    ```
 
@@ -517,6 +518,22 @@ request, next to `deps-latest`'s own result.
    with nothing uploaded, which is the guard doing its job; the `git show`
    above is the same check one step earlier, where it costs nothing, and
    the chain is what makes the push wait on it.
+
+   `version-check` reads the version with `uv version --short`, which
+   reads a project directory and so needs the tag checked out. `grep -Fx`
+   reads the tag's `pyproject.toml` without one, and matches only the
+   whole line `version = "${version}"`, its dots as dots, so a tag on a
+   commit that declares another version stops the chain. A tag that does
+   not exist stops it too: `git show` prints nothing on its output, and
+   `grep` finds no line.
+
+   Where the chain stops at `grep`, which prints nothing, the tag
+   `git tag -s` made is still in the local repository: on the wrong
+   commit, or under the wrong name where `version` was the wrong value.
+   Delete it with `git tag -d "v${version:?}"` while `version` still
+   holds the value it was made with, then correct the values and run the
+   fence again. A tag left in place makes `git tag -s` refuse the same
+   name, as *If something goes wrong* says.
 
 1. Read the tag's signature back from the API, now that it is pushed. It
    answers `true`: an unsigned annotated tag answers `false`, and a
