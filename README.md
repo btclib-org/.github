@@ -4289,9 +4289,9 @@ does not ask yet or cannot. A repository answers for itself where it can:
 `interpreters_test.py`, `conventions_test.py`, the hook-pin tests. Section 3's
 rule that the classifiers name a tree's interpreters is `interpreters_test.py`
 where a tree publishes and the window sweep below where it does not: publishing
-decides, not being a library, because an index shows the classifiers of any
-distribution. The suite reads `test.yml` against the pin; other workflows stay a
-reading, an interpreter outside the window correct with its reason beside it.
+decides, not being a library, as an index shows any distribution's classifiers.
+The suite reads `test.yml` against the pin; other workflows may name a callee's,
+a second tree's or a dependency's interpreter, judged by the reason beside it.
 
 The settings: squash the only method, the `main-integrity` rules held with an
 **empty** bypass list, `required_signatures` **off** in classic protection and

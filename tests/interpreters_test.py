@@ -15,15 +15,14 @@ what section 15 means by a repository answering for itself. It is a
 published tree's, which section 3 states where it states the convention
 and section 15 gives the reason for.
 
-Three questions are left here. The one no tree can ask: the libraries
-name one window, so a tree that disagrees with the others is out of step
-with them. And the ends of that window, where the tree that would
-compare them holds no module of its own: they are declared in
-`pyproject.toml` and in `.python-version` whatever the tree is, and this
-reads them against one another. Which tree is a library is `library`
-below, section 1 giving the rule and the reason. And the pin against the
-interpreters a tree's `test.yml` names, for the same reason as the ends
-of the window.
+Left here is the question no tree can ask: the libraries name one
+window, so a tree that disagrees with the others is out of step with
+them. And what a tree holding no module of its own leaves unasked: the
+ends of that window, declared in `pyproject.toml` and in
+`.python-version` whatever the tree is, and read here against one
+another; and the pin against the interpreters a tree's `test.yml` names.
+Which tree is a library is `library` below, section 1 giving the rule
+and the reason.
 
 The calendar itself is asked of nothing here. What decides it is
 python.org's, a date in it is a date this suite would have to be told,
