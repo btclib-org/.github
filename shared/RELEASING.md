@@ -978,10 +978,14 @@ reading a mismatch as tampering:
     --title "v${version:?}" --notes-file notes.md
   ```
 
-  Where the tag's `RELEASE_NOTES.md` has no notes for the release, the
-  script stops before the release exists, so that the notes are written
-  first. The job creates the release anyway, as the comment on its step
-  in `reusable-github-release.yml` says.
+  Where the read fails or the tag's section has no notes, the script
+  stops before the release exists rather than publish an empty body. The
+  job creates the release anyway, as the comment on its step in
+  `reusable-github-release.yml` says. `version-check` refuses a tag whose
+  section is missing or empty before `build`, so after the upload the
+  stop means the read failed: check `version` and the tag. The tag
+  cannot change after the upload, so where its section is empty all the
+  same, write `notes.md` by hand and run the commands after the awk.
 
   The digest comparison is not optional: it is what stands in for the
   provenance a second, unwanted publish attempt would otherwise have to
