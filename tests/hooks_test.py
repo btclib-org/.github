@@ -692,8 +692,8 @@ def network(repo: str) -> str:
 
     A fork's owner sets its default branch, so `on_default()` proves
     nothing of a repository in the tree's network. An outsider cannot
-    move upstream's root, so refusing the tree's own network turns no pin
-    red. It reaches the network, so only an `integration` test calls it.
+    move upstream's root, so no outsider can turn a pin red through it.
+    It reaches the network, so only an `integration` test calls it.
 
     :param repo: the repository, `owner/name`, as `sound()` accepts it.
     :returns: the root's `owner/name`, the repository's own where it is
