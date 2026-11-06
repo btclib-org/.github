@@ -3669,7 +3669,7 @@ A label means what its description says. Who applies and removes it:
   public-API check reads the section headed `## v<version>`, the version being
   `pyproject.toml`'s, else the first `##` section. Before the notes are
   written, that section is the previous release's or a work-in-progress one,
-  and the check fails on each break it does not name.
+  and the check fails on each finding it does not name.
 - **A published sdist reproduces from its tag.** The attestation every publisher
   attaches vouches for bytes, so a release rebuilt from the commit its tag names
   — by running what the release ran — gives those bytes back. What the release

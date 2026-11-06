@@ -16,7 +16,7 @@ name: reusable-public-api
 #
 # A finding is refused only where the release's own section of
 # RELEASE_NOTES.md does not name its object, so the job is red on a
-# break nobody wrote down and green on one the notes list. The section
+# finding nobody wrote down and green on one the notes list. The section
 # is the tag's on a release and, on a rehearsal, the one for the version
 # in pyproject.toml, else the first under the file's title; the script
 # says how a name is read.
