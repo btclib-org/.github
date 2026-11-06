@@ -389,16 +389,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("portanode",),
     ),
     (
-        1974,
-        "test_the_homepage_is_the_page_on_btclib_org",
-        ("benchmarks", "functional-tests"),
-    ),
-    (
-        1974,
-        "test_the_documentation_is_the_read_the_docs_site_serving_the_tree",
-        ("functional-tests",),
-    ),
-    (
         1982,
         "test_no_workflow_runs_on_an_x86_64_macos_image",
         ("btclib-secp256k1",),
