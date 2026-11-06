@@ -314,7 +314,7 @@ jobs:
           esac
       - name: Assess the issue
         id: assess
-        uses: anthropics/claude-code-action@ae68417a745a5df4b2124873632bd73a2255e6f6 # v1.0.259
+        uses: anthropics/claude-code-action@6d5ae526d25ce88daa2200be073e1a373167f064 # v1.0.265
         timeout-minutes: 15
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -545,7 +545,7 @@ jobs:
         run: mkdir -m 700 "$MESSAGE"
       - name: Edit the tree
         id: implement
-        uses: anthropics/claude-code-action@ae68417a745a5df4b2124873632bd73a2255e6f6 # v1.0.259
+        uses: anthropics/claude-code-action@6d5ae526d25ce88daa2200be073e1a373167f064 # v1.0.265
         timeout-minutes: 60
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -710,7 +710,7 @@ jobs:
           git add -A
           echo "tree=$(git write-tree)" >> "$GITHUB_OUTPUT"
       - name: Setup uv
-        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: false
       # the probe asks, as the gates' user and before any gate, for what
