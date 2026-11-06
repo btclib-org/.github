@@ -8,7 +8,7 @@
     "status": "Met"
   },
   "OSPS-AC-03.01": {
-    "justification": "The main-self-merge ruleset requires a pull request for every change to main and has no bypass actor, so nobody pushes to main directly. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main, so nobody pushes to main directly. The only bypass is one the maintainer adds for a merge and then removes, in pull_request mode, which still takes a pull request. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Met"
   },
   "OSPS-AC-03.02": {
@@ -104,7 +104,7 @@
     "status": "Met"
   },
   "OSPS-DO-07.01": {
-    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the build: uv sync creates the environment from uv.lock, and uv build produces the sdist and wheel. uv is the only prerequisite, except a Rust toolchain on Python 3.15. https://github.com/btclib-org/btclib-wallet/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md's *The environment and the gates* gives uv sync, which creates the environment from uv.lock, and says uv is the only tool that must be installed. *Reproducing what CI runs* gives uv build, which produces the sdist and wheel. https://github.com/btclib-org/btclib-wallet/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "OSPS-GV-01.01": {
@@ -192,7 +192,7 @@
     "status": "Met"
   },
   "OSPS-QA-06.02": {
-    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the command that runs the suite and which workflows run it on every pull request, on main and on a schedule, and which of them gate a merge. https://github.com/btclib-org/btclib-wallet/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the command that runs the suite, and *What gates a merge, and what only reports* gives which workflows run it on every pull request, on main and on a schedule, and which of them gate a merge. https://github.com/btclib-org/btclib-wallet/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "OSPS-QA-06.03": {
@@ -200,7 +200,7 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. It has no bypass actor at rest. The maintainer adds a pull_request-mode bypass around merges and removes it afterwards. GOVERNANCE.md reserves that bypass for an emergency, and it has also been used for ordinary work: 13 of the 18 pull requests of v2026.10.31 landed with no approval, and main shows 173 bypass rule suites in the month to 2026-11-01. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
     "status": "Met"
   },
   "OSPS-SA-01.01": {
@@ -240,7 +240,7 @@
     "status": "Met"
   },
   "OSPS-VM-05.01": {
-    "justification": "The standard sets the threshold: actions/dependency-review-action fails a pull request that adds or changes a dependency with an advisory of moderate severity or above, or with a licence outside the allow-list. Its settings are one file, btclib-org/.github's .github/dependency-review.yml. https://github.com/btclib-org/.github/blob/main/.github/dependency-review.yml https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "justification": "The standard sets the threshold: actions/dependency-review-action fails a pull request that adds or changes a runtime dependency with an advisory of moderate severity or above, or with a licence outside the allow-list. Its settings are one file, btclib-org/.github's .github/dependency-review.yml. https://github.com/btclib-org/.github/blob/main/.github/dependency-review.yml https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
     "status": "Met"
   },
   "OSPS-VM-05.02": {
@@ -248,7 +248,7 @@
     "status": "Met"
   },
   "OSPS-VM-05.03": {
-    "justification": "The required lint check audits the whole uv.lock, every dependency group, on every pull request: check_audit.py --all-groups runs uv audit, which reads OSV's malicious-package (MAL-) entries as well as advisories. Any such entry fails the check, and so does an OSV that cannot be reached. The audit's only exemption is a .github/vex.toml entry, reviewed like any other change. The required Dependency review check also blocks a change that adds a dependency with an advisory of moderate severity or above, or a licence outside the allow-list. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "justification": "The required lint check audits the whole uv.lock, every dependency group, on every pull request: check_audit.py --all-groups runs uv audit, which reads OSV's malicious-package (MAL-) entries as well as advisories. Any such entry fails the check, and so does an OSV that cannot be reached. The audit's only exemption is a .github/vex.toml entry, reviewed like any other change. The required Dependency review check also blocks a change that adds a runtime dependency with an advisory of moderate severity or above, or a licence outside the allow-list. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
     "status": "Met"
   },
   "OSPS-VM-06.01": {
@@ -316,7 +316,7 @@
     "status": "N/A"
   },
   "bus_factor": {
-    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, most of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review and has contributed some changes. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/btclib-wallet/graphs/contributors",
+    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, most of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review and has contributed some changes. mayankdhingra02 opened 17 merged pull requests in October 2026, about 500 lines under src/ and 4,000 under tests/, on BIP322, PSBT and descriptors. Other outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/btclib-wallet/graphs/contributors",
     "status": "Unmet"
   },
   "code_of_conduct": {
@@ -344,7 +344,7 @@
     "status": "Met"
   },
   "contributors_unassociated": {
-    "justification": "The significant contributors are fametrano and pmazzocchi. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. https://github.com/fametrano https://github.com/pmazzocchi",
+    "justification": "The significant contributors are fametrano, pmazzocchi and mayankdhingra02. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. mayankdhingra02 opened 17 merged pull requests in October 2026, about 500 lines under src/ and 4,000 under tests/, on BIP322, PSBT and descriptors. Whether he is unassociated is not established. Other outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. https://github.com/fametrano https://github.com/pmazzocchi https://github.com/mayankdhingra02",
     "status": "Unmet"
   },
   "copyright_per_file": {
@@ -392,12 +392,12 @@
     "status": "Met"
   },
   "crypto_tls12": {
-    "justification": "TlsLineTransport sets minimum_version to TLS 1.2 itself. The other backends use bitcoin-core-rpc's HTTPS. https://github.com/btclib-org/btclib-wallet/blob/main/src/btclib_wallet/fetch/transport.py",
+    "justification": "TlsLineTransport sets minimum_version to TLS 1.2 itself. The Esplora and Core backends use bitcoin-core-rpc's HTTPS. CompactFilterFetcher's p2p transport does not use TLS. https://github.com/btclib-org/btclib-wallet/blob/main/src/btclib_wallet/fetch/transport.py",
     "status": "Met"
   },
   "crypto_used_network": {
-    "justification": "Traffic goes in the clear only where the caller chooses it. TlsLineTransport, the Electrum transport, verifies the server certificate and host name with a TLS 1.2 floor, and offers no plain TCP. The Esplora backend has no default server. The BLOCKSTREAM_INFO constant it offers holds https urls. The Core backends use the caller's bitcoin-core-rpc client, which verifies HTTPS and speaks plain HTTP only for an http url. https://github.com/btclib-org/btclib-wallet/blob/main/src/btclib_wallet/fetch/transport.py https://github.com/btclib-org/btclib-wallet/blob/main/src/btclib_wallet/fetch/esplora.py",
-    "status": "Met"
+    "justification": "Not every network communication has a secure protocol. CompactFilterFetcher talks to a peer over plain TCP, the p2p v1 transport, and no encrypted transport is offered for it; its transport has no default, so the caller chooses it, and its messages are checked against what the fetcher holds. Elsewhere traffic goes in the clear only where the caller chooses it. TlsLineTransport, the Electrum transport, verifies the server certificate and host name with a TLS 1.2 floor, and offers no plain TCP. The Esplora backend has no default server. The BLOCKSTREAM_INFO constant it offers holds https urls. The Core backends use the caller's bitcoin-core-rpc client, which verifies HTTPS and speaks plain HTTP only for an http url. https://github.com/btclib-org/btclib-wallet/blob/main/src/btclib_wallet/fetch/peer_transport.py https://github.com/btclib-org/btclib-wallet/blob/main/src/btclib_wallet/fetch/transport.py https://github.com/btclib-org/btclib-wallet/blob/main/src/btclib_wallet/fetch/esplora.py",
+    "status": "Unmet"
   },
   "crypto_verification_private": {
     "justification": "TlsLineTransport completes the TLS handshake before it writes the request line. https://github.com/btclib-org/btclib-wallet/blob/main/src/btclib_wallet/fetch/transport.py",
@@ -508,7 +508,7 @@
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "The project site is served over HTTPS and answers Content-Security-Policy with frame-ancestors 'none', X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security. Check with curl -sI https://btclib.org/btclib-wallet/",
+    "justification": "The project site is served over HTTPS and answers Content-Security-Policy with frame-ancestors 'none', X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security. Check with curl -sI https://btclib.org/btclib-wallet/ The repository on github.com sends all four. PyPI's project page https://pypi.org/project/btclib-wallet/ sends all but the CSP; that is PyPI's to set. The documentation site https://btclib-wallet.readthedocs.io/ is served by Read the Docs over HTTPS with Strict-Transport-Security and X-Content-Type-Options nosniff, and no Content-Security-Policy or X-Frame-Options; that is Read the Docs' to set. Measured with curl -sIL on 2026-11-01.",
     "status": "Met"
   },
   "hardening": {
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "The release notes name the GHSA id of each advisory published by the time of the release: v2026.10.29 fixes none and names none; v2026.10.4 names GHSA-qq38-77mp-j6wr and GHSA-v4gq-j2v2-c4jp, v2026.10.8 names GHSA-62jf-v327-86h5, and v2026.10.9 names GHSA-8qrf-j8jh-cx23. v2026.10.16 describes the fix of GHSA-4x2v-6p43-cq6x and links its issue, but not the id: the advisory was published 86 minutes after the release. https://github.com/btclib-org/btclib-wallet/releases/tag/v2026.10.29",
+    "justification": "The release notes name the GHSA id of each advisory published by the time of the release: v2026.10.18 to v2026.10.31 fix none and name none; v2026.10.4 names GHSA-qq38-77mp-j6wr and GHSA-v4gq-j2v2-c4jp, v2026.10.8 names GHSA-62jf-v327-86h5, and v2026.10.9 names GHSA-8qrf-j8jh-cx23. v2026.10.16 describes the fix of GHSA-4x2v-6p43-cq6x and links its issue, but not the id: the advisory was published 86 minutes after the release. https://github.com/btclib-org/btclib-wallet/releases/tag/v2026.10.31",
     "status": "Met"
   },
   "repo_distributed": {
@@ -652,7 +652,7 @@
     "status": "Met"
   },
   "sites_password_security": {
-    "justification": "Project sites are GitHub, PyPI and Read the Docs; none of these repositories runs a site of its own that stores user passwords -- authentication is GitHub's and PyPI's, not this project's. https://github.com/btclib-org/btclib-wallet/blob/main/SECURITY.md",
+    "justification": "Project sites are btclib.org, a static GitHub Pages site, GitHub, PyPI and Read the Docs; none of these repositories runs a site of its own that stores user passwords -- authentication is GitHub's and PyPI's, not this project's. https://github.com/btclib-org/btclib-wallet/blob/main/SECURITY.md",
     "status": "N/A"
   },
   "small_tasks": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.29 shipped 10 of 20 pull requests approved by somebody other than the author, 50%, the 50% the criterion asks. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Met"
+    "justification": "Over the last two releases, v2026.10.29 and v2026.10.31, 15 of 38 pull requests were approved by somebody other than the author, 39%, below the 50% the criterion asks (v2026.10.31 5 of 19, v2026.10.29 10 of 19); 8 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Unmet"
   },
   "updateable_reused_components": {
     "justification": "Reused components are standard-library modules or PyPI packages pinned in uv.lock. Dependabot updates them weekly, and deps-latest runs the suite weekly against their latest releases. https://github.com/btclib-org/btclib-wallet/blob/main/.github/workflows/deps-latest.yml",
@@ -752,7 +752,7 @@
     "status": "Met"
   },
   "vulnerability_report_credit": {
-    "justification": "An advisory credits its reporter as finder: pmazzocchi on GHSA-qq38-77mp-j6wr and GHSA-v4gq-j2v2-c4jp. fametrano, the maintainer, filed the others, and GHSA-62jf-v327-86h5 offers pmazzocchi credit as remediation developer. https://github.com/btclib-org/btclib-wallet/security/advisories",
+    "justification": "An advisory credits its reporter as finder: pmazzocchi on GHSA-qq38-77mp-j6wr and GHSA-v4gq-j2v2-c4jp, and on GHSA-62jf-v327-86h5, where the credit awaits his acceptance. fametrano, the maintainer, filed the other two. https://github.com/btclib-org/btclib-wallet/security/advisories",
     "status": "Met"
   },
   "vulnerability_report_private": {

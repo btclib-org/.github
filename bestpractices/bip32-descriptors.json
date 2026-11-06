@@ -1,0 +1,786 @@
+{
+  "OSPS-AC-01.01": {
+    "justification": "The btclib-org organization requires two-factor authentication of every member and accepts only secure methods, not SMS. https://github.com/btclib-org/.github/issues/1362#issuecomment-5903994882",
+    "status": "Met"
+  },
+  "OSPS-AC-02.01": {
+    "justification": "A new member gets read access, the organization's base permission (gh api orgs/btclib-org --jq .default_repository_permission). Every higher grant is assigned by hand, through an issue in btclib-org/.github that an owner other than the one asking approves. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
+    "status": "Met"
+  },
+  "OSPS-AC-03.01": {
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main, and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
+  },
+  "OSPS-AC-03.02": {
+    "justification": "The main-integrity ruleset forbids deleting main and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
+  },
+  "OSPS-AC-04.01": {
+    "justification": "The default GITHUB_TOKEN is read-only at the organization and the repository, and cannot approve pull requests. Every workflow also sets permissions: contents: read at the top. https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "status": "Met"
+  },
+  "OSPS-AC-04.02": {
+    "justification": "Every workflow sets permissions: contents: read at the top, and a job adds a write scope only where it uses it. zizmor's excessive-permissions audit runs in the required lint check. https://github.com/btclib-org/.github/blob/main/README.md#what-every-workflow-does",
+    "status": "Met"
+  },
+  "OSPS-BR-01.01": {
+    "justification": "No workflow uses pull_request_target or workflow_run. Event fields and inputs reach run: steps only through env:, and zizmor's template-injection audit in the required lint check refuses the unsafe form. https://github.com/btclib-org/bip32-descriptors/blob/main/.pre-commit-config.yaml",
+    "status": "Met"
+  },
+  "OSPS-BR-01.02": {
+    "justification": null,
+    "status": 0
+  },
+  "OSPS-BR-01.03": {
+    "justification": "Pull-request runs use the pull_request and pull_request_review_comment triggers, which give a fork no secrets and a read-only token. The review job, which holds a secret, runs only when the head repository is this one. The mention job holds a secret on any pull request's issue comment, and there checks out the default branch. It answers only a comment whose author is an owner, a member or a collaborator, and its tools exclude Bash, edits, writes, file reads and every tool Claude Code marked as running code when last measured, on 2.1.301. https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-claude-review.yml",
+    "status": "Met"
+  },
+  "OSPS-BR-01.04": {
+    "justification": "A workflow_dispatch input is either mutation.yml's profile, a choice from a fixed list (all, keys or descriptors), or verified-signatures.yml's before and after, which the called workflow reads through env: and refuses unless they are commit shas. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/mutation.yml",
+    "status": "Met"
+  },
+  "OSPS-BR-02.01": {
+    "justification": "Each release has a unique calendar version (YYYY.M.D, or YYYY.M.D.N for a patch), declared in pyproject.toml and matched by a signed v* tag. release.yml refuses a tag that disagrees with the package version or is not on main, and PyPI never accepts a version twice. https://github.com/btclib-org/bip32-descriptors/releases",
+    "status": "Met"
+  },
+  "OSPS-BR-02.02": {
+    "justification": "Every release asset carries the version in its file name, as v2026.10.31's do: the sdist (bip32_descriptors-2026.10.31.tar.gz), the wheel (bip32_descriptors-2026.10.31-py3-none-any.whl), the CycloneDX SBOM (bip32_descriptors-2026.10.31.cdx.json) and the attestation bundle (v2026.10.31.intoto.jsonl). The attestation binds each asset to its digest. https://github.com/btclib-org/bip32-descriptors/releases/tag/v2026.10.31",
+    "status": "Met"
+  },
+  "OSPS-BR-03.01": {
+    "justification": "Every official channel the project lists is served over HTTPS only: the GitHub repository, its issue tracker and advisories, and the documentation at https://bip32-descriptors.readthedocs.io/.",
+    "status": "Met"
+  },
+  "OSPS-BR-03.02": {
+    "justification": "Releases are distributed through PyPI and GitHub Releases, both HTTPS only. PyPI files carry PEP 740 attestations and the GitHub release a Sigstore bundle. https://pypi.org/project/bip32-descriptors/",
+    "status": "Met"
+  },
+  "OSPS-BR-04.01": {
+    "justification": "The GitHub release body is RELEASE_NOTES.md's entry: what a user must act on, breaking and security changes included. CHANGELOG.md lists every change. https://github.com/btclib-org/bip32-descriptors/blob/main/RELEASE_NOTES.md",
+    "status": "Met"
+  },
+  "OSPS-BR-05.01": {
+    "justification": "Python dependencies come from PyPI, and the required test check runs the suite with uv from the committed uv.lock with --locked. pre-commit installs its hooks at the revisions .pre-commit-config.yaml names. Third-party actions are pinned by commit SHA. https://github.com/btclib-org/.github/blob/main/README.md#uvlock",
+    "status": "Met"
+  },
+  "OSPS-BR-06.01": {
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing. The GitHub release carries a Sigstore build-provenance bundle over each asset's SHA-256. The tag is signed. https://github.com/btclib-org/bip32-descriptors/releases/latest",
+    "status": "Met"
+  },
+  "OSPS-BR-07.01": {
+    "justification": "Secret scanning and push protection are on, so a push carrying a recognised credential is refused. The detect-private-key and detect-secrets hooks run in the required lint check. https://github.com/btclib-org/bip32-descriptors/blob/main/.secrets.baseline",
+    "status": "Met"
+  },
+  "OSPS-BR-07.02": {
+    "justification": "A secret is an environment secret that only the owners reach. A secret kept in any other store is recorded in the REPOSITORY.md of the repository that uses it, and btclib-org/.github's tests/secrets_test.py refuses an unrecorded one. A secret is rotated when an owner changes or an exposure is suspected. The secrets kept outside an environment are rotated before they are a year old, and the list is reviewed yearly. https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "status": "Met"
+  },
+  "OSPS-DO-01.01": {
+    "justification": "The user documentation is README.md, whose Python example tests/readme_test.py runs, and the API reference on Read the Docs. https://github.com/btclib-org/bip32-descriptors/blob/main/README.md#a-key-a-descriptor-an-address https://bip32-descriptors.readthedocs.io/",
+    "status": "Met"
+  },
+  "OSPS-DO-02.01": {
+    "justification": "CONTRIBUTING.md says where a defect is filed, and the bug-report form asks for what a report needs. SECURITY.md sends a vulnerability to a private channel instead. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/ISSUE_TEMPLATE/bug_report.yml",
+    "status": "Met"
+  },
+  "OSPS-DO-03.01": {
+    "justification": "SECURITY.md gives the gh attestation verify command for the release assets, and RELEASING.md the check that rebuilds the sdist and the wheel from their tag. https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md#supported-versions",
+    "status": "Met"
+  },
+  "OSPS-DO-03.02": {
+    "justification": "The verify command pins the signer and the source: --owner btclib-org, --signer-workflow the organization's reusable-build.yml and --source-ref the release tag, and it compares the certificate's sourceRepositoryIdentifier with this repository's id, which a rename keeps. It passes on the v2026.10.31 sdist, wheel and SBOM. https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md#supported-versions",
+    "status": "Met"
+  },
+  "OSPS-DO-04.01": {
+    "justification": "SECURITY.md's *Supported versions*: only the latest release is supported, a fix ships as a new release, and nothing is backported. https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md#supported-versions",
+    "status": "Met"
+  },
+  "OSPS-DO-05.01": {
+    "justification": "SECURITY.md: only the latest release is supported, so a release stops receiving security updates when the next one is published. https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md#supported-versions",
+    "status": "Met"
+  },
+  "OSPS-DO-06.01": {
+    "justification": "pyproject.toml says beside each runtime dependency (btclib, ecc and typing-extensions) and beside the secp256k1 extra (btclib[secp256k1] and btclib-secp256k1) why it is one, and CONTRIBUTING.md's *The one constraint* says what the package imports. uv obtains every dependency from PyPI and pins it in uv.lock, and Dependabot tracks them weekly with a seven-day cooldown. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml https://github.com/btclib-org/.github/blob/main/README.md#dependabot-and-pre-commitci",
+    "status": "Met"
+  },
+  "OSPS-DO-07.01": {
+    "justification": "CONTRIBUTING.md gives the build: uv is the only prerequisite, uv sync builds the environment from uv.lock, and uv build produces the sdist and wheel. https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Met"
+  },
+  "OSPS-GV-01.01": {
+    "justification": "GOVERNANCE.md's Roles names who holds access to sensitive resources. fametrano is the maintainer. Every owner, named there by login, is an administrator of every repository and a reviewer of the publishing environments. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "status": "Met"
+  },
+  "OSPS-GV-01.02": {
+    "justification": "GOVERNANCE.md's *Roles* describes the maintainer, owners, repository collaborators, contributors, reviewers, the review bot, Dependabot and pre-commit.ci, and what each owes. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "status": "Met"
+  },
+  "OSPS-GV-02.01": {
+    "justification": "Proposed changes and usage obstacles are discussed publicly in the repository's GitHub issues (with a question form) and pull requests; cross-repository questions go to btclib-org/.github's tracker. https://github.com/btclib-org/bip32-descriptors/issues",
+    "status": "Met"
+  },
+  "OSPS-GV-03.01": {
+    "justification": "CONTRIBUTING.md explains the contribution process: one subject per pull request, the local gates, the review and the landing. https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md#pull-requests",
+    "status": "Met"
+  },
+  "OSPS-GV-03.02": {
+    "justification": "CONTRIBUTING.md states what a contribution must meet: one subject, a Signed-off-by trailer on every commit, the gates CI runs, 100% line and branch coverage, and a review against REVIEWING.md. https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "OSPS-GV-04.01": {
+    "justification": "A grant of write or admin, to any repository of the organization, is an issue in btclib-org/.github that states the reason, and an owner other than the one asking approves it there. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
+    "status": "Met"
+  },
+  "OSPS-LE-01.01": {
+    "justification": "main requires the lint / Sign-off check, which refuses a commit that lacks its author's Signed-off-by: trailer, Dependabot's, pre-commit.ci's and claude[bot]'s aside. Web commits are signed off automatically. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
+    "status": "Met"
+  },
+  "OSPS-LE-02.01": {
+    "justification": "The source code is under the MIT license, which the OSI approves. https://github.com/btclib-org/bip32-descriptors/blob/main/LICENSE",
+    "status": "Met"
+  },
+  "OSPS-LE-02.02": {
+    "justification": "The released wheel and sdist declare License-Expression: MIT, the same OSI-approved license as the source. https://pypi.org/project/bip32-descriptors/",
+    "status": "Met"
+  },
+  "OSPS-LE-03.01": {
+    "justification": "The license text is the repository's root LICENSE file. https://github.com/btclib-org/bip32-descriptors/blob/main/LICENSE",
+    "status": "Met"
+  },
+  "OSPS-LE-03.02": {
+    "justification": "The LICENSE file ships inside every release asset: the sdist root and the wheel's .dist-info/licenses/. https://github.com/btclib-org/bip32-descriptors/blob/main/LICENSE",
+    "status": "Met"
+  },
+  "OSPS-QA-01.01": {
+    "justification": "The repository is public on GitHub at a static URL. https://github.com/btclib-org/bip32-descriptors",
+    "status": "Met"
+  },
+  "OSPS-QA-01.02": {
+    "justification": "Git history on GitHub records every change with its author, committer, date and signature; linear history and no force-pushes on main keep that record from being rewritten. https://github.com/btclib-org/bip32-descriptors/commits/main",
+    "status": "Met"
+  },
+  "OSPS-QA-02.01": {
+    "justification": "pyproject.toml declares the direct dependencies: btclib, ecc and typing-extensions at run time, the optional secp256k1 extra, and the development tools in dependency groups. The committed uv.lock resolves and pins them. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "OSPS-QA-02.02": {
+    "justification": "The release is pure Python. Every GitHub release attaches a CycloneDX SBOM generated from the built wheel and covered by the release attestation. v2026.10.31's, bip32_descriptors-2026.10.31.cdx.json, lists btclib, ecc and typing-extensions as required and btclib-secp256k1 as optional. https://github.com/btclib-org/bip32-descriptors/releases/latest",
+    "status": "Met"
+  },
+  "OSPS-QA-03.01": {
+    "justification": "main requires six status checks: test: every job passed, docs / Build the documentation, lint / Lint and type-check, lint / Dependency review, lint / Sign-off and regtest / Regtest against Bitcoin Core. enforce_admins is off, so an admin merge without the checks is a manual bypass, which the control allows. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
+  },
+  "OSPS-QA-04.01": {
+    "justification": "The project has no subproject: each release is built from this one repository, as pyproject.toml shows. btclib, ecc and btclib-secp256k1, which it depends on, are separate projects with their own repositories. The organization standard's section 2 lists btclib-org's repositories and their tiers, bip32-descriptors at tier 1. https://github.com/btclib-org/.github/blob/main/README.md#which-repositories-and-how-far",
+    "status": "Met"
+  },
+  "OSPS-QA-04.02": {
+    "justification": "The project has no additional subproject repository: each release is built from this one repository. btclib, ecc and btclib-secp256k1, which it depends on, are released separately from their own repositories, held to the same standard. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "N/A"
+  },
+  "OSPS-QA-05.01": {
+    "justification": "No generated executable is committed. The only files git treats as binary are the Sphinx inventory docs/source/_inventories/python.inv and two of the fuzzers' input seeds under fuzz/corpus/.",
+    "status": "Met"
+  },
+  "OSPS-QA-05.02": {
+    "justification": "No executable, library or compiled file is committed. The Sphinx inventory docs/source/_inventories/python.inv and the fuzz seeds under fuzz/corpus/ are data, and .clusterfuzzlite/build.sh is the only file with the executable bit, a shell script.",
+    "status": "Met"
+  },
+  "OSPS-QA-06.01": {
+    "justification": "test.yml's aggregate check ('test: every job passed') runs the test suite on every pull request and is a required status check on main. integration-bitcoind.yml's 'regtest / Regtest against Bitcoin Core' runs the integration tests against a Bitcoin Core node on every pull request, and is a required check too. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/test.yml https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/integration-bitcoind.yml",
+    "status": "Met"
+  },
+  "OSPS-QA-06.02": {
+    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the command that runs the suite, and tests/README.md the integration tests' switches. CONTRIBUTING.md's *What gates a merge, and what only reports* lists the workflows that run them on every pull request, on main and on a schedule, and which of them gate a merge. https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md#what-gates-a-merge-and-what-only-reports",
+    "status": "Met"
+  },
+  "OSPS-QA-06.03": {
+    "justification": "The policy is 100% line and branch coverage (CONTRIBUTING.md, standard section 8). pyproject.toml sets fail_under = 100, so untested new code fails the required test check. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "OSPS-QA-07.01": {
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
+  },
+  "OSPS-SA-01.01": {
+    "justification": "ARCHITECTURE.md gives the two subpackages, bip32 and descriptors, their layers bottom-up and what each may import, which tests/imports_test.py holds. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversaries, and what each can do. https://github.com/btclib-org/bip32-descriptors/blob/main/ARCHITECTURE.md https://github.com/btclib-org/bip32-descriptors/blob/main/ASSURANCE_CASE.md#trust-boundaries",
+    "status": "Met"
+  },
+  "OSPS-SA-02.01": {
+    "justification": "The API reference at https://bip32-descriptors.readthedocs.io/ is generated from the docstrings of every public module, and tests/docs_test.py fails when a shipped module is missing from it. CONTRIBUTING.md's *The public surface* states what is public. https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md#the-public-surface",
+    "status": "Met"
+  },
+  "OSPS-SA-03.01": {
+    "justification": "ASSURANCE_CASE.md is the security assessment: what is claimed, the threat model, the trust boundaries and how each common implementation weakness is countered; SECURITY.md's *Where constant time ends* records the known residual risks. https://github.com/btclib-org/bip32-descriptors/blob/main/ASSURANCE_CASE.md",
+    "status": "Met"
+  },
+  "OSPS-SA-03.02": {
+    "justification": "ASSURANCE_CASE.md's *Threat model* names what is defended, the adversaries and what is not defended, and *Trust boundaries* maps the attack surface where untrusted input enters, each argument naming the file, test or workflow behind it. https://github.com/btclib-org/bip32-descriptors/blob/main/ASSURANCE_CASE.md#threat-model",
+    "status": "Met"
+  },
+  "OSPS-VM-01.01": {
+    "justification": "SECURITY.md's *Reporting a vulnerability* gives the private channels, a GitHub security advisory or email, and the timeframes: a report is acknowledged within 7 days, and a fix or a published advisory follows within 90 days. https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md#reporting-a-vulnerability",
+    "status": "Met"
+  },
+  "OSPS-VM-02.01": {
+    "justification": "SECURITY.md names the security contacts: a private GitHub security advisory, or email to security at btclib dot org. GOVERNANCE.md's Roles says that address reaches every organization owner. https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md#reporting-a-vulnerability https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "status": "Met"
+  },
+  "OSPS-VM-03.01": {
+    "justification": "Private vulnerability reporting is enabled, and SECURITY.md points to it (the Security tab's 'Report a vulnerability') and gives an email address as the alternative. https://github.com/btclib-org/bip32-descriptors/security/advisories/new",
+    "status": "Met"
+  },
+  "OSPS-VM-04.01": {
+    "justification": "Vulnerabilities are published as GitHub security advisories on this repository, each naming the release that fixes it. None has been published yet. https://github.com/btclib-org/bip32-descriptors/security/advisories",
+    "status": "Met"
+  },
+  "OSPS-VM-04.02": {
+    "justification": "The CycloneDX SBOM a release attaches lists, in its vulnerabilities array, every vulnerability that the tree's .github/vex.toml judges not to affect the release, with the reason. A tree with no such judgement has no vex.toml, and its SBOM has no vulnerabilities key. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing",
+    "status": "Met"
+  },
+  "OSPS-VM-05.01": {
+    "justification": "The standard sets the threshold: actions/dependency-review-action fails a pull request that adds or changes a dependency with an advisory of moderate severity or above, or with a licence outside the allow-list. Its settings are one file, btclib-org/.github's .github/dependency-review.yml. https://github.com/btclib-org/.github/blob/main/.github/dependency-review.yml https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "status": "Met"
+  },
+  "OSPS-VM-05.02": {
+    "justification": "release.yml runs uv audit over everything the wheel can require: btclib, ecc and typing-extensions, and through the secp256k1 extra btclib-secp256k1, cffi and pycparser. Every publish job needs it to succeed. An advisory, or a service it cannot reach, stops the release. The only exemption is an id that the tree's own .github/vex.toml, carried into the release's signed SBOM, states as not affecting it. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing",
+    "status": "Met"
+  },
+  "OSPS-VM-05.03": {
+    "justification": "The required lint check audits the whole uv.lock, every dependency group, on every pull request that is not a draft: check_audit.py --all-groups runs uv audit, which reads OSV's malicious-package (MAL-) entries as well as advisories. Any such entry fails the check, and so does an OSV that cannot be reached. The audit's only exemption is a .github/vex.toml entry, reviewed like any other change. The required Dependency review check also blocks a change that adds a dependency with an advisory of moderate severity or above, or a known licence outside the allow-list, apart from the packages dependency-review.yml exempts by name; a dependency with no detected licence is reported but does not fail. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "status": "Met"
+  },
+  "OSPS-VM-06.01": {
+    "justification": "The standard's section 5 sets a threshold of zero for ruff: select = ALL, bandit's S rules included, and each finding is fixed or suppressed in place with a reason. zizmor holds workflows to the same, in the required lint check. CodeQL runs on every pull request, but the standard sets no threshold for its alerts. https://github.com/btclib-org/.github/blob/main/README.md#5-ruff",
+    "status": "Met"
+  },
+  "OSPS-VM-06.02": {
+    "justification": "The required lint check runs .pre-commit-config.yaml on every pull request (ruff with the S rules, strict mypy, zizmor, detect-secrets) and blocks the merge on any finding not suppressed in place with a reason. CodeQL also runs on every pull request but is not a required check. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/lint.yml",
+    "status": "Met"
+  },
+  "access_continuity": {
+    "justification": "The organization has three owners, fametrano, giacomocaironi and pmazzocchi, each an administrator of this repository and a reviewer of its publishing environments. If one becomes unavailable, the other two can still close issues, merge changes and release. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity",
+    "status": "Met"
+  },
+  "accessibility_best_practices": {
+    "justification": "The package is a library of functions with no user interface: no terminal prompt, no GUI and no web front end, and nothing under src/ calls input or print. https://github.com/btclib-org/bip32-descriptors/tree/main/src/bip32_descriptors",
+    "status": "N/A"
+  },
+  "achieve_passing": {
+    "justification": null,
+    "status": "Met"
+  },
+  "achieve_silver": {
+    "justification": null,
+    "status": "Met"
+  },
+  "assurance_case": {
+    "justification": "ASSURANCE_CASE.md gives the threat model (what is defended, the adversaries, what is not defended), the trust boundaries, the secure design principles and the common implementation weaknesses with what counters each, naming the file, test or workflow behind every argument. https://github.com/btclib-org/bip32-descriptors/blob/main/ASSURANCE_CASE.md",
+    "status": "Met"
+  },
+  "automated_integration_testing": {
+    "justification": "test.yml runs the test suite on every pull request and on every push to main that changes more than Markdown. integration-bitcoind.yml runs tests/integration against a Bitcoin Core 32.1 regtest node on every pull request, on every push to main and weekly, and fails if those tests skipped rather than ran. `test: every job passed` and `regtest / Regtest against Bitcoin Core` are required checks on main. The os-ubuntu, os-macos and os-windows workflows run the suite on every supported interpreter weekly and before a release. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/test.yml https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/integration-bitcoind.yml",
+    "status": "Met"
+  },
+  "build": {
+    "justification": "CONTRIBUTING.md gives the build: uv is the only prerequisite, uv sync builds the environment from uv.lock and uv build produces the sdist and wheel. https://github.com/btclib-org/bip32-descriptors?tab=contributing-ov-file",
+    "status": "Met"
+  },
+  "build_common_tools": {
+    "justification": "The build uses uv with the uv_build backend, the standard tools of a Python package. https://github.com/btclib-org/bip32-descriptors?tab=contributing-ov-file",
+    "status": "Met"
+  },
+  "build_floss_tools": {
+    "justification": "The build needs only FLOSS tools: uv and uv_build, with Python running the sdist normalizer. https://github.com/btclib-org/bip32-descriptors?tab=contributing-ov-file",
+    "status": "Met"
+  },
+  "build_non_recursive": {
+    "justification": "This tree builds no native binaries, so there is no recursive-build question to answer. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "N/A"
+  },
+  "build_preserve_debug": {
+    "justification": "No native build or installation step exists to strip or preserve debugging information. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "N/A"
+  },
+  "build_repeatable": {
+    "justification": "Rebuilt from the tag v2026.10.31 with uv 0.13.6, the uv the wheel names, and Python 3.15, as RELEASING.md's Rebuild a release from its tag says, the sdist, the wheel and the SBOM are byte-identical to the released files: their SHA-256 match PyPI's and the GitHub release's (compared on 2026-11-01). Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag and passes only if it matches the release's attested digest. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/sdist-rebuild.yml",
+    "status": "Met"
+  },
+  "build_reproducible": {
+    "justification": "The sdist is built with SOURCE_DATE_EPOCH from the commit and normalized by .github/scripts/normalize_sdist.py. A rebuild of v2026.10.31 on 2026-11-01 gave the same SHA-256 as the released sdist and wheel, on PyPI and on the GitHub release. RELEASING.md's Rebuild a release from its tag gives the command. https://github.com/btclib-org/bip32-descriptors/blob/main/RELEASING.md#rebuild-a-release-from-its-tag",
+    "status": "Met"
+  },
+  "build_standard_variables": {
+    "justification": "This tree builds no native binaries: it is pure Python on the uv_build backend, so there is no compiler or linker invocation for CC/CFLAGS/LDFLAGS to reach. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "N/A"
+  },
+  "bus_factor": {
+    "justification": "We estimate the bus factor at one: fametrano wrote most of the code this repository carries from btclib-wallet. Of the commits to btclib-wallet's src/btclib_wallet/bip32 and src/btclib_wallet/descriptors up to b8b5c9b, git log credits Ferdinando Ametrano (fametrano) with 33 of 59, adding 11528 of 12781 lines. 9488 of fametrano's added lines come from 67a7910, which copied bip32 and descriptors from btclib b7b571a0 without their history, adapting their imports and qualifying their issue references as btclib-org/btclib#N; git blame over the 9489 lines of the originals at b7b571a0 credits fametrano with 9446, Giacomo Caironi (giacomocaironi) with 36 and Stefano Pellegrini (St333p) with 7. All 8 commits up to v2026.10.31 are fametrano's, each AI-assisted with a Co-Authored-By: Claude trailer. The organization owners administer every repository. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/bip32-descriptors/graphs/contributors",
+    "status": "Unmet"
+  },
+  "code_of_conduct": {
+    "justification": "btclib-org/.github's CODE_OF_CONDUCT.md is this repository's code of conduct, through GitHub's organization-wide default; the community-profile API reports it. https://github.com/btclib-org/.github/blob/main/CODE_OF_CONDUCT.md",
+    "status": "Met"
+  },
+  "code_review_standards": {
+    "justification": "REVIEWING.md states what a review checks, how a finding is written and what clears a pull request; the part shared by every repository is followed by what this tree checks in particular. https://github.com/btclib-org/bip32-descriptors/blob/main/REVIEWING.md",
+    "status": "Met"
+  },
+  "coding_standards": {
+    "justification": "pyproject.toml selects every ruff rule (select = [\"ALL\"]) with a documented ignore list, and runs mypy in strict mode. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "coding_standards_enforced": {
+    "justification": "ruff-check, ruff-format and mypy run as pre-commit hooks, and lint.yml runs the same .pre-commit-config.yaml in CI as a required check, so the style is enforced automatically rather than by review alone. https://github.com/btclib-org/bip32-descriptors/blob/main/.pre-commit-config.yaml",
+    "status": "Met"
+  },
+  "contribution": {
+    "justification": "Non-trivial contribution file in repository: <https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md>.",
+    "status": "Met"
+  },
+  "contribution_requirements": {
+    "justification": "CONTRIBUTING.md states the public-surface, input-validation, lint-gate and 100%-coverage requirements a contribution must meet before it can land. https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "contributors_unassociated": {
+    "justification": "All commits of this repository are fametrano's. The code they carry from btclib-wallet has other authors: git blame at btclib-wallet b8b5c9b over src/btclib_wallet/bip32, src/btclib_wallet/descriptors and the tests this repository carries credits Paolo Mazzocchi (pmazzocchi) with 2151 lines, past the criterion's 1,000-line indicator, and no one else but Ferdinando Ametrano (fametrano) with more than 511. fametrano and pmazzocchi are associated: CheckSig, where both are co-founders, pays both to work on this project and stands to benefit from it. https://github.com/fametrano https://github.com/pmazzocchi",
+    "status": "Unmet"
+  },
+  "copyright_per_file": {
+    "justification": "Every Python file opens with \"Copyright (c) The btclib developers\", and ruff's flake8-copyright rule (CPY001) keeps it there, e.g. https://github.com/btclib-org/bip32-descriptors/blob/main/src/bip32_descriptors/__init__.py",
+    "status": "Met"
+  },
+  "crypto_algorithm_agility": {
+    "justification": "The algorithms are fixed by the specifications: BIP32 fixes HMAC-SHA512 and secp256k1, and the scripts a descriptor expands to fix hash160, SHA-256 and BIP340 keys, as Bitcoin's consensus rules do. A user cannot switch to another without leaving the format; another algorithm needs a soft fork and a new BIP first. https://github.com/btclib-org/bip32-descriptors/blob/main/README.md#what-is-here",
+    "status": "Unmet"
+  },
+  "crypto_call": {
+    "justification": "The package reimplements no primitive. BIP32's HMAC-SHA512 is the standard library's hmac; hash160 and RIPEMD-160 are btclib's; the curve arithmetic, BIP340's tagged hash and MuSig2 key aggregation are ecc's, which reaches libsecp256k1 through btclib-secp256k1 where the secp256k1 extra is installed. What the package writes itself is what the BIPs define above them: BIP32's derivation steps, the descriptor checksum and the miniscript compiler. https://github.com/btclib-org/bip32-descriptors/tree/main/src/bip32_descriptors",
+    "status": "Met"
+  },
+  "crypto_certificate_verification": {
+    "justification": "bip32-descriptors performs no network communications, so it uses no TLS: no module under src/ imports socket, ssl, http or urllib. https://github.com/btclib-org/bip32-descriptors/tree/main/src/bip32_descriptors",
+    "status": "N/A"
+  },
+  "crypto_credential_agility": {
+    "justification": "bip32-descriptors is a library with no configuration file, credential store or password: it derives and parses the keys and descriptors a caller passes in, and keeps nothing. https://github.com/btclib-org/bip32-descriptors/blob/main/ASSURANCE_CASE.md#threat-model",
+    "status": "N/A"
+  },
+  "crypto_floss": {
+    "justification": "No closed-source dependency: btclib, ecc and typing-extensions, and with the secp256k1 extra btclib-secp256k1, the libsecp256k1 it builds from, cffi and pycparser, are all FLOSS. This tree imports nothing else outside the standard library. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "crypto_keylength": {
+    "justification": "Keys are secp256k1 keys, about 128 bits of security, above NIST's 112-bit minimum for 2030. rootxprv_from_seed refuses a seed under 128 or over 512 bits, the range BIP32 sets. https://github.com/btclib-org/bip32-descriptors/blob/main/src/bip32_descriptors/bip32/bip32.py",
+    "status": "Met"
+  },
+  "crypto_password_storage": {
+    "justification": "The package stores no password and authenticates no one: it has no user, account or secret of its own.",
+    "status": "N/A"
+  },
+  "crypto_pfs": {
+    "justification": "The package implements no network key-agreement protocol: it performs no network communications at all.",
+    "status": "N/A"
+  },
+  "crypto_published": {
+    "justification": "Every algorithm is a published one: HMAC-SHA512 (RFC 2104, FIPS 180-4) and secp256k1 (SEC 2) in BIP32, hash160 (SHA-256 then RIPEMD-160) for fingerprints and scripts, and BIP340's tagged hashes and BIP327's MuSig2 key aggregation for taproot descriptors. BIP380's descriptor checksum is a BCH code that detects errors and is not cryptography. Each is checked against the vectors its authors publish. https://github.com/btclib-org/bip32-descriptors/blob/main/README.md#what-is-here",
+    "status": "Met"
+  },
+  "crypto_random": {
+    "justification": "The package draws no random number: nothing under src/ imports random or secrets or reads os.urandom. A seed is the caller's. https://github.com/btclib-org/bip32-descriptors/tree/main/src/bip32_descriptors",
+    "status": "N/A"
+  },
+  "crypto_tls12": {
+    "justification": "bip32-descriptors performs no network communications and so uses no TLS. https://github.com/btclib-org/bip32-descriptors/tree/main/src/bip32_descriptors",
+    "status": "N/A"
+  },
+  "crypto_used_network": {
+    "justification": "bip32-descriptors does not use the network: no module under src/ imports socket, ssl, http or urllib, and ASSURANCE_CASE.md's threat model states it opens no socket. https://github.com/btclib-org/bip32-descriptors/tree/main/src/bip32_descriptors",
+    "status": "N/A"
+  },
+  "crypto_verification_private": {
+    "justification": "bip32-descriptors performs no network communications and so uses no TLS. https://github.com/btclib-org/bip32-descriptors/tree/main/src/bip32_descriptors",
+    "status": "N/A"
+  },
+  "crypto_weaknesses": {
+    "justification": "No SHA-1 or MD5 appears under src/. BIP32's HMAC-SHA512 comes from hmac in bip32.py. RIPEMD-160 appears only where Bitcoin fixes it: inside hash160, for BIP32's fingerprints and the script templates; in descriptors.py's direct call to btclib's ripemd160, which turns a P2WSH program into the hash160 of its script to look the script up; and in miniscript's ripemd160() hashlock, which BIP379 defines and which commits with OP_RIPEMD160. https://github.com/btclib-org/bip32-descriptors/tree/main/src/bip32_descriptors",
+    "status": "Met"
+  },
+  "crypto_working": {
+    "justification": "No broken cryptographic algorithm: HMAC-SHA512, SHA-256, RIPEMD-160 inside hash160, and secp256k1, as BIP32 and Bitcoin fix them.",
+    "status": "Met"
+  },
+  "dco": {
+    "justification": "main requires the lint / Sign-off check, which refuses a pull request with a commit that lacks its author's Signed-off-by: trailer. Dependabot's, pre-commit.ci's and claude[bot]'s commits are exempt. https://github.com/btclib-org/.github/blob/main/.github/scripts/check_sign_off.py",
+    "status": "Met"
+  },
+  "delivery_mitm": {
+    "justification": "Distribution channels use HTTPS exclusively: GitHub, and PyPI through Trusted Publishing. [osps_br_03_02]",
+    "status": "Met"
+  },
+  "delivery_unsigned": {
+    "justification": "Releases are published to PyPI and GitHub Releases and installed with pip from PyPI, all over HTTPS. No package or hash is fetched over plain HTTP. https://pypi.org/project/bip32-descriptors/ https://github.com/btclib-org/bip32-descriptors/releases",
+    "status": "Met"
+  },
+  "dependency_monitoring": {
+    "justification": "Dependabot version updates cover uv, github-actions and docker, and Dependabot security updates are on. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/dependabot.yml",
+    "status": "Met"
+  },
+  "description_good": {
+    "justification": "bip32-descriptors implements BIP32 hierarchical deterministic keys, BIP380 output script descriptors with BIP388 wallet policies, and BIP379 miniscript, in typed Python on top of btclib and ecc. https://bip32-descriptors.readthedocs.io/",
+    "status": "Met"
+  },
+  "discussion": {
+    "justification": "GitHub supports discussions on issues and pull requests.",
+    "status": "Met"
+  },
+  "documentation_achievements": {
+    "justification": "README.md links the OpenSSF Scorecard, Best Practices and Baseline badges on the lines the organization standard reserves for them. https://github.com/btclib-org/bip32-descriptors/blob/main/README.md",
+    "status": "Met"
+  },
+  "documentation_architecture": {
+    "justification": "ARCHITECTURE.md gives the two subpackages bottom-up, bip32 then descriptors, the modules of each and what each may import, on top of btclib and ecc. tests/imports_test.py holds the rule: its _ALLOWED_UNITS table is checked against the import statements of every file in src/bip32_descriptors/. https://github.com/btclib-org/bip32-descriptors/blob/main/ARCHITECTURE.md",
+    "status": "Met"
+  },
+  "documentation_basics": {
+    "justification": "README.md says what the package holds and what it does not, how to install it, and gives a first use that tests/readme_test.py runs; CONTRIBUTING.md, SECURITY.md and ASSURANCE_CASE.md cover the rest. https://github.com/btclib-org/bip32-descriptors/blob/main/README.md",
+    "status": "Met"
+  },
+  "documentation_current": {
+    "justification": "The docs build is gated in CI as a required check (docs.yml, `-n -W`), tests/docs_test.py fails when a shipped module has no API page, and tests/readme_test.py runs every Python block of README.md, so neither the reference generated from the docstrings nor the README's example can drift from the code. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/docs.yml",
+    "status": "Met"
+  },
+  "documentation_interface": {
+    "justification": "Every public module and function carries a docstring, gated by ruff's pydocstyle rules and pydoclint, and docs/source's automodule pages render them into the API reference published at https://bip32-descriptors.readthedocs.io/; tests/docs_test.py fails when a shipped module is missing from them.",
+    "status": "Met"
+  },
+  "documentation_quick_start": {
+    "justification": "README.md's *Installing* and *A key, a descriptor, an address* are a first use: a BIP32 root key from a seed and a derived xpub, a ranged descriptor with its key origin, checksum and address, and a miniscript policy. tests/readme_test.py runs it, so it is the one the suite checks. https://github.com/btclib-org/bip32-descriptors/blob/main/README.md#a-key-a-descriptor-an-address",
+    "status": "Met"
+  },
+  "documentation_roadmap": {
+    "justification": "ROADMAP.md, organization-wide in btclib-org/.github, is reviewed every September and states what is maintained, what is intended and what is deliberately not. This repository's README.md and CONTRIBUTING.md link it. https://github.com/btclib-org/.github/blob/main/ROADMAP.md",
+    "status": "Met"
+  },
+  "documentation_security": {
+    "justification": "SECURITY.md's *Where constant time ends* states the known limits: the curve arithmetic is ecc's, constant-time only where libsecp256k1 serves it; an install without the secp256k1 extra runs every secret through the Python arithmetic; secret material is not zeroized, and the base58 decode cache keeps an xprv reachable for longer. https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md#where-constant-time-ends",
+    "status": "Met"
+  },
+  "dynamic_analysis": {
+    "justification": "Every release runs the test suite and the regtest tests before it is published: release.yml calls test.yml and integration-bitcoind.yml, and the PyPI upload runs only if both pass, as they did for v2026.10.31. The suite fails below 100% coverage, branches included. fuzz.yml is scheduled weekly to run two ClusterFuzzLite atheris harnesses, fuzz/fuzz_bip32.py over the BIP32 wire decoders and fuzz/fuzz_descriptor.py over descriptor parsing. mutation.yml is scheduled weekly to run cosmic-ray mutation testing on two profiles, .github/mutation/bip32.toml and .github/mutation/descriptors.toml. qa-assets.yml is scheduled weekly to replay Bitcoin Core's descriptor fuzz corpus, and has not run yet. Manually dispatched on 2026-10-31 at bb37e84: fuzz.yml ran fuzz_descriptor and fuzz_bip32 for 30 minutes each with no reportable crash (https://github.com/btclib-org/bip32-descriptors/actions/runs/41245162550). mutation.yml's time-budgeted run executed part of each profile: descriptors killed 714, survived 263, never run 12483; bip32 killed 824, survived 70, skipped 242, never run 474 (https://github.com/btclib-org/bip32-descriptors/actions/runs/41250474104). https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/release.yml https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/fuzz.yml",
+    "status": "Met"
+  },
+  "dynamic_analysis_enable_assertions": {
+    "justification": "pytest, the regtest tests, the mutation runs and the ClusterFuzzLite targets run Python without -O, so every assert is checked. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/fuzz.yml",
+    "status": "Met"
+  },
+  "dynamic_analysis_fixed": {
+    "justification": "No vulnerability found by dynamic analysis is known or open: the fuzz run of 2026-10-31 at bb37e84 reported no crash (https://github.com/btclib-org/bip32-descriptors/actions/runs/41245162550). Issues #6 and #19 report inputs found by dynamic analysis on which parse differs from Bitcoin Core; both are open and filed as defects, not as vulnerabilities: #6, an input of Core's qa-assets corpus that parse accepts and Core refuses, and #19, inputs of a seeded fuzz run that both refuse with different faults. The mutation run of the same date passed with survivors, 263 in descriptors and 70 in bip32 (https://github.com/btclib-org/bip32-descriptors/actions/runs/41250474104). A survivor is a mutant the tests did not catch, a test gap and not itself a vulnerability. All 333 were triaged on 2026-11-01: none revealed a code bug on the inputs measured; the gaps on security-relevant checks are issues #32 to #40 and the ordinary ones #41. The evidence is partial: the run judged 977 of 13460 descriptors mutants and 894 of 1610 bip32 mutants.",
+    "status": "Met"
+  },
+  "dynamic_analysis_unsafe": {
+    "justification": "This tree ships pure Python, a memory-safe language, and produces no software written in a memory-unsafe language. The optional secp256k1 extra installs btclib-secp256k1, whose C is built and analysed in its own repository. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "N/A"
+  },
+  "english": {
+    "justification": "https://github.com/btclib-org/bip32-descriptors/issues",
+    "status": "Met"
+  },
+  "enhancement_responses": {
+    "justification": "Every enhancement request on the tracker was filed by the maintainer, fametrano: the only issues anyone else filed are pmazzocchi's bug reports #6 and #10. https://github.com/btclib-org/bip32-descriptors/issues?q=is%3Aissue",
+    "status": "Met"
+  },
+  "external_dependencies": {
+    "justification": "pyproject.toml declares the runtime dependencies btclib, ecc and typing-extensions, each with the reason it is one, the optional secp256k1 extra (btclib[secp256k1] and btclib-secp256k1), and the test and tooling dependencies in its dependency-groups, all resolved and pinned in the committed uv.lock. tests/imports_test.py refuses an import of a distribution pyproject.toml does not declare. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "floss_license": {
+    "justification": "The MIT license is approved by the Open Source Initiative (OSI).",
+    "status": "Met"
+  },
+  "floss_license_osi": {
+    "justification": "The MIT license is approved by the Open Source Initiative (OSI).",
+    "status": "Met"
+  },
+  "governance": {
+    "justification": "GOVERNANCE.md, organization-wide in btclib-org/.github, documents the decision model and every role a contributor, reviewer or owner holds; this tree's README.md links it. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md",
+    "status": "Met"
+  },
+  "hardened_site": {
+    "justification": "https://btclib.org/bip32-descriptors/, the project's page on the organization's site, answers 200 with Strict-Transport-Security, Content-Security-Policy, X-Frame-Options DENY and X-Content-Type-Options nosniff, measured with curl -sI on 2026-10-31. The repository on github.com sends all four. The documentation site https://bip32-descriptors.readthedocs.io/ is served by Read the Docs over HTTPS with Strict-Transport-Security and X-Content-Type-Options nosniff, and no Content-Security-Policy or X-Frame-Options; that is Read the Docs' to set. PyPI's project page sends all but the CSP.",
+    "status": "Met"
+  },
+  "hardening": {
+    "justification": "ruff's select = [\"ALL\"] includes the bandit S rules, so a hardening defect such as unsafe deserialization or shell injection fails the lint gate. CodeQL also runs on every pull request and every push to main. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/codeql.yml",
+    "status": "Met"
+  },
+  "homepage_url": {
+    "justification": null,
+    "status": "?"
+  },
+  "implement_secure_design": {
+    "justification": "ASSURANCE_CASE.md's *Secure design principles* applies Saltzer and Schroeder's principles one by one: economy of mechanism, fail-safe defaults, complete mediation, open design, least privilege and psychological acceptability, each to the parser, check or test that carries it. https://github.com/btclib-org/bip32-descriptors/blob/main/ASSURANCE_CASE.md#secure-design-principles",
+    "status": "Met"
+  },
+  "input_validation": {
+    "justification": "Every public function validates its inputs and refuses what is invalid with btclib's BTClibTypeError or BTClibValueError, or ecc's class of the same kind where an argument reaches that package, as CONTRIBUTING.md's *The public surface* requires. tests/input_validation_test.py drives the rule over every public function, and tests/fuzz_test.py holds every parser to it on hostile input. https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md#the-public-surface",
+    "status": "Met"
+  },
+  "installation_common": {
+    "justification": "`python -m pip install --upgrade bip32-descriptors` installs it from PyPI, as README.md says, and pypi-install.yml installs the published version on Ubuntu, macOS and Windows after each release and weekly. https://pypi.org/project/bip32-descriptors/",
+    "status": "Met"
+  },
+  "installation_development_quick": {
+    "justification": "`uv sync` installs the whole development environment in one command, uv being the only tool to install first; CONTRIBUTING.md's *The environment and the gates* gives it beside `uv run pytest` and the lint gate. https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Met"
+  },
+  "installation_standard_variables": {
+    "justification": "Installation is `pip install`, which follows pip's and the interpreter's own install-location conventions; there is no project-specific installer that could diverge from that convention. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "N/A"
+  },
+  "interact": {
+    "justification": "https://github.com/btclib-org/bip32-descriptors",
+    "status": "Met"
+  },
+  "interfaces_current": {
+    "justification": "ruff's UP and FA rules flag deprecated constructs, and pytest turns every warning into an error. deps-latest and deps-oldest run the suite weekly at the newest and the floor versions of btclib, ecc and the rest. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "internationalization": {
+    "justification": "The package produces no text for end users and sorts none: it turns keys, paths and descriptors into scripts, addresses and their ASCII spellings, and its exceptions are English messages for developers. https://github.com/btclib-org/bip32-descriptors/tree/main/src/bip32_descriptors",
+    "status": "N/A"
+  },
+  "know_common_errors": {
+    "justification": "ASSURANCE_CASE.md lists the common implementation weaknesses that apply here, among them CWE-20 (input validation), CWE-248 and CWE-755 (uncaught exceptions), CWE-400 (resource consumption), CWE-209 (sensitive information in errors) and CWE-843 (type confusion), and what counters each. https://github.com/btclib-org/bip32-descriptors/blob/main/ASSURANCE_CASE.md#common-implementation-weaknesses",
+    "status": "Met"
+  },
+  "know_secure_design": {
+    "justification": "The primary developer maintains ASSURANCE_CASE.md, whose *Secure design principles* section applies Saltzer and Schroeder's principles to the code one by one. No security review of it has been done yet. https://github.com/btclib-org/bip32-descriptors/blob/main/ASSURANCE_CASE.md#secure-design-principles",
+    "status": "Met"
+  },
+  "license_location": {
+    "justification": "Non-trivial license location file in repository: <https://github.com/btclib-org/bip32-descriptors/blob/main/LICENSE>.",
+    "status": "Met"
+  },
+  "license_per_file": {
+    "justification": "Every Python file states \"Distributed under the MIT software license, see the accompanying LICENSE file or https://opensource.org/license/mit\", e.g. https://github.com/btclib-org/bip32-descriptors/blob/main/src/bip32_descriptors/__init__.py",
+    "status": "Met"
+  },
+  "maintained": {
+    "justification": "The repository opened on 2026-10-31 with the BIP32, descriptor and miniscript code started from btclib-wallet 910ba96, a local integration of the pull requests for btclib-wallet issue #620 before they landed (the last, #631, as 78e360b); its src/btclib_wallet/bip32 and src/btclib_wallet/descriptors equal those of 1fa1a78, #631's first commit. That code was synced to btclib-wallet b8b5c9b for the first release, v2026.10.31, published on 2026-10-31. main has opened the next cycle, 2026.11. https://github.com/btclib-org/bip32-descriptors/commits/main https://github.com/btclib-org/bip32-descriptors/releases",
+    "status": "Met"
+  },
+  "maintenance_or_update": {
+    "justification": "Only the latest release is supported and nothing is backported (SECURITY.md's *Supported versions*). release.yml compares each release's public API with the previous tag's using griffe; v2026.10.31 is the first release, so the comparison starts with the next one. RELEASE_NOTES.md lists what a user must act on to upgrade. https://github.com/btclib-org/bip32-descriptors/blob/main/RELEASE_NOTES.md",
+    "status": "Met"
+  },
+  "no_leaked_credentials": {
+    "justification": "detect-secrets baseline gated by pre-commit, and GitHub secret scanning with push protection enabled on the repository: https://github.com/btclib-org/bip32-descriptors/blob/main/.secrets.baseline",
+    "status": "Met"
+  },
+  "regression_tests_added50": {
+    "justification": "REVIEWING.md asks of every change whether what it adds is tested, and the 100% line and branch coverage gate fails a fix whose new code no test runs. One bug fix reached src/ before v2026.10.31, synced from btclib-wallet: miniscript parsing ends a key, timelock or hash fragment where Bitcoin Core does (btclib-org/btclib-wallet#609). Its regression test, tests/descriptors/key_fragment_brace_test.py, came with it. https://github.com/btclib-org/bip32-descriptors/blob/main/REVIEWING.md https://github.com/btclib-org/bip32-descriptors/blob/main/tests/descriptors/key_fragment_brace_test.py",
+    "status": "Met"
+  },
+  "release_notes": {
+    "justification": "RELEASE_NOTES.md holds each release's notes, and release.yml publishes the tag's section as the GitHub release body. https://github.com/btclib-org/bip32-descriptors/releases/latest",
+    "status": "Met"
+  },
+  "release_notes_vulns": {
+    "justification": "v2026.10.31 is the first release and fixes no publicly known vulnerability: no security advisory exists for this repository. https://github.com/btclib-org/bip32-descriptors/releases/tag/v2026.10.31",
+    "status": "Met"
+  },
+  "repo_distributed": {
+    "justification": "Repository on GitHub, which uses git. git is distributed.",
+    "status": "Met"
+  },
+  "repo_interim": {
+    "justification": "development is on the main branch of https://github.com/btclib-org/bip32-descriptors",
+    "status": "Met"
+  },
+  "repo_public": {
+    "justification": "Repository on GitHub, which provides public git repositories with URLs.",
+    "status": "Met"
+  },
+  "repo_track": {
+    "justification": "Repository on GitHub, which uses git. git can track the changes, who made them, and when they were made.",
+    "status": "Met"
+  },
+  "report_archive": {
+    "justification": "https://github.com/btclib-org/bip32-descriptors/pulls?q=is%3Apr+is%3Aclosed https://github.com/btclib-org/bip32-descriptors/issues?q=is%3Aissue%20state%3Aclosed",
+    "status": "Met"
+  },
+  "report_process": {
+    "justification": "Bugs are reported on the GitHub issue tracker, through the issue forms under .github/ISSUE_TEMPLATE/, as CONTRIBUTING.md's *The issue tracker* describes: <https://github.com/btclib-org/bip32-descriptors/issues>. Vulnerabilities go through SECURITY.md instead: <https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md>.",
+    "status": "Met"
+  },
+  "report_responses": {
+    "justification": "Issues #4 to #20 were transferred from btclib-wallet on 2026-10-31, the day the repository opened, and the rest were filed here. On 2026-11-01 the only bug reports from someone other than the maintainer are #6 and #10: pmazzocchi, an organization owner, filed them in btclib-wallet, and fametrano acknowledged them within two hours and within four days. Both are open. fametrano filed every other issue, among them the alignment findings #2 and #3, both answered and closed. https://github.com/btclib-org/bip32-descriptors/issues?q=is%3Aissue",
+    "status": "Met"
+  },
+  "report_tracker": {
+    "justification": "Each repository uses its own GitHub Issues tracker for individual issues, with issue forms under .github/ISSUE_TEMPLATE/, and an organization-wide tracker in btclib-org/.github for cross-repository findings. https://github.com/btclib-org/bip32-descriptors/issues",
+    "status": "Met"
+  },
+  "report_url": {
+    "justification": null,
+    "status": "?"
+  },
+  "require_2FA": {
+    "justification": "The btclib-org organization requires two-factor authentication of every member. https://github.com/btclib-org",
+    "status": "Met"
+  },
+  "roles_responsibilities": {
+    "justification": "GOVERNANCE.md's Roles names the maintainer, the owners, repository collaborators, contributors, reviewers, the review bot, Dependabot and pre-commit.ci, and what each owes. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#roles",
+    "status": "Met"
+  },
+  "secure_2FA": {
+    "justification": "The btclib-org organization requires two-factor authentication and allows only secure methods: TOTP apps, security keys or passkeys, and GitHub Mobile, not SMS. https://github.com/btclib-org/.github/issues/1362#issuecomment-5903994882",
+    "status": "Met"
+  },
+  "security_review": {
+    "justification": "No security review of this repository has been done. SECURITY.md's *Security review* says so, and ASSURANCE_CASE.md is what one will be done against. https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md#security-review",
+    "status": "Unmet"
+  },
+  "signed_releases": {
+    "justification": "Every PyPI file carries a PEP 740 attestation from Trusted Publishing, and each GitHub release a Sigstore provenance bundle. SECURITY.md gives the gh attestation verify command. https://github.com/btclib-org/bip32-descriptors/releases/latest",
+    "status": "Met"
+  },
+  "sites_https": {
+    "justification": "Given only https: URLs.",
+    "status": "Met"
+  },
+  "sites_password_security": {
+    "justification": "Project sites are GitHub, PyPI and Read the Docs; this repository runs no site of its own that stores user passwords. Authentication is GitHub's and PyPI's, not this project's. https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md",
+    "status": "N/A"
+  },
+  "small_tasks": {
+    "justification": "The label good first issue marks a small task for a first contribution, as CONTRIBUTING.md says, and one search lists the open ones across the organization. Issue #9 carries it and is open; issue #3, which asked for one, was closed as answered by #9. https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md#the-issue-tracker https://github.com/btclib-org/bip32-descriptors/issues/9 https://github.com/search?q=org%3Abtclib-org+label%3A%22good+first+issue%22+is%3Aopen&type=issues",
+    "status": "Met"
+  },
+  "static_analysis": {
+    "justification": "mypy in strict mode, ruff with every rule and CodeQL's python analysis.",
+    "status": "Met"
+  },
+  "static_analysis_common_vulnerabilities": {
+    "justification": "ruff's `select = [\"ALL\"]` includes the bandit-derived S rules, a FLOSS static-analysis tool looking for common vulnerabilities, in the required lint check. CodeQL's python analysis (codeql.yml), whose engine is not FLOSS, also runs on a schedule, on every pull request and on every push to main. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/codeql.yml",
+    "status": "Met"
+  },
+  "static_analysis_fixed": {
+    "justification": "No static-analysis finding is open: ruff and mypy findings fail the required lint check, and CodeQL has raised no alert. On 2026-11-01 the open code-scanning alerts are all OpenSSF Scorecard's, from its BranchProtection, CodeReview, Maintained, SAST, CIIBestPractices and PinnedDependencies checks. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/codeql.yml",
+    "status": "Met"
+  },
+  "static_analysis_often": {
+    "justification": "On every pull request and every push to main: https://github.com/btclib-org/bip32-descriptors/actions/workflows/lint.yml, https://github.com/btclib-org/bip32-descriptors/actions/workflows/codeql.yml",
+    "status": "Met"
+  },
+  "test": {
+    "justification": "test.yml runs the suite, gated at 100% line and branch coverage, against vectors their authors publish: BIP32's; those of BIP380 to BIP390, in full for BIP384, BIP385, BIP386 and BIP390 and in part for the others, with BIP389 and BIP383 the largest gaps; and subsets of Bitcoin Core's descriptor_tests.cpp and miniscript_tests.cpp and of bitcoin-s's. tests/_data/README.md pins each vendored file to its upstream commit, and vendored-vectors.yml checks the pins weekly. .github/scripts/compare_descriptors.py, run by hand, compares the parser with Bitcoin Core and with rust-miniscript through the Rust program under .github/interop/miniscript-compare. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/test.yml https://github.com/btclib-org/bip32-descriptors/blob/main/tests/README.md#comparing-descriptors-with-core-and-rust-miniscript",
+    "status": "Met"
+  },
+  "test_branch_coverage80": {
+    "justification": "pyproject.toml sets branch = true under [tool.coverage.run], and the 100% fail_under gate includes branches: https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "test_continuous_integration": {
+    "justification": "test.yml runs the suite on every pull request and on every push to main that changes more than Markdown files, and integration-bitcoind.yml runs the regtest tests on every pull request and push to main. test: every job passed and regtest / Regtest against Bitcoin Core are required checks on main. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/test.yml",
+    "status": "Met"
+  },
+  "test_invocation": {
+    "justification": "https://github.com/btclib-org/bip32-descriptors?tab=contributing-ov-file",
+    "status": "Met"
+  },
+  "test_most": {
+    "justification": "100% coverage floor",
+    "status": "Met"
+  },
+  "test_policy": {
+    "justification": "CONTRIBUTING.md makes 100% coverage a gate every change must pass, so new functionality comes with its tests. https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "status": "Met"
+  },
+  "test_policy_mandated": {
+    "justification": "CONTRIBUTING.md requires 100% line and branch coverage, and fail_under = 100.0 fails the CI gate on any new code without a test. https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "test_statement_coverage80": {
+    "justification": "pyproject.toml sets fail_under = 100.0, gated on every pull request by test.yml. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "test_statement_coverage90": {
+    "justification": "pyproject.toml sets fail_under = 100.0 under [tool.coverage.report], and the required test check enforces it on every pull request: https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "tests_are_added": {
+    "justification": "The required check test: every job passed fails any pull request that leaves a line or branch untested, so a change to src/ cannot land without its tests. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/test.yml",
+    "status": "Met"
+  },
+  "tests_documented_added": {
+    "justification": "CONTRIBUTING.md documents the 100% coverage gate, so new functionality is not accepted without a test. https://github.com/btclib-org/bip32-descriptors/blob/main/CONTRIBUTING.md",
+    "status": "Met"
+  },
+  "two_person_review": {
+    "justification": "No pull request has been merged in this repository: every change on main, through the next-cycle commit bb37e84, was pushed directly to main by fametrano, before main was protected. Since then main's main-self-merge ruleset requires one approving review from somebody other than the author. No change has yet been approved by anyone. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Unmet"
+  },
+  "updateable_reused_components": {
+    "justification": "At run time the package reuses btclib, ecc and typing-extensions, and with the secp256k1 extra btclib-secp256k1: PyPI packages, as are the test and tooling components. All are pinned in uv.lock and bumped by Dependabot; deps-latest runs the full suite against the latest releases every week, and deps-oldest against the declared floors. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/deps-latest.yml",
+    "status": "Met"
+  },
+  "version_semver": {
+    "justification": "CalVer, YYYY.M.D, declared in pyproject.toml and explained in RELEASE_NOTES.md: the number says when a release was cut and promises nothing about compatibility, so a breaking change is announced in RELEASE_NOTES.md. https://github.com/btclib-org/bip32-descriptors/blob/main/RELEASE_NOTES.md",
+    "status": "Met"
+  },
+  "version_tags": {
+    "justification": "Each release is tagged v<version> on the release commit, as RELEASING.md requires. https://github.com/btclib-org/bip32-descriptors/tags",
+    "status": "Met"
+  },
+  "version_tags_signed": {
+    "justification": "Every release tag is signed, and RELEASING.md reads each signature back. https://github.com/btclib-org/bip32-descriptors/tags",
+    "status": "Met"
+  },
+  "version_unique": {
+    "justification": "Each release carries a unique calendar version, YYYY.M.D, declared once in pyproject.toml and tagged v<version>. https://github.com/btclib-org/bip32-descriptors/releases",
+    "status": "Met"
+  },
+  "vulnerabilities_critical_fixed": {
+    "justification": "No vulnerability is known and none is unfixed: the repository has no security advisory and no Dependabot alert. https://github.com/btclib-org/bip32-descriptors/security/advisories",
+    "status": "Met"
+  },
+  "vulnerabilities_fixed_60_days": {
+    "justification": "No vulnerability has been reported or published, and the repository has no Dependabot alert. Each advisory would name the release that fixes it. https://github.com/btclib-org/bip32-descriptors/security/advisories",
+    "status": "Met"
+  },
+  "vulnerability_report_credit": {
+    "justification": "No vulnerability has been reported to this repository, so there is no reporter to credit. SECURITY.md says how a report is made. https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md#reporting-a-vulnerability",
+    "status": "N/A"
+  },
+  "vulnerability_report_private": {
+    "justification": "https://github.com/btclib-org/bip32-descriptors?tab=security-ov-file",
+    "status": "Met"
+  },
+  "vulnerability_report_process": {
+    "justification": "https://github.com/btclib-org/bip32-descriptors?tab=security-ov-file",
+    "status": "Met"
+  },
+  "vulnerability_report_response": {
+    "justification": "No vulnerability report has been received since the repository opened on 2026-10-31: it has no security advisory in any state. SECURITY.md promises an acknowledgement within 7 days. https://github.com/btclib-org/bip32-descriptors/security/advisories",
+    "status": "N/A"
+  },
+  "vulnerability_response_process": {
+    "justification": "SECURITY.md's Reporting a vulnerability gives the private channels (a GitHub security advisory, or security at btclib dot org), who can see a report, and how a CVE is requested. Private vulnerability reporting is enabled. https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md#reporting-a-vulnerability",
+    "status": "Met"
+  },
+  "warnings": {
+    "justification": "mypy strict with all relevant extra checks activated, see https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "warnings_fixed": {
+    "justification": "Warnings are not tolerated: ruff, strict mypy and pytest's filterwarnings = [\"error\"] fail the required checks. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "Met"
+  },
+  "warnings_strict": {
+    "justification": "ruff runs with `select = [\"ALL\"]` (every rule family) and mypy runs with `strict = true`; both are zero-finding pre-commit hooks enforced again by the required lint workflow. https://github.com/btclib-org/bip32-descriptors/blob/main/pyproject.toml",
+    "status": "Met"
+  }
+}

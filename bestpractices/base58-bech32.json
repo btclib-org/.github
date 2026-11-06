@@ -200,7 +200,7 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. It has no bypass actor at rest. The maintainer adds a pull_request-mode bypass around merges and removes it afterwards. GOVERNANCE.md reserves that bypass for an emergency, and it has also been used for ordinary work: seven times between 2026-10-20 and 2026-10-28, when 14 pull requests landed without an approval, the last being 74. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
     "status": "Met"
   },
   "OSPS-SA-01.01": {
@@ -304,7 +304,7 @@
     "status": "N/A"
   },
   "build_repeatable": {
-    "justification": "Rebuilt from the tag v2026.10.23 with the uv named in the wheel, the sdist and the wheel are byte-identical to the released files (SHA-256 compared on 2026-10-23). Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag and passes only if it matches the release's attested digest; it has run by hand, and its first scheduled run is Sunday 2026-10-25. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/sdist-rebuild.yml",
+    "justification": "Rebuilt from the tag v2026.10.23 with the uv named in the wheel, the sdist and the wheel are byte-identical to the released files (SHA-256 compared on 2026-10-23). Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag and passes only if it matches the release's attested digest; its scheduled run of 2026-10-25 passed. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/sdist-rebuild.yml",
     "status": "Met"
   },
   "build_reproducible": {
@@ -316,7 +316,7 @@
     "status": "N/A"
   },
   "bus_factor": {
-    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. This repository opened on 2026-10-17 with the Base58 and bech32 code moved from btclib and new SS58 and CashAddr codecs. Since 2026-10-17, 16 of the 31 commits are fametrano's and 10 are pmazzocchi's, an organization owner, whose changes fametrano approved; 3 are Dependabot's, 1 is pre-commit.ci's and 1 is an outside contributor's. git log --follow at btclib 8e87317b4 shows fametrano made 109 of 111 commits to base58.py and 62 of 64 to bech32.py. The claude account in the contributors graph comes from Co-Authored-By trailers on AI-assisted commits. giacomocaironi, also an organization owner, has made no commit here. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/base58-bech32/graphs/contributors",
+    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. This repository opened on 2026-10-17 with the Base58 and bech32 code moved from btclib and new SS58 and CashAddr codecs. Since 2026-10-17, 28 of the 50 commits are fametrano's and 10 are pmazzocchi's, an organization owner, whose changes fametrano approved; 9 are Dependabot's, 2 are pre-commit.ci's and 1 is an outside contributor's. git log --follow at btclib 8e87317b4 shows fametrano made 109 of 111 commits to base58.py and 62 of 64 to bech32.py. The claude account in the contributors graph comes from Co-Authored-By trailers on AI-assisted commits. giacomocaironi, also an organization owner, has made no commit here. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/base58-bech32/graphs/contributors",
     "status": "Unmet"
   },
   "code_of_conduct": {
@@ -508,7 +508,7 @@
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "The project page https://btclib.org/base58-bech32/ sends Content-Security-Policy (default-src 'self', frame-ancestors 'none'), Strict-Transport-Security, X-Frame-Options DENY and X-Content-Type-Options nosniff (curl -sI, 2026-10-23). The repository on github.com sends all four. PyPI's project page sends the last three and no CSP; that is PyPI's to set.",
+    "justification": "The project page https://btclib.org/base58-bech32/ sends Content-Security-Policy (default-src 'self', frame-ancestors 'none'), Strict-Transport-Security, X-Frame-Options DENY and X-Content-Type-Options nosniff (curl -sI, 2026-10-23). The repository on github.com sends all four. PyPI's project page sends the last three and no CSP; that is PyPI's to set. The documentation site https://base58-bech32.readthedocs.io/ is served by Read the Docs over HTTPS with Strict-Transport-Security and X-Content-Type-Options nosniff, and no Content-Security-Policy or X-Frame-Options; that is Read the Docs' to set. Measured with curl -sIL on 2026-11-01.",
     "status": "Met"
   },
   "hardening": {
@@ -580,7 +580,7 @@
     "status": "Met"
   },
   "regression_tests_added50": {
-    "justification": "Bug fixes merged since 2026-10-17 each add a test: pull request 45 (convertbits width, closes 38) changes tests/bech32_test.py, 39 (closes 37) is a test fix, and 33 (b58decode_check, closes 28) changes eight test files. REVIEWING.md asks of every change whether what it adds is tested, and the 100% line and branch coverage gate fails a fix whose new code no test runs. https://github.com/btclib-org/base58-bech32/blob/main/REVIEWING.md https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "justification": "Bug fixes merged since 2026-10-17 each add a test: pull request 45 (convertbits width, closes 38) changes tests/bech32_test.py, 39 (closes 37) is a test fix, and 33 (b58decode_check, closes 28) changes six test files. REVIEWING.md asks of every change whether what it adds is tested, and the 100% line and branch coverage gate fails a fix whose new code no test runs. https://github.com/btclib-org/base58-bech32/blob/main/REVIEWING.md https://github.com/btclib-org/base58-bech32/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
     "status": "Met"
   },
   "release_notes": {
@@ -616,7 +616,7 @@
     "status": "Met"
   },
   "report_responses": {
-    "justification": "Five bug reports have been filed since the repository opened on 2026-10-17, issues 37, 38, 40, 41 and 42, all by pmazzocchi on 2026-10-19. Each got a comment or a linked change within the day and all are closed by 2026-10-21. Issues 54 and 57 are the maintainer's own tasks. https://github.com/btclib-org/base58-bech32/issues",
+    "justification": "Five bug reports have been filed by somebody other than the maintainer since the repository opened on 2026-10-17: issues 37, 38, 40, 41 and 42, all by pmazzocchi on 2026-10-19. Each got a comment or a linked change within the day and all are closed by 2026-10-21. Issues 54, 57, 76, 79 and 82 are the maintainer's own. 79 and 82 are open, and pull request 81 answers 79. https://github.com/btclib-org/base58-bech32/issues",
     "status": "Met"
   },
   "report_tracker": {
@@ -668,7 +668,7 @@
     "status": "Met"
   },
   "static_analysis_fixed": {
-    "justification": "No static-analysis finding is open: CodeQL has no open alert, and ruff and mypy findings fail the required lint check. The 29 open code-scanning alerts are OpenSSF Scorecard's scores for pinning (26), code review, maintenance and branch protection. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/codeql.yml",
+    "justification": "No static-analysis finding is open: CodeQL has no open alert, and ruff and mypy findings fail the required lint check. The 5 open code-scanning alerts are OpenSSF Scorecard's scores: pinning (2), code review, maintenance and branch protection. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/codeql.yml",
     "status": "Met"
   },
   "static_analysis_often": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.23 shipped 5 of 22 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Unmet"
+    "justification": "Over the last two releases, v2026.10.18 and v2026.10.23, 19 of 27 pull requests were approved by somebody other than the author, 70%, above the 50% the criterion asks (v2026.10.23 17 of 23, v2026.10.18 2 of 4); 5 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
   },
   "updateable_reused_components": {
     "justification": "At runtime the package reuses only the standard library. The test and tooling components are PyPI packages pinned in uv.lock and bumped by Dependabot, and the deps-latest sentinel runs the full suite against the upgraded set every week. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/deps-latest.yml",

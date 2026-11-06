@@ -8,7 +8,7 @@
     "status": "Met"
   },
   "OSPS-AC-03.01": {
-    "justification": "The main-self-merge ruleset requires a pull request for every change to main and has no bypass actor, so nobody pushes to main directly. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main. It has no bypass actor at rest. The maintainer adds himself for the seconds around some merges, in pull_request mode, which excuses the approval and still refuses a direct push. https://github.com/btclib-org/btclib/blob/main/REPOSITORY.md",
     "status": "Met"
   },
   "OSPS-AC-03.02": {
@@ -180,15 +180,15 @@
     "status": "N/A"
   },
   "OSPS-QA-05.01": {
-    "justification": "No generated executable is committed. The binary files are Bitcoin-serialized data (blocks, transactions, scripts, P2P messages) used as test data and fuzz seeds, and the Sphinx inventory python.inv. https://github.com/btclib-org/btclib",
+    "justification": "No generated executable is committed. The binary files are Bitcoin-serialized data (blocks, transactions, scripts, P2P messages) used as test data and fuzz seeds, and the Sphinx inventories python.inv and ecc.inv. https://github.com/btclib-org/btclib",
     "status": "Met"
   },
   "OSPS-QA-05.02": {
-    "justification": "The binary files are Bitcoin-serialized data (blocks, transactions, scripts, P2P messages) used as test data and fuzz seeds, which the library itself decodes, and the Sphinx inventory python.inv. tests/_data/README.md pins each vendored test file to its source, and docs/source/conf.py gives the command that fetches the inventory. https://github.com/btclib-org/btclib/blob/main/tests/_data/README.md",
+    "justification": "The binary files are Bitcoin-serialized data (blocks, transactions, scripts, P2P messages) used as test data and fuzz seeds, which the library itself decodes, and the Sphinx inventories python.inv and ecc.inv. tests/_data/README.md pins each vendored test file to its source, and docs/source/conf.py gives the command that fetches each inventory. https://github.com/btclib-org/btclib/blob/main/tests/_data/README.md",
     "status": "Met"
   },
   "OSPS-QA-06.01": {
-    "justification": "test.yml runs the test suite on every pull request, and its aggregate check, 'test: every job passed', is required on main. https://github.com/btclib-org/btclib/blob/main/.github/workflows/test.yml",
+    "justification": "integration-bitcoind.yml runs its test suite on every pull request, and its check is required on main. test.yml runs the main suite on every pull request that changes more than the prose files it names, and its aggregate check, 'test: every job passed', is required on main. https://github.com/btclib-org/btclib/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "OSPS-QA-06.02": {
@@ -200,7 +200,7 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. It has no bypass actor at rest. The maintainer adds a pull_request-mode bypass around merges and removes it afterwards. GOVERNANCE.md reserves that bypass for an emergency, and it has also been used for ordinary work: since 2026-10-16, 39 of the 94 pull requests merged to main had no approval from anybody other than their author. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
     "status": "Met"
   },
   "OSPS-SA-01.01": {
@@ -240,7 +240,7 @@
     "status": "Met"
   },
   "OSPS-VM-05.01": {
-    "justification": "The standard sets the threshold: actions/dependency-review-action fails a pull request that adds or changes a dependency with an advisory of moderate severity or above, or with a licence outside the allow-list. Its settings are one file, btclib-org/.github's .github/dependency-review.yml. https://github.com/btclib-org/.github/blob/main/.github/dependency-review.yml https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "justification": "The standard sets the threshold: actions/dependency-review-action fails a pull request that adds or changes a runtime dependency with an advisory of moderate severity or above, or with a licence outside the allow-list. Its settings are one file, btclib-org/.github's .github/dependency-review.yml. Development dependencies are covered by the audit in the required lint check. https://github.com/btclib-org/.github/blob/main/.github/dependency-review.yml https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
     "status": "Met"
   },
   "OSPS-VM-05.02": {
@@ -248,7 +248,7 @@
     "status": "Met"
   },
   "OSPS-VM-05.03": {
-    "justification": "The required lint check audits the whole uv.lock, every dependency group, on every pull request: check_audit.py --all-groups runs uv audit, which reads OSV's malicious-package (MAL-) entries as well as advisories. Any such entry fails the check, and so does an OSV that cannot be reached. The audit's only exemption is a .github/vex.toml entry, reviewed like any other change. The required Dependency review check also blocks a change that adds a dependency with an advisory of moderate severity or above, or a licence outside the allow-list. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
+    "justification": "The required lint check audits the whole uv.lock, every dependency group, on every pull request: check_audit.py --all-groups runs uv audit, which reads OSV's malicious-package (MAL-) entries as well as advisories. Any such entry fails the check, and so does an OSV that cannot be reached. The audit's only exemption is a .github/vex.toml entry, reviewed like any other change. The required Dependency review check also blocks a change that adds a runtime dependency with an advisory of moderate severity or above, or a licence outside the allow-list. https://github.com/btclib-org/.github/blob/main/README.md#12-releasing https://github.com/btclib-org/.github/blob/main/README.md#tokens-publishing-scanning",
     "status": "Met"
   },
   "OSPS-VM-06.01": {
@@ -280,7 +280,7 @@
     "status": "Met"
   },
   "automated_integration_testing": {
-    "justification": "test.yml runs the suite, and integration-bitcoind.yml runs tests/integration against Bitcoin Core on regtest, on every pull request and push to main. Both are required checks. https://github.com/btclib-org/btclib/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the suite on every pull request that changes more than the prose files it names. integration-bitcoind.yml runs tests/integration against Bitcoin Core on regtest on every pull request and push to main. Both are required checks. https://github.com/btclib-org/btclib/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "build": {
@@ -356,7 +356,7 @@
     "status": "Unmet"
   },
   "crypto_call": {
-    "justification": "btclib calls libraries for its primitives: curve arithmetic and signature schemes from ecc, BIP324's ChaCha20 and ChaCha20-Poly1305 from cryptography, hashes from hashlib. It writes only what Bitcoin's specifications build on them (MuHash3072, the BIP324 key schedule). Its RIPEMD-160 is Bitcoin Core's own Python copy, used only where hashlib has none. https://github.com/btclib-org/btclib/tree/main/src/btclib",
+    "justification": "btclib calls libraries for its ciphers and general hashes: curve arithmetic and signature schemes from ecc, BIP324's ChaCha20 and ChaCha20-Poly1305 from cryptography, hashes from hashlib. It writes what Bitcoin's specifications build on them (MuHash3072, the BIP324 key schedule) and these primitives: SipHash-2-4, which BIP152, BIP158 and the headers presync need, a private ChaCha20 block function inside MuHash3072 that encrypts nothing, and Bitcoin Core's Python copy of RIPEMD-160, used only where hashlib has none. https://github.com/btclib-org/btclib/tree/main/src/btclib",
     "status": "Met"
   },
   "crypto_certificate_verification": {
@@ -388,7 +388,7 @@
     "status": "Met"
   },
   "crypto_random": {
-    "justification": "btclib draws randomness only from Python's `secrets` module (the BMS nonce, the transaction input and output shuffle); ECDSA nonces are deterministic (RFC 6979). Key, mnemonic and nonce generation is in ecc and btclib-wallet, which hold their own entries. https://github.com/btclib-org/btclib/tree/main/src/btclib",
+    "justification": "btclib draws randomness only from Python's `secrets` module (the BMS nonce, the transaction input and output shuffle, the headers presync's commitment offset and salt); ECDSA nonces are deterministic (RFC 6979). Key, mnemonic and nonce generation is in ecc and btclib-wallet, which hold their own entries. https://github.com/btclib-org/btclib/tree/main/src/btclib",
     "status": "Met"
   },
   "crypto_tls12": {
@@ -476,7 +476,7 @@
     "status": "Met"
   },
   "dynamic_analysis_fixed": {
-    "justification": "No fuzzing or mutation-testing finding is open, and the weekly fuzz and mutation runs on main pass. https://github.com/btclib-org/btclib/actions/workflows/fuzz.yml https://github.com/btclib-org/btclib/actions/workflows/mutation.yml",
+    "justification": "No fuzzing or mutation-testing finding is an exploitable vulnerability, and the weekly fuzz and mutation runs on main pass. What is open is test gaps: mutants the suite does not kill, such as issue 2890, which states that the code behaves correctly today. https://github.com/btclib-org/btclib/actions/workflows/fuzz.yml https://github.com/btclib-org/btclib/actions/workflows/mutation.yml",
     "status": "Met"
   },
   "dynamic_analysis_unsafe": {
@@ -492,7 +492,7 @@
     "status": "Met"
   },
   "external_dependencies": {
-    "justification": "Every dependency is declared in machine-readable form in pyproject.toml's [project.dependencies] and dependency-groups, resolved and pinned in the committed uv.lock. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "The library's and its tooling's Python dependencies are declared in machine-readable form in pyproject.toml's [project.dependencies] and dependency-groups, resolved and pinned in the committed uv.lock. The btcd comparison in the fuzz tooling declares its Go modules in fuzz/btcd_decode/go.mod and go.sum, and .clusterfuzzlite/Dockerfile names its base image. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "Met"
   },
   "floss_license": {
@@ -508,7 +508,7 @@
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "https://btclib.org/btclib/ sends Content-Security-Policy (with frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security. Check with curl -sI https://btclib.org/btclib/",
+    "justification": "https://btclib.org/btclib/ sends Content-Security-Policy (with frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security. Check with curl -sI https://btclib.org/btclib/ The repository on github.com sends all four. PyPI's project page https://pypi.org/project/btclib/ sends all but the CSP; that is PyPI's to set. The documentation site https://btclib.readthedocs.io/ is served by Read the Docs over HTTPS with Strict-Transport-Security and X-Content-Type-Options nosniff, and no Content-Security-Policy or X-Frame-Options; that is Read the Docs' to set. Measured with curl -sIL on 2026-11-01.",
     "status": "Met"
   },
   "hardening": {
@@ -580,7 +580,7 @@
     "status": "Met"
   },
   "regression_tests_added50": {
-    "justification": "A merged pull request that changes code under src/ also changes tests/, unless it leaves behaviour as it was: a docstring, a comment, a move, a removal or a refactor. The 100% line and branch coverage gate also fails a fix whose new code no test runs. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
+    "justification": "Since 2026-05-01, 245 of the 276 commits on main that change code under src/ also change tests/. Nearly all the other 31 leave behaviour as it was: a docstring, a comment, a move or a removal. The 100% line and branch coverage gate also fails a fix whose new code no test runs. https://github.com/btclib-org/btclib/blob/main/CONTRIBUTING.md#the-environment-and-the-gates",
     "status": "Met"
   },
   "release_notes": {
@@ -668,7 +668,7 @@
     "status": "Met"
   },
   "static_analysis_fixed": {
-    "justification": "No open CodeQL, ruff or mypy finding is a vulnerability in btclib's code, and ruff and mypy findings fail the required lint check. CodeQL's actions/unpinned-tag alerts flag workflows that call btclib-org/.github's reusable workflow at main, and earlier ones were dismissed as won't fix. https://github.com/btclib-org/btclib/blob/main/.github/workflows/claude-review.yml",
+    "justification": "No CodeQL alert is open, and ruff and mypy findings fail the required lint check. The earlier actions/unpinned-tag alerts, on workflows that called btclib-org/.github's reusable workflows at main, were dismissed as won't fix, and those calls are now pinned to a tagged commit. https://github.com/btclib-org/btclib/blob/main/.github/workflows/claude-review.yml",
     "status": "Met"
   },
   "static_analysis_often": {
@@ -676,7 +676,7 @@
     "status": "Met"
   },
   "test": {
-    "justification": "test.yml runs the pytest suite, gated at 100% line and branch coverage, on every pull request. It checks vectors from the BIPs, Bitcoin Core and Core's qa-assets, and tests/_data/README.md pins each vendored file to its upstream commit. https://github.com/btclib-org/btclib/actions/workflows/test.yml",
+    "justification": "test.yml runs the pytest suite, gated at 100% line and branch coverage, on every pull request that changes more than the prose files test.yml names. It checks vectors from the BIPs, Bitcoin Core and Core's qa-assets, and tests/_data/README.md pins each vendored file to its upstream commit. https://github.com/btclib-org/btclib/actions/workflows/test.yml",
     "status": "Met"
   },
   "test_branch_coverage80": {
@@ -684,7 +684,7 @@
     "status": "Met"
   },
   "test_continuous_integration": {
-    "justification": "test.yml runs the suite on every pull request and on every push to main that changes more than Markdown files. Its aggregate job, test: every job passed, is a required check on main. https://github.com/btclib-org/btclib/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the suite on every pull request that changes more than the prose files it names, and on every push to main that changes more than top-level Markdown files. Its aggregate job, test: every job passed, is a required check on main. https://github.com/btclib-org/btclib/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "test_invocation": {
@@ -704,11 +704,11 @@
     "status": "Met"
   },
   "test_statement_coverage80": {
-    "justification": "pyproject.toml sets fail_under = 100.0 under [tool.coverage.report], gated on every pull request. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "pyproject.toml sets fail_under = 100.0 under [tool.coverage.report], gated on every pull request that changes more than the prose files test.yml names. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "Met"
   },
   "test_statement_coverage90": {
-    "justification": "Coverage is gated at 100% (`fail_under = 100.0` under `[tool.coverage.report]`) on every pull request. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
+    "justification": "Coverage is gated at 100% (`fail_under = 100.0` under `[tool.coverage.report]`) on every pull request that changes more than the prose files test.yml names. https://github.com/btclib-org/btclib/blob/main/pyproject.toml",
     "status": "Met"
   },
   "tests_are_added": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.30 shipped 12 of 14 pull requests approved by somebody other than the author, 86%, above the 50% the criterion asks; 10 were approved by somebody other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "Over the last two releases, v2026.10.28 and v2026.10.30, 29 of 51 pull requests were approved by somebody other than the author, 57%, above the 50% the criterion asks (v2026.10.30 12 of 15, v2026.10.28 17 of 36); 22 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Met"
   },
   "updateable_reused_components": {

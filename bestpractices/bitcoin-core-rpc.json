@@ -188,11 +188,11 @@
     "status": "Met"
   },
   "OSPS-QA-06.01": {
-    "justification": "test.yml's aggregate check ('test: every job passed') runs the test suite on every pull request and is a required status check on main. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml's aggregate check ('test: every job passed') is a required status check on main. It runs the test suite on every pull request that changes code. A pull request that edits only prose skips the suite, and the check still reports. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "OSPS-QA-06.02": {
-    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the command that runs the suite and which workflows run it on every pull request, on main and on a schedule, and which of them gate a merge. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the command that runs the suite. Its *What gates a merge, and what only reports* says which workflows run it on every pull request, on main and on a schedule, and which of them gate a merge. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "OSPS-QA-06.03": {
@@ -476,7 +476,7 @@
     "status": "Met"
   },
   "dynamic_analysis_fixed": {
-    "justification": "No mutation-testing finding is open, and the weekly mutation run on main passes. https://github.com/btclib-org/bitcoin-core-rpc/actions/workflows/mutation.yml",
+    "justification": "No security issue from dynamic analysis is open. The weekly fuzz and mutation runs on main pass. The mutation run has no threshold and reports survivors: 53 of the 264 mutants it executed on 2026-10-26. Nobody has yet read those survivors one by one. https://github.com/btclib-org/bitcoin-core-rpc/actions/workflows/mutation.yml",
     "status": "Met"
   },
   "dynamic_analysis_unsafe": {
@@ -508,7 +508,7 @@
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "https://btclib.org/bitcoin-core-rpc/ is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security.",
+    "justification": "https://btclib.org/bitcoin-core-rpc/ is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security. The repository on github.com sends all four. PyPI's project page https://pypi.org/project/bitcoin-core-rpc/ sends all but the CSP; that is PyPI's to set. The documentation site https://bitcoin-core-rpc.readthedocs.io/ is served by Read the Docs over HTTPS with Strict-Transport-Security and X-Content-Type-Options nosniff, and no Content-Security-Policy or X-Frame-Options; that is Read the Docs' to set. Measured with curl -sIL on 2026-11-01.",
     "status": "Met"
   },
   "hardening": {
@@ -652,7 +652,7 @@
     "status": "Met"
   },
   "sites_password_security": {
-    "justification": "Project sites are GitHub, PyPI and Read the Docs; none of these repositories runs a site of its own that stores user passwords -- authentication is GitHub's and PyPI's, not this project's. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/SECURITY.md",
+    "justification": "Project sites are btclib.org, GitHub, PyPI and Read the Docs. This project's page on btclib.org has no form and no login, and none of these repositories runs a site of its own that stores user passwords -- authentication is GitHub's and PyPI's, not this project's. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/SECURITY.md",
     "status": "N/A"
   },
   "small_tasks": {
@@ -704,11 +704,11 @@
     "status": "Met"
   },
   "test_statement_coverage80": {
-    "justification": "pyproject.toml sets fail_under = 100.0, gated on every pull request by test.yml. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/pyproject.toml",
+    "justification": "pyproject.toml sets fail_under = 100.0, gated by test.yml on every pull request that changes code. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/pyproject.toml",
     "status": "Met"
   },
   "test_statement_coverage90": {
-    "justification": "pyproject.toml sets fail_under = 100.0, gated on every pull request by test.yml. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/pyproject.toml",
+    "justification": "pyproject.toml sets fail_under = 100.0, gated by test.yml on every pull request that changes code. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/pyproject.toml",
     "status": "Met"
   },
   "tests_are_added": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.30 shipped 15 of 28 pull requests approved by somebody other than the author, 54%, above the 50% the criterion asks; 10 were approved by somebody other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "Over the last two releases, v2026.10.23 and v2026.10.30, 25 of 44 pull requests were approved by somebody other than the author, 57%, above the 50% the criterion asks (v2026.10.30 15 of 28, v2026.10.23 10 of 16); 18 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Met"
   },
   "updateable_reused_components": {

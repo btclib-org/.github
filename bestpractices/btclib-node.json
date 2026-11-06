@@ -188,7 +188,7 @@
     "status": "Met"
   },
   "OSPS-QA-06.01": {
-    "justification": "test.yml's aggregate check ('test: every job passed') runs the test suite on every pull request and is a required status check on main. https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml's aggregate check ('test: every job passed') is a required status check on main. It runs the test suite on every pull request that changes more than root prose or the secrets baseline, and reports a pull request changing only those as a pass. https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "OSPS-QA-06.02": {
@@ -200,7 +200,7 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. It has no bypass actor at rest. The maintainer adds a pull_request-mode bypass around merges and removes it afterwards. GOVERNANCE.md reserves that bypass for an emergency, and it has also been used for ordinary work: 27 times from 2026-10-18 to 2026-11-01, and 41 of the 90 pull requests merged since 2026-10-16 had no non-author approval. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
     "status": "Met"
   },
   "OSPS-SA-01.01": {
@@ -280,7 +280,7 @@
     "status": "Met"
   },
   "automated_integration_testing": {
-    "justification": "test.yml runs the test suite on every push to main and every pull request, and its aggregate job is a required check. https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the test suite on every pull request and every push to main that changes more than root Markdown files or the secrets baseline, and its aggregate job is a required check. https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "build": {
@@ -356,7 +356,7 @@
     "status": "Unmet"
   },
   "crypto_call": {
-    "justification": "The node reimplements no cryptography: it calls btclib, btclib-ecc and Python's hashlib and hmac.",
+    "justification": "The node reimplements no cryptography: it calls btclib, ecc and Python's hashlib and hmac.",
     "status": "Met"
   },
   "crypto_certificate_verification": {
@@ -376,7 +376,7 @@
     "status": "Met"
   },
   "crypto_password_storage": {
-    "justification": "-rpcauth credentials belong to the node's operator and the operator's own RPC clients, not to external users of a service. The node stores them as Bitcoin Core does, a salted single-round HMAC-SHA256, as SECURITY.md records. https://github.com/btclib-org/btclib-node/blob/main/SECURITY.md",
+    "justification": "-rpcauth credentials belong to the node's operator and the operator's own RPC clients, not to external users of a service. The node stores them as Bitcoin Core does, a salted single-round HMAC-SHA256, as the docstring of rpc/auth.py records. https://github.com/btclib-org/btclib-node/blob/main/src/btclib_node/rpc/auth.py",
     "status": "N/A"
   },
   "crypto_pfs": {
@@ -384,7 +384,7 @@
     "status": "Met"
   },
   "crypto_published": {
-    "justification": "The node implements no algorithm of its own: it calls btclib and btclib-ecc, which implement published algorithms, and Python's hashlib and hmac.",
+    "justification": "The node implements no algorithm of its own: it calls btclib and ecc, which implement published algorithms, and Python's hashlib and hmac.",
     "status": "Met"
   },
   "crypto_random": {
@@ -468,7 +468,7 @@
     "status": "Met"
   },
   "dynamic_analysis": {
-    "justification": "Every release runs the test suite before it is published. release.yml calls test.yml, and the PyPI upload runs only if it passes. The suite fails below 100% coverage, branches included. ClusterFuzzLite fuzzing and cosmic-ray mutation testing also run every week. https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/release.yml https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/fuzz.yml",
+    "justification": "Every release runs the test suite before it is published. release.yml calls test.yml, and the PyPI upload runs only if it passes. The suite fails below 100% coverage, branches included. Atheris fuzzing and cosmic-ray mutation testing also run every week. https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/release.yml https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/fuzz.yml",
     "status": "Met"
   },
   "dynamic_analysis_enable_assertions": {
@@ -508,7 +508,7 @@
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "The project site is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security. https://btclib.org/btclib-node/",
+    "justification": "The project site is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security. https://btclib.org/btclib-node/ The repository on github.com sends all four. PyPI's project page https://pypi.org/project/btclib-node/ sends all but the CSP; that is PyPI's to set. The documentation site https://btclib-node.readthedocs.io/ is served by Read the Docs over HTTPS with Strict-Transport-Security and X-Content-Type-Options nosniff, and no Content-Security-Policy or X-Frame-Options; that is Read the Docs' to set. Measured with curl -sIL on 2026-11-01.",
     "status": "Met"
   },
   "hardening": {
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "v2026.10.8's notes name GHSA-74pj-5cgg-3m66, the advisory it fixes. v2026.10.4's notes describe its three fixes and link their issues, but do not name GHSA-rm5x-6v45-j8m6, GHSA-6hv4-mmgr-39wq and GHSA-68jv-ghr4-jjmj, published minutes after the release. https://github.com/btclib-org/btclib-node/releases/tag/v2026.10.8",
+    "justification": "The GitHub release notes name each advisory the release fixes: v2026.10.8's name GHSA-74pj-5cgg-3m66, and v2026.10.4's name GHSA-rm5x-6v45-j8m6, GHSA-6hv4-mmgr-39wq and GHSA-68jv-ghr4-jjmj. RELEASE_NOTES.md's v2026.10.4 section does not name those three. https://github.com/btclib-org/btclib-node/releases/tag/v2026.10.4 https://github.com/btclib-org/btclib-node/releases/tag/v2026.10.8",
     "status": "Met"
   },
   "repo_distributed": {
@@ -684,7 +684,7 @@
     "status": "Met"
   },
   "test_continuous_integration": {
-    "justification": "test.yml runs the suite on every pull request and on every push to main that changes more than Markdown files or the secrets baseline. Its aggregate job, test: every job passed, is a required check on main. https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the suite on every pull request and every push to main that changes more than root Markdown files or the secrets baseline. A pull request changing only those reports the skip as a pass. Its aggregate job, test: every job passed, is a required check on main. https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "test_invocation": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.30 shipped 9 of 12 pull requests approved by somebody other than the author, 75%, above the 50% the criterion asks; all 9 were approved by somebody other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "Over the last two releases, v2026.10.29 and v2026.10.30, 25 of 43 pull requests were approved by somebody other than the author, 58%, above the 50% the criterion asks (v2026.10.30 9 of 12, v2026.10.29 16 of 31); 12 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Met"
   },
   "updateable_reused_components": {

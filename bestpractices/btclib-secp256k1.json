@@ -88,7 +88,7 @@
     "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "The verify command pins the signer: --repo names this repository, --signer-workflow the workflow that signed, which SECURITY.md names for each release, and --source-ref the release tag. https://github.com/btclib-org/btclib-secp256k1/blob/main/SECURITY.md",
+    "justification": "The verify command pins the signer: --owner and a comparison of the certificate's repository id name this repository, --signer-workflow the workflow that signed, which SECURITY.md names for each release, and --source-ref the release tag. https://github.com/btclib-org/btclib-secp256k1/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-04.01": {
@@ -188,7 +188,7 @@
     "status": "Met"
   },
   "OSPS-QA-06.01": {
-    "justification": "test.yml runs the test suite on every pull request, and its aggregate check, 'test: every job passed', is required on main. https://github.com/btclib-org/btclib-secp256k1/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the test suite on every pull request that changes anything but prose, and its aggregate check, 'test: every job passed', is required on main. A pull request that changes only prose files nothing built reads skips the suite, and the aggregate check still passes. https://github.com/btclib-org/btclib-secp256k1/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "OSPS-QA-06.02": {
@@ -200,7 +200,7 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. It has no bypass actor at rest. The maintainer adds a pull_request-mode bypass around merges and removes it afterwards. GOVERNANCE.md reserves that bypass for an emergency, and it has also been used for ordinary work: most recently on 2026-10-28. 11 of the 25 pull requests in v0.8.0.13 and 13 of the 24 merged since have no approval. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
     "status": "Met"
   },
   "OSPS-SA-01.01": {
@@ -280,7 +280,7 @@
     "status": "Met"
   },
   "automated_integration_testing": {
-    "justification": "test.yml runs the test suite on every push to main and every pull request, and its aggregate job is a required check. https://github.com/btclib-org/btclib-secp256k1/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the test suite on every push to main and every pull request that changes anything but prose, and its aggregate job is a required check. A pull request that changes only prose files nothing built reads skips the suite, and the aggregate check still passes. https://github.com/btclib-org/btclib-secp256k1/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "build": {
@@ -508,7 +508,7 @@
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "https://btclib.org/btclib-secp256k1/ is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security.",
+    "justification": "https://btclib.org/btclib-secp256k1/ is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security. The repository on github.com sends all four. PyPI's project page https://pypi.org/project/btclib-secp256k1/ sends all but the CSP; that is PyPI's to set. The documentation site https://btclib-secp256k1.readthedocs.io/ is served by Read the Docs over HTTPS with Strict-Transport-Security and X-Content-Type-Options nosniff, and no Content-Security-Policy or X-Frame-Options; that is Read the Docs' to set. Measured with curl -sIL on 2026-11-01.",
     "status": "Met"
   },
   "hardening": {
@@ -676,7 +676,7 @@
     "status": "Met"
   },
   "test": {
-    "justification": "test.yml runs the pytest suite, gated at 100% line and branch coverage, on every pull request. It checks vectors published by the BIPs and other upstreams, and tests/README.md pins each vendored file to its upstream commit. https://github.com/btclib-org/btclib-secp256k1/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the pytest suite, gated at 100% line and branch coverage, on every push to main and every pull request that changes anything but prose. It checks vectors published by the BIPs and other upstreams, and tests/README.md pins each vendored file to its upstream commit. A pull request that changes only prose files nothing built reads skips the suite, and the aggregate check still passes. https://github.com/btclib-org/btclib-secp256k1/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "test_branch_coverage80": {
@@ -684,7 +684,7 @@
     "status": "Met"
   },
   "test_continuous_integration": {
-    "justification": "test.yml runs the suite on every pull request and push to main. https://github.com/btclib-org/btclib-secp256k1/actions/workflows/test.yml",
+    "justification": "test.yml runs the suite on every push to main and every pull request that changes anything but prose. A pull request that changes only prose files nothing built reads skips the suite, and the aggregate check still passes. https://github.com/btclib-org/btclib-secp256k1/actions/workflows/test.yml",
     "status": "Met"
   },
   "test_invocation": {
@@ -704,11 +704,11 @@
     "status": "Met"
   },
   "test_statement_coverage80": {
-    "justification": "pyproject.toml sets fail_under = 100 over the Python code, gated on every pull request by test.yml. The vendored C is tested by libsecp256k1's own suite, not by this gate. https://github.com/btclib-org/btclib-secp256k1/blob/main/pyproject.toml",
+    "justification": "pyproject.toml sets fail_under = 100 over the Python code, gated by test.yml on every pull request that changes anything but prose. The vendored C is tested by libsecp256k1's own suite, not by this gate. https://github.com/btclib-org/btclib-secp256k1/blob/main/pyproject.toml",
     "status": "Met"
   },
   "test_statement_coverage90": {
-    "justification": "Coverage is gated at 100% (fail_under = 100 in [tool.coverage.report]) on every pull request. https://github.com/btclib-org/btclib-secp256k1/blob/main/pyproject.toml",
+    "justification": "Coverage is gated at 100% (fail_under = 100 in [tool.coverage.report]) on every pull request that changes anything but prose. https://github.com/btclib-org/btclib-secp256k1/blob/main/pyproject.toml",
     "status": "Met"
   },
   "tests_are_added": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v0.8.0.13 shipped 9 of 25 pull requests approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Unmet"
+    "justification": "Over the last two releases, v0.8.0.12 and v0.8.0.13, 36 of 54 pull requests were approved by somebody other than the author, 67%, above the 50% the criterion asks (v0.8.0.13 14 of 25, v0.8.0.12 22 of 29); 28 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
   },
   "updateable_reused_components": {
     "justification": "PyPI packages are pinned in uv.lock and updated by weekly Dependabot pull requests that run the full suite. The vendored libsecp256k1 and secp256k1-zkp are git submodules pinned at a commit, and Dependabot opens a weekly pull request when upstream moves. https://github.com/btclib-org/btclib-secp256k1/blob/main/.github/dependabot.yml",

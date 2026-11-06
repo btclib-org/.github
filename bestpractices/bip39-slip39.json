@@ -36,7 +36,7 @@
     "status": "Met"
   },
   "OSPS-BR-01.04": {
-    "justification": "The only workflow_dispatch input is mutation.yml's profile, a choice from a fixed list. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/mutation.yml",
+    "justification": "Two workflows take workflow_dispatch inputs. mutation.yml's profile is a choice from a fixed list. verified-signatures.yml's before and after reach the run: step only through env:, and the step refuses a value that is not a hexadecimal commit sha. A release tag's name is checked against the package version before anything is built. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/mutation.yml https://github.com/btclib-org/.github/blob/main/.github/workflows/reusable-verified-signatures.yml",
     "status": "Met"
   },
   "OSPS-BR-02.01": {
@@ -88,7 +88,7 @@
     "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "The verify command pins the signer: --repo names this repository, --signer-workflow the organization's reusable-build.yml (reusable-attest.yml for earlier releases) and --source-ref the release tag. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md",
+    "justification": "The verify command pins the signer: --owner names the organization, the output's sourceRepositoryIdentifier must equal this repository's id, --signer-workflow names the organization's reusable-build.yml (reusable-attest.yml for earlier releases) and --source-ref the release tag. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md",
     "status": "Met"
   },
   "OSPS-DO-04.01": {
@@ -188,11 +188,11 @@
     "status": "Met"
   },
   "OSPS-QA-06.01": {
-    "justification": "test.yml's aggregate check ('test: every job passed') runs the test suite on every pull request and is a required status check on main. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml's aggregate check ('test: every job passed') is a required status check on main, and it runs the test suite on every pull request except one that changes only the prose files test.yml's prose-pattern names, which no job reads. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "OSPS-QA-06.02": {
-    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the command that runs the suite and which workflows run it on every pull request, on main and on a schedule, and which of them gate a merge. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md",
+    "justification": "CONTRIBUTING.md's *The environment and the gates* gives the command that runs the suite. *Reproducing what CI runs* gives each job's command, and *What gates a merge, and what only reports* says which workflows run on a pull request, on a push and on a schedule, and which of them gate a merge. https://github.com/btclib-org/bip39-slip39/blob/main/CONTRIBUTING.md",
     "status": "Met"
   },
   "OSPS-QA-06.03": {
@@ -200,7 +200,7 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. It has no bypass actor at rest. The maintainer adds a pull_request-mode bypass around merges and removes it afterwards. GOVERNANCE.md reserves that bypass for an emergency, and it has also been used for ordinary work: 15 pull requests landed without a non-author approval between 2026-10-20 and 2026-10-28, the last being 180. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
     "status": "Met"
   },
   "OSPS-SA-01.01": {
@@ -264,7 +264,7 @@
     "status": "Met"
   },
   "accessibility_best_practices": {
-    "justification": "The only user interface is entropy.collect_rolls, a dice prompt in the terminal built on input() and print(). Its prompts are plain text, with no colour, cursor movement or layout, so any screen reader the terminal supports reads them as written. There is no GUI and no web front end. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md#limitations-not-vulnerabilities",
+    "justification": "The user interfaces are entropy.collect_rolls, a dice prompt in the terminal built on input() and print(), and the command python -m bip39_slip39, which reads rolls with getpass. Their prompts are plain text with no colour or layout, so any screen reader the terminal supports reads them as written. The command clears the screen around a SLIP-0039 share and does not echo rolls. There is no GUI and no web front end. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md#limitations-not-vulnerabilities",
     "status": "Met"
   },
   "achieve_passing": {
@@ -280,7 +280,7 @@
     "status": "Met"
   },
   "automated_integration_testing": {
-    "justification": "test.yml runs the test suite, on every supported interpreter, on every push to main and every pull request, and its aggregate job `test: every job passed` is a required check. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the test suite on every pull request that changes more than prose and on every push to main that changes more than top-level Markdown files, and its aggregate job `test: every job passed` is a required check. It runs on one interpreter; the os-ubuntu, os-macos and os-windows workflows run the supported interpreters weekly and at a release. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "build": {
@@ -316,7 +316,7 @@
     "status": "N/A"
   },
   "bus_factor": {
-    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review but has made no commit to this repository. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/bip39-slip39/graphs/contributors",
+    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. The claude account in the contributors graph comes from the Co-Authored-By trailer on AI-assisted commits, almost all of them fametrano's. pmazzocchi, an organization owner, did the 2026-09-30 security review, approves pull requests and has made one small commit to this repository. In the last year, outside contributors have made only small changes. giacomocaironi, also an organization owner, has made no commit to this repository. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/bip39-slip39/graphs/contributors",
     "status": "Unmet"
   },
   "code_of_conduct": {
@@ -344,7 +344,7 @@
     "status": "Met"
   },
   "contributors_unassociated": {
-    "justification": "fametrano is the only significant contributor. In the last year, outside contributors have made only small changes. pmazzocchi, an organization owner, has made no commit to this repository. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. giacomocaironi, also an organization owner, has made no commit to this repository. https://github.com/fametrano https://github.com/pmazzocchi",
+    "justification": "fametrano is the only significant contributor. In the last year, outside contributors have made only small changes. pmazzocchi, an organization owner, has made one small commit to this repository. pmazzocchi and fametrano are associated: both are CheckSig co-founders, as their GitHub profiles state. giacomocaironi, also an organization owner, has made no commit to this repository. https://github.com/fametrano https://github.com/pmazzocchi",
     "status": "Unmet"
   },
   "copyright_per_file": {
@@ -508,7 +508,7 @@
     "status": "Met"
   },
   "hardened_site": {
-    "justification": "https://btclib.org/bip39-slip39/ is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security.",
+    "justification": "https://btclib.org/bip39-slip39/ is served over HTTPS with Content-Security-Policy (frame-ancestors 'none'), X-Frame-Options: DENY, X-Content-Type-Options: nosniff and Strict-Transport-Security. The repository on github.com sends all four. PyPI's project page https://pypi.org/project/bip39-slip39/ sends all but the CSP; that is PyPI's to set. The documentation site https://bip39-slip39.readthedocs.io/ is served by Read the Docs over HTTPS with Strict-Transport-Security and X-Content-Type-Options nosniff, and no Content-Security-Policy or X-Frame-Options; that is Read the Docs' to set. Measured with curl -sIL on 2026-11-01.",
     "status": "Met"
   },
   "hardening": {
@@ -548,8 +548,8 @@
     "status": "Met"
   },
   "internationalization": {
-    "justification": "The mnemonic sentence comes in every language the specifications give a word list for: BIP39's reference lists, with Japanese joined by the ideographic space BIP39 requires, and Electrum's own. The language is read back off the words. SLIP-0039 defines English alone. The dice prompt of entropy.collect_rolls is in English only, and issue #94 weighs offering it in those languages. https://github.com/btclib-org/bip39-slip39/issues/94 https://github.com/btclib-org/bip39-slip39/tree/main/src/bip39_slip39/_data",
-    "status": "Unmet"
+    "justification": "The mnemonic sentence comes in every language the specifications give a word list for: BIP39's reference lists, with Japanese joined by the ideographic space BIP39 requires, and Electrum's own. The language is read back off the words. SLIP-0039 defines English alone. entropy.collect_rolls takes a lang parameter and shows its prompts in all 12 BIP39 languages, translated and checked with AI, as issue #94 decided. The messages of python -m bip39_slip39 and the refusals are in English. https://github.com/btclib-org/bip39-slip39/issues/94 https://github.com/btclib-org/bip39-slip39/blob/main/src/bip39_slip39/_rolls_prompts.py",
+    "status": "Met"
   },
   "know_common_errors": {
     "justification": "ASSURANCE_CASE.md lists the common implementation weaknesses, such as CWE-209 and CWE-330, and what counters each: https://github.com/btclib-org/bip39-slip39/blob/main/ASSURANCE_CASE.md",
@@ -684,7 +684,7 @@
     "status": "Met"
   },
   "test_continuous_integration": {
-    "justification": "test.yml runs the suite on every pull request and on every push to main that changes more than Markdown files. Its aggregate job, test: every job passed, is a required check on main. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/test.yml",
+    "justification": "test.yml runs the suite on every pull request that changes more than the prose files its prose-pattern names, and on every push to main that changes more than top-level Markdown files. Its aggregate job, test: every job passed, is a required check on main. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/test.yml",
     "status": "Met"
   },
   "test_invocation": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "v2026.10.24 shipped 32 pull requests, 20 of them approved by somebody other than the author and other than fametrano. main's ruleset requires one approving review from somebody other than the author and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Unmet"
+    "justification": "Over the last two releases, v2026.10.17 and v2026.10.24, 33 of 54 pull requests were approved by somebody other than the author, 61%, above the 50% the criterion asks (v2026.10.24 22 of 33, v2026.10.17 11 of 21); 27 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Met"
   },
   "updateable_reused_components": {
     "justification": "At runtime the package reuses only the standard library. The test and tooling components are PyPI packages pinned in uv.lock and bumped by Dependabot, and the deps-latest sentinel runs the full suite against the upgraded set every week. https://github.com/btclib-org/bip39-slip39/blob/main/.github/workflows/deps-latest.yml",
@@ -752,7 +752,7 @@
     "status": "Met"
   },
   "vulnerability_report_credit": {
-    "justification": "An advisory credits its reporter as finder. fametrano, the maintainer, filed GHSA-qjpp-8mp6-7744, so it has no outside reporter to credit. SECURITY.md's Security review credits the 2026-09-30 review to pmazzocchi. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md#security-review https://github.com/btclib-org/bip39-slip39/security/advisories",
+    "justification": "An advisory credits its reporter as finder. GHSA-qjpp-8mp6-7744 lists pmazzocchi as finder. SECURITY.md's Security review credits the 2026-09-30 review to pmazzocchi. https://github.com/btclib-org/bip39-slip39/blob/main/SECURITY.md#security-review https://github.com/btclib-org/bip39-slip39/security/advisories",
     "status": "Met"
   },
   "vulnerability_report_private": {
