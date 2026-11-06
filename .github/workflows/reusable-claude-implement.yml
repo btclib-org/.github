@@ -105,9 +105,9 @@ name: reusable-claude-implement
 #
 # The commit is authored by claude[bot], 209825114+claude[bot] at
 # users.noreply.github.com (`gh api 'users/claude[bot]' --jq .id`). It
-# carries no `Signed-off-by:` trailer, for the reason the docstring of
-# .github/scripts/check_sign_off.py gives. It is not signed, which
-# section 11's *Signatures* asks only of what lands.
+# carries no `Signed-off-by:` trailer, for the reason `CONTRIBUTING.md`'s
+# *Working with an LLM* gives. It is not signed, which section 11's
+# *Signatures* asks only of what lands.
 #
 # The bounds. Each job has `timeout-minutes`, each agent step a smaller
 # one and `--max-turns`, each far above what one issue should need; the
@@ -860,9 +860,10 @@ jobs:
             && { echo "check-message: a closing reference" >&2; exit 1; }
           printf '%s\n' "$text" | LC_ALL=C grep -E '(^|[^[:alnum:]])@[[:alnum:]]' \
             && { echo "check-message: a mention" >&2; exit 1; }
-          # no `-by:` trailer, since the agent can neither certify nor
-          # credit in a person's name; indented too, since what GitHub
-          # credits is not known
+          # no `-by:` trailer: the agent signs off nothing, for the reason
+          # `CONTRIBUTING.md`'s *Working with an LLM* gives, and credits no
+          # one in a person's name; indented too, since what GitHub credits
+          # is not known
           printf '%s\n' "$text" \
             | LC_ALL=C grep -i -E '^[[:space:]]*[[:alnum:]-]+-by[[:space:]]*:' \
             && { echo "check-message: a -by: trailer" >&2; exit 1; }
