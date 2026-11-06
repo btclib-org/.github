@@ -48,6 +48,19 @@ DEFAULTS = {"contents", "issues", "pull_requests"}
 SCRIPT_RULE = re.compile(r"^Bash\(\$\{\{ runner\.temp \}\}/claude-(\w+)/(\w+):\*\)$")
 
 
+@pytest.fixture(autouse=True)
+def no_git_config(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep the machine's git configuration out of every git command here.
+
+    A global `commit.gpgsign = true` would otherwise sign the fixtures'
+    commits, and fail where no key can sign.
+
+    :param monkeypatch: sets the environment for one test.
+    """
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", os.devnull)
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+
+
 def action(job: str) -> dict[str, str]:
     """Read the `with:` of a job's claude-code-action step.
 
