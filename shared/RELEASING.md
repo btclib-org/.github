@@ -592,17 +592,23 @@ request, next to `deps-latest`'s own result.
    `failure` and `--job` refusing a skip outright, so what recovers one is
    doing by hand what it would have done: for `github-release` the script "If
    something goes wrong" gives, for `published` a dispatch of
-   `pypi-install.yml`, which installs what the index serves at the time.
+   `pypi-install.yml`.
+
+   A dispatch of `pypi-install.yml` passes no version, so it waits for
+   nothing and installs what the index serves at the time. Read the
+   installed version each cell prints in its log, and dispatch again
+   where a cell installed the previous release.
 
    Read the Docs builds a tag on its first push only: a deleted and
    re-pushed tag is rebuilt by hand from the builds page, and `documented`
    stays red until it is.
 
 1. Install what was just published, in an environment of its own rather
-   than one that may already hold it, and run something with it:
+   than one that may already hold it, and run something with it.
+   `version` is the one the tagging step set:
 
    ```shell
-   uv run --isolated --no-project --with "${dist:?}" \
+   uv run --isolated --no-project --with "${dist:?}==${version:?}" \
      --refresh-package "${dist:?}" \
      python -c "${smoke:?}"
    ```
@@ -610,7 +616,11 @@ request, next to `deps-latest`'s own result.
    from a directory that belongs to no checkout of this project: run
    inside one, uv can answer from a cached build of the tree rather than
    from the index. `--refresh-package` makes uv read the index again
-   rather than its cache, which can miss a version just published.
+   rather than its cache, which can miss a version just published. The
+   pin makes the check test this release: unpinned, an index still
+   serving the previous release installs that one, and the smoke test
+   passes on it. Pinned, uv answers `No solution found` until the index
+   serves the version, and the command is run again then.
 
    then check the attestations — the JSON API answers `null` for
    `provenance` even where they exist; the simple API,
