@@ -296,6 +296,7 @@ def test_a_suite_workflow_naming_another_interpreter_is_reported(
         ("3.15t", "3.15", ""),
         ("3.14", "3.15", "3.14"),
         ("3.15", "3.13", "3.13"),
+        ("3.15", '"3.13"', "3.13"),
     ]
     for index, (setup, run, wanted) in enumerate(cases):
         root = tmp_path / str(index)
@@ -317,8 +318,8 @@ def test_a_suite_workflow_naming_another_interpreter_is_reported(
             test_the_suite_workflow_names_only_the_interpreter_the_tree_pins("x", trees)
 
 
-NAMED = re.compile(r"--python[= ](\d+(?:\.\d+)+t?)")
-"""An interpreter version a step names on a `uv run` command line.
+NAMED = re.compile(r"--python[= ][\"']?(\d+(?:\.\d+)+t?)")
+"""An interpreter version a step names on a `uv run` line, quoted or not.
 
 Whatever uv is asked for, patch level and free-threaded suffix included:
 a request narrower than the one a tree pins is a request nothing here
