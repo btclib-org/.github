@@ -155,7 +155,7 @@ for PyPI anyway: `pypi` and `testpypi` are two registrations, and only
 the tag exercises the first.
 
 1. On GitHub, Actions → release → Run workflow, and pick the branch to
-   rehearse (usually `main`). A release that breaks the public API is
+   rehearse (usually `main`). A release with any public-API finding is
    rehearsed from the release pull request's branch, after its notes are
    written: before, `public-api` reads the previous release's section and
    fails.

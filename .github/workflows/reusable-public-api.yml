@@ -130,7 +130,7 @@ jobs:
       # tag to check a public surface at, so the comparison falls back to
       # griffe's own default, the current code, and the notes' section
       # for pyproject.toml's version, else the first. A rehearsal of a
-      # release that breaks the public API runs from the release pull
+      # release with any public-API finding runs from the release pull
       # request's branch after its notes are written; README section 12
       # has why. griffe prints its findings on standard error, and
       # oneline is the format that puts the object and the file on one

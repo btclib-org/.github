@@ -3664,7 +3664,7 @@ A label means what its description says. Who applies and removes it:
   branch is the latest release's at every commit. The tag says what
   `pyproject.toml` says, so the version bump stays in the pull request that
   sets it. A release publishes the section the release pull request added.
-  A rehearsal of a release that breaks the public API is dispatched from that
+  A rehearsal of a release with any public-API finding is dispatched from that
   branch, after the notes are written. A rehearsal has no tag, so the
   public-API check reads the section headed `## v<version>`, the version being
   `pyproject.toml`'s, else the first `##` section. Before the notes are
