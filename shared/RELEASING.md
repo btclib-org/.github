@@ -997,10 +997,29 @@ reading a mismatch as tampering:
   gh run download "${run:?}" -n dist -D dist &&
   gh run download "${run:?}" -n sbom -D sbom &&
   gh run download "${run:?}" -n attestation -D attestation &&
-  shasum -a 256 dist/* &&
-  curl -s "https://pypi.org/pypi/${dist:?}/${version:?}/json" \
-    | python3 -c 'import json,sys; d=json.load(sys.stdin)
-  [print(u["filename"], u["digests"]["sha256"]) for u in d["urls"]]' &&
+  curl -fsS "https://pypi.org/pypi/${dist:?}/${version:?}/json" \
+    -o pypi.json &&
+  python3 -c '
+  import hashlib, json, os, sys
+  with open("pypi.json") as f:
+      urls = json.load(f)["urls"]
+  pypi = {u["filename"]: u["digests"]["sha256"] for u in urls}
+  local = {}
+  for path in sys.argv[1:]:
+      with open(path, "rb") as f:
+          digest = hashlib.sha256(f.read()).hexdigest()
+      local[os.path.basename(path)] = digest
+  for name in sorted(pypi.keys() | local.keys()):
+      if name not in local:
+          print("missing from dist/:", name)
+      elif name not in pypi:
+          print("not on PyPI:", name)
+      elif local[name] != pypi[name]:
+          print("digest differs:", name)
+      else:
+          print("same as PyPI:", name)
+  sys.exit(not local or local != pypi)
+  ' dist/* &&
 
   git show "v${version:?}:RELEASE_NOTES.md" > tag-notes.md &&
   awk -v tag="v${version:?}" '
@@ -1026,13 +1045,24 @@ reading a mismatch as tampering:
   section is missing or empty before `build`, so after the upload the
   stop means the read failed: check `version` and the tag. The tag
   cannot change after the upload, so where its section is empty all the
-  same, write `notes.md` by hand and run the commands after the awk.
+  same, write `notes.md` by hand and run the commands after the awk. The
+  awk runs only once the Python step has passed, so its message means
+  every file matched PyPI.
 
-  The digest comparison is not optional: it is what stands in for the
-  provenance a second, unwanted publish attempt would otherwise have to
-  establish, confirming the files a human is about to attach are the
-  exact bytes the token exchange already accepted rather than a fresh
-  local build that merely claims to be.
+  The Python step compares the files `gh release create` attaches from
+  `dist/` with the files PyPI holds for `version`, by name and SHA-256,
+  and prints what it found for each name. A file only one side has, or a
+  digest that differs, stops the script before the release exists: a
+  wrong `run` would otherwise attach files PyPI never accepted. A failed
+  fetch stops it too, `curl -f` exiting non-zero on an HTTP error.
+
+  A script that stopped leaves the downloaded artifacts behind, and `gh
+  run download` refuses to write a file that already exists. Remove them
+  before running the script again:
+
+  ```shell
+  rm -rf dist sbom attestation
+  ```
 
 ## This repository in particular
 
