@@ -803,7 +803,13 @@ gh attestation verify "dist/${stem:?}.tar.gz" --owner btclib-org \
 gh attestation verify "dist/${stem:?}-py3-none-any.whl" --owner btclib-org \
   --signer-workflow "${signer:?}" \
   --source-ref "refs/tags/v${version:?}" --format json \
-  --jq "${cert:?}.sourceRepositoryIdentifier" | grep -qx "${id:?}" &&
+  --jq "${cert:?}.sourceRepositoryIdentifier" | grep -qx "${id:?}"
+```
+
+A release with no `.cdx.json` asset has no bill of materials to verify,
+and this last command is left out for it:
+
+```shell
 gh attestation verify "sbom/${stem:?}.cdx.json" --owner btclib-org \
   --signer-workflow "${signer:?}" \
   --source-ref "refs/tags/v${version:?}" --format json \
