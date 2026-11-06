@@ -28,7 +28,7 @@ true. The pattern reaches both scopes: a setting the organization decides
 once is read back here too, where a section below rests on it.
 
 ```shell
-grep -oE '(repos/btclib-org/\.github|orgs/btclib-org)[a-z/-]*' \
+grep -oE '(repos/btclib-org/\.github|orgs/btclib-org)[A-Za-z0-9/{}._-]*' \
   REPOSITORY.md | sort -u
 ```
 
