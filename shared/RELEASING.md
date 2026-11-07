@@ -189,7 +189,7 @@ the tag exercises the first.
    tagging step below gives.
 
    ```shell
-   uv run --isolated --no-project \
+   uv run --isolated --no-project --python "${python:?}" \
      --index https://test.pypi.org/simple/ \
      --index-strategy unsafe-best-match \
      --with "${test_dist:?}==${dev:?}" \
@@ -633,8 +633,8 @@ request, next to `deps-latest`'s own result.
    `version` is the one the tagging step set:
 
    ```shell
-   uv run --isolated --no-project --with "${dist:?}==${version:?}" \
-     --refresh-package "${dist:?}" \
+   uv run --isolated --no-project --python "${python:?}" \
+     --with "${dist:?}==${version:?}" --refresh-package "${dist:?}" \
      python -c "${smoke:?}"
    ```
 
@@ -645,7 +645,12 @@ request, next to `deps-latest`'s own result.
    pin makes the check test this release: unpinned, an index still
    serving the previous release installs that one, and the smoke test
    passes on it. Pinned, uv answers `No solution found` until the index
-   serves the version, and the command is run again then.
+   serves the version. It answers the same where the distribution or a
+   dependency has no file the interpreter `python` names can use, and no
+   wait changes that. So check the interpreter first: uv's `cause:` line
+   then names the interpreter, as an ABI tag such as `cp315` or as a
+   Python version. Otherwise run the command again once the index serves
+   the version.
 
    then check the attestations — the JSON API answers `null` for
    `provenance` even where they exist; the simple API,
@@ -660,10 +665,8 @@ request, next to `deps-latest`'s own result.
    `release.yml` calls that workflow once PyPI has accepted the files, with
    the tag's version, and it waits for the index to serve that version
    before installing anything — so it cannot pass by testing the release
-   before this one. It installs from PyPI on every image `os-ubuntu.yml`,
-   `os-macos.yml` and `os-windows.yml` run between them, at the floor of
-   the supported interpreter range and at its two newest interpreters,
-   each of those beside its free-threaded build, and runs its smoke test.
+   before this one. It installs from PyPI on the images and interpreters
+   this tree's `pypi-install.yml` names, and runs its smoke test in each.
    From then on it runs weekly on its own, and a failure means the outside
    world moved, not this repository — a new runner image, an interpreter
    release, PyPI serving a file that does not match its own hash — which
@@ -805,7 +808,7 @@ environment and refuse to run without it.
 ```shell
 git worktree add --detach "/tmp/${repo:?}-rebuild" "v${version:?}" &&
 cd "/tmp/${repo:?}-rebuild" &&
-python=$(grep -Ev '^[[:space:]]*(#|$)' .python-version) &&
+pin=$(grep -Ev '^[[:space:]]*(#|$)' .python-version) &&
 export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct) &&
 signer=btclib-org/.github/.github/workflows/reusable-build.yml &&
 id=$(gh api "repos/btclib-org/${repo:?}" --jq .id) &&
@@ -823,13 +826,13 @@ uv_version=$(unzip -p "$wheels"/*.whl '*.dist-info/WHEEL' |
   sed -n 's/^Generator: uv //p') &&
 [[ $uv_version =~ ^[0-9]+([.][0-9]+)*$ ]] &&
 uvx "uv@$uv_version" build &&
-uv run --no-project --python "$python" \
+uv run --no-project --python "$pin" \
   .github/scripts/normalize_sdist.py dist/ &&
 served=$(mktemp -d) &&
 git clone --depth 1 --filter=blob:none --sparse \
   https://github.com/btclib-org/.github "$served" &&
 git -C "$served" sparse-checkout set .github/scripts &&
-uv run --no-project --python "$python" \
+uv run --no-project --python "$pin" \
   "$served"/.github/scripts/generate_sbom.py dist/ sbom/ &&
 gh attestation verify "dist/${stem:?}.tar.gz" --owner btclib-org \
   --signer-workflow "${signer:?}" \
@@ -854,7 +857,7 @@ gh attestation verify "sbom/${stem:?}.cdx.json" --owner btclib-org \
 Section 12 of the organization standard names the signer of a release
 made before this repository called `reusable-build.yml`.
 
-`python` is the interpreter the tag's own `.python-version` pins, its
+`pin` is the interpreter the tag's own `.python-version` pins, its
 comment and blank lines dropped, and not the one `main` pins:
 `normalize_sdist.py` writes the sdist again through the running
 interpreter's `gzip`, so a rebuild under another pin is the published
@@ -1081,6 +1084,7 @@ test_dist=<the project's name on TestPyPI>
 pkg=<the import package>
 rtd=<the Read the Docs project>
 bp=<the bestpractices.dev project id>
+python=<the interpreter the install checks run under>
 smoke=<the Python the install checks run>
 ```
 
