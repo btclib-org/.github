@@ -224,19 +224,8 @@ def test_the_calendar_gives_each_workflow_an_instant_of_its_own() -> None:
     assert not shared, f"section 10 gives one slot to several workflows: {shared}"
 
 
-LAST = "scorecard"
-"""The row section 10 keeps last, for section 2's badge line.
-
-Section 10: "section 2 puts the Scorecard badge at the head of the
-OpenSSF line because `scorecard` is the last row, so a sentinel appended
-past it takes that reason away."
-"""
-
 ORDER = "rows out of the week's order, Monday first"
 """The finding for a row whose slot is not after the row above it."""
-
-TAIL = f"the last row, where section 2's badge line wants `{LAST}`"
-"""The finding for a table ending on any other row."""
 
 
 def week(slot: tuple[str, str]) -> tuple[int, int]:
@@ -256,16 +245,15 @@ def week(slot: tuple[str, str]) -> tuple[int, int]:
 def misplaced(table: dict[str, tuple[str, str]]) -> dict[str, list[str]]:
     """Read a calendar for what section 10 says of its rows' positions.
 
-    Each row's slot has to be later in the week than the row above it,
-    and the last row has to be `LAST`. A slot shared by two rows is
+    Each row's slot has to be later in the week than the row above it. A
+    slot shared by two rows is
     `test_the_calendar_gives_each_workflow_an_instant_of_its_own`'s
     finding and fails here too, the second row being no later than the
     first.
 
     :param table: the calendar, in the table's order.
-    :returns: each finding against what it names, findings naming none
-        left out. `TAIL` names rows and `ORDER` names pairs, a sentence
-        per pair giving both rows and both slots.
+    :returns: `ORDER` against its pairs, a sentence per pair giving both
+        rows and both slots, or nothing where no pair is out of order.
     """
     names = list(table)
     disordered = [
@@ -274,18 +262,14 @@ def misplaced(table: dict[str, tuple[str, str]]) -> dict[str, list[str]]:
         for earlier, later in pairwise(names)
         if week(table[later]) <= week(table[earlier])
     ]
-    findings = {
-        ORDER: disordered,
-        TAIL: [] if names and names[-1] == LAST else names[-1:],
-    }
-    return {finding: found for finding, found in findings.items() if found}
+    return {ORDER: disordered} if disordered else {}
 
 
-def test_the_calendar_rows_are_in_the_weeks_order_and_scorecard_is_last() -> None:
+def test_the_calendar_rows_are_in_the_weeks_order() -> None:
     """The position of a row is what section 10 reasons about, so it is read.
 
     "The day and the hour place a row among the families" -- so a row is
-    read against the row above it, and the last row against `LAST`.
+    read against the row above it.
     `test_the_record_has_an_entry_per_row_of_the_calendar` cannot see a
     row written in the wrong place: it compares the record's order with
     the calendar's, and a row moved together with its record entry
@@ -312,7 +296,7 @@ def planted(tmp_path: Path, table: list[tuple[str, str, str]]) -> Path:
     return document
 
 
-def test_a_row_past_scorecard_and_a_swapped_hour_are_each_found(
+def test_a_moved_row_and_a_swapped_hour_are_each_found(
     tmp_path: Path,
 ) -> None:
     """The two ways the table goes wrong, planted, are the two findings.
@@ -321,9 +305,9 @@ def test_a_row_past_scorecard_and_a_swapped_hour_are_each_found(
     itself, so that what the two probes measure is the order and not the
     planting. Read as a list of pairs and not as a mapping, two mappings
     of one set of rows in two orders being equal, which is the property
-    under test. A row moved below `LAST` is both findings, each naming it;
-    two rows of one day with their hours swapped is the order finding
-    alone, `LAST` still last.
+    under test. The first row moved to the end and two rows of one day
+    with their hours swapped are each the order finding, naming the row
+    that moved.
 
     :param tmp_path: where the copies are planted.
     """
@@ -334,8 +318,7 @@ def test_a_row_past_scorecard_and_a_swapped_hour_are_each_found(
     past = [*kept, moved]
     assert past != table
     found = misplaced(calendar(planted(tmp_path, past)))
-    assert set(found) == {ORDER, TAIL}, found
-    assert found[TAIL] == [moved[0]], found
+    assert set(found) == {ORDER}, found
     assert any(f"`{moved[0]}`" in finding for finding in found[ORDER]), found
     first = next(
         (i for i, (row, after) in enumerate(pairwise(table)) if row[1] == after[1]),
