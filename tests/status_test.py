@@ -110,14 +110,13 @@ def unmet(readme: str) -> list[str]:
         return problems
     if start is None:
         return [f"no `{HEADING}` section is the last `## ` section", *problems]
-    above = [image for at, image in status if at < start]
-    if above:
+    if above := [image for at, image in status if at < start]:
         problems.append(f"badges of section 2's third group above it: {above}")
-    below = [image for at, image in badges if at > start and not STATUS.search(image)]
-    if below:
+    if below := [
+        image for at, image in badges if at > start and not STATUS.search(image)
+    ]:
         problems.append(f"badges of the head under it: {below}")
-    supported = SUPPORTED.search(text)
-    if supported is not None and supported.start() < start:
+    if (supported := SUPPORTED.search(text)) is not None and supported.start() < start:
         problems.append("it is below the supported-by line")
     return problems
 
