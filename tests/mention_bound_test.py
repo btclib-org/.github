@@ -26,6 +26,23 @@ from .workflows_test import jobs
 # the reusable review, which holds the mention job
 WORKFLOW = ROOT / ".github/workflows/reusable-claude-review.yml"
 
+# the tools whose reach the docstring of
+# `test_other_sessions_worktrees_and_later_turns_are_denied_by_name` gives
+SESSION_TOOLS = frozenset(
+    {
+        "ListAgents",
+        "SendMessage",
+        "SendFile",
+        "FetchInboxMessage",
+        "SendToProject",
+        "EnterWorktree",
+        "ExitWorktree",
+        "ScheduleWakeup",
+        "CronList",
+        "CronDelete",
+    }
+)
+
 
 def arguments() -> list[str]:
     """Split the mention job's `claude_args` into its arguments.
@@ -93,15 +110,4 @@ def test_other_sessions_worktrees_and_later_turns_are_denied_by_name() -> None:
     or a later turn, and an answer needs none of them
     (btclib-org/.github#2113).
     """
-    assert {
-        "ListAgents",
-        "SendMessage",
-        "SendFile",
-        "FetchInboxMessage",
-        "SendToProject",
-        "EnterWorktree",
-        "ExitWorktree",
-        "ScheduleWakeup",
-        "CronList",
-        "CronDelete",
-    } <= denied()
+    assert denied() >= SESSION_TOOLS

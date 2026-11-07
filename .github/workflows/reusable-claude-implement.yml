@@ -65,14 +65,16 @@ name: reusable-claude-implement
 #
 # What the agent may do. The agent jobs run in agent mode, which the
 # action picks where a `prompt` is given (`detectMode` in its
-# `src/modes/detector.ts`), and which allows what `--allowedTools` gives
-# it. `assess` reads the checkout. `implement` also edits it, with
-# `.git/` denied, and writes the commit message to a file outside it. It
-# has no Bash rule but the scripts below, and runs no git, no gate and no
-# interpreter. The action sets the App's token as GH_TOKEN in its own
-# process and its children (`src/entrypoints/run.ts`), and the gates run
-# the tree's code, a conftest.py the agent may have edited included. So
-# the gates run in a job of their own, holding what section 10 says.
+# `src/modes/detector.ts`). Both deny the tools
+# reusable-claude-review.yml's review step denies, for the reason that
+# step's comment gives, and neither needs one of them. `assess` reads
+# the checkout. `implement` also edits it, with `.git/` denied, and
+# writes the commit message to a file outside it. It has no Bash rule
+# but the scripts below, and runs no git, no gate and no interpreter.
+# The action sets the App's token as GH_TOKEN in its own process and its
+# children (`src/entrypoints/run.ts`), and the gates run the tree's
+# code, a conftest.py the agent may have edited included. So the gates
+# run in a job of their own, holding what section 10 says.
 #
 # The scripts, mode 555, take the issue and the repository from a file
 # beside them and never from their arguments. `comment` posts a comment
@@ -390,6 +392,8 @@ jobs:
             "Glob(./**)"
             "Bash(${{ runner.temp }}/claude-assess/comment:*)"
             "Bash(${{ runner.temp }}/claude-assess/label:*)"
+            --disallowedTools
+            "ListAgents,SendMessage,SendFile,FetchInboxMessage,SendToProject,EnterWorktree,ExitWorktree,ScheduleWakeup,CronList,CronDelete,CronCreate,RemoteTrigger,PushNotification,ProposeGoal"
       # the action reports a refusal by skipping, with the step still
       # green, for the reason reusable-claude-review.yml's guard gives
       - name: Refuse to report an assessment that never ran
@@ -619,6 +623,7 @@ jobs:
             --disallowedTools
             "Edit(./.git/**)"
             "Write(./.git/**)"
+            "ListAgents,SendMessage,SendFile,FetchInboxMessage,SendToProject,EnterWorktree,ExitWorktree,ScheduleWakeup,CronList,CronDelete,CronCreate,RemoteTrigger,PushNotification,ProposeGoal"
       - name: Refuse to report an edit that never ran
         if: ${{ !cancelled() }}
         env:

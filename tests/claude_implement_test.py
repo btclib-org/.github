@@ -27,6 +27,7 @@ from typing import Any, NamedTuple
 import pytest
 
 from . import ROOT
+from .claude_review_test import AGENT_DENIED
 from .workflows_test import document, jobs
 
 # the reusable workflow, which holds the jobs and their scripts
@@ -153,6 +154,16 @@ def test_the_editing_agent_is_kept_out_of_git() -> None:
     assert {"Edit(./.git/**)", "Write(./.git/**)"} <= set(
         tools("implement", "--disallowedTools")
     )
+
+
+@pytest.mark.parametrize("job", AGENTS)
+def test_the_agent_denies_what_the_review_denies(job: str) -> None:
+    """The workflow's header says why (btclib-org/.github#2115).
+
+    :param job: the job's id.
+    """
+    rules = tools(job, "--disallowedTools")
+    assert {tool for rule in rules for tool in rule.split(",")} >= AGENT_DENIED
 
 
 def test_the_job_running_the_edit_asks_for_no_secret_and_no_oidc_token() -> None:
