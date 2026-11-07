@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "Over the last two releases, v2026.11.2 and v2026.11.7, 14 of 50 pull requests were approved by somebody other than the author, 28%, below the 50% the criterion asks (v2026.11.7 5 of 25, v2026.11.2 9 of 25); 4 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author, and fametrano holds a pull_request-mode bypass of it. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "Over the last two releases, v2026.11.2 and v2026.11.7, 14 of 50 pull requests were approved by somebody other than the author, 28%, below the 50% the criterion asks (v2026.11.7 5 of 25, v2026.11.2 9 of 25); 4 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author, and fametrano holds a pull_request-mode bypass of it. https://github.com/btclib-org/.github/issues/2021",
     "status": "Unmet"
   },
   "updateable_reused_components": {
