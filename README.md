@@ -1,24 +1,5 @@
 # The btclib-org repository standard
 
-<!-- The badges are what the reader decides with, one property of the
-tree per badge, in the groups section 2 below fixes and in its order:
-the gates first -- pre-commit.ci, then the lint workflow -- and the
-sentinels after them in the order section 10's calendar schedules them,
-the day and the hour each one owns being that section's and not
-restated here. Which sentinels this tree carries is section 10's
-record: `links` is every repository's and `alignment` is this tree's,
-and the record gives it no other, so there is no Scorecard badge and
-no `scorecard.yml` behind it. There is no `test` badge either, this
-tree's suite running inside `alignment.yml` and section 2 giving a
-suite's badge to the workflow that runs it; and nothing keyed on
-publishing or on a documentation build, this tree doing neither. One
-badge per line keeps a change to one line and every line inside MD013,
-whose 80 columns bind only where a space follows them. -->
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/btclib-org/.github/main.svg)](https://results.pre-commit.ci/latest/github/btclib-org/.github/main)
-[![lint workflow status](https://github.com/btclib-org/.github/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/btclib-org/.github/actions/workflows/lint.yml?query=branch%3Amain)
-[![links workflow status](https://github.com/btclib-org/.github/actions/workflows/links.yml/badge.svg?branch=main)](https://github.com/btclib-org/.github/actions/workflows/links.yml?query=branch%3Amain)
-[![alignment workflow status](https://github.com/btclib-org/.github/actions/workflows/alignment.yml/badge.svg?branch=main)](https://github.com/btclib-org/.github/actions/workflows/alignment.yml?query=branch%3Amain)
-
 **This repository keeps the standards the btclib-org projects have in
 common: it states them, and it is where they are kept true.** The
 statement is this file; keeping it true is the issue tracker beside it,
@@ -425,12 +406,12 @@ shows what the review did not cover and stays true until the next
 review; a list of the changes since would need an edit at every landing.
 Before any review, the section says *No security review has been done*.
 
-**The badges at a `README.md`'s head are never curated.** A curated list
-has no answer to *should this tree carry that badge*: where a property
-of the repository decides a badge the answer is read off the tree, and
-where none does the membership is written down, the row growing with
-section 10's calendar and a tree wanting a shorter row dropping a
-sentinel and its badge.
+**A `README.md`'s badges are never curated.** A curated list has no
+answer to *should this tree carry that badge*: where a property of the
+repository decides a badge the answer is read off the tree, and where
+none does the membership is written down, the row growing with section
+10's calendar and a tree wanting a shorter row dropping a sentinel and
+its badge.
 
 Which badge a tree carries, and what decides it:
 
@@ -494,19 +475,29 @@ lands on lists the runs the image answers for.
 
 **The order is fixed**, in three groups, and a tree skips what it does
 not own and keeps the rest in that order, so two `README.md` files
-compare like with like:
+compare like with like. In the source each badge has a line to itself,
+which keeps a change to one line and every line inside MD013, whose 80
+columns bind only where a space follows them. The groups, in order:
 
 1. what the software is — the version beside `github/v/release`, the
    development status, the licence, the downloads, the supported Python
    versions, `implementation` and `wheel`;
+1. what the OpenSSF makes of it — the Best Practices badge, then the
+   Baseline badge, on a line of their own;
 1. whether it works — pre-commit.ci, `lint`, `test`, `docs` and Read the
    Docs, then the sentinels in section 10's calendar order, so a
    workflow moved to another day moves its badge; the calendar has no
-   row for the gates, and this list is where their order is decided;
-1. what the OpenSSF makes of it — the Scorecard badge, then the Best
-   Practices badge, then the Baseline badge, on a line of their own;
-   `scorecard` being the calendar's last row, the sentinels end where
-   that line begins.
+   row for the gates, and this list is where their order is decided.
+
+**The first two groups sit at the head of a `README.md`, and the third
+in a `## Status` section**, the last `##` section, above the
+supported-by line where there is one. GitHub renders the README on every
+tree's repository page, and an index renders it as the page of a package
+a tree publishes, so in every tree its head is where a reader starts: it
+says what the tree is, and the badges that can turn red come after what
+the README says. A comment directly above the head's badges, or above
+those of `## Status`, is one line pointing to this section, and restates
+none of it.
 
 `img.shields.io/pypi/wheel` and `img.shields.io/pypi/implementation`
 are read off the files a release uploaded, not off what the project
@@ -2320,9 +2311,7 @@ day and an hour, the repository owns the minute:
 
 **The rows are in the order of what they ask about**, family by family. A new
 sentinel takes the slot its family already holds rather than the end of the
-table: section 2 puts the Scorecard badge at the head of the OpenSSF line
-because `scorecard` is the last row, so a sentinel appended past it takes that
-reason away. The day and the hour place a row among the families, so a slot free
+table. The day and the hour place a row among the families, so a slot free
 between two rows of another family does not seat it.
 
 **The week is the whole of the grid's period**: every row is weekly, and a
@@ -4988,3 +4977,11 @@ comfortable with agentic development ;-). A contribution must have been
 read and understood by the person who submits it.
 [`CONTRIBUTING.md`](https://github.com/btclib-org/.github/blob/main/CONTRIBUTING.md#working-with-an-llm)
 has the rules.
+
+## Status
+
+<!-- Section 2 says which badges sit here, and in what order. -->
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/btclib-org/.github/main.svg)](https://results.pre-commit.ci/latest/github/btclib-org/.github/main)
+[![lint workflow status](https://github.com/btclib-org/.github/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/btclib-org/.github/actions/workflows/lint.yml?query=branch%3Amain)
+[![links workflow status](https://github.com/btclib-org/.github/actions/workflows/links.yml/badge.svg?branch=main)](https://github.com/btclib-org/.github/actions/workflows/links.yml?query=branch%3Amain)
+[![alignment workflow status](https://github.com/btclib-org/.github/actions/workflows/alignment.yml/badge.svg?branch=main)](https://github.com/btclib-org/.github/actions/workflows/alignment.yml?query=branch%3Amain)
