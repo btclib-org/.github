@@ -5,9 +5,9 @@
 """What bounds the mention job of `reusable-claude-review.yml`.
 
 The job runs in tag mode, whose own allow list no argument removes, so
-its bound is `--restricted` and its deny list. An edit to either reaches
-no run until somebody mentions the bot, so these tests are what turns
-red first (btclib-org/.github#1833).
+its bound is `--tools`, `--restricted` and its deny list. An edit to any
+of them reaches no run until somebody mentions the bot, so these tests
+are what turns red first (btclib-org/.github#1833).
 
 The action reads `claude_args` with shell-quote
 (`parseClaudeArgsToExtraArgs` in its `base-action/src/parse-sdk-options.ts`),
@@ -26,23 +26,6 @@ from .workflows_test import jobs
 # the reusable review, which holds the mention job
 WORKFLOW = ROOT / ".github/workflows/reusable-claude-review.yml"
 
-# the tools whose reach the docstring of
-# `test_other_sessions_worktrees_and_later_turns_are_denied_by_name` gives
-SESSION_TOOLS = frozenset(
-    {
-        "ListAgents",
-        "SendMessage",
-        "SendFile",
-        "FetchInboxMessage",
-        "SendToProject",
-        "EnterWorktree",
-        "ExitWorktree",
-        "ScheduleWakeup",
-        "CronList",
-        "CronDelete",
-    }
-)
-
 
 def arguments() -> list[str]:
     """Split the mention job's `claude_args` into its arguments.
@@ -57,22 +40,38 @@ def arguments() -> list[str]:
     return shlex.split(step["with"]["claude_args"])
 
 
-def denied() -> set[str]:
-    """Collect the tools the mention job's `--disallowedTools` names.
+def values(flag: str) -> list[list[str]]:
+    """Collect what each occurrence of a flag names.
 
-    The action takes every argument after the flag up to the next one
-    starting `--`, and splits each on commas.
+    A value is the text after `=`, or else every argument after the flag
+    up to the next one starting `--`, each split on commas.
 
-    :returns: the tool names.
+    :param flag: the flag, with its leading `--`.
+    :returns: the names, one list per occurrence.
     """
     args = arguments()
-    start = args.index("--disallowedTools") + 1
-    values: list[str] = []
-    for arg in args[start:]:
-        if arg.startswith("--"):
-            break
-        values.append(arg)
-    return {tool.strip() for value in values for tool in value.split(",")}
+    found: list[list[str]] = []
+    for index, arg in enumerate(args):
+        name, equals, value = arg.partition("=")
+        if name != flag:
+            continue
+        given = [value] if equals else []
+        if not equals:
+            for following in args[index + 1 :]:
+                if following.startswith("--"):
+                    break
+                given.append(following)
+        found.append([tool.strip() for text in given for tool in text.split(",")])
+    return found
+
+
+def test_tools_names_tool_search_alone() -> None:
+    """`--tools` is passed once, and names ToolSearch and nothing else.
+
+    It withholds every built-in tool it does not name, so another name
+    would offer one to an answer (btclib-org/.github#2114).
+    """
+    assert values("--tools") == [["ToolSearch"]]
 
 
 def test_restricted_is_passed_as_a_flag() -> None:
@@ -87,27 +86,10 @@ def test_restricted_is_passed_as_a_flag() -> None:
     assert not after or after[0].startswith("--")
 
 
-def test_no_tool_is_kept_out_of_the_restricted_mode() -> None:
-    """No `--tools`: the CLI leaves a tool it names out of what is denied."""
-    assert not [arg for arg in arguments() if arg.split("=")[0] == "--tools"]
-
-
-def test_sub_agents_are_denied_by_name() -> None:
-    """Agent and Skill are not marked `enablesCodeExecution` on 2.1.309.
-
-    So `--restricted` does not deny them, and the deny list has to.
-    Workflow is named for the same reason it is denied, the sub-agents
-    it starts (btclib-org/.github#1809).
-    """
-    assert {"Agent", "Skill", "Workflow"} <= denied()
-
-
-def test_other_sessions_worktrees_and_later_turns_are_denied_by_name() -> None:
-    """None of these is marked `enablesCodeExecution` on 2.1.314.
-
-    So `--restricted` does not deny them, and the deny list has to. They
-    reach another agent or session, a git worktree on the runner,
-    or a later turn, and an answer needs none of them
-    (btclib-org/.github#2113).
-    """
-    assert denied() >= SESSION_TOOLS
+def test_the_file_operation_tools_are_denied_by_name() -> None:
+    """`--tools` keeps every MCP tool, so the deny list names these."""
+    denied = {tool for found in values("--disallowedTools") for tool in found}
+    assert denied >= {
+        "mcp__github_file_ops__commit_files",
+        "mcp__github_file_ops__delete_files",
+    }

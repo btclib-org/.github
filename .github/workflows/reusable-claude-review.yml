@@ -128,8 +128,9 @@ name: reusable-claude-review
 # allow. The review job runs in agent mode, and what bounds it is its
 # allow list and its deny list, for the reason the review step's comment
 # gives. The mention job runs in tag mode, which allows `git commit` and
-# a push script of its own, so what bounds it is its deny list and
-# `--restricted`.
+# a push script of its own, so what bounds it is `--tools`,
+# `--restricted` and its deny list, for the reasons the mention step's
+# comment gives.
 #
 # The review job posts through a script it writes, `post-review`, which
 # is `exec gh pr review <number> -R <repository> --comment --body-file -`
@@ -636,10 +637,14 @@ jobs:
           # PushNotification and ProposeGoal have no check of their own,
           # FetchInboxMessage allows every call, and ScheduleWakeup,
           # CronCreate and RemoteTrigger allow every call outside auto
-          # mode, which agent mode does not set. The deny list is the
-          # mention job's row that starts with ListAgents, and
-          # CronCreate, RemoteTrigger, PushNotification and ProposeGoal;
-          # a review needs none of them. `--restricted` denies
+          # mode, which agent mode does not set. The deny list names
+          # them, and SendMessage, SendFile, SendToProject and
+          # EnterWorktree. ListAgents, SendMessage, SendFile,
+          # FetchInboxMessage and SendToProject reach another agent or
+          # session, on the runner or in the cloud, and EnterWorktree and
+          # ExitWorktree make and leave a git worktree on the runner
+          # (btclib-org/.github#2113). A review needs none of them.
+          # `--restricted` denies
           # CronCreate and RemoteTrigger in the mention job, and is not
           # passed here because it denies Bash too. Read in the 2.1.314
           # bundle that v1.0.265 of this action installs
@@ -936,62 +941,39 @@ jobs:
             issues: read
           # the App's token stays out of `.git/config`, by the mechanism
           # the review job gives. Not measured in this job: it rests on
-          # the code path the two share. The deny list below already
-          # stops an answer from reading the file; this keeps the token
-          # out of it in case that list is ever loosened
+          # the code path the two share. `--tools` below already keeps an
+          # answer from reading the file; this keeps the token out of it
+          # in case that list is ever widened
           allowed_non_write_users: "-none-"
-          # An answer is a comment, which the action's own tool posts.
-          # Tag mode allows Bash for `git commit` and its push script,
-          # and the two file-operation tools commit through the API when
-          # commit signing is on; none of them is for an answer, and the
-          # edit tools change a runner nothing is pushed from. Denied
-          # rather than left out of an allow list, which cannot remove
-          # what tag mode adds
+          # An answer is a comment, which the action's own MCP tool posts.
+          # `--tools ToolSearch` withholds every built-in tool but
+          # ToolSearch, which loads the tools the CLI defers, MCP tools
+          # among them. Withheld are the tools tag mode allows by name
+          # (`tagModeTools` in the action's `src/modes/tag/index.ts`):
+          # Bash, for `git commit` and its push script, and Read, Grep,
+          # Glob and LS, a rule naming one of which reaches any path. So
+          # an answer runs nothing and reads no file, the checkout
+          # included. A built-in tool that a bump of this action brings
+          # is withheld too, where a deny list has to name it
+          # (btclib-org/.github#2114)
           #
-          # Tag mode also allows Read, Grep, Glob and LS by name
-          # (`tagModeTools` in the action's `src/modes/tag/index.ts`). A
-          # rule naming one reaches any path, so they are denied too, and
-          # an answer reads no file, the checkout included. A deny scoped
-          # to paths outside the checkout was not taken: it would have to
-          # list every such path, and a path the list missed would be the
-          # hole this closes
-          #
-          # Monitor runs a shell command and reads its output, as Bash
-          # does, and an answer runs nothing. `--restricted` denies it,
-          # with PowerShell, WebFetch and every other tool the CLI marks
-          # `enablesCodeExecution`, read from the CLI's own tools at the
-          # start of each run. So a bump of this action that brings a new
-          # such tool needs no edit here. Read in the 2.1.309 bundle that
-          # v1.0.259 of this action installs. `--tools` is not passed: a
-          # tool it names escapes that denial. The flag also makes the
-          # CLI ignore the user, project and local settings files. The
-          # action writes one of its own to the user's directory, setting
-          # only `enableAllProjectMcpServers`
+          # `--tools` keeps every MCP tool. The deny list names the
+          # file-operation tools, which commit through the API when commit
+          # signing is on, and `--restricted` denies by name the MCP
+          # tools the CLI knows to run code, such as
+          # `mcp__ide__executeCode`. `--restricted` also makes the CLI
+          # ignore the user, project and local settings files. The action
+          # writes one of its own to the user's directory, setting only
+          # `enableAllProjectMcpServers`
           # (`base-action/src/setup-claude-code-settings.ts`), and passes
           # its MCP servers as `--mcp-config` instead
-          # (`src/modes/tag/index.ts`). tests/mention_bound_test.py fails
-          # where `--restricted` is dropped, given a value or joined by
-          # `--tools`
+          # (`src/modes/tag/index.ts`)
           #
-          # Agent starts a sub-agent, and so do Workflow and Skill, which
-          # runs a skill marked `context: fork` as one. An answer reads
-          # no file, so a sub-agent gives it nothing, and it needs no
-          # skill (btclib-org/.github#1809). Workflow is named although
-          # `--restricted` denies it too, since its sub-agents are why it
-          # is denied. GetTask reads a background shell command's output
-          # and TaskStop stops a background task, and an answer starts
-          # none. On 2.1.309 a rule naming Task is read as Agent, and one
-          # naming KillShell or KillBash as TaskStop, so the older names
-          # need no rule of their own
-          #
-          # ListAgents, SendMessage, SendFile, FetchInboxMessage and
-          # SendToProject reach another agent or session, on the runner or
-          # in the cloud. EnterWorktree and ExitWorktree make and leave a
-          # git worktree on the runner. ScheduleWakeup schedules a later
-          # turn, and CronList and CronDelete list and cancel scheduled
-          # ones. An answer needs none of them (btclib-org/.github#2113).
           # Read in the 2.1.314 bundle that v1.0.265 of this action
-          # installs, where a rule naming ListPeers is read as ListAgents
+          # installs, which keeps EndConversation whatever `--tools`
+          # names. tests/mention_bound_test.py fails where `--tools`
+          # leaves or names another tool, and where `--restricted` is
+          # dropped or given a value
           #
           # the model is named for the reason the review job gives, and
           # the setting sources for the reason the header gives
@@ -999,8 +981,6 @@ jobs:
             --model claude-opus-5-5
             --setting-sources user
             --restricted
+            --tools ToolSearch
             --disallowedTools
-            "Bash,Edit,MultiEdit,Write,NotebookEdit,mcp__github_file_ops__commit_files,mcp__github_file_ops__delete_files"
-            "Read,Grep,Glob,LS"
-            "Agent,Skill,Workflow,GetTask,TaskStop"
-            "ListAgents,SendMessage,SendFile,FetchInboxMessage,SendToProject,EnterWorktree,ExitWorktree,ScheduleWakeup,CronList,CronDelete"
+            "mcp__github_file_ops__commit_files,mcp__github_file_ops__delete_files"

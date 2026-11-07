@@ -21,7 +21,6 @@ import re
 import shlex
 
 from . import ROOT
-from .mention_bound_test import SESSION_TOOLS
 from .workflows_test import jobs
 
 # the reusable review, which holds both jobs
@@ -33,14 +32,26 @@ CALLER = ROOT / ".github/workflows/claude-review.yml"
 # the workflow whose pull requests a bot opens
 IMPLEMENT = ROOT / ".github/workflows/reusable-claude-implement.yml"
 
-# the tools the agent-mode jobs deny, for the reason the review step's
+# the tools the agent-mode jobs deny, for the reasons the review step's
 # comment gives
-AGENT_DENIED = SESSION_TOOLS | {
-    "CronCreate",
-    "RemoteTrigger",
-    "PushNotification",
-    "ProposeGoal",
-}
+AGENT_DENIED = frozenset(
+    {
+        "ListAgents",
+        "SendMessage",
+        "SendFile",
+        "FetchInboxMessage",
+        "SendToProject",
+        "EnterWorktree",
+        "ExitWorktree",
+        "ScheduleWakeup",
+        "CronList",
+        "CronDelete",
+        "CronCreate",
+        "RemoteTrigger",
+        "PushNotification",
+        "ProposeGoal",
+    }
+)
 
 # the mention job's condition on the commenter, spaced as one line
 GUARD = (
