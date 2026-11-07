@@ -336,7 +336,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         1851,
         "test_a_readme_opens_its_contributing_section_with_the_paragraph",
         (
-            "btclib-node",
             "benchmarks",
             "bbt",
             "functional-tests",
@@ -349,7 +348,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         1851,
         "test_the_local_hooks_run",
         (
-            "btclib-node",
             "benchmarks",
             "bbt",
             "functional-tests",
