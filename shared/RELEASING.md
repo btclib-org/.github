@@ -227,9 +227,11 @@ is the point.
 inferring it from a sibling. A release declares the ranges
 `pyproject.toml` gives its dependencies and its extras, not what `uv.lock`
 pins, so a user's install resolves the newest version each range admits. A
-failure in one of them is one users will meet the day the release ships,
-and it is read before the tag. A failure confined to a package that only a
-dependency group names reaches no user and waits for the next lock bump.
+failure in any package a user's install resolves, those dependencies and
+extras and what they in turn require, is one users will meet the day the
+release ships, and it is read before the tag. A failure confined to a
+package that only a dependency group names reaches no user and waits for
+the next lock bump.
 
 **The drift it reports is left to Dependabot.** The release pull request
 does not run `uv lock --upgrade`: section 1's
