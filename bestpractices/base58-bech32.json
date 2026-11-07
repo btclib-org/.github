@@ -8,7 +8,7 @@
     "status": "Met"
   },
   "OSPS-AC-03.01": {
-    "justification": "The main-self-merge ruleset requires a pull request for every change to main, and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main. Its one bypass actor, fametrano, holds it in pull_request mode, which excuses the approval but still refuses a direct push, so nobody pushes to main directly. https://github.com/btclib-org/.github/issues/2021",
     "status": "Met"
   },
   "OSPS-AC-03.02": {
@@ -44,7 +44,7 @@
     "status": "Met"
   },
   "OSPS-BR-02.02": {
-    "justification": "Every release asset carries the version in its file name: the sdist, the wheel, the CycloneDX SBOM (base58_bech32-2026.10.23.cdx.json) and the attestation bundle (v2026.10.23.intoto.jsonl). The attestation binds each asset to its digest. https://github.com/btclib-org/base58-bech32/releases/latest",
+    "justification": "Every release asset carries the version in its file name, as v2026.11.7's do: the sdist (base58_bech32-2026.11.7.tar.gz), the wheel (base58_bech32-2026.11.7-py3-none-any.whl), the CycloneDX SBOM (base58_bech32-2026.11.7.cdx.json) and the attestation bundle (v2026.11.7.intoto.jsonl). The attestation binds each asset to its digest. https://github.com/btclib-org/base58-bech32/releases/tag/v2026.11.7",
     "status": "Met"
   },
   "OSPS-BR-03.01": {
@@ -88,7 +88,7 @@
     "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "The verify command pins the signer and the source: --owner btclib-org, --signer-workflow the organization's reusable-build.yml and --source-ref the release tag, and it compares the certificate's sourceRepositoryIdentifier with this repository's id, which a rename keeps. It passes on the v2026.10.23 wheel. https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md",
+    "justification": "The verify command pins the signer and the source: --owner btclib-org, --signer-workflow the organization's reusable-build.yml and --source-ref the release tag, and it compares the certificate's sourceRepositoryIdentifier with this repository's id, which a rename keeps. It passes on the v2026.11.7 sdist, wheel and SBOM (2026-11-07). https://github.com/btclib-org/base58-bech32/blob/main/SECURITY.md#supported-versions",
     "status": "Met"
   },
   "OSPS-DO-04.01": {
@@ -200,8 +200,8 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. It has no bypass actor at rest. The maintainer adds a pull_request-mode bypass around merges and removes it afterwards. GOVERNANCE.md reserves that bypass for an emergency, and it has also been used for ordinary work: seven times between 2026-10-20 and 2026-10-28, when 14 pull requests landed without an approval, the last being 74. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
-    "status": "Met"
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. Its bypass list holds one actor, fametrano, in pull_request mode, at rest: the organization-wide bypass the maintainer kept on 2026-11-04 (btclib-org/.github#2021 and btclib-org/.github#2040), read with gh api repos/btclib-org/base58-bech32/rulesets on 2026-11-07. GOVERNANCE.md reserves that bypass for an emergency, and it is used for ordinary work: over the last two releases, 37 of the 70 pull requests merged had no approval from anybody other than their author (v2026.11.7 31 of 47, v2026.10.23 6 of 23). https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
+    "status": "Unmet"
   },
   "OSPS-SA-01.01": {
     "justification": "ARCHITECTURE.md gives the modules, their layers bottom-up and what each may import, which tests/imports_test.py holds. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversary, and what each can do. https://github.com/btclib-org/base58-bech32/blob/main/ARCHITECTURE.md https://github.com/btclib-org/base58-bech32/blob/main/ASSURANCE_CASE.md#trust-boundaries",
@@ -304,7 +304,7 @@
     "status": "N/A"
   },
   "build_repeatable": {
-    "justification": "Rebuilt from the tag v2026.10.23 with the uv named in the wheel, the sdist and the wheel are byte-identical to the released files (SHA-256 compared on 2026-10-23). Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag and passes only if it matches the release's attested digest; its scheduled run of 2026-10-25 passed. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/sdist-rebuild.yml",
+    "justification": "Rebuilt from the tag v2026.10.23 with the uv named in the wheel, the sdist and the wheel are byte-identical to the released files (SHA-256 compared on 2026-10-23). Every week sdist-rebuild.yml rebuilds the latest release's sdist from its tag and passes only if it matches the release's attested digest; its scheduled run of 2026-11-01 passed (https://github.com/btclib-org/base58-bech32/actions/runs/41299737382). https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/sdist-rebuild.yml",
     "status": "Met"
   },
   "build_reproducible": {
@@ -316,7 +316,7 @@
     "status": "N/A"
   },
   "bus_factor": {
-    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. This repository opened on 2026-10-17 with the Base58 and bech32 code moved from btclib and new SS58 and CashAddr codecs. Since 2026-10-17, 28 of the 50 commits are fametrano's and 10 are pmazzocchi's, an organization owner, whose changes fametrano approved; 9 are Dependabot's, 2 are pre-commit.ci's and 1 is an outside contributor's. git log --follow at btclib 8e87317b4 shows fametrano made 109 of 111 commits to base58.py and 62 of 64 to bech32.py. The claude account in the contributors graph comes from Co-Authored-By trailers on AI-assisted commits. giacomocaironi, also an organization owner, has made no commit here. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/base58-bech32/graphs/contributors",
+    "justification": "fametrano wrote almost all of the code and is the only person who knows it in depth. This repository opened on 2026-10-17 with the Base58 and bech32 code moved from btclib and new SS58 and CashAddr codecs. Of the 78 commits on main since 2026-10-17, 53 are fametrano's and 10 are pmazzocchi's, an organization owner, whose changes fametrano approved; 11 are Dependabot's, 3 are pre-commit.ci's and 1 is an outside contributor's (counted on 2026-11-07). git log --follow at btclib 8e87317b4 shows fametrano made 109 of 111 commits to base58.py and 62 of 64 to bech32.py. The claude account in the contributors graph comes from Co-Authored-By trailers on AI-assisted commits. giacomocaironi, also an organization owner, has made no commit here. The organization owners administer every repository. Knowledge of the code rests on fametrano alone. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#continuity https://github.com/btclib-org/base58-bech32/graphs/contributors",
     "status": "Unmet"
   },
   "code_of_conduct": {
@@ -468,7 +468,7 @@
     "status": "Met"
   },
   "dynamic_analysis": {
-    "justification": "Every release runs the test suite before it is published: release.yml calls test.yml, and the PyPI upload runs only if it passes. The suite fails below 100% coverage, branches included. ClusterFuzzLite fuzzing ran by hand on 2026-10-18 and on schedule on 2026-10-20 and passes, and it and cosmic-ray mutation testing are scheduled weekly. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/release.yml https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/fuzz.yml",
+    "justification": "Every release runs the test suite before it is published: release.yml calls test.yml, and the PyPI upload runs only if it passes, as it did for v2026.11.7 (https://github.com/btclib-org/base58-bech32/actions/runs/42311483583). The suite fails below 100% coverage, branches included. ClusterFuzzLite fuzzing and cosmic-ray mutation testing are scheduled weekly; the latest scheduled fuzz run, of 2026-11-03, passed (https://github.com/btclib-org/base58-bech32/actions/runs/41635881610). https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/release.yml https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/fuzz.yml",
     "status": "Met"
   },
   "dynamic_analysis_enable_assertions": {
@@ -476,7 +476,7 @@
     "status": "Met"
   },
   "dynamic_analysis_fixed": {
-    "justification": "No fuzzing or mutation-testing finding is open. The scheduled fuzz run of 2026-10-20 and the scheduled mutation run of 2026-10-26 passed. https://github.com/btclib-org/base58-bech32/actions/workflows/fuzz.yml https://github.com/btclib-org/base58-bech32/actions/workflows/mutation.yml",
+    "justification": "No fuzzing or mutation-testing finding is open: on 2026-11-07 every issue in the tracker is closed. The scheduled fuzz run of 2026-11-03 and the scheduled mutation run of 2026-11-02 passed. https://github.com/btclib-org/base58-bech32/actions/workflows/fuzz.yml https://github.com/btclib-org/base58-bech32/actions/workflows/mutation.yml",
     "status": "Met"
   },
   "dynamic_analysis_unsafe": {
@@ -568,7 +568,7 @@
     "status": "Met"
   },
   "maintained": {
-    "justification": "The first release, v2026.10.18, was published on 2026-10-18, a day after the repository opened. The second, v2026.10.23, followed on 2026-10-23, after 22 pull requests merged between the two. https://github.com/btclib-org/base58-bech32/pulls?q=is%3Apr+is%3Amerged https://github.com/btclib-org/base58-bech32/releases",
+    "justification": "The first release, v2026.10.18, was published on 2026-10-18, a day after the repository opened. The second, v2026.10.23, followed on 2026-10-23, and the third, v2026.11.7, on 2026-11-06 UTC, after 47 pull requests merged since the second. https://github.com/btclib-org/base58-bech32/pulls?q=is%3Apr+is%3Amerged https://github.com/btclib-org/base58-bech32/releases",
     "status": "Met"
   },
   "maintenance_or_update": {
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "v2026.10.23 fixes no published vulnerability and no advisory exists. It fixes three issues the maintainer labelled security: the missing length limits of bech32 and b58decode (issues 8 and 9) and the checksum quoted by b58decode_check (issue 28), and RELEASE_NOTES.md names the limit and the quoting. https://github.com/btclib-org/base58-bech32/releases/tag/v2026.10.23",
+    "justification": "No release fixes a published vulnerability, and no advisory exists. v2026.10.23 fixes three issues the maintainer labelled security: the missing length limits of bech32 and b58decode (issues 8 and 9) and the checksum quoted by b58decode_check (issue 28), and RELEASE_NOTES.md names the limit and the quoting. v2026.11.7 fixes no issue labelled security. https://github.com/btclib-org/base58-bech32/releases/tag/v2026.11.7",
     "status": "Met"
   },
   "repo_distributed": {
@@ -616,7 +616,7 @@
     "status": "Met"
   },
   "report_responses": {
-    "justification": "Five bug reports have been filed by somebody other than the maintainer since the repository opened on 2026-10-17: issues 37, 38, 40, 41 and 42, all by pmazzocchi on 2026-10-19. Each got a comment or a linked change within the day and all are closed by 2026-10-21. Issues 54, 57, 76, 79 and 82 are the maintainer's own. 79 and 82 are open, and pull request 81 answers 79. https://github.com/btclib-org/base58-bech32/issues",
+    "justification": "Five bug reports have been filed by somebody other than the maintainer since the repository opened on 2026-10-17: issues 37, 38, 40, 41 and 42, all by pmazzocchi on 2026-10-19. Each got a comment or a linked change within the day and all are closed by 2026-10-21. Every other issue is the maintainer's own, and on 2026-11-07 all 36 issues are closed. https://github.com/btclib-org/base58-bech32/issues",
     "status": "Met"
   },
   "report_tracker": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "Over the last two releases, v2026.10.18 and v2026.10.23, 19 of 27 pull requests were approved by somebody other than the author, 70%, above the 50% the criterion asks (v2026.10.23 17 of 23, v2026.10.18 2 of 4); 5 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Met"
+    "justification": "Over the last two releases, v2026.10.23 and v2026.11.7, 33 of 70 pull requests were approved by somebody other than the author, 47%, below the 50% the criterion asks (v2026.11.7 16 of 47, v2026.10.23 17 of 23); 12 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author, and fametrano holds a pull_request-mode bypass of it. https://github.com/btclib-org/.github/issues/2021",
+    "status": "Unmet"
   },
   "updateable_reused_components": {
     "justification": "At runtime the package reuses only the standard library. The test and tooling components are PyPI packages pinned in uv.lock and bumped by Dependabot, and the deps-latest sentinel runs the full suite against the upgraded set every week. https://github.com/btclib-org/base58-bech32/blob/main/.github/workflows/deps-latest.yml",

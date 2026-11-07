@@ -8,7 +8,7 @@
     "status": "Met"
   },
   "OSPS-AC-03.01": {
-    "justification": "The main-self-merge ruleset requires a pull request for every change to main, and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main. Its one bypass actor, fametrano, holds it in pull_request mode, which excuses the approval but still refuses a direct push, so nobody pushes to main directly. https://github.com/btclib-org/.github/issues/2021",
     "status": "Met"
   },
   "OSPS-AC-03.02": {
@@ -44,7 +44,7 @@
     "status": "Met"
   },
   "OSPS-BR-02.02": {
-    "justification": "Every release asset carries the version in its file name, as v2026.10.31's do: the sdist (bip32_descriptors-2026.10.31.tar.gz), the wheel (bip32_descriptors-2026.10.31-py3-none-any.whl), the CycloneDX SBOM (bip32_descriptors-2026.10.31.cdx.json) and the attestation bundle (v2026.10.31.intoto.jsonl). The attestation binds each asset to its digest. https://github.com/btclib-org/bip32-descriptors/releases/tag/v2026.10.31",
+    "justification": "Every release asset carries the version in its file name, as v2026.11.7's do: the sdist (bip32_descriptors-2026.11.7.tar.gz), the wheel (bip32_descriptors-2026.11.7-py3-none-any.whl), the CycloneDX SBOM (bip32_descriptors-2026.11.7.cdx.json) and the attestation bundle (v2026.11.7.intoto.jsonl). The attestation binds each asset to its digest. https://github.com/btclib-org/bip32-descriptors/releases/tag/v2026.11.7",
     "status": "Met"
   },
   "OSPS-BR-03.01": {
@@ -88,7 +88,7 @@
     "status": "Met"
   },
   "OSPS-DO-03.02": {
-    "justification": "The verify command pins the signer and the source: --owner btclib-org, --signer-workflow the organization's reusable-build.yml and --source-ref the release tag, and it compares the certificate's sourceRepositoryIdentifier with this repository's id, which a rename keeps. It passes on the v2026.10.31 sdist, wheel and SBOM. https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md#supported-versions",
+    "justification": "The verify command pins the signer and the source: --owner btclib-org, --signer-workflow the organization's reusable-build.yml and --source-ref the release tag, and it compares the certificate's sourceRepositoryIdentifier with this repository's id, which a rename keeps. It passes on the v2026.11.7 sdist, wheel and SBOM (2026-11-07). https://github.com/btclib-org/bip32-descriptors/blob/main/SECURITY.md#supported-versions",
     "status": "Met"
   },
   "OSPS-DO-04.01": {
@@ -164,7 +164,7 @@
     "status": "Met"
   },
   "OSPS-QA-02.02": {
-    "justification": "The release is pure Python. Every GitHub release attaches a CycloneDX SBOM generated from the built wheel and covered by the release attestation. v2026.10.31's, bip32_descriptors-2026.10.31.cdx.json, lists btclib, ecc and typing-extensions as required and btclib-secp256k1 as optional. https://github.com/btclib-org/bip32-descriptors/releases/latest",
+    "justification": "The release is pure Python. Every GitHub release attaches a CycloneDX SBOM generated from the built wheel and covered by the release attestation. v2026.11.7's, bip32_descriptors-2026.11.7.cdx.json, lists btclib, ecc and typing-extensions as required. https://github.com/btclib-org/bip32-descriptors/releases/tag/v2026.11.7",
     "status": "Met"
   },
   "OSPS-QA-03.01": {
@@ -200,8 +200,8 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Met"
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. Its bypass list holds one actor, fametrano, in pull_request mode, at rest: the organization-wide bypass the maintainer kept on 2026-11-04 (btclib-org/.github#2021 and btclib-org/.github#2040), read with gh api repos/btclib-org/bip32-descriptors/rulesets on 2026-11-07. GOVERNANCE.md reserves that bypass for an emergency, and it is used for ordinary work: over the last two releases, 29 of the 32 pull requests merged had no approval from anybody other than their author (v2026.11.7 19 of 21, v2026.11.4 10 of 11). https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
+    "status": "Unmet"
   },
   "OSPS-SA-01.01": {
     "justification": "ARCHITECTURE.md gives the two subpackages, bip32 and descriptors, their layers bottom-up and what each may import, which tests/imports_test.py holds. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller and the adversaries, and what each can do. https://github.com/btclib-org/bip32-descriptors/blob/main/ARCHITECTURE.md https://github.com/btclib-org/bip32-descriptors/blob/main/ASSURANCE_CASE.md#trust-boundaries",
@@ -468,7 +468,7 @@
     "status": "Met"
   },
   "dynamic_analysis": {
-    "justification": "Every release runs the test suite and the regtest tests before it is published: release.yml calls test.yml and integration-bitcoind.yml, and the PyPI upload runs only if both pass, as they did for v2026.10.31. The suite fails below 100% coverage, branches included. fuzz.yml is scheduled weekly to run two ClusterFuzzLite atheris harnesses, fuzz/fuzz_bip32.py over the BIP32 wire decoders and fuzz/fuzz_descriptor.py over descriptor parsing. mutation.yml is scheduled weekly to run cosmic-ray mutation testing on two profiles, .github/mutation/bip32.toml and .github/mutation/descriptors.toml. qa-assets.yml is scheduled weekly to replay Bitcoin Core's descriptor fuzz corpus, and has not run yet. Manually dispatched on 2026-10-31 at bb37e84: fuzz.yml ran fuzz_descriptor and fuzz_bip32 for 30 minutes each with no reportable crash (https://github.com/btclib-org/bip32-descriptors/actions/runs/41245162550). mutation.yml's time-budgeted run executed part of each profile: descriptors killed 714, survived 263, never run 12483; bip32 killed 824, survived 70, skipped 242, never run 474 (https://github.com/btclib-org/bip32-descriptors/actions/runs/41250474104). https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/release.yml https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/fuzz.yml",
+    "justification": "Every release runs the test suite and the regtest tests before it is published: release.yml calls test.yml and integration-bitcoind.yml, and the PyPI upload runs only if both pass, as they did for v2026.11.7 (https://github.com/btclib-org/bip32-descriptors/actions/runs/42313929535). The suite fails below 100% coverage, branches included. fuzz.yml runs two ClusterFuzzLite atheris harnesses weekly, fuzz/fuzz_bip32.py over the BIP32 wire decoders and fuzz/fuzz_descriptor.py over descriptor parsing; its scheduled run of 2026-11-03 ran each for 30 minutes with no reportable crash (https://github.com/btclib-org/bip32-descriptors/actions/runs/41636358585). mutation.yml runs cosmic-ray weekly on two profiles, .github/mutation/bip32.toml and .github/mutation/descriptors.toml. Its time-budgeted scheduled run of 2026-11-02 executed part of each profile: bip32 killed 784, survived 51, skipped 242, never run 533; descriptors killed 478, survived 210, never run 13338 (https://github.com/btclib-org/bip32-descriptors/actions/runs/41456861722). qa-assets.yml replays Bitcoin Core's descriptor fuzz corpus weekly; its scheduled run of 2026-11-03 passed (https://github.com/btclib-org/bip32-descriptors/actions/runs/41627321869). https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/release.yml https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/fuzz.yml",
     "status": "Met"
   },
   "dynamic_analysis_enable_assertions": {
@@ -476,7 +476,7 @@
     "status": "Met"
   },
   "dynamic_analysis_fixed": {
-    "justification": "No vulnerability found by dynamic analysis is known or open: the fuzz run of 2026-10-31 at bb37e84 reported no crash (https://github.com/btclib-org/bip32-descriptors/actions/runs/41245162550). Issues #6 and #19 report inputs found by dynamic analysis on which parse differs from Bitcoin Core; both are open and filed as defects, not as vulnerabilities: #6, an input of Core's qa-assets corpus that parse accepts and Core refuses, and #19, inputs of a seeded fuzz run that both refuse with different faults. The mutation run of the same date passed with survivors, 263 in descriptors and 70 in bip32 (https://github.com/btclib-org/bip32-descriptors/actions/runs/41250474104). A survivor is a mutant the tests did not catch, a test gap and not itself a vulnerability. All 333 were triaged on 2026-11-01: none revealed a code bug on the inputs measured; the gaps on security-relevant checks are issues #32 to #40 and the ordinary ones #41. The evidence is partial: the run judged 977 of 13460 descriptors mutants and 894 of 1610 bip32 mutants.",
+    "justification": "No vulnerability found by dynamic analysis is known or open: the scheduled fuzz run of 2026-11-03 reported no crash (https://github.com/btclib-org/bip32-descriptors/actions/runs/41636358585). Issue #19 reports inputs of a seeded fuzz run that parse and Bitcoin Core both refuse with different faults; it is open and filed as a defect, not as a vulnerability. #6, an input of Core's qa-assets corpus that parse accepted and Core refuses, was fixed by pull request 31 on 2026-11-01. The scheduled mutation run of 2026-11-02 passed with survivors, 210 in descriptors and 51 in bip32 (https://github.com/btclib-org/bip32-descriptors/actions/runs/41456861722). A survivor is a mutant the tests did not catch, a test gap and not itself a vulnerability. The 333 survivors of the 2026-10-31 run were triaged on 2026-11-01: none revealed a code bug on the inputs measured; the gaps on security-relevant checks, issues #32 to #40, are closed, and #41, the ordinary ones, is open. No issue records a triage of the 2026-11-02 run's survivors. The evidence is partial: that run judged 688 of 14026 descriptors mutants and 835 of 1610 bip32 mutants.",
     "status": "Met"
   },
   "dynamic_analysis_unsafe": {
@@ -568,11 +568,11 @@
     "status": "Met"
   },
   "maintained": {
-    "justification": "The repository opened on 2026-10-31 with the BIP32, descriptor and miniscript code started from btclib-wallet 910ba96, a local integration of the pull requests for btclib-wallet issue #620 before they landed (the last, #631, as 78e360b); its src/btclib_wallet/bip32 and src/btclib_wallet/descriptors equal those of 1fa1a78, #631's first commit. That code was synced to btclib-wallet b8b5c9b for the first release, v2026.10.31, published on 2026-10-31. main has opened the next cycle, 2026.11. https://github.com/btclib-org/bip32-descriptors/commits/main https://github.com/btclib-org/bip32-descriptors/releases",
+    "justification": "The repository opened on 2026-10-31 with the BIP32, descriptor and miniscript code started from btclib-wallet 910ba96, a local integration of the pull requests for btclib-wallet issue #620 before they landed (the last, #631, as 78e360b); its src/btclib_wallet/bip32 and src/btclib_wallet/descriptors equal those of 1fa1a78, #631's first commit. That code was synced to btclib-wallet b8b5c9b for the first release, v2026.10.31, published on 2026-10-31. Three releases followed, v2026.11.2, v2026.11.4 and v2026.11.7, and main has opened the next cycle, 2026.12. https://github.com/btclib-org/bip32-descriptors/commits/main https://github.com/btclib-org/bip32-descriptors/releases",
     "status": "Met"
   },
   "maintenance_or_update": {
-    "justification": "Only the latest release is supported and nothing is backported (SECURITY.md's *Supported versions*). release.yml compares each release's public API with the previous tag's using griffe; v2026.10.31 is the first release, so the comparison starts with the next one. RELEASE_NOTES.md lists what a user must act on to upgrade. https://github.com/btclib-org/bip32-descriptors/blob/main/RELEASE_NOTES.md",
+    "justification": "Only the latest release is supported and nothing is backported (SECURITY.md's *Supported versions*). release.yml compares each release's public API with the previous tag's using griffe; v2026.10.31 was the first release, and the comparison passed for v2026.11.7 (https://github.com/btclib-org/bip32-descriptors/actions/runs/42313929535). RELEASE_NOTES.md lists what a user must act on to upgrade. https://github.com/btclib-org/bip32-descriptors/blob/main/RELEASE_NOTES.md",
     "status": "Met"
   },
   "no_leaked_credentials": {
@@ -580,7 +580,7 @@
     "status": "Met"
   },
   "regression_tests_added50": {
-    "justification": "REVIEWING.md asks of every change whether what it adds is tested, and the 100% line and branch coverage gate fails a fix whose new code no test runs. One bug fix reached src/ before v2026.10.31, synced from btclib-wallet: miniscript parsing ends a key, timelock or hash fragment where Bitcoin Core does (btclib-org/btclib-wallet#609). Its regression test, tests/descriptors/key_fragment_brace_test.py, came with it. https://github.com/btclib-org/bip32-descriptors/blob/main/REVIEWING.md https://github.com/btclib-org/bip32-descriptors/blob/main/tests/descriptors/key_fragment_brace_test.py",
+    "justification": "REVIEWING.md asks of every change whether what it adds is tested, and the 100% line and branch coverage gate fails a fix whose new code no test runs. One bug fix reached src/ before v2026.10.31, synced from btclib-wallet, with its regression test, tests/descriptors/key_fragment_brace_test.py (btclib-org/btclib-wallet#609). Of the pull requests merged since that change src/ and close an issue, all but two also change tests/, such as 28 (closes #10), 29 (closes #13), 31 (closes #6 and #7), 66 (closes #44 and #45) and 71 (closes #9). The two are 43, which stops calling btclib-wallet a library above this one, and 81, which adapts a call to a btclib type change (closes #5). https://github.com/btclib-org/bip32-descriptors/blob/main/REVIEWING.md https://github.com/btclib-org/bip32-descriptors/pulls?q=is%3Apr+is%3Amerged",
     "status": "Met"
   },
   "release_notes": {
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "v2026.10.31 is the first release and fixes no publicly known vulnerability: no security advisory exists for this repository. https://github.com/btclib-org/bip32-descriptors/releases/tag/v2026.10.31",
+    "justification": "No release, from v2026.10.31 to v2026.11.7, fixes a publicly known vulnerability: no security advisory exists for this repository. https://github.com/btclib-org/bip32-descriptors/releases",
     "status": "Met"
   },
   "repo_distributed": {
@@ -616,7 +616,7 @@
     "status": "Met"
   },
   "report_responses": {
-    "justification": "Issues #4 to #20 were transferred from btclib-wallet on 2026-10-31, the day the repository opened, and the rest were filed here. On 2026-11-01 the only bug reports from someone other than the maintainer are #6 and #10: pmazzocchi, an organization owner, filed them in btclib-wallet, and fametrano acknowledged them within two hours and within four days. Both are open. fametrano filed every other issue, among them the alignment findings #2 and #3, both answered and closed. https://github.com/btclib-org/bip32-descriptors/issues?q=is%3Aissue",
+    "justification": "Issues #4 to #20 were transferred from btclib-wallet on 2026-10-31, the day the repository opened, and the rest were filed here. The only bug reports from someone other than the maintainer are #6 and #10: pmazzocchi, an organization owner, filed them in btclib-wallet, and fametrano acknowledged them within two hours and within four days. Both were closed on 2026-11-01, by pull requests 31 and 28. fametrano filed every other issue but #62, which a workflow opened. https://github.com/btclib-org/bip32-descriptors/issues?q=is%3Aissue",
     "status": "Met"
   },
   "report_tracker": {
@@ -668,7 +668,7 @@
     "status": "Met"
   },
   "static_analysis_fixed": {
-    "justification": "No static-analysis finding is open: ruff and mypy findings fail the required lint check, and CodeQL has raised no alert. On 2026-11-01 the open code-scanning alerts are all OpenSSF Scorecard's, from its BranchProtection, CodeReview, Maintained, SAST, CIIBestPractices and PinnedDependencies checks. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/codeql.yml",
+    "justification": "No static-analysis finding is open: ruff and mypy findings fail the required lint check, and CodeQL has raised no alert. On 2026-11-07 the open code-scanning alerts are all OpenSSF Scorecard's, from its BranchProtection, CodeReview, Maintained and PinnedDependencies checks. https://github.com/btclib-org/bip32-descriptors/blob/main/.github/workflows/codeql.yml",
     "status": "Met"
   },
   "static_analysis_often": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "No pull request has been merged in this repository: every change on main, through the next-cycle commit bb37e84, was pushed directly to main by fametrano, before main was protected. Since then main's main-self-merge ruleset requires one approving review from somebody other than the author. No change has yet been approved by anyone. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "Over the last two releases, v2026.11.4 and v2026.11.7, 3 of 32 pull requests were approved by somebody other than the author, 9%, below the 50% the criterion asks (v2026.11.7 2 of 21, v2026.11.4 1 of 11); 0 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author, and fametrano holds a pull_request-mode bypass of it. https://github.com/btclib-org/.github/issues/2021",
     "status": "Unmet"
   },
   "updateable_reused_components": {
