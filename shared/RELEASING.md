@@ -649,8 +649,9 @@ request, next to `deps-latest`'s own result.
    dependency has no file the interpreter `python` names can use, and no
    wait changes that. So check the interpreter first: uv's `cause:` line
    then names the interpreter, as an ABI tag such as `cp315` or as a
-   Python version. Otherwise run the command again once the index serves
-   the version.
+   Python version. Run the command again only where that line says
+   `there is no version of <dist>==<version>`. Any other cause, such as a
+   dependency conflict, is fixed rather than waited out.
 
    then check the attestations — the JSON API answers `null` for
    `provenance` even where they exist; the simple API,
