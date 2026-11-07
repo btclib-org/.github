@@ -8,7 +8,7 @@
     "status": "Met"
   },
   "OSPS-AC-03.01": {
-    "justification": "The main-self-merge ruleset requires a pull request for every change to main and has no bypass actor, so nobody pushes to main directly. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main. Its one bypass actor, fametrano, holds it in pull_request mode, which excuses the approval but still refuses a direct push, so nobody pushes to main directly. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
     "status": "Met"
   },
   "OSPS-AC-03.02": {
@@ -200,8 +200,8 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. It has no bypass actor at rest. The maintainer adds a pull_request-mode bypass around merges and removes it afterwards. GOVERNANCE.md reserves that bypass for an emergency, and it has also been used for ordinary work: 27 times from 2026-10-18 to 2026-11-01, and 41 of the 90 pull requests merged since 2026-10-16 had no non-author approval. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
-    "status": "Met"
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. Its bypass list holds one actor, fametrano, in pull_request mode, at rest: the organization-wide bypass the maintainer kept on 2026-11-04 (btclib-org/.github#2021 and btclib-org/.github#2040), read with gh api repos/btclib-org/btclib-node/rulesets on 2026-11-07. GOVERNANCE.md reserves that bypass for an emergency, and it is used for ordinary work: over the last two releases, 19 of the 22 pull requests merged had no approval from anybody other than their author (v2026.11.7 8 of 11, v2026.11.4 11 of 11). https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
+    "status": "Unmet"
   },
   "OSPS-SA-01.01": {
     "justification": "ARCHITECTURE.md describes each component and how it reaches outside the process: the node's main loop, the peer-to-peer protocol and the RPC surface, the transport, the chain state and its store, and validation. ASSURANCE_CASE.md's *Threat model* and *Trust boundaries* name the actors and what each can do. https://github.com/btclib-org/btclib-node/blob/main/ARCHITECTURE.md https://github.com/btclib-org/btclib-node/blob/main/ASSURANCE_CASE.md",
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "The GitHub release notes name each advisory the release fixes: v2026.10.8's name GHSA-74pj-5cgg-3m66, and v2026.10.4's name GHSA-rm5x-6v45-j8m6, GHSA-6hv4-mmgr-39wq and GHSA-68jv-ghr4-jjmj. RELEASE_NOTES.md's v2026.10.4 section does not name those three. https://github.com/btclib-org/btclib-node/releases/tag/v2026.10.4 https://github.com/btclib-org/btclib-node/releases/tag/v2026.10.8",
+    "justification": "The GitHub release notes name each advisory the release fixes: v2026.10.8's name GHSA-74pj-5cgg-3m66, and v2026.10.4's name GHSA-rm5x-6v45-j8m6, GHSA-6hv4-mmgr-39wq and GHSA-68jv-ghr4-jjmj. RELEASE_NOTES.md's v2026.10.4 section does not name those three. No later release fixes a published advisory; v2026.11.2 and v2026.11.4 list their security fixes under a Security heading, such as the drop of a peer paused on a full send buffer (closes #2112), the defect of Bitcoin Core's 2026-10-28 disclosure. https://github.com/btclib-org/btclib-node/releases/tag/v2026.10.4 https://github.com/btclib-org/btclib-node/releases/tag/v2026.11.4",
     "status": "Met"
   },
   "repo_distributed": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "Over the last two releases, v2026.10.29 and v2026.10.30, 25 of 43 pull requests were approved by somebody other than the author, 58%, above the 50% the criterion asks (v2026.10.30 9 of 12, v2026.10.29 16 of 31); 12 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Met"
+    "justification": "Over the last two releases, v2026.11.4 and v2026.11.7, 3 of 22 pull requests were approved by somebody other than the author, 14%, below the 50% the criterion asks (v2026.11.7 3 of 11, v2026.11.4 0 of 11); 0 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author, and fametrano holds a pull_request-mode bypass of it. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "status": "Unmet"
   },
   "updateable_reused_components": {
     "justification": "Reused components are either standard-library modules or PyPI packages pinned in uv.lock and bumped weekly by Dependabot, and the deps-latest sentinel runs the full suite against the upgraded set every week. https://github.com/btclib-org/btclib-node/blob/main/.github/workflows/deps-latest.yml",
