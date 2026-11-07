@@ -475,7 +475,9 @@ lands on lists the runs the image answers for.
 
 **The order is fixed**, in three groups, and a tree skips what it does
 not own and keeps the rest in that order, so two `README.md` files
-compare like with like:
+compare like with like. In the source each badge has a line to itself,
+which keeps a change to one line and every line inside MD013, whose 80
+columns bind only where a space follows them. The groups, in order:
 
 1. what the software is — the version beside `github/v/release`, the
    development status, the licence, the downloads, the supported Python
@@ -489,9 +491,10 @@ compare like with like:
 
 **The first two groups sit at the head of a `README.md`, and the third
 in a `## Status` section**, the last `##` section, above the
-supported-by line where there is one. An index renders the README as the
-package's page, so its head is the first screen a reader sees: it says
-what the package is, and the badges that can turn red come after what
+supported-by line where there is one. GitHub renders the README on every
+tree's repository page, and an index renders it as the page of a package
+a tree publishes, so in every tree its head is where a reader starts: it
+says what the tree is, and the badges that can turn red come after what
 the README says. A comment directly above the head's badges, or above
 those of `## Status`, is one line pointing to this section, and restates
 none of it.
