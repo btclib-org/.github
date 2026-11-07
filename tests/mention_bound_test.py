@@ -83,3 +83,25 @@ def test_sub_agents_are_denied_by_name() -> None:
     it starts (btclib-org/.github#1809).
     """
     assert {"Agent", "Skill", "Workflow"} <= denied()
+
+
+def test_other_sessions_worktrees_and_later_turns_are_denied_by_name() -> None:
+    """None of these is marked `enablesCodeExecution` on 2.1.314.
+
+    So `--restricted` does not deny them, and the deny list has to. They
+    reach another agent or session, a git worktree on the runner,
+    or a later turn, and an answer needs none of them
+    (btclib-org/.github#2113).
+    """
+    assert {
+        "ListAgents",
+        "SendMessage",
+        "SendFile",
+        "FetchInboxMessage",
+        "SendToProject",
+        "EnterWorktree",
+        "ExitWorktree",
+        "ScheduleWakeup",
+        "CronList",
+        "CronDelete",
+    } <= denied()

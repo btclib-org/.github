@@ -964,6 +964,15 @@ jobs:
           # naming KillShell or KillBash as TaskStop, so the older names
           # need no rule of their own
           #
+          # ListAgents, SendMessage, SendFile, FetchInboxMessage and
+          # SendToProject reach another agent or session, on the runner or
+          # in the cloud. EnterWorktree and ExitWorktree make and leave a
+          # git worktree on the runner. ScheduleWakeup schedules a later
+          # turn, and CronList and CronDelete list and cancel scheduled
+          # ones. An answer needs none of them (btclib-org/.github#2113).
+          # Read in the 2.1.314 bundle that v1.0.265 of this action
+          # installs, where a rule naming ListPeers is read as ListAgents
+          #
           # the model is named for the reason the review job gives, and
           # the setting sources for the reason the header gives
           claude_args: >-
@@ -974,3 +983,4 @@ jobs:
             "Bash,Edit,MultiEdit,Write,NotebookEdit,mcp__github_file_ops__commit_files,mcp__github_file_ops__delete_files"
             "Read,Grep,Glob,LS"
             "Agent,Skill,Workflow,GetTask,TaskStop"
+            "ListAgents,SendMessage,SendFile,FetchInboxMessage,SendToProject,EnterWorktree,ExitWorktree,ScheduleWakeup,CronList,CronDelete"
