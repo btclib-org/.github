@@ -59,6 +59,14 @@ jobs:
           # --include-fragments, or a heading rename breaks an anchor
           # into it with nothing red anywhere; a fragment is read off a
           # page the plain check already fetched, so it adds no request
+          # --remap checks an /issues/N link, with or without a fragment,
+          # under a renamed repository's old name at its current name:
+          # GitHub answers 404 for an issue page under the old name. Each
+          # line holds one repository's old names, and
+          # `gh api repos/btclib-org/<old> --jq .full_name` answers its
+          # current name. lychee applies only the first remap that
+          # matches, so these come first and drop an issue comment
+          # fragment themselves.
           # --remap drops the fragment of an issue comment link. GitHub
           # renders an issue page client-side: the comments are JSON in
           # the HTML and no element carries id="issuecomment-N", so lychee
@@ -83,6 +91,14 @@ jobs:
             --timeout 45
             --accept 100..=103,200..=299,429
             --include-fragments
+            --remap '^https://github\.com/btclib-org/claude-process/issues/([0-9]+)(?:#issuecomment-[0-9]+|(#.*))?$ https://github.com/btclib-org/ai-agents-process/issues/$1$2'
+            --remap '^https://github\.com/btclib-org/btclib-benchmarks/issues/([0-9]+)(?:#issuecomment-[0-9]+|(#.*))?$ https://github.com/btclib-org/benchmarks/issues/$1$2'
+            --remap '^https://github\.com/btclib-org/btclib-mnemonics/issues/([0-9]+)(?:#issuecomment-[0-9]+|(#.*))?$ https://github.com/btclib-org/bip39-slip39/issues/$1$2'
+            --remap '^https://github\.com/btclib-org/btclib-bitcoin-core-rpc/issues/([0-9]+)(?:#issuecomment-[0-9]+|(#.*))?$ https://github.com/btclib-org/bitcoin-core-rpc/issues/$1$2'
+            --remap '^https://github\.com/btclib-org/btclib_node/issues/([0-9]+)(?:#issuecomment-[0-9]+|(#.*))?$ https://github.com/btclib-org/btclib-node/issues/$1$2'
+            --remap '^https://github\.com/btclib-org/btclib-libsecp256k1/issues/([0-9]+)(?:#issuecomment-[0-9]+|(#.*))?$ https://github.com/btclib-org/btclib-secp256k1/issues/$1$2'
+            --remap '^https://github\.com/btclib-org/(?:btclib-ecc|ellipticcurves)/issues/([0-9]+)(?:#issuecomment-[0-9]+|(#.*))?$ https://github.com/btclib-org/ecc/issues/$1$2'
+            --remap '^https://github\.com/btclib-org/(?:bitcoin-node-tests|btclib-functional-tests)/issues/([0-9]+)(?:#issuecomment-[0-9]+|(#.*))?$ https://github.com/btclib-org/functional-tests/issues/$1$2'
             --remap '^(https://github\.com/[^/]+/[^/]+/issues/[0-9]+)#issuecomment-[0-9]+$ $1'
             --remap '^https://github\.com/([^/]+/[^/]+)/blob/([^#]+)(?:#L[0-9]+(?:-L?[0-9]+)?|(#.*))?$ https://raw.githubusercontent.com/$1/$2$3'
             ${{ inputs.targets }}
