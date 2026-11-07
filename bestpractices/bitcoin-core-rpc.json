@@ -8,7 +8,7 @@
     "status": "Met"
   },
   "OSPS-AC-03.01": {
-    "justification": "The main-self-merge ruleset requires a pull request for every change to main and has no bypass actor, so nobody pushes to main directly. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main. Its one bypass actor, fametrano, holds it in pull_request mode, which excuses the approval but still refuses a direct push, so nobody pushes to main directly. https://github.com/btclib-org/.github/issues/2021",
     "status": "Met"
   },
   "OSPS-AC-03.02": {
@@ -200,8 +200,8 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before any merge to main. It dismisses an approval on a new push. It has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Met"
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. Its bypass list holds one actor, fametrano, in pull_request mode, at rest: the organization-wide bypass the maintainer kept on 2026-11-04 (btclib-org/.github#2021 and btclib-org/.github#2040), read with gh api repos/btclib-org/bitcoin-core-rpc/rulesets on 2026-11-07. GOVERNANCE.md reserves that bypass for an emergency, and it is used for ordinary work: over the last two releases, 28 of the 31 pull requests merged had no approval from anybody other than their author (v2026.11.7 20 of 23, v2026.11.3 8 of 8). https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
+    "status": "Unmet"
   },
   "OSPS-SA-01.01": {
     "justification": "ARCHITECTURE.md gives the components and their layering. ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors and what each can do. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/ARCHITECTURE.md",
@@ -476,7 +476,7 @@
     "status": "Met"
   },
   "dynamic_analysis_fixed": {
-    "justification": "No security issue from dynamic analysis is open. The weekly fuzz and mutation runs on main pass. The mutation run has no threshold and reports survivors: 53 of the 264 mutants it executed on 2026-10-26. Nobody has yet read those survivors one by one. https://github.com/btclib-org/bitcoin-core-rpc/actions/workflows/mutation.yml",
+    "justification": "No security issue from dynamic analysis is open. The weekly fuzz and mutation runs on main pass. The mutation run has no threshold and reports survivors: 99 of the 466 mutants it executed on 2026-11-02 (https://github.com/btclib-org/bitcoin-core-rpc/actions/runs/41452868895). No issue reads those survivors one by one. https://github.com/btclib-org/bitcoin-core-rpc/actions/workflows/mutation.yml",
     "status": "Met"
   },
   "dynamic_analysis_unsafe": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "Over the last two releases, v2026.10.23 and v2026.10.30, 25 of 44 pull requests were approved by somebody other than the author, 57%, above the 50% the criterion asks (v2026.10.30 15 of 28, v2026.10.23 10 of 16); 18 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Met"
+    "justification": "Over the last two releases, v2026.11.3 and v2026.11.7, 3 of 31 pull requests were approved by somebody other than the author, 10%, below the 50% the criterion asks (v2026.11.7 3 of 23, v2026.11.3 0 of 8); 0 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author, and fametrano holds a pull_request-mode bypass of it. https://github.com/btclib-org/.github/issues/2021",
+    "status": "Unmet"
   },
   "updateable_reused_components": {
     "justification": "At run time the package reuses only the standard library. Its development tools are pinned in uv.lock and updated weekly by Dependabot. https://github.com/btclib-org/bitcoin-core-rpc/blob/main/.github/dependabot.yml",

@@ -8,7 +8,7 @@
     "status": "Met"
   },
   "OSPS-AC-03.01": {
-    "justification": "The main-self-merge ruleset requires a pull request for every change to main and has no bypass actor, so nobody pushes to main directly. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main. Its one bypass actor, fametrano, holds it in pull_request mode, which excuses the approval but still refuses a direct push, so nobody pushes to main directly. https://github.com/btclib-org/.github/issues/2021",
     "status": "Met"
   },
   "OSPS-AC-03.02": {
@@ -200,8 +200,8 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. It has no bypass actor at rest. The maintainer adds a pull_request-mode bypass around merges and removes it afterwards. GOVERNANCE.md reserves that bypass for an emergency, and it has also been used for ordinary work: 33 of the 75 merges to main from 2026-10-17 to 2026-10-30 landed that way. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
-    "status": "Met"
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. Its bypass list holds one actor, fametrano, in pull_request mode, at rest: the organization-wide bypass the maintainer kept on 2026-11-04 (btclib-org/.github#2021 and btclib-org/.github#2040), read with gh api repos/btclib-org/ecc/rulesets on 2026-11-07. GOVERNANCE.md reserves that bypass for an emergency, and it is used for ordinary work: over the last two releases, 18 of the 20 pull requests merged had no approval from anybody other than their author (v2026.11.7 10 of 12, v2026.11.6 8 of 8). https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
+    "status": "Unmet"
   },
   "OSPS-SA-01.01": {
     "justification": "ASSURANCE_CASE.md's Threat model and Trust boundaries name the actors, the caller, the adversary and the libsecp256k1 bindings, and what each can do. Its Layering paragraph says which part of the package may import which. https://github.com/btclib-org/ecc/blob/main/ASSURANCE_CASE.md#trust-boundaries",
@@ -384,7 +384,7 @@
     "status": "N/A"
   },
   "crypto_published": {
-    "justification": "The Python arithmetic implements published algorithms (SEC 1, RFC 6979, BIP340, BIP327, draft BIP445, draft BIP458, BIP374, BIP324, and the DLC specification's ECDSA adaptor and oracle signatures) and is validated against the specifications' own vectors. The opt-in ecc.ecc.ssa_adaptor follows the proposal in BlockstreamResearch/secp256k1-zkp#299, which no published specification includes, and nothing else in the library calls it. On secp256k1, with the optional bindings installed, a call delegates to Bitcoin Core's libsecp256k1 wherever its guard admits it. https://github.com/btclib-org/ecc/blob/main/README.md",
+    "justification": "The Python arithmetic implements published algorithms (SEC 1, RFC 6979, BIP340, BIP327, draft BIP445, draft BIP458, draft BIP459, BIP374, BIP324, and the DLC specification's ECDSA adaptor and oracle signatures) and is validated against the specifications' own vectors. The opt-in ecc.ecc.ssa_adaptor follows the proposal in BlockstreamResearch/secp256k1-zkp#299, which no published specification includes, and nothing else in the library calls it. On secp256k1, with the optional bindings installed, a call delegates to Bitcoin Core's libsecp256k1 wherever its guard admits it. https://github.com/btclib-org/ecc/blob/main/README.md",
     "status": "Met"
   },
   "crypto_random": {
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "The release notes name each vulnerability the release fixes or asks for a fix of: v2026.10.30 and v2026.10.28 fix none and name none; v2026.10.23 names GHSA-8h6f-34jj-7p6c, fixed in btclib-secp256k1 0.8.0.10 (the secp256k1 extra asks for 0.8.0.12 or later); v2026.10.10 names the share leak of FROST's deterministic_sign (issue #168) as its first entry, and v2026.10.8 names GHSA-2wgq-4cfh-5gqh. https://github.com/btclib-org/ecc/releases/tag/v2026.10.30",
+    "justification": "The release notes name each vulnerability the release fixes or asks for a fix of: v2026.10.28 to v2026.11.7 fix none and name none; v2026.10.23 names GHSA-8h6f-34jj-7p6c, fixed in btclib-secp256k1 0.8.0.10 (the secp256k1 extra asks for 0.8.0.12 or later); v2026.10.10 names the share leak of FROST's deterministic_sign (issue #168) as its first entry, and v2026.10.8 names GHSA-2wgq-4cfh-5gqh. https://github.com/btclib-org/ecc/releases/tag/v2026.11.7",
     "status": "Met"
   },
   "repo_distributed": {
@@ -720,8 +720,8 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "Over the last two releases, v2026.10.28 and v2026.10.30, 18 of 35 pull requests were approved by somebody other than the author, 51%, above the 50% the criterion asks (v2026.10.30 4 of 6, v2026.10.28 14 of 29); 13 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
-    "status": "Met"
+    "justification": "Over the last two releases, v2026.11.6 and v2026.11.7, 2 of 20 pull requests were approved by somebody other than the author, 10%, below the 50% the criterion asks (v2026.11.7 2 of 12, v2026.11.6 0 of 8); 0 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author, and fametrano holds a pull_request-mode bypass of it. https://github.com/btclib-org/.github/issues/2021",
+    "status": "Unmet"
   },
   "updateable_reused_components": {
     "justification": "Reused components are either standard-library modules or PyPI packages pinned in uv.lock and bumped weekly by Dependabot, and the deps-latest sentinel runs the full suite against the upgraded set every week. https://github.com/btclib-org/ecc/blob/main/.github/workflows/deps-latest.yml",

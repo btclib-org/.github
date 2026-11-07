@@ -8,7 +8,7 @@
     "status": "Met"
   },
   "OSPS-AC-03.01": {
-    "justification": "The main-self-merge ruleset requires a pull request for every change to main, and has no bypass actor. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "The main-self-merge ruleset requires a pull request for every change to main. Its one bypass actor, fametrano, holds it in pull_request mode, which excuses the approval but still refuses a direct push, so nobody pushes to main directly. https://github.com/btclib-org/.github/issues/2021",
     "status": "Met"
   },
   "OSPS-AC-03.02": {
@@ -44,7 +44,7 @@
     "status": "Met"
   },
   "OSPS-BR-02.02": {
-    "justification": "The only asset of a release is GitHub's source archive, named after the tag: portanode-2026.10.30.zip for v2026.10.30. https://github.com/btclib-org/portanode/releases/latest",
+    "justification": "The only asset of a release is GitHub's source archive, named after the tag: portanode-2026.11.7.zip for v2026.11.7. https://github.com/btclib-org/portanode/releases/latest",
     "status": "Met"
   },
   "OSPS-BR-03.01": {
@@ -200,8 +200,8 @@
     "status": "Met"
   },
   "OSPS-QA-07.01": {
-    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. It has no bypass actor at rest. The maintainer adds a pull_request-mode bypass around merges and removes it afterwards. GOVERNANCE.md reserves that bypass for an emergency, and it has also been used for ordinary work: 22 times from 2026-10-25 to 2026-11-01, and 6 of the 7 pull requests landed since v2026.10.30 have no non-author approval. https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
-    "status": "Met"
+    "justification": "The main-self-merge ruleset requires one approving review from somebody other than the author before a merge to main, and dismisses an approval on a new push. Its bypass list holds one actor, fametrano, in pull_request mode, at rest: the organization-wide bypass the maintainer kept on 2026-11-04 (btclib-org/.github#2021 and btclib-org/.github#2040), read with gh api repos/btclib-org/portanode/rulesets on 2026-11-07. GOVERNANCE.md reserves that bypass for an emergency, and it is used for ordinary work: over the last two releases, 30 of the 32 pull requests merged had no approval from anybody other than their author (v2026.11.7 13 of 14, v2026.11.2 17 of 18). https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md#how-a-decision-is-made",
+    "status": "Unmet"
   },
   "OSPS-SA-01.01": {
     "justification": "README.md names the actors and actions: the user and the launchers, the per-platform scripts they reach, Bitcoin Core and Electrum, the publishers' download sites, gpg and the user's keyring. Updating Binaries and Limitations, not vulnerabilities say what each update, verification and rollback does and whom it trusts. https://github.com/btclib-org/portanode/blob/main/README.md#folder-structure https://github.com/btclib-org/portanode/blob/main/README.md#limitations-not-vulnerabilities",
@@ -588,7 +588,7 @@
     "status": "Met"
   },
   "release_notes_vulns": {
-    "justification": "No release has fixed a vulnerability with a CVE assignment or similar: the repository has no security advisory. CHANGELOG.md's v2026.10.25 section cites the public security issues that release fixed. https://github.com/btclib-org/portanode/security/advisories",
+    "justification": "No release has fixed a vulnerability with a CVE assignment or similar: the repository has no security advisory. CHANGELOG.md's v2026.10.25 and v2026.11.2 sections cite the public security issues those releases fixed. https://github.com/btclib-org/portanode/security/advisories",
     "status": "N/A"
   },
   "repo_distributed": {
@@ -616,7 +616,7 @@
     "status": "Met"
   },
   "report_responses": {
-    "justification": "On 2026-11-01, 394 of the 429 issues filed were closed. The maintainer filed all but 11, which pmazzocchi filed between 2026-10-18 and 2026-10-20: 6 of them were closed by 2026-10-27, and the 5 open ones carry labels. https://github.com/btclib-org/portanode/issues?q=is%3Aissue%20state%3Aclosed",
+    "justification": "On 2026-11-07, 412 of the 438 issues filed were closed. The maintainer filed all but 11, which pmazzocchi filed between 2026-10-18 and 2026-10-20: 8 of them were closed by 2026-11-04, and the 3 open ones carry labels. https://github.com/btclib-org/portanode/issues?q=is%3Aissue%20state%3Aclosed",
     "status": "Met"
   },
   "report_tracker": {
@@ -712,7 +712,7 @@
     "status": "Unmet"
   },
   "tests_are_added": {
-    "justification": "Recent changes to a launcher or a helper add tests: pull request 805 (health-check) changes tests/sh/health-check.sh, 736 two test files, 732 one, 717 two. Since the first test landed on 2026-10-19, 19 of the 26 merged pull requests that change a script also touch tests/. https://github.com/btclib-org/portanode/pulls?q=is%3Apr+is%3Amerged",
+    "justification": "Recent changes to a launcher or a helper add tests: pull request 805 (health-check) changes tests/sh/health-check.sh, 736 two test files, 732 one, 717 two. Since the first test landed on 2026-10-19, 28 of the 35 merged pull requests that change a script (a .sh, .ps1, .command, .bat or .py file outside tests/) also touch tests/ (counted on 2026-11-07). https://github.com/btclib-org/portanode/pulls?q=is%3Apr+is%3Amerged",
     "status": "Met"
   },
   "tests_documented_added": {
@@ -720,7 +720,7 @@
     "status": "Met"
   },
   "two_person_review": {
-    "justification": "Over the last two releases, v2026.10.26 and v2026.10.30, 7 of 29 pull requests were approved by somebody other than the author, 24%, below the 50% the criterion asks (v2026.10.30 7 of 18, v2026.10.26 0 of 11); 4 were approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author. https://github.com/btclib-org/.github/blob/main/README.md#branch-protection-and-rulesets",
+    "justification": "Over the last two releases, v2026.11.2 and v2026.11.7, 2 of 32 pull requests were approved by somebody other than the author, 6%, below the 50% the criterion asks (v2026.11.7 1 of 14, v2026.11.2 1 of 18); 1 was approved by somebody other than fametrano. Counted by merge time between release publications, over the same two-release window on every btclib-org project. main's ruleset requires one approving review from somebody other than the author, and fametrano holds a pull_request-mode bypass of it. https://github.com/btclib-org/.github/issues/2021",
     "status": "Unmet"
   },
   "updateable_reused_components": {
@@ -744,11 +744,11 @@
     "status": "Met"
   },
   "vulnerabilities_critical_fixed": {
-    "justification": "13 issues labelled security have been filed since 2026-10-18; none carries a severity rating. 11 were closed within 5 days, and v2026.10.25 ships the fixes CHANGELOG.md credits to them. #672 and #695 are open, and #695 waits on a Windows machine to measure. The repository has no security advisory and no open alert. https://github.com/btclib-org/portanode/issues?q=is%3Aissue+label%3Asecurity",
+    "justification": "13 issues labelled security have been filed since 2026-10-18; none carries a severity rating, and all are closed. 11 were closed within 5 days, and v2026.10.25 ships the fixes CHANGELOG.md credits to them; #672 and #695 were closed on 2026-11-01 and v2026.11.2 ships their fixes. The repository has no security advisory and no open alert. https://github.com/btclib-org/portanode/issues?q=is%3Aissue+label%3Asecurity",
     "status": "Met"
   },
   "vulnerabilities_fixed_60_days": {
-    "justification": "There is no security advisory and no open Dependabot alert. Two issues labelled security are open, #672 and #695, each filed under 60 days ago, on 2026-10-18 and 2026-10-19. https://github.com/btclib-org/portanode/issues?q=is%3Aissue+label%3Asecurity",
+    "justification": "There is no security advisory and no open Dependabot alert. No issue labelled security is open: the last two, #672 and #695, filed on 2026-10-18 and 2026-10-19, were fixed in v2026.11.2. https://github.com/btclib-org/portanode/issues?q=is%3Aissue+label%3Asecurity",
     "status": "Met"
   },
   "vulnerability_report_credit": {
