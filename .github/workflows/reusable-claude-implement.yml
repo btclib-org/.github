@@ -37,7 +37,9 @@ name: reusable-claude-implement
 # Anybody else's issue runs nothing until an administrator of the
 # repository labels it `agent`. The same label starts an assessment on
 # any open issue not labelled `decision`, so that an issue opened before
-# the switch was turned on can still be handed to the agent. The
+# the switch was turned on can still be handed to the agent. Neither
+# path assesses an issue labelled `needs-hardware` or `needs-maintainer`,
+# since what such an issue waits for an agent cannot do. The
 # administrator is read from the API, because the event carries the
 # login and not its permission. A re-run is refused, by
 # `github.run_attempt == 1` in each job's condition: it keeps the event
@@ -170,6 +172,8 @@ jobs:
           && github.run_attempt == 1
           && github.event_name == 'issues'
           && github.event.issue.state == 'open'
+          && !contains(github.event.issue.labels.*.name, 'needs-hardware')
+          && !contains(github.event.issue.labels.*.name, 'needs-maintainer')
           && ((github.event.action == 'opened'
                && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'),
                            github.event.issue.author_association))
@@ -216,9 +220,8 @@ jobs:
                  "'$permission'; only an administrator admits an issue."
             exit 1
           fi
-      # an issue opened with `agent` on it fires `opened` and `labeled`,
-      # whose runs the job's group puts one after the other: the header
-      # says why the second then assesses nothing
+      # the header says why a run that finds an assessment posted since
+      # the newest `agent` label assesses nothing
       - name: Read whether an assessment already answers the event
         id: answered
         env:
@@ -226,6 +229,11 @@ jobs:
           REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.issue.number }}
           CREATED: ${{ github.event.issue.created_at }}
+          # a comment's first line that is not blank, trailing space cut,
+          # which the steps reading an assessment all take
+          FIRST_LINE: &first-line >-
+            def first_line: (.body // "") | split("\n")
+            | map(sub("\\s+$"; "")) | map(select(length > 0)) | first // "";
         run: |
           events=$(gh api "repos/$REPO/issues/$NUMBER/events" --paginate --slurp)
           since=$(printf '%s\n' "$events" \
@@ -235,12 +243,12 @@ jobs:
           comments=$(gh api "repos/$REPO/issues/$NUMBER/comments" --paginate \
             --slurp)
           answered=$(printf '%s\n' "$comments" \
-            | jq --arg since "$since" \
-                '[ .[][] | select(.user.login == "claude[bot]"
-                                  and .created_at >= $since
-                                  and (.body // ""
-                                       | startswith("Recommendation: "))) ]
-                 | length > 0')
+            | jq --arg since "$since" "$FIRST_LINE"'
+                [ .[][] | select(.user.login == "claude[bot]"
+                                 and .created_at >= $since
+                                 and (first_line
+                                      | startswith("Recommendation: "))) ]
+                | length > 0')
           if [ "$answered" = true ]; then
             echo "::notice::#$NUMBER holds an assessment posted since $since."
           fi
@@ -459,16 +467,15 @@ jobs:
           NUMBER: ${{ github.event.issue.number }}
           SINCE: ${{ steps.start.outputs.at }}
           ASSOCIATION: ${{ github.event.issue.author_association }}
+          FIRST_LINE: *first-line
         run: |
           comments=$(gh api "repos/$REPO/issues/$NUMBER/comments" --paginate \
             --slurp)
           first=$(printf '%s\n' "$comments" \
-            | jq -r --arg since "$SINCE" \
-                '[ .[][] | select(.user.login == "claude[bot]"
-                                  and .created_at >= $since) ]
-                 | last | (.body // "") | split("\n")
-                 | map(sub("\\s+$"; "")) | map(select(length > 0))
-                 | first // empty')
+            | jq -r --arg since "$SINCE" "$FIRST_LINE"'
+                [ .[][] | select(.user.login == "claude[bot]"
+                                 and .created_at >= $since) ]
+                | last | first_line')
           case "$first" in
             "Recommendation: implement") recommended=true ;;
             "Recommendation: do not implement") recommended=false ;;
@@ -562,14 +569,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.issue.number }}
+          FIRST_LINE: *first-line
         run: |
           comments=$(gh api "repos/$REPO/issues/$NUMBER/comments" --paginate \
             --slurp)
           assessed=$(printf '%s\n' "$comments" \
-            | jq '[ .[][] | select(.user.login == "claude[bot]"
-                                  and (.body // ""
-                                       | startswith("Recommendation: "))) ]
-                  | length')
+            | jq "$FIRST_LINE"'
+                [ .[][] | select(.user.login == "claude[bot]"
+                                 and (first_line
+                                      | startswith("Recommendation: "))) ]
+                | length')
           if [ "$assessed" = 0 ]; then
             echo "::error::#$NUMBER holds no assessment: remove agent and" \
                  "label it again to have it assessed."

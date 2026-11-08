@@ -1906,12 +1906,25 @@ def issue_event(
             False,
             id="a closed issue",
         ),
+        *[
+            pytest.param(
+                issue_event(action, association, labels), False, id=f"{action} {label}"
+            )
+            for label in ("needs-hardware", "needs-maintainer")
+            for action, association, labels in [
+                ("opened", "MEMBER", [label]),
+                ("labeled", "MEMBER", ["agent", label]),
+                ("labeled", "NONE", ["agent", label]),
+            ]
+        ],
     ],
 )
 def test_the_agent_label_starts_an_assessment_on_any_author_s_issue(
     event: dict[str, Any], *, expected: bool
 ) -> None:
     """`opened` for an owner, a member or a collaborator; `agent` for anyone.
+
+    On neither path where the issue waits for what an agent cannot do.
 
     :param event: the event's payload.
     :param expected: whether `assess` starts.
@@ -1971,6 +1984,7 @@ def answered(bench: Path, events: list[Any], comments: list[Any]) -> str:
         "REPO": "o/r",
         "NUMBER": "7",
         "CREATED": T0,
+        "FIRST_LINE": step["env"]["FIRST_LINE"],
         "GITHUB_OUTPUT": str(output),
     }
     subprocess.run(["bash", "-e", "-c", step["run"]], env=env, check=True)
@@ -2012,6 +2026,18 @@ def answered(bench: Path, events: list[Any], comments: list[Any]) -> str:
             "false",
             id="not an assessment",
         ),
+        pytest.param(
+            [ADMIN],
+            [comment("claude[bot]", T_LATER, "\nRecommendation: implement\n")],
+            "true",
+            id="after a blank line",
+        ),
+        pytest.param(
+            [ADMIN],
+            [comment("claude[bot]", T_LATER, " \t\nRecommendation: implement \n")],
+            "true",
+            id="after a line of spaces",
+        ),
     ],
 )
 def test_an_issue_opened_with_agent_is_assessed_once(
@@ -2034,3 +2060,77 @@ def test_an_answered_event_runs_no_step_after_the_check() -> None:
     assert later
     for step in later:
         assert "steps.answered.outputs.answered == 'false'" in step["if"], step["name"]
+
+
+def first_line_steps() -> list[dict[str, Any]]:
+    """Find the steps that read an assessment's first line.
+
+    :returns: the steps, in file order.
+    """
+    return [
+        step
+        for job in jobs(WORKFLOW).values()
+        for step in job.get("steps", [])
+        if "first_line" in step.get("run", "")
+    ]
+
+
+def test_every_step_reads_an_assessment_s_first_line_alike() -> None:
+    """The steps take one definition, and each uses it."""
+    found = first_line_steps()
+    assert [step["name"] for step in found] == [
+        "Read whether an assessment already answers the event",
+        "Read the recommendation back",
+        "Refuse an issue that holds no assessment",
+    ]
+    assert len({step["env"]["FIRST_LINE"] for step in found}) == 1
+    for step in found:
+        assert '"$FIRST_LINE"' in step["run"], step["name"]
+        # a comment's body is read through the definition alone
+        assert ".body" not in step["run"], step["name"]
+
+
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        pytest.param("Recommendation: implement\n", 0, id="on the first line"),
+        pytest.param("\nRecommendation: implement\n", 0, id="after a blank line"),
+        pytest.param(" \t\nRecommendation: implement\n", 0, id="after spaces"),
+        pytest.param("no recommendation\n", 1, id="not an assessment"),
+    ],
+)
+def test_implement_finds_the_assessment_as_the_read_back_does(
+    tmp_path: Path, body: str, expected: int
+) -> None:
+    """`implement`'s check reads the same first line as `assess`'s steps.
+
+    :param tmp_path: a directory of this test's own.
+    :param body: the claude[bot] comment's text.
+    :param expected: the step's exit status.
+    """
+    stand_in = tmp_path / "gh"
+    stand_in.write_text(ANSWERED_GH)
+    stand_in.chmod(0o755)
+    (tmp_path / "comments.json").write_text(
+        json.dumps([[comment("claude[bot]", T0, body)]])
+    )
+    (step,) = [
+        step
+        for step in jobs(WORKFLOW)["implement"]["steps"]
+        if step.get("name") == "Refuse an issue that holds no assessment"
+    ]
+    env = {
+        **os.environ,
+        "PATH": f"{tmp_path}:{os.environ['PATH']}",
+        "REPO": "o/r",
+        "NUMBER": "7",
+        "FIRST_LINE": step["env"]["FIRST_LINE"],
+    }
+    done = subprocess.run(
+        ["bash", "-e", "-c", step["run"]],
+        env=env,
+        capture_output=True,
+        encoding="utf-8",
+        check=False,
+    )
+    assert done.returncode == expected, done.stdout + done.stderr
