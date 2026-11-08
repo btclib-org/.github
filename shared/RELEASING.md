@@ -229,9 +229,11 @@ inferring it from a sibling. A release declares the ranges
 pins, so a user's install resolves the newest version each range admits. A
 failure in any package a user's install resolves, those dependencies and
 extras and what they in turn require, is one users will meet the day the
-release ships, and it is read before the tag. A failure confined to a
-package that only a dependency group names reaches no user and waits for
-the next lock bump.
+release ships, and it is read before the tag. `deps-latest` does not test
+every such version: its lock holds the dependency groups too, so a group's
+upper bound keeps a package below the version a user's install resolves. A
+failure confined to a package that only a dependency group names reaches
+no user and waits for the next lock bump.
 
 **The drift it reports is left to Dependabot.** The release pull request
 does not run `uv lock --upgrade`: section 1's
@@ -417,14 +419,24 @@ request, next to `deps-latest`'s own result.
    and `uv lock`, and gate again:
 
    ```shell
-   git fetch origin
+   tip=$(git rev-parse HEAD) &&
+   git fetch origin &&
    git reset --hard origin/main
    ```
 
    The sections are written again from `git log` of the new tip, and the
    version is a few lines. Where the branch is already pushed, the redone
-   one goes up with `git push --force-with-lease`: its commits do not
-   descend from the pushed head, and a plain `git push` is refused.
+   one goes up with a lease on `tip`, the head reviewed before the fetch:
+
+   ```shell
+   git push origin HEAD \
+     --force-with-lease="refs/heads/$(git branch --show-current):${tip:?}"
+   ```
+
+   Its commits do not descend from the pushed head, so a plain `git push`
+   is refused. A bare `--force-with-lease` compares against what the fetch
+   just brought, so it would overwrite a push made since the review; the
+   lease on `tip` refuses it.
 
 1. Give the release pull request its title and its body, before merging it
    and not after. The title is the version; the body says what the release
