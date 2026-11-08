@@ -8,9 +8,11 @@ The rule is section 10's, and the workflow's header says how the file
 keeps it. These tests read that configuration: the scopes each token is
 asked for, the agent's allow list and the job that runs the agent's
 edit. The scripts `comment`, `label`, `check-admission` and
-`check-message`, the command running the gates and the step committing
-the edit are read out of the workflow and run here, the scripts against
-a stand-in `gh`, so what is asked is what the runner writes.
+`check-message`, the command running the gates, the step committing the
+edit and the one reading whether an assessment answers the event are
+read out of the workflow and run here, the scripts and that step against
+a stand-in `gh`, so what is asked is what the runner writes. The
+condition starting `assess` is evaluated on the events it decides.
 """
 
 from __future__ import annotations
@@ -1790,3 +1792,350 @@ def test_publish_refuses_an_edit_to_coderabbit(tmp_path: Path, name: str) -> Non
     assert done.returncode == 1, done.stdout + done.stderr
     assert "CodeRabbit's configuration" in done.stdout
     assert "committed" not in done.stdout
+
+
+# a context name of an expression, as `github.event.issue.labels.*.name`
+CONTEXT = re.compile(r"\b(?:vars|github)(?:\.[\w*]+)+")
+
+
+def looked_up(context: dict[str, Any], name: str) -> object:
+    """Read one name of an expression's context, `*` mapping over a list.
+
+    :param context: the contexts, by their first part.
+    :param name: the dotted name.
+    :returns: the value, None where a part is missing.
+    """
+    values: list[Any] = [context]
+    starred = False
+    for part in name.split("."):
+        if part == "*":
+            starred = True
+            values = [item for value in values for item in value or []]
+        else:
+            values = [(value or {}).get(part) for value in values]
+    return values if starred else values[0]
+
+
+def admitted(event: dict[str, Any]) -> bool:
+    """Evaluate `assess`'s condition on an `issues` event.
+
+    The condition's `&&`, `||`, `!`, `==`, `contains` and `fromJSON` are
+    read as Python's, which holds for the operands it compares.
+
+    :param event: the event's payload.
+    :returns: whether `assess` starts.
+    """
+    condition = jobs(WORKFLOW)["assess"]["if"]
+    text = condition.strip().removeprefix("${{").removesuffix("}}")
+    text = text.replace("&&", " and ").replace("||", " or ")
+    text = re.sub(r"!(?!=)", " not ", text).replace("fromJSON(", "loads(")
+    text = CONTEXT.sub(lambda match: f"name({match[0]!r})", text)
+    context = {
+        "vars": {"CLAUDE_IMPLEMENT_ENABLED": "true"},
+        "github": {"run_attempt": 1, "event_name": "issues", "event": event},
+    }
+    names = {
+        "name": lambda name: looked_up(context, name),
+        "loads": json.loads,
+        "contains": lambda haystack, needle: needle in haystack,
+    }
+    return bool(eval(" ".join(text.split()), {"__builtins__": {}}, names))  # noqa: S307
+
+
+def issue_event(
+    action: str, association: str, labels: list[str], label: str = "agent"
+) -> dict[str, Any]:
+    """Make an `issues` event's payload, as the condition reads it.
+
+    :param action: `opened` or `labeled`.
+    :param association: the author's `author_association`.
+    :param labels: the labels the issue carries.
+    :param label: the label a `labeled` event applied.
+    :returns: the payload.
+    """
+    payload: dict[str, Any] = {
+        "action": action,
+        "issue": {
+            "state": "open",
+            "author_association": association,
+            "labels": [{"name": name} for name in labels],
+        },
+    }
+    if action == "labeled":
+        payload["label"] = {"name": label}
+    return payload
+
+
+@pytest.mark.parametrize(
+    ("event", "expected"),
+    [
+        pytest.param(issue_event("opened", "MEMBER", []), True, id="a member opens"),
+        pytest.param(
+            issue_event("opened", "NONE", ["agent"]), False, id="anybody else opens"
+        ),
+        pytest.param(
+            issue_event("labeled", "MEMBER", ["agent"]),
+            True,
+            id="agent on a member's issue",
+        ),
+        pytest.param(
+            issue_event("labeled", "OWNER", ["agent"]),
+            True,
+            id="agent on an owner's issue",
+        ),
+        pytest.param(
+            issue_event("labeled", "NONE", ["agent"]),
+            True,
+            id="agent on anybody else's issue",
+        ),
+        pytest.param(
+            issue_event("opened", "MEMBER", ["decision"]),
+            True,
+            id="a member opens with decision",
+        ),
+        pytest.param(
+            issue_event("labeled", "MEMBER", ["agent", "decision"]),
+            False,
+            id="agent beside decision",
+        ),
+        pytest.param(
+            issue_event("labeled", "MEMBER", ["agent", "bug"], "bug"),
+            False,
+            id="another label",
+        ),
+        pytest.param(
+            {
+                **issue_event("labeled", "MEMBER", ["agent"]),
+                "issue": {"state": "closed"},
+            },
+            False,
+            id="a closed issue",
+        ),
+        *[
+            pytest.param(
+                issue_event(action, association, labels), False, id=f"{action} {label}"
+            )
+            for label in ("needs-hardware", "needs-maintainer")
+            for action, association, labels in [
+                ("opened", "MEMBER", [label]),
+                ("labeled", "MEMBER", ["agent", label]),
+                ("labeled", "NONE", ["agent", label]),
+            ]
+        ],
+    ],
+)
+def test_the_agent_label_starts_an_assessment_on_any_author_s_issue(
+    event: dict[str, Any], *, expected: bool
+) -> None:
+    """`opened` for an owner, a member or a collaborator; `agent` for anyone.
+
+    On neither path where the issue waits for what an agent cannot do.
+
+    :param event: the event's payload.
+    :param expected: whether `assess` starts.
+    """
+    assert admitted(event) is expected
+
+
+# a stand-in for `gh` answering the issue's events and comments from files
+# beside it
+ANSWERED_GH = """#!/bin/sh
+here=${0%/*}
+case $2 in
+  repos/o/r/issues/7/events) cat "$here/events.json" ;;
+  repos/o/r/issues/7/comments) cat "$here/comments.json" ;;
+  *) echo "gh: Not Found (HTTP 404)" >&2; exit 1 ;;
+esac
+"""
+
+T_LATER = "2026-11-03T10:05:00Z"
+
+
+def comment(
+    login: str, at: str, body: str = "Recommendation: implement\n"
+) -> dict[str, Any]:
+    """Make one issue comment, as the API gives it.
+
+    :param login: its author's login.
+    :param at: when it was posted.
+    :param body: its text.
+    :returns: the comment.
+    """
+    return {"user": {"login": login}, "created_at": at, "body": body}
+
+
+def answered(bench: Path, events: list[Any], comments: list[Any]) -> str:
+    """Run `assess`'s step reading whether an assessment answers the event.
+
+    :param bench: where the stand-in and its answers go.
+    :param events: the issue's events, one page.
+    :param comments: the issue's comments, one page.
+    :returns: what the step writes to its output.
+    """
+    stand_in = bench / "gh"
+    stand_in.write_text(ANSWERED_GH)
+    stand_in.chmod(0o755)
+    (bench / "events.json").write_text(json.dumps([events]))
+    (bench / "comments.json").write_text(json.dumps([comments]))
+    (step,) = [
+        step
+        for step in jobs(WORKFLOW)["assess"]["steps"]
+        if step.get("id") == "answered"
+    ]
+    output = bench / "output"
+    env = {
+        **os.environ,
+        "PATH": f"{bench}:{os.environ['PATH']}",
+        "REPO": "o/r",
+        "NUMBER": "7",
+        "CREATED": T0,
+        "FIRST_LINE": step["env"]["FIRST_LINE"],
+        "GITHUB_OUTPUT": str(output),
+    }
+    subprocess.run(["bash", "-e", "-c", step["run"]], env=env, check=True)
+    return output.read_text()
+
+
+@pytest.mark.parametrize(
+    ("events", "comments", "expected"),
+    [
+        pytest.param(
+            [ADMIN], [comment("claude[bot]", T_LATER)], "true", id="the other run's"
+        ),
+        pytest.param([ADMIN], [], "false", id="none yet"),
+        pytest.param(
+            [], [comment("claude[bot]", T_LATER)], "true", id="since it opened"
+        ),
+        pytest.param(
+            [event("labeled", "admin1", T_LATER)],
+            [comment("claude[bot]", T0)],
+            "false",
+            id="before a new label",
+        ),
+        pytest.param(
+            [
+                ADMIN,
+                event("unlabeled", "admin1", T1),
+                event("labeled", "admin1", T_LATER),
+            ],
+            [comment("claude[bot]", T1)],
+            "false",
+            id="before a label applied again",
+        ),
+        pytest.param(
+            [ADMIN], [comment("writer", T_LATER)], "false", id="anybody else's"
+        ),
+        pytest.param(
+            [ADMIN],
+            [comment("claude[bot]", T_LATER, "no recommendation\n")],
+            "false",
+            id="not an assessment",
+        ),
+        pytest.param(
+            [ADMIN],
+            [comment("claude[bot]", T_LATER, "\nRecommendation: implement\n")],
+            "true",
+            id="after a blank line",
+        ),
+        pytest.param(
+            [ADMIN],
+            [comment("claude[bot]", T_LATER, " \t\nRecommendation: implement \n")],
+            "true",
+            id="after a line of spaces",
+        ),
+    ],
+)
+def test_an_issue_opened_with_agent_is_assessed_once(
+    tmp_path: Path, events: list[Any], comments: list[Any], expected: str
+) -> None:
+    """An assessment since the newest `agent` label answers the second run.
+
+    :param tmp_path: a directory of this test's own.
+    :param events: the issue's events.
+    :param comments: the issue's comments.
+    :param expected: the step's `answered`.
+    """
+    assert answered(tmp_path, events, comments) == f"answered={expected}\n"
+
+
+def test_an_answered_event_runs_no_step_after_the_check() -> None:
+    """Each step after the check runs only where it answered `false`."""
+    names = [step.get("id") for step in jobs(WORKFLOW)["assess"]["steps"]]
+    later = jobs(WORKFLOW)["assess"]["steps"][names.index("answered") + 1 :]
+    assert later
+    for step in later:
+        assert "steps.answered.outputs.answered == 'false'" in step["if"], step["name"]
+
+
+def first_line_steps() -> list[dict[str, Any]]:
+    """Find the steps that read an assessment's first line.
+
+    :returns: the steps, in file order.
+    """
+    return [
+        step
+        for job in jobs(WORKFLOW).values()
+        for step in job.get("steps", [])
+        if "first_line" in step.get("run", "")
+    ]
+
+
+def test_every_step_reads_an_assessment_s_first_line_alike() -> None:
+    """The steps take one definition, and each uses it."""
+    found = first_line_steps()
+    assert [step["name"] for step in found] == [
+        "Read whether an assessment already answers the event",
+        "Read the recommendation back",
+        "Refuse an issue that holds no assessment",
+    ]
+    assert len({step["env"]["FIRST_LINE"] for step in found}) == 1
+    for step in found:
+        assert '"$FIRST_LINE"' in step["run"], step["name"]
+        # a comment's body is read through the definition alone
+        assert ".body" not in step["run"], step["name"]
+
+
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        pytest.param("Recommendation: implement\n", 0, id="on the first line"),
+        pytest.param("\nRecommendation: implement\n", 0, id="after a blank line"),
+        pytest.param(" \t\nRecommendation: implement\n", 0, id="after spaces"),
+        pytest.param("no recommendation\n", 1, id="not an assessment"),
+    ],
+)
+def test_implement_finds_the_assessment_as_the_read_back_does(
+    tmp_path: Path, body: str, expected: int
+) -> None:
+    """`implement`'s check reads the same first line as `assess`'s steps.
+
+    :param tmp_path: a directory of this test's own.
+    :param body: the claude[bot] comment's text.
+    :param expected: the step's exit status.
+    """
+    stand_in = tmp_path / "gh"
+    stand_in.write_text(ANSWERED_GH)
+    stand_in.chmod(0o755)
+    (tmp_path / "comments.json").write_text(
+        json.dumps([[comment("claude[bot]", T0, body)]])
+    )
+    (step,) = [
+        step
+        for step in jobs(WORKFLOW)["implement"]["steps"]
+        if step.get("name") == "Refuse an issue that holds no assessment"
+    ]
+    env = {
+        **os.environ,
+        "PATH": f"{tmp_path}:{os.environ['PATH']}",
+        "REPO": "o/r",
+        "NUMBER": "7",
+        "FIRST_LINE": step["env"]["FIRST_LINE"],
+    }
+    done = subprocess.run(
+        ["bash", "-e", "-c", step["run"]],
+        env=env,
+        capture_output=True,
+        encoding="utf-8",
+        check=False,
+    )
+    assert done.returncode == expected, done.stdout + done.stderr
