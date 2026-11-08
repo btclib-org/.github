@@ -48,18 +48,22 @@ def remapped(url: str) -> str:
     :param url: the URL a tree links to.
     :returns: the URL lychee asks for, the same one where no rule matches.
     """
-    for pattern, replacement in remaps():
-        if pattern.search(url):
-            return pattern.sub(replacement, url)
-    return url
+    return next(
+        (
+            pattern.sub(replacement, url)
+            for pattern, replacement in remaps()
+            if pattern.search(url)
+        ),
+        url,
+    )
 
 
 OLD = "https://github.com/btclib-org/btclib-benchmarks"
 NEW = "https://github.com/btclib-org/benchmarks"
 
 
-# each old name `gh api repos/btclib-org/<old> --jq .full_name` answers
-# with a current name, and that name
+# each old name, and the current name
+# `gh api repos/btclib-org/<old> --jq .full_name` answers for it
 RENAMED = {
     "bitcoin-node-tests": "functional-tests",
     "btclib-benchmarks": "benchmarks",
