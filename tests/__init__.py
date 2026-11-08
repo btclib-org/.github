@@ -354,27 +354,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ),
     ),
     (
-        1856,
-        "test_a_readme_keeps_its_gates_and_sentinels_in_its_status_section",
-        (
-            "btclib",
-            "btclib-secp256k1",
-            "bitcoin-core-rpc",
-            "btclib-node",
-            "btclib-wallet",
-            "ecc",
-            "bip39-slip39",
-            "base58-bech32",
-            "bip32-descriptors",
-            "benchmarks",
-            "bbt",
-            "functional-tests",
-            "portanode",
-            "btclib-org.github.io",
-            "ai-agents-process",
-        ),
-    ),
-    (
         1928,
         "test_the_suite_runs_each_harness",
         (
