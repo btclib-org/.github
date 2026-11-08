@@ -232,8 +232,9 @@ extras and what they in turn require, is one users will meet the day the
 release ships, and it is read before the tag. `deps-latest` does not test
 every such version: its lock holds the dependency groups too, so a group's
 upper bound keeps a package below the version a user's install resolves. A
-failure confined to a package that only a dependency group names reaches
-no user and waits for the next lock bump.
+failure confined to a package that no user's install resolves, one only a
+dependency group brings in, reaches no user and waits for the next lock
+bump.
 
 **The drift it reports is left to Dependabot.** The release pull request
 does not run `uv lock --upgrade`: section 1's
