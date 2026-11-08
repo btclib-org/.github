@@ -35,13 +35,23 @@ name: reusable-claude-implement
 # is assessed; the action then refuses an author without write access
 # (`checkWritePermissions`, called from its `src/entrypoints/run.ts`).
 # Anybody else's issue runs nothing until an administrator of the
-# repository labels it `agent`. On an issue whose author is an owner, a
-# member or a collaborator the label starts no assessment, so an issue
-# opened with `agent` on it is assessed once. The administrator is read
-# from the API, because the event carries the login and not its
-# permission. A re-run is refused, by `github.run_attempt == 1` in each
-# job's condition: it keeps the event it re-runs, and the labels may
-# have moved since.
+# repository labels it `agent`. The same label starts an assessment on
+# any open issue not labelled `decision`, so that an issue opened before
+# the switch was turned on can still be handed to the agent. The
+# administrator is read from the API, because the event carries the
+# login and not its permission. A re-run is refused, by
+# `github.run_attempt == 1` in each job's condition: it keeps the event
+# it re-runs, and the labels may have moved since.
+#
+# An issue opened with `agent` on it fires both `opened` and `labeled`.
+# The job's concurrency group starts the second run once the first ends.
+# A run assesses nothing where claude[bot] has posted an assessment since
+# the issue's newest `agent` label, or since it opened where it was never
+# labelled `agent`, so the second run stops and the issue is assessed
+# once. The check reads what was posted, rather than whether the label
+# came with the issue: an assessment that was never posted leaves the
+# second run to post one, and an administrator who removes `agent` and
+# applies it again gets a new assessment.
 #
 # What follows the assessment. Its first line is the recommendation,
 # read back by the last step of `assess`. `implement` starts only where
@@ -165,8 +175,6 @@ jobs:
                            github.event.issue.author_association))
               || (github.event.action == 'labeled'
                   && github.event.label.name == 'agent'
-                  && !contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'),
-                               github.event.issue.author_association)
                   && !contains(github.event.issue.labels.*.name,
                                'decision'))) }}
     runs-on: ubuntu-latest
@@ -208,11 +216,42 @@ jobs:
                  "'$permission'; only an administrator admits an issue."
             exit 1
           fi
+      # an issue opened with `agent` on it fires `opened` and `labeled`,
+      # whose runs the job's group puts one after the other: the header
+      # says why the second then assesses nothing
+      - name: Read whether an assessment already answers the event
+        id: answered
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          CREATED: ${{ github.event.issue.created_at }}
+        run: |
+          events=$(gh api "repos/$REPO/issues/$NUMBER/events" --paginate --slurp)
+          since=$(printf '%s\n' "$events" \
+            | jq -r --arg created "$CREATED" \
+                '[ .[][] | select(.event == "labeled" and .label.name == "agent") ]
+                 | last | .created_at // $created')
+          comments=$(gh api "repos/$REPO/issues/$NUMBER/comments" --paginate \
+            --slurp)
+          answered=$(printf '%s\n' "$comments" \
+            | jq --arg since "$since" \
+                '[ .[][] | select(.user.login == "claude[bot]"
+                                  and .created_at >= $since
+                                  and (.body // ""
+                                       | startswith("Recommendation: "))) ]
+                 | length > 0')
+          if [ "$answered" = true ]; then
+            echo "::notice::#$NUMBER holds an assessment posted since $since."
+          fi
+          echo "answered=$answered" >> "$GITHUB_OUTPUT"
       # the assessment read back in the last step is one posted after this
       - name: Record when the assessment starts
+        if: ${{ steps.answered.outputs.answered == 'false' }}
         id: start
         run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
       - name: Write the issue and the scripts the agent uses
+        if: ${{ steps.answered.outputs.answered == 'false' }}
         env:
           GH_TOKEN: ${{ github.token }}
           NUMBER: ${{ github.event.issue.number }}
@@ -256,6 +295,7 @@ jobs:
       # author cannot apply but can outlast by editing the issue; checked
       # after the file is written, so the text read is the text admitted
       - name: Refuse an issue its admission no longer covers
+        if: ${{ steps.answered.outputs.answered == 'false' }}
         env: &admission-env
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -316,6 +356,7 @@ jobs:
             *) "$DIR/check-admission" "$REPO" "$NUMBER" ;;
           esac
       - name: Assess the issue
+        if: ${{ steps.answered.outputs.answered == 'false' }}
         id: assess
         uses: anthropics/claude-code-action@6d5ae526d25ce88daa2200be073e1a373167f064 # v1.0.265
         timeout-minutes: 15
@@ -397,7 +438,7 @@ jobs:
       # the action reports a refusal by skipping, with the step still
       # green, for the reason reusable-claude-review.yml's guard gives
       - name: Refuse to report an assessment that never ran
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.answered.outputs.answered == 'false' }}
         env:
           OUTCOME: ${{ steps.assess.outcome }}
           EXECUTION: ${{ steps.assess.outputs.execution_file }}
@@ -410,6 +451,7 @@ jobs:
       # what was posted, not what the action produced: the newest
       # claude[bot] comment posted since the step started, its first line
       - name: Read the recommendation back
+        if: ${{ steps.answered.outputs.answered == 'false' }}
         id: recommendation
         env:
           GH_TOKEN: ${{ github.token }}
