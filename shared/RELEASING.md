@@ -192,9 +192,12 @@ the tag exercises the first.
    uv run --isolated --no-project --python "${python:?}" \
      --index https://test.pypi.org/simple/ \
      --index-strategy unsafe-best-match \
-     --with "${test_dist:?}==${dev:?}" \
+     --with "${test_dist:?}==${dev:?}" --refresh-package "${test_dist:?}" \
      python -c "${smoke:?}"
    ```
+
+   `--refresh-package` is there for the reason the step installing the
+   release gives below.
 
 1. Check that the `build` job is green. It signs a rehearsal's files too,
    which is what it is here for: a permission or an API that only works
@@ -221,9 +224,17 @@ consumed than after. It gates nothing, so it will not stop you: reading it
 is the point.
 
 **Read it per job, not as a verdict**, and open the failure rather than
-inferring it from a sibling. A release ships what `uv.lock` pins, so drift
-against a newer version of some dependency does not make the release
-wrong — it says the next bump is going to be work.
+inferring it from a sibling. A release declares the ranges
+`pyproject.toml` gives its dependencies and its extras, not what `uv.lock`
+pins, so a user's install resolves the newest version each range admits. A
+failure in any package a user's install resolves, those dependencies and
+extras and what they in turn require, is one users will meet the day the
+release ships, and it is read before the tag. `deps-latest` does not test
+every such version: its lock holds the dependency groups too, so a group's
+upper bound keeps a package below the version a user's install resolves. A
+failure confined to a package that no user's install resolves, one only a
+dependency group brings in, reaches no user and waits for the next lock
+bump.
 
 **The drift it reports is left to Dependabot.** The release pull request
 does not run `uv lock --upgrade`: section 1's
@@ -409,12 +420,24 @@ request, next to `deps-latest`'s own result.
    and `uv lock`, and gate again:
 
    ```shell
-   git fetch origin
+   tip=$(git rev-parse HEAD) &&
+   git fetch origin &&
    git reset --hard origin/main
    ```
 
    The sections are written again from `git log` of the new tip, and the
-   version is a few lines.
+   version is a few lines. Where the branch is already pushed, the redone
+   one goes up with a lease on `tip`, the head reviewed before the fetch:
+
+   ```shell
+   git push origin HEAD \
+     --force-with-lease="refs/heads/$(git branch --show-current):${tip:?}"
+   ```
+
+   Its commits do not descend from the pushed head, so a plain `git push`
+   is refused. A bare `--force-with-lease` compares against what the fetch
+   just brought, so it would overwrite a push made since the review; the
+   lease on `tip` refuses it.
 
 1. Give the release pull request its title and its body, before merging it
    and not after. The title is the version; the body says what the release
@@ -641,17 +664,19 @@ request, next to `deps-latest`'s own result.
    from a directory that belongs to no checkout of this project: run
    inside one, uv can answer from a cached build of the tree rather than
    from the index. `--refresh-package` makes uv read the index again
-   rather than its cache, which can miss a version just published. The
-   pin makes the check test this release: unpinned, an index still
-   serving the previous release installs that one, and the smoke test
-   passes on it. Pinned, uv answers `No solution found` until the index
-   serves the version. It answers the same where the distribution or a
-   dependency has no file the interpreter `python` names can use, and no
-   wait changes that. So check the interpreter first: uv's `cause:` line
-   then names the interpreter, as an ABI tag such as `cp315` or as a
-   Python version. Run the command again only where that line says
-   `there is no version of <dist>==<version>`. Any other cause, such as a
-   dependency conflict, is fixed rather than waited out.
+   rather than its cache. uv keeps an index's page for as long as the
+   index's HTTP caching headers allow, so a page cached before the
+   upload misses the version just published. The pin makes the check
+   test this release: unpinned, an index still serving the previous
+   release installs that one, and the smoke test passes on it. Pinned,
+   uv answers `No solution found` until the index serves the version. It
+   answers the same where the distribution or a dependency has no file
+   the interpreter `python` names can use, and no wait changes that. So
+   check the interpreter first: uv's `cause:` line then names the
+   interpreter, as an ABI tag such as `cp315` or as a Python version.
+   Run the command again only where that line says
+   `there is no version of <dist>==<version>`. Any other cause, such as
+   a dependency conflict, is fixed rather than waited out.
 
    then check the attestations — the JSON API answers `null` for
    `provenance` even where they exist; the simple API,
