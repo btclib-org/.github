@@ -1889,6 +1889,11 @@ def issue_event(
             id="agent on anybody else's issue",
         ),
         pytest.param(
+            issue_event("opened", "MEMBER", ["decision"]),
+            True,
+            id="a member opens with decision",
+        ),
+        pytest.param(
             issue_event("labeled", "MEMBER", ["agent", "decision"]),
             False,
             id="agent beside decision",
