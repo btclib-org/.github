@@ -654,8 +654,10 @@ jobs:
             <the comment>
             EOF
           # the model and the setting sources as in the assessment. The
-          # file tools reach the checkout but not `.git/`, a deny winning
-          # over an allow
+          # file tools write the checkout and the message, and not
+          # `.git/`, a deny winning over an allow. These rules are `Edit`
+          # ones: an `Edit` rule governs every tool that writes a file,
+          # and a `Write` rule allows nothing
           claude_args: >-
             --model claude-opus-5-5
             --setting-sources user
@@ -665,15 +667,13 @@ jobs:
             "Read(/${{ runner.temp }}/claude-implement/issue.md)"
             "Read(~/.claude/projects/**)"
             "Edit(./**)"
-            "Write(./**)"
-            "Write(/${{ runner.temp }}/claude-implement-message/message)"
+            "Edit(/${{ runner.temp }}/claude-implement-message/message)"
             "Grep(./**)"
             "Glob(./**)"
             "Bash(${{ runner.temp }}/claude-implement/comment:*)"
             "Bash(${{ runner.temp }}/claude-implement/label:*)"
             --disallowedTools
             "Edit(./.git/**)"
-            "Write(./.git/**)"
             "ListAgents,SendMessage,SendFile,FetchInboxMessage,SendToProject,EnterWorktree,ExitWorktree,ScheduleWakeup,CronList,CronDelete,CronCreate,RemoteTrigger,PushNotification,ProposeGoal"
       - name: Refuse to report an edit that never ran
         if: ${{ !cancelled() }}

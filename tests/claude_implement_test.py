@@ -30,7 +30,7 @@ import pytest
 
 from . import ROOT
 from .claude_review_test import AGENT_DENIED
-from .workflows_test import document, jobs
+from .workflows_test import document, jobs, steps
 
 # the reusable workflow, which holds the jobs and their scripts
 WORKFLOW = ROOT / ".github/workflows/reusable-claude-implement.yml"
@@ -152,10 +152,58 @@ def test_the_agent_runs_nothing_but_its_job_s_scripts(job: str) -> None:
 
 
 def test_the_editing_agent_is_kept_out_of_git() -> None:
-    """Edit and Write are denied `.git/`, a deny winning over an allow."""
-    assert {"Edit(./.git/**)", "Write(./.git/**)"} <= set(
-        tools("implement", "--disallowedTools")
-    )
+    """Every tool that writes a file is denied `.git/`.
+
+    A deny rule wins over the allow of `./**`.
+    """
+    assert "Edit(./.git/**)" in tools("implement", "--disallowedTools")
+
+
+def agent_args(workflow: Path) -> list[str]:
+    """Read the `claude_args` of each step of a workflow running the agent.
+
+    :param workflow: the file to read.
+    :returns: each step's `claude_args`, expressions unexpanded.
+    """
+    return [
+        step.get("with", {}).get("claude_args", "")
+        for step in steps(workflow)
+        if step.get("uses", "").startswith("anthropics/claude-code-action@")
+    ]
+
+
+# the reusable workflows that run the agent
+CLAUDE_WORKFLOWS = sorted((ROOT / ".github/workflows").glob("reusable-claude-*.yml"))
+
+
+@pytest.mark.parametrize("workflow", CLAUDE_WORKFLOWS, ids=lambda path: path.name)
+def test_no_agent_rule_is_a_write_rule(workflow: Path) -> None:
+    """No `claude_args` holds a `Write(...)` rule (btclib-org/.github#2135).
+
+    The `implement` job's comment on its `claude_args` says why. The
+    text is searched whole, so a rule an expression builds, and either
+    spelling of the flags, are read too.
+
+    :param workflow: a reusable workflow that runs the agent.
+    """
+    found = agent_args(workflow)
+    assert found
+    assert not [args for args in found if "Write(" in args]
+
+
+def test_a_write_rule_an_expression_builds_is_found(tmp_path: Path) -> None:
+    """A `Write(...)` rule inside a `format(...)` fails the test above.
+
+    :param tmp_path: holds the edited copy of the review workflow.
+    """
+    review = ROOT / ".github/workflows/reusable-claude-review.yml"
+    text = review.read_text()
+    shape = '"Glob(/{0}/bitcoin/**)"'
+    assert text.count(shape) == 1
+    copy = tmp_path / review.name
+    copy.write_text(text.replace(shape, '"Write(/{0}/bitcoin/**)"'))
+    with pytest.raises(AssertionError):
+        test_no_agent_rule_is_a_write_rule(copy)
 
 
 @pytest.mark.parametrize("job", AGENTS)
@@ -1321,7 +1369,7 @@ def test_the_agent_can_write_its_message_after_the_setup(tmp_path: Path) -> None
     )
     (Path(message) / "message").write_text("Do it (closes #7)\n")
     assert (Path(message) / "message").read_text() == "Do it (closes #7)\n"
-    rule = "Write(/${{ runner.temp }}/claude-implement-message/message)"
+    rule = "Edit(/${{ runner.temp }}/claude-implement-message/message)"
     assert rule in tools("implement", "--allowedTools")
 
 
