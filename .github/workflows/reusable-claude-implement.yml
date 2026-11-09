@@ -97,25 +97,27 @@ name: reusable-claude-implement
 # tests/claude_implement_test.py runs them.
 #
 # How the edit travels. `implement` packs the checkout without any
-# `.git` path, uploads it with the commit message, and publishes their
-# SHA-256 as an output. `gates` and `publish` each take the upload only
-# where its digest matches and it holds no `.git` path, and lay it over
-# a fresh checkout. `gates` stages it, records the tree `git write-tree`
-# names, and removes every file that tree does not hold, ignored ones
-# included, before any gate runs; `publish` commits only where its own
-# staged tree is the same. `publish` uploads nothing back and runs no
-# code of the tree. It re-reads the issue's state and labels. It refuses
-# a message whose subject does not end with the issue's own
-# `(closes #<n>)`, that carries any other closing reference, an
-# @-mention or a `-by:` trailer, or whose second line is not empty,
-# since git's subject runs to the first blank line and becomes the
-# title. It commits, and asks for the App's token the way the action
-# does (`exchangeForAppToken` in `src/github/token.ts`), with contents
-# and pull requests only. It refuses an edit to `.coderabbit.yaml` or
-# `.coderabbit.yml`, in any letter case, because a branch's own copy of
-# CodeRabbit's configuration can turn its automatic approvals back on,
-# as section 11's *Review* says, and the agent's pull request would then
-# be approved by no person.
+# `.git` path and without the empty files at its root that git does not
+# track, as the step's comment says. It uploads the pack with the commit
+# message, and publishes their SHA-256 as an output. `gates` and
+# `publish` each take the upload only where its digest matches and it
+# holds no `.git` path, and lay it over a fresh checkout. `gates` stages
+# it, records the tree `git write-tree` names, and removes every file
+# that tree does not hold, ignored ones included, before any gate runs;
+# `publish` commits only where its own staged tree is the same.
+# `publish` uploads nothing back and runs no code of the tree. It
+# re-reads the issue's state and labels. It refuses a message whose
+# subject does not end with the issue's own `(closes #<n>)`, that
+# carries any other closing reference, an @-mention or a `-by:` trailer,
+# or whose second line is not empty, since git's subject runs to the
+# first blank line and becomes the title. It commits, and asks for the
+# App's token the way the action does (`exchangeForAppToken` in
+# `src/github/token.ts`), with contents and pull requests only. It
+# refuses an edit to `.coderabbit.yaml` or `.coderabbit.yml`, in any
+# letter case, because a branch's own copy of CodeRabbit's configuration
+# can turn its automatic approvals back on, as section 11's *Review*
+# says, and the agent's pull request would then be approved by no
+# person.
 #
 # The commit is authored by claude[bot], 209825114+claude[bot] at
 # users.noreply.github.com (`gh api 'users/claude[bot]' --jq .id`). It
@@ -699,6 +701,21 @@ jobs:
             exit 0
           fi
           cp "$DIR/message" "$OUT/message"
+          # the editing step leaves empty files at the root that the base
+          # does not hold, as .npmrc, package.json and .env. They are no
+          # part of the edit, and the gates would run on them. tar packs
+          # ignored files too, so the list holds them as well
+          untracked=$(mktemp)
+          git -C "$GITHUB_WORKSPACE" ls-files --others -z > "$untracked"
+          while IFS= read -r -d '' path; do
+            case $path in */*) continue ;; esac
+            file="$GITHUB_WORKSPACE/$path"
+            if [ -f "$file" ] && [ ! -L "$file" ] && [ ! -s "$file" ]; then
+              echo "left out $path, empty and untracked"
+              rm -- "$file"
+            fi
+          done < "$untracked"
+          rm -- "$untracked"
           tar --exclude=.git -cf "$OUT/tree.tar" -C "$GITHUB_WORKSPACE" .
           digest=$(set -o pipefail
                    cat "$OUT/message" "$OUT/tree.tar" | sha256sum | cut -d' ' -f1)
