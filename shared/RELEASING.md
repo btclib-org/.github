@@ -13,8 +13,8 @@ against TestPyPI. A rehearsal is never tagged.
 
 **This file is the same in every repository that publishes, up to its
 last section.** Section 14 of the
-[organization standard](https://github.com/btclib-org/.github#14-copied-verbatim-and-decided-per-repository)
-says so, and `tests/verbatim_test.py` of that repository compares the
+[organization's standard](https://github.com/btclib-org/.github#14-copied-verbatim-and-decided-per-repository)
+says so, and `tests/verbatim_test.py` of btclib-org/.github compares the
 copies. The steps read this tree's names from shell variables, set by a
 block in its last section: run that block first, in the shell the steps
 run in. Prose and URLs write the same names as `<repo>`, `<dist>` and so
@@ -372,9 +372,9 @@ request, next to `deps-latest`'s own result.
    (btclib-org/.github#1596).
 
 1. Write the release's sections in the release pull request, above the
-   previous release's, as section 12 of the organization standard says:
-   `## v<version>` in `CHANGELOG.md`, from the squash
-   subjects since the previous tag, grouped and shortened,
+   previous release's, as section 12 of the organization's standard
+   says: `## v<version>` in `CHANGELOG.md`, from the squash subjects
+   since the previous tag, grouped and shortened,
 
    ```shell
    git log "${tag:?}"..HEAD --format=%s
@@ -518,7 +518,7 @@ request, next to `deps-latest`'s own result.
    in a fence of their own with nothing under them to reach, and the
    fence below writes each as `${name:?}` and chains. Both are needed:
    `:?` fails at run time, which the chain propagates, where a parse
-   error takes its own `&&` with it. Section 9 of the organization
+   error takes its own `&&` with it. Section 9 of the organization's
    standard is the rule.
 
    ```shell
@@ -604,7 +604,7 @@ request, next to `deps-latest`'s own result.
    for red. A failed job is loud; a skipped one carries no step, starts
    and completes in the same second, and leaves the run looking finished
    with a job missing from it, which is what a bare `needs:` behind a
-   red `public-api` produces — section 12 of the organization standard
+   red `public-api` produces — section 12 of the organization's standard
    has the rule, and the `github-release` case under "If something goes
    wrong" below is the same mechanism behind a skipped job rather than a
    failed one:
@@ -767,7 +767,7 @@ request, next to `deps-latest`'s own result.
    given, so the sdist and the bill of materials verify against the same
    bundle.
 
-   Each command is section 12's verifier. Section 12 of the organization
+   Each command is section 12's verifier. Section 12 of the organization's
    standard says what its exit code means, why the signer is named without a
    ref, why `--source-ref` names the tag, why the repository is compared by
    its id, and which workflow signed a release made before this repository
@@ -782,11 +782,12 @@ request, next to `deps-latest`'s own result.
 1. **Review the bestpractices.dev answers.** Refresh the saved answers
    in btclib-org/.github with its `.github/scripts/bestpractices.py`,
    and use its `--stale` and `--differ` to find what to read (section 10
-   of its README). Read `https://www.bestpractices.dev/projects/<bp>`
-   against the release, and update every answer it changed: the release
-   notes and the vulnerabilities it fixed, signed tags and assets,
-   attestation names. Then refresh the saved answers again. An advisory
-   this repository publishes is owed the same review.
+   of the organization's standard). Read
+   `https://www.bestpractices.dev/projects/<bp>` against the release,
+   and update every answer it changed: the release notes and the
+   vulnerabilities it fixed, signed tags and assets, attestation names.
+   Then refresh the saved answers again. An advisory this repository
+   publishes is owed the same review.
 
 1. Open the next cycle: set a generic next version without the day (e.g.
    after 2026.8.6, use 2026.9) in `pyproject.toml`, through a pull
@@ -806,8 +807,8 @@ request, next to `deps-latest`'s own result.
    against what `pyproject.toml` declares, so a tree already bumped would
    offer it the next cycle's month instead of the version being released.
 
-A dependent adapts after the release, as section 12 of the organization
-standard says.
+A dependent adapts after the release, as section 12 of the
+organization's standard says.
 
 ## Rebuild a release from its tag
 
@@ -880,8 +881,8 @@ gh attestation verify "sbom/${stem:?}.cdx.json" --owner btclib-org \
   --jq "${cert:?}.sourceRepositoryIdentifier" | grep -qx "${id:?}"
 ```
 
-Section 12 of the organization standard names the signer of a release
-made before this repository called `reusable-build.yml`.
+Section 12 of the organization's standard names the signer of a
+release made before this repository called `reusable-build.yml`.
 
 `pin` is the interpreter the tag's own `.python-version` pins, its
 comment and blank lines dropped, and not the one `main` pins:
