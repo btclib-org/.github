@@ -4,9 +4,9 @@
 
 """Assert that a refusal carries no secret, in any exception it chains.
 
-The rule is section 7 of the btclib-org standard, *A refusal carries no
-secret*. Section 14 has this file copied verbatim, so a change to it is
-made in btclib-org/.github and carried to every copy.
+The rule is section 7's *A refusal carries no secret*, in the
+organization's standard. Section 14 has this file copied verbatim, so a
+change to it is made in btclib-org/.github and carried to every copy.
 """
 
 from __future__ import annotations
