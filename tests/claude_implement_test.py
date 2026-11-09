@@ -8,11 +8,12 @@ The rule is section 10's, and the workflow's header says how the file
 keeps it. These tests read that configuration: the scopes each token is
 asked for, the agent's allow list and the job that runs the agent's
 edit. The scripts `comment`, `label`, `check-admission` and
-`check-message`, the command running the gates, the step committing the
-edit and the one reading whether an assessment answers the event are
-read out of the workflow and run here, the scripts and that step against
-a stand-in `gh`, so what is asked is what the runner writes. The
-condition starting `assess` is evaluated on the events it decides.
+`check-message`, the command running the gates, the steps packing and
+committing the edit and the one reading whether an assessment answers
+the event are read out of the workflow and run here, the scripts and
+that last step against a stand-in `gh`, so what is asked is what the
+runner writes. The condition starting `assess` is evaluated on the
+events it decides.
 """
 
 from __future__ import annotations
@@ -1702,6 +1703,113 @@ def admission(bench: Path) -> subprocess.CompletedProcess[str]:
         check=False,
         env=env,
     )
+
+
+# empty files the editing step leaves at the root, as examples; `.env` is
+# the one the tree's `.gitignore` names
+PLACEHOLDERS = (".npmrc", "package.json", ".env")
+
+
+@pytest.fixture
+def packed(tmp_path: Path) -> tuple[subprocess.CompletedProcess[str], set[str]]:
+    """Run the pack step on a checkout holding an edit and placeholders.
+
+    The checkout's base holds a file, an empty one and a `.gitignore`.
+    The edit changes the file and adds a new one, an empty file below the
+    root, a non-empty one at the root and a link to the empty file.
+
+    :param tmp_path: a directory of this test's own.
+    :returns: the finished step, and the files its tar holds.
+    """
+    tree = tmp_path / "tree"
+    tree.mkdir()
+    git = ["git", "-C", str(tree)]
+    subprocess.run([*git, "init", "-q"], check=True)
+    (tree / ".gitignore").write_text(".env\n")
+    (tree / "kept.txt").write_text("base\n")
+    (tree / "tracked-empty").write_text("")
+    subprocess.run([*git, "add", "-A"], check=True)
+    subprocess.run(
+        [*git, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "x"],
+        check=True,
+    )
+    (tree / "kept.txt").write_text("edited\n")
+    (tree / "new.py").write_text("x = 1\n")
+    (tree / "sub").mkdir()
+    (tree / "sub" / "empty").write_text("")
+    (tree / "notes.txt").write_text("a note\n")
+    (tree / "link").symlink_to("tracked-empty")
+    for name in PLACEHOLDERS:
+        (tree / name).write_text("")
+    (message := tmp_path / "message").mkdir()
+    (message / "message").write_text("Do it (closes #7)\n")
+    (step,) = [
+        step
+        for step in jobs(WORKFLOW)["implement"]["steps"]
+        if step.get("name") == "Pack the edited tree"
+    ]
+    out = tmp_path / "out"
+    env = {
+        **os.environ,
+        "GITHUB_WORKSPACE": str(tree),
+        "GITHUB_OUTPUT": str(tmp_path / "output"),
+        "DIR": str(message),
+        "OUT": str(out),
+    }
+    done = subprocess.run(
+        ["bash", "-e", "-c", step["run"]],
+        cwd=tree,
+        env=env,
+        capture_output=True,
+        encoding="utf-8",
+        check=False,
+    )
+    listing = subprocess.run(
+        ["tar", "-tf", str(out / "tree.tar")],
+        capture_output=True,
+        encoding="utf-8",
+        check=True,
+    ).stdout.splitlines()
+    files = {entry.removeprefix("./") for entry in listing if not entry.endswith("/")}
+    return done, files
+
+
+def test_the_pack_leaves_out_the_empty_untracked_files_at_the_root(
+    packed: tuple[subprocess.CompletedProcess[str], set[str]],
+) -> None:
+    """The placeholders, ignored or not, are gone, and the edit is packed.
+
+    :param packed: the finished step, and the files its tar holds.
+    """
+    done, files = packed
+    assert done.returncode == 0, done.stderr
+    assert not files & set(PLACEHOLDERS)
+    assert {"kept.txt", "new.py"} <= files
+    for name in PLACEHOLDERS:
+        assert f"left out {name}, empty and untracked" in done.stdout
+
+
+def test_the_pack_keeps_what_is_tracked_below_the_root_or_not_empty(
+    packed: tuple[subprocess.CompletedProcess[str], set[str]],
+) -> None:
+    """The control: a tracked empty file and the edit's other files stay.
+
+    An empty file below the root, a non-empty one at the root and a link
+    to an empty file are no placeholders.
+
+    :param packed: the finished step, and the files its tar holds.
+    """
+    done, files = packed
+    assert done.returncode == 0, done.stderr
+    assert files == {
+        ".gitignore",
+        "kept.txt",
+        "tracked-empty",
+        "new.py",
+        "sub/empty",
+        "notes.txt",
+        "link",
+    }
 
 
 def gated(tree: Path, gates: str) -> subprocess.CompletedProcess[str]:
