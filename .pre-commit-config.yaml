@@ -421,7 +421,7 @@ repos:
     # `uses: $/...`. The finding is declined per site, with an inline
     # `# zizmor: ignore[self-repository]` on each `uses: ./` line
     # (btclib-org/.github#1144).
-    rev: v1.31.1
+    rev: v1.32.0
     hooks:
       - id: zizmor
         # offline is what it does by default, said out loud: it warns
@@ -436,7 +436,7 @@ repos:
         # declares, so passing --offline alone would drop it
         args: [--offline, --no-progress, --persona=auditor]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.3
+    rev: v0.17.4
     hooks:
       - id: ruff-check
         name: ruff check (in place fixes)
@@ -501,7 +501,7 @@ repos:
         pass_filenames: false
         require_serial: true
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.13.6
+    rev: 0.13.7
     hooks:
       # keep uv.lock in sync with pyproject.toml
       - id: uv-lock
