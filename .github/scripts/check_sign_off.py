@@ -5,7 +5,7 @@
 """Refuse each commit with no `Signed-off-by:` trailer naming its author.
 
 What the trailer attests, and why a signature does not stand in for it,
-is section 11's *Signatures* in btclib-org/.github's `README.md`.
+is section 11's *Signatures* in the organization's standard.
 
 A trailer counts where its address, the part in angle brackets, is the
 commit's author address, compared without case. Two kinds of commit are

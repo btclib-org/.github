@@ -63,7 +63,7 @@ NUMBERED = re.compile(
 """A section of the standard, cited by its number.
 
 The optional middle is the form naming the document as well -- *section
-2 of the organization standard's `The documentation`* -- and it refuses
+2 of the organization's standard's `The documentation`* -- and it refuses
 a second `ection`, so that a sentence naming one section and citing
 another is read as the citation in it rather than as a citation of the
 first number in it.
