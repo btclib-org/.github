@@ -64,8 +64,8 @@ name: reusable-claude-release
 # requests, those on the release path among them, and deps-latest's
 # newest run go to the pull request's body without passing through the
 # agent, since anybody can open a pull request. `prepare` sets the
-# version with `uv version --frozen` and runs `uv lock`, never
-# `uv lock --upgrade`.
+# version with `uv version <version> --no-sync`, which re-locks without
+# installing anything, never `uv lock --upgrade`.
 #
 # What the agent may do. As in reusable-claude-implement.yml, agent
 # mode, the tools reusable-claude-review.yml's review step denies, and
@@ -316,8 +316,7 @@ jobs:
           PLACEHOLDER: ${{ steps.release.outputs.placeholder }}
           FACTS: ${{ runner.temp }}/claude-release-facts
         run: |
-          uv version --frozen "$VERSION"
-          uv lock
+          uv version "$VERSION" --no-sync
           changed=$(git diff --name-only | tr '\n' ' ')
           if [ "$changed" != "pyproject.toml uv.lock " ]; then
             echo "::error::setting the version changed '$changed'"

@@ -333,6 +333,7 @@ TAKEN = re.compile(r"^\d+(?:\.\d+)+t?$")
 NAMES_ONE = (
     ".github/workflows/reusable-api-break.yml",
     ".github/workflows/reusable-audit.yml",
+    ".github/workflows/reusable-claude-release.yml",
     ".github/workflows/reusable-docs.yml",
     ".github/workflows/reusable-documented.yml",
     ".github/workflows/reusable-integration-bitcoind.yml",

@@ -643,7 +643,7 @@ def lock_tree(tmp_path: Path) -> Path:
 def test_setting_the_version_changes_one_line_of_two_files(
     tmp_path: Path, extra: str, expected: int
 ) -> None:
-    """A stand-in `uv lock` that writes anything more fails the step.
+    """A stand-in `uv version` that writes anything more fails the step.
 
     A line it adds to `uv.lock` or to `pyproject.toml` stands for a pin
     moved; a third file, for any other change.
@@ -658,9 +658,9 @@ def test_setting_the_version_changes_one_line_of_two_files(
         tmp_path,
         "uv",
         'case "$1" in\n'
-        '  version) [ "$2" = --frozen ] || exit 9\n'
-        '    sed -i.bak "s/2026.12/$3/" pyproject.toml && rm pyproject.toml.bak ;;\n'
-        f'  lock) sed -i.bak "s/2026.12/{TODAY}/" uv.lock && rm uv.lock.bak\n'
+        '  version) [ "$3" = --no-sync ] || exit 9\n'
+        '    sed -i.bak "s/2026.12/$2/" pyproject.toml uv.lock\n'
+        "    rm pyproject.toml.bak uv.lock.bak\n"
         f"    {touch} ;;\n"
         "esac\n",
     )

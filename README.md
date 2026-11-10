@@ -2049,16 +2049,17 @@ without adding to it is deleted.
   alternative is the action's `allowed_non_write_users: "*"`, which runs
   anybody's issue text as a prompt beside the credentials.
 - **`reusable-claude-release.yml` takes a release as far as its open pull
-  request, and no further**, for the reasons of the bullet above: the
-  maintainer approves it, lands it and signs the tag (section 12). An
-  administrator of the tree starts it by hand, and no issue or comment is a
-  prompt. Steps do what is mechanical: the previous tag and the subjects
-  since it, the public-API comparison at the commit `release.yml` pins, what is
-  open, the version and `uv lock`. The agent writes the release's sections and
-  the pull request's body, and edits no other file. Its gates job is the one
-  above, run after a check of the two sections. `tests/claude_release_test.py`
-  reads each of these. The rejected alternative is an agent that runs the steps
-  itself, which needs a Bash rule and leaves the comparison to a model.
+  request, and no further**, for the reasons of the bullet above: the maintainer
+  approves it, lands it and signs the tag (section 12). An administrator of the
+  tree starts it by hand, and no issue or comment is a prompt. Steps do what is
+  mechanical: the previous tag and the subjects since it, the public-API
+  comparison at the commit `release.yml` pins, what is open, the version and the
+  lock. The agent writes the release's sections and the pull request's body, and
+  edits no other file. Its gates job is the one above, run after a check of the
+  two sections and of the notes against the API findings.
+  `tests/claude_release_test.py` reads each of these. The rejected alternative
+  is an agent that runs the steps itself, which needs a Bash rule and leaves the
+  comparison to a model.
 - **`timeout-minutes` on every job that runs steps**, far above what the work
   needs: it bounds a hung job holding a runner. A called job's is the callee's,
   one number for every caller, which only a caller the bound would cut raises.
