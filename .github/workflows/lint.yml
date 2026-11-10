@@ -197,8 +197,8 @@ jobs:
 
   dependency-review:
     # btclib-org/.github's reusable-lint.yml job, written out because this
-    # file keeps its own lint job; section 11 of btclib-org/.github's
-    # README.md states the rule. A job of its own rather than a step of the
+    # file keeps its own lint job; section 11 of the organization's
+    # standard states the rule. A job of its own rather than a step of the
     # one above: it reads the forge's dependency graph and not the checkout,
     # so it takes no checkout and no hook environment. It is a required
     # check, and its context is this name.

@@ -1,5 +1,5 @@
 ---
-# the lint gate of the repository that carries the organization
+# the lint gate of the repository that carries the organization's
 # standard. Mostly the markdown half of it, this tree being mostly prose;
 # the Python half applies to tests/, the standard asking the
 # organization the questions no single repository can ask itself, and to
