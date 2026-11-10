@@ -1127,10 +1127,14 @@ def _locked(name: str) -> str:
 
 
 def test_the_tests_load_the_griffe_the_workflows_run() -> None:
-    """Every pin in both workflows, the test group's, and the lock agree."""
+    """The griffe pins of the workflows, the test group's and the lock agree."""
     pins = {
         pin
-        for name in ("reusable-api-break.yml", "reusable-public-api.yml")
+        for name in (
+            "reusable-api-break.yml",
+            "reusable-public-api.yml",
+            "reusable-claude-release.yml",
+        )
         for pin in re.findall(
             r"griffe==([\d.]+)", (_WORKFLOWS / name).read_text(encoding="utf-8")
         )

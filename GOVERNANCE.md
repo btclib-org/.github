@@ -115,11 +115,13 @@ owes, rather than restating it.
   organization variable `CLAUDE_REVIEW_ENABLED` is `true`: section 11's
   *Review* has the rule and the command that reads the variable. It is
   not a required check.
-- **The implement agent** is `claude[bot]` too, run on an issue by this
-  repository's `reusable-claude-implement.yml` where a repository calls
-  it. Section 10 says how far it goes, and the workflow's header which
-  issues it takes and the switch that turns it on. `CONTRIBUTING.md`'s
-  *Working with an LLM* says who answers for the pull request it opens.
+- **The pull-request agent** is `claude[bot]` too, run by this
+  repository's `reusable-claude-implement.yml` on an issue, or
+  `reusable-claude-release.yml` on a release, where a repository calls
+  them. Section 10 says how far it goes, the first workflow's header
+  which issues it takes and the switch that turns it on, and the
+  second's who starts it. `CONTRIBUTING.md`'s *Working with an LLM* says
+  who answers for the pull request it opens.
 - **CodeRabbit** is another reviewing bot, configured by each
   repository's `.coderabbit.yaml`. Section 11's *Review* says what its
   review is.

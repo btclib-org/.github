@@ -17,10 +17,10 @@ not read:
 - a commit whose author address is one in `BOTS`. Dependabot signs off
   as `support@github.com`, not as its author, and pre-commit.ci does not
   sign off at all. claude[bot], which section 10's
-  `reusable-claude-implement.yml` commits as, signs off nothing, for the
-  reason `CONTRIBUTING.md`'s *Working with an LLM* gives. The rejected
-  alternative is a trailer the workflow writes in its name, which
-  certifies nothing.
+  `reusable-claude-implement.yml` and `reusable-claude-release.yml`
+  commit as, signs off nothing, for the reason `CONTRIBUTING.md`'s
+  *Working with an LLM* gives. The rejected alternative is a trailer the
+  workflow writes in its name, which certifies nothing.
 
   The exemption goes by the author address alone, not by who opened the
   pull request: a commit authored at one of these addresses passes in a
