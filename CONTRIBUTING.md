@@ -62,7 +62,7 @@ review without the model. Text or code you have not read, or cannot
 explain, is closed without review.
 
 **For a pull request the agent opened, whoever approves it reads every
-line and answers for it as their own**, the agent being the implement
+line and answers for it as their own**, the agent being the pull-request
 agent of [`GOVERNANCE.md`][governance]'s *Roles*. The maintainer,
 landing it through the bypass without an approval, reads every line and
 answers for it instead, the landing being their own act; requiring an
@@ -72,7 +72,7 @@ Certificate of Origin][dco], so the approval, or that landing, is the
 certification.
 
 **The `agent` label hands an issue to that agent**, in a repository
-that calls its workflow. [Section 11][s11]'s *Labels and issue types*
+that calls its implement workflow. [Section 11][s11]'s *Labels and issue types*
 says who applies it, [section 10][s10] what the agent does with an issue
 it admits, and the workflow's header which issues it takes, what answers
 a `decision`, and the switch that turns it on.

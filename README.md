@@ -2048,6 +2048,18 @@ without adding to it is deleted.
   says who admits an issue and what answers a `decision`. The rejected
   alternative is the action's `allowed_non_write_users: "*"`, which runs
   anybody's issue text as a prompt beside the credentials.
+- **`reusable-claude-release.yml` takes a release as far as its open pull
+  request, and no further**, for the reasons of the bullet above: the maintainer
+  approves it, lands it and signs the tag (section 12). An administrator of the
+  tree starts it by hand, and no issue or comment is a prompt. Steps do what is
+  mechanical: the previous tag and the subjects since it, the public-API
+  comparison at the commit `release.yml` pins, what is open, the version and the
+  lock. The agent writes the release's sections and the pull request's body, and
+  edits no other file. Its gates job is the one above, run after a check of the
+  two sections and of the notes against the API findings.
+  `tests/claude_release_test.py` reads each of these. The rejected alternative
+  is an agent that runs the steps itself, which needs a Bash rule and leaves the
+  comparison to a model.
 - **`timeout-minutes` on every job that runs steps**, far above what the work
   needs: it bounds a hung job holding a runner. A called job's is the callee's,
   one number for every caller, which only a caller the bound would cut raises.
@@ -3893,18 +3905,18 @@ A label means what its description says. Who applies and removes it:
   surface**, by `griffe check` and a script beside it in the release path,
   comparing the tag being cut against the tag before it. Section 7's census
   answers *is this module's surface stated* and never *did this release take
-  something the last one gave*, and `RELEASE_NOTES.md` is written by hand, so
-  nothing else can tell that an entry is missing. `griffe check` walks the
-  public API of two git references, names each break it finds by the kind of
-  break it is, and exits non-zero having found any.
+  something the last one gave*, and `RELEASE_NOTES.md` is prose that nothing
+  derives from the code, so nothing else can tell that an entry is missing.
+  `griffe check` walks the public API of two git references, names each break it
+  finds by the kind of break it is, and exits non-zero having found any.
   `.github/scripts/api_gaps.py` reports, in the same format and the same job,
   breaks of the kinds its docstring names, which griffe does not compare or can
   skip. No griffe release up to 2.4.1 closes that gap, so moving the pin up to
   it would not replace the script, and leaving them for the release's author to
-  list would leave the hand-written notes unchecked for them. What the two
-  report is either a `RELEASE_NOTES.md` entry or a reason for not being one,
-  written where the release is written. A break neither reports is read by hand,
-  as the public API step of `shared/RELEASING.md` says.
+  list would leave the notes unchecked for them. What the two report is either a
+  `RELEASE_NOTES.md` entry or a reason for not being one, written where the
+  release is written. A break neither reports is read by hand, as the public API
+  step of `shared/RELEASING.md` says.
 
     **The release path and not the merge gate.** Before 1.0 a package breaks its
     surface deliberately, so a gate comparing the branch against the last
