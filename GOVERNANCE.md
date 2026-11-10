@@ -108,12 +108,18 @@ owes, rather than restating it.
   owes what `CONTRIBUTING.md` says.
 - **A reviewer** is anybody reading a pull request they did not write,
   and owes what [`REVIEWING.md`](./REVIEWING.md) says.
-- **The review bot** is each repository's `claude-review.yml`, which
-  calls this repository's `reusable-claude-review.yml`. It posts the ack
-  of record, as a review of type COMMENT and never as an approval, and it
-  runs only where the organization variable `CLAUDE_REVIEW_ENABLED` is
-  `true`: section 11's *Review* has the rule and the command that reads
-  the variable. It is not a required check.
+- **The review bot** is `claude[bot]`, run by each repository's
+  `claude-review.yml`, which calls this repository's
+  `reusable-claude-review.yml`. It posts the ack of record, as a review
+  of type COMMENT and never as an approval, and it runs only where the
+  organization variable `CLAUDE_REVIEW_ENABLED` is `true`: section 11's
+  *Review* has the rule and the command that reads the variable. It is
+  not a required check.
+- **The implement agent** is `claude[bot]` too, run on an issue by this
+  repository's `reusable-claude-implement.yml` where a repository calls
+  it. Section 10 says how far it goes, and the workflow's header which
+  issues it takes and the switch that turns it on. `CONTRIBUTING.md`'s
+  *Working with an LLM* says who answers for the pull request it opens.
 - **CodeRabbit** is another reviewing bot, configured by each
   repository's `.coderabbit.yaml`. Section 11's *Review* says what its
   review is.
