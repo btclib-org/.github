@@ -398,11 +398,14 @@ SOURCERY_CONFIG = ".sourcery.yaml"
 SOURCERY_CALLED = "reusable-sourcery.yml"
 """The workflow of this repository section 10 has a Python tree call."""
 
-TURNED_OFF: dict[str, str] = {}
+TURNED_OFF: dict[str, str] = {
+    "dont-import-test-modules": "ruff's relative-imports (TID252)",
+}
 """The rules section 10 says `.sourcery.yaml` turns off, against the reason.
 
 The reason is the rule of another gate that conflicts with it, as
-section 10 defines conflict. Empty: no rule does. A literal, for the
+section 10 defines conflict, or that the maintainer's decision set beside
+it, as section 10 says of `dont-import-test-modules`. A literal, for the
 reason `STATED` above is one: the trees' copies agree with each other
 while all of them are wrong.
 """
@@ -1518,18 +1521,26 @@ def test_a_disable_list_off_turned_off_would_be_reported(
 ) -> None:
     """`disable_departures` reports a rule left on, and one turned off besides.
 
-    `TURNED_OFF` is empty, so a stand-in naming one rule asks the first.
+    Against `TURNED_OFF` itself, then against two stand-ins: an empty one,
+    which an empty or missing `disable:` agrees with, and one naming one
+    rule.
 
-    :param monkeypatch: stands the stand-in in for `TURNED_OFF`.
+    :param monkeypatch: stands the stand-ins in for `TURNED_OFF`.
     """
-    assert disable_departures({"rule_settings": {"disable": []}}) == []
-    assert disable_departures({"rule_settings": {}}) == [], "no disable: is refused"
-    assert disable_departures({}) == [], "no rule_settings: is refused"
+    agreeing = list(TURNED_OFF)
+    assert disable_departures({"rule_settings": {"disable": agreeing}}) == []
+    left_on = f"{SOURCERY_CONFIG} leaves on {sorted(TURNED_OFF)}"
+    assert disable_departures({"rule_settings": {"disable": []}}) == [left_on]
+    assert disable_departures({"rule_settings": {}}) == [left_on]
+    assert disable_departures({}) == [left_on], "no rule_settings: leaves them on"
     assert disable_departures(None) == [], "an absent file is the other test's"
     for extra in ("default", "refactoring", "reintroduce-else", "assign-if-exp"):
-        assert disable_departures({"rule_settings": {"disable": [extra]}}) == [
-            f"{SOURCERY_CONFIG} also turns off ['{extra}']"
-        ]
+        assert disable_departures(
+            {"rule_settings": {"disable": [*agreeing, extra]}}
+        ) == [f"{SOURCERY_CONFIG} also turns off ['{extra}']"]
+    monkeypatch.setattr(f"{__name__}.TURNED_OFF", {})
+    assert disable_departures({"rule_settings": {"disable": []}}) == []
+    assert disable_departures({"rule_settings": {}}) == [], "no disable: is refused"
     monkeypatch.setattr(f"{__name__}.TURNED_OFF", {"reintroduce-else": "a stand-in"})
     assert disable_departures({"rule_settings": {"disable": []}}) == [
         f"{SOURCERY_CONFIG} leaves on ['reintroduce-else']"

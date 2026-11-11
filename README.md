@@ -2247,8 +2247,9 @@ without the bypass. The context is the caller's job name then the callee's,
 
 **`.sourcery.yaml` leaves every rule on but those `TURNED_OFF` in
 `tests/hooks_test.py` names**, as ruff's `select = ["ALL"]` takes every family.
-A rule is off only where it conflicts with another gate of the tree: ruff with
-the tree's configuration, `ruff format`, or mypy. A rule conflicts where no form
+A rule is off only where it conflicts with another gate of the tree, ruff with
+the tree's configuration, `ruff format` or mypy, or where the maintainer turned
+it off on a recorded issue, as below. A rule conflicts where no form
 of the code it reports, keeping its behaviour and carrying no `# sourcery skip`,
 passes both that gate and Sourcery with the rule on. The rule of that gate is
 named beside it. The form may carry a comment that silences that gate, a
@@ -2263,6 +2264,18 @@ rule off because ruff's reading stands is the alternative set aside. A rule the
 trees' own style would not write is on too: the code adapts. `enable:` and
 `rule_types:` stay at their defaults, and `disable:` can name a tag:
 `disable: [default]` turns every rule off.
+
+**`dont-import-test-modules` is off, beside ruff's `relative-imports`
+(TID252), by the maintainer's decision on #2162.** In a subpackage of `tests/`,
+Sourcery reports `from tests import X` and ruff, at its default
+`ban-relative-imports = "parents"`, reports `from .. import X`. Forms that pass
+both exist, and were set aside for what they cost: a subpackage's `__init__.py`
+that takes each helper from `sys.modules["tests"]` types each of them `Any`, and
+moving the shared helpers to a package not named for tests changes every tree's
+layout, the files section 14 keeps byte for byte included. A `per-file-ignores`
+of TID252 under `tests/` was set aside too, since it silences another gate. A
+test at the top of `tests/` that writes `from . import X` keeps it: both pass
+that form.
 
 **A tree whose `disable:` has not yet followed a change to `TURNED_OFF` is in
 the `BACKLOG` row of `test_a_sourcery_yaml_turns_off_the_rules_turned_off`**,
