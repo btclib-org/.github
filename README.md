@@ -2255,11 +2255,11 @@ named beside it. The form may carry a comment that silences that gate, a
 already carries that comment for its own reason. A rewrite that passes once
 adapted is no conflict, as a line ruff finds too long, an `else` after a
 `return` that ruff removes, or an annotation mypy asks for. A rule that reads
-the same code as a ruff rule is on, because Sourcery reads more widely:
-`assign-if-exp` reports an `if` and `else` that each assign the same subscript,
-which ruff's if-else-block-instead-of-if-exp passes. Turning such a rule off
-because ruff's reading stands is the alternative set aside. A rule the trees'
-own style would not write is on too: the code adapts. `enable:` and
+the same code as a ruff rule is on, since an overlap is no conflict.
+`assign-if-exp` also reports an `if` and `else` that each assign the same
+subscript, which ruff's if-else-block-instead-of-if-exp passes. Turning such a
+rule off because ruff's reading stands is the alternative set aside. A rule the
+trees' own style would not write is on too: the code adapts. `enable:` and
 `rule_types:` stay at their defaults, and `disable:` can name a tag:
 `disable: [default]` turns every rule off.
 
