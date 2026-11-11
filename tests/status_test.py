@@ -78,8 +78,7 @@ def long_comments(text: str, start: int | None) -> list[str]:
     """
     lines = text.splitlines()
     offsets = [0]
-    for line in lines:
-        offsets.append(offsets[-1] + len(line) + 1)
+    offsets.extend(offsets[-1] + len(line) + 1 for line in lines)
     places: dict[str, int] = {}
     for row, line in enumerate(lines):
         if not BADGE.search(line):
@@ -132,7 +131,7 @@ def test_a_readme_keeps_its_gates_and_sentinels_in_its_status_section(
     """
     readme = (trees[repository] / "README.md").read_text(encoding="utf-8")
     problems = unmet(readme)
-    assert not problems, f"{problems}; " + by_hand(repository, ASKED)
+    assert not problems, f"{problems}; {by_hand(repository, ASKED)}"
 
 
 HEAD = "[![PyPI version](https://img.shields.io/pypi/v/x.svg)](https://pypi.org/x)"

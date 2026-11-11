@@ -202,8 +202,8 @@ def test_every_publisher_holds_the_module_that_reads_its_declarations(
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    assert tracked(trees[repository], OWN_MODULE), f"no {OWN_MODULE}; " + by_hand(
-        repository, f"git ls-files {OWN_MODULE}"
+    assert tracked(trees[repository], OWN_MODULE), (
+        f"no {OWN_MODULE}; {by_hand(repository, f'git ls-files {OWN_MODULE}')}"
     )
 
 

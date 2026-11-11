@@ -146,7 +146,7 @@ def test_it_reads_a_blob_or_a_file_with_a_get_and_nothing_else(
         pytest.param(["o/r/contents/a..b"], id="two dots in a name"),
         pytest.param(["o/r/issues"], id="other path"),
         pytest.param(["o/r/issues/1/comments"], id="other path, deeper"),
-        pytest.param(["o/r/git/trees/" + SHA], id="trees"),
+        pytest.param([f"o/r/git/trees/{SHA}"], id="trees"),
         pytest.param(["o/r/git/blobs"], id="blobs without a sha"),
         pytest.param([f"o/r/git/blobs/{SHA[:39]}"], id="short sha"),
         pytest.param([f"o/r/git/blobs/{SHA}0"], id="long sha"),

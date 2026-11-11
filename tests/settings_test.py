@@ -449,9 +449,8 @@ def test_the_workflow_token_is_read(repository: str) -> None:
     """
     endpoint = f"repos/{ORG}/{repository}/actions/permissions/workflow"
     granted = gh_json(endpoint)["default_workflow_permissions"]
-    assert granted == "read", f"the default workflow token is {granted!r}; " + by_hand(
-        repository, f"gh api {endpoint}"
-    )
+    command = by_hand(repository, f"gh api {endpoint}")
+    assert granted == "read", f"the default workflow token is {granted!r}; {command}"
 
 
 def test_actions_are_pinned_and_every_owner_is_allowed(repository: str) -> None:
@@ -470,8 +469,8 @@ def test_actions_are_pinned_and_every_owner_is_allowed(repository: str) -> None:
         for key, want in wanted.items()
         if document.get(key) != want
     }
-    assert not wrong, f"{wrong} does not hold; " + by_hand(
-        repository, f"gh api {endpoint}"
+    assert not wrong, (
+        f"{wrong} does not hold; {by_hand(repository, f'gh api {endpoint}')}"
     )
 
 
@@ -496,10 +495,11 @@ def test_the_wiki_and_the_projects_board_are_off(
         f"gh api -X PATCH repos/{ORG}/{repository}"
         " -F has_wiki=false -F has_projects=false"
     )
-    assert not on, f"{on} still on; flip with `{flip}`; " + by_hand(
+    command = by_hand(
         repository,
         f"gh api repos/{ORG}/{repository} --jq '{{has_wiki, has_projects}}'",
     )
+    assert not on, f"{on} still on; flip with `{flip}`; {command}"
 
 
 def test_web_commits_are_signed_off(
@@ -516,6 +516,6 @@ def test_web_commits_are_signed_off(
     on = settings[repository].get("web_commit_signoff_required")
     flip = f"gh api -X PATCH orgs/{ORG} -F web_commit_signoff_required=true"
     read = f"gh api repos/{ORG}/{repository} --jq .web_commit_signoff_required"
-    assert on is True, f"the setting is {on!r}; flip with `{flip}`; " + by_hand(
-        repository, read
+    assert on is True, (
+        f"the setting is {on!r}; flip with `{flip}`; {by_hand(repository, read)}"
     )

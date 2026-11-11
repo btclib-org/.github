@@ -73,7 +73,7 @@ the silence both readings below are against.
 UNCONDITIONAL = re.compile(re.escape(EVERYWHERE) + TERMINATOR)
 """The unconditional opening, closed the way `TERMINATOR` says."""
 
-AS_A_PATHSPEC = re.compile(re.escape(CONDITIONAL) + r"`([^`]+)`" + TERMINATOR)
+AS_A_PATHSPEC = re.compile(f"{re.escape(CONDITIONAL)}`([^`]+)`{TERMINATOR}")
 """How a condition states its observable: one backticked pathspec, alone.
 
 A pathspec and not a path: `tracked` takes them, so `*.toml` is read off
@@ -116,6 +116,7 @@ EXPECTED_DRIFT: dict[str, str] = {
     "tests/secret_free/__init__.py": "btclib-org/.github#1803",
     "RELEASING.md": "btclib-org/.github#1855",
     "CONTRIBUTING.md": "btclib-org/.github#2145",
+    ".github/scripts/generate_sbom.py": "btclib-org/.github#2162",
 }
 """A path section 14 names whose copies are known not to agree yet.
 

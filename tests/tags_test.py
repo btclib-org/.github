@@ -41,9 +41,8 @@ def test_the_newest_tag_is_an_object_a_signature_can_sit_on(repository: str) -> 
     tag = listed[0]["name"]
     endpoint = f"repos/{ORG}/{repository}/git/ref/tags/{tag}"
     kind = gh_json(endpoint)["object"]["type"]
-    assert kind == "tag", f"{tag} points at a {kind}, not a tag object; " + by_hand(
-        repository, f"gh api {endpoint} --jq .object.type"
-    )
+    command = by_hand(repository, f"gh api {endpoint} --jq .object.type")
+    assert kind == "tag", f"{tag} points at a {kind}, not a tag object; {command}"
 
 
 def test_the_newest_release_tag_is_verified(repository: str) -> None:

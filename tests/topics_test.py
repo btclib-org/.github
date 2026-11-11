@@ -103,6 +103,5 @@ def test_a_repository_has_topics(repository: str, topics: dict[str, set[str]]) -
     :param repository: the repository asked about.
     :param topics: the topics of each repository.
     """
-    assert topics[repository], "no topics at all; " + by_hand(
-        repository, f"gh api repos/{ORG}/{repository}/topics --jq .names"
-    )
+    command = by_hand(repository, f"gh api repos/{ORG}/{repository}/topics --jq .names")
+    assert topics[repository], f"no topics at all; {command}"

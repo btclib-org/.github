@@ -419,6 +419,7 @@ def test_the_settings_file_reads_the_wiki_and_the_projects_board_back(
         for name, pattern in (("has_wiki", WIKI), ("has_projects", PROJECTS))
         if not recorded(text, pattern)
     ]
-    assert not missing, f"{SETTINGS} does not read {missing} back; " + by_hand(
+    command = by_hand(
         repository, f"gh api repos/{ORG}/{repository} --jq '{{has_wiki, has_projects}}'"
     )
+    assert not missing, f"{SETTINGS} does not read {missing} back; {command}"

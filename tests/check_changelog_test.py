@@ -617,7 +617,7 @@ def test_an_entry_above_every_release_heading_is_caught(script: ModuleType) -> N
 
 def test_a_release_cut_over_the_newest_is_not_reported(script: ModuleType) -> None:
     """A new release heading takes its own entries."""
-    text = _RELEASED.replace("## v2", _THREE + "## v2")
+    text = _RELEASED.replace("## v2", f"{_THREE}## v2")
     assert script.problems(text, base=_BASE) == []
 
 
@@ -644,7 +644,7 @@ def test_an_entry_added_to_an_old_release_beside_a_new_one_is_caught(
     script: ModuleType,
 ) -> None:
     """The new release vouches for its own entries and for no other."""
-    text = (_RELEASED + _LATE).replace("## v2", _THREE + "## v2")
+    text = (_RELEASED + _LATE).replace("## v2", f"{_THREE}## v2")
     found = script.problems(text, base=_BASE)
     assert len(found) == 1
     assert f"{_REFUSED} 'v1'" in found[0]
@@ -734,7 +734,7 @@ def test_main_passes_a_release_cut(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """The control: a release's section in the same diff passes, compared."""
-    _commit(repo, _RELEASED.replace("## v2", _THREE + "## v2"))
+    _commit(repo, _RELEASED.replace("## v2", f"{_THREE}## v2"))
     assert script.main([]) == 0
     assert "no entry is new outside a release's own section" in capsys.readouterr().out
 

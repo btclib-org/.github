@@ -148,7 +148,7 @@ def rehearsal_tag(notes: Path) -> str | None:
         version = None
     if not isinstance(version, str):
         return None
-    return "v" + version
+    return f"v{version}"
 
 
 def _spans(text: str) -> list[str]:

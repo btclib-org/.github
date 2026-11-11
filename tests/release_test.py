@@ -305,9 +305,8 @@ def test_a_publisher_writes_a_bill_of_materials(
         for workflow in workflows(trees[repository])
         if any(SBOM in artifacts(job, UPLOAD) for job in jobs(workflow).values())
     ]
-    assert writing, f"no job uploads a {SBOM} artifact; " + by_hand(
-        repository, f"grep -rn 'name: {SBOM}$' .github/workflows/"
-    )
+    command = by_hand(repository, f"grep -rn 'name: {SBOM}$' .github/workflows/")
+    assert writing, f"no job uploads a {SBOM} artifact; {command}"
 
 
 @pytest.mark.tier(Tier.PUBLISHER)
@@ -326,7 +325,7 @@ def test_the_attestation_signs_the_bill_of_materials(
         found_repository, f"grep -n -A6 '{ATTEST}' .github/workflows/{found_file}"
     )
     landed = artifacts(job, DOWNLOAD).get(SBOM)
-    assert landed, f"{job_id} takes back no {SBOM} artifact; " + command
+    assert landed, f"{job_id} takes back no {SBOM} artifact; {command}"
     signed = str((step.get("with") or {}).get("subject-path", "")).split()
     assert any(covers(pattern, landed) for pattern in signed), (
         f"{job_id} signs {signed} and the {SBOM} artifact lands in {landed!r}; "
@@ -350,7 +349,7 @@ def test_the_release_attaches_the_bill_of_materials(
         found_repository, f"grep -n '{CREATE}' .github/workflows/{found_file}"
     )
     landed = artifacts(job, DOWNLOAD).get(SBOM)
-    assert landed, f"{job_id} takes back no {SBOM} artifact; " + command
+    assert landed, f"{job_id} takes back no {SBOM} artifact; {command}"
     assert any(covers(word, landed) for word in attached), (
         f"{job_id} attaches {attached} and the {SBOM} artifact lands in "
         f"{landed!r}; " + command

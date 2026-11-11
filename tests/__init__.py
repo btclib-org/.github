@@ -578,7 +578,7 @@ def bulleted(document: Path, opening: str, closing: str) -> list[str]:
         if line.startswith("- "):
             bullets.append(line)
         elif line.startswith("  ") and bullets:
-            bullets[-1] += " " + line.strip()
+            bullets[-1] += f" {line.strip()}"
     return bullets
 
 
