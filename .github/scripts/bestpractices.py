@@ -23,14 +23,17 @@ status that is not a string. It writes nothing in this repository.
 
 `--drift` fetches each tree's answers from the site and lists each
 criterion the file holds whose status or justification there differs.
-Then it prints one URL of the site's edit form for each section of the
-form that holds one of them, because the form ignores a field of another
-section. Each URL carries the file's values for its criteria and forces
-them over the answers given, for whoever may edit the project to review
-and save. The section of a criterion is the first level that lists it in
-the criteria files of ossf/best-practices-badge at `CRITERIA_REF`. A
-criterion no level lists there gets no URL, and is named on a line of
-its own. A tree whose file and site agree prints nothing.
+Then it prints URLs of the site's edit form, each for one section of
+the form, because the form ignores a field of another section. Each URL
+carries the file's values for its criteria and forces them over the
+answers given, for whoever may edit the project to review and save. A
+section's criteria go over several URLs where one would be longer than
+the site accepts. A criterion too long for a URL of its own is named on
+a line of its own, to type into the form by hand. The section of a
+criterion is the first level that lists it in the criteria files of
+ossf/best-practices-badge at `CRITERIA_REF`. A criterion no level lists
+there gets no URL, and is named on a line of its own. A tree whose file
+and site agree prints nothing.
 
 `--stale` fetches nothing from bestpractices.dev. It reads the files and
 lists each answer whose justification names a `v`-prefixed version older
@@ -68,8 +71,14 @@ if TYPE_CHECKING:
 
 ORG = "btclib-org"
 FILE = ".bestpractices.json"
-PROJECT = "https://www.bestpractices.dev/projects/{id}.json"
-EDIT = "https://www.bestpractices.dev/projects/{id}/{section}/edit?{query}"
+SITE = "https://www.bestpractices.dev"
+PROJECT = SITE + "/projects/{id}.json"
+EDIT = SITE + "/projects/{id}/{section}/edit?{query}"
+# the longest path and query the site answers: one byte more gets a 414
+TARGET = 8192
+# the site redirects a path without a locale to one with it, so a URL
+# leaves room for the longest locale its pages link, as `zh-CN`
+LOCALE = len("/zh-CN")
 UPSTREAM = "ossf/best-practices-badge"
 # the commit of UPSTREAM whose criteria files say where a criterion is,
 # moved by hand: a criterion added upstream after it is named by --drift
@@ -330,6 +339,38 @@ def proposal(
     return EDIT.format(id=number, section=section, query=urlencode(pairs))
 
 
+def fits(url: str) -> bool:
+    """Say whether the site accepts the URL once its redirect adds a locale.
+
+    `urlencode` writes ASCII, so a character of the URL is a byte.
+    """
+    return len(url.removeprefix(SITE)) + LOCALE <= TARGET
+
+
+def proposals(
+    number: int, section: str, given: Answers, differing: Sequence[str]
+) -> tuple[list[str], list[str]]:
+    """Return the `proposal` URLs for the criteria, and those too long for one.
+
+    The criteria fill each URL in order, a new one starting where the next
+    criterion would make it longer than the site accepts.
+    """
+    urls: list[str] = []
+    alone: list[str] = []
+    held: list[str] = []
+    for criterion in differing:
+        if not fits(proposal(number, section, given, [criterion])):
+            alone.append(criterion)
+            continue
+        if held and not fits(proposal(number, section, given, [*held, criterion])):
+            urls.append(proposal(number, section, given, held))
+            held = []
+        held.append(criterion)
+    if held:
+        urls.append(proposal(number, section, given, held))
+    return urls, alone
+
+
 def seed(root: Path, trees: dict[str, int]) -> None:
     """Write each tree's file under `root` from the site's answers."""
     for tree, number in trees.items():
@@ -355,8 +396,14 @@ def drifted(found: dict[str, Answers], trees: dict[str, int]) -> list[str]:
         for section, held in sections.items():
             if section is None:
                 out.append(f"{tree}: in no section of the form: {', '.join(held)}")
-            else:
-                out.append(f"{tree}: {proposal(trees[tree], section, given, held)}")
+                continue
+            urls, alone = proposals(trees[tree], section, given, held)
+            out += [f"{tree}: {url}" for url in urls]
+            if alone:
+                out.append(
+                    f"{tree}: too long for a URL, to type into the {section}"
+                    f" form by hand: {', '.join(alone)}"
+                )
     return out
 
 

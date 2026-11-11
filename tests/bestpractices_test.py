@@ -12,14 +12,19 @@ asks the API how long ago each registered tree released.
 
 from __future__ import annotations
 
+import http.client
 import importlib.util
+import itertools
 import json
+import re
 import subprocess
 import sys
 from datetime import UTC, datetime, timedelta
+from http import HTTPStatus
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qsl, urlsplit
+from urllib.request import Request, urlopen
 
 import pytest
 import yaml
@@ -373,6 +378,78 @@ def test_a_status_the_file_lacks_is_not_proposed(script: ModuleType) -> None:
     ]
 
 
+def _target(url: str) -> int:
+    """Return the length of the URL's path and query, as the site reads it."""
+    parts = urlsplit(url)
+    return len(parts.path) + len("?") + len(parts.query)
+
+
+def test_drift_splits_a_section_over_urls_the_site_accepts(
+    script: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Each URL fits, takes the criteria in order, and is full before the next.
+
+    The site adds a locale to the path, so a URL fits with room for it.
+    """
+    criteria = [f"c{index:02}" for index in range(12)]
+    given = {
+        key: value
+        for criterion in criteria
+        for key, value in (
+            (criterion + "_status", "Met"),
+            (criterion + "_justification", criterion + " " + "x" * 1500),
+        )
+    }
+    given["c05_justification"] = "y" * script.TARGET
+    files = _files(tmp_path, {"btclib": given})
+    monkeypatch.setattr(script, "registered", lambda: {"btclib": _ID})
+    monkeypatch.setattr(script, "fetch", lambda number: {**_PROJECT, "id": number})
+    monkeypatch.setattr(script, "form", lambda: dict.fromkeys(criteria, "passing"))
+    assert script.main(["--drift", "--files", str(files)]) == 0
+    lines = capsys.readouterr().out.splitlines()
+    assert lines[: len(criteria)] == [
+        f"btclib: {criterion}: status, justification" for criterion in criteria
+    ]
+    *urls, alone = [line.removeprefix("btclib: ") for line in lines[len(criteria) :]]
+    assert alone == "too long for a URL, to type into the passing form by hand: c05"
+    proposed = [criterion for criterion in criteria if criterion != "c05"]
+    assert _target(script.proposal(_ID, "passing", given, proposed)) > script.TARGET
+    held = []
+    for url in urls:
+        assert urlsplit(url).path == f"/projects/{_ID}/passing/edit"
+        assert _target(url) + len("/zh-CN") <= script.TARGET
+        *pairs, (overrides, keys) = parse_qsl(urlsplit(url).query)
+        assert overrides == "overrides"
+        assert keys == ",".join(key for key, _ in pairs)
+        sent = list(dict.fromkeys(key.rsplit("_", 1)[0] for key, _ in pairs))
+        assert pairs == [
+            (criterion + suffix, given[criterion + suffix])
+            for criterion in sent
+            for suffix in ("_status", "_justification")
+        ]
+        held.append(sent)
+    assert [criterion for sent in held for criterion in sent] == proposed
+    for sent, after in itertools.pairwise(held):
+        url = script.proposal(_ID, "passing", given, [*sent, after[0]])
+        assert _target(url) + len("/zh-CN") > script.TARGET
+
+
+def test_a_criterion_fills_a_url_to_the_limit_and_no_further(
+    script: ModuleType,
+) -> None:
+    """A URL as long as the site accepts is proposed, one byte more is not."""
+    stem = _target(script.proposal(_ID, "passing", {"a_justification": ""}, ["a"]))
+    room = script.TARGET - len("/zh-CN") - stem
+    given = {"a_justification": "a" * room, "b_justification": "a" * (room + 1)}
+    urls, alone = script.proposals(_ID, "passing", given, ["a", "b"])
+    assert alone == ["b"]
+    assert urls == [script.proposal(_ID, "passing", given, ["a"])]
+    assert _target(urls[0]) + len("/zh-CN") == script.TARGET
+
+
 @pytest.mark.parametrize(
     ("code", "stderr", "expected"),
     [(0, "", "{}\n"), (1, "gh: Not Found (HTTP 404)\n", None)],
@@ -491,6 +568,38 @@ def test_a_registered_tree_holds_its_answers(
         )
     )
     assert script.render(json.loads(text)) == text
+
+
+def _status(target: str) -> int:
+    """Return the status the site answers a GET of the target, unfollowed."""
+    connection = http.client.HTTPSConnection("www.bestpractices.dev", timeout=30)
+    try:
+        connection.request("GET", target)
+        return connection.getresponse().status
+    finally:
+        connection.close()
+
+
+@pytest.mark.integration
+def test_the_site_answers_a_target_as_long_as_target_and_no_longer(
+    script: ModuleType,
+) -> None:
+    """A path and query of `TARGET` bytes is read, one byte more gets a 414."""
+    stem = f"/projects/{_ID}?x="
+    longest = stem + "a" * (script.TARGET - len(stem))
+    assert _status(longest) != HTTPStatus.REQUEST_URI_TOO_LONG
+    assert _status(longest + "a") == HTTPStatus.REQUEST_URI_TOO_LONG
+
+
+@pytest.mark.integration
+def test_locale_is_as_long_as_the_longest_locale_the_site_links(
+    script: ModuleType,
+) -> None:
+    """The redirect adds a locale the site's pages link, `/` included."""
+    with urlopen(Request(script.SITE + "/en"), timeout=30) as answer:  # noqa: S310
+        page = answer.read().decode()
+    locales = set(re.findall(r'hreflang="([^"]+)"', page)) - {"x-default"}
+    assert max(len("/" + locale) for locale in locales) == script.LOCALE
 
 
 class _Loader(yaml.SafeLoader):
