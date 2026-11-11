@@ -103,9 +103,7 @@ def version_of(filename: str) -> str | None:
         parts = filename.split("-")
         return parts[1] if len(parts) > 1 else None
     stem = filename.removesuffix(".tar.gz").removesuffix(".zip")
-    if stem == filename:
-        return None
-    return stem.rpartition("-")[2] or None
+    return None if stem == filename else stem.rpartition("-")[2] or None
 
 
 def lists(document: dict[str, object], version: str) -> bool:

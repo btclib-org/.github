@@ -636,12 +636,13 @@ def test_a_call_into_this_repository_pins_a_tag(
         for pin in read
         if tagged().get(str(pin.trailing)) != pin.value.rpartition("@")[2]
     ]
-    assert not wrong, f"pins at no commit their tag names: {wrong}; " + by_hand(
+    command = by_hand(
         repository,
         f"grep -n -B1 'uses: {here}' .github/workflows/*.yml;"
         f" gh api repos/{ORG}/{SELF}/tags"
         " --jq '.[] | \"\\(.name) \\(.commit.sha)\"'",
     )
+    assert not wrong, f"pins at no commit their tag names: {wrong}; {command}"
 
 
 ZIZMOR = (".github/zizmor.yml", ".github/zizmor.yaml", "zizmor.yml", "zizmor.yaml")
@@ -1034,9 +1035,7 @@ def shape(job: dict[str, Any]) -> str | None:
             msg = f"an aggregate job's text carries both {LISTING!r} and {NEEDS!r}"
             raise LookupError(msg)
         return "listing"
-    if needs:
-        return "needs"
-    return None
+    return "needs" if needs else None
 
 
 def test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing(

@@ -103,7 +103,7 @@ def test_a_readme_opens_its_contributing_section_with_the_paragraph(
     """
     readme = (trees[repository] / "README.md").read_text(encoding="utf-8")
     problem = unmet(readme, filled(paragraph(), repository))
-    assert problem is None, f"{problem}; " + by_hand(repository, ASKED)
+    assert problem is None, f"{problem}; {by_hand(repository, ASKED)}"
 
 
 def test_the_organization_page_carries_the_paragraph() -> None:

@@ -235,7 +235,7 @@ def gate(repository: str, trees: dict[str, Path]) -> dict[str, Any]:
     """
     path = trees[repository] / CONFIG
     if not path.is_file():
-        msg = f"{repository} has no {CONFIG}; " + by_hand(repository, f"ls {CONFIG}")
+        msg = f"{repository} has no {CONFIG}; {by_hand(repository, f'ls {CONFIG}')}"
         raise FileNotFoundError(msg)
     document: dict[str, Any] = yaml.safe_load(path.read_text(encoding="utf-8"))
     return document
@@ -324,10 +324,10 @@ def test_name_tests_test_runs_at_its_default(
         hook for hook in hooks(repository, trees) if hook["id"] == "name-tests-test"
     ]
     command = by_hand(repository, f"grep -n -A1 '^ *- id: name-tests-test' {CONFIG}")
-    assert found, "name-tests-test is not in the gate; " + command
+    assert found, f"name-tests-test is not in the gate; {command}"
     arguments = [argument for hook in found for argument in hook.get("args", [])]
     assert not arguments, (
-        f"name-tests-test is given {arguments}, not its default; " + command
+        f"name-tests-test is given {arguments}, not its default; {command}"
     )
 
 
@@ -388,9 +388,8 @@ def test_the_gate_runs_mypy(repository: str, trees: dict[str, Path]) -> None:
         for hook in hooks(repository, trees)
         if hook["id"] in MYPY or hook["repo"].endswith("/mirrors-mypy")
     ]
-    assert runs, "no hook runs mypy; " + by_hand(
-        repository, f"grep -n 'mirrors-mypy\\|id: mypy' {CONFIG}"
-    )
+    command = by_hand(repository, f"grep -n 'mirrors-mypy\\|id: mypy' {CONFIG}")
+    assert runs, f"no hook runs mypy; {command}"
 
 
 SOURCERY_CONFIG = ".sourcery.yaml"
@@ -399,30 +398,13 @@ SOURCERY_CONFIG = ".sourcery.yaml"
 SOURCERY_CALLED = "reusable-sourcery.yml"
 """The workflow of this repository section 10 has a Python tree call."""
 
-TURNED_OFF = {
-    "reintroduce-else": "undoes superfluous-else-return",
-    "use-fstring-for-concatenation": "folds a by_hand hint into the f-string it joins",
-    "dont-import-test-modules": "refuses `from tests import`, the shared helpers' path",
-    "assign-if-exp": "if-else-block-instead-of-if-exp",
-    "comprehension-to-generator": "unnecessary-comprehension-in-call",
-    "de-morgan": "negate-equal-op, negate-not-equal-op, double-negation, not-in-test",
-    "equality-identity": "comparison-with-itself",
-    "for-append-to-extend": "manual-list-copy, manual-list-comprehension",
-    "identity-comprehension": "unnecessary-comprehension",
-    "list-comprehension": "manual-list-comprehension",
-    "merge-comparisons": "repeated-equality-comparison",
-    "merge-duplicate-blocks": "if-with-same-arms",
-    "merge-else-if-into-elif": "collapsible-else-if",
-    "remove-redundant-fstring": "f-string-missing-placeholders",
-    "remove-unnecessary-else": "superfluous-else-return",
-    "simplify-boolean-comparison": "true-false-comparison",
-}
+TURNED_OFF: dict[str, str] = {}
 """The rules section 10 says `.sourcery.yaml` turns off, against the reason.
 
-The reason is the ruff rule that turns each off, or another reason in
-words. A rule ruff ships only in preview is no reason. A literal, for
-the reason `STATED` above is one: the trees' copies agree with each
-other while all of them are wrong.
+The reason is the rule of another gate that conflicts with it, as
+section 10 defines conflict. Empty: no rule does. A literal, for the
+reason `STATED` above is one: the trees' copies agree with each other
+while all of them are wrong.
 """
 
 RULE_TYPES = ("comment", "refactoring", "suggestion")
@@ -826,7 +808,11 @@ def pinned(
     for document in files:
         if document.rsplit("/", 1)[-1] != PIN_FILE or not passes(workflow, document):
             continue
-        for path, fields in pins((root / document).read_text(encoding="utf-8")).items():
+        out.extend(
+            path
+            for path, fields in pins(
+                (root / document).read_text(encoding="utf-8")
+            ).items()
             if (
                 path in among
                 and path in files
@@ -839,8 +825,8 @@ def pinned(
                 and network_of(fields["repo"]).casefold()
                 != network_of(f"{ORG}/{repository}").casefold()
                 and asks.merged(fields["repo"], fields["commit"])
-            ):
-                out.append(path)
+            )
+        )
     return out
 
 
@@ -944,11 +930,6 @@ def config_departures(
         return [f"there is no {SOURCERY_CONFIG}"]
     out: list[str] = []
     settings = config.get("rule_settings") or {}
-    disabled = {str(rule) for rule in settings.get("disable") or []}
-    if left_on := sorted(set(TURNED_OFF) - disabled):
-        out.append(f"{SOURCERY_CONFIG} leaves on {left_on}")
-    if also := sorted(disabled - set(TURNED_OFF)):
-        out.append(f"{SOURCERY_CONFIG} also turns off {also}")
     if "enable" in settings and settings["enable"] != ["default"]:
         out.append(f"{SOURCERY_CONFIG} sets enable: {settings['enable']!r}")
     if "rule_types" in settings and sorted(settings["rule_types"] or []) != list(
@@ -970,6 +951,29 @@ def config_departures(
             f"{SOURCERY_CONFIG} python_version {declared} is above the"
             f" requires-python floor {floor[0]}.{floor[1]}"
         )
+    return out
+
+
+def disable_departures(config: dict[str, Any] | None) -> list[str]:
+    """Report where a `.sourcery.yaml`'s `disable:` is not `TURNED_OFF`.
+
+    Apart from `config_departures`, so that a `BACKLOG` row on a change to
+    `TURNED_OFF` excuses this comparison alone, and leaves the tree's
+    `sourcery` check required.
+
+    :param config: the parsed file, or `None` where the tree has none,
+        which `config_departures` reports.
+    :returns: one finding per direction, empty where the two agree.
+    """
+    if config is None:
+        return []
+    settings = config.get("rule_settings") or {}
+    disabled = {str(rule) for rule in settings.get("disable") or []}
+    out: list[str] = []
+    if left_on := sorted(set(TURNED_OFF) - disabled):
+        out.append(f"{SOURCERY_CONFIG} leaves on {left_on}")
+    if also := sorted(disabled - set(TURNED_OFF)):
+        out.append(f"{SOURCERY_CONFIG} also turns off {also}")
     return out
 
 
@@ -1016,12 +1020,41 @@ def test_a_python_tree_calls_sourcery_with_its_rules_off(
             pinned(root, repository, hidden),
         )
     )
-    assert not found, f"{found}; " + by_hand(
+    command = by_hand(
         repository,
         f"grep -ln {SOURCERY_CALLED} .github/workflows/*.yml;"
         f" grep -n -A6 'id: {BARE_SKIP}' {CONFIG}; cat {SOURCERY_CONFIG};"
         f" grep -n requires-python pyproject.toml; grep -n {PIN_FILE} {PIN_WORKFLOW}",
     )
+    assert not found, f"{found}; {command}"
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_a_sourcery_yaml_turns_off_the_rules_turned_off(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10's `disable:`, which is `TURNED_OFF` and no other rule.
+
+    Apart from `test_a_python_tree_calls_sourcery_with_its_rules_off`, as
+    `disable_departures` says. A tree with no `.sourcery.yaml` passes here,
+    the other test reporting it.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    root = trees[repository]
+    if not tracked(root, "*.py"):
+        pytest.skip(f"{repository} tracks no Python file")
+    path = root / SOURCERY_CONFIG
+    config = (
+        (yaml.safe_load(path.read_text(encoding="utf-8")) or {})
+        if path.is_file()
+        else None
+    )
+    found = disable_departures(config)
+    command = by_hand(repository, f"cat {SOURCERY_CONFIG}")
+    assert not found, f"{found}; {command}"
 
 
 @pytest.mark.tier(Tier.PYTHON)
@@ -1041,9 +1074,8 @@ def test_a_python_tree_guards_sourcery_skips_as_this_one_does(
     if not tracked(trees[repository], "*.py"):
         pytest.skip(f"{repository} tracks no Python file")
     found = stanza_departures(gate(repository, trees))
-    assert not found, f"{found}; " + by_hand(
-        repository, f"grep -n -A6 'id: {BARE_SKIP}' {CONFIG}"
-    )
+    command = by_hand(repository, f"grep -n -A6 'id: {BARE_SKIP}' {CONFIG}")
+    assert not found, f"{found}; {command}"
 
 
 COPYING = ("bitcoin/bitcoin", "b23b901363c56043c536f32261ac8cb540624a84", "COPYING")
@@ -1320,6 +1352,32 @@ def test_bare_sourcery_skip_refuses_a_skip_naming_no_rule(
     assert bool(found) is refused, f"{entry!r} on {line!r}"
 
 
+def test_a_disable_list_off_turned_off_would_be_reported(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """`disable_departures` reports a rule left on, and one turned off besides.
+
+    `TURNED_OFF` is empty, so a stand-in naming one rule asks the first.
+
+    :param monkeypatch: stands the stand-in in for `TURNED_OFF`.
+    """
+    assert disable_departures({"rule_settings": {"disable": []}}) == []
+    assert disable_departures({"rule_settings": {}}) == [], "no disable: is refused"
+    assert disable_departures({}) == [], "no rule_settings: is refused"
+    assert disable_departures(None) == [], "an absent file is the other test's"
+    for extra in ("default", "refactoring", "reintroduce-else", "assign-if-exp"):
+        assert disable_departures({"rule_settings": {"disable": [extra]}}) == [
+            f"{SOURCERY_CONFIG} also turns off ['{extra}']"
+        ]
+    monkeypatch.setattr(f"{__name__}.TURNED_OFF", {"reintroduce-else": "a stand-in"})
+    assert disable_departures({"rule_settings": {"disable": []}}) == [
+        f"{SOURCERY_CONFIG} leaves on ['reintroduce-else']"
+    ]
+    assert (
+        disable_departures({"rule_settings": {"disable": ["reintroduce-else"]}}) == []
+    )
+
+
 def test_a_sourcery_yaml_off_section_4_would_be_reported() -> None:
     """`config_departures` reports each way a `.sourcery.yaml` can leave it.
 
@@ -1352,17 +1410,11 @@ def test_a_sourcery_yaml_off_section_4_would_be_reported() -> None:
     lower["rule_settings"]["python_version"] = "3.10"
     assert config_departures(lower, python, floor) == [], "a lower version is refused"
     assert config_departures(None, python, floor) == [f"there is no {SOURCERY_CONFIG}"]
-    left = copy.deepcopy(agreeing)
-    left["rule_settings"]["disable"].remove("assign-if-exp")
-    assert config_departures(left, python, floor) == [
-        f"{SOURCERY_CONFIG} leaves on ['assign-if-exp']"
-    ]
-    for extra in ("default", "refactoring", "use-next", "switch"):
-        more = copy.deepcopy(agreeing)
-        more["rule_settings"]["disable"].append(extra)
-        assert config_departures(more, python, floor) == [
-            f"{SOURCERY_CONFIG} also turns off ['{extra}']"
-        ]
+    more = copy.deepcopy(agreeing)
+    more["rule_settings"]["disable"].append("assign-if-exp")
+    assert config_departures(more, python, floor) == [], (
+        "disable: is disable_departures' question"
+    )
     for enable in (["reintroduce-else"], [], ["default", "use-next"]):
         enabled = copy.deepcopy(agreeing)
         enabled["rule_settings"]["enable"] = enable
@@ -1571,9 +1623,8 @@ def test_a_baseline_with_the_hex_plugin_filters_frozen_rev_lines(
     if not path.is_file():
         pytest.skip(f"{repository} has no {BASELINE}")
     found = rev_line_departures(json.loads(path.read_text(encoding="utf-8")))
-    assert not found, f"{found}; " + by_hand(
-        repository, f"grep -n -A4 'should_exclude_line' {BASELINE}"
-    )
+    command = by_hand(repository, f"grep -n -A4 'should_exclude_line' {BASELINE}")
+    assert not found, f"{found}; {command}"
 
 
 def test_a_baseline_without_the_rev_line_filter_would_be_reported() -> None:
@@ -1999,9 +2050,8 @@ def test_pyroma_says_what_section_4_says(
     drifted = [
         line for hook in found for line in stated_departures(hook, PYROMA_STATED)
     ]
-    assert not drifted, f"{PYROMA} says what section 4 does not: {drifted}; " + by_hand(
-        repository, f"grep -n -B8 -A6 '^ *- id: {PYROMA}' {CONFIG}"
-    )
+    command = by_hand(repository, f"grep -n -B8 -A6 '^ *- id: {PYROMA}' {CONFIG}")
+    assert not drifted, f"{PYROMA} says what section 4 does not: {drifted}; {command}"
 
 
 def test_a_pyroma_hook_that_had_drifted_would_be_reported() -> None:
@@ -2052,9 +2102,7 @@ def admitted(rev: str, declared: str) -> bool | None:
         `test_the_uv_floor_is_not_above_what_dependabot_bundles`'s finding.
     """
     floor = FLOOR.match(declared)
-    if floor is None:
-        return None
-    return version(rev) >= version(floor["version"])
+    return None if floor is None else version(rev) >= version(floor["version"])
 
 
 def bundling(repository: str, trees: dict[str, Path]) -> list[dict[str, Any]]:
@@ -2122,7 +2170,7 @@ def test_the_uv_lock_hook_bundles_a_uv_the_floor_admits(
     for hook in pinned:
         rev = str(hook["rev"])
         assert RELEASE.match(rev), (
-            f"{UV_LOCK} is pinned at {rev!r}, which names no uv release; " + reading
+            f"{UV_LOCK} is pinned at {rev!r}, which names no uv release; {reading}"
         )
         verdict = admitted(rev, declared)
         if verdict is None:

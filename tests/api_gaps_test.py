@@ -537,7 +537,7 @@ def test_a_return_annotation_removed_is_left_to_griffe(
     """Griffe reports it for a function, so this script does not."""
     body = "\n    return 1\n"
 
-    found = pair.compare("def f(x) -> int:" + body, "def f(x):" + body)
+    found = pair.compare(f"def f(x) -> int:{body}", f"def f(x):{body}")
 
     assert found == (0, [])
     assert pair.griffe() == ["Return types are incompatible"]

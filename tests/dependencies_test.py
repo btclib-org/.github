@@ -262,6 +262,7 @@ class Statements(NamedTuple):
     edges: list[tuple[int, str, str, dict[str, str]]]
 
 
+# one loop over the statements, each refusal beside the shape it refuses
 def sorted_statements(path: Path) -> Statements:  # noqa: C901  # sourcery skip: low-code-quality
     """Read the defaults and the nodes, and set the edges aside.
 
@@ -678,8 +679,8 @@ def test_an_edge_painted_where_it_is_not_named_is_refused(
 @pytest.mark.parametrize(
     "line",
     [
-        '    "btclib" -> "ecc" [style=dashed, ' + ECC_POS + "];",
-        '    "btclib" -> "ecc" [' + ECC_POS + "];",
+        f'    "btclib" -> "ecc" [style=dashed, {ECC_POS}];',
+        f'    "btclib" -> "ecc" [{ECC_POS}];',
         '    "btclib-secp256k1" -> "libsecp256k1" [style=dotted, arrowhead=none, '
         'label="bundled", lp="0,0", ' + BUNDLED_POS + "];",
         '    "btclib" [pos="290,260"];',

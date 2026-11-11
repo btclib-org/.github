@@ -18,6 +18,7 @@ and a reader's, and not asked here.
 
 from __future__ import annotations
 
+import itertools
 import re
 from typing import TYPE_CHECKING
 
@@ -77,9 +78,7 @@ def long_comments(text: str, start: int | None) -> list[str]:
     :returns: the rows, `the head` or `## Status`, and their comments' lines.
     """
     lines = text.splitlines()
-    offsets = [0]
-    for line in lines:
-        offsets.append(offsets[-1] + len(line) + 1)
+    offsets = list(itertools.accumulate((len(line) + 1 for line in lines), initial=0))
     places: dict[str, int] = {}
     for row, line in enumerate(lines):
         if not BADGE.search(line):
@@ -132,7 +131,7 @@ def test_a_readme_keeps_its_gates_and_sentinels_in_its_status_section(
     """
     readme = (trees[repository] / "README.md").read_text(encoding="utf-8")
     problems = unmet(readme)
-    assert not problems, f"{problems}; " + by_hand(repository, ASKED)
+    assert not problems, f"{problems}; {by_hand(repository, ASKED)}"
 
 
 HEAD = "[![PyPI version](https://img.shields.io/pypi/v/x.svg)](https://pypi.org/x)"

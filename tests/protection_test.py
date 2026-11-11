@@ -312,11 +312,12 @@ def test_main_requires_sourcery_once_out_of_its_row(
         sourcery_context(trees[repository]),
         waiting=bool(filed(SOURCERY_ROW, repository)),
     )
-    assert not found, f"{found}; " + by_hand(
+    command = by_hand(
         repository,
         f"gh api repos/{ORG}/{repository}/{ENDPOINT} --jq "
         "'[.required_status_checks.checks[]? | [.context, .app_id]]'",
     )
+    assert not found, f"{found}; {command}"
 
 
 @pytest.mark.parametrize(

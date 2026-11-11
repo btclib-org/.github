@@ -142,9 +142,8 @@ def test_the_organization_stores_hold_only_what_is_recorded(
             "with an admin token reads it here"
         )
     extra = unrecorded(found, ORGANIZATION_EXCEPTIONS, trees[SELF])
-    assert not extra, f"{sorted(extra)} outside an environment; " + by_hand(
-        SELF, f"gh api {endpoint} --jq '.secrets[].name'"
-    )
+    command = by_hand(SELF, f"gh api {endpoint} --jq '.secrets[].name'")
+    assert not extra, f"{sorted(extra)} outside an environment; {command}"
 
 
 @pytest.mark.parametrize(
@@ -186,9 +185,8 @@ def test_a_repository_holds_no_secret_outside_an_environment(
     for store in ("actions", "dependabot"):
         endpoint = f"repos/{ORG}/{repository}/{store}/secrets"
         extra = unrecorded(held(endpoint), allowed, trees[repository])
-        assert not extra, f"{sorted(extra)} outside an environment; " + by_hand(
-            repository, f"gh api {endpoint} --jq '.secrets[].name'"
-        )
+        command = by_hand(repository, f"gh api {endpoint} --jq '.secrets[].name'")
+        assert not extra, f"{sorted(extra)} outside an environment; {command}"
 
 
 @pytest.mark.parametrize(("secret", "store"), sorted(DATED.items()))
@@ -203,9 +201,8 @@ def test_an_exception_is_rotated_before_it_is_a_year_old(
     endpoint = f"{store}/{secret}"
     written = datetime.fromisoformat(read(endpoint)["updated_at"])
     age = datetime.now(UTC) - written
-    assert age < DUE, f"{secret} is {age.days} days old: rotate it; " + by_hand(
-        SELF, f"gh api {endpoint} --jq .updated_at"
-    )
+    command = by_hand(SELF, f"gh api {endpoint} --jq .updated_at")
+    assert age < DUE, f"{secret} is {age.days} days old: rotate it; {command}"
 
 
 def test_every_exception_is_dated() -> None:

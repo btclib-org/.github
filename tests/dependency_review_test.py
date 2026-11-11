@@ -131,7 +131,7 @@ def test_the_dependency_graph_is_on(repository: str) -> None:
         gh_json(endpoint)
     except Refused as refused:
         said = refused.stderr.strip()
-        pytest.fail(f"{said}; " + by_hand(repository, f"gh api {endpoint}"))
+        pytest.fail(f"{said}; {by_hand(repository, f'gh api {endpoint}')}")
 
 
 def test_the_lint_gate_reviews_added_dependencies(

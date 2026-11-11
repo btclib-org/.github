@@ -177,9 +177,10 @@ def test_the_homepage_is_the_page_on_btclib_org(
         "[project.urls] homepage": urls.get("homepage"),
     }
     wrong = {surface: url for surface, url in read.items() if url != expected}
-    assert not wrong, f"{wrong}, expected {expected}; " + by_hand(
+    command = by_hand(
         repository, f"gh api repos/{ORG}/{repository} --jq .homepage; {URLS}"
     )
+    assert not wrong, f"{wrong}, expected {expected}; {command}"
 
 
 @pytest.mark.integration

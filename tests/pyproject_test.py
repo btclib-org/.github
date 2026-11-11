@@ -397,10 +397,10 @@ def test_the_name_normalizes_to_the_repository(
     project = distribution(repository, pyprojects)
     command = by_hand(repository, "grep -n '^name = ' pyproject.toml")
     declared = project.get("name")
-    assert isinstance(declared, str), f"name is {declared!r}; " + command
+    assert isinstance(declared, str), f"name is {declared!r}; {command}"
     normalized = RUNS.sub("-", declared).lower()
     named = {normalized, normalized.removeprefix("btclib-")}
-    assert repository in named, f"name normalizes to {normalized!r}; " + command
+    assert repository in named, f"name normalizes to {normalized!r}; {command}"
 
 
 @pytest.mark.tier(Tier.PYTHON)
@@ -421,9 +421,9 @@ def test_the_name_is_the_canonical_spelling(
     project = distribution(repository, pyprojects)
     command = by_hand(repository, "grep -n '^name = ' pyproject.toml")
     declared = project.get("name")
-    assert isinstance(declared, str), f"name is {declared!r}; " + command
+    assert isinstance(declared, str), f"name is {declared!r}; {command}"
     canonical = RUNS.sub("-", declared).lower()
-    assert declared == canonical, f"name is {declared!r}, not {canonical!r}; " + command
+    assert declared == canonical, f"name is {declared!r}, not {canonical!r}; {command}"
 
 
 OWN_LICENCE_FILES = frozenset({"LICENSE", "AUTHORS.md"})
@@ -534,12 +534,12 @@ def test_the_licence_is_an_expression_with_its_files(
     project = distribution(repository, pyprojects)
     command = by_hand(repository, "grep -n '^license' pyproject.toml")
     expression = project.get("license")
-    assert isinstance(expression, str), f"license is {expression!r}; " + command
+    assert isinstance(expression, str), f"license is {expression!r}; {command}"
     files = project.get("license-files")
-    assert isinstance(files, list), f"license-files is {files!r}; " + command
+    assert isinstance(files, list), f"license-files is {files!r}; {command}"
     named = set(files)
     missing = OWN_LICENCE_FILES - named
-    assert not missing, f"license-files lacks {sorted(missing)}; " + command
+    assert not missing, f"license-files lacks {sorted(missing)}; {command}"
     notices = vendored_notices(submodule_paths(trees[repository]))
     extra = named - OWN_LICENCE_FILES - notices
     assert not extra, (
@@ -635,13 +635,13 @@ def test_authors_names_the_copyright_s_collective(
         pytest.skip(f"{repository} {reason}")
     command = by_hand(repository, "grep -n '^authors' pyproject.toml")
     authors = project.get("authors")
-    assert isinstance(authors, list), f"authors is {authors!r}; " + command
-    assert len(authors) == 1, f"authors is {authors!r}, not a single entry; " + command
+    assert isinstance(authors, list), f"authors is {authors!r}; {command}"
+    assert len(authors) == 1, f"authors is {authors!r}, not a single entry; {command}"
     entry = authors[0]
     declared = entry.get("name") if isinstance(entry, dict) else None
     expected = collective(trees[repository] / "COPYRIGHT")
     assert declared == expected, (
-        f"authors names {declared!r}, not COPYRIGHT's {expected!r}; " + command
+        f"authors names {declared!r}, not COPYRIGHT's {expected!r}; {command}"
     )
 
 
@@ -701,9 +701,9 @@ def test_cpy_is_selected_with_a_notice_rgx(
     """
     lint = ruff_lint(repository, pyprojects)
     command = by_hand(repository, "grep -n 'notice-rgx\\|\"CPY\"' pyproject.toml")
-    assert ruff_selects(lint, "CPY"), "CPY is not selected; " + command
+    assert ruff_selects(lint, "CPY"), f"CPY is not selected; {command}"
     pattern = lint.get("flake8-copyright", {}).get("notice-rgx")
-    assert pattern, "CPY is selected with no notice-rgx; " + command
+    assert pattern, f"CPY is selected with no notice-rgx; {command}"
 
 
 @pytest.mark.tier(Tier.PYTHON)
@@ -724,9 +724,9 @@ def test_w_is_selected_with_max_doc_length_at_80(
     """
     lint = ruff_lint(repository, pyprojects)
     command = by_hand(repository, "grep -n 'max-doc-length\\|\"W\"' pyproject.toml")
-    assert ruff_selects(lint, "W"), "W is not selected; " + command
+    assert ruff_selects(lint, "W"), f"W is not selected; {command}"
     width = lint.get("pycodestyle", {}).get("max-doc-length")
-    assert width == DOC_WIDTH, f"max-doc-length is {width!r}; " + command
+    assert width == DOC_WIDTH, f"max-doc-length is {width!r}; {command}"
 
 
 @pytest.mark.tier(Tier.PYTHON)
@@ -747,9 +747,9 @@ def test_d_is_selected_with_the_pep257_convention(
     """
     lint = ruff_lint(repository, pyprojects)
     command = by_hand(repository, "grep -n 'convention\\|\"D\"' pyproject.toml")
-    assert ruff_selects(lint, "D"), "D is not selected; " + command
+    assert ruff_selects(lint, "D"), f"D is not selected; {command}"
     convention = lint.get("pydocstyle", {}).get("convention")
-    assert convention == "pep257", f"convention is {convention!r}; " + command
+    assert convention == "pep257", f"convention is {convention!r}; {command}"
 
 
 @pytest.mark.tier(Tier.PYTHON)
@@ -772,7 +772,7 @@ def test_td_is_ignored_by_all_seven_rule_names(
     )
     ignored = {str(code) for code in lint.get("ignore", [])}
     missing = sorted(set(TD_NAMES) - ignored)
-    assert not missing, f"TD rule names missing from ignore: {missing}; " + command
+    assert not missing, f"TD rule names missing from ignore: {missing}; {command}"
 
 
 @pytest.mark.tier(Tier.PYTHON)
@@ -800,7 +800,7 @@ def test_fix_is_exempted_nowhere(
     )
     exempted = {str(code) for code in lint.get("ignore", [])} | per_file_ignores(lint)
     found = sorted(e for e in exempted if e in FIX_NAMES or e.startswith("FIX"))
-    assert not found, f"FIX exempted: {found}; " + command
+    assert not found, f"FIX exempted: {found}; {command}"
 
 
 def enabled() -> list[str]:

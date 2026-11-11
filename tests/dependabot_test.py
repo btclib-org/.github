@@ -122,7 +122,7 @@ def updates(repository: str, trees: dict[str, Path]) -> list[dict[str, Any]]:
     """
     path = trees[repository] / CONFIG
     if not path.is_file():
-        msg = f"{repository} has no {CONFIG}; " + by_hand(repository, DECLARED)
+        msg = f"{repository} has no {CONFIG}; {by_hand(repository, DECLARED)}"
         raise FileNotFoundError(msg)
     parsed = yaml.safe_load(path.read_text(encoding="utf-8"))
     declared: list[dict[str, Any]] = parsed.get("updates", [])
@@ -163,7 +163,7 @@ def instructions(text: str) -> list[str]:
         while instruction.endswith("\\"):
             following = next(lines, "")
             if not following.lstrip().startswith("#"):
-                instruction = instruction[:-1] + " " + following.rstrip()
+                instruction = f"{instruction[:-1]} {following.rstrip()}"
         for heredoc in HEREDOC.finditer(instruction):
             for body in lines:
                 if body.lstrip("\t") == heredoc.group(2):
@@ -215,9 +215,8 @@ def test_dependabot_watches_only_the_ecosystems_section_11_names(
     :param trees: the checkouts.
     """
     unknown = sorted(ecosystems(repository, trees) - NAMED)
-    assert not unknown, f"ecosystems section 11 does not name: {unknown}; " + by_hand(
-        repository, DECLARED
-    )
+    command = by_hand(repository, DECLARED)
+    assert not unknown, f"ecosystems section 11 does not name: {unknown}; {command}"
 
 
 def test_dependabot_watches_what_section_11_gives_every_tree(
@@ -320,7 +319,8 @@ def test_dependabot_ecosystems_are_grouped_weekly_with_a_cooldown(
             wrong.append(f"{ecosystem}: cooldown {entry.get('cooldown')!r}")
         if "target-branch" in entry:
             wrong.append(f"{ecosystem}: target-branch {entry['target-branch']!r}")
-    assert not wrong, f"{'; '.join(wrong)}; " + by_hand(repository, f"cat {CONFIG}")
+    command = by_hand(repository, f"cat {CONFIG}")
+    assert not wrong, f"{'; '.join(wrong)}; {command}"
 
 
 def test_dependabot_cools_down_no_tag_of_this_repository(

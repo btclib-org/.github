@@ -169,7 +169,7 @@ def test_the_badge_names_the_project(script: ModuleType) -> None:
     assert script.project_id(_README) == _ID
     assert script.project_id("www.bestpractices.dev/projects/<id>/badge") is None
     with pytest.raises(ValueError, match="several"):
-        script.project_id(_README + "bestpractices.dev/projects/14813")
+        script.project_id(f"{_README}bestpractices.dev/projects/14813")
 
 
 def test_stale_lists_what_is_older_than_the_release(script: ModuleType) -> None:

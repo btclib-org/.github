@@ -45,6 +45,5 @@ def test_the_release_calls_the_signing_build(
         for job_id, job in jobs.items()
         if calls_here(str(job.get("uses", "")), CALLED)
     ]
-    assert calling, f"no job of release.yml calls {CALLED}; " + by_hand(
-        repository, f"grep -n {CALLED}@ .github/workflows/release.yml"
-    )
+    command = by_hand(repository, f"grep -n {CALLED}@ .github/workflows/release.yml")
+    assert calling, f"no job of release.yml calls {CALLED}; {command}"

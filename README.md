@@ -2225,9 +2225,11 @@ gives. It reads the Python files the pull request changes, whole, and the whole
 tree where it changes `.sourcery.yaml` or the version; otherwise, where it
 changes no Python file, it reads nothing and passes. It has no `push` trigger
 and no `workflow_dispatch`, against *What every workflow does*: neither event
-carries the pull request it reads. A finding fails that job alone, and its skip
-is `# sourcery skip: <rule>` on the line Sourcery reports or on the `def` line
-of the function holding it, in the form section 4's `bare-sourcery-skip` admits.
+carries the pull request it reads. A finding fails that job alone. It is fixed,
+or answered at its own site as section 5 has a ruff finding answered with a
+`# noqa`: `# sourcery skip: <rule>` on the line Sourcery reports or on the `def`
+line of the function holding it, in the form section 4's `bare-sourcery-skip`
+admits, with its reason in a comment beside it.
 
 **`sourcery` is a required check in a tree whose caller is in place and that no
 `BACKLOG` row of `test_a_python_tree_calls_sourcery_with_its_rules_off` in
@@ -2242,18 +2244,37 @@ does its row's cell; until it lands, no other pull request on that tree merges
 without the bypass. The context is the caller's job name then the callee's,
 `sourcery / Sourcery`.
 
+**`.sourcery.yaml` leaves every rule on but those `TURNED_OFF` in
+`tests/hooks_test.py` names**, as ruff's `select = ["ALL"]` takes every family.
+A rule is off only where it conflicts with another gate of the tree: ruff with
+the tree's configuration, `ruff format`, or mypy. A rule conflicts where no form
+of the code it reports, keeping its behaviour and carrying no `# sourcery skip`,
+passes both that gate and Sourcery with the rule on. The rule of that gate is
+named beside it. The form may carry a comment that silences that gate, a
+`# noqa`, `# type: ignore` or `# fmt: skip`, only where the reported code
+already carries that comment for its own reason. A rewrite that passes once
+adapted is no conflict, as a line ruff finds too long, an `else` after a
+`return` that ruff removes, or an annotation mypy asks for. A rule that reads
+the same code as a ruff rule is on, since an overlap is no conflict.
+`assign-if-exp` also reports an `if` and `else` that each assign the same
+subscript, which ruff's if-else-block-instead-of-if-exp passes. Turning such a
+rule off because ruff's reading stands is the alternative set aside. A rule the
+trees' own style would not write is on too: the code adapts. `enable:` and
+`rule_types:` stay at their defaults, and `disable:` can name a tag:
+`disable: [default]` turns every rule off.
+
+**A tree whose `disable:` has not yet followed a change to `TURNED_OFF` is in
+the `BACKLOG` row of `test_a_sourcery_yaml_turns_off_the_rules_turned_off`**,
+which leaves its `sourcery` check required. Once the tree's own pull request
+lands, a pull request here drops it from the row.
+
 **`.sourcery.yaml` sets `python_version` to the lowest interpreter the tree's
-code runs on, never above the `requires-python` floor, and turns off the rules
-`TURNED_OFF` in `tests/hooks_test.py` names and no others**, the reason beside
-each: the trees' own style, or the stable ruff rule that reads the same code,
-whose reading stands where Sourcery reads more widely. `enable:` and
-`rule_types:` stay at their defaults, and `disable:` can name a tag: `disable:
-[default]` turns every rule off. No `ignore:` entry, read as Sourcery reads it,
-covers a tracked Python file but one pinned byte for byte to an upstream as
-section 7's *Test data is vendored, never fetched* says: a finding there is
-upstream's, and a `# sourcery skip` would end the copy being byte for byte. A
-pin to a repository outside the tree's fork network is taken on trust.
-`ignored()` and `pinned()` in `tests/hooks_test.py` are the two readings.
+code runs on, never above the `requires-python` floor.** No `ignore:` entry,
+read as Sourcery reads it, covers a tracked Python file but one pinned byte for
+byte to an upstream as section 7's *Test data is vendored, never fetched* says:
+a finding there is upstream's, and a `# sourcery skip` would end the copy being
+byte for byte. A pin to a repository outside the tree's fork network is taken on
+trust. `ignored()` and `pinned()` in `tests/hooks_test.py` are the two readings.
 
 **macOS is supported on arm64 alone, and no workflow runs on an x86_64 macOS
 image.** An x86_64 macOS cell can hang until the job's timeout and hold up a

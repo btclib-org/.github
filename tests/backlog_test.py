@@ -33,9 +33,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-import tests
-
-from . import BACKLOG, ORG, SELF, conftest, hooks_test, still_open
+from . import BACKLOG, ORG, SELF, conftest, hooks_test, names, still_open
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -223,5 +221,5 @@ def test_the_repository_list_drops_an_advisory_fork_and_keeps_every_tree(
         "bip39-slip39",
         "ai-agents-process",
     ]
-    monkeypatch.setattr(tests, "gh", lambda _endpoint, _jq: [*trees, fork])
-    assert tests.names.__wrapped__() == trees
+    monkeypatch.setattr("tests.gh", lambda _endpoint, _jq: [*trees, fork])
+    assert names.__wrapped__() == trees

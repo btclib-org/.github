@@ -202,8 +202,8 @@ def test_every_publisher_holds_the_module_that_reads_its_declarations(
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
-    assert tracked(trees[repository], OWN_MODULE), f"no {OWN_MODULE}; " + by_hand(
-        repository, f"git ls-files {OWN_MODULE}"
+    assert tracked(trees[repository], OWN_MODULE), (
+        f"no {OWN_MODULE}; {by_hand(repository, f'git ls-files {OWN_MODULE}')}"
     )
 
 
@@ -783,9 +783,7 @@ def callee(called: str, root: Path, shared: Path) -> Path | None:
     if path.startswith(("./", "$/")):
         return root / path[2:]
     prefix = f"{ORG}/{SELF}/"
-    if path.startswith(prefix):
-        return shared / path.removeprefix(prefix)
-    return None
+    return shared / path.removeprefix(prefix) if path.startswith(prefix) else None
 
 
 def resolved(
@@ -1145,7 +1143,7 @@ def test_a_job_running_the_suite_names_the_patch_the_floor_names(
         " grep -rn -- '--python \\|python-version' .github/workflows/",
     )
     assert PATCH.match(floor), (
-        f"requires-python is >={floor}, which names no patch; " + command
+        f"requires-python is >={floor}, which names no patch; {command}"
     )
     named = lanes(trees[repository], trees[SELF])
     assert floor in {version.removesuffix("t") for version in named}, (
@@ -1297,7 +1295,7 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
     missing = "no job running the suite names 3.11.9"
     cases: list[tuple[str, str, str]] = [
         ("3.11.9", f'{call}      python-version: "3.11.9"\n', ""),
-        ("3.11.9", call + """      python-versions: '["3.11.9", "3.15"]'\n""", ""),
+        ("3.11.9", f"""{call}      python-versions: '["3.11.9", "3.15"]'\n""", ""),
         ("3.11.9", call + sweep, ""),
         ("3.11.9", call + sweep.replace("macos", "ubuntu"), missing),
         ("3.11.9", run("uv run -p=3.11.9 pytest"), ""),
@@ -1319,7 +1317,7 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
         ("3.11.9", run("true&&uv run --python 3.11.9 pytest"), ""),
         (
             "3.11.9",
-            "workflow_call" + only + run("uv run --python 3.11.9 pytest"),
+            f"workflow_call{only}{run('uv run --python 3.11.9 pytest')}",
             missing,
         ),
         ("3.11.9", on_python.replace("IF", "matrix.python == '3.15'"), missing),
@@ -1513,7 +1511,7 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
             + """      python-versions: '["3.11.9"]'\n""",
             missing,
         ),
-        ("3.11.9", "    if: false\n" + run("uv run --python 3.11.9 pytest"), missing),
+        ("3.11.9", f"    if: false\n{run('uv run --python 3.11.9 pytest')}", missing),
         (
             "3.11.9",
             run("uv run --index-strategy x --python 3.11.9 ruff check pytest"),

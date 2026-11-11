@@ -1361,7 +1361,7 @@ def test_the_agent_can_write_its_message_after_the_setup(tmp_path: Path) -> None
     (make,) = [step for step in steps if "MESSAGE" in step.get("env", {})]
     message = make["env"]["MESSAGE"].replace("${{ runner.temp }}", str(tmp_path))
     locked = "${{ runner.temp }}/claude-implement"
-    assert not make["env"]["MESSAGE"].startswith(locked + "/")
+    assert not make["env"]["MESSAGE"].startswith(f"{locked}/")
     (tmp_path / "claude-implement").mkdir(mode=0o555)
     subprocess.run(
         ["bash", "-e", "-c", make["run"]],

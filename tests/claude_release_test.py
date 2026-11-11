@@ -391,7 +391,7 @@ def heading_written(tree: Path, bench: Path) -> None:
     """Write the release's heading, with words after it, in the notes."""
     del bench
     notes = tree / "RELEASE_NOTES.md"
-    notes.write_text(notes.read_text() + f"\n## v{TODAY} (draft)\n")
+    notes.write_text(f"{notes.read_text()}\n## v{TODAY} (draft)\n")
 
 
 def notes_missing(tree: Path, bench: Path) -> None:

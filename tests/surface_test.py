@@ -187,11 +187,11 @@ def test_the_package_directory_is_typed_and_declares_its_surface(
         f" grep -n '^__all__' {directory}/__init__.py",
     )
     assert tracked(root, f"{directory}/{TYPED}"), (
-        f"{directory} holds no {TYPED}; " + command
+        f"{directory} holds no {TYPED}; {command}"
     )
     declaration = (root / directory / "__init__.py").read_text(encoding="utf-8")
     assert DECLARED.search(declaration), (
-        f"{directory}/__init__.py declares no __all__; " + command
+        f"{directory}/__init__.py declares no __all__; {command}"
     )
 
 
