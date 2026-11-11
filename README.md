@@ -2222,17 +2222,18 @@ tier that has the CLI and exits 1 having read nothing, so a local gate never
 read it; on a GitHub-hosted runner, whose checkout is a clone with a public
 `origin`, it reads with no login (btclib-org/.github#2005). A tree that tracks
 Python carries a `sourcery.yml` calling `reusable-sourcery.yml` on
-`pull_request` with no `paths` filter, so that its protection can gain the check
-with no change to the caller, for the reason *`paths-ignore` only on `push`*
-gives. It reads the Python files the pull request changes, whole, and the whole
-tree where it changes `.sourcery.yaml` or the version; otherwise, where it
-changes no Python file, it reads nothing and passes. It has no `push` trigger
-and no `workflow_dispatch`, against *What every workflow does*: neither event
-carries the pull request it reads. A finding fails that job alone. It is fixed,
-or answered at its own site as section 5 has a ruff finding answered with a
-`# noqa`: `# sourcery skip: <rule>` on the line Sourcery reports or on the `def`
-line of the function holding it, in the form section 4's `bare-sourcery-skip`
-admits, with its reason in a comment beside it.
+`pull_request` with no `paths` filter, with `synchronize` among its `types:`
+where it lists them, and with no branch filter that excludes `main`, so that its
+protection can gain the check with no change to the caller, for the reason
+*`paths-ignore` only on `push`* gives. It reads the Python files the pull
+request changes, whole, and the whole tree where it changes `.sourcery.yaml` or
+the version; otherwise, where it changes no Python file, it reads nothing and
+passes. It has no `push` trigger and no `workflow_dispatch`, against *What every
+workflow does*: neither event carries the pull request it reads. A finding fails
+that job alone. It is fixed, or answered at its own site as section 5 has a ruff
+finding answered with a `# noqa`: `# sourcery skip: <rule>` on the line Sourcery
+reports or on the `def` line of the function holding it, in the form section 4's
+`bare-sourcery-skip` admits, with its reason in a comment beside it.
 
 **`sourcery` is a required check in a tree whose caller is in place and that no
 `BACKLOG` row of `test_a_python_tree_calls_sourcery_with_its_rules_off` in
