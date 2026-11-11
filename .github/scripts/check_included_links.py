@@ -112,8 +112,9 @@ def main(argv: list[str]) -> int:
     if found:
         print(
             "::error::the links above reach at BLOB a file these pages render; "
-            "RootFileLinks in docs/source/conf.py is to turn them into that page "
-            "(section 2's The documentation)"
+            "they are to reach that page, which RootFileLinks in "
+            "docs/source/conf.py does only for a file whose include it reads "
+            "and a link form it rewrites (section 2's The documentation)"
         )
     return 1 if found else 0
 

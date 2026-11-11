@@ -141,14 +141,18 @@ def test_a_page_other_than_a_shim_renders_what_it_includes(
     script: ModuleType,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     """`index.md` including `README.md` renders it, as a shim would.
 
-    A page with no include fence renders no root file.
+    A page with no include fence renders no root file. The error says
+    `RootFileLinks` turns a link into the page only where it reads the
+    include and rewrites the link's form.
 
     :param script: the module under test.
     :param tmp_path: where the stand-in tree is written.
     :param monkeypatch: to run from the root of the stand-in.
+    :param capsys: to read what the script prints.
     """
     html = tree(tmp_path, f'<a href="{_BLOB}README.md">it</a>\n')
     source = tmp_path / "docs" / "source"
@@ -160,6 +164,9 @@ def test_a_page_other_than_a_shim_renders_what_it_includes(
     assert script.included(tmp_path) == {"SECURITY.md", "README.md"}
     monkeypatch.chdir(tmp_path)
     assert script.main([os.fspath(html)]) == 1
+    error = capsys.readouterr().out.splitlines()[-1]
+    assert "reach that page" in error
+    assert "whose include it reads and a link form it rewrites" in error
 
 
 def test_a_page_with_two_fences_stops_the_check(
