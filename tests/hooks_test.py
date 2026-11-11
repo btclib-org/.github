@@ -401,10 +401,10 @@ SOURCERY_CALLED = "reusable-sourcery.yml"
 TURNED_OFF: dict[str, str] = {}
 """The rules section 10 says `.sourcery.yaml` turns off, against the reason.
 
-The reason is the rule of another gate that refuses or undoes the
-rewrite, the one reason section 10 admits. Empty: no rule's rewrite is.
-A literal, for the reason `STATED` above is one: the trees' copies agree
-with each other while all of them are wrong.
+The reason is the rule of another gate that conflicts with it, as
+section 10 defines conflict. Empty: no rule does. A literal, for the
+reason `STATED` above is one: the trees' copies agree with each other
+while all of them are wrong.
 """
 
 RULE_TYPES = ("comment", "refactoring", "suggestion")
