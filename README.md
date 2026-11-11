@@ -3651,6 +3651,34 @@ A label means what its description says. Who applies and removes it:
 - **A rehearsal on TestPyPI** uses `.dev<run number>`, patched in by the
   workflow rather than typed, so it is unique per run and sorts below the
   release it rehearses.
+- **A rehearsal that is not to be approved is closed by rejecting its
+  `testpypi` deployment, before the branch is rehearsed again.** A publisher's
+  `release.yml` has one concurrency group per ref, with `cancel-in-progress:
+  false`, and a run waiting at section 11's `testpypi` approval holds it. A
+  later dispatch of the same branch waits as `pending`, and the dispatch after
+  it cancels that one: GitHub keeps one pending run per group. `gh run cancel`
+  does not close a run waiting at an approval, and rejecting its deployment
+  does (btclib-org/btclib#2854). The rejection is a person's act, open only to
+  a required reviewer of `testpypi`, and `tests/rehearsal_test.py` reads the
+  tree's half, the group. From a checkout of the tree:
+
+    ```shell
+    run=<run id>
+    ```
+
+    ```shell
+    env=$(gh api 'repos/{owner}/{repo}/environments' \
+      --jq '.environments[] | select(.name == "testpypi") | .id')
+    ```
+
+    ```shell
+    gh api -X POST \
+      "repos/{owner}/{repo}/actions/runs/${run:?}/pending_deployments" \
+      -F "environment_ids[]=${env:?}" -f state=rejected -f comment=superseded
+    ```
+
+    A tree's `RELEASING.md` gives these commands for its own repository, in
+    *Rehearse on TestPyPI*, and points here.
 - **The tag is signed**, is checked to be an ancestor of `main`, and is checked
   to say what `pyproject.toml` says.
 - **A release dispatches no `fuzz` run**, and `fuzz` is not among the sentinels
