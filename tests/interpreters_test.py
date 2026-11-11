@@ -46,6 +46,7 @@ import re
 import shlex
 import shutil
 import subprocess
+from itertools import product
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -613,17 +614,21 @@ def invocation(words: list[str]) -> tuple[bool, bool, str | None]:
     `-m pytest`; variable assignments may come first. An option of
     `VALUED` takes the next word, and every other option none. An
     interpreter is asked for by `uv run`'s `--python` or `-p`, spaced or
-    joined by `=`.
+    joined by `=`, or else by a `UV_PYTHON=` assignment before it.
 
     :param words: the command's words.
     :returns: whether it runs pytest, whether through `uv run`, and the
         interpreter `uv run` asks for, `None` where it asks for none.
     """
     rest = list(words)
+    asked: str | None = None
     while rest and re.match(r"^\w+=", rest[0]):
+        name, _, value = rest[0].partition("=")
+        asked = value if name == "UV_PYTHON" else asked
         rest = rest[1:]
     through_uv = rest[:2] == ["uv", "run"]
-    asked: str | None = None
+    if not through_uv:
+        asked = None
     if through_uv:
         rest = rest[2:]
         while rest and rest[0].startswith("-") and rest[0] not in {"-m", "--module"}:
@@ -641,8 +646,9 @@ def invocation(words: list[str]) -> tuple[bool, bool, str | None]:
 def callee(called: str, root: Path, shared: Path) -> Path | None:
     """Find the file a job calls, where a checkout here holds it.
 
-    A call into this repository is read in its checkout at the tip, not
-    at the revision the call pins.
+    A call into the tree itself starts `./` or `$/`. A call into this
+    repository is read in its checkout at the tip, not at the revision
+    the call pins.
 
     :param called: the job's `uses:`.
     :param root: the root of the calling tree.
@@ -650,8 +656,8 @@ def callee(called: str, root: Path, shared: Path) -> Path | None:
     :returns: the workflow file, or `None` for a call into anywhere else.
     """
     path = called.split("@", maxsplit=1)[0]
-    if path.startswith("./"):
-        return root / path.removeprefix("./")
+    if path.startswith(("./", "$/")):
+        return root / path[2:]
     prefix = f"{ORG}/{SELF}/"
     if path.startswith(prefix):
         return shared / path.removeprefix(prefix)
@@ -665,9 +671,8 @@ def resolved(
 
     A version stands for itself, and `${{ inputs.<name> }}` for what the
     caller handed as that input. `${{ matrix.<key> }}` stands for the
-    key's row, a list or `${{ fromJSON(inputs.<name>) }}`, each `<key>`
-    of an `include` row added and each `exclude` row naming that key
-    alone taken away. Any other expression stands for nothing here.
+    key's values in the combinations `combinations` expands. Any other
+    expression stands for nothing here.
 
     :param value: the value as YAML or the script gave it.
     :param job: the job's own mapping, for its matrix.
@@ -678,26 +683,93 @@ def resolved(
     text = str(value)
     if TAKEN.match(text):
         return {text}
-    named_input = INPUT.match(text)
-    if named_input:
+    if named_input := INPUT.match(text):
         return set(inputs.get(named_input[1], set()))
-    key = MATRIX.match(text)
-    matrix = (job.get("strategy") or {}).get("matrix")
-    if not key or not isinstance(matrix, dict):
+    if not (key := MATRIX.match(text)):
         return set()
-    row = matrix.get(key[1])
-    found: set[str] = set()
-    if isinstance(row, list):
-        found = {version for item in row for version in resolved(item, {}, {})}
-    elif (listed := LISTED_INPUT.match(str(row))) is not None:
-        found = set(inputs.get(listed[1], set()))
-    for extra in matrix.get("include") or []:
-        if isinstance(extra, dict) and key[1] in extra:
-            found |= resolved(extra[key[1]], {}, inputs)
-    for dropped in matrix.get("exclude") or []:
-        if isinstance(dropped, dict) and set(dropped) == {key[1]}:
-            found -= resolved(dropped[key[1]], {}, inputs)
+    return {
+        version
+        for combination in combinations(job, inputs)
+        if key[1] in combination
+        for version in resolved(combination[key[1]], {}, inputs)
+    }
+
+
+def combinations(
+    job: dict[str, Any], inputs: dict[str, set[str]]
+) -> list[dict[str, str]]:
+    """Expand a job's matrix into the combinations GitHub runs.
+
+    Each key's row is a list, or `${{ fromJSON(inputs.<name>) }}` for
+    what a caller handed; any other expression is one value that no
+    `exclude` row matches. An `exclude` row drops each combination it
+    matches in every key it names, and only then is each `include` row
+    added to every combination whose original values it does not
+    change, or run on its own where it fits none, as GitHub's workflow
+    syntax says.
+
+    :param job: the job's own mapping.
+    :param inputs: what a caller handed, by input.
+    :returns: the combinations, each value as YAML gave it, in text.
+    """
+    matrix = (job.get("strategy") or {}).get("matrix")
+    if not isinstance(matrix, dict):
+        return []
+    rows = {
+        str(name): values(row, inputs)
+        for name, row in matrix.items()
+        if name not in {"include", "exclude"}
+    }
+    found = (
+        [dict(zip(rows, row, strict=True)) for row in product(*rows.values())]
+        if rows
+        else []
+    )
+    for dropped in rules(matrix, "exclude"):
+        found = [
+            combination
+            for combination in found
+            if any(combination.get(k) != v for k, v in dropped.items())
+        ]
+    for added in rules(matrix, "include"):
+        fits = [
+            combination
+            for combination in found
+            if all(combination.get(k, v) == v for k, v in added.items() if k in rows)
+        ]
+        for combination in fits:
+            combination.update(added)
+        if not fits:
+            found.append(added)
     return found
+
+
+def values(row: object, inputs: dict[str, set[str]]) -> list[str]:
+    """Read one key's row of a matrix, as `combinations` reads it.
+
+    :param row: the row as YAML gave it.
+    :param inputs: what a caller handed, by input.
+    :returns: its values, in text.
+    """
+    if isinstance(row, list):
+        return [str(item) for item in row]
+    if listed := LISTED_INPUT.match(str(row)):
+        return sorted(inputs.get(listed[1], set()))
+    return [str(row)]
+
+
+def rules(matrix: dict[str, Any], kind: str) -> list[dict[str, str]]:
+    """Read a matrix's `include` or `exclude` rows, in text.
+
+    :param matrix: the matrix's own mapping.
+    :param kind: `include` or `exclude`.
+    :returns: each row that is a mapping, its keys and values as text.
+    """
+    return [
+        {str(key): str(value) for key, value in row.items()}
+        for row in matrix.get(kind) or []
+        if isinstance(row, dict)
+    ]
 
 
 def ran(job: dict[str, Any], inputs: dict[str, set[str]]) -> set[str]:
@@ -708,8 +780,8 @@ def ran(job: dict[str, Any], inputs: dict[str, set[str]]) -> set[str]:
     and a bare `pytest` or `python -m pytest` on that of the last
     `setup-python` step; with no such step, each runs on what nothing
     here reads, `.python-version` or the runner's own. Each value is
-    read as `resolved` reads it. An `env:` setting `UV_PYTHON` is not
-    read.
+    read as `resolved` reads it. A step whose `if:` is the literal
+    `false` is left out, and an `env:` setting `UV_PYTHON` is not read.
 
     :param job: the job's own mapping.
     :param inputs: what a caller handed, by input, as `resolved` takes it.
@@ -719,6 +791,8 @@ def ran(job: dict[str, Any], inputs: dict[str, set[str]]) -> set[str]:
     uv: set[str] = set()
     python: set[str] = set()
     for step in job.get("steps") or []:
+        if skipped(step):
+            continue
         uses = str(step.get("uses", ""))
         given = (step.get("with") or {}).get("python-version", "")
         if uses.startswith(SETUP_UV):
@@ -752,16 +826,17 @@ def handed(job: dict[str, Any]) -> dict[str, set[str]]:
         except json.JSONDecodeError:
             listed = None
         items = listed if isinstance(listed, list) else [value]
-        carried = {version for item in items for version in resolved(item, job, {})}
-        if carried:
+        if carried := {
+            version for item in items for version in resolved(item, job, {})
+        }:
             found[str(name)] = carried
     return found
 
 
 def skipped(job: dict[str, Any]) -> bool:
-    """Say whether a job's `if:` is the literal `false`, so it never runs.
+    """Say whether a job's or a step's `if:` is the literal `false`.
 
-    :param job: the job's own mapping.
+    :param job: the job's or the step's own mapping.
     :returns: whether it is skipped whatever the event.
     """
     condition = job.get("if", True)
@@ -839,13 +914,14 @@ def test_a_job_running_the_suite_names_the_patch_the_floor_names(
 def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
     """The cell above fails on planted trees whose floor pytest never runs on.
 
-    Each form `lanes` reads is planted once naming the floor, and agrees,
+    Each form the docstrings of `invocation`, `ran`, `combinations` and
+    `lanes` name is planted once naming the floor, and agrees,
     btclib-secp256k1's `uv run` among them. Each near miss is planted
     too, and fails: a floor without its patch, the minor version alone,
     a version pytest does not run on, in the job or in the workflow it
     calls, pytest only mentioned, installed or echoed, an excluded
-    matrix row, a job that never runs, and calls to a workflow that runs
-    no pytest or that no checkout here holds.
+    matrix combination, a job or a step that never runs, and calls to a
+    workflow that runs no pytest or that no checkout here holds.
 
     :param tmp_path: where the trees are planted.
     """
@@ -889,6 +965,27 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
     excluded = (
         matrix.replace(steps_, "")
         + f'        exclude:\n          - python: "3.11.9"\n{steps_}{on_matrix}'
+    )
+    restored = excluded.replace(
+        steps_, f'        include:\n          - python: "3.11.9"\n{steps_}'
+    )
+    on_os = (
+        f"{steps_}    strategy:\n      matrix:\n        os: [OS]\n"
+        '        python: ["3.11.9", "3.15"]\n        exclude:\n'
+        '          - os: a\n            python: "3.11.9"\n'
+        f"{on_matrix}"
+    )
+    added = (
+        f"{steps_}    strategy:\n      matrix:\n        os: [a]\n"
+        f'        include:\n          - python: "3.11.9"\n{on_matrix}'
+    )
+    local = (
+        "    uses: $/.github/workflows/reusable-suite.yml\n    with:\n"
+        '      python-version: "3.11.9"\n'
+    )
+    skipped_setup = (
+        "      - uses: astral-sh/setup-uv@v1\n        if: false\n"
+        '        with:\n          python-version: "3.15"\n'
     )
 
     secp256k1 = (
@@ -944,6 +1041,32 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
             missing,
         ),
         ("3.11.9", excluded, missing),
+        ("3.11.9", restored, ""),
+        ("3.11.9", on_os.replace("OS", "a"), missing),
+        ("3.11.9", on_os.replace("OS", "a, b"), ""),
+        ("3.11.9", added, ""),
+        ("3.11.9", run("UV_PYTHON=3.11.9 pytest"), missing),
+        ("3.11.9", f"{steps_}{setup_python}      - run: pytest\n", ""),
+        ("3.11.9", run("uv run --python 3.11.9 python3 -m pytest"), ""),
+        ("3.11.9", run("uv run --python 3.11.9 --module pytest"), ""),
+        ("3.11.9", local, ""),
+        ("3.11.9", run("UV_PYTHON=3.11.9 uv run pytest"), ""),
+        ("3.11.9", run("UV_PYTHON=3.12.3 uv run -p 3.11.9 pytest"), ""),
+        (
+            "3.11.9",
+            f"{steps_}{setup_uv}      - run: UV_PYTHON=3.12.3 uv run pytest\n",
+            missing,
+        ),
+        (
+            "3.11.9",
+            f"{steps_}{setup_uv}{skipped_setup}      - run: uv run pytest\n",
+            "",
+        ),
+        (
+            "3.11.9",
+            run("uv run --python 3.11.9 pytest") + "        if: false\n",
+            missing,
+        ),
         ("3.11.9", f'{call}      linted: "3.11.9"\n', missing),
         ("3.11.9", "    if: false\n" + run("uv run --python 3.11.9 pytest"), missing),
         (

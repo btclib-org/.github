@@ -148,26 +148,20 @@ The two point at opposite ends on purpose:
 the version line makes uv ignore the file and fall back to a default
 interpreter.
 
-**The floor is the oldest patch release a CI job runs, and a job that
-runs the suite names it.** Patch releases of one minor version compile
-different code: a `with` statement in a test that a later 3.12 patch
-compiles is a `SyntaxError` on an earlier one
-(btclib-org/functional-tests#583). A floor of `>=X.Y` admits every patch
-down to `X.Y.0`, and a job asking for `X.Y` alone runs whichever patch
-its runner image ships or uv downloads, the image's choice and not the
-tree's. The job runs the suite because the suite imports the tree's code
-and its tests, which compiles them on that patch. A job running `X.Y.0`
-instead keeps the floor at the minor version, and is the rejected
-alternative: it holds the tree to the bugs that release's later patches
-fix.
+**A job that runs the suite names the floor's patch.** Patches of one
+minor version compile different code: a `with` statement in a test is a
+`SyntaxError` on 3.12.3 and compiles on 3.12.13
+(btclib-org/functional-tests#583). A job asking for `X.Y` alone runs the
+patch its runner image ships or uv downloads, and the suite is what
+imports, and so compiles, the tree's code and tests. Running `X.Y.0`
+with a floor of `>=X.Y` is the rejected alternative: it holds the tree
+to the bugs later patches fix.
 
-**`test.yml` and `.python-version` agree where they name one `X.Y`.**
-So where the floor and the pin share a minor version, the coverage job
-can be the job that names the floor's patch, at the cost of running a
-patch other than the one a bare `uv run` resolves. The rejected
-alternative is a second job for the floor outside `test.yml`, which runs
-the suite again on the minor version the coverage job already runs.
-Section 15 says what the suite reads of both rules.
+`test.yml` and `.python-version` agree where they name one `X.Y`, so
+where the floor and the pin share a minor version the coverage job can
+name the floor's patch, a bare `uv run` resolving another. A second job
+outside `test.yml` is the rejected alternative. Section 15 says what the
+suite reads.
 
 **A library publishes and declares the classifier
 `Topic :: Software Development :: Libraries :: Python Modules`. Every
