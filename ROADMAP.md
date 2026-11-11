@@ -50,8 +50,6 @@ decides: an issue there proposes a rule and every repository the rule
 reaches takes it up. The entries below that cite btclib-org/.github are
 its intentions beyond that.
 
-- **The codecs leave `btclib`** for `base58-bech32`, a package of their
-  own that `btclib` is to depend on (btclib-org/btclib#2712).
 - **BIP32, miniscript and the descriptors leave `btclib-wallet`** for
   `bip32-descriptors`, a package of their own that `btclib-node` is to
   depend on in place of `btclib-wallet` (btclib-org/.github#1811).
@@ -73,8 +71,8 @@ its intentions beyond that.
   in-process HWI adapter** beside the subprocess one
   (btclib-org/btclib#469).
 - **A package of their own for the hashes, `p2p` or the shared
-  substrate**, and any split of `btclib` beyond the codecs' under
-  *Intended* (btclib-org/btclib#2129).
+  substrate**, and any split of `btclib` beyond the codecs', which left
+  for `base58-bech32` (btclib-org/btclib#2129, btclib-org/btclib#2712).
 - **A cipher of `btclib`'s own, and code in `btclib` or `btclib-node`
   written for tf2 (`btclib-functional-tests`) alone**
   (btclib-org/btclib#2220).
