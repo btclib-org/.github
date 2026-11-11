@@ -399,8 +399,8 @@ def test_drift_splits_a_section_over_urls_the_site_accepts(
         key: value
         for criterion in criteria
         for key, value in (
-            (criterion + "_status", "Met"),
-            (criterion + "_justification", criterion + " " + "x" * 1500),
+            (f"{criterion}_status", "Met"),
+            (f"{criterion}_justification", f"{criterion} {'x' * 1500}"),
         )
     }
     given["c05_justification"] = "y" * script.TARGET
@@ -586,7 +586,7 @@ def test_the_site_answers_a_target_as_long_as_target_and_no_longer(
 ) -> None:
     """A path and query of `TARGET` bytes is read, one byte more gets a 414."""
     stem = f"/projects/{_ID}?x="
-    longest = stem + "a" * (script.TARGET - len(stem))
+    longest = f"{stem}{'a' * (script.TARGET - len(stem))}"
     assert _status(longest) != HTTPStatus.REQUEST_URI_TOO_LONG
     assert _status(longest + "a") == HTTPStatus.REQUEST_URI_TOO_LONG
 
@@ -596,10 +596,10 @@ def test_locale_is_as_long_as_the_longest_locale_the_site_links(
     script: ModuleType,
 ) -> None:
     """The redirect adds a locale the site's pages link, `/` included."""
-    with urlopen(Request(script.SITE + "/en"), timeout=30) as answer:  # noqa: S310
+    with urlopen(Request(f"{script.SITE}/en"), timeout=30) as answer:  # noqa: S310
         page = answer.read().decode()
     locales = set(re.findall(r'hreflang="([^"]+)"', page)) - {"x-default"}
-    assert max(len("/" + locale) for locale in locales) == script.LOCALE
+    assert max(len(f"/{locale}") for locale in locales) == script.LOCALE
 
 
 class _Loader(yaml.SafeLoader):
