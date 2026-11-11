@@ -717,17 +717,9 @@ depth re-derived from headings that move.
 it: a `*_link.md` shim, or another page such as `index.md`. `BLOB` is
 `[project.urls] repository` and `/blob/main/`, the form the root
 `README.md` writes. A reader of the documentation stays on the version
-they are reading, where GitHub shows `main`.
-
-`reusable-docs.yml` refuses a built page that links such a file at
-`BLOB`, reading the include of every `docs/source/*.md` page, whatever
-`conf.py` does.
-
-`conf.py`'s `RootFileLinks` reads the include of every page, or of the
-shims alone, and turns a link to a file it finds there into its page: a
-relative link in every tree, and a `BLOB` link only where it handles
-that form, which not every tree's does. Where it reads the shims alone,
-only a shim includes a root file.
+they are reading, where GitHub shows `main`. `reusable-docs.yml`
+refuses a built page that links such a file at `BLOB`, whatever
+`conf.py`'s `RootFileLinks` turns into the page.
 
 **`--keep-going` is not passed.** In the sphinx `uv.lock` resolves the
 flag is accepted, hidden from `--help` and unused: `-W` alone reports
