@@ -83,7 +83,7 @@ repos:
               |conventions|copyright|coverage|dependabot|dependencies|dependency_review
               |deprecation|dockerfile|grid|homepage|hooks
               |interpreters|issue_template|layout|links|names|per_subject|pins
-              |protection|pull_request_template|pyproject|readme_link|release|roadmap
+              |protection|pull_request_template|pyproject|readme_link|rehearsal|release|roadmap
               |root_files|scope|security|sourcery|status|surface|tags|topics|verbatim
               |workflows)_test\.py)$
       - id: check-yaml

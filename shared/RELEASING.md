@@ -209,6 +209,31 @@ the tag exercises the first.
    branch as its source ref, so the `--source-ref` of *Verify the
    provenance of an asset* refuses it.
 
+**A rehearsal that is not to be approved is closed by rejecting its
+`testpypi` deployment, before the branch is rehearsed again.** Section 12
+of the organization's standard says why. The runs waiting at an approval
+are listed by:
+
+```shell
+gh run list --repo "btclib-org/${repo:?}" --workflow release.yml \
+  --status waiting
+```
+
+```shell
+run=<run id>
+```
+
+```shell
+env=$(gh api "repos/btclib-org/${repo:?}/environments" \
+  --jq '.environments[] | select(.name == "testpypi") | .id')
+```
+
+```shell
+gh api -X POST \
+  "repos/btclib-org/${repo:?}/actions/runs/${run:?}/pending_deployments" \
+  -F "environment_ids[]=${env:?}" -f state=rejected -f comment=superseded
+```
+
 ## Release to PyPI
 
 **A release is a tag on `main`, and everything below that edits a file
