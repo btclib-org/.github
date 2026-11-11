@@ -393,11 +393,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "functional-tests",
         ),
     ),
-    (
-        2153,
-        "test_a_registered_tree_holds_its_answers",
-        ("btclib-wallet",),
-    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
