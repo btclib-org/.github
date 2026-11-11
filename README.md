@@ -2249,15 +2249,15 @@ without the bypass. The context is the caller's job name then the callee's,
 A rule is off only where it conflicts with another gate of the tree: ruff with
 the tree's configuration, `ruff format`, or mypy. A rule conflicts where no form
 of the code it reports, keeping its behaviour and carrying no `# sourcery skip`,
-passes both that gate and Sourcery with the rule on. The form may carry a
-comment that silences that gate, a `# noqa`, `# type: ignore` or `# fmt: skip`,
-only where the code it reports already carries it for its own reason. The rule
-of that gate is named beside it. A rewrite that passes once adapted is no
-conflict, as a line ruff finds too long, an `else` after a `return` that ruff
-removes, or an annotation mypy asks for. A rule that reads the same code as a
-ruff rule is on, and so is one the trees' own style would not write: the code
-adapts. `enable:` and `rule_types:` stay at their defaults, and `disable:` can
-name a tag: `disable: [default]` turns every rule off.
+passes both that gate and Sourcery with the rule on. The rule of that gate is
+named beside it. The form may carry a comment that silences that gate, a
+`# noqa`, `# type: ignore` or `# fmt: skip`, only where the reported code
+already carries that comment for its own reason. A rewrite that passes once
+adapted is no conflict, as a line ruff finds too long, an `else` after a
+`return` that ruff removes, or an annotation mypy asks for. A rule that reads
+the same code as a ruff rule is on, and so is one the trees' own style would not
+write: the code adapts. `enable:` and `rule_types:` stay at their defaults, and
+`disable:` can name a tag: `disable: [default]` turns every rule off.
 
 **A tree whose `disable:` has not yet followed a change to `TURNED_OFF` is in
 the `BACKLOG` row of `test_a_sourcery_yaml_turns_off_the_rules_turned_off`**,
