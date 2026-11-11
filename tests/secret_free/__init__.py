@@ -21,25 +21,25 @@ __all__ = [
     "assert_secret_free",
     "chained",
     "hexes",
+    "levels",
+    "read_back",
     "spellings",
     "text_of",
     "windows",
+    "without_whitespace",
 ]
 
 #: How many characters a piece of a string secret has; a bytes piece has half
 #: as many bytes.
 WINDOW = 12
 
-#: What `repr` writes for a tab, a newline and a carriage return, dropped from
-#: the text with its whitespace.
-ESCAPES = ("\\t", "\\n", "\\r")
+#: What `repr` writes for a backslash, a quote, a tab, a newline and a carriage
+#: return, and the character each stands for.
+ESCAPED = {"\\\\": "\\", "\\'": "'", "\\t": "\t", "\\n": "\n", "\\r": "\r"}
 
-#: A backslash as `repr` writes it, doubled.
-BACKSLASH = "\\\\"
-
-#: A doubled backslash or one of `ESCAPES`. The doubled backslash is matched
-#: whole, so that its second half starts no escape.
-ESCAPE_OR_BACKSLASH = re.compile("|".join(map(re.escape, (BACKSLASH, *ESCAPES))))
+#: One of `ESCAPED`, matched from the left, so that the second half of a doubled
+#: backslash starts no escape.
+REPR_ESCAPE = re.compile("|".join(map(re.escape, ESCAPED)))
 
 
 def chained(exc: BaseException) -> Iterator[BaseException]:
@@ -101,6 +101,46 @@ def text_of(e: BaseException) -> str:
     return " ".join(parts).lower()
 
 
+def read_back(text: str) -> str:
+    """Return a text with each of `ESCAPED` read back as its character.
+
+    :param text: the text of an exception.
+    :returns: the text one `repr` less escaped.
+    """
+    return REPR_ESCAPE.sub(lambda m: ESCAPED[m[0]], text)
+
+
+def levels(text: str, *, compact: bool = False) -> Iterator[str]:
+    """Yield a text, then each text `read_back` makes of the one before.
+
+    Each yield is shorter than the one before, so the walk ends.
+
+    :param text: the text of an exception.
+    :param compact: whether whitespace is dropped before each yield, so that
+        an escape whitespace was put inside is read back whole.
+    :returns: the texts, until reading back changes nothing.
+    """
+    while True:
+        if compact:
+            text = "".join(text.split())
+        yield text
+        back = read_back(text)
+        if back == text:
+            return
+        text = back
+
+
+def without_whitespace(text: str) -> str:
+    r"""Return a text with its whitespace dropped, as itself and as an escape.
+
+    :param text: the text of an exception, at one level.
+    :returns: the text without whitespace and without the `\t`, `\n` and `\r`
+        escapes, `\\` and `\'` kept.
+    """
+    compact = "".join(text.split())
+    return REPR_ESCAPE.sub(lambda m: "" if ESCAPED[m[0]].isspace() else m[0], compact)
+
+
 def spellings(secret: str | bytes | bytearray) -> list[str]:
     """Return what a secret is looked for as, lowercased.
 
@@ -154,11 +194,22 @@ def assert_secret_free(
     not hidden by whitespace a message puts inside it. Dropping the escapes
     from each piece too is the rejected alternative: a piece spelled with them
     but for one letter, as the `repr` of bytes that are tabs but for that
-    letter is, shrinks to the letter, which is inside many clean messages.
-    Other whitespace, such as `\x0b` or `\u2003`, does hide a piece where the
-    text holds it only as the escape `repr` writes, as a `KeyError` shows its
-    key. A piece with whitespace of its own is looked for as given, so a
-    refusal that changes that whitespace does not match it.
+    letter is, shrinks to the letter, which is inside many clean messages. A
+    piece with whitespace of its own is looked for as given, so a refusal that
+    changes that whitespace does not match it.
+
+    A backslash or a quote that `repr` escapes does not hide a piece either,
+    however many times a refusal shows it through `repr`. `repr` doubles a
+    backslash, such as the one in `\xe9`, the spelling of a byte, and writes
+    `'` as `\'` in a text holding both quotes. So every search is made again at
+    each of the `levels` of the text, until reading back changes nothing. The
+    levels are walked twice, the second time with whitespace dropped before
+    each reading back, so whitespace put inside an escape, such as between the
+    halves of a doubled backslash, does not hide a piece either. Every other
+    escape `repr` writes stays in the text: a character `repr` does not print,
+    such as `\x0b` or `\u2003`, hides a piece it splits, or a piece of a string
+    holding it, where the text holds it only as that escape, as a `KeyError`
+    shows its key.
 
     :param exc: the exception raised.
     :param secrets: the secret fed, as bytes, as a bytearray, or in each
@@ -173,11 +224,11 @@ def assert_secret_free(
     }
     for e in chained(exc):
         text = text_of(e)
-        compact_text = "".join(text.split())
-        unescaped_text = ESCAPE_OR_BACKSLASH.sub(
-            lambda m: BACKSLASH if m[0] == BACKSLASH else "", compact_text
-        )
+        searched = {
+            found
+            for level in (*levels(text), *levels(text, compact=True))
+            for found in (level, "".join(level.split()), without_whitespace(level))
+        }
         for piece in pieces:
-            assert piece not in text
-            assert piece not in compact_text
-            assert piece not in unescaped_text
+            for found in searched:
+                assert piece not in found
