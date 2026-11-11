@@ -2248,16 +2248,19 @@ without the bypass. The context is the caller's job name then the callee's,
 `tests/hooks_test.py` names**, as ruff's `select = ["ALL"]` takes every family.
 A rule is off only where another gate of the tree refuses or undoes its rewrite:
 ruff with the tree's configuration, `ruff format`, or mypy. The rule of that
-gate is named beside it. A rule that reads the same code as a ruff rule is on,
-and so is one the trees' own style would not write: the code adapts. A rewrite
-that passes once adapted, as a line ruff finds too long or an annotation mypy
-asks for, is no reason to turn its rule off. `enable:` and `rule_types:` stay at
-their defaults, and `disable:` can name a tag: `disable: [default]` turns every
-rule off. A tree whose `disable:` has not yet followed a change to `TURNED_OFF`
-is in the `BACKLOG` row of
-`test_a_sourcery_yaml_turns_off_the_rules_turned_off`, which leaves its
-`sourcery` check required, and the tree's own pull request that follows drops it
-from the row.
+gate is named beside it. A rule conflicts where its finding cannot be cleared:
+no code passes both that gate and Sourcery with the rule on. A rewrite that
+passes once adapted is no conflict, as a line ruff finds too long, an `else`
+after a `return` that ruff removes, or an annotation mypy asks for. A rule that
+reads the same code as a ruff rule is on, and so is one the trees' own style
+would not write: the code adapts. `enable:` and `rule_types:` stay at their
+defaults, and `disable:` can name a tag: `disable: [default]` turns every rule
+off.
+
+**A tree whose `disable:` has not yet followed a change to `TURNED_OFF` is in
+the `BACKLOG` row of `test_a_sourcery_yaml_turns_off_the_rules_turned_off`**,
+which leaves its `sourcery` check required. Once the tree's own pull request
+lands, a pull request here drops it from the row.
 
 **`.sourcery.yaml` sets `python_version` to the lowest interpreter the tree's
 code runs on, never above the `requires-python` floor.** No `ignore:` entry,

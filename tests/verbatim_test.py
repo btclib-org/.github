@@ -310,9 +310,7 @@ def owed(root: Path, path: str, clause: str) -> bool:
     :raises LookupError: where the clause is one `observable` refuses.
     """
     where = observable(path, clause)
-    if where is None:
-        return True
-    return bool(tracked(root, where))
+    return True if where is None else bool(tracked(root, where))
 
 
 def unreached(root: Path, path: str, clause: str) -> bool:

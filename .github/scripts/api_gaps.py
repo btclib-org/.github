@@ -287,9 +287,7 @@ def _annotation(obj: griffe.Object) -> str | griffe.Expr | None:
     """Return what a function returns, or what an attribute is annotated."""
     if isinstance(obj, griffe.Function):
         return obj.returns
-    if isinstance(obj, griffe.Attribute):
-        return obj.annotation
-    return None
+    return obj.annotation if isinstance(obj, griffe.Attribute) else None
 
 
 def _annotation_changed(
@@ -305,9 +303,7 @@ def _annotation_changed(
     """
     if old is None or str(old) == "None":
         return False
-    if new is None:
-        return removed_is_a_change
-    return str(old) != str(new)
+    return removed_is_a_change if new is None else str(old) != str(new)
 
 
 def _line(obj: griffe.Object, kind: str, change: str = "", parameter: str = "") -> str:

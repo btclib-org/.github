@@ -146,9 +146,7 @@ def rehearsal_tag(notes: Path) -> str | None:
         version = None
     except TypeError:
         version = None
-    if not isinstance(version, str):
-        return None
-    return f"v{version}"
+    return f"v{version}" if isinstance(version, str) else None
 
 
 def _spans(text: str) -> list[str]:

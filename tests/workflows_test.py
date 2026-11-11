@@ -1035,9 +1035,7 @@ def shape(job: dict[str, Any]) -> str | None:
             msg = f"an aggregate job's text carries both {LISTING!r} and {NEEDS!r}"
             raise LookupError(msg)
         return "listing"
-    if needs:
-        return "needs"
-    return None
+    return "needs" if needs else None
 
 
 def test_a_called_aggregate_reads_needs_and_an_uncalled_one_the_listing(

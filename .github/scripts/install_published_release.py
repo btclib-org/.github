@@ -208,10 +208,11 @@ def main(argv: list[str] | None = None) -> int:
     if not installer:
         parser.error("the installer command after `--` is empty")
 
-    version = args.tag.removeprefix("v")
-    if not version:
-        return run_installer([*installer, args.requirement], show)[0]
-    return install(installer, args.requirement, version, args.timeout, args.interval)
+    if version := args.tag.removeprefix("v"):
+        return install(
+            installer, args.requirement, version, args.timeout, args.interval
+        )
+    return run_installer([*installer, args.requirement], show)[0]
 
 
 if __name__ == "__main__":

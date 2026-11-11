@@ -6,8 +6,8 @@
 version: "1"
 
 rule_settings:
-  disable:
-    - reintroduce-else # ruff's superfluous-else-return removes the else it adds
+  # TURNED_OFF is empty: no rule's rewrite is refused or undone
+  disable: []
   # The lowest interpreter this tree's code runs on: pyproject.toml's
   # per-file-target-version holds the scripts it names at py311.
   python_version: "3.11"

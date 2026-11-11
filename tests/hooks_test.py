@@ -398,15 +398,13 @@ SOURCERY_CONFIG = ".sourcery.yaml"
 SOURCERY_CALLED = "reusable-sourcery.yml"
 """The workflow of this repository section 10 has a Python tree call."""
 
-TURNED_OFF = {
-    "reintroduce-else": "superfluous-else-return removes the else it adds",
-}
+TURNED_OFF: dict[str, str] = {}
 """The rules section 10 says `.sourcery.yaml` turns off, against the reason.
 
 The reason is the rule of another gate that refuses or undoes the
-rewrite, the one reason section 10 admits. A literal, for the reason
-`STATED` above is one: the trees' copies agree with each other while all
-of them are wrong.
+rewrite, the one reason section 10 admits. Empty: no rule's rewrite is.
+A literal, for the reason `STATED` above is one: the trees' copies agree
+with each other while all of them are wrong.
 """
 
 RULE_TYPES = ("comment", "refactoring", "suggestion")
@@ -1354,8 +1352,34 @@ def test_bare_sourcery_skip_refuses_a_skip_naming_no_rule(
     assert bool(found) is refused, f"{entry!r} on {line!r}"
 
 
+def test_a_disable_list_off_turned_off_would_be_reported(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """`disable_departures` reports a rule left on, and one turned off besides.
+
+    `TURNED_OFF` is empty, so a stand-in naming one rule asks the first.
+
+    :param monkeypatch: stands the stand-in in for `TURNED_OFF`.
+    """
+    assert disable_departures({"rule_settings": {"disable": []}}) == []
+    assert disable_departures({"rule_settings": {}}) == [], "no disable: is refused"
+    assert disable_departures({}) == [], "no rule_settings: is refused"
+    assert disable_departures(None) == [], "an absent file is the other test's"
+    for extra in ("default", "refactoring", "reintroduce-else", "assign-if-exp"):
+        assert disable_departures({"rule_settings": {"disable": [extra]}}) == [
+            f"{SOURCERY_CONFIG} also turns off ['{extra}']"
+        ]
+    monkeypatch.setattr(f"{__name__}.TURNED_OFF", {"reintroduce-else": "a stand-in"})
+    assert disable_departures({"rule_settings": {"disable": []}}) == [
+        f"{SOURCERY_CONFIG} leaves on ['reintroduce-else']"
+    ]
+    assert (
+        disable_departures({"rule_settings": {"disable": ["reintroduce-else"]}}) == []
+    )
+
+
 def test_a_sourcery_yaml_off_section_4_would_be_reported() -> None:
-    """`config_departures` and `disable_departures` report each departure.
+    """`config_departures` reports each way a `.sourcery.yaml` can leave it.
 
     The floor is 3.11 and the tree tracks one module at the root and four
     under `tests/`, two of them further down: an entry naming a file or a
@@ -1386,22 +1410,11 @@ def test_a_sourcery_yaml_off_section_4_would_be_reported() -> None:
     lower["rule_settings"]["python_version"] = "3.10"
     assert config_departures(lower, python, floor) == [], "a lower version is refused"
     assert config_departures(None, python, floor) == [f"there is no {SOURCERY_CONFIG}"]
-    assert disable_departures(agreeing) == []
-    assert disable_departures(None) == [], "an absent file is the other test's"
-    left = copy.deepcopy(agreeing)
-    left["rule_settings"]["disable"].remove("reintroduce-else")
-    assert config_departures(left, python, floor) == [], (
+    more = copy.deepcopy(agreeing)
+    more["rule_settings"]["disable"].append("assign-if-exp")
+    assert config_departures(more, python, floor) == [], (
         "disable: is disable_departures' question"
     )
-    assert disable_departures(left) == [
-        f"{SOURCERY_CONFIG} leaves on ['reintroduce-else']"
-    ]
-    for extra in ("default", "refactoring", "use-next", "switch", "assign-if-exp"):
-        more = copy.deepcopy(agreeing)
-        more["rule_settings"]["disable"].append(extra)
-        assert disable_departures(more) == [
-            f"{SOURCERY_CONFIG} also turns off ['{extra}']"
-        ]
     for enable in (["reintroduce-else"], [], ["default", "use-next"]):
         enabled = copy.deepcopy(agreeing)
         enabled["rule_settings"]["enable"] = enable
@@ -2089,9 +2102,7 @@ def admitted(rev: str, declared: str) -> bool | None:
         `test_the_uv_floor_is_not_above_what_dependabot_bundles`'s finding.
     """
     floor = FLOOR.match(declared)
-    if floor is None:
-        return None
-    return version(rev) >= version(floor["version"])
+    return None if floor is None else version(rev) >= version(floor["version"])
 
 
 def bundling(repository: str, trees: dict[str, Path]) -> list[dict[str, Any]]:
