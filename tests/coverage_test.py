@@ -2,9 +2,10 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Section 8's clause on a statement only some invocations execute.
+"""Section 8's clauses on what a floor measures.
 
-Such a statement is covered on the invocations that execute it and
+The first is the one on a statement only some invocations execute. Such
+a statement is covered on the invocations that execute it and
 reads as a miss on the others, so under a floor with no slack the
 runner's flags decide whether the gate passes. The section answers with
 a test of the statement rather than a pragma over it, and this asks the
@@ -18,6 +19,12 @@ whatever the flags -- `pytest_configure`, `pytest_generate_tests` -- is
 outside the class, and a check keyed on a conftest hook no test module
 names would report those too, in trees where nothing is wrong.
 
+The second is the one on the scripts under `.github/scripts`: a tree
+holding Python scripts there names the directory in
+`[tool.coverage.run]`'s `source`, so its floor reaches them. Whether a
+script it omits carries its reason is a comment of `pyproject.toml`, and
+prose is left to a reader.
+
 Asked of a tree that declares a coverage floor rather than of a tier:
 section 8 reads which gate applies off what the tree installs, and where
 no total is gated on, no flag turns a hook into a red build.
@@ -30,7 +37,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import by_hand
+from . import by_hand, output, tracked
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -65,6 +72,12 @@ WHATEVER_THE_FLAGS = "pytest_configure"
 
 SILENT = "from . import nothing"
 """A planted test module that names no hook."""
+
+SCRIPTS = ".github/scripts"
+"""Section 8's directory of a tree's workflow scripts, as `source` names it."""
+
+PYTHON_SCRIPTS = f"{SCRIPTS}/*.py"
+"""The pathspec of the scripts the clause is about."""
 
 
 def defined(conftest: Path) -> set[str]:
@@ -183,3 +196,79 @@ def test_a_planted_tree_reddens_only_where_the_flags_can_strand_a_hook(
     """
     plant(tmp_path, hook, module)
     assert stranded(tmp_path) == expected
+
+
+def unmeasured(root: Path, config: dict[str, Any]) -> list[str]:
+    """Return the Python scripts under `.github/scripts` a floor leaves out.
+
+    :param root: the root of the checkout.
+    :param config: its parsed `pyproject.toml`, empty where it keeps none.
+    :returns: the tracked scripts, where `source` does not name the
+        directory; empty where it does or where there are none.
+    """
+    run = config.get("tool", {}).get("coverage", {}).get("run", {})
+    if SCRIPTS in run.get("source", []):
+        return []
+    return tracked(root, PYTHON_SCRIPTS)
+
+
+@pytest.mark.integration
+def test_a_floor_measures_the_scripts_under_github_scripts(
+    repository: str,
+    trees: dict[str, Path],
+    pyprojects: dict[str, dict[str, Any]],
+) -> None:
+    """Section 8: a floor reaches the Python scripts a tree holds.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    :param pyprojects: each tree's parsed `pyproject.toml`.
+    """
+    config = pyprojects.get(repository, {})
+    total = floor(config)
+    if total is None:
+        pytest.skip(f"{repository} declares no coverage floor")
+    left = unmeasured(trees[repository], config)
+    assert not left, (
+        f"[tool.coverage.run] source does not name {SCRIPTS}, so"
+        f" fail_under = {total} says nothing of {left}; "
+        + by_hand(
+            repository,
+            f"git ls-files '{PYTHON_SCRIPTS}'; grep -n '^source' pyproject.toml",
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    ("scripts", "source", "expected"),
+    [
+        pytest.param(["s.py"], ["pkg", "tests"], [f"{SCRIPTS}/s.py"], id="omitted"),
+        pytest.param(["s.py"], ["pkg", "tests", SCRIPTS], [], id="named"),
+        pytest.param([], ["pkg", "tests"], [], id="none"),
+    ],
+)
+def test_a_planted_tree_reddens_only_where_source_leaves_a_script_out(
+    tmp_path: Path,
+    scripts: list[str],
+    source: list[str],
+    expected: list[str],
+) -> None:
+    """Each state a tree can be in against the clause, and the finding.
+
+    The scripts are added to the index of a repository of their own,
+    since what the reading lists is what git tracks, and a file beside
+    them in another language is the control on the pathspec.
+
+    :param tmp_path: where the tree is built.
+    :param scripts: the Python scripts the planted tree holds.
+    :param source: what its `source` names.
+    :param expected: what `unmeasured` owes for that tree.
+    """
+    directory = tmp_path / SCRIPTS
+    directory.mkdir(parents=True)
+    for script in [*scripts, "render.mjs"]:
+        (directory / script).write_text("", encoding="utf-8")
+    output("git", "-C", str(tmp_path), "init", "--quiet")
+    output("git", "-C", str(tmp_path), "add", "--all")
+    config = {"tool": {"coverage": {"run": {"source": source}}}}
+    assert unmeasured(tmp_path, config) == expected

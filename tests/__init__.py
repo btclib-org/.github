@@ -376,6 +376,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("btclib-secp256k1",),
     ),
     (
+        2008,
+        "test_a_floor_measures_the_scripts_under_github_scripts",
+        ("btclib-wallet", "functional-tests"),
+    ),
+    (
         2050,
         "test_a_python_tree_guards_sourcery_skips_as_this_one_does",
         (
