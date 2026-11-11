@@ -867,6 +867,72 @@ def stanza_departures(document: dict[str, Any]) -> list[str]:
 FILTERS = ("paths", "paths-ignore")
 """The `pull_request` filters a caller carries neither of."""
 
+SYNCHRONIZE = "synchronize"
+"""The activity a push to a pull request is, which a `types:` list holds."""
+
+DEFAULT_BRANCH = "main"
+"""The branch a caller's branch filter admits, the one the check guards."""
+
+GLOB = re.compile(r"\\.|\*\*/|\*\*|\*|\[[^\]]+\]|.")
+"""The tokens of a branch filter pattern, an escape or a class whole."""
+
+
+def listed(value: object) -> list[str]:
+    """Read a trigger's list, which YAML may also give as one string.
+
+    :param value: what the key holds.
+    :returns: its entries, as strings, empty where it holds neither.
+    """
+    if isinstance(value, str):
+        return [value]
+    return [str(item) for item in value] if isinstance(value, list) else []
+
+
+def branch_matches(pattern: str, branch: str) -> bool:
+    """Whether a branch filter pattern, `!` removed, matches a branch.
+
+    The tokens are those of GitHub's *Filter pattern cheat sheet*: `**`
+    matches any characters, `**/` any directories or none, `*` any
+    characters but `/`, `?` and `+` make the character before them
+    optional or repeated, `[]` is a class, and a backslash makes the next
+    character literal. A `?` or `+` that opens the pattern has no
+    character before it, and is read as itself.
+
+    :param pattern: the pattern, without a leading `!`.
+    :param branch: the branch name.
+    :returns: whether the whole name matches.
+    """
+    regex = "".join(
+        re.escape(token) if index == 0 and token in {"?", "+"} else _branch_regex(token)
+        for index, token in enumerate(GLOB.findall(pattern))
+    )
+    return re.fullmatch(regex, branch) is not None
+
+
+def _branch_regex(token: str) -> str:
+    wildcards = {"**/": "(?:.*/)?", "**": ".*", "*": "[^/]*", "?": "?", "+": "+"}
+    if token in wildcards:
+        return wildcards[token]
+    if len(token) > 1 and token.startswith("["):
+        return token
+    return re.escape(token.removeprefix("\\") if len(token) > 1 else token)
+
+
+def branch_listed(patterns: list[str], branch: str) -> bool:
+    """Whether a branch filter's patterns, read in order, take a branch.
+
+    The last pattern matching it decides, one starting `!` leaving it out.
+
+    :param patterns: the filter's patterns.
+    :param branch: the branch name.
+    :returns: whether the branch is taken.
+    """
+    taken = False
+    for pattern in patterns:
+        if branch_matches(pattern.removeprefix("!"), branch):
+            taken = not pattern.startswith("!")
+    return taken
+
 
 def sourcery_calls(root: Path) -> list[tuple[Path, str]]:
     """List the jobs of a tree that call `SOURCERY_CALLED`.
@@ -893,7 +959,9 @@ def caller_departures(root: Path) -> list[str]:
     """Report where a tree calls `SOURCERY_CALLED` otherwise than section 10.
 
     Each call `sourcery_calls` finds is in a workflow triggered on
-    `pull_request` with no `FILTERS` entry.
+    `pull_request` with no `FILTERS` entry, with `SYNCHRONIZE` in its
+    `types:` where it has one, and with a `branches` or `branches-ignore`
+    filter, where it has one, that admits `DEFAULT_BRANCH`.
 
     :param root: the root of the checkout.
     :returns: one finding per departure, empty where there is none.
@@ -909,6 +977,18 @@ def caller_departures(root: Path) -> list[str]:
         trigger = triggers(workflow)["pull_request"] or {}
         if found := [name for name in FILTERS if name in trigger]:
             out.append(f"{workflow.name}'s pull_request filters on {found}")
+        if "types" in trigger and SYNCHRONIZE not in listed(trigger["types"]):
+            out.append(f"{workflow.name}'s pull_request types omit {SYNCHRONIZE}")
+        excluded = [
+            name
+            for name, admitting in (("branches", True), ("branches-ignore", False))
+            if name in trigger
+            and branch_listed(listed(trigger[name]), DEFAULT_BRANCH) != admitting
+        ]
+        out.extend(
+            f"{workflow.name}'s pull_request {name} excludes {DEFAULT_BRANCH}"
+            for name in excluded
+        )
     return out
 
 
@@ -1225,7 +1305,7 @@ def test_a_tree_off_section_10s_caller_would_be_reported(tmp_path: Path) -> None
         _workflow(
             root,
             "sourcery.yml",
-            f"on:\n  {trigger}:\n    types: [opened]\n"
+            f"on:\n  {trigger}:\n    types: [opened, synchronize]\n"
             f"jobs:\n  sourcery:\n    uses: {called}\n",
         )
         assert caller_departures(root) == wanted, f"{trigger}, {called}"
@@ -1248,6 +1328,87 @@ def test_a_tree_off_section_10s_caller_would_be_reported(tmp_path: Path) -> None
     assert caller_departures(tmp_path / "none") == [
         f"no workflow calls {SOURCERY_CALLED}"
     ]
+
+
+def test_a_caller_no_push_or_no_main_runs_would_be_reported(
+    tmp_path: Path,
+) -> None:
+    """`caller_departures` wants `synchronize` and `main` admitted.
+
+    :param tmp_path: where the trees are built.
+    """
+    remote = f"{ORG}/{SELF}/.github/workflows/{SOURCERY_CALLED}@v1"
+    types = "sourcery.yml's pull_request types omit synchronize"
+    only = "sourcery.yml's pull_request branches excludes main"
+    ignore = "sourcery.yml's pull_request branches-ignore excludes main"
+    cases: list[tuple[str, list[str]]] = [
+        ("types: [opened, synchronize, closed]", []),
+        ("types: synchronize", []),
+        ("types: [opened, reopened, closed]", [types]),
+        ("types: opened", [types]),
+        ("types: []", [types]),
+        ("branches: [main]", []),
+        ("branches: main", []),
+        ("branches: ['**']", []),
+        ("branches: ['ma*', '!dev']", []),
+        ("branches: ['!main', 'm?ain']", []),
+        ("branches: [release]", [only]),
+        ("branches: ['*', '!main']", [only]),
+        ("branches: [main/*]", [only]),
+        ("branches-ignore: [dev, 'release/**']", []),
+        ("branches-ignore: ['[mn]ain']", [ignore]),
+        ("branches-ignore: main", [ignore]),
+        ("branches-ignore: ['ma+in']", [ignore]),
+        ("branches-ignore: ['**/main']", [ignore]),
+        ("branches: ['**/main']", []),
+        ("branches-ignore: ['?main', '+main']", []),
+    ]
+    for index, (key, wanted) in enumerate(cases):
+        root = tmp_path / str(index)
+        _workflow(
+            root,
+            "sourcery.yml",
+            f"on:\n  pull_request:\n    {key}\njobs:\n  s:\n    uses: {remote}\n",
+        )
+        assert caller_departures(root) == wanted, key
+
+
+def test_a_branch_pattern_is_read_as_github_reads_it() -> None:
+    """`branch_matches` on each token of GitHub's cheat sheet, both ways."""
+    cases = [
+        ("main", "main", True),
+        ("main", "mainline", False),
+        ("*", "main", True),
+        ("*", "feature/x", False),
+        ("**", "feature/x", True),
+        ("feature/**", "feature/a/b", True),
+        ("v2*", "v2.0", True),
+        ("v2*", "v3", False),
+        ("ma?in", "min", True),
+        ("ma?in", "main", True),
+        ("ma?in", "maain", False),
+        ("ma+in", "maaain", True),
+        ("ma+in", "min", False),
+        ("[CB]at", "Cat", True),
+        ("[CB]at", "Rat", False),
+        ("v[12].[0-9]+.[0-9]+", "v1.10.1", True),
+        ("v[12].[0-9]+.[0-9]+", "v1x10x1", False),
+        (r"a\*b", "a*b", True),
+        (r"a\*b", "axb", False),
+        ("a[b", "a[b", True),
+        ("a\\", "a\\", True),
+        ("**/docs/**", "docs/hello.md", True),
+        ("**/docs/**", "dir/docs/my-file.txt", True),
+        ("**/main", "main", True),
+        ("**/main", "x/y/main", True),
+        ("**/main", "xmain", False),
+        ("?a", "?a", True),
+        ("?a", "a", False),
+        ("+a", "+a", True),
+        ("[]", "[]", True),
+    ]
+    for pattern, branch, wanted in cases:
+        assert branch_matches(pattern, branch) is wanted, (pattern, branch)
 
 
 def test_this_trees_bare_sourcery_skip_is_section_4s() -> None:
