@@ -586,9 +586,9 @@ def test_the_site_answers_a_target_as_long_as_target_and_no_longer(
 ) -> None:
     """A path and query of `TARGET` bytes is read, one byte more gets a 414."""
     stem = f"/projects/{_ID}?x="
-    longest = f"{stem}{'a' * (script.TARGET - len(stem))}"
+    longest = stem + "a" * (script.TARGET - len(stem))
     assert _status(longest) != HTTPStatus.REQUEST_URI_TOO_LONG
-    assert _status(longest + "a") == HTTPStatus.REQUEST_URI_TOO_LONG
+    assert _status(f"{longest}a") == HTTPStatus.REQUEST_URI_TOO_LONG
 
 
 @pytest.mark.integration
