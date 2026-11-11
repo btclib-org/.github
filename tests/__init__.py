@@ -394,11 +394,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ),
     ),
     (
-        2153,
-        "test_a_registered_tree_holds_its_answers",
-        ("btclib-wallet",),
-    ),
-    (
         2156,
         "test_a_job_running_the_suite_names_the_patch_the_floor_names",
         (
