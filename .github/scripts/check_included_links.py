@@ -39,10 +39,11 @@ INCLUDE = re.compile(r"^\{include\}\s+(.+)$")
 # the name of the directive an info string opens
 DIRECTIVE = re.compile(r"^\{([^}]+)\}")
 
-# directives of docutils and sphinx that parse their body as markup: the
-# admonitions, the containers and the version notes. A directive not
-# named here, as {code-block}, {eval-rst} or {toctree}, is read as code,
-# so an include it shows is text
+# the directives whose body this check reads as markup, among them the
+# admonitions, containers and version notes of docutils and sphinx. Every
+# directive not named here is read as code, so an include inside it is
+# not checked: {code-block}, {eval-rst} and {toctree}, and also some that
+# do parse their body, as {figure}, {list-table} and {glossary}
 PARSED = frozenset(
     [
         "admonition",
