@@ -1,9 +1,9 @@
 # Repository configuration
 
-What is set on this repository, as the `gh api` call that reads it back
-and the answer that call gives today. A setting recorded as prose alone
-is one nobody can check; recorded this way, a drift is one command away
-from being seen.
+What is set on this repository, and what it rests on outside it, as the
+command that reads it back and the answer that command gives today. A
+setting recorded as prose alone is one nobody can check; recorded this
+way, a drift is one command away from being seen.
 
 [Section 11 of the standard][s11] says every repository writes its
 settings down here, this one included: the repository that holds the
@@ -26,6 +26,8 @@ The endpoints these answers come from are the file's own `gh api` lines,
 listed rather than restated in a second place that would have to be kept
 true. The pattern reaches both scopes: a setting the organization decides
 once is read back here too, where a section below rests on it.
+*btclib.org on Cloudflare* reads a domain, not GitHub, with `curl` and
+`dig`, so this `grep` does not list it.
 
 ```shell
 grep -oE '(repos/btclib-org/\.github|orgs/btclib-org)[A-Za-z0-9/{}._-]*' \
@@ -483,6 +485,92 @@ request. That answer is a fact about a changing world in the way the
 plan name is: an upgrade, or either feature becoming generally
 available, turns it `enabled` with nobody having decided anything. Read
 at 2026-09-22T22:21:50Z.
+
+## btclib.org on Cloudflare
+
+The organization's domain is a zone of a Cloudflare account. It serves
+the site `btclib-org/btclib-org.github.io` deploys, and it receives the
+mail of the organization's addresses. Its settings are set in the
+Cloudflare dashboard, and no tree configures them. The standard rests on
+them for [section 2][s2-root]'s reporting address, for the project pages
+[section 3][s3] makes each `homepage`, and for the `hardened_site`
+answer of each tree registered at bestpractices.dev
+([section 10][s10-carries]).
+
+The site's response headers read back with:
+
+```shell
+curl -sI https://btclib.org/ \
+  | grep -i -E 'strict|content-security|x-content-type|x-frame'
+# strict-transport-security: max-age=31536000
+# x-frame-options: DENY
+# content-security-policy: default-src 'self'; script-src 'self';
+#   style-src 'self'; img-src 'self' data:; font-src 'self';
+#   object-src 'none'; base-uri 'self'; form-action 'self';
+#   frame-ancestors 'none'
+# x-content-type-options: nosniff
+```
+
+- **The hardening headers.** The Response Header Transform Rule
+  *Hardening headers*, under *Rules*, sets `Content-Security-Policy`,
+  `X-Content-Type-Options: nosniff` and `X-Frame-Options: DENY`. They
+  are what each registered tree's `hardened_site` answer cites. The
+  policy is the one the header of the site's
+  `.github/scripts/check-built-pages.sh` holds the built pages to, so a
+  change to one is a change to the other. `script-src` names `'self'`
+  alone (btclib-org/btclib-org.github.io#182).
+- **HSTS.** *SSL/TLS → Edge Certificates → HTTP Strict Transport
+  Security*: 12 months, `includeSubDomains` off, preload off. The header
+  above answers `max-age=31536000` with neither directive. A year is
+  what GitHub, PyPI and Read the Docs send. The two directives stay off
+  until the subdomains are checked
+  (btclib-org/btclib-org.github.io#184).
+- **Always Use HTTPS.** *SSL/TLS → Edge Certificates*: on, so no page
+  is served over HTTP. A request over HTTP gets a `301` to the same path
+  over HTTPS:
+
+  ```shell
+  curl -sI http://btclib.org/ | grep -i -E '^HTTP|^location'
+  # HTTP/1.1 301 Moved Permanently
+  # Location: https://btclib.org/
+  ```
+
+  The `301` is Cloudflare's own: it carries `Server: cloudflare` and
+  none of the `x-github-request-id` and `via: 1.1 varnish` the HTTPS
+  response carries from GitHub Pages. Whether Always Use HTTPS or a
+  redirect rule sent it, only the dashboard says.
+
+**Email Routing has no public readback.** The MX records say only that
+Cloudflare receives the domain's mail:
+
+```shell
+dig +short MX btclib.org | sort
+# 10 route2.mx.cloudflare.net.
+# 10 route3.mx.cloudflare.net.
+# 38 route1.mx.cloudflare.net.
+```
+
+A maintainer reads the rules in the dashboard: *Compute → Email Service
+→ Email Routing → Routing Rules* for the rules and the catch-all, and
+*Destination Addresses* for whether each destination is verified
+([Cloudflare's *Email routing rules and
+addresses*](https://developers.cloudflare.com/email-service/configuration/email-routing-addresses/)).
+They answer:
+
+- `security@` forwards to a CheckSig mailbox. It is section 2's
+  reporting address.
+- `admins@` forwards to a CheckSig mailbox. It answers PyPI's request
+  for an @btclib.org address that receives mail
+  (btclib-org/.github#1957).
+- `devs@` has no rule, because Cloudflare cannot verify its CheckSig
+  destination (btclib-org/.github#1559). It is the address a tree's
+  `pyproject.toml` names in `authors`, and mail to it is not delivered.
+- The catch-all rule is disabled, so an address with no rule receives
+  nothing.
+
+The destination addresses are not written here, against harvesting, as
+section 2 keeps the reporting address from an `@` form.
+btclib-org/.github#2019 names them.
 
 ## What is not configured, and why
 
