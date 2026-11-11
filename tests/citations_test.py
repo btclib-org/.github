@@ -85,9 +85,7 @@ OPENING = re.compile(r"(?m)^## (\d+)\. ")
 HISTORY = re.compile(r"^(CHANGELOG|RELEASE_NOTES)\.md$|^changelog/")
 """Where section 9 keeps a citation of a heading as written: it is a record."""
 
-KNOWN: tuple[tuple[int, str, str], ...] = (
-    (2159, ".bestpractices.json", "GOVERNANCE.md's *Roles*"),
-)
+KNOWN: tuple[tuple[int, str, str], ...] = ()
 """Citations already known broken, as `(issue, path, citation)`.
 
 A row holds a citation broken in another tree, whose fix is that tree's
