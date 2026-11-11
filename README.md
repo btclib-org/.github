@@ -137,15 +137,24 @@ The two point at opposite ends on purpose:
 
 - `.python-version` is the **newest** interpreter the matrix covers. It
   is what a bare `uv run` uses, so a local run measures what the
-  coverage job measures.
-- `requires-python` is the **oldest** supported. ruff infers its target
-  from it; `[tool.mypy] python_version` restates it, because mypy
-  otherwise targets whatever runs it and a typing construct missing from
-  the floor becomes invisible.
+  coverage job measures, on one minor version.
+- `requires-python` is the **oldest** supported, down to the patch:
+  `>=X.Y.Z`. ruff infers its target from it; `[tool.mypy]
+  python_version` restates its `X.Y`, the only form mypy takes, because
+  mypy otherwise targets whatever runs it and a typing construct missing
+  from the floor becomes invisible.
 
 `.python-version` takes a whole-line comment only: a trailing comment on
 the version line makes uv ignore the file and fall back to a default
 interpreter.
+
+**A job that runs the suite names the floor's patch**, since patches
+differ: a `with` in a test fails on 3.12.3 and not on 3.12.13
+(btclib-org/functional-tests#583), and a job asking for `X.Y` runs its
+image's patch. `test.yml` agrees with `.python-version` at `X.Y`, so the
+coverage job can be that job. The rejected alternatives are `X.Y.0`
+under `>=X.Y`, holding the tree to bugs later patches fix, and a second
+job outside `test.yml`, rerunning the suite on the coverage job's `X.Y`.
 
 **A library publishes and declares the classifier
 `Topic :: Software Development :: Libraries :: Python Modules`. Every
@@ -168,11 +177,11 @@ command is what reads it.
 An **application takes the newest interpreter its dependencies allow**, not
 being there to be imported: `.python-version` is the newest version every
 dependency installs on, a release candidate counting here too, and
-`requires-python` the oldest the tree itself means to run on, which is that
-same version where it means to run on one interpreter alone. Where a dependency
-holds `.python-version` below the newest with a candidate out, that file's
-comment names the dependency and the condition for raising it, a ceiling with
-no reason beside it reading as a preference.
+`requires-python` the oldest the tree itself means to run on, which is a patch
+of that same version where it means to run on one interpreter alone. Where a
+dependency holds `.python-version` below the newest with a candidate out, that
+file's comment names the dependency and the condition for raising it, a ceiling
+with no reason beside it reading as a preference.
 
 ### Dependency groups
 
@@ -850,8 +859,8 @@ hook then passes no path to; section 14 names each of those files.
   `Operating System` only where the package is built for it and
   `OS Independent` only where nothing is compiled; and one
   `Programming Language :: Python :: X.Y` per interpreter the matrix
-  runs. A `t` suffix in the matrix names that same `X.Y`, unlike a
-  `pypy` prefix, which has a classifier of its own under
+  runs. A patch or a `t` suffix in the matrix names that same `X.Y`,
+  unlike a `pypy` prefix, which has a classifier of its own under
   `Implementation`.
 
     PyPI's own `Free Threading` classifiers are a maturity level an
@@ -1285,7 +1294,7 @@ signature loosens the code around it and not only itself.
 [tool.mypy]
 strict = true
 warn_unreachable = true
-python_version = "<the requires-python floor>"
+python_version = "<the X.Y of the requires-python floor>"
 show_column_numbers = true
 enable_error_code = [
     "deprecated",
@@ -4326,9 +4335,10 @@ does not ask yet or cannot. A repository answers for itself where it can:
 rule that the classifiers name a tree's interpreters is `interpreters_test.py`
 where a tree publishes and the window sweep below where it does not: publishing
 decides, not being a library, as an index shows any distribution's classifiers.
-The suite reads `test.yml` against the pin; other workflows may name a callee's,
-a second tree's or a dependency's interpreter, judged by the reason beside it,
-since a list excusing each would go stale as trees move.
+The suite reads `test.yml` against the pin at `X.Y`, and the floor's patch in a
+job running pytest; other workflows may name a callee's, a second tree's or a
+dependency's interpreter, judged by the reason beside it, since a list excusing
+each would go stale as trees move.
 
 The settings: squash the only method, the `main-integrity` rules held with an
 **empty** bypass list, `required_signatures` **off** in classic protection and
@@ -4484,7 +4494,7 @@ matrix:
 for r in <every repository>; do
   read_or_mark pyproject.toml
   floor=$(printf '%s' "$content" |
-    sed -nE 's/^requires-python = ">=(3\.[0-9]+)"/\1/p')
+    sed -nE 's/^requires-python = ">=(3\.[0-9]+(\.[0-9]+)?)"/\1/p')
   classifiers=$(printf '%s' "$content" |
     sed -nE 's/^ +"Programming Language :: Python :: (3\.[0-9]+)",$/\1/p' |
     paste -sd, -)
@@ -4509,7 +4519,7 @@ for r in <every repository>; do
       read_or_mark ".github/workflows/$f"
       if [ "$ok" = found ]; then
         printf '%s' "$content" |
-          sed -nE 's/^ +- "(3\.[0-9]+t?|pypy3\.[0-9]+)"$/\1/p'
+          sed -nE 's/^ +- "(3\.[0-9]+(\.[0-9]+)?t?|pypy3\.[0-9]+)"$/\1/p'
       else echo unreadable; fi
     done | sort -u | paste -sd, -)
   fi
@@ -4523,10 +4533,10 @@ for r in <every repository>; do
 done
 ```
 
-Where a line carries classifiers, the floor is the lowest, the pin the highest,
-and the matrix, which only this compares, runs every one, the pin running where
-it is empty. `library` lines share one window; an `application` line is read
-against the comment in its `.python-version`.
+Where a line carries classifiers, the floor's `X.Y` is the lowest, the pin the
+highest, and the matrix, which only this compares, runs every one at its `X.Y`,
+the pin running where it is empty. `library` lines share one window; an
+`application` line is read against the comment in its `.python-version`.
 
 Section 1's uv floor, and the ceiling `dependabot-core`'s `main` pins, above
 which the service may refuse to re-lock:
