@@ -722,13 +722,16 @@ anchors, and a link into a root markdown file's heading fails `-W` under
 depth re-derived from headings that move.
 
 **A page links a file the documentation renders as that page, never at
-`BLOB`.** A file is rendered where a `docs/source/*.md` page includes
-it: a `*_link.md` shim, or another page such as `index.md`. `BLOB` is
-`[project.urls] repository` and `/blob/main/`, the form the root
-`README.md` writes. A reader of the documentation stays on the version
-they are reading, where GitHub shows `main`. `reusable-docs.yml`
-refuses a built page that links such a file at `BLOB`, whatever
-`conf.py`'s `RootFileLinks` turns into the page.
+`BLOB`.** A file is rendered where it is a page of `docs/source`, or
+where a `docs/source/*.md` page includes it: a `*_link.md` shim, or
+another page such as `index.md`. `BLOB` is `[project.urls] repository`
+and `/blob/main/`, the form the root `README.md` writes. A reader of the
+documentation stays on the version they are reading, where GitHub shows
+`main`. `conf.py`'s `RootFileLinks`, which section 14 keeps verbatim,
+makes a relative or `BLOB` link to a rendered file a link to its page,
+and a relative link in an included file to any other file of the tree
+its `BLOB` link. `reusable-docs.yml` refuses a built page still linking
+an included file at `BLOB`.
 
 **`--keep-going` is not passed.** In the sphinx `uv.lock` resolves the
 flag is accepted, hidden from `--help` and unused: `-W` alone reports
@@ -4189,14 +4192,14 @@ The paths are what that test compares:
 **Verbatim in part**, the file around it being the repository's own and so
 nothing a comparison by path can do: the `ci:` block of
 `.pre-commit-config.yaml`, the mypy strictness block, the ruff width and
-complexity settings, the pytest strictness flags, and `fail_under = 100`. Of the
-`ci:` block, `autofix_prs`, `autoupdate_commit_msg` and `autoupdate_schedule`
-are the shared part, with the values section 4 gives; `skip:` is the
-repository's own, because it names hooks of that file that pre-commit.ci cannot
-run. `tests/verbatim_test.py` compares none of these, its subject being a path:
-what holds a part equal across the copies is that each was written from this
-file, and that a command of section 15 greps for it, which none does for the
-`ci:` block.
+complexity settings, the pytest strictness flags, `fail_under = 100`, and
+`RootFileLinks` of `docs/source/conf.py`. Of the `ci:` block, `autofix_prs`,
+`autoupdate_commit_msg` and `autoupdate_schedule` are the shared part, with the
+values section 4 gives; `skip:` is the repository's own, because it names hooks
+of that file that pre-commit.ci cannot run. `tests/verbatim_test.py` compares
+none of these, its subject being a path. A part no test asks is held equal by
+each copy being written from this file, and by a command of section 15 that
+greps for it, which none does for the `ci:` block.
 
 **A part is held against this file, and not against the other copies.**
 Section 4 states `check-changelog`'s keys, and `tests/hooks_test.py`
@@ -4206,7 +4209,10 @@ compares that stanza between the trees, which is green wherever the
 copies agree and are wrong together — the state each tree's
 btclib-org/.github#1138 port is the fix for. Any other part above gets
 its check in that shape on the day it gets one: this file states the
-value, and a test asks each tree for it.
+value, and a test asks each tree for it. `RootFileLinks` has it, its
+value being the part of this repository's `shared/root_file_links.py`
+below the line that says so: `tests/root_file_links_test.py` asks each
+tree's `conf.py` for that part byte for byte.
 
 Whole files are here too, and these say in themselves where the
 comparison stops:

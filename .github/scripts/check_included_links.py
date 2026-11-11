@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Refuse a built page that links at `BLOB` a file the docs render.
+"""Refuse a built page that links at `BLOB` a file a docs page includes.
 
 Section 2 of the standard, *The documentation*, is the rule. This reads
 the built html for a link `RootFileLinks` left at `BLOB`.
@@ -13,7 +13,7 @@ Run from the root of the tree, with the directory the build wrote:
         standard/.github/scripts/check_included_links.py docs/build/html
 
 `BLOB` is `[project.urls] repository` of `pyproject.toml` followed by
-`/blob/main/`, `conf.py` reading the same key. The rendered files are
+`/blob/main/`, `conf.py` reading the same key. The included files are
 the ones the `docs/source/*.md` pages include, each page holding at most
 one include fence whose path is relative to the page. A fence shown in a
 code block is text, not an include. Each link found is printed as
