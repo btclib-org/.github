@@ -25,11 +25,86 @@ BLOB = f"{PYPROJECT['project']['urls']['repository']}/blob/main/"
 source_suffix = [".rst", ".md"]
 
 # section 14's verbatim part of docs/source/conf.py starts below this line
-# everything after the directive name on an include fence's opening line
-# is the directive's argument: the path of the file the page renders,
-# spaces included. Options are the lines under it, never that one, so the
-# path ends where the line does
-INCLUDE = re.compile(r"^```\{include\}\s+(.+?)\s*$", re.MULTILINE)
+# a line opening or closing a fence: its marker, and the info string after it
+FENCE = re.compile(r"^(`{3,}|~{3,})\s*(.*?)\s*$")
+
+# the info string of an include fence; its argument runs to the end of the line
+INCLUDE = re.compile(r"^\{include\}\s+(.+)$")
+
+# the name of the directive an info string opens
+DIRECTIVE = re.compile(r"^\{([^}]+)\}")
+
+# the directives whose body this reads as markup, among them the
+# admonitions, containers and version notes of docutils and sphinx. Every
+# directive not named here is read as code, so an include inside it is
+# not read: {code-block}, {eval-rst} and {toctree}, and also some that
+# do parse their body, as {figure}, {list-table} and {glossary}. The list
+# names only directives MyST renders by parsing their body, and grows
+# when a page needs an include inside another one
+PARSED = (
+    "admonition",
+    "attention",
+    "caution",
+    "danger",
+    "error",
+    "hint",
+    "important",
+    "note",
+    "tip",
+    "warning",
+    "seealso",
+    "topic",
+    "sidebar",
+    "epigraph",
+    "highlights",
+    "pull-quote",
+    "compound",
+    "container",
+    "only",
+    "hlist",
+    "acks",
+    "deprecated",
+    "versionadded",
+    "versionchanged",
+    "versionremoved",
+    "version-deprecated",
+    "version-added",
+    "version-changed",
+    "version-removed",
+)
+
+
+def includes(text: str) -> list[str]:
+    """Return the paths of the include fences of a page, in page order.
+
+    A fence opening a directive of `PARSED` holds markdown, which myst
+    parses, so a fence inside it is read. Any other fence is code, and
+    what it holds is shown, not parsed. A fence closes at a bare marker
+    of its own character, at least as long as the one that opened it.
+
+    :param text: the page.
+    :returns: the paths, as the fences write them.
+    """
+    paths: list[str] = []
+    # the open fences, innermost last: marker, and whether it is code
+    open_fences: list[tuple[str, bool]] = []
+    for line in text.splitlines():
+        fence = FENCE.match(line)
+        if fence is None:
+            continue
+        marker, info = fence.groups()
+        if open_fences:
+            top, _ = open_fences[-1]
+            if not info and marker[0] == top[0] and len(marker) >= len(top):
+                open_fences.pop()
+                continue
+            if open_fences[-1][1]:
+                continue
+        if include := INCLUDE.match(info):
+            paths.append(include[1])
+        directive = DIRECTIVE.match(info)
+        open_fences.append((marker, directive is None or directive[1] not in PARSED))
+    return paths
 
 
 def included(page: Path) -> tuple[str, str] | None:
@@ -40,7 +115,7 @@ def included(page: Path) -> tuple[str, str] | None:
     two files to start from, and which one is not a question this can
     answer.
     """
-    paths = INCLUDE.findall(page.read_text(encoding="utf-8"))
+    paths = includes(page.read_text(encoding="utf-8"))
     if len(paths) > 1:
         err_msg = f"{page.name}: {len(paths)} include fences, expected at most one"
         raise ValueError(err_msg)
@@ -172,6 +247,8 @@ class RootFileLinks(SphinxPostTransform):
         """
         for node in list(self.document.findall(nodes.reference)):
             url, _, anchor = node.get("refuri", "").partition("#")
+            # the path ends at a query, as `?plain=1`, which the page drops
+            url = url.partition("?")[0]
             target = url.removeprefix(BLOB)
             if target == url:
                 continue
