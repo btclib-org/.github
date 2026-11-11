@@ -1966,17 +1966,17 @@ without adding to it is deleted.
   such as `merge=union` resolves it without a word, the rebase exiting 0
   (btclib-org/.github#1582).
 - **Nothing already written is rewritten.** An entry speaks of its own
-  day, and a count in it that has since moved stays. The exception: a
+  day, and a count in it that has since moved stays. The exceptions: a
   release's pull request may correct which issues the body of a released
-  `CHANGELOG.md` entry cites, adding one it lacks, and nothing else in
-  the entry, since a wrong citation was false on its own day, where a
-  count that moved was true.
+  `CHANGELOG.md` entry cites, adding one it lacks, and wording in that
+  body that misleads about the change, and nothing else in the entry:
+  both were wrong on their own day, where a count that moved was true.
 - **A released section may leave `CHANGELOG.md` for its own
   `changelog/v<version>.md`**, that file holding one release and the
   index in `CHANGELOG.md`'s preamble linking it. Past a size ceiling
   GitHub's contents API answers a file with an empty `content` at HTTP
   200, and a file per release is what keeps each of them under it.
-  An archived file takes the same rule and the same exception.
+  An archived file takes the same rule and the same exceptions.
 
 ## 10. Workflows
 
