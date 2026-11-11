@@ -3187,14 +3187,17 @@ approval**, and it does not buy the OpenSSF Scorecard's `Code-Review`
 check, which does not count a review by a bot as code review.
 
 **The ack of record is `claude-review.yml`'s**, and an author's own is
-not one: a comment from the account that opened the pull request says
-its gates were run, and is not a reading. What triggers the workflow is
-section 10's *`pull_request` types* — the exemption there is for a group
-that does not cancel in progress, and this group cancels — and a comment
-naming `@claude`, which is how a head that moved after the review gets a
-fresh one. A closed run posts no review, the review job declining that
-action: what the type buys is the group, where the run supersedes a
-review nobody is going to read.
+not one: an author's comment says the author's gates were run, and is
+not a reading. On a pull request that `GOVERNANCE.md`'s pull-request
+agent opened, the review bot's verdict is still the ack of record, being
+a separate reading of the diff; that file's *Roles* says which account
+each of them posts as. What triggers the workflow is section 10's
+*`pull_request` types* — the exemption there is for a group that does
+not cancel in progress, and this group cancels — and a comment naming
+`@claude`, which is how a head that moved after the review gets a fresh
+one. A closed run posts no review, the review job declining that action:
+what the type buys is the group, where the run supersedes a review
+nobody is going to read.
 
 **One organization variable turns on the review and the `@claude`
 answer.** `reusable-claude-review.yml`'s two jobs each carry

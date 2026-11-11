@@ -704,7 +704,9 @@ jobs:
           # the editing step leaves empty files at the root that the base
           # does not hold, as .npmrc, package.json and .env. They are no
           # part of the edit, and the gates would run on them. tar packs
-          # ignored files too, so the list holds them as well
+          # ignored files too, so the list holds them as well. An empty
+          # root file the edit means to add, as .nojekyll or .gitkeep, is
+          # left out too, and the job log's `left out` line shows it
           untracked=$(mktemp)
           git -C "$GITHUB_WORKSPACE" ls-files --others -z > "$untracked"
           while IFS= read -r -d '' path; do
