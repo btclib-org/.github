@@ -148,13 +148,13 @@ The two point at opposite ends on purpose:
 the version line makes uv ignore the file and fall back to a default
 interpreter.
 
-**A job that runs the suite names the floor's patch**: one minor
-version's patches compile different code, a `with` in a test failing on
-3.12.3 and not on 3.12.13 (btclib-org/functional-tests#583), and a job
-asking for `X.Y` runs the patch its image ships. `test.yml` agrees with
-`.python-version` at `X.Y`, so the coverage job can be that job. The
-rejected alternatives are `X.Y.0` under `>=X.Y`, holding the tree to
-bugs later patches fix, and a second job outside `test.yml`.
+**A job that runs the suite names the floor's patch**, since patches
+differ: a `with` in a test fails on 3.12.3 and not on 3.12.13
+(btclib-org/functional-tests#583), and a job asking for `X.Y` runs its
+image's patch. `test.yml` agrees with `.python-version` at `X.Y`, so the
+coverage job can be that job. The rejected alternatives are `X.Y.0`
+under `>=X.Y`, holding the tree to bugs later patches fix, and a second
+job outside `test.yml`, rerunning the suite on the coverage job's `X.Y`.
 
 **A library publishes and declares the classifier
 `Topic :: Software Development :: Libraries :: Python Modules`. Every

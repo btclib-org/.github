@@ -614,7 +614,9 @@ def invocation(words: list[str]) -> tuple[bool, bool, str | None]:
     `-m pytest`; variable assignments may come first. An option of
     `VALUED` takes the next word, and every other option none. An
     interpreter is asked for by `uv run`'s `--python` or `-p`, spaced or
-    joined by `=`, or else by a `UV_PYTHON=` assignment before it.
+    joined by `=`, or else by a `UV_PYTHON=` assignment among the words
+    directly before `uv run`; `env UV_PYTHON=<version>` and an earlier `export`
+    are not read.
 
     :param words: the command's words.
     :returns: whether it runs pytest, whether through `uv run`, and the
@@ -701,12 +703,13 @@ def combinations(
     """Expand a job's matrix into the combinations GitHub runs.
 
     Each key's row is a list, or `${{ fromJSON(inputs.<name>) }}` for
-    what a caller handed; any other expression is one value that no
+    the versions a caller handed as that input; any other expression,
+    and an input that carries no version, is one value that no
     `exclude` row matches. An `exclude` row drops each combination it
-    matches in every key it names, and only then is each `include` row
-    added to every combination whose original values it does not
-    change, or run on its own where it fits none, as GitHub's workflow
-    syntax says.
+    matches in every key it names. Only then is each `include` row added
+    to every remaining combination of the keys' rows whose values it
+    does not change, or run as a combination of its own where it fits
+    none, which no later row extends, as GitHub's workflow syntax says.
 
     :param job: the job's own mapping.
     :param inputs: what a caller handed, by input.
@@ -720,28 +723,29 @@ def combinations(
         for name, row in matrix.items()
         if name not in {"include", "exclude"}
     }
-    found = (
+    original = (
         [dict(zip(rows, row, strict=True)) for row in product(*rows.values())]
         if rows
         else []
     )
     for dropped in rules(matrix, "exclude"):
-        found = [
+        original = [
             combination
-            for combination in found
+            for combination in original
             if any(combination.get(k) != v for k, v in dropped.items())
         ]
+    alone: list[dict[str, str]] = []
     for added in rules(matrix, "include"):
         fits = [
             combination
-            for combination in found
-            if all(combination.get(k, v) == v for k, v in added.items() if k in rows)
+            for combination in original
+            if all(combination[k] == v for k, v in added.items() if k in rows)
         ]
         for combination in fits:
             combination.update(added)
         if not fits:
-            found.append(added)
-    return found
+            alone.append(added)
+    return original + alone
 
 
 def values(row: object, inputs: dict[str, set[str]]) -> list[str]:
@@ -753,8 +757,8 @@ def values(row: object, inputs: dict[str, set[str]]) -> list[str]:
     """
     if isinstance(row, list):
         return [str(item) for item in row]
-    if listed := LISTED_INPUT.match(str(row)):
-        return sorted(inputs.get(listed[1], set()))
+    if (listed := LISTED_INPUT.match(str(row))) and listed[1] in inputs:
+        return sorted(inputs[listed[1]])
     return [str(row)]
 
 
@@ -931,6 +935,7 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
         "          python-version: ${{ inputs.python-version }}\n"
         "      - run: uv run --group test pytest --no-cov\n"
         "  many:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n"
+        "        os: ${{ fromJSON(inputs.runners) }}\n"
         "        python: ${{ fromJSON(inputs.python-versions) }}\n"
         "    steps:\n      - run: uv run -p ${{ matrix.python }} -m pytest\n"
         "      - run: uv run --python ${{ inputs.linted }} ruff check .\n"
@@ -975,6 +980,22 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
         '          - os: a\n            python: "3.11.9"\n'
         f"{on_matrix}"
     )
+    sweep = (
+        """      runners: '["macos-latest"]'\n"""
+        """      python-versions: '["3.11.9", "3.15"]'\n"""
+    )
+    alone = (
+        f"{steps_}    strategy:\n      matrix:\n        include:\n"
+        '          - python: "3.11.9"\n          - python: "3.15"\n'
+        f"{on_matrix}"
+    )
+    apart = (
+        f"{steps_}    strategy:\n      matrix:\n        os: [ubuntu-latest]\n"
+        "        include:\n"
+        '          - os: macos-latest\n            python: "3.11.9"\n'
+        '          - os: macos-latest\n            python: "3.12.3"\n'
+        f"{on_matrix}"
+    )
     added = (
         f"{steps_}    strategy:\n      matrix:\n        os: [a]\n"
         f'        include:\n          - python: "3.11.9"\n{on_matrix}'
@@ -1000,6 +1021,9 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
     cases: list[tuple[str, str, str]] = [
         ("3.11.9", f'{call}      python-version: "3.11.9"\n', ""),
         ("3.11.9", call + """      python-versions: '["3.11.9", "3.15"]'\n""", ""),
+        ("3.11.9", call + sweep, ""),
+        ("3.11.9", alone, ""),
+        ("3.11.9", apart, ""),
         ("3.11.9", f'{shared}    with:\n      python-version: "3.11.9"\n', ""),
         (
             "3.11.9",
@@ -1120,3 +1144,32 @@ def test_valued_is_what_uv_run_help_lists() -> None:
         f"uv run --help lists {sorted(found - VALUED)} beyond VALUED, and"
         f" VALUED holds {sorted(VALUED - found)} it does not list"
     )
+
+
+def test_combinations_read_the_workflow_syntax_example() -> None:
+    """`combinations` gives the jobs GitHub's own matrix example lists.
+
+    The example of *Running variations of jobs in a workflow*, where an
+    `include` row that fits no original combination runs on its own and
+    a later row does not extend it.
+    """
+    matrix = {
+        "fruit": ["apple", "pear"],
+        "animal": ["cat", "dog"],
+        "include": [
+            {"color": "green"},
+            {"color": "pink", "animal": "cat"},
+            {"fruit": "apple", "shape": "circle"},
+            {"fruit": "banana"},
+            {"fruit": "banana", "animal": "cat"},
+        ],
+    }
+    expected = [
+        {"fruit": "apple", "animal": "cat", "color": "pink", "shape": "circle"},
+        {"fruit": "apple", "animal": "dog", "color": "green", "shape": "circle"},
+        {"fruit": "pear", "animal": "cat", "color": "pink"},
+        {"fruit": "pear", "animal": "dog", "color": "green"},
+        {"fruit": "banana"},
+        {"fruit": "banana", "animal": "cat"},
+    ]
+    assert combinations({"strategy": {"matrix": matrix}}, {}) == expected
