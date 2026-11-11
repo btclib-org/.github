@@ -210,6 +210,29 @@ def test_seed_writes_a_file_per_tree_and_a_rerun_the_same(
     assert first.decode() == script.render(_FILE)
 
 
+def test_form_reads_the_criteria_files_at_the_pin(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Both files are read raw at `CRITERIA_REF`, once a run."""
+    asked: list[tuple[str, ...]] = []
+
+    def gh(*args: str) -> str:
+        asked.append(args)
+        return _METAL if script.METAL in args[-1] else _BASELINE
+
+    monkeypatch.setattr(script, "gh", gh)
+    assert script.form() == _WHERE
+    assert script.form() == _WHERE
+    assert asked == [
+        (
+            "-H",
+            "Accept: application/vnd.github.raw",
+            f"repos/ossf/best-practices-badge/contents/{path}?ref={script.CRITERIA_REF}",
+        )
+        for path in ("criteria/criteria.yml", "criteria/baseline_criteria.yml")
+    ]
+
+
 @pytest.mark.parametrize(
     "argv", [[], ["--seed", "out", "--files", "in"]], ids=["no-mode", "seed-files"]
 )
@@ -383,6 +406,28 @@ def test_a_tree_file_is_read_from_its_default_branch(
         ]
     ]
     assert script.read("btclib", None) == (None if expected is None else {})
+
+
+@pytest.mark.parametrize(
+    ("text", "error", "match"),
+    [
+        ('{"a_status": "Met",}', ValueError, "btclib: .bestpractices.json is not JSON"),
+        ('["a_status"]', TypeError, "btclib: .bestpractices.json holds no JSON object"),
+    ],
+    ids=["not-json", "not-an-object"],
+)
+def test_a_file_that_is_no_json_object_names_its_tree(
+    script: ModuleType,
+    tmp_path: Path,
+    text: str,
+    error: type[Exception],
+    match: str,
+) -> None:
+    """A broken file stops the run, naming the tree it belongs to."""
+    (tmp_path / "btclib").mkdir()
+    (tmp_path / "btclib" / ".bestpractices.json").write_text(text)
+    with pytest.raises(error, match=match):
+        script.read("btclib", tmp_path)
 
 
 def test_a_failure_other_than_a_missing_file_stops(

@@ -2522,24 +2522,14 @@ and the badge land together.
     whose badges section 2's row carries: `CII-Best-Practices` is the check
     reading that registration. Registering is an account action, carried by
     btclib-org/.github#350. The questionnaire restates how a vulnerability is
-    reported, how a release is cut and what gates a change, so a registered
-    tree reviews its answers at each release and at each advisory it
-    publishes. A periodic review is declined: an answer goes stale mostly at
-    a release. A tree six months without a release is owed an issue asking for
-    the review: `tests/bestpractices_test.py` reads the age, and a `BACKLOG`
-    row cites the issue.
-
-    **A registered tree's answers of record are its `.bestpractices.json`**,
-    at its top level, in the format bestpractices.dev documents for that file:
-    `tests/bestpractices_test.py` asks each tree this entry names for it. A
-    pull request after the release or the advisory changes the file, so that
-    a review shows as a diff. The site follows once it lands: the `--drift`
-    mode of `.github/scripts/bestpractices.py` lists each criterion where the
-    site answers otherwise than the file. It then prints a URL of the site's
-    edit form for each section of the form that holds one of them, carrying
-    the file's values. Whoever may edit the project opens each URL and saves
-    the form. The site is up to date when `--drift` prints nothing for the
-    tree. The script's docstring gives its other modes.
+    reported, how a release is cut and what gates a change. So a registered
+    tree's answers of record, its `.bestpractices.json`, are reviewed in a
+    pull request after each release and each advisory it publishes: an answer
+    cites the published tag and its assets. A periodic review is declined: an
+    answer goes stale mostly at a release. A tree six months without a release
+    is owed an issue asking for the review: `tests/bestpractices_test.py`
+    reads the age, and a `BACKLOG` row cites the issue. `shared/RELEASING.md`
+    says how the site follows the file.
 
     **Each of the same trees has had an issue labelled `good first issue` open
     at some time in the last 12 months.** bestpractices.dev's gold criterion

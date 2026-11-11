@@ -173,7 +173,14 @@ def read(tree: str, files: Path | None) -> Answers | None:
         text = path.read_text(encoding="utf-8") if path.is_file() else None
     if text is None:
         return None
-    given: Answers = json.loads(text)
+    try:
+        given = json.loads(text)
+    except json.JSONDecodeError as error:
+        msg = f"{tree}: {FILE} is not JSON: {error}"
+        raise ValueError(msg) from error
+    if not isinstance(given, dict):
+        msg = f"{tree}: {FILE} holds no JSON object"
+        raise TypeError(msg)
     return given
 
 
@@ -295,12 +302,11 @@ def drift(given: Answers, live: Answers) -> dict[str, list[str]]:
     """Return each criterion of the file the site answers otherwise."""
     out = {}
     for criterion in criteria(given):
-        fields = [
+        if fields := [
             suffix.removeprefix("_")
             for suffix in (STATUS, JUSTIFICATION)
             if given.get(criterion + suffix) != live.get(criterion + suffix)
-        ]
-        if fields:
+        ]:
             out[criterion] = fields
     return out
 
