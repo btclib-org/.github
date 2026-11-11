@@ -6,7 +6,7 @@
 version: "1"
 
 rule_settings:
-  # TURNED_OFF is empty: no rule conflicts with another gate, as section 10 says
+  # TURNED_OFF's rules, none at present
   disable: []
   # The lowest interpreter this tree's code runs on: pyproject.toml's
   # per-file-target-version holds the scripts it names at py311.

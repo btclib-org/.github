@@ -18,6 +18,7 @@ and a reader's, and not asked here.
 
 from __future__ import annotations
 
+import itertools
 import re
 from typing import TYPE_CHECKING
 
@@ -77,8 +78,7 @@ def long_comments(text: str, start: int | None) -> list[str]:
     :returns: the rows, `the head` or `## Status`, and their comments' lines.
     """
     lines = text.splitlines()
-    offsets = [0]
-    offsets.extend(offsets[-1] + len(line) + 1 for line in lines)
+    offsets = list(itertools.accumulate((len(line) + 1 for line in lines), initial=0))
     places: dict[str, int] = {}
     for row, line in enumerate(lines):
         if not BADGE.search(line):
