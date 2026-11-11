@@ -2530,13 +2530,15 @@ and the badge land together.
     row cites the issue.
 
     **A registered tree's answers of record are its `.bestpractices.json`**,
-    at its top level, in the format bestpractices.dev documents for that file.
-    The release or advisory pull request changes the file, so that a review
-    shows as a diff. The site follows once it lands: the `--drift` mode of
-    `.github/scripts/bestpractices.py` lists each criterion where the site
-    answers otherwise than the file, then prints a URL of the site's edit
-    form carrying the file's values, which whoever may edit the project opens
-    and saves. The site is up to date when `--drift` prints nothing for the
+    at its top level, in the format bestpractices.dev documents for that file:
+    `tests/bestpractices_test.py` asks each tree this entry names for it. A
+    pull request after the release or the advisory changes the file, so that
+    a review shows as a diff. The site follows once it lands: the `--drift`
+    mode of `.github/scripts/bestpractices.py` lists each criterion where the
+    site answers otherwise than the file. It then prints a URL of the site's
+    edit form for each section of the form that holds one of them, carrying
+    the file's values. Whoever may edit the project opens each URL and saves
+    the form. The site is up to date when `--drift` prints nothing for the
     tree. The script's docstring gives its other modes.
 
     **Each of the same trees has had an issue labelled `good first issue` open

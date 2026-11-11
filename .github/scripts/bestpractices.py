@@ -8,22 +8,29 @@ A tree is registered where its README carries a bestpractices.dev badge,
 which is where the project id is read from. Its answers of record are its
 `.bestpractices.json`, at the top level of its default branch: flat keys
 `<criterion>_status` and `<criterion>_justification`, keys sorted, two
-spaces of indent, a newline at the end. A criterion is named as the site
-reads it from that file: lower case, `-` and `.` made `_`, so that
-`OSPS-AC-01.01` is `osps_ac_01_01`.
+spaces of indent, a newline at the end. A key is named as the site
+reads it from that file, which matches names exactly: as the site's entry
+gives it, except an OSPS id, which the entry gives as `OSPS-AC-01.01` and
+the file as `osps_ac_01_01`.
 
     uv run --no-project --python 3.15 .github/scripts/bestpractices.py --drift
 
 `--seed <dir>` writes `<dir>/<tree>/.bestpractices.json` from the answers
-the site gives, for a tree's first file to copy. A null justification is
-left out. It writes nothing in this repository.
+the site gives, for a tree's first file to copy. It leaves out a null
+justification, a status of `?` and a status that is not a string, such
+as an integer: the site skips a `?` it reads in the file, and drops a
+status that is not a string. It writes nothing in this repository.
 
 `--drift` fetches each tree's answers from the site and lists each
 criterion the file holds whose status or justification there differs.
-Then it prints one URL of the site's edit form, which carries the file's
-status and justification for those criteria and forces them over the
-answers given, for whoever may edit the project to review and save. A
-tree whose file and site agree prints nothing.
+Then it prints one URL of the site's edit form for each section of the
+form that holds one of them, because the form ignores a field of another
+section. Each URL carries the file's values for its criteria and forces
+them over the answers given, for whoever may edit the project to review
+and save. The section of a criterion is the first level that lists it in
+the criteria files of ossf/best-practices-badge at `CRITERIA_REF`. A
+criterion no level lists there gets no URL, and is named on a line of
+its own. A tree whose file and site agree prints nothing.
 
 `--stale` fetches nothing from bestpractices.dev. It reads the files and
 lists each answer whose justification names a `v`-prefixed version older
@@ -47,6 +54,7 @@ of the trees' default branches.
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import re
 import subprocess
@@ -61,7 +69,22 @@ if TYPE_CHECKING:
 ORG = "btclib-org"
 FILE = ".bestpractices.json"
 PROJECT = "https://www.bestpractices.dev/projects/{id}.json"
-EDIT = "https://www.bestpractices.dev/projects/{id}/choose/edit?{query}"
+EDIT = "https://www.bestpractices.dev/projects/{id}/{section}/edit?{query}"
+UPSTREAM = "ossf/best-practices-badge"
+# the commit of UPSTREAM whose criteria files say where a criterion is,
+# moved by hand: a criterion added upstream after it is named by --drift
+# as in no section until the pin moves
+CRITERIA_REF = "9a7839f4e85a9c51cde24efa5cf386f97c2f2921"
+METAL = "criteria/criteria.yml"
+METAL_LEVEL = re.compile(r"^- '(\d+)':")
+METAL_CRITERION = re.compile(r"^      - ([A-Za-z0-9_]+):[ ]*(?:#.*)?$")
+# the form's section for each level, as upstream's REDIRECTS names it
+METAL_SECTION = {"0": "passing", "1": "silver", "2": "gold"}
+BASELINE = "criteria/baseline_criteria.yml"
+BASELINE_LEVEL = re.compile(r"^([^\s:]+):")
+BASELINE_CRITERION = re.compile(r"^      ([a-z0-9_]+):[ ]*(?:#.*)?$")
+OSPS = "OSPS-"
+UNKNOWN = "?"
 BADGE = re.compile(r"bestpractices\.dev/projects/(\d+)")
 STATUS = "_status"
 JUSTIFICATION = "_justification"
@@ -156,20 +179,62 @@ def read(tree: str, files: Path | None) -> Answers | None:
 
 def field(key: str) -> str:
     """Return a key of the site's entry as the file and the form name it."""
+    if not key.startswith(OSPS):
+        return key
     return key.lower().replace("-", "_").replace(".", "_")
 
 
 def answers(project: dict[str, Any]) -> Answers:
-    """Return each criterion's status and justification, nothing else."""
+    """Return each criterion's status and justification as the file has them."""
     out: Answers = {}
     for key, status in project.items():
         if key.endswith(STATUS):
             criterion = key.removesuffix(STATUS)
-            out[field(key)] = status
+            if isinstance(status, str) and status != UNKNOWN:
+                out[field(key)] = status
             justification = project.get(criterion + JUSTIFICATION)
             if justification is not None:
                 out[field(criterion) + JUSTIFICATION] = justification
     return out
+
+
+def _baseline(key: str) -> str | None:
+    """Return the section a top-level key of the baseline file names."""
+    return key if key.startswith("baseline-") else None
+
+
+def where(metal: str, baseline: str) -> dict[str, str]:
+    """Return the first section of the form that holds each criterion.
+
+    The criteria files are read a line at a time, at the indent each
+    gives a criterion, since this script runs on the standard library.
+    """
+    out: dict[str, str] = {}
+    for text, level, criterion, section_of in (
+        (metal, METAL_LEVEL, METAL_CRITERION, METAL_SECTION.get),
+        (baseline, BASELINE_LEVEL, BASELINE_CRITERION, _baseline),
+    ):
+        section = None
+        for line in text.splitlines():
+            if found := level.match(line):
+                section = section_of(found[1])
+            elif section and (found := criterion.match(line)):
+                out.setdefault(found[1], section)
+    return out
+
+
+@functools.cache
+def form() -> dict[str, str]:
+    """Return `where` for the criteria files at `CRITERIA_REF`."""
+    metal, baseline = (
+        gh(
+            "-H",
+            "Accept: application/vnd.github.raw",
+            f"repos/{UPSTREAM}/contents/{path}?ref={CRITERIA_REF}",
+        )
+        for path in (METAL, BASELINE)
+    )
+    return where(metal, baseline)
 
 
 def render(given: Answers) -> str:
@@ -240,15 +305,23 @@ def drift(given: Answers, live: Answers) -> dict[str, list[str]]:
     return out
 
 
-def proposal(number: int, given: Answers, differing: Sequence[str]) -> str:
-    """Return the edit form's URL carrying the file's values, forced."""
+def proposal(
+    number: int, section: str, given: Answers, differing: Sequence[str]
+) -> str:
+    """Return the edit form's URL carrying the file's values, forced.
+
+    A status the file does not hold is not sent, the form rejecting a
+    blank one. A justification it does not hold is sent blank.
+    """
     pairs = []
     for criterion in differing:
-        for suffix in (STATUS, JUSTIFICATION):
-            value = given.get(criterion + suffix)
-            pairs.append((criterion + suffix, "" if value is None else str(value)))
+        if (status := given.get(criterion + STATUS)) is not None:
+            pairs.append((criterion + STATUS, str(status)))
+        pairs.append(
+            (criterion + JUSTIFICATION, given.get(criterion + JUSTIFICATION) or "")
+        )
     pairs.append(("overrides", ",".join(key for key, _ in pairs)))
-    return EDIT.format(id=number, query=urlencode(pairs))
+    return EDIT.format(id=number, section=section, query=urlencode(pairs))
 
 
 def seed(root: Path, trees: dict[str, int]) -> None:
@@ -268,8 +341,16 @@ def drifted(found: dict[str, Answers], trees: dict[str, int]) -> list[str]:
             f"{tree}: {criterion}: {', '.join(fields)}"
             for criterion, fields in differing.items()
         ]
-        if differing:
-            out.append(f"{tree}: {proposal(trees[tree], given, list(differing))}")
+        if not differing:
+            continue
+        sections: dict[str | None, list[str]] = {}
+        for criterion in differing:
+            sections.setdefault(form().get(criterion), []).append(criterion)
+        for section, held in sections.items():
+            if section is None:
+                out.append(f"{tree}: in no section of the form: {', '.join(held)}")
+            else:
+                out.append(f"{tree}: {proposal(trees[tree], section, given, held)}")
     return out
 
 
@@ -318,6 +399,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="read DIR/<tree>/.bestpractices.json, not the trees' default branches",
     )
     args = parser.parse_args(argv)
+    if args.seed is not None and args.files is not None:
+        parser.error("--files reads the files, and --seed writes them")
     trees = registered()
 
     if args.seed is not None:

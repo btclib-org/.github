@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qsl, urlsplit
 
 import pytest
+import yaml
 
 from . import ORG, by_hand, gh_json
 from .grid_test import record
@@ -34,23 +35,78 @@ _SCRIPT = _ROOT / ".github" / "scripts" / "bestpractices.py"
 
 # the shapes measured on a real entry: a criterion with both keys, one
 # with a status and no justification key, an OSPS key in upper case, a
-# justification that is null, and a field that is no criterion
+# metal name with capitals, a justification that is null, a status of
+# `?`, a status that is an integer, and a field that is no criterion
 _PROJECT: dict[str, Any] = {
     "id": 1,
     "name": "btclib",
     "description_good_status": "Met",
     "sites_https_status": "Met",
     "sites_https_justification": "Signed v2026.9.1 and v2026.10.4.",
+    "require_2FA_status": "Met",
+    "require_2FA_justification": "The organization requires it.",
     "OSPS-QA-05.02_status": "Unmet",
     "OSPS-QA-05.02_justification": None,
+    "contribution_status": "?",
+    "OSPS-BR-01.02_status": 0,
 }
 
 # what the file holds for `_PROJECT`
 _FILE: dict[str, Any] = {
     "description_good_status": "Met",
     "osps_qa_05_02_status": "Unmet",
+    "require_2FA_justification": "The organization requires it.",
+    "require_2FA_status": "Met",
     "sites_https_justification": "Signed v2026.9.1 and v2026.10.4.",
     "sites_https_status": "Met",
+}
+
+# the shapes of upstream's criteria files at `CRITERIA_REF`: levels and
+# groups as ordered maps, a criterion listed again at a later level, a
+# criterion with a comment after it, and baseline metadata
+_METAL = """--- !!omap
+- '0': !!omap
+  - Basics: !!omap
+    - Basic project website content: !!omap
+      - description_good:
+          category: MUST
+      - sites_https:
+          category: MUST
+- '1': !!omap
+  - Basics: !!omap
+    - Project oversight: !!omap
+      - description_good:
+          category: MUST
+- '2': !!omap
+  - Security: !!omap
+    - Secure development knowledge: !!omap
+      - require_2FA:
+          category: MUST
+      - hardened_site: # After delivery_mitm?
+          category: MUST
+"""
+_BASELINE = """---
+_metadata:
+  source: OpenSSF Baseline HTML
+  total_controls: 64
+baseline-1:
+  General:
+    Controls:
+      osps_ac_01_01:
+        category: MUST
+baseline-2:
+  Quality:
+    Controls:
+      osps_qa_05_02:
+        category: MUST
+"""
+_WHERE = {
+    "description_good": "passing",
+    "sites_https": "passing",
+    "require_2FA": "gold",
+    "hardened_site": "gold",
+    "osps_ac_01_01": "baseline-1",
+    "osps_qa_05_02": "baseline-2",
 }
 
 _ID = 14253
@@ -83,8 +139,20 @@ def _files(tmp_path: Path, held: dict[str, dict[str, Any]]) -> Path:
 def test_answers_are_flat_and_named_as_the_site_reads_them(
     script: ModuleType,
 ) -> None:
-    """An OSPS key is lower case with `_`; a null justification is dropped."""
+    """Only an OSPS id changes name; what the site skips is left out.
+
+    `require_2FA` keeps its capitals. A null justification, a status of
+    `?` and one that is no string are dropped.
+    """
     assert script.answers(_PROJECT) == _FILE
+    assert json.loads(script.render(_FILE))["require_2FA_status"] == "Met"
+
+
+def test_where_names_the_first_section_listing_a_criterion(
+    script: ModuleType,
+) -> None:
+    """A criterion listed at two levels belongs to the first."""
+    assert script.where(_METAL, _BASELINE) == _WHERE
 
 
 def test_render_does_not_depend_on_the_order_fetched(script: ModuleType) -> None:
@@ -142,10 +210,15 @@ def test_seed_writes_a_file_per_tree_and_a_rerun_the_same(
     assert first.decode() == script.render(_FILE)
 
 
-def test_a_mode_is_required(script: ModuleType) -> None:
-    """With no mode the script stops before it reads anything."""
+@pytest.mark.parametrize(
+    "argv", [[], ["--seed", "out", "--files", "in"]], ids=["no-mode", "seed-files"]
+)
+def test_the_arguments_are_refused_before_anything_is_read(
+    script: ModuleType, argv: list[str]
+) -> None:
+    """No mode, and `--files` beside `--seed`, which reads no file."""
     with pytest.raises(SystemExit, match="2"):
-        script.main([])
+        script.main(argv)
 
 
 def test_differ_lists_a_status_not_the_same_in_every_tree(
@@ -215,11 +288,12 @@ def test_drift_lists_what_differs_and_proposes_the_file(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Each differing criterion, then a URL forcing the file's values."""
+    """Each differing criterion, then a URL per section forcing the file."""
     given = {
         **_FILE,
         "description_good_status": "Unmet",
         "description_good_justification": "Says what & why.",
+        "gone_status": "Met",
         "osps_qa_05_02_status": "Met",
         "sites_https_justification": "Signed v2026.11.1.",
     }
@@ -227,31 +301,52 @@ def test_drift_lists_what_differs_and_proposes_the_file(
     trees = {"btclib": _ID, "btclib-ecc": 2, "ecc": 3}
     monkeypatch.setattr(script, "registered", lambda: trees)
     monkeypatch.setattr(script, "fetch", lambda number: {**_PROJECT, "id": number})
+    monkeypatch.setattr(script, "form", lambda: _WHERE)
     assert script.main(["--drift", "--files", str(files)]) == 0
-    *listed, last = capsys.readouterr().out.splitlines()
+    *listed, passing, gone, baseline = capsys.readouterr().out.splitlines()
     assert listed == [
         "ecc: no .bestpractices.json",
         "btclib: description_good: status, justification",
+        "btclib: gone: status",
         "btclib: osps_qa_05_02: status",
         "btclib: sites_https: justification",
     ]
-    tree, url = last.split(": ", 1)
-    assert tree == "btclib"
-    parts = urlsplit(url)
-    assert (parts.scheme, parts.netloc, parts.path) == (
-        "https",
-        "www.bestpractices.dev",
-        f"/projects/{_ID}/choose/edit",
-    )
-    query = parse_qsl(parts.query, keep_blank_values=True)
-    assert query == [
-        ("description_good_status", "Unmet"),
-        ("description_good_justification", "Says what & why."),
-        ("osps_qa_05_02_status", "Met"),
-        ("osps_qa_05_02_justification", ""),
-        ("sites_https_status", "Met"),
-        ("sites_https_justification", "Signed v2026.11.1."),
-        ("overrides", ",".join(key for key, _ in query[:-1])),
+    assert gone == "btclib: in no section of the form: gone"
+    proposed = {}
+    for line in (passing, baseline):
+        tree, url = line.split(": ", 1)
+        assert tree == "btclib"
+        parts = urlsplit(url)
+        assert (parts.scheme, parts.netloc) == ("https", "www.bestpractices.dev")
+        proposed[parts.path] = parse_qsl(parts.query, keep_blank_values=True)
+    assert proposed == {
+        f"/projects/{_ID}/passing/edit": [
+            ("description_good_status", "Unmet"),
+            ("description_good_justification", "Says what & why."),
+            ("sites_https_status", "Met"),
+            ("sites_https_justification", "Signed v2026.11.1."),
+            (
+                "overrides",
+                (
+                    "description_good_status,description_good_justification,"
+                    "sites_https_status,sites_https_justification"
+                ),
+            ),
+        ],
+        f"/projects/{_ID}/baseline-2/edit": [
+            ("osps_qa_05_02_status", "Met"),
+            ("osps_qa_05_02_justification", ""),
+            ("overrides", "osps_qa_05_02_status,osps_qa_05_02_justification"),
+        ],
+    }
+
+
+def test_a_status_the_file_lacks_is_not_proposed(script: ModuleType) -> None:
+    """The form rejects a blank status, so only the justification goes."""
+    url = script.proposal(_ID, "passing", {"a_justification": "Why."}, ["a"])
+    assert parse_qsl(urlsplit(url).query) == [
+        ("a_justification", "Why."),
+        ("overrides", "a_justification"),
     ]
 
 
@@ -327,3 +422,82 @@ def test_a_registered_tree_released_within_six_months(repository: str) -> None:
         f" {ORG}/.github asking for its bestpractices.dev review; "
         + by_hand(repository, "gh release view --json tagName,publishedAt")
     )
+
+
+@pytest.mark.integration
+def test_a_registered_tree_holds_its_answers(
+    script: ModuleType, repository: str
+) -> None:
+    """Section 10 makes a tree's `.bestpractices.json` its answers of record.
+
+    The file is on the tree's default branch, as the script writes it.
+
+    :param script: the script, loaded by path.
+    :param repository: the repository asked about.
+    """
+    if repository not in record()["scorecard"]:
+        pytest.skip(f"section 10's scorecard entry does not name {repository}")
+    text = script.tree_file(repository)
+    assert text is not None, (
+        f"{repository} holds no .bestpractices.json: copy the one"
+        f" `bestpractices.py --seed` writes for it; "
+        + by_hand(
+            repository, "gh api repos/{owner}/{repo}/contents/.bestpractices.json"
+        )
+    )
+    assert script.render(json.loads(text)) == text
+
+
+class _Loader(yaml.SafeLoader):
+    """Read `!!omap` as its pairs, in order."""
+
+
+def _pairs(loader: yaml.SafeLoader, node: yaml.Node) -> list[tuple[Any, Any]]:
+    """Return an ordered map's pairs, as `!!omap` lists them."""
+    assert isinstance(node, yaml.SequenceNode)
+    return [
+        next(iter(pair.items())) for pair in loader.construct_sequence(node, deep=True)
+    ]
+
+
+_Loader.add_constructor("tag:yaml.org,2002:omap", _pairs)
+
+
+def _metal(text: str, sections: dict[str, str]) -> dict[str, str]:
+    """Return the first section of each criterion `criteria.yml` lists."""
+    out: dict[str, str] = {}
+    for level, groups in yaml.load(text, Loader=_Loader):  # noqa: S506
+        for _, minors in groups:
+            for _, listed in minors:
+                for criterion, _ in listed:
+                    out.setdefault(criterion, sections[level])
+    return out
+
+
+def _baseline(text: str) -> dict[str, str]:
+    """Return the section of each criterion `baseline_criteria.yml` lists."""
+    out: dict[str, str] = {}
+    for level, groups in yaml.safe_load(text).items():
+        if level.startswith("baseline-"):
+            for group in groups.values():
+                for listed in group.values():
+                    for criterion in listed:
+                        out.setdefault(criterion, level)
+    return out
+
+
+@pytest.mark.integration
+def test_the_criteria_files_read_as_a_yaml_parser_reads_them(
+    script: ModuleType,
+) -> None:
+    """`where` agrees with PyYAML on upstream's files at `CRITERIA_REF`."""
+    metal, baseline = (
+        script.gh(
+            "-H",
+            "Accept: application/vnd.github.raw",
+            f"repos/{script.UPSTREAM}/contents/{path}?ref={script.CRITERIA_REF}",
+        )
+        for path in (script.METAL, script.BASELINE)
+    )
+    expected = _metal(metal, script.METAL_SECTION) | _baseline(baseline)
+    assert script.where(metal, baseline) == expected
