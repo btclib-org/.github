@@ -90,12 +90,12 @@ KNOWN: tuple[tuple[int, str, str], ...] = (
 )
 """Citations already known broken, as `(issue, path, citation)`.
 
-A row holds a citation in a file the tree cannot change alone, as
-`.bestpractices.json`, which stays equal to bestpractices.dev until the
-site's answer is saved. The issue is this tracker's, and says how the
-citation gets fixed. The row exempts that citation in that path of every
-tree, and nothing else there. `test_a_known_break_still_breaks` fails
-once no tree holds it, so the row leaves with the fix.
+A row holds a citation whose fix waits on a decision its issue records,
+as the answers in `.bestpractices.json`. The issue is this tracker's and
+says how the citation gets fixed. The row exempts that citation in that
+path of every tree, and nothing else there.
+`test_a_known_break_still_breaks` fails once no tree holds it, so the row
+leaves with the fix.
 """
 
 
