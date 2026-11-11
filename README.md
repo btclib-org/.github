@@ -2522,14 +2522,14 @@ and the badge land together.
     whose badges section 2's row carries: `CII-Best-Practices` is the check
     reading that registration. Registering is an account action, carried by
     btclib-org/.github#350. The questionnaire restates how a vulnerability is
-    reported, how a release is cut and what gates a change, so a registered
-    tree reviews its answers at each release and at each advisory it
-    publishes. A periodic review is declined: an answer goes stale mostly at
-    a release. A tree six months without a release is owed an issue asking for
-    the review: `tests/bestpractices_test.py` reads the age, and a `BACKLOG`
-    row cites the issue. `.github/scripts/bestpractices.py` saves the answers
-    in this repository, in `bestpractices/<tree>.json`, so that a review shows
-    as a diff.
+    reported, how a release is cut and what gates a change. So a registered
+    tree's answers of record, its `.bestpractices.json`, are reviewed in a
+    pull request after each release and each advisory it publishes: an answer
+    cites the published tag and its assets. A periodic review is declined: an
+    answer goes stale mostly at a release. A tree six months without a release
+    is owed an issue asking for the review: `tests/bestpractices_test.py`
+    reads the age, and a `BACKLOG` row cites the issue. `shared/RELEASING.md`
+    says how the site follows the file.
 
     **Each of the same trees has had an issue labelled `good first issue` open
     at some time in the last 12 months.** bestpractices.dev's gold criterion

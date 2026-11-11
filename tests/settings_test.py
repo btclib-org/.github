@@ -44,8 +44,8 @@ _SCRIPT = Path(__file__).parent.parent / ".github" / "scripts" / "bestpractices.
 def badge_trees() -> set[str]:
     """Return the trees whose README carries a bestpractices.dev badge.
 
-    Read by the script that registers them, so that this suite and the
-    saved answers agree on which trees these are.
+    Read by the script that reads their answers, so that this suite and
+    that script agree on which trees these are.
 
     :returns: their names.
     """
