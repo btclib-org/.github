@@ -2527,9 +2527,17 @@ and the badge land together.
     publishes. A periodic review is declined: an answer goes stale mostly at
     a release. A tree six months without a release is owed an issue asking for
     the review: `tests/bestpractices_test.py` reads the age, and a `BACKLOG`
-    row cites the issue. `.github/scripts/bestpractices.py` saves the answers
-    in this repository, in `bestpractices/<tree>.json`, so that a review shows
-    as a diff.
+    row cites the issue.
+
+    **A registered tree's answers of record are its `.bestpractices.json`**,
+    at its top level, in the format bestpractices.dev documents for that file.
+    The release or advisory pull request changes the file, so that a review
+    shows as a diff. The site follows once it lands: the `--drift` mode of
+    `.github/scripts/bestpractices.py` lists each criterion where the site
+    answers otherwise than the file, then prints a URL of the site's edit
+    form carrying the file's values, which whoever may edit the project opens
+    and saves. The site is up to date when `--drift` prints nothing for the
+    tree. The script's docstring gives its other modes.
 
     **Each of the same trees has had an issue labelled `good first issue` open
     at some time in the last 12 months.** bestpractices.dev's gold criterion

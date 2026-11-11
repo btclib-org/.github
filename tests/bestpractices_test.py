@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Tests for the bestpractices.dev snapshot, and for how old a review gets.
+"""Tests for the bestpractices.dev answers, and for how old a review gets.
 
 The script's tests are offline: `gh` and the bestpractices.dev fetch are
 replaced by fixtures. The script is loaded by path, `.github/scripts`
@@ -14,10 +14,12 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+from urllib.parse import parse_qsl, urlsplit
 
 import pytest
 
@@ -43,6 +45,14 @@ _PROJECT: dict[str, Any] = {
     "OSPS-QA-05.02_justification": None,
 }
 
+# what the file holds for `_PROJECT`
+_FILE: dict[str, Any] = {
+    "description_good_status": "Met",
+    "osps_qa_05_02_status": "Unmet",
+    "sites_https_justification": "Signed v2026.9.1 and v2026.10.4.",
+    "sites_https_status": "Met",
+}
+
 _ID = 14253
 _README = """
 [![Best Practices](https://www.bestpractices.dev/projects/14253/badge)](https://www.bestpractices.dev/projects/14253)
@@ -62,16 +72,19 @@ def script(monkeypatch: pytest.MonkeyPatch) -> ModuleType:
     return module
 
 
-def test_answers_keep_status_and_justification_only(script: ModuleType) -> None:
-    """Each criterion has both fields, a missing justification as `None`."""
-    assert script.answers(_PROJECT) == {
-        "description_good": {"status": "Met", "justification": None},
-        "sites_https": {
-            "status": "Met",
-            "justification": "Signed v2026.9.1 and v2026.10.4.",
-        },
-        "OSPS-QA-05.02": {"status": "Unmet", "justification": None},
-    }
+def _files(tmp_path: Path, held: dict[str, dict[str, Any]]) -> Path:
+    """Write each tree's file where `--seed` puts it, and return the root."""
+    for tree, given in held.items():
+        (tmp_path / tree).mkdir()
+        (tmp_path / tree / ".bestpractices.json").write_text(json.dumps(given))
+    return tmp_path
+
+
+def test_answers_are_flat_and_named_as_the_site_reads_them(
+    script: ModuleType,
+) -> None:
+    """An OSPS key is lower case with `_`; a null justification is dropped."""
+    assert script.answers(_PROJECT) == _FILE
 
 
 def test_render_does_not_depend_on_the_order_fetched(script: ModuleType) -> None:
@@ -93,20 +106,20 @@ def test_the_badge_names_the_project(script: ModuleType) -> None:
 
 def test_stale_lists_what_is_older_than_the_release(script: ModuleType) -> None:
     """Older versions and dates, and the undated words, are listed."""
-    saved = {
-        "a": {"justification": "Since v2026.9.30, 2026-10-01 and v2026.9.30."},
-        "b": {"justification": "In the next release; the Draft says so."},
-        "c": {"justification": "v2026.10.4 and v2026.11.1, until 2027-09-30."},
-        "d": {"justification": "2026.9.30 without its v, Python 3.10."},
-        "e": {"justification": None},
+    given = {
+        "a_justification": "Since v2026.9.30, 2026-10-01 and v2026.9.30.",
+        "b_justification": "In the next release; the Draft says so.",
+        "c_justification": "v2026.10.4 and v2026.11.1, until 2027-09-30.",
+        "d_justification": "2026.9.30 without its v, Python 3.10.",
+        "e_status": "Met",
     }
-    assert script.stale(saved, "v2026.10.4", "2026-10-03T22:09:48Z") == [
+    assert script.stale(given, "v2026.10.4", "2026-10-03T22:09:48Z") == [
         "a: v2026.9.30, 2026-10-01",
         "b: next release, draft",
     ]
 
 
-def test_a_rerun_with_nothing_changed_writes_the_same_files(
+def test_seed_writes_a_file_per_tree_and_a_rerun_the_same(
     script: ModuleType, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """Only a tree with a badge is written, and a second run changes nothing."""
@@ -119,54 +132,54 @@ def test_a_rerun_with_nothing_changed_writes_the_same_files(
 
     monkeypatch.setattr(script, "gh", gh)
     monkeypatch.setattr(script, "fetch", lambda number: {**_PROJECT, "id": number})
-    assert script.main(["--saved", str(tmp_path)]) == 0
-    first = (tmp_path / "btclib.json").read_bytes()
-    assert script.main(["--saved", str(tmp_path)]) == 0
-    assert [path.name for path in tmp_path.iterdir()] == ["btclib.json"]
-    assert (tmp_path / "btclib.json").read_bytes() == first
+    assert script.main(["--seed", str(tmp_path)]) == 0
+    written = tmp_path / "btclib" / ".bestpractices.json"
+    first = written.read_bytes()
+    assert script.main(["--seed", str(tmp_path)]) == 0
+    assert [path.name for path in tmp_path.iterdir()] == ["btclib"]
+    assert [path.name for path in written.parent.iterdir()] == [written.name]
+    assert written.read_bytes() == first
+    assert first.decode() == script.render(_FILE)
 
 
-def test_the_file_of_a_tree_no_longer_registered_is_removed(
-    script: ModuleType, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
-    """A saved file whose tree has lost its badge goes with it."""
-    (tmp_path / "bbt.json").write_text("{}\n")
-    monkeypatch.setattr(script, "registered", lambda: {"btclib": _ID})
-    monkeypatch.setattr(script, "fetch", lambda number: {**_PROJECT, "id": number})
-    assert script.main(["--saved", str(tmp_path)]) == 0
-    assert [path.name for path in tmp_path.iterdir()] == ["btclib.json"]
+def test_a_mode_is_required(script: ModuleType) -> None:
+    """With no mode the script stops before it reads anything."""
+    with pytest.raises(SystemExit, match="2"):
+        script.main([])
 
 
 def test_differ_lists_a_status_not_the_same_in_every_tree(
-    script: ModuleType, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    script: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Only a criterion whose statuses differ is listed, trees sorted."""
-    saved = {
-        "btclib": {"a": {"status": "Met"}, "b": {"status": "Met"}},
-        "bitcoin-core-rpc": {"a": {"status": "Unmet"}, "b": {"status": "Met"}},
-        "btclib-ecc": {
-            "a": {"status": "Met"},
-            "b": {"status": "Met"},
-            "c": {"status": "Met"},
-        },
+    held = {
+        "btclib": {"a_status": "Met", "b_status": "Met"},
+        "bitcoin-core-rpc": {"a_status": "Unmet", "b_status": "Met"},
+        "btclib-ecc": {"a_status": "Met", "b_status": "Met", "c_status": "Met"},
     }
-    for tree, given in saved.items():
-        (tmp_path / f"{tree}.json").write_text(json.dumps(given))
-    assert script.main(["--differ", "--saved", str(tmp_path)]) == 0
+    files = _files(tmp_path, held)
+    trees = dict.fromkeys(sorted([*held, "ecc"]), _ID)
+    monkeypatch.setattr(script, "registered", lambda: trees)
+    assert script.main(["--differ", "--files", str(files)]) == 0
     assert capsys.readouterr().out == (
+        "ecc: no .bestpractices.json\n"
         "a: bitcoin-core-rpc Unmet, btclib Met, btclib-ecc Met\n"
         "c: bitcoin-core-rpc -, btclib -, btclib-ecc Met\n"
     )
 
 
-def test_stale_reads_the_saved_files_and_the_latest_release(
+def test_stale_reads_the_files_and_the_latest_release(
     script: ModuleType,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Each line names the tree, its release, the criterion and what is old."""
-    (tmp_path / "btclib.json").write_text(script.render(script.answers(_PROJECT)))
+    files = _files(tmp_path, {"btclib": _FILE})
+    monkeypatch.setattr(script, "registered", lambda: {"btclib": _ID, "ecc": 1})
     release = {"tag_name": "v2026.10.4", "published_at": "2026-10-03T22:09:48Z"}
     asked: list[tuple[str, ...]] = []
 
@@ -175,18 +188,121 @@ def test_stale_reads_the_saved_files_and_the_latest_release(
         return json.dumps(release)
 
     monkeypatch.setattr(script, "gh", gh)
-    assert script.main(["--stale", "--saved", str(tmp_path)]) == 0
+    assert script.main(["--stale", "--files", str(files)]) == 0
     assert asked == [("repos/btclib-org/btclib/releases/latest",)]
-    assert capsys.readouterr().out == "btclib v2026.10.4: sites_https: v2026.9.1\n"
+    assert capsys.readouterr().out == (
+        "ecc: no .bestpractices.json\nbtclib v2026.10.4: sites_https: v2026.9.1\n"
+    )
+
+
+def test_drift_prints_nothing_for_a_tree_that_agrees(
+    script: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The file `--seed` writes agrees with the site it was read from."""
+    monkeypatch.setattr(script, "registered", lambda: {"btclib": _ID})
+    monkeypatch.setattr(script, "fetch", lambda number: {**_PROJECT, "id": number})
+    assert script.main(["--seed", str(tmp_path)]) == 0
+    assert script.main(["--drift", "--files", str(tmp_path)]) == 0
+    assert capsys.readouterr().out == ""
+
+
+def test_drift_lists_what_differs_and_proposes_the_file(
+    script: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Each differing criterion, then a URL forcing the file's values."""
+    given = {
+        **_FILE,
+        "description_good_status": "Unmet",
+        "description_good_justification": "Says what & why.",
+        "osps_qa_05_02_status": "Met",
+        "sites_https_justification": "Signed v2026.11.1.",
+    }
+    files = _files(tmp_path, {"btclib": given, "btclib-ecc": _FILE})
+    trees = {"btclib": _ID, "btclib-ecc": 2, "ecc": 3}
+    monkeypatch.setattr(script, "registered", lambda: trees)
+    monkeypatch.setattr(script, "fetch", lambda number: {**_PROJECT, "id": number})
+    assert script.main(["--drift", "--files", str(files)]) == 0
+    *listed, last = capsys.readouterr().out.splitlines()
+    assert listed == [
+        "ecc: no .bestpractices.json",
+        "btclib: description_good: status, justification",
+        "btclib: osps_qa_05_02: status",
+        "btclib: sites_https: justification",
+    ]
+    tree, url = last.split(": ", 1)
+    assert tree == "btclib"
+    parts = urlsplit(url)
+    assert (parts.scheme, parts.netloc, parts.path) == (
+        "https",
+        "www.bestpractices.dev",
+        f"/projects/{_ID}/choose/edit",
+    )
+    query = parse_qsl(parts.query, keep_blank_values=True)
+    assert query == [
+        ("description_good_status", "Unmet"),
+        ("description_good_justification", "Says what & why."),
+        ("osps_qa_05_02_status", "Met"),
+        ("osps_qa_05_02_justification", ""),
+        ("sites_https_status", "Met"),
+        ("sites_https_justification", "Signed v2026.11.1."),
+        ("overrides", ",".join(key for key, _ in query[:-1])),
+    ]
 
 
 @pytest.mark.parametrize(
-    "path", sorted((_ROOT / "bestpractices").glob("*.json")), ids=lambda p: p.name
+    ("code", "stderr", "expected"),
+    [(0, "", "{}\n"), (1, "gh: Not Found (HTTP 404)\n", None)],
+    ids=["found", "missing"],
 )
-def test_a_saved_file_is_what_the_script_writes(script: ModuleType, path: Path) -> None:
-    """A hand edit that the next run would undo is refused now."""
-    text = path.read_text(encoding="utf-8")
-    assert script.render(json.loads(text)) == text
+def test_a_tree_file_is_read_from_its_default_branch(
+    script: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    code: int,
+    stderr: str,
+    expected: str | None,
+) -> None:
+    """The raw contents of the file, or `None` where the API has none."""
+    asked: list[list[str]] = []
+
+    def run(args: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+        asked.append(args)
+        return subprocess.CompletedProcess(
+            args, code, "{}\n" if code == 0 else "", stderr
+        )
+
+    monkeypatch.setattr(script.subprocess, "run", run)
+    assert script.tree_file("btclib") == expected
+    assert asked == [
+        [
+            "gh",
+            "api",
+            "-H",
+            "Accept: application/vnd.github.raw",
+            "repos/btclib-org/btclib/contents/.bestpractices.json",
+        ]
+    ]
+    assert script.read("btclib", None) == (None if expected is None else {})
+
+
+def test_a_failure_other_than_a_missing_file_stops(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A tree is not listed as having no file because the API failed."""
+
+    def run(args: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(
+            args, 1, "", "gh: Bad credentials (HTTP 401)\n"
+        )
+
+    monkeypatch.setattr(script.subprocess, "run", run)
+    with pytest.raises(subprocess.CalledProcessError):
+        script.tree_file("btclib")
 
 
 # the longest a registered tree goes without a release, and so a review
