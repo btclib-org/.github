@@ -85,6 +85,19 @@ OPENING = re.compile(r"(?m)^## (\d+)\. ")
 HISTORY = re.compile(r"^(CHANGELOG|RELEASE_NOTES)\.md$|^changelog/")
 """Where section 9 keeps a citation of a heading as written: it is a record."""
 
+KNOWN: tuple[tuple[int, str, str], ...] = (
+    (2159, ".bestpractices.json", "GOVERNANCE.md's *Roles*"),
+)
+"""Citations already known broken, as `(issue, path, citation)`.
+
+A row holds a citation broken in another tree, whose fix is that tree's
+own pull request, as the answers in `.bestpractices.json`. The issue is
+this tracker's and says how the citation gets fixed. The row exempts that
+citation in that path of every tree, and nothing else there.
+`test_a_known_break_still_breaks` fails once no tree holds it, so the row
+leaves with the fix.
+"""
+
 
 def flattened(text: str) -> str:
     """Reduce prose to the words in it, whatever lies between them.
@@ -167,11 +180,27 @@ def unresolved(
 
 
 def dead(root: Path, standard: dict[str, str]) -> list[str]:
-    """List the citations of a tree that name words nothing holds.
+    """List the citations of a tree that resolve nowhere, outside `KNOWN`.
 
     :param root: the root of the checkout.
     :param standard: each section number of the standard against its words.
     :returns: one line per citation resolving nowhere, sorted.
+    """
+    known = known_lines()
+    return [line for line in broken(root, standard) if line not in known]
+
+
+def known_lines() -> set[str]:
+    """Return the lines `unresolved` writes for the rows of `KNOWN`."""
+    return {f"{path}: {citation}" for _, path, citation in KNOWN}
+
+
+def broken(root: Path, standard: dict[str, str]) -> list[str]:
+    """List every citation of a tree that names words nothing holds.
+
+    :param root: the root of the checkout.
+    :param standard: each section number of the standard against its words.
+    :returns: one line per citation resolving nowhere, sorted, `KNOWN` too.
     """
     paths = tracked(root)
     documents: dict[str, str] = {}
@@ -291,3 +320,18 @@ def test_every_citation_of_a_section_resolves_in_what_it_names(
         f"citations naming words no document holds: {broken}; "
         + by_hand(repository, """grep -rEn "'s [*\\"]" .""")
     )
+
+
+def test_a_known_break_still_breaks(trees: dict[str, Path]) -> None:
+    """Each row of `KNOWN` still names a broken citation in some tree.
+
+    :param trees: the checkouts.
+    """
+    standard = sections((trees[SELF] / "README.md").read_text(encoding="utf-8"))
+    found = {line for root in trees.values() for line in broken(root, standard)}
+    gone = [
+        (issue, path, citation)
+        for issue, path, citation in KNOWN
+        if f"{path}: {citation}" not in found
+    ]
+    assert not gone, f"KNOWN rows whose citation no tree holds broken: {gone}"
