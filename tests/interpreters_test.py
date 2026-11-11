@@ -475,9 +475,6 @@ LISTED_INPUT = re.compile(r"^\$\{\{\s*fromJSON\(\s*inputs\.([\w-]+)\s*\)\s*\}\}$
 EXPRESSION = re.compile(r"\$\{\{\s*(.*?)\s*\}\}")
 """An expression in a `run:` script, closed up so that it splits as one word."""
 
-ENDS = frozenset({"&&", "||", ";", "|", "&"})
-"""The words that end one shell command and start the next."""
-
 VALUED = frozenset(
     {
         "--allow-insecure-host",
@@ -573,14 +570,64 @@ def uncommented(line: str) -> str:
     return line
 
 
+def literal(line: str) -> list[bool]:
+    """Say which characters of a line the shell reads as plain text.
+
+    A character inside quotes, or escaped by a backslash outside single
+    quotes, is plain; the quotes and the backslash are not.
+
+    :param line: one line of a script.
+    :returns: one flag per character.
+    """
+    flags: list[bool] = []
+    quote = ""
+    escaped = False
+    for char in line:
+        plain = escaped or (bool(quote) and char != quote)
+        if escaped:
+            escaped = False
+        elif char == "\\" and quote != "'":
+            escaped = True
+        elif quote:
+            quote = "" if char == quote else quote
+        elif char in "'\"":
+            quote = char
+        flags.append(plain)
+    return flags
+
+
+def pieces(line: str) -> list[tuple[str, bool]]:
+    """Cut one line where the shell would, before unquoting.
+
+    A cut falls at whitespace and at each `;`, `|` or `&`, so at `&&` and
+    `||` too, each read as `literal` says: a quoted or escaped one is
+    part of a word.
+
+    :param line: one line of a script, its comment dropped.
+    :returns: each piece, and whether it is a separator.
+    """
+    found: list[tuple[str, bool]] = []
+    word = ""
+    for char, plain in zip(line, literal(line), strict=True):
+        if plain or not (char.isspace() or char in ";|&"):
+            word += char
+            continue
+        if word:
+            found.append((word, False))
+        word = ""
+        if not char.isspace():
+            found.append((char, True))
+    return [*found, (word, False)] if word else found
+
+
 def commands(run: str) -> list[list[str]]:
     """Split a `run:` script into the words of each of its commands.
 
     A backslash ending a line continues it, a comment is dropped as
-    `uncommented` drops it, and an unquoted `&&`, `||`, `;`, `|` or `&`
-    ends a command; a quoted one is a word. A line with an unclosed
-    quote gives no command. A backslash escaping a separator is not
-    read as an escape.
+    `uncommented` drops it, and the line is cut as `pieces` cuts it, so
+    a quoted or escaped separator is a word. Each word is then unquoted
+    as the shell would. A line with an unclosed quote, or ending in a
+    lone backslash, gives no command.
 
     :param run: the script.
     :returns: each command's words, unquoted, in order.
@@ -591,17 +638,16 @@ def commands(run: str) -> list[list[str]]:
         run.replace("\\\n", " "),
     )
     for line in joined.splitlines():
-        lexer = shlex.shlex(uncommented(line), posix=False, punctuation_chars=True)
-        lexer.whitespace_split = True
-        lexer.commenters = ""
         try:
-            tokens = list(lexer)
-            words = [" ".join(shlex.split(token)) for token in tokens]
+            words = [
+                (piece if ends else " ".join(shlex.split(piece)), ends)
+                for piece, ends in pieces(uncommented(line))
+            ]
         except ValueError:
             continue
         command: list[str] = []
-        for token, word in [*zip(tokens, words, strict=True), (";", ";")]:
-            if token not in ENDS:
+        for word, ends in [*words, (";", True)]:
+            if not ends:
                 command.append(word)
             elif command:
                 found.append(command)
@@ -804,7 +850,8 @@ def applies(step: dict[str, Any], binding: dict[str, str]) -> bool:
 
     An `if:` naming no `matrix.` key is taken to hold, unless it is the
     literal `false`. One naming a key holds where it is the `MATRIX_TEST`
-    form and the combination agrees; any other one naming a key is taken
+    form and the combination agrees, compared regardless of case as
+    GitHub compares strings; any other one naming a key is taken
     not to hold, so its step counts nothing.
 
     :param step: the step's own mapping.
@@ -819,7 +866,8 @@ def applies(step: dict[str, Any], binding: dict[str, str]) -> bool:
     test = MATRIX_TEST.match(condition)
     if not test or test[1] not in binding:
         return False
-    return (binding[test[1]] == test[3]) == (test[2] == "==")
+    agrees = binding[test[1]].casefold() == test[3].casefold()
+    return agrees == (test[2] == "==")
 
 
 def ran(job: dict[str, Any], inputs: dict[str, set[str]]) -> set[str]:
@@ -1080,6 +1128,11 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
         "    steps:\n      - if: IF\n"
         "        run: uv run --python ${{ matrix.python }} pytest\n"
     )
+    cased = (
+        f"{steps_}    strategy:\n      matrix:\n        os: [Ubuntu]\n"
+        "    steps:\n      - if: matrix.os == 'ubuntu'\n"
+        "        run: uv run --python 3.11.9 pytest\n"
+    )
     added = (
         f"{steps_}    strategy:\n      matrix:\n        os: [a]\n"
         f'        include:\n          - python: "3.11.9"\n{on_matrix}'
@@ -1114,6 +1167,16 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
         ("3.11.9", run("uv run --python 3.11.9 pytest --help"), missing),
         ("3.11.9", run("echo ';' uv run --python 3.11.9 pytest"), missing),
         ("3.11.9", run("echo x; uv run --python 3.11.9 pytest"), ""),
+        ("3.11.9", run('uv run -p 3.11.9 pytest --junitxml="a b.xml"'), ""),
+        ("3.11.9", run('uv run -p 3.11.9 pytest --junitxml="a;b.xml"'), ""),
+        ("3.11.9", run('uv run -p 3.11.9 pytest -k="not slow"'), ""),
+        ("3.11.9", run('PYTEST_ADDOPTS="-x -q" uv run -p 3.11.9 pytest'), ""),
+        ("3.11.9", run('uv run -p 3.11.9 pytest -k "a \\"b\\""'), ""),
+        ("3.11.9", run("echo a\\; uv run --python 3.11.9 pytest"), missing),
+        ("3.11.9", run("uv run -p 3.11.9 pytest -k a\\;b"), ""),
+        ("3.11.9", run("echo 'a\\'; uv run -p 3.11.9 pytest"), ""),
+        ("3.11.9", run('uv run --python "3.11.9" pytest'), ""),
+        ("3.11.9", run("true&&uv run --python 3.11.9 pytest"), ""),
         (
             "3.11.9",
             "workflow_call" + only + run("uv run --python 3.11.9 pytest"),
@@ -1122,6 +1185,7 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
         ("3.11.9", on_python.replace("IF", "matrix.python == '3.15'"), missing),
         ("3.11.9", unbound, missing),
         ("3.11.9", on_python.replace("IF", "matrix.python != '3.15'"), ""),
+        ("3.11.9", cased, ""),
         ("3.11.9", on_python.replace("IF", "${{ matrix.python == '3.11.9' }}"), ""),
         (
             "3.11.9",
