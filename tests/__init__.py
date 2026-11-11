@@ -409,6 +409,25 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "portanode",
         ),
     ),
+    (
+        2156,
+        "test_a_job_running_the_suite_names_the_patch_the_floor_names",
+        (
+            ".github",
+            "base58-bech32",
+            "bbt",
+            "benchmarks",
+            "bip32-descriptors",
+            "bip39-slip39",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-node",
+            "btclib-secp256k1",
+            "btclib-wallet",
+            "ecc",
+            "functional-tests",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
