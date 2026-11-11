@@ -14,8 +14,8 @@ Run from the root of the tree, with the directory the build wrote:
 
 `BLOB` is `[project.urls] repository` of `pyproject.toml` followed by
 `/blob/main/`, `conf.py` reading the same key. The rendered files are
-the ones the `docs/source/*_link.md` shims include, each shim holding
-one include fence whose path is relative to the shim. Each link found
+the ones the `docs/source/*.md` pages include, each page holding at most
+one include fence whose path is relative to the page. Each link found
 is printed as `page:line: url`; `main` says what the exit code is.
 """
 
@@ -26,10 +26,10 @@ import sys
 import tomllib
 from pathlib import Path
 
-# where the shims sit, relative to the root of the tree
+# where the pages sit, relative to the root of the tree
 SOURCE = Path("docs/source")
 
-# the include fence of a shim; its argument runs to the end of the line
+# the include fence of a page; its argument runs to the end of the line
 INCLUDE = re.compile(r"^```\{include\}\s+(.+?)\s*$", re.MULTILINE)
 
 
@@ -52,20 +52,21 @@ def blob(root: Path) -> str:
 
 
 def included(root: Path) -> set[str]:
-    """Return the paths, relative to the root, that a shim includes.
+    """Return the paths, relative to the root, that a page includes.
 
     :param root: the root of the tree.
     :returns: the paths, `/`-separated.
-    :raises ValueError: where a shim holds other than one include fence.
+    :raises ValueError: where a page holds more than one include fence.
     """
     paths: set[str] = set()
-    for shim in sorted((root / SOURCE).glob("*_link.md")):
-        found = INCLUDE.findall(shim.read_text(encoding="utf-8"))
-        if len(found) != 1:
-            msg = f"{shim}: {len(found)} include fences, expected one"
+    for page in sorted((root / SOURCE).glob("*.md")):
+        found = INCLUDE.findall(page.read_text(encoding="utf-8"))
+        if len(found) > 1:
+            msg = f"{page}: {len(found)} include fences, expected at most one"
             raise ValueError(msg)
-        target = (shim.parent / found[0]).resolve().relative_to(root.resolve())
-        paths.add(target.as_posix())
+        for path in found:
+            target = (page.parent / path).resolve().relative_to(root.resolve())
+            paths.add(target.as_posix())
     return paths
 
 
