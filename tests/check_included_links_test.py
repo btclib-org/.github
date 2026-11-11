@@ -180,6 +180,14 @@ def test_a_page_other_than_a_shim_renders_what_it_includes(
         pytest.param(
             "````{note}\n```{include} a.md\n```\n````\n", ["a.md"], id="directive"
         ),
+        pytest.param(
+            "````{code-block} markdown\n```{include} b.md\n```\n````\n",
+            [],
+            id="code-block",
+        ),
+        pytest.param(
+            "````{eval-rst}\n```{include} b.md\n```\n````\n", [], id="eval-rst"
+        ),
         pytest.param("~~~{include} a.md\n~~~\n", ["a.md"], id="tilde-include"),
     ],
 )
@@ -188,7 +196,7 @@ def test_a_fence_shown_in_a_code_block_is_no_include(
     page: str,
     paths: list[str],
 ) -> None:
-    """A code block shows its fences; a directive's body is parsed.
+    """A code block shows its fences; a parsed directive's body is read.
 
     :param script: the module under test.
     :param page: the text of the page.

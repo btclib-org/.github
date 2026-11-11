@@ -36,15 +36,55 @@ FENCE = re.compile(r"^(`{3,}|~{3,})\s*(.*?)\s*$")
 # the info string of an include fence; its argument runs to the end of the line
 INCLUDE = re.compile(r"^\{include\}\s+(.+)$")
 
+# the name of the directive an info string opens
+DIRECTIVE = re.compile(r"^\{([^}]+)\}")
+
+# directives of docutils and sphinx that parse their body as markup: the
+# admonitions, the containers and the version notes. A directive not
+# named here, as {code-block}, {eval-rst} or {toctree}, is read as code,
+# so an include it shows is text
+PARSED = frozenset(
+    [
+        "admonition",
+        "attention",
+        "caution",
+        "danger",
+        "error",
+        "hint",
+        "important",
+        "note",
+        "tip",
+        "warning",
+        "seealso",
+        "topic",
+        "sidebar",
+        "epigraph",
+        "highlights",
+        "pull-quote",
+        "compound",
+        "container",
+        "only",
+        "hlist",
+        "acks",
+        "deprecated",
+        "versionadded",
+        "versionchanged",
+        "versionremoved",
+        "version-deprecated",
+        "version-added",
+        "version-changed",
+        "version-removed",
+    ]
+)
+
 
 def includes(text: str) -> list[str]:
     """Return the paths of the include fences of a page, in page order.
 
-    A fence whose info string is a `{directive}` holds markdown, which
-    myst parses, so a fence inside it is read. Any other fence is a code
-    block, and what it holds is shown, not parsed. A fence closes at a
-    bare marker of its own character, at least as long as the one that
-    opened it.
+    A fence opening a directive of `PARSED` holds markdown, which myst
+    parses, so a fence inside it is read. Any other fence is code, and
+    what it holds is shown, not parsed. A fence closes at a bare marker
+    of its own character, at least as long as the one that opened it.
 
     :param text: the page.
     :returns: the paths, as the fences write them.
@@ -66,7 +106,8 @@ def includes(text: str) -> list[str]:
                 continue
         if include := INCLUDE.match(info):
             paths.append(include[1])
-        open_fences.append((marker, not info.startswith("{")))
+        directive = DIRECTIVE.match(info)
+        open_fences.append((marker, directive is None or directive[1] not in PARSED))
     return paths
 
 
