@@ -52,7 +52,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 
 from . import ORG, SELF, Tier, by_hand, tracked
-from .workflows_test import document, jobs, steps, workflows
+from .workflows_test import document, jobs, steps, triggers, workflows
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -720,7 +720,8 @@ def callee(called: str, root: Path, shared: Path) -> Path | None:
 
     A call into the tree itself starts `./` or `$/`. A call into this
     repository is read in its checkout at the tip, not at the revision
-    the call pins.
+    the call pins: `alignment.yml` checks this repository out at depth
+    1, so a pinned revision older than the tip is not there to read.
 
     :param called: the job's `uses:`.
     :param root: the root of the calling tree.
@@ -774,7 +775,9 @@ def combinations(
     key it names. Only then is each `include` row added to every
     remaining combination of the keys' rows whose values it does not
     change, or run as a combination of its own where it fits none, which
-    no later row extends, as GitHub's workflow syntax says.
+    no later row extends, as GitHub's workflow syntax says. A job with no
+    matrix runs once, with no combination; one whose every combination is
+    excluded runs none.
 
     :param job: the job's own mapping.
     :param inputs: what a caller handed, by input.
@@ -782,7 +785,7 @@ def combinations(
     """
     matrix = (job.get("strategy") or {}).get("matrix")
     if not isinstance(matrix, dict):
-        return []
+        return [{}]
     rows = {
         str(name): values(row, inputs)
         for name, row in matrix.items()
@@ -844,23 +847,35 @@ def rules(matrix: dict[str, Any], kind: str) -> list[dict[str, str]]:
 MATRIX_TEST = re.compile(r"^matrix\.([\w-]+)\s*(==|!=)\s*'([^']*)'$")
 """A step's `if:` comparing one matrix key with a quoted literal."""
 
+EVENT_TEST = re.compile(r"^github\.event_name\s*(==|!=)\s*'([^']*)'$")
+"""An `if:` comparing the event that started the workflow with a literal."""
 
-def applies(step: dict[str, Any], binding: dict[str, str]) -> bool:
-    """Say whether a step runs in the matrix combination a run has.
 
-    An `if:` naming no `matrix.` key is taken to hold, unless it is the
-    literal `false`. One naming a key holds where it is the `MATRIX_TEST`
-    form and the combination agrees, compared regardless of case as
-    GitHub compares strings; any other one naming a key is taken
-    not to hold, so its step counts nothing.
+def applies(
+    step: dict[str, Any], binding: dict[str, str], started_by: set[str]
+) -> bool:
+    """Say whether a step or a job runs in the matrix combination a run has.
 
-    :param step: the step's own mapping.
+    An `if:` that is the `EVENT_TEST` form holds where an event that
+    starts the workflow agrees. Any other naming no `matrix.` key is
+    taken to hold, unless it is the literal `false`. One naming a key
+    holds where it is the `MATRIX_TEST` form and the combination agrees;
+    any other one naming a key is taken not to hold, so its step counts
+    nothing. Both compare regardless of case, as GitHub compares strings.
+
+    :param step: the step's or the job's own mapping.
     :param binding: the run's matrix combination.
+    :param started_by: the events that start the workflow, as `events`
+        reads them.
     :returns: whether the step is read.
     """
     if skipped(step):
         return False
     condition = EXPRESSION.sub(r"\1", str(step.get("if", ""))).strip()
+    if event := EVENT_TEST.match(condition):
+        named = event[2].casefold()
+        wanted = event[1] == "=="
+        return any((name.casefold() == named) == wanted for name in started_by)
     if "matrix." not in condition:
         return True
     test = MATRIX_TEST.match(condition)
@@ -870,39 +885,59 @@ def applies(step: dict[str, Any], binding: dict[str, str]) -> bool:
     return agrees == (test[2] == "==")
 
 
-def ran(job: dict[str, Any], inputs: dict[str, set[str]]) -> set[str]:
+def uv_python(mapping: dict[str, Any]) -> str | None:
+    """Read the `UV_PYTHON` a job's or a step's `env:` sets.
+
+    :param mapping: the job's or the step's own mapping.
+    :returns: the value, `None` where its `env:` sets none.
+    """
+    env = mapping.get("env")
+    named = env.get("UV_PYTHON") if isinstance(env, dict) else None
+    return None if named is None else str(named)
+
+
+def ran(
+    job: dict[str, Any], inputs: dict[str, set[str]], started_by: set[str]
+) -> set[str]:
     """Read the interpreters a job's own steps run tests on with pytest.
 
-    Each matrix combination of the job is read apart, or the job once
-    where it has none. A `uv run` asking for one runs on it. A `uv run`
-    asking for none runs on the `python-version` of the last `setup-uv`
-    step before it, and a bare `pytest` or `python -m pytest` on that of
-    the last `setup-python` step; with no such step, each runs on what
-    nothing here reads, `.python-version` or the runner's own. Each
-    value is read as `resolved` reads it, and a step only where
-    `applies` says it runs. An `env:` setting `UV_PYTHON` is not read.
+    Each combination `combinations` gives is read apart. A `uv run`
+    asking for an interpreter runs on it. One asking for none runs on
+    the `UV_PYTHON` its step's `env:` sets, else on the `UV_PYTHON` the
+    job's `env:` sets or a `setup-uv` step before it sets from its
+    `python-version`, whichever comes last, as the runner sets them. A
+    bare `pytest` or `python -m pytest` runs on the `python-version` of
+    the last `setup-python` step before it. With none of these, each
+    runs on what nothing here reads, `.python-version` or the runner's
+    own; a workflow's own `env:` is not read. Each value is read as
+    `resolved` reads it, and a step only where `applies` says it runs.
 
     :param job: the job's own mapping.
     :param inputs: what a caller handed, by input, as `resolved` takes it.
+    :param started_by: the events that start the workflow.
     :returns: the versions, free-threaded suffix included.
     """
     found: set[str] = set()
-    for binding in combinations(job, inputs) or [{}]:
-        uv: set[str] = set()
+    for binding in combinations(job, inputs):
+        named = uv_python(job)
+        uv = set() if named is None else resolved(named, binding, inputs)
         python: set[str] = set()
         for step in job.get("steps") or []:
-            if not applies(step, binding):
+            if not applies(step, binding, started_by):
                 continue
             uses = str(step.get("uses", ""))
             given = (step.get("with") or {}).get("python-version", "")
-            if uses.startswith(SETUP_UV):
+            if uses.startswith(SETUP_UV) and given:
                 uv = resolved(given, binding, inputs)
             elif uses.startswith(SETUP_PYTHON):
                 python = resolved(given, binding, inputs)
+            own = uv_python(step)
             for words in commands(str(step.get("run", ""))):
                 runs, through_uv, asked = invocation(words)
                 if not runs:
                     continue
+                if asked is None and through_uv and own is not None:
+                    asked = own
                 if asked is not None:
                     found |= resolved(asked, binding, inputs)
                 else:
@@ -923,7 +958,7 @@ def handed(job: dict[str, Any]) -> dict[str, set[str]]:
     :returns: the values each input carries, empty sets dropped.
     """
     found: dict[str, set[str]] = {}
-    bindings = combinations(job, {}) or [{}]
+    bindings = combinations(job, {})
     for name, value in (job.get("with") or {}).items():
         try:
             listed = json.loads(str(value))
@@ -950,16 +985,30 @@ def skipped(job: dict[str, Any]) -> bool:
     return condition is False or EXPRESSION.sub(r"\1", str(condition)) == "false"
 
 
-def started(workflow: Path) -> bool:
-    """Say whether an event other than a call starts a workflow.
+def events(workflow: Path) -> set[str]:
+    """Read the events other than a call that start a workflow.
 
     :param workflow: the file to read.
-    :returns: whether its `on:` names any trigger but `workflow_call`.
+    :returns: the triggers its `on:` names, `workflow_call` left out.
     """
     parsed = document(workflow)
     on = parsed.get("on", parsed.get(True))
     names = {on} if isinstance(on, str) else set(on or [])
-    return bool(names - {"workflow_call"})
+    return {str(name) for name in names} - {"workflow_call"}
+
+
+def defaults(workflow: Path) -> dict[str, object]:
+    """Read the `default` of each input a called workflow declares.
+
+    :param workflow: the called file.
+    :returns: each input that has one against it.
+    """
+    declared = (triggers(workflow).get("workflow_call") or {}).get("inputs") or {}
+    return {
+        str(name): spec["default"]
+        for name, spec in declared.items()
+        if isinstance(spec, dict) and "default" in spec
+    }
 
 
 def lanes(root: Path, shared: Path) -> set[str]:
@@ -969,9 +1018,12 @@ def lanes(root: Path, shared: Path) -> set[str]:
     A job's own steps count as `ran` reads them. A call counts where the
     workflow it calls is in this tree or in this repository's checkout:
     its jobs' steps count as `ran` reads them, given what `handed` reads
-    in the call, so a version handed on counts only where it reaches a
-    pytest command there. A call made from that workflow in turn is not
-    followed, and a job whose `if:` is the literal `false` is left out.
+    in the call, under which each input the called workflow declares a
+    `default` for and the call does not hand carries that default, so a
+    version handed on counts only where it reaches a pytest command
+    there. A call made from that workflow in turn is not followed. A job
+    or a step counts only where `applies` says it runs, against the
+    events that start the calling workflow.
 
     :param root: the root of the checkout.
     :param shared: the root of this repository's checkout.
@@ -979,21 +1031,22 @@ def lanes(root: Path, shared: Path) -> set[str]:
     """
     found: set[str] = set()
     for workflow in workflows(root):
-        if not started(workflow):
+        if not (started_by := events(workflow)):
             continue
         for job in jobs(workflow).values():
-            if skipped(job):
+            if not applies(job, {}, started_by):
                 continue
             if "uses" not in job:
-                found |= ran(job, {})
+                found |= ran(job, {}, started_by)
                 continue
             path = callee(str(job["uses"]), root, shared)
             if path is None or not path.is_file():
                 continue
-            inputs = handed(job)
+            given = {**defaults(path), **(job.get("with") or {})}
+            inputs = handed({**job, "with": given})
             for called in jobs(path).values():
-                if "uses" not in called and not skipped(called):
-                    found |= ran(called, inputs)
+                if "uses" not in called and applies(called, {}, started_by):
+                    found |= ran(called, inputs, started_by)
     return found
 
 
@@ -1036,16 +1089,16 @@ def test_a_job_running_the_suite_names_the_patch_the_floor_names(
 def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
     """The cell above fails on planted trees whose floor pytest never runs on.
 
-    Each form the docstrings of `invocation`, `ran`, `combinations` and
-    `lanes` name is planted once naming the floor, and agrees,
-    btclib-secp256k1's `uv run` among them. Each near miss is planted
-    too, and fails: a floor without its patch, the minor version alone,
-    a version pytest does not run on, in the job or in the workflow it
-    calls, pytest only mentioned, installed or echoed or running no
-    test, an excluded matrix combination, a job or a step that never
-    runs or runs only on another combination, a workflow no event
-    starts, and calls to a workflow that runs no pytest or that no
-    checkout here holds.
+    Each form the docstrings of `invocation`, `ran`, `combinations`,
+    `applies` and `lanes` name is planted once naming the floor, and
+    agrees, btclib-secp256k1's `uv run` among them. Each near miss is
+    planted too, and fails: a floor without its patch, the minor version
+    alone, a version pytest does not run on, in the job or in the
+    workflow it calls, pytest only mentioned, installed or echoed or
+    running no test, an excluded matrix combination, a job or a step
+    that never runs or runs only on another combination or another
+    event, a workflow no event starts, and calls to a workflow that runs
+    no pytest or that no checkout here holds.
 
     :param tmp_path: where the trees are planted.
     """
@@ -1067,7 +1120,13 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
         "    steps:\n      - run: |\n          # pytest is the next job's\n"
         "          python check.py\n"
     )
+    defaulted = suite.replace(
+        "on: workflow_call\n",
+        "on:\n  workflow_call:\n    inputs:\n      python-version:\n"
+        '        default: "3.11.9"\n',
+    )
     call = "    uses: ./.github/workflows/reusable-suite.yml\n    with:\n"
+    by_default = "    uses: ./.github/workflows/reusable-defaulted.yml\n"
     shared = f"    uses: {ORG}/{SELF}/.github/workflows/reusable-shared.yml@0\n"
     elsewhere = "    uses: someone/else/.github/workflows/reusable-suite.yml@0\n"
     checker = "    uses: ./.github/workflows/reusable-other.yml\n    with:\n"
@@ -1140,6 +1199,19 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
     local = (
         "    uses: $/.github/workflows/reusable-suite.yml\n    with:\n"
         '      python-version: "3.11.9"\n'
+    )
+    exhausted = (
+        f'{steps_}    strategy:\n      matrix:\n        python: ["3.11.9"]\n'
+        '        exclude:\n          - python: "3.11.9"\n'
+        "    steps:\n      - run: uv run --python 3.11.9 pytest\n"
+    )
+    job_env = f'{steps_}    env:\n      UV_PYTHON: "3.11.9"\n'
+    step_env = (
+        "    steps:\n      - env:\n          UV_PYTHON: VERSION\n        run: RUN\n"
+    )
+    on_event = (
+        f"{steps_}    steps:\n      - if: IF\n"
+        "        run: uv run --python 3.11.9 pytest\n"
     )
     skipped_setup = (
         "      - uses: astral-sh/setup-uv@v1\n        if: false\n"
@@ -1262,6 +1334,68 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
             missing,
         ),
         ("3.11.9", f'{call}      linted: "3.11.9"\n', missing),
+        ("3.11.9", exhausted, missing),
+        ("3.11.9", job_env + "    steps:\n      - run: uv run pytest\n", ""),
+        (
+            "3.11.9",
+            job_env
+            + setup_uv.replace("3.11.9", "3.15")
+            + "      - run: uv run pytest\n",
+            missing,
+        ),
+        (
+            "3.11.9",
+            steps_
+            + setup_uv
+            + "      - uses: astral-sh/setup-uv@v1\n      - run: uv run pytest\n",
+            "",
+        ),
+        (
+            "3.11.9",
+            steps_
+            + step_env.replace("VERSION", '"3.11.9"').replace("RUN", "uv run pytest"),
+            "",
+        ),
+        (
+            "3.11.9",
+            steps_
+            + setup_uv
+            + step_env.replace("    steps:\n", "")
+            .replace("VERSION", '"3.15"')
+            .replace("RUN", "uv run pytest"),
+            missing,
+        ),
+        (
+            "3.11.9",
+            steps_
+            + step_env.replace("VERSION", '"3.15"').replace(
+                "RUN", "UV_PYTHON=3.11.9 uv run pytest"
+            ),
+            "",
+        ),
+        ("3.11.9", by_default, ""),
+        ("3.11.9", f'{by_default}    with:\n      python-version: "3.15"\n', missing),
+        (
+            "3.11.9",
+            on_event.replace("IF", "github.event_name == 'pull_request'"),
+            missing,
+        ),
+        (
+            "3.11.9",
+            "[push, pull_request]"
+            + only
+            + on_event.replace("IF", "${{ github.event_name == 'pull_request' }}"),
+            "",
+        ),
+        ("3.11.9", on_event.replace("IF", "github.event_name != 'push'"), missing),
+        ("3.11.9", on_event.replace("IF", "github.event_name != 'schedule'"), ""),
+        ("3.11.9", on_event.replace("IF", "github.event_name == 'PUSH'"), ""),
+        (
+            "3.11.9",
+            "    if: github.event_name == 'schedule'\n"
+            + run("uv run --python 3.11.9 pytest"),
+            missing,
+        ),
         ("3.11.9", "    if: false\n" + run("uv run --python 3.11.9 pytest"), missing),
         (
             "3.11.9",
@@ -1269,30 +1403,44 @@ def test_a_floor_no_suite_job_names_is_reported(tmp_path: Path) -> None:
             missing,
         ),
     ]
-    hosted = tmp_path / "shared" / ".github" / "workflows"
+    called = {"suite": suite, "other": other, "defaulted": defaulted}
+    for index, case in enumerate(cases):
+        planted_floor(tmp_path / str(index), case, called)
+
+
+def planted_floor(
+    root: Path, case: tuple[str, str, str], called: dict[str, str]
+) -> None:
+    """Plant one tree and run the floor cell on it.
+
+    :param root: where the tree is planted, with this repository's
+        checkout beside it.
+    :param case: the floor, the `on:` and the job split by a NUL, the job
+        alone being started by `push`, and the failure wanted, empty for
+        none.
+    :param called: the text of each `reusable-<name>.yml` the tree holds,
+        `suite` also held in this repository's checkout as
+        `reusable-shared.yml`.
+    """
+    floor, planted, wanted = case
+    hosted = root / "shared" / ".github" / "workflows"
     hosted.mkdir(parents=True)
-    (hosted / "reusable-shared.yml").write_text(suite, encoding="utf-8")
-    for index, (floor, planted, wanted) in enumerate(cases):
-        root = tmp_path / str(index)
-        folder = root / ".github" / "workflows"
-        folder.mkdir(parents=True)
-        trigger, _, job = planted.rpartition(only)
-        (folder / "lane.yml").write_text(
-            f"on: {trigger or 'push'}\njobs:\n  lane:\n{job}", encoding="utf-8"
-        )
-        (folder / "reusable-suite.yml").write_text(suite, encoding="utf-8")
-        (folder / "reusable-other.yml").write_text(other, encoding="utf-8")
-        trees = {"x": root, SELF: tmp_path / "shared"}
-        parsed = {"x": {"project": {"requires-python": f">={floor}"}}}
-        if not wanted:
-            test_a_job_running_the_suite_names_the_patch_the_floor_names(
-                "x", trees, parsed
-            )
-            continue
-        with pytest.raises(AssertionError, match=wanted):
-            test_a_job_running_the_suite_names_the_patch_the_floor_names(
-                "x", trees, parsed
-            )
+    (hosted / "reusable-shared.yml").write_text(called["suite"], encoding="utf-8")
+    folder = root / "x" / ".github" / "workflows"
+    folder.mkdir(parents=True)
+    trigger, _, job = planted.rpartition("\0")
+    (folder / "lane.yml").write_text(
+        f"on: {trigger or 'push'}\njobs:\n  lane:\n{job}", encoding="utf-8"
+    )
+    for name, text in called.items():
+        (folder / f"reusable-{name}.yml").write_text(text, encoding="utf-8")
+    trees = {"x": root / "x", SELF: root / "shared"}
+    parsed = {"x": {"project": {"requires-python": f">={floor}"}}}
+    if not wanted:
+        test_a_job_running_the_suite_names_the_patch_the_floor_names("x", trees, parsed)
+        return
+    with pytest.raises(AssertionError, match=wanted):
+        test_a_job_running_the_suite_names_the_patch_the_floor_names("x", trees, parsed)
 
 
 def test_valued_is_what_uv_run_help_lists() -> None:
