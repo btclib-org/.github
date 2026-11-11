@@ -932,11 +932,6 @@ def config_departures(
         return [f"there is no {SOURCERY_CONFIG}"]
     out: list[str] = []
     settings = config.get("rule_settings") or {}
-    disabled = {str(rule) for rule in settings.get("disable") or []}
-    if left_on := sorted(set(TURNED_OFF) - disabled):
-        out.append(f"{SOURCERY_CONFIG} leaves on {left_on}")
-    if also := sorted(disabled - set(TURNED_OFF)):
-        out.append(f"{SOURCERY_CONFIG} also turns off {also}")
     if "enable" in settings and settings["enable"] != ["default"]:
         out.append(f"{SOURCERY_CONFIG} sets enable: {settings['enable']!r}")
     if "rule_types" in settings and sorted(settings["rule_types"] or []) != list(
@@ -958,6 +953,29 @@ def config_departures(
             f"{SOURCERY_CONFIG} python_version {declared} is above the"
             f" requires-python floor {floor[0]}.{floor[1]}"
         )
+    return out
+
+
+def disable_departures(config: dict[str, Any] | None) -> list[str]:
+    """Report where a `.sourcery.yaml`'s `disable:` is not `TURNED_OFF`.
+
+    Apart from `config_departures`, so that a `BACKLOG` row on a change to
+    `TURNED_OFF` excuses this comparison alone, and leaves the tree's
+    `sourcery` check required.
+
+    :param config: the parsed file, or `None` where the tree has none,
+        which `config_departures` reports.
+    :returns: one finding per direction, empty where the two agree.
+    """
+    if config is None:
+        return []
+    settings = config.get("rule_settings") or {}
+    disabled = {str(rule) for rule in settings.get("disable") or []}
+    out: list[str] = []
+    if left_on := sorted(set(TURNED_OFF) - disabled):
+        out.append(f"{SOURCERY_CONFIG} leaves on {left_on}")
+    if also := sorted(disabled - set(TURNED_OFF)):
+        out.append(f"{SOURCERY_CONFIG} also turns off {also}")
     return out
 
 
@@ -1010,6 +1028,34 @@ def test_a_python_tree_calls_sourcery_with_its_rules_off(
         f" grep -n -A6 'id: {BARE_SKIP}' {CONFIG}; cat {SOURCERY_CONFIG};"
         f" grep -n requires-python pyproject.toml; grep -n {PIN_FILE} {PIN_WORKFLOW}",
     )
+    assert not found, f"{found}; {command}"
+
+
+@pytest.mark.tier(Tier.PYTHON)
+def test_a_sourcery_yaml_turns_off_the_rules_turned_off(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 10's `disable:`, which is `TURNED_OFF` and no other rule.
+
+    Apart from `test_a_python_tree_calls_sourcery_with_its_rules_off`, as
+    `disable_departures` says. A tree with no `.sourcery.yaml` passes here,
+    the other test reporting it.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    root = trees[repository]
+    if not tracked(root, "*.py"):
+        pytest.skip(f"{repository} tracks no Python file")
+    path = root / SOURCERY_CONFIG
+    config = (
+        (yaml.safe_load(path.read_text(encoding="utf-8")) or {})
+        if path.is_file()
+        else None
+    )
+    found = disable_departures(config)
+    command = by_hand(repository, f"cat {SOURCERY_CONFIG}")
     assert not found, f"{found}; {command}"
 
 
@@ -1309,7 +1355,7 @@ def test_bare_sourcery_skip_refuses_a_skip_naming_no_rule(
 
 
 def test_a_sourcery_yaml_off_section_4_would_be_reported() -> None:
-    """`config_departures` reports each way a `.sourcery.yaml` can leave it.
+    """`config_departures` and `disable_departures` report each departure.
 
     The floor is 3.11 and the tree tracks one module at the root and four
     under `tests/`, two of them further down: an entry naming a file or a
@@ -1340,15 +1386,20 @@ def test_a_sourcery_yaml_off_section_4_would_be_reported() -> None:
     lower["rule_settings"]["python_version"] = "3.10"
     assert config_departures(lower, python, floor) == [], "a lower version is refused"
     assert config_departures(None, python, floor) == [f"there is no {SOURCERY_CONFIG}"]
+    assert disable_departures(agreeing) == []
+    assert disable_departures(None) == [], "an absent file is the other test's"
     left = copy.deepcopy(agreeing)
     left["rule_settings"]["disable"].remove("reintroduce-else")
-    assert config_departures(left, python, floor) == [
+    assert config_departures(left, python, floor) == [], (
+        "disable: is disable_departures' question"
+    )
+    assert disable_departures(left) == [
         f"{SOURCERY_CONFIG} leaves on ['reintroduce-else']"
     ]
     for extra in ("default", "refactoring", "use-next", "switch", "assign-if-exp"):
         more = copy.deepcopy(agreeing)
         more["rule_settings"]["disable"].append(extra)
-        assert config_departures(more, python, floor) == [
+        assert disable_departures(more) == [
             f"{SOURCERY_CONFIG} also turns off ['{extra}']"
         ]
     for enable in (["reintroduce-else"], [], ["default", "use-next"]):

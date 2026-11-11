@@ -2253,7 +2253,11 @@ and so is one the trees' own style would not write: the code adapts. A rewrite
 that passes once adapted, as a line ruff finds too long or an annotation mypy
 asks for, is no reason to turn its rule off. `enable:` and `rule_types:` stay at
 their defaults, and `disable:` can name a tag: `disable: [default]` turns every
-rule off.
+rule off. A tree whose `disable:` has not yet followed a change to `TURNED_OFF`
+is in the `BACKLOG` row of
+`test_a_sourcery_yaml_turns_off_the_rules_turned_off`, which leaves its
+`sourcery` check required, and the tree's own pull request that follows drops it
+from the row.
 
 **`.sourcery.yaml` sets `python_version` to the lowest interpreter the tree's
 code runs on, never above the `requires-python` floor.** No `ignore:` entry,
