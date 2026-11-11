@@ -43,7 +43,9 @@ DIRECTIVE = re.compile(r"^\{([^}]+)\}")
 # admonitions, containers and version notes of docutils and sphinx. Every
 # directive not named here is read as code, so an include inside it is
 # not checked: {code-block}, {eval-rst} and {toctree}, and also some that
-# do parse their body, as {figure}, {list-table} and {glossary}
+# do parse their body, as {figure}, {list-table} and {glossary}. The list
+# names only directives MyST renders by parsing their body, and grows
+# when a page needs an include inside another one
 PARSED = frozenset(
     [
         "admonition",
