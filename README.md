@@ -148,20 +148,13 @@ The two point at opposite ends on purpose:
 the version line makes uv ignore the file and fall back to a default
 interpreter.
 
-**A job that runs the suite names the floor's patch.** Patches of one
-minor version compile different code: a `with` statement in a test is a
-`SyntaxError` on 3.12.3 and compiles on 3.12.13
-(btclib-org/functional-tests#583). A job asking for `X.Y` alone runs the
-patch its runner image ships or uv downloads, and the suite is what
-imports, and so compiles, the tree's code and tests. Running `X.Y.0`
-with a floor of `>=X.Y` is the rejected alternative: it holds the tree
-to the bugs later patches fix.
-
-`test.yml` and `.python-version` agree where they name one `X.Y`, so
-where the floor and the pin share a minor version the coverage job can
-name the floor's patch, a bare `uv run` resolving another. A second job
-outside `test.yml` is the rejected alternative. Section 15 says what the
-suite reads.
+**A job that runs the suite names the floor's patch**: one minor
+version's patches compile different code, a `with` in a test failing on
+3.12.3 and not on 3.12.13 (btclib-org/functional-tests#583), and a job
+asking for `X.Y` runs the patch its image ships. `test.yml` agrees with
+`.python-version` at `X.Y`, so the coverage job can be that job. The
+rejected alternatives are `X.Y.0` under `>=X.Y`, holding the tree to
+bugs later patches fix, and a second job outside `test.yml`.
 
 **A library publishes and declares the classifier
 `Topic :: Software Development :: Libraries :: Python Modules`. Every
@@ -4312,10 +4305,10 @@ does not ask yet or cannot. A repository answers for itself where it can:
 rule that the classifiers name a tree's interpreters is `interpreters_test.py`
 where a tree publishes and the window sweep below where it does not: publishing
 decides, not being a library, as an index shows any distribution's classifiers.
-The suite reads `test.yml` against the pin at `X.Y`, and asks a job running the
-suite to name the floor's patch; otherwise a workflow may name a callee's, a
-second tree's or a dependency's interpreter, judged by the reason beside it,
-since a list excusing each would go stale as trees move.
+The suite reads `test.yml` against the pin at `X.Y`, and the floor's patch in a
+job running pytest; other workflows may name a callee's, a second tree's or a
+dependency's interpreter, judged by the reason beside it, since a list excusing
+each would go stale as trees move.
 
 The settings: squash the only method, the `main-integrity` rules held with an
 **empty** bypass list, `required_signatures` **off** in classic protection and
