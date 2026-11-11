@@ -15,8 +15,9 @@ Run from the root of the tree, with the directory the build wrote:
 `BLOB` is `[project.urls] repository` of `pyproject.toml` followed by
 `/blob/main/`, `conf.py` reading the same key. The rendered files are
 the ones the `docs/source/*.md` pages include, each page holding at most
-one include fence whose path is relative to the page. Each link found
-is printed as `page:line: url`; `main` says what the exit code is.
+one include fence whose path is relative to the page. A fence shown in a
+code block is text, not an include. Each link found is printed as
+`page:line: url`; `main` says what the exit code is.
 """
 
 from __future__ import annotations
@@ -29,8 +30,44 @@ from pathlib import Path
 # where the pages sit, relative to the root of the tree
 SOURCE = Path("docs/source")
 
-# the include fence of a page; its argument runs to the end of the line
-INCLUDE = re.compile(r"^```\{include\}\s+(.+?)\s*$", re.MULTILINE)
+# a line opening or closing a fence: its marker, and the info string after it
+FENCE = re.compile(r"^(`{3,}|~{3,})\s*(.*?)\s*$")
+
+# the info string of an include fence; its argument runs to the end of the line
+INCLUDE = re.compile(r"^\{include\}\s+(.+)$")
+
+
+def includes(text: str) -> list[str]:
+    """Return the paths of the include fences of a page, in page order.
+
+    A fence whose info string is a `{directive}` holds markdown, which
+    myst parses, so a fence inside it is read. Any other fence is a code
+    block, and what it holds is shown, not parsed. A fence closes at a
+    bare marker of its own character, at least as long as the one that
+    opened it.
+
+    :param text: the page.
+    :returns: the paths, as the fences write them.
+    """
+    paths: list[str] = []
+    # the open fences, innermost last: marker, and whether it is code
+    open_fences: list[tuple[str, bool]] = []
+    for line in text.splitlines():
+        fence = FENCE.match(line)
+        if fence is None:
+            continue
+        marker, info = fence.groups()
+        if open_fences:
+            top, _ = open_fences[-1]
+            if not info and marker[0] == top[0] and len(marker) >= len(top):
+                open_fences.pop()
+                continue
+            if open_fences[-1][1]:
+                continue
+        if include := INCLUDE.match(info):
+            paths.append(include[1])
+        open_fences.append((marker, not info.startswith("{")))
+    return paths
 
 
 def blob(root: Path) -> str:
@@ -60,7 +97,7 @@ def included(root: Path) -> set[str]:
     """
     paths: set[str] = set()
     for page in sorted((root / SOURCE).glob("*.md")):
-        found = INCLUDE.findall(page.read_text(encoding="utf-8"))
+        found = includes(page.read_text(encoding="utf-8"))
         if len(found) > 1:
             msg = f"{page}: {len(found)} include fences, expected at most one"
             raise ValueError(msg)
@@ -78,7 +115,8 @@ def links(html: Path, prefix: str, paths: set[str]) -> list[str]:
     :param paths: what `included` returns.
     :returns: one `page:line: url` per link, in page order.
     """
-    href = re.compile(rf'href="({re.escape(prefix)}([^"#]*)[^"]*)"')
+    # the path ends at a query, as `?plain=1`, or at a fragment
+    href = re.compile(rf'href="({re.escape(prefix)}([^"#?]*)[^"]*)"')
     found: list[str] = []
     for page in sorted(html.rglob("*.html")):
         lines = page.read_text(encoding="utf-8").splitlines()
@@ -111,10 +149,8 @@ def main(argv: list[str]) -> int:
         print(line)
     if found:
         print(
-            "::error::the links above reach at BLOB a file these pages render; "
-            "they are to reach that page, which RootFileLinks in "
-            "docs/source/conf.py does only for a file whose include it reads "
-            "and a link form it rewrites (section 2's The documentation)"
+            "::error::the links above reach at BLOB a file these pages render, "
+            "where they are to reach that page (section 2's The documentation)"
         )
     return 1 if found else 0
 
