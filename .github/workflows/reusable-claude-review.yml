@@ -757,9 +757,8 @@ jobs:
       #
       # So what is read here is what was posted rather than what the
       # action produced: the verdict is the first line of a review body,
-      # which is where REVIEWING.md puts it, and only what claude[bot]
-      # wrote is the ack of record -- section 11's *Review* is what says
-      # an author's own is not.
+      # which is where REVIEWING.md puts it, and section 11's *Review*
+      # says whose verdict is the ack of record.
       #
       # The reviews endpoint and not the issue comments one, those being
       # two stores rather than two views: a review posted with `gh pr
