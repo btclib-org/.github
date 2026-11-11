@@ -14,9 +14,10 @@ Run from the root of the tree, with the directory the build wrote:
 
 `BLOB` is `[project.urls] repository` of `pyproject.toml` followed by
 `/blob/main/`, `conf.py` reading the same key. The rendered files are
-the ones the `docs/source/*_link.md` shims include, each shim holding
-one include fence whose path is relative to the shim. Each link found
-is printed as `page:line: url`; `main` says what the exit code is.
+the ones the `docs/source/*.md` pages include, each page holding at most
+one include fence whose path is relative to the page. A fence shown in a
+code block is text, not an include. Each link found is printed as
+`page:line: url`; `main` says what the exit code is.
 """
 
 from __future__ import annotations
@@ -26,11 +27,91 @@ import sys
 import tomllib
 from pathlib import Path
 
-# where the shims sit, relative to the root of the tree
+# where the pages sit, relative to the root of the tree
 SOURCE = Path("docs/source")
 
-# the include fence of a shim; its argument runs to the end of the line
-INCLUDE = re.compile(r"^```\{include\}\s+(.+?)\s*$", re.MULTILINE)
+# a line opening or closing a fence: its marker, and the info string after it
+FENCE = re.compile(r"^(`{3,}|~{3,})\s*(.*?)\s*$")
+
+# the info string of an include fence; its argument runs to the end of the line
+INCLUDE = re.compile(r"^\{include\}\s+(.+)$")
+
+# the name of the directive an info string opens
+DIRECTIVE = re.compile(r"^\{([^}]+)\}")
+
+# the directives whose body this check reads as markup, among them the
+# admonitions, containers and version notes of docutils and sphinx. Every
+# directive not named here is read as code, so an include inside it is
+# not checked: {code-block}, {eval-rst} and {toctree}, and also some that
+# do parse their body, as {figure}, {list-table} and {glossary}. The list
+# names only directives MyST renders by parsing their body, and grows
+# when a page needs an include inside another one
+PARSED = frozenset(
+    [
+        "admonition",
+        "attention",
+        "caution",
+        "danger",
+        "error",
+        "hint",
+        "important",
+        "note",
+        "tip",
+        "warning",
+        "seealso",
+        "topic",
+        "sidebar",
+        "epigraph",
+        "highlights",
+        "pull-quote",
+        "compound",
+        "container",
+        "only",
+        "hlist",
+        "acks",
+        "deprecated",
+        "versionadded",
+        "versionchanged",
+        "versionremoved",
+        "version-deprecated",
+        "version-added",
+        "version-changed",
+        "version-removed",
+    ]
+)
+
+
+def includes(text: str) -> list[str]:
+    """Return the paths of the include fences of a page, in page order.
+
+    A fence opening a directive of `PARSED` holds markdown, which myst
+    parses, so a fence inside it is read. Any other fence is code, and
+    what it holds is shown, not parsed. A fence closes at a bare marker
+    of its own character, at least as long as the one that opened it.
+
+    :param text: the page.
+    :returns: the paths, as the fences write them.
+    """
+    paths: list[str] = []
+    # the open fences, innermost last: marker, and whether it is code
+    open_fences: list[tuple[str, bool]] = []
+    for line in text.splitlines():
+        fence = FENCE.match(line)
+        if fence is None:
+            continue
+        marker, info = fence.groups()
+        if open_fences:
+            top, _ = open_fences[-1]
+            if not info and marker[0] == top[0] and len(marker) >= len(top):
+                open_fences.pop()
+                continue
+            if open_fences[-1][1]:
+                continue
+        if include := INCLUDE.match(info):
+            paths.append(include[1])
+        directive = DIRECTIVE.match(info)
+        open_fences.append((marker, directive is None or directive[1] not in PARSED))
+    return paths
 
 
 def blob(root: Path) -> str:
@@ -52,20 +133,21 @@ def blob(root: Path) -> str:
 
 
 def included(root: Path) -> set[str]:
-    """Return the paths, relative to the root, that a shim includes.
+    """Return the paths, relative to the root, that a page includes.
 
     :param root: the root of the tree.
     :returns: the paths, `/`-separated.
-    :raises ValueError: where a shim holds other than one include fence.
+    :raises ValueError: where a page holds more than one include fence.
     """
     paths: set[str] = set()
-    for shim in sorted((root / SOURCE).glob("*_link.md")):
-        found = INCLUDE.findall(shim.read_text(encoding="utf-8"))
-        if len(found) != 1:
-            msg = f"{shim}: {len(found)} include fences, expected one"
+    for page in sorted((root / SOURCE).glob("*.md")):
+        found = includes(page.read_text(encoding="utf-8"))
+        if len(found) > 1:
+            msg = f"{page}: {len(found)} include fences, expected at most one"
             raise ValueError(msg)
-        target = (shim.parent / found[0]).resolve().relative_to(root.resolve())
-        paths.add(target.as_posix())
+        for path in found:
+            target = (page.parent / path).resolve().relative_to(root.resolve())
+            paths.add(target.as_posix())
     return paths
 
 
@@ -77,7 +159,8 @@ def links(html: Path, prefix: str, paths: set[str]) -> list[str]:
     :param paths: what `included` returns.
     :returns: one `page:line: url` per link, in page order.
     """
-    href = re.compile(rf'href="({re.escape(prefix)}([^"#]*)[^"]*)"')
+    # the path ends at a query, as `?plain=1`, or at a fragment
+    href = re.compile(rf'href="({re.escape(prefix)}([^"#?]*)[^"]*)"')
     found: list[str] = []
     for page in sorted(html.rglob("*.html")):
         lines = page.read_text(encoding="utf-8").splitlines()
@@ -110,9 +193,8 @@ def main(argv: list[str]) -> int:
         print(line)
     if found:
         print(
-            "::error::the links above reach at BLOB a file these pages render; "
-            "RootFileLinks in docs/source/conf.py is to turn them into that page "
-            "(section 2's The documentation)"
+            "::error::the links above reach at BLOB a file these pages render, "
+            "where they are to reach that page (section 2's The documentation)"
         )
     return 1 if found else 0
 

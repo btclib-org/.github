@@ -74,6 +74,8 @@ def tree(root: Path, page: str) -> Path:
     [
         pytest.param(f"{_BLOB}SECURITY.md", True, id="included"),
         pytest.param(f"{_BLOB}SECURITY.md#known-limitations", True, id="anchor"),
+        pytest.param(f"{_BLOB}SECURITY.md?plain=1", True, id="query"),
+        pytest.param(f"{_BLOB}SECURITY.md?plain=1#L3", True, id="query-anchor"),
         pytest.param("security_link.html", False, id="page"),
         pytest.param(f"{_BLOB}RELEASING.md", False, id="not-included"),
         pytest.param(f"{_REPOSITORY}/blob/v1/SECURITY.md", False, id="tag"),
@@ -91,7 +93,7 @@ def test_a_built_page_linking_an_included_file_at_blob_is_refused(
     href: str,
     refused: bool,  # noqa: FBT001
 ) -> None:
-    """Only a link to `BLOB` plus a path a shim includes is reported.
+    """Only a link to `BLOB` plus a path a page includes is reported.
 
     :param script: the module under test.
     :param tmp_path: where the stand-in tree is written.
@@ -137,11 +139,77 @@ def test_the_report_names_the_page_and_the_line(
     assert found == [f"{html / 'readme_link.html'}:2: {_BLOB}README.md"]
 
 
-def test_a_shim_with_two_fences_stops_the_check(
+def test_a_page_other_than_a_shim_renders_what_it_includes(
+    script: ModuleType,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """`index.md` including `README.md` renders it, as a shim would.
+
+    A page with no include fence renders no root file.
+
+    :param script: the module under test.
+    :param tmp_path: where the stand-in tree is written.
+    :param monkeypatch: to run from the root of the stand-in.
+    """
+    html = tree(tmp_path, f'<a href="{_BLOB}README.md">it</a>\n')
+    source = tmp_path / "docs" / "source"
+    (source / "readme_link.md").unlink()
+    (source / "index.md").write_text(
+        "# Stand-in\n\n```{include} ../../README.md\n```\n", encoding="utf-8"
+    )
+    (source / "api.md").write_text("# API\n", encoding="utf-8")
+    assert script.included(tmp_path) == {"SECURITY.md", "README.md"}
+    monkeypatch.chdir(tmp_path)
+    assert script.main([os.fspath(html)]) == 1
+
+
+@pytest.mark.parametrize(
+    ("page", "paths"),
+    [
+        pytest.param(
+            "```{include} a.md\n```\n\n```\n```{include} b.md\n```\n",
+            ["a.md"],
+            id="backticks",
+        ),
+        pytest.param("~~~\n```{include} b.md\n```\n~~~\n", [], id="tildes"),
+        pytest.param("````markdown\n```{include} b.md\n```\n````\n", [], id="nested"),
+        pytest.param(
+            "~~~~text\n~~~\n```{include} b.md\n```\n", [], id="shorter-marker"
+        ),
+        pytest.param(
+            "````{note}\n```{include} a.md\n```\n````\n", ["a.md"], id="directive"
+        ),
+        pytest.param(
+            "````{code-block} markdown\n```{include} b.md\n```\n````\n",
+            [],
+            id="code-block",
+        ),
+        pytest.param(
+            "````{eval-rst}\n```{include} b.md\n```\n````\n", [], id="eval-rst"
+        ),
+        pytest.param("~~~{include} a.md\n~~~\n", ["a.md"], id="tilde-include"),
+    ],
+)
+def test_a_fence_shown_in_a_code_block_is_no_include(
+    script: ModuleType,
+    page: str,
+    paths: list[str],
+) -> None:
+    """A code block shows its fences; a parsed directive's body is read.
+
+    :param script: the module under test.
+    :param page: the text of the page.
+    :param paths: what the page includes.
+    """
+    assert script.includes(page) == paths
+
+
+def test_a_page_with_two_fences_stops_the_check(
     script: ModuleType,
     tmp_path: Path,
 ) -> None:
-    """A shim that does not name one file is an error, not a skipped shim.
+    """A page naming more than one file is an error, not a skipped page.
 
     :param script: the module under test.
     :param tmp_path: where the stand-in tree is written.

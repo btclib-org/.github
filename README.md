@@ -722,14 +722,13 @@ anchors, and a link into a root markdown file's heading fails `-W` under
 depth re-derived from headings that move.
 
 **A page links a file the documentation renders as that page, never at
-`BLOB`.** A file is rendered where a `docs/source/*_link.md` shim
-includes it. `conf.py`'s `RootFileLinks` turns a link to it into the
-page, whether the link is relative or is `BLOB` plus the file's path,
-`BLOB` being `[project.urls] repository` and `/blob/main/`, the form the
-root `README.md` writes. A reader of the documentation stays on the
-version they are reading, where GitHub shows `main`.
-`reusable-docs.yml` refuses a built page that links such a file at
-`BLOB`.
+`BLOB`.** A file is rendered where a `docs/source/*.md` page includes
+it: a `*_link.md` shim, or another page such as `index.md`. `BLOB` is
+`[project.urls] repository` and `/blob/main/`, the form the root
+`README.md` writes. A reader of the documentation stays on the version
+they are reading, where GitHub shows `main`. `reusable-docs.yml`
+refuses a built page that links such a file at `BLOB`, whatever
+`conf.py`'s `RootFileLinks` turns into the page.
 
 **`--keep-going` is not passed.** In the sphinx `uv.lock` resolves the
 flag is accepted, hidden from `--help` and unused: `-W` alone reports
