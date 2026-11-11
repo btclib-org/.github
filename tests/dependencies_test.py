@@ -262,6 +262,7 @@ class Statements(NamedTuple):
     edges: list[tuple[int, str, str, dict[str, str]]]
 
 
+# one loop over the statements, each refusal beside the shape it refuses
 def sorted_statements(path: Path) -> Statements:  # noqa: C901  # sourcery skip: low-code-quality
     """Read the defaults and the nodes, and set the edges aside.
 
