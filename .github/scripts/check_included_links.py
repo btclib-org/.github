@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # LICENSE file or https://opensource.org/license/mit for the full text.
 
-"""Refuse a built page that links at `BLOB` a file the docs render.
+"""Refuse a built page that links at `BLOB` a file a docs page includes.
 
 Section 2 of the standard, *The documentation*, is the rule. This reads
 the built html for a link `RootFileLinks` left at `BLOB`.
@@ -13,7 +13,7 @@ Run from the root of the tree, with the directory the build wrote:
         standard/.github/scripts/check_included_links.py docs/build/html
 
 `BLOB` is `[project.urls] repository` of `pyproject.toml` followed by
-`/blob/main/`, `conf.py` reading the same key. The rendered files are
+`/blob/main/`, `conf.py` reading the same key. The included files are
 the ones the `docs/source/*.md` pages include, each page holding at most
 one include fence whose path is relative to the page. A fence shown in a
 code block is text, not an include. Each link found is printed as
@@ -30,8 +30,10 @@ from pathlib import Path
 # where the pages sit, relative to the root of the tree
 SOURCE = Path("docs/source")
 
-# a line opening or closing a fence: its marker, and the info string after it
-FENCE = re.compile(r"^(`{3,}|~{3,})\s*(.*?)\s*$")
+# a line opening or closing a fence: the spaces before it, its marker, and
+# the info string after it. Behind four spaces, a line at the top level of
+# a page is no fence
+FENCE = re.compile(r"^( {0,3})(`{3,}|~{3,})\s*(.*?)\s*$")
 
 # the info string of an include fence; its argument runs to the end of the line
 INCLUDE = re.compile(r"^\{include\}\s+(.+)$")
@@ -46,38 +48,36 @@ DIRECTIVE = re.compile(r"^\{([^}]+)\}")
 # do parse their body, as {figure}, {list-table} and {glossary}. The list
 # names only directives MyST renders by parsing their body, and grows
 # when a page needs an include inside another one
-PARSED = frozenset(
-    [
-        "admonition",
-        "attention",
-        "caution",
-        "danger",
-        "error",
-        "hint",
-        "important",
-        "note",
-        "tip",
-        "warning",
-        "seealso",
-        "topic",
-        "sidebar",
-        "epigraph",
-        "highlights",
-        "pull-quote",
-        "compound",
-        "container",
-        "only",
-        "hlist",
-        "acks",
-        "deprecated",
-        "versionadded",
-        "versionchanged",
-        "versionremoved",
-        "version-deprecated",
-        "version-added",
-        "version-changed",
-        "version-removed",
-    ]
+PARSED = (
+    "admonition",
+    "attention",
+    "caution",
+    "danger",
+    "error",
+    "hint",
+    "important",
+    "note",
+    "tip",
+    "warning",
+    "seealso",
+    "topic",
+    "sidebar",
+    "epigraph",
+    "highlights",
+    "pull-quote",
+    "compound",
+    "container",
+    "only",
+    "hlist",
+    "acks",
+    "deprecated",
+    "versionadded",
+    "versionchanged",
+    "versionremoved",
+    "version-deprecated",
+    "version-added",
+    "version-changed",
+    "version-removed",
 )
 
 
@@ -88,6 +88,8 @@ def includes(text: str) -> list[str]:
     parses, so a fence inside it is read. Any other fence is code, and
     what it holds is shown, not parsed. A fence closes at a bare marker
     of its own character, at least as long as the one that opened it.
+    A marker behind spaces may close a fence but opens none: it may sit
+    in a list item, which this does not read.
 
     :param text: the page.
     :returns: the paths, as the fences write them.
@@ -99,7 +101,7 @@ def includes(text: str) -> list[str]:
         fence = FENCE.match(line)
         if fence is None:
             continue
-        marker, info = fence.groups()
+        indent, marker, info = fence.groups()
         if open_fences:
             top, _ = open_fences[-1]
             if not info and marker[0] == top[0] and len(marker) >= len(top):
@@ -107,6 +109,8 @@ def includes(text: str) -> list[str]:
                 continue
             if open_fences[-1][1]:
                 continue
+        if indent:
+            continue
         if include := INCLUDE.match(info):
             paths.append(include[1])
         directive = DIRECTIVE.match(info)

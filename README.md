@@ -722,13 +722,16 @@ anchors, and a link into a root markdown file's heading fails `-W` under
 depth re-derived from headings that move.
 
 **A page links a file the documentation renders as that page, never at
-`BLOB`.** A file is rendered where a `docs/source/*.md` page includes
-it: a `*_link.md` shim, or another page such as `index.md`. `BLOB` is
-`[project.urls] repository` and `/blob/main/`, the form the root
-`README.md` writes. A reader of the documentation stays on the version
-they are reading, where GitHub shows `main`. `reusable-docs.yml`
-refuses a built page that links such a file at `BLOB`, whatever
-`conf.py`'s `RootFileLinks` turns into the page.
+`BLOB`.** A file is rendered where it is a page of `docs/source`, or
+where a `docs/source/*.md` page includes it: a `*_link.md` shim, or
+another page such as `index.md`. `BLOB` is `[project.urls] repository`
+and `/blob/main/`, the form the root `README.md` writes. A reader of the
+documentation stays on the version they are reading, where GitHub shows
+`main`. `conf.py`'s `RootFileLinks`, which section 14 keeps verbatim,
+makes a relative or `BLOB` link to a rendered file a link to its page,
+and a relative link in an included file to any other file of the tree
+its `BLOB` link. `reusable-docs.yml` refuses a built page still linking
+an included file at `BLOB`.
 
 **`--keep-going` is not passed.** In the sphinx `uv.lock` resolves the
 flag is accepted, hidden from `--help` and unused: `-W` alone reports
@@ -2257,8 +2260,9 @@ without the bypass. The context is the caller's job name then the callee's,
 
 **`.sourcery.yaml` leaves every rule on but those `TURNED_OFF` in
 `tests/hooks_test.py` names**, as ruff's `select = ["ALL"]` takes every family.
-A rule is off only where it conflicts with another gate of the tree: ruff with
-the tree's configuration, `ruff format`, or mypy. A rule conflicts where no form
+A rule is off only where it conflicts with another gate of the tree, ruff with
+the tree's configuration, `ruff format` or mypy, or where the maintainer turned
+it off on a recorded issue, as below. A rule conflicts where no form
 of the code it reports, keeping its behaviour and carrying no `# sourcery skip`,
 passes both that gate and Sourcery with the rule on. The rule of that gate is
 named beside it. The form may carry a comment that silences that gate, a
@@ -2273,6 +2277,18 @@ rule off because ruff's reading stands is the alternative set aside. A rule the
 trees' own style would not write is on too: the code adapts. `enable:` and
 `rule_types:` stay at their defaults, and `disable:` can name a tag:
 `disable: [default]` turns every rule off.
+
+**`dont-import-test-modules` is off, beside ruff's `relative-imports`
+(TID252), by the maintainer's decision on #2162.** In a subpackage of `tests/`,
+Sourcery reports `from tests import X` and ruff, at its default
+`ban-relative-imports = "parents"`, reports `from .. import X`. Forms that pass
+both exist, and were set aside for what they cost: a subpackage's `__init__.py`
+that takes each helper from `sys.modules["tests"]` types each of them `Any`, and
+moving the shared helpers to a package not named for tests changes every tree's
+layout, the files section 14 keeps byte for byte included. A `per-file-ignores`
+of TID252 under `tests/` was set aside too, since it silences another gate. A
+test at the top of `tests/` that writes `from . import X` keeps it: both pass
+that form.
 
 **A tree whose `disable:` has not yet followed a change to `TURNED_OFF` is in
 the `BACKLOG` row of `test_a_sourcery_yaml_turns_off_the_rules_turned_off`**,
@@ -4200,14 +4216,14 @@ The paths are what that test compares:
 **Verbatim in part**, the file around it being the repository's own and so
 nothing a comparison by path can do: the `ci:` block of
 `.pre-commit-config.yaml`, the mypy strictness block, the ruff width and
-complexity settings, the pytest strictness flags, and `fail_under = 100`. Of the
-`ci:` block, `autofix_prs`, `autoupdate_commit_msg` and `autoupdate_schedule`
-are the shared part, with the values section 4 gives; `skip:` is the
-repository's own, because it names hooks of that file that pre-commit.ci cannot
-run. `tests/verbatim_test.py` compares none of these, its subject being a path:
-what holds a part equal across the copies is that each was written from this
-file, and that a command of section 15 greps for it, which none does for the
-`ci:` block.
+complexity settings, the pytest strictness flags, `fail_under = 100`, and
+`RootFileLinks` of `docs/source/conf.py`. Of the `ci:` block, `autofix_prs`,
+`autoupdate_commit_msg` and `autoupdate_schedule` are the shared part, with the
+values section 4 gives; `skip:` is the repository's own, because it names hooks
+of that file that pre-commit.ci cannot run. `tests/verbatim_test.py` compares
+none of these, its subject being a path. A part no test asks is held equal by
+each copy being written from this file, and by a command of section 15 that
+greps for it, which none does for the `ci:` block.
 
 **A part is held against this file, and not against the other copies.**
 Section 4 states `check-changelog`'s keys, and `tests/hooks_test.py`
@@ -4217,7 +4233,10 @@ compares that stanza between the trees, which is green wherever the
 copies agree and are wrong together — the state each tree's
 btclib-org/.github#1138 port is the fix for. Any other part above gets
 its check in that shape on the day it gets one: this file states the
-value, and a test asks each tree for it.
+value, and a test asks each tree for it. `RootFileLinks` has it, its
+value being the part of this repository's `shared/root_file_links.py`
+below the line that says so: `tests/root_file_links_test.py` asks each
+tree's `conf.py` for that part byte for byte.
 
 Whole files are here too, and these say in themselves where the
 comparison stops:

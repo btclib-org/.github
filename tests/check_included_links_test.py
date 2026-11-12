@@ -164,33 +164,51 @@ def test_a_page_other_than_a_shim_renders_what_it_includes(
     assert script.main([os.fspath(html)]) == 1
 
 
-@pytest.mark.parametrize(
-    ("page", "paths"),
-    [
-        pytest.param(
-            "```{include} a.md\n```\n\n```\n```{include} b.md\n```\n",
-            ["a.md"],
-            id="backticks",
-        ),
-        pytest.param("~~~\n```{include} b.md\n```\n~~~\n", [], id="tildes"),
-        pytest.param("````markdown\n```{include} b.md\n```\n````\n", [], id="nested"),
-        pytest.param(
-            "~~~~text\n~~~\n```{include} b.md\n```\n", [], id="shorter-marker"
-        ),
-        pytest.param(
-            "````{note}\n```{include} a.md\n```\n````\n", ["a.md"], id="directive"
-        ),
-        pytest.param(
-            "````{code-block} markdown\n```{include} b.md\n```\n````\n",
-            [],
-            id="code-block",
-        ),
-        pytest.param(
-            "````{eval-rst}\n```{include} b.md\n```\n````\n", [], id="eval-rst"
-        ),
-        pytest.param("~~~{include} a.md\n~~~\n", ["a.md"], id="tilde-include"),
-    ],
-)
+# pages, and the paths of the include fences each holds;
+# root_file_links_test.py asks the same of section 14's part of conf.py
+FENCES = [
+    pytest.param(
+        "```{include} a.md\n```\n\n```\n```{include} b.md\n```\n",
+        ["a.md"],
+        id="backticks",
+    ),
+    pytest.param("~~~\n```{include} b.md\n```\n~~~\n", [], id="tildes"),
+    pytest.param("````markdown\n```{include} b.md\n```\n````\n", [], id="nested"),
+    pytest.param("~~~~text\n~~~\n```{include} b.md\n```\n", [], id="shorter-marker"),
+    pytest.param(
+        "````{note}\n```{include} a.md\n```\n````\n", ["a.md"], id="directive"
+    ),
+    pytest.param(
+        "````{code-block} markdown\n```{include} b.md\n```\n````\n",
+        [],
+        id="code-block",
+    ),
+    pytest.param("````{eval-rst}\n```{include} b.md\n```\n````\n", [], id="eval-rst"),
+    pytest.param("~~~{include} a.md\n~~~\n", ["a.md"], id="tilde-include"),
+    pytest.param("````{include} a.md\n````\n", ["a.md"], id="long-include"),
+    pytest.param(
+        "```text\nexample\n ```\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="indented-close",
+    ),
+    pytest.param(
+        "- ```text\n  x\n  ```\n\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="bullet-item-fence",
+    ),
+    pytest.param(
+        "1. ```text\n   x\n   ```\n\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="numbered-item-fence",
+    ),
+    pytest.param("    ```{include} b.md\n    ```\n", [], id="four-spaces"),
+    pytest.param(
+        "```text\n    ```\n```{include} b.md\n```\n", [], id="four-spaces-close"
+    ),
+]
+
+
+@pytest.mark.parametrize(("page", "paths"), FENCES)
 def test_a_fence_shown_in_a_code_block_is_no_include(
     script: ModuleType,
     page: str,
