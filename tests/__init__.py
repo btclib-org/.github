@@ -427,6 +427,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "coin-addresses",
             "ecc",
             "functional-tests",
+            "seed-scan",
         ),
     ),
     (
