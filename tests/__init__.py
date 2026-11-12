@@ -414,7 +414,10 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_a_sourcery_yaml_turns_off_the_rules_turned_off",
         (
             "base58-bech32",
+            "bbt",
+            "benchmarks",
             "bip32-descriptors",
+            "bip39-slip39",
             "bitcoin-core-rpc",
             "btclib",
             "btclib-node",
