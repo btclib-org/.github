@@ -1969,17 +1969,17 @@ without adding to it is deleted.
   such as `merge=union` resolves it without a word, the rebase exiting 0
   (btclib-org/.github#1582).
 - **Nothing already written is rewritten.** An entry speaks of its own
-  day, and a count in it that has since moved stays. The exception: a
+  day, and a count in it that has since moved stays. The exceptions: a
   release's pull request may correct which issues the body of a released
-  `CHANGELOG.md` entry cites, adding one it lacks, and nothing else in
-  the entry, since a wrong citation was false on its own day, where a
-  count that moved was true.
+  `CHANGELOG.md` entry cites, adding one it lacks, and wording in that
+  body that misleads about the change, and nothing else in the entry:
+  both were wrong on their own day, where a count that moved was true.
 - **A released section may leave `CHANGELOG.md` for its own
   `changelog/v<version>.md`**, that file holding one release and the
   index in `CHANGELOG.md`'s preamble linking it. Past a size ceiling
   GitHub's contents API answers a file with an empty `content` at HTTP
   200, and a file per release is what keeps each of them under it.
-  An archived file takes the same rule and the same exception.
+  An archived file takes the same rule and the same exceptions.
 
 ## 10. Workflows
 
@@ -2250,8 +2250,9 @@ without the bypass. The context is the caller's job name then the callee's,
 
 **`.sourcery.yaml` leaves every rule on but those `TURNED_OFF` in
 `tests/hooks_test.py` names**, as ruff's `select = ["ALL"]` takes every family.
-A rule is off only where it conflicts with another gate of the tree: ruff with
-the tree's configuration, `ruff format`, or mypy. A rule conflicts where no form
+A rule is off only where it conflicts with another gate of the tree, ruff with
+the tree's configuration, `ruff format` or mypy, or where the maintainer turned
+it off on a recorded issue, as below. A rule conflicts where no form
 of the code it reports, keeping its behaviour and carrying no `# sourcery skip`,
 passes both that gate and Sourcery with the rule on. The rule of that gate is
 named beside it. The form may carry a comment that silences that gate, a
@@ -2266,6 +2267,18 @@ rule off because ruff's reading stands is the alternative set aside. A rule the
 trees' own style would not write is on too: the code adapts. `enable:` and
 `rule_types:` stay at their defaults, and `disable:` can name a tag:
 `disable: [default]` turns every rule off.
+
+**`dont-import-test-modules` is off, beside ruff's `relative-imports`
+(TID252), by the maintainer's decision on #2162.** In a subpackage of `tests/`,
+Sourcery reports `from tests import X` and ruff, at its default
+`ban-relative-imports = "parents"`, reports `from .. import X`. Forms that pass
+both exist, and were set aside for what they cost: a subpackage's `__init__.py`
+that takes each helper from `sys.modules["tests"]` types each of them `Any`, and
+moving the shared helpers to a package not named for tests changes every tree's
+layout, the files section 14 keeps byte for byte included. A `per-file-ignores`
+of TID252 under `tests/` was set aside too, since it silences another gate. A
+test at the top of `tests/` that writes `from . import X` keeps it: both pass
+that form.
 
 **A tree whose `disable:` has not yet followed a change to `TURNED_OFF` is in
 the `BACKLOG` row of `test_a_sourcery_yaml_turns_off_the_rules_turned_off`**,

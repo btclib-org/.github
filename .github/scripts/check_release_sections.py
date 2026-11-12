@@ -20,8 +20,9 @@ compared with the file at the base, the commit the release is cut from:
 - the file without the release's section is the base without its first
   section where that is a work-in-progress one, and the base whole
   otherwise. So the agent changes no line outside its section, a
-  released entry included. Section 9 lets a release's pull request
-  correct which issues a released entry cites; that edit is a person's.
+  released entry included. Section 9's *Nothing already written is
+  rewritten* says which corrections a release's pull request may make
+  to a released entry; such an edit is a person's.
 
 A `## ` line inside a fenced code block is an example, not a heading.
 
