@@ -40,8 +40,8 @@
 // `btclib` and `btclib-benchmarks` under it, so that the arrows of
 // `btclib-functional-tests` and `btclib-node` into `btclib` pass on
 // either side of `bip32-descriptors`. Every other arrow of
-// `btclib-benchmarks` leaves its box from below and runs round the
-// outside.
+// `btclib-benchmarks` leaves its box from below, runs under its row and
+// round the outside.
 //
 // The colours are for a transparent background under both of GitHub's
 // themes: text sits on the fill of its box, and the grey of the arrows
@@ -67,6 +67,7 @@ digraph dependencies {
     "btclib-functional-tests" [pos="145,60"];
     "btclib-benchmarks"       [pos="290,60"];
     "btclib-node"             [pos="435,60"];
+    "seed-scan"               [pos="0,-40"];
 
     "btclib-secp256k1" -> "libsecp256k1" [style=dotted, arrowhead=none, label="bundled", lp="262,510",
         pos="290,478 290,478 290,542 290,542"];

@@ -330,6 +330,7 @@ a gap.
 | `base58-bech32` | 1 |
 | `bip32-descriptors` | 1 |
 | `coin-addresses` | 1 |
+| `seed-scan` | 1 |
 | `benchmarks` | 2 |
 | `.github` | 2 |
 | `bbt` | 2 |
@@ -2371,6 +2372,7 @@ day and an hour, the repository owns the minute:
 | `bbt` | 32 |
 | `btclib-org.github.io` | 36 |
 | `btclib-wallet` | 40 |
+| `seed-scan` | 42 |
 | `functional-tests` | 44 |
 | `ecc` | 48 |
 | `coin-addresses` | 50 |
@@ -2489,38 +2491,38 @@ by that row.
 - `zkp-oracle` — `ecc`;
 - `integration-hwi` — `btclib-wallet`;
 - `deps-latest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`, `coin-addresses`,
-  `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
+  `benchmarks`, `btclib-node`, `btclib-wallet`, `seed-scan`, `ecc`,
+  `coin-addresses`, `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
 - `pypi-install` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-node`, `btclib-wallet`, `ecc`, `coin-addresses`, `bip39-slip39`,
-  `bip32-descriptors`, `base58-bech32`;
-- `deps-oldest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `benchmarks`, `btclib-node`, `btclib-wallet`, `ecc`, `coin-addresses`,
+  `btclib-node`, `btclib-wallet`, `seed-scan`, `ecc`, `coin-addresses`,
   `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
+- `deps-oldest` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
+  `benchmarks`, `btclib-node`, `btclib-wallet`, `seed-scan`, `ecc`,
+  `coin-addresses`, `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
 - `py-arm-authority` — `ecc`;
 - `os-macos` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `benchmarks`,
-  `btclib-node`, `portanode`, `btclib-wallet`, `ecc`, `coin-addresses`,
-  `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
+  `btclib-node`, `portanode`, `btclib-wallet`, `seed-scan`, `ecc`,
+  `coin-addresses`, `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
 - `slow` — `btclib-node`;
 - `os-ubuntu` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `benchmarks`,
-  `btclib-node`, `btclib-wallet`, `ecc`, `coin-addresses`, `bip39-slip39`,
-  `bip32-descriptors`, `base58-bech32`;
+  `btclib-node`, `btclib-wallet`, `seed-scan`, `ecc`, `coin-addresses`,
+  `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
 - `os-windows` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `portanode`,
-  `btclib-wallet`, `ecc`, `coin-addresses`, `bip39-slip39`, `bip32-descriptors`,
-  `base58-bech32`;
+  `btclib-wallet`, `seed-scan`, `ecc`, `coin-addresses`, `bip39-slip39`,
+  `bip32-descriptors`, `base58-bech32`;
 - `homepage` — `btclib-org.github.io`;
 - `links` — every repository;
 - `alignment` — `.github`;
 - `wheel-reproducibility` — `btclib-secp256k1`;
 - `sdist-rebuild` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`,
-  `btclib-node`, `btclib-wallet`, `ecc`, `coin-addresses`, `bip39-slip39`,
-  `bip32-descriptors`, `base58-bech32`;
-- `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `benchmarks`,
-  `btclib-node`, `portanode`, `btclib-wallet`, `ecc`, `coin-addresses`,
+  `btclib-node`, `btclib-wallet`, `seed-scan`, `ecc`, `coin-addresses`,
   `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
+- `codeql` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `benchmarks`,
+  `btclib-node`, `portanode`, `btclib-wallet`, `seed-scan`, `ecc`,
+  `coin-addresses`, `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
 - `scorecard` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `btclib-node`,
-  `portanode`, `btclib-wallet`, `ecc`, `coin-addresses`, `bip39-slip39`,
-  `bip32-descriptors`, `base58-bech32`.
+  `portanode`, `btclib-wallet`, `seed-scan`, `ecc`, `coin-addresses`,
+  `bip39-slip39`, `bip32-descriptors`, `base58-bech32`.
 
 **An entry is what was decided, not what a tree happens to hold**, where section
 2's tier is read off the tree. A tree short of what its entry names is a gap in

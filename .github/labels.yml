@@ -80,6 +80,7 @@ labels:
       - base58-bech32
       - bip32-descriptors
       - coin-addresses
+      - seed-scan
 
 # Labels the test passes over, neither owed nor refused.
 #
