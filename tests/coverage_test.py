@@ -21,9 +21,9 @@ names would report those too, in trees where nothing is wrong.
 
 The second is the one on the scripts under `.github/scripts`: a tree
 holding Python scripts there names the directory in
-`[tool.coverage.run]`'s `source`, so its floor reaches them. Whether a
-script it omits carries its reason is a comment of `pyproject.toml`, and
-prose is left to a reader.
+`[tool.coverage.run]`'s `source`, where coverage finds each of them, so
+its floor reaches them. Whether a script it omits carries its reason is
+a comment of `pyproject.toml`, and prose is left to a reader.
 
 Asked of a tree that declares a coverage floor rather than of a tier:
 section 8 reads which gate applies off what the tree installs, and where
@@ -33,6 +33,7 @@ no total is gated on, no flag turns a hook into a red build.
 from __future__ import annotations
 
 import ast
+from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -78,6 +79,10 @@ SCRIPTS = ".github/scripts"
 
 PYTHON_SCRIPTS = f"{SCRIPTS}/*.py"
 """The pathspec of the scripts the clause is about."""
+
+NAMESPACES = {"include_namespace_packages": True}
+"""The `[tool.coverage.report]` setting that reports a subdirectory with no
+`__init__.py`."""
 
 
 def defined(conftest: Path) -> set[str]:
@@ -201,15 +206,43 @@ def test_a_planted_tree_reddens_only_where_the_flags_can_strand_a_hook(
 def unmeasured(root: Path, config: dict[str, Any]) -> list[str]:
     """Return the Python scripts under `.github/scripts` a floor leaves out.
 
+    `source` is compared as a path, so `./.github/scripts` and
+    `.github/scripts/` name the directory as coverage reads them. Below
+    it, coverage reports a script nothing runs only where each directory
+    down to it holds an `__init__.py`, unless `[tool.coverage.report]`
+    sets `include_namespace_packages`: a script it would not report is
+    left out too.
+
     :param root: the root of the checkout.
     :param config: its parsed `pyproject.toml`, empty where it keeps none.
     :returns: the tracked scripts, where `source` does not name the
-        directory; empty where it does or where there are none.
+        directory; those coverage would not report, where it does.
     """
-    run = config.get("tool", {}).get("coverage", {}).get("run", {})
-    if SCRIPTS in run.get("source", []):
+    coverage = config.get("tool", {}).get("coverage", {})
+    found = tracked(root, PYTHON_SCRIPTS)
+    directory = (root / SCRIPTS).resolve()
+    source = coverage.get("run", {}).get("source", [])
+    if all((root / entry).resolve() != directory for entry in source):
+        return found
+    if coverage.get("report", {}).get("include_namespace_packages"):
         return []
-    return tracked(root, PYTHON_SCRIPTS)
+    paths = [PurePosixPath(script) for script in found]
+    packages = {path.parent for path in paths if path.name == "__init__.py"}
+    return [str(path) for path in paths if not discovered(path, packages)]
+
+
+def discovered(path: PurePosixPath, packages: set[PurePosixPath]) -> bool:
+    """Say whether coverage finds a script under `.github/scripts` unrun.
+
+    :param path: the script, relative to the root of the checkout.
+    :param packages: the directories that hold an `__init__.py`.
+    :returns: whether each directory between `.github/scripts` and the
+        script is one of them.
+    """
+    top = PurePosixPath(SCRIPTS)
+    return all(
+        directory in packages for directory in path.parents if top in directory.parents
+    )
 
 
 @pytest.mark.integration
@@ -230,8 +263,9 @@ def test_a_floor_measures_the_scripts_under_github_scripts(
         pytest.skip(f"{repository} declares no coverage floor")
     left = unmeasured(trees[repository], config)
     assert not left, (
-        f"[tool.coverage.run] source does not name {SCRIPTS}, so"
-        f" fail_under = {total} says nothing of {left}; "
+        f"fail_under = {total} says nothing of {left}: [tool.coverage.run]"
+        f" source does not name {SCRIPTS}, or a directory below it holds no"
+        " __init__.py; "
         + by_hand(
             repository,
             f"git ls-files '{PYTHON_SCRIPTS}'; grep -n '^source' pyproject.toml",
@@ -240,17 +274,52 @@ def test_a_floor_measures_the_scripts_under_github_scripts(
 
 
 @pytest.mark.parametrize(
-    ("scripts", "source", "expected"),
+    ("scripts", "source", "report", "expected"),
     [
-        pytest.param(["s.py"], ["pkg", "tests"], [f"{SCRIPTS}/s.py"], id="omitted"),
-        pytest.param(["s.py"], ["pkg", "tests", SCRIPTS], [], id="named"),
-        pytest.param([], ["pkg", "tests"], [], id="none"),
+        pytest.param(["s.py"], ["pkg", "tests"], {}, [f"{SCRIPTS}/s.py"], id="omitted"),
+        pytest.param(["s.py"], ["pkg", "tests", SCRIPTS], {}, [], id="named"),
+        pytest.param(
+            ["s.py"], ["pkg", "tests", f"./{SCRIPTS}"], {}, [], id="dot-slash"
+        ),
+        pytest.param(
+            ["s.py"], ["pkg", "tests", f"{SCRIPTS}/"], {}, [], id="trailing-slash"
+        ),
+        pytest.param([], ["pkg", "tests"], {}, [], id="none"),
+        pytest.param(
+            ["s.py", "tools/t.py"],
+            ["pkg", "tests", SCRIPTS],
+            {},
+            [f"{SCRIPTS}/tools/t.py"],
+            id="subdirectory",
+        ),
+        pytest.param(
+            ["tools/__init__.py", "tools/t.py"],
+            ["pkg", "tests", SCRIPTS],
+            {},
+            [],
+            id="subpackage",
+        ),
+        pytest.param(
+            ["tools/deep/t.py", "tools/deep/__init__.py"],
+            ["pkg", "tests", SCRIPTS],
+            {},
+            [f"{SCRIPTS}/tools/deep/__init__.py", f"{SCRIPTS}/tools/deep/t.py"],
+            id="package-below-a-plain-directory",
+        ),
+        pytest.param(
+            ["tools/t.py"],
+            ["pkg", "tests", SCRIPTS],
+            NAMESPACES,
+            [],
+            id="namespace-packages",
+        ),
     ],
 )
 def test_a_planted_tree_reddens_only_where_source_leaves_a_script_out(
     tmp_path: Path,
     scripts: list[str],
     source: list[str],
+    report: dict[str, bool],
     expected: list[str],
 ) -> None:
     """Each state a tree can be in against the clause, and the finding.
@@ -262,13 +331,14 @@ def test_a_planted_tree_reddens_only_where_source_leaves_a_script_out(
     :param tmp_path: where the tree is built.
     :param scripts: the Python scripts the planted tree holds.
     :param source: what its `source` names.
+    :param report: its `[tool.coverage.report]`, beside the floor.
     :param expected: what `unmeasured` owes for that tree.
     """
     directory = tmp_path / SCRIPTS
-    directory.mkdir(parents=True)
     for script in [*scripts, "render.mjs"]:
+        (directory / script).parent.mkdir(parents=True, exist_ok=True)
         (directory / script).write_text("", encoding="utf-8")
     output("git", "-C", str(tmp_path), "init", "--quiet")
     output("git", "-C", str(tmp_path), "add", "--all")
-    config = {"tool": {"coverage": {"run": {"source": source}}}}
+    config = {"tool": {"coverage": {"run": {"source": source}, "report": report}}}
     assert unmeasured(tmp_path, config) == expected

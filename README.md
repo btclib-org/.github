@@ -1746,9 +1746,12 @@ fail_under = 100.0
   Python scripts there. They are code a workflow runs, and left out of
   `source` they are outside the floor, so a branch of one that no test
   reaches goes unseen. The directory is no importable package, and
-  coverage measures it by path all the same. A script goes in `omit`,
-  its reason beside it, where the suite cannot reach it, or where it is
-  a copy section 14 compares, tested where its canonical copy is.
+  coverage measures it by path all the same. In a subdirectory, it
+  reports a script nothing runs only where each directory down to it
+  holds an `__init__.py`, or where `[tool.coverage.report]` sets
+  `include_namespace_packages`. A script goes in `omit`, its reason
+  beside it, where the suite cannot reach it, or where it is a copy
+  section 14 compares, tested where its canonical copy is.
 - **`branch = true`.** Statement coverage alone calls a half-tested `if`
   fully covered: the line ran, one of its two ways out never did. The
   gate is 100% of statements *and* branches.
