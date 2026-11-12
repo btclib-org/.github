@@ -414,6 +414,22 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("bip32-descriptors", "btclib-node"),
     ),
     (
+        2193,
+        "test_a_conf_py_carries_section_14_s_root_file_links",
+        (
+            "base58-bech32",
+            "benchmarks",
+            "bip39-slip39",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-secp256k1",
+            "btclib-wallet",
+            "coin-addresses",
+            "ecc",
+            "functional-tests",
+        ),
+    ),
+    (
         2197,
         "test_a_registered_tree_released_within_six_months",
         ("coin-addresses",),

@@ -66,6 +66,10 @@ test = [
     # this suite asks of one is where its `cron:` entries are, which is
     # a question about the document's shape rather than about a line
     "pyyaml",
+    # what section 14's part of docs/source/conf.py imports:
+    # tests/root_file_links_test.py runs its `RootFileLinks` on a
+    # stand-in tree
+    "sphinx",
     # the offline copy of PyPI's classifier list, which is what makes
     # "is this a real classifier" answerable before an upload rather
     # than during one. Section 3 has the argument

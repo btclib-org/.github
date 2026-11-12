@@ -12,21 +12,25 @@ section 14's *A part is held against this file* is the shape asked here.
 The part reads a page's include fences as `check_included_links.py`
 does, since that script refuses what the part leaves at `BLOB`: the two
 fence readers are the same code, and are run on the script's own cases.
+
+The transform runs on a hand-made doctree, its `conf.py` a copy of
+`SOURCE` in a stand-in tree with root files, shims and pages of its own.
 """
 
 from __future__ import annotations
 
 import ast
-import re
-from typing import TYPE_CHECKING
+import importlib
+import importlib.util
+import shutil
+from pathlib import Path
+from types import ModuleType, SimpleNamespace
+from typing import Any
 
 import pytest
 
 from . import ROOT, tracked
 from .check_included_links_test import FENCES
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 # Where this repository keeps the part, below the names a tree sets itself.
 SOURCE = "shared/root_file_links.py"
@@ -44,7 +48,49 @@ REGISTERED = b"app.add_post_transform(RootFileLinks)"
 SCRIPT = ".github/scripts/check_included_links.py"
 
 # The names, top level in both files, that read a page's include fences.
-READER = ("FENCE", "INCLUDE", "DIRECTIVE", "PARSED", "includes")
+READER = (
+    "FENCE",
+    "INCLUDE",
+    "DIRECTIVE",
+    "CONTAINER",
+    "ITEM",
+    "HTML_BLOCKS",
+    "HTML_NAMED",
+    "HTML_TAG",
+    "BLANK",
+    "HEADING",
+    "UNDERLINE",
+    "LABEL",
+    "UNSAFE",
+    "IMAGE",
+    "PARSED",
+    "VERSIONS",
+    "PLACED",
+    "BARE",
+    "UNARGUED",
+    "QUOTES",
+    "ATTRIBUTION",
+    "fence_end",
+    "opens_html",
+    "html_block",
+    "interrupts",
+    "destination",
+    "title",
+    "definition",
+    "top_line",
+    "options",
+    "attribution",
+    "front_matter",
+    "markdown_start",
+    "dedent",
+    "ends_containers",
+    "opens_container",
+    "inner_line",
+    "fenced",
+    "Reading",
+    "read_page",
+    "includes",
+)
 
 
 def part(source: bytes) -> bytes:
@@ -84,7 +130,7 @@ def reader(path: Path) -> dict[str, ast.stmt]:
     """
     out: dict[str, ast.stmt] = {}
     for node in ast.parse(path.read_text(encoding="utf-8")).body:
-        if isinstance(node, ast.FunctionDef):
+        if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
             name = node.name
         elif isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name):
             name = node.targets[0].id
@@ -107,23 +153,208 @@ def test_the_part_reads_fences_with_the_script_s_code() -> None:
     ]
 
 
+_REPOSITORY = "https://github.com/btclib-org/stand-in"
+_BLOB = f"{_REPOSITORY}/blob/main/"
+
+# the stand-in's pages, and what each holds: two shims, a page other than
+# a shim including a root file, and pages that include nothing
+_PAGES = {
+    "readme_link.md": "```{include} ../../README.md\n```\n",
+    "security_link.md": "```{include} ../../SECURITY.md\n```\n",
+    "changes.md": "# Changes\n\n```{include} ../../CHANGELOG.md\n```\n",
+    "index.md": "# Stand-in\n",
+    "guide.md": "# Guide\n",
+    "api.rst": "API\n===\n",
+}
+
+
+@pytest.fixture(scope="module")
+def conf(tmp_path_factory: pytest.TempPathFactory) -> ModuleType:
+    """Return `SOURCE`, executed as the `conf.py` of a stand-in tree.
+
+    :param tmp_path_factory: where the stand-in is written.
+    :returns: the module.
+    """
+    root = tmp_path_factory.mktemp("stand-in")
+    (root / "pyproject.toml").write_text(
+        f'[project]\nname = "stand-in"\n[project.urls]\nrepository = "{_REPOSITORY}"\n',
+        encoding="utf-8",
+    )
+    for name in ("README.md", "SECURITY.md", "CHANGELOG.md", "LICENSE"):
+        (root / name).write_text(f"{name}\n", encoding="utf-8")
+    source = root / "docs" / "source"
+    source.mkdir(parents=True)
+    for name, text in _PAGES.items():
+        (source / name).write_text(text, encoding="utf-8")
+    shutil.copyfile(ROOT / SOURCE, source / "conf.py")
+    spec = importlib.util.spec_from_file_location("stand_in_conf", source / "conf.py")
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 @pytest.mark.parametrize(("page", "paths"), FENCES)
 def test_the_part_finds_the_includes_the_script_finds(
-    page: str, paths: list[str]
+    conf: ModuleType, page: str, paths: list[str]
 ) -> None:
     """The part's own `includes`, run on each of the script's cases.
 
+    :param conf: the part, as a stand-in's `conf.py`.
     :param page: the text of the page.
     :param paths: what the script reads as its include fences.
     """
-    module = ast.Module(body=list(reader(ROOT / SOURCE).values()), type_ignores=[])
-    namespace: dict[str, object] = {"re": re}
-    # the part's own statements, not input: the part imports sphinx, which
-    # this suite does not install, so it is not imported whole
-    exec(compile(module, SOURCE, "exec"), namespace)  # noqa: S102
-    includes = namespace["includes"]
-    assert callable(includes)
-    assert includes(page) == paths
+    assert conf.includes(page) == paths
+
+
+def test_a_page_other_than_a_shim_renders_what_it_includes(conf: ModuleType) -> None:
+    """Every page's include is read, a `*_link.md` shim's or not.
+
+    :param conf: the part, as a stand-in's `conf.py`.
+    """
+    assert conf.INCLUDED == {
+        "CHANGELOG.md": "changes",
+        "README.md": "readme_link",
+        "SECURITY.md": "security_link",
+    }
+
+
+def test_a_page_with_two_include_fences_is_refused(
+    conf: ModuleType, tmp_path: Path
+) -> None:
+    """A relative link on it would have two files to start from.
+
+    :param conf: the part, as a stand-in's `conf.py`.
+    :param tmp_path: where the page is written.
+    """
+    page = tmp_path / "both.md"
+    page.write_text(
+        _PAGES["readme_link.md"] + _PAGES["security_link.md"], encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="2 include fences"):
+        conf.included(page)
+
+
+def _run(conf: ModuleType, node: Any, docname: str) -> Any:  # noqa: ANN401
+    """Run `RootFileLinks` on a page holding `node`; return its replacement.
+
+    :param conf: the part, as a stand-in's `conf.py`.
+    :param node: the link, as myst makes it.
+    :param docname: the page the link is on.
+    :returns: the node in the link's place once the transform has run.
+    """
+    source = conf.ROOT / "docs" / "source"
+    paths = {Path(name).stem: str(source / name) for name in _PAGES}
+    document = importlib.import_module("docutils.utils").new_document("<test>")
+    document.settings.env = SimpleNamespace(
+        docname=docname,
+        all_docs=dict.fromkeys(paths, 0.0),
+        found_docs=set(paths),
+        doc2path=paths.__getitem__,
+    )
+    paragraph = conf.nodes.paragraph()
+    paragraph += node
+    document += paragraph
+    conf.RootFileLinks(document).run()
+    return paragraph[0]
+
+
+def _blob(conf: ModuleType, path: str) -> Any:  # noqa: ANN401
+    """Return the reference myst makes from a link to `BLOB` and `path`.
+
+    :param conf: the part, as a stand-in's `conf.py`.
+    :param path: what follows `BLOB`.
+    :returns: the reference.
+    """
+    assert conf.BLOB == _BLOB
+    return conf.nodes.reference("", "it", refuri=f"{_BLOB}{path}")
+
+
+def _relative(conf: ModuleType, target: str, docname: str) -> Any:  # noqa: ANN401
+    """Return the xref myst makes from a relative link it cannot resolve.
+
+    :param conf: the part, as a stand-in's `conf.py`.
+    :param target: the link's destination.
+    :param docname: the page the link is on.
+    :returns: the xref.
+    """
+    return conf.pending_xref(
+        "",
+        conf.nodes.inline("", "it"),
+        reftype="myst",
+        refdomain=None,
+        reftarget=target,
+        refdoc=docname,
+    )
+
+
+def _page(conf: ModuleType, node: Any) -> tuple[str, str | None]:  # noqa: ANN401
+    """Return the page and the anchor a link resolved to.
+
+    :param conf: the part, as a stand-in's `conf.py`.
+    :param node: what `_run` returned.
+    :returns: the docname and the anchor.
+    """
+    assert isinstance(node, conf.pending_xref)
+    assert node["refdomain"] == "doc"
+    return node["reftarget"], node["reftargetid"]
+
+
+@pytest.mark.parametrize(
+    ("path", "page"),
+    [
+        pytest.param("docs/source/guide.md", "guide", id="md"),
+        pytest.param("docs/source/api.rst", "api", id="rst"),
+    ],
+)
+def test_a_link_to_a_page_no_shim_includes_is_that_page(
+    conf: ModuleType, path: str, page: str
+) -> None:
+    """A `BLOB` link and a relative one in an included file alike.
+
+    :param conf: the part, as a stand-in's `conf.py`.
+    :param path: the page's file, from the root of the tree.
+    :param page: its docname.
+    """
+    assert _page(conf, _run(conf, _blob(conf, path), "index")) == (page, None)
+    relative = _relative(conf, f"./{path}", "readme_link")
+    assert _page(conf, _run(conf, relative, "readme_link")) == (page, None)
+
+
+@pytest.mark.parametrize(
+    ("suffix", "anchor"),
+    [
+        pytest.param("?plain=1", None, id="query"),
+        pytest.param("?plain=1#reporting", "reporting", id="query-anchor"),
+    ],
+)
+def test_a_query_is_dropped(conf: ModuleType, suffix: str, anchor: str | None) -> None:
+    """`?plain=1` is GitHub's, and the page is reached without it.
+
+    :param conf: the part, as a stand-in's `conf.py`.
+    :param suffix: what follows the file's path.
+    :param anchor: what the link keeps of it.
+    """
+    blob = _run(conf, _blob(conf, f"SECURITY.md{suffix}"), "index")
+    assert _page(conf, blob) == ("security_link", anchor)
+    included = _relative(conf, f"./SECURITY.md{suffix}", "readme_link")
+    assert _page(conf, _run(conf, included, "readme_link")) == ("security_link", anchor)
+    # on a page including nothing, the link is relative to the page
+    plain = _relative(conf, f"../../SECURITY.md{suffix}", "index")
+    assert _page(conf, _run(conf, plain, "index")) == ("security_link", anchor)
+
+
+def test_a_relative_link_to_a_file_no_page_renders_is_at_blob(conf: ModuleType) -> None:
+    """`LICENSE`, included by no page, stays on GitHub, query dropped.
+
+    :param conf: the part, as a stand-in's `conf.py`.
+    """
+    node = _run(
+        conf, _relative(conf, "./LICENSE?plain=1", "readme_link"), "readme_link"
+    )
+    assert isinstance(node, conf.nodes.reference)
+    assert node["refuri"] == f"{_BLOB}LICENSE"
 
 
 def test_a_copy_differing_by_a_byte_is_not_the_part() -> None:
