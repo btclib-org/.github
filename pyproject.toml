@@ -203,6 +203,9 @@ ignore = [
 # reason read the other way: what each one prints is its whole report,
 # to a failing developer's terminal or to a job's log
 ".github/scripts/*.py" = ["INP001", "T20"]
+# flake8-no-pep420: a file here is the source section 14 copies into the
+# other trees, never imported, for the reason the scripts' entry gives
+"shared/*.py" = ["INP001"]
 
 [tool.ruff.lint.mccabe]
 # ruff's default, as everywhere in the organization

@@ -427,6 +427,23 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "functional-tests",
         ),
     ),
+    (
+        2166,
+        "test_a_conf_py_carries_section_14_s_root_file_links",
+        (
+            "base58-bech32",
+            "benchmarks",
+            "bip32-descriptors",
+            "bip39-slip39",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-node",
+            "btclib-secp256k1",
+            "btclib-wallet",
+            "ecc",
+            "functional-tests",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
