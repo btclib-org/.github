@@ -21,8 +21,7 @@ not deadlines.
   organization's standards, with no new features planned
   (btclib-org/.github#1330).
 - **`bip39-slip39`** is maintained: fixes, dependency updates and the
-  organization's standards (btclib-org/.github#1892,
-  btclib-org/.github#2197).
+  organization's standards (btclib-org/.github#1892).
 - **`bitcoin-core-rpc`** follows the RPCs of each Bitcoin Core release
   (btclib-org/.github#1330).
 - **`btclib-benchmarks`** is maintained as it is: fixes, dependency
