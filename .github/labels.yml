@@ -79,6 +79,7 @@ labels:
       - bip39-slip39
       - base58-bech32
       - bip32-descriptors
+      - coin-addresses
 
 # Labels the test passes over, neither owed nor refused.
 #

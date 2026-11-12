@@ -348,6 +348,7 @@ def test_the_label_is_owed_by_the_publishing_trees_alone() -> None:
         "btclib-node",
         "btclib-secp256k1",
         "btclib-wallet",
+        "coin-addresses",
         "ecc",
     ]
 

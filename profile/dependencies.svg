@@ -182,20 +182,26 @@
 <path fill="#1f6feb" stroke="#1f6feb" d="M419.2,-158C419.2,-158 320.8,-158 320.8,-158 314.8,-158 308.8,-152 308.8,-146 308.8,-146 308.8,-134 308.8,-134 308.8,-128 314.8,-122 320.8,-122 320.8,-122 419.2,-122 419.2,-122 425.2,-122 431.2,-128 431.2,-134 431.2,-134 431.2,-146 431.2,-146 431.2,-152 425.2,-158 419.2,-158"/>
 <text xml:space="preserve" text-anchor="middle" x="370" y="-136.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">bip32&#45;descriptors</text>
 </g>
-<!-- btclib&#45;functional&#45;tests -->
+<!-- coin&#45;addresses -->
 <g id="node11" class="node">
+<title>coin&#45;addresses</title>
+<path fill="#1f6feb" stroke="#1f6feb" d="M129.2,-58C129.2,-58 30.8,-58 30.8,-58 24.8,-58 18.8,-52 18.8,-46 18.8,-46 18.8,-34 18.8,-34 18.8,-28 24.8,-22 30.8,-22 30.8,-22 129.2,-22 129.2,-22 135.2,-22 141.2,-28 141.2,-34 141.2,-34 141.2,-46 141.2,-46 141.2,-52 135.2,-58 129.2,-58"/>
+<text xml:space="preserve" text-anchor="middle" x="80" y="-36.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">coin&#45;addresses</text>
+</g>
+<!-- btclib&#45;functional&#45;tests -->
+<g id="node12" class="node">
 <title>btclib&#45;functional&#45;tests</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M274.2,-58C274.2,-58 175.8,-58 175.8,-58 169.8,-58 163.8,-52 163.8,-46 163.8,-46 163.8,-34 163.8,-34 163.8,-28 169.8,-22 175.8,-22 175.8,-22 274.2,-22 274.2,-22 280.2,-22 286.2,-28 286.2,-34 286.2,-34 286.2,-46 286.2,-46 286.2,-52 280.2,-58 274.2,-58"/>
 <text xml:space="preserve" text-anchor="middle" x="225" y="-36.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">btclib&#45;functional&#45;tests</text>
 </g>
 <!-- btclib&#45;benchmarks -->
-<g id="node12" class="node">
+<g id="node13" class="node">
 <title>btclib&#45;benchmarks</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M419.2,-58C419.2,-58 320.8,-58 320.8,-58 314.8,-58 308.8,-52 308.8,-46 308.8,-46 308.8,-34 308.8,-34 308.8,-28 314.8,-22 320.8,-22 320.8,-22 419.2,-22 419.2,-22 425.2,-22 431.2,-28 431.2,-34 431.2,-34 431.2,-46 431.2,-46 431.2,-52 425.2,-58 419.2,-58"/>
 <text xml:space="preserve" text-anchor="middle" x="370" y="-36.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">btclib&#45;benchmarks</text>
 </g>
 <!-- btclib&#45;node -->
-<g id="node13" class="node">
+<g id="node14" class="node">
 <title>btclib&#45;node</title>
 <path fill="#1f6feb" stroke="#1f6feb" d="M564.2,-58C564.2,-58 465.8,-58 465.8,-58 459.8,-58 453.8,-52 453.8,-46 453.8,-46 453.8,-34 453.8,-34 453.8,-28 459.8,-22 465.8,-22 465.8,-22 564.2,-22 564.2,-22 570.2,-22 576.2,-28 576.2,-34 576.2,-34 576.2,-46 576.2,-46 576.2,-52 570.2,-58 564.2,-58"/>
 <text xml:space="preserve" text-anchor="middle" x="515" y="-36.4" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#ffffff">btclib&#45;node</text>
