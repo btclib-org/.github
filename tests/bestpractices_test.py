@@ -192,6 +192,17 @@ def test_stale_lists_what_is_older_than_the_release(script: ModuleType) -> None:
     ]
 
 
+def test_stale_lists_a_datetime_before_the_release(script: ModuleType) -> None:
+    """A date followed by a time is read by its day."""
+    given = {
+        "a_justification": "merged:2026-10-02T23:59:59Z..2026-10-03T00:00:00Z",
+        "b_justification": "At 2026-10-03T22:09:48Z and 2026-10-04T01:00Z.",
+    }
+    assert script.stale(given, "v2026.10.4", "2026-10-03T22:09:48Z") == [
+        "a: 2026-10-02"
+    ]
+
+
 def test_seed_writes_a_file_per_tree_and_a_rerun_the_same(
     script: ModuleType, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
