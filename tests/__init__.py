@@ -383,16 +383,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("btclib-wallet", "functional-tests"),
     ),
     (
-        2050,
-        "test_a_python_tree_guards_sourcery_skips_as_this_one_does",
-        (
-            "btclib",
-            "btclib-secp256k1",
-            "btclib-wallet",
-            "bip32-descriptors",
-        ),
-    ),
-    (
         2156,
         "test_a_job_running_the_suite_names_the_patch_the_floor_names",
         (
@@ -409,16 +399,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-wallet",
             "ecc",
             "functional-tests",
-        ),
-    ),
-    (
-        2162,
-        "test_a_sourcery_yaml_turns_off_the_rules_turned_off",
-        (
-            "bip32-descriptors",
-            "btclib",
-            "btclib-secp256k1",
-            "btclib-wallet",
         ),
     ),
     (
