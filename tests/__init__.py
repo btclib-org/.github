@@ -385,10 +385,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         2050,
         "test_a_python_tree_guards_sourcery_skips_as_this_one_does",
-        (
-            "btclib",
-            "bip32-descriptors",
-        ),
+        ("bip32-descriptors",),
     ),
     (
         2156,
@@ -412,10 +409,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         2162,
         "test_a_sourcery_yaml_turns_off_the_rules_turned_off",
-        (
-            "bip32-descriptors",
-            "btclib",
-        ),
+        ("bip32-descriptors",),
     ),
     (
         2166,
