@@ -63,6 +63,7 @@ digraph dependencies {
     "btclib"           [pos="290,260"];
     "btclib-wallet"           [pos="0,160"];
     "bip32-descriptors"       [pos="290,160"];
+    "coin-addresses"          [pos="0,60"];
     "btclib-functional-tests" [pos="145,60"];
     "btclib-benchmarks"       [pos="290,60"];
     "btclib-node"             [pos="435,60"];

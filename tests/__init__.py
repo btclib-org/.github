@@ -397,6 +397,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib-node",
             "btclib-secp256k1",
             "btclib-wallet",
+            "coin-addresses",
             "ecc",
             "functional-tests",
         ),
@@ -405,6 +406,16 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         2166,
         "test_a_conf_py_carries_section_14_s_root_file_links",
         ("bip32-descriptors", "btclib-node"),
+    ),
+    (
+        2210,
+        "test_a_registered_tree_holds_its_answers",
+        ("coin-addresses",),
+    ),
+    (
+        2210,
+        "test_a_scorecard_tree_has_a_recent_good_first_issue",
+        ("coin-addresses",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
