@@ -98,7 +98,7 @@ BADGE = re.compile(r"bestpractices\.dev/projects/(\d+)")
 STATUS = "_status"
 JUSTIFICATION = "_justification"
 VERSION = re.compile(r"\bv(\d+(?:\.\d+)+)\b")
-DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
+DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}(?=\b|T\d{2}:\d{2})")
 UNDATED = re.compile(r"\b(?:draft|next release)\b", re.IGNORECASE)
 
 Answers = dict[str, Any]
