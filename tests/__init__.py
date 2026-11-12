@@ -380,7 +380,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         2008,
         "test_a_floor_measures_the_scripts_under_github_scripts",
-        ("btclib-wallet", "functional-tests"),
+        ("btclib-wallet",),
     ),
     (
         2156,
@@ -404,19 +404,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         2166,
         "test_a_conf_py_carries_section_14_s_root_file_links",
-        (
-            "base58-bech32",
-            "benchmarks",
-            "bip32-descriptors",
-            "bip39-slip39",
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-node",
-            "btclib-secp256k1",
-            "btclib-wallet",
-            "ecc",
-            "functional-tests",
-        ),
+        ("bip32-descriptors", "btclib-node"),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
