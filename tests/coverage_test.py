@@ -33,6 +33,7 @@ no total is gated on, no flag turns a hook into a red build.
 from __future__ import annotations
 
 import ast
+import re
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any
 
@@ -79,6 +80,9 @@ SCRIPTS = ".github/scripts"
 
 PYTHON_SCRIPTS = f"{SCRIPTS}/*.py"
 """The pathspec of the scripts the clause is about."""
+
+MODULE_NAME = re.compile(r"[^.#~!$@%^&*()+=,]+\.pyw?")
+"""The file names `find_python_files` reports unrun."""
 
 NAMESPACES = {"include_namespace_packages": True}
 """The `[tool.coverage.report]` setting that reports a subdirectory with no
@@ -207,11 +211,9 @@ def unmeasured(root: Path, config: dict[str, Any]) -> list[str]:
     """Return the Python scripts under `.github/scripts` a floor leaves out.
 
     `source` is compared as a path, so `./.github/scripts` and
-    `.github/scripts/` name the directory as coverage reads them. Below
-    it, coverage reports a script nothing runs only where each directory
-    down to it holds an `__init__.py`, unless `[tool.coverage.report]`
-    sets `include_namespace_packages`: a script it would not report is
-    left out too.
+    `.github/scripts/` name the directory as coverage reads them. A script
+    is still left out where coverage would not report it unrun, as section
+    8 says of a subdirectory and `discovered` of a name.
 
     :param root: the root of the checkout.
     :param config: its parsed `pyproject.toml`, empty where it keeps none.
@@ -224,23 +226,36 @@ def unmeasured(root: Path, config: dict[str, Any]) -> list[str]:
     source = coverage.get("run", {}).get("source", [])
     if all((root / entry).resolve() != directory for entry in source):
         return found
-    if coverage.get("report", {}).get("include_namespace_packages"):
-        return []
+    namespaces = bool(coverage.get("report", {}).get("include_namespace_packages"))
     paths = [PurePosixPath(script) for script in found]
     packages = {path.parent for path in paths if path.name == "__init__.py"}
-    return [str(path) for path in paths if not discovered(path, packages)]
+    return [
+        str(path)
+        for path in paths
+        if not discovered(path, packages, namespaces=namespaces)
+    ]
 
 
-def discovered(path: PurePosixPath, packages: set[PurePosixPath]) -> bool:
-    """Say whether coverage finds a script under `.github/scripts` unrun.
+def discovered(
+    path: PurePosixPath, packages: set[PurePosixPath], *, namespaces: bool
+) -> bool:
+    """Say whether coverage reports a script under `.github/scripts` unrun.
+
+    The name test is coverage's own, in `coverage.files.find_python_files`,
+    and `include_namespace_packages` does not lift it.
 
     :param path: the script, relative to the root of the checkout.
     :param packages: the directories that hold an `__init__.py`.
-    :returns: whether each directory between `.github/scripts` and the
-        script is one of them.
+    :param namespaces: whether `[tool.coverage.report]` sets
+        `include_namespace_packages`.
+    :returns: whether coverage's name test takes the name, and each
+        directory between `.github/scripts` and the script holds an
+        `__init__.py` or `namespaces` is set.
     """
+    if not MODULE_NAME.fullmatch(path.name):
+        return False
     top = PurePosixPath(SCRIPTS)
-    return all(
+    return namespaces or all(
         directory in packages for directory in path.parents if top in directory.parents
     )
 
@@ -264,8 +279,8 @@ def test_a_floor_measures_the_scripts_under_github_scripts(
     left = unmeasured(trees[repository], config)
     assert not left, (
         f"fail_under = {total} says nothing of {left}: [tool.coverage.run]"
-        f" source does not name {SCRIPTS}, or a directory below it holds no"
-        " __init__.py; "
+        f" source does not name {SCRIPTS}, or coverage would not report them"
+        " unrun, for a directory with no __init__.py or a name it skips; "
         + by_hand(
             repository,
             f"git ls-files '{PYTHON_SCRIPTS}'; grep -n '^source' pyproject.toml",
@@ -312,6 +327,20 @@ def test_a_floor_measures_the_scripts_under_github_scripts(
             NAMESPACES,
             [],
             id="namespace-packages",
+        ),
+        pytest.param(
+            ["s.py", "a.b.py"],
+            ["pkg", "tests", SCRIPTS],
+            {},
+            [f"{SCRIPTS}/a.b.py"],
+            id="unimportable-name",
+        ),
+        pytest.param(
+            ["tools/a.b.py", "tools/t.py"],
+            ["pkg", "tests", SCRIPTS],
+            NAMESPACES,
+            [f"{SCRIPTS}/tools/a.b.py"],
+            id="unimportable-name-in-a-namespace-package",
         ),
     ],
 )
