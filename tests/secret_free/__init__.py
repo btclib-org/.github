@@ -245,12 +245,11 @@ def assert_secret_free(
     `'` as `\'` in a text holding both quotes. So every search is made again at
     each of the `levels` of the text, until reading back changes nothing. The
     levels are walked twice, the second time with whitespace dropped before
-    each reading back, so whitespace put inside an escape, such as between the
-    halves of a doubled backslash, does not hide a piece holding no whitespace
-    of its own either. Every other escape `repr` writes stays in the text: a
-    character `repr` does not print, such as `\x0b` or `\u2003`, hides a piece
-    it splits, or a piece of a string holding it, where the text holds it only
-    as that escape, as a `KeyError` shows its key.
+    each reading back, for the whitespace put inside an escape that the
+    paragraph above names. Every other escape `repr` writes stays in the text:
+    a character `repr` does not print, such as `\x0b` or `\u2003`, hides a
+    piece it splits, or a piece of a string holding it, where the text holds it
+    only as that escape, as a `KeyError` shows its key.
 
     :param exc: the exception raised.
     :param secrets: the secret fed, as bytes, as a bytearray, or in each

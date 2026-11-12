@@ -12,6 +12,8 @@ every planted case has to fail.
 
 from __future__ import annotations
 
+from functools import partial
+from timeit import repeat
 from typing import TYPE_CHECKING, override
 
 import pytest
@@ -427,10 +429,17 @@ def test_whitespace_after_a_string_s_own_backslash_does_not_hide_it(
 def test_a_run_of_tabs_holds_no_piece_with_a_letter_among_tabs() -> None:
     """Tabs, as a `KeyError`'s key, pass a piece needing a letter among tabs.
 
-    A gap that can hold the piece's own tab makes a backtracking search take
-    seconds on this run of them.
+    The search is timed against a piece with no tab, which the run cannot
+    slow: a gap that can hold the piece's own tab backtracks through the run,
+    far past the bound. Section 7's *A test that bounds time bounds a ratio*
+    says why the bound is a ratio.
     """
-    assert_secret_free(raised(KeyError, b"\t" * 100), [b"\t\t\t\tx\t"])
+    tabs = raised(KeyError, b"\t" * 100)
+    among, control = (
+        min(repeat(partial(assert_secret_free, tabs, [piece]), number=1, repeat=5))
+        for piece in (b"\t\t\t\tx\t", b"vvvvxv")
+    )
+    assert among < 100 * control
 
 
 @pytest.mark.parametrize("shown", SHOWN)
