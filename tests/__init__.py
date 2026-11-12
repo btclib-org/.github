@@ -405,6 +405,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "coin-addresses",
             "ecc",
             "functional-tests",
+            "seed-scan",
         ),
     ),
     (
@@ -418,9 +419,24 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("coin-addresses",),
     ),
     (
+        2203,
+        "test_a_registered_tree_released_within_six_months",
+        ("seed-scan",),
+    ),
+    (
         2210,
         "test_a_registered_tree_holds_its_answers",
         ("coin-addresses",),
+    ),
+    (
+        2230,
+        "test_a_registered_tree_holds_its_answers",
+        ("seed-scan",),
+    ),
+    (
+        2230,
+        "test_a_scorecard_tree_has_a_recent_good_first_issue",
+        ("seed-scan",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
