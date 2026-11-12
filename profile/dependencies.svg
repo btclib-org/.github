@@ -39,13 +39,13 @@
 <polygon fill="#7d8590" stroke="#7d8590" points="367.55,-313.49 370,-320.49 372.45,-313.49 367.55,-313.49"/>
 </g>
 <!-- btclib&#45;wallet&#45;&gt;bip39&#45;slip39 -->
-<g id="edge19" class="edge">
+<g id="edge20" class="edge">
 <title>btclib&#45;wallet&#45;&gt;bip39&#45;slip39</title>
 <path fill="none" stroke="#7d8590" d="M40,-158C40,-158 40,-515 40,-515"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="37.55,-513.49 40,-520.49 42.45,-513.49 37.55,-513.49"/>
 </g>
 <!-- btclib&#45;wallet&#45;&gt;bitcoin&#45;core&#45;rpc -->
-<g id="edge18" class="edge">
+<g id="edge19" class="edge">
 <title>btclib&#45;wallet&#45;&gt;bitcoin&#45;core&#45;rpc</title>
 <path fill="none" stroke="#7d8590" d="M60,-158C60,-158 60,-440 60,-440 60,-440 157,-440 157,-440"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="155.49,-442.45 162.49,-440 155.49,-437.55 155.49,-442.45"/>
@@ -68,56 +68,62 @@
 <path fill="none" stroke="#7d8590" d="M370,-158C370,-158 370,-215 370,-215"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="367.55,-213.49 370,-220.49 372.45,-213.49 367.55,-213.49"/>
 </g>
+<!-- coin&#45;addresses&#45;&gt;ecc -->
+<g id="edge9" class="edge">
+<title>coin&#45;addresses&#45;&gt;ecc</title>
+<path fill="none" stroke="#7d8590" d="M141,-40C141,-40 152,-40 152,-40 152,-40 152,-340 152,-340 152,-340 302,-340 302,-340"/>
+<polygon fill="#7d8590" stroke="#7d8590" points="300.49,-342.45 307.49,-340 300.49,-337.55 300.49,-342.45"/>
+</g>
 <!-- btclib&#45;functional&#45;tests&#45;&gt;bitcoin&#45;core&#45;rpc -->
-<g id="edge11" class="edge">
+<g id="edge12" class="edge">
 <title>btclib&#45;functional&#45;tests&#45;&gt;bitcoin&#45;core&#45;rpc</title>
 <path fill="none" stroke="#7d8590" d="M205,-58C205,-58 205,-415 205,-415"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="202.55,-413.49 205,-420.49 207.45,-413.49 202.55,-413.49"/>
 </g>
 <!-- btclib&#45;functional&#45;tests&#45;&gt;btclib -->
-<g id="edge10" class="edge">
+<g id="edge11" class="edge">
 <title>btclib&#45;functional&#45;tests&#45;&gt;btclib</title>
 <path fill="none" stroke="#7d8590" d="M245,-58C245,-58 245,-230 245,-230 245,-230 302,-230 302,-230"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="300.49,-232.45 307.49,-230 300.49,-227.55 300.49,-232.45"/>
 </g>
 <!-- btclib&#45;functional&#45;tests&#45;&gt;bip32&#45;descriptors -->
-<g id="edge9" class="edge">
+<g id="edge10" class="edge">
 <title>btclib&#45;functional&#45;tests&#45;&gt;bip32&#45;descriptors</title>
 <path fill="none" stroke="#7d8590" d="M265,-58C265,-58 265,-90 265,-90 265,-90 330,-90 330,-90 330,-90 330,-115 330,-115"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="327.55,-113.49 330,-120.49 332.45,-113.49 327.55,-113.49"/>
 </g>
 <!-- btclib&#45;benchmarks&#45;&gt;bip39&#45;slip39 -->
-<g id="edge17" class="edge">
+<g id="edge18" class="edge">
 <title>btclib&#45;benchmarks&#45;&gt;bip39&#45;slip39</title>
 <path fill="none" stroke="#7d8590" d="M330,-22C330,-22 330,0 330,0 330,0 0,0 0,0 0,0 0,-590 0,-590 0,-590 80,-590 80,-590 80,-590 80,-565 80,-565"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="82.45,-566.51 80,-559.51 77.55,-566.51 82.45,-566.51"/>
 </g>
 <!-- btclib&#45;benchmarks&#45;&gt;btclib&#45;secp256k1 -->
-<g id="edge16" class="edge">
+<g id="edge17" class="edge">
 <title>btclib&#45;benchmarks&#45;&gt;btclib&#45;secp256k1</title>
 <path fill="none" stroke="#7d8590" d="M410,-22C410,-22 410,-5 410,-5 410,-5 610,-5 610,-5 610,-5 610,-440 610,-440 610,-440 438,-440 438,-440"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="439.51,-437.55 432.51,-440 439.51,-442.45 439.51,-437.55"/>
 </g>
 <!-- btclib&#45;benchmarks&#45;&gt;bip32&#45;descriptors -->
-<g id="edge12" class="edge">
+<g id="edge13" class="edge">
 <title>btclib&#45;benchmarks&#45;&gt;bip32&#45;descriptors</title>
 <path fill="none" stroke="#7d8590" d="M370,-58C370,-58 370,-115 370,-115"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="367.55,-113.49 370,-120.49 372.45,-113.49 367.55,-113.49"/>
 </g>
 <!-- btclib&#45;node&#45;&gt;bitcoin&#45;core&#45;rpc -->
-<g id="edge15" class="edge">
+<g id="edge16" class="edge">
 <title>btclib&#45;node&#45;&gt;bitcoin&#45;core&#45;rpc</title>
 <path fill="none" stroke="#7d8590" d="M545,-58C545,-58 545,-290 545,-290 545,-290 265,-290 265,-290 265,-290 265,-415 265,-415"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="262.55,-413.49 265,-420.49 267.45,-413.49 262.55,-413.49"/>
 </g>
 <!-- btclib&#45;node&#45;&gt;btclib -->
-<g id="edge14" class="edge">
+<g id="edge15" class="edge">
 <title>btclib&#45;node&#45;&gt;btclib</title>
 <path fill="none" stroke="#7d8590" d="M515,-58C515,-58 515,-230 515,-230 515,-230 438,-230 438,-230"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="439.51,-227.55 432.51,-230 439.51,-232.45 439.51,-227.55"/>
 </g>
 <!-- btclib&#45;node&#45;&gt;bip32&#45;descriptors -->
-<g id="edge13" class="edge">
+<g id="edge14" class="edge">
 <title>btclib&#45;node&#45;&gt;bip32&#45;descriptors</title>
 <path fill="none" stroke="#7d8590" d="M475,-58C475,-58 475,-90 475,-90 475,-90 410,-90 410,-90 410,-90 410,-115 410,-115"/>
 <polygon fill="#7d8590" stroke="#7d8590" points="407.55,-113.49 410,-120.49 412.45,-113.49 407.55,-113.49"/>
