@@ -2480,11 +2480,12 @@ by that row.
   `bip32-descriptors`, `base58-bech32`;
 - `bootstrap-dns` — `btclib-node`;
 - `mutation` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `benchmarks`,
-  `btclib-node`, `btclib-wallet`, `ecc`, `bip39-slip39`, `bip32-descriptors`,
-  `base58-bech32`;
+  `btclib-node`, `btclib-wallet`, `ecc`, `coin-addresses`, `bip39-slip39`,
+  `bip32-descriptors`, `base58-bech32`;
 - `qa-assets` — `btclib`, `btclib-wallet`, `bip32-descriptors`;
 - `fuzz` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `btclib-node`,
-  `btclib-wallet`, `ecc`, `bip39-slip39`, `bip32-descriptors`, `base58-bech32`;
+  `btclib-wallet`, `ecc`, `coin-addresses`, `bip39-slip39`, `bip32-descriptors`,
+  `base58-bech32`;
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`,
   `btclib-wallet`, `bip32-descriptors`;
 - `btcd-oracle` — `btclib`;
@@ -2616,8 +2617,9 @@ and the badge land together.
   choose them, `btclib-node` speaks the peer-to-peer protocol, `btclib-wallet`
   parses PSBTs, output descriptors and BIP32/BIP322 data a counterparty hands it,
   `ecc` decodes the DER and BIP340 signatures and the ECIES envelopes a
-  sender writes, `bip39-slip39` decodes the SLIP39 shares their
-  holders hand back, a few of whom SLIP39 allows to be compromised,
+  sender writes, `coin-addresses` validates the addresses a stranger hands
+  over to be paid, `bip39-slip39` decodes the SLIP39 shares their holders
+  hand back, a few of whom SLIP39 allows to be compromised,
   `base58-bech32` decodes the base58, bech32, SS58 and CashAddr strings
   of the addresses and keys a stranger hands over, and `bip32-descriptors`
   decodes the BIP32 extended keys, as 78 octets and as Base58Check, the
