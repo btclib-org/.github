@@ -389,8 +389,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "btclib",
             "btclib-secp256k1",
             "btclib-wallet",
-            "ecc",
-            "base58-bech32",
             "bip32-descriptors",
         ),
     ),
@@ -417,13 +415,10 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         2162,
         "test_a_sourcery_yaml_turns_off_the_rules_turned_off",
         (
-            "base58-bech32",
             "bip32-descriptors",
-            "bip39-slip39",
             "btclib",
             "btclib-secp256k1",
             "btclib-wallet",
-            "ecc",
         ),
     ),
     (
