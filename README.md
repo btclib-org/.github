@@ -4251,11 +4251,13 @@ comparison stops:
   up to the same heading, a review that means one thing in one tree and
   another in the next being no standard. Under it is what a review of
   that tree checks beyond the generic.
-- `RELEASING.md` — owed where `.github/workflows/release.yml`, and the same
-  file in each up to the same heading. Under it are the names its steps read,
-  set once, and what that tree does beyond them. This repository publishes
-  nothing, so the source is this repository's `shared/RELEASING.md` and not a
-  copy at its root, which section 2 keeps out of a tier-2 tree.
+- `RELEASING.md` — owed where `.github/workflows/release.yml`, and the same file
+  in each up to the same heading. Under it are the names its steps read, set
+  once, and what that tree does beyond them. This repository publishes nothing,
+  so section 2 keeps a copy out of its root, and the source is this repository's
+  `shared/RELEASING.md`. Every copy carries the source's `python=` line, which
+  reads `.python-version` (section 9's *One fact in one place*):
+  `tests/releasing_test.py` asks each tree for it.
 
 `tests/verbatim_test.py` compares what precedes that heading where a file
 carries one, the whole file where it does not, and only the section a bullet

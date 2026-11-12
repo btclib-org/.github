@@ -356,6 +356,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ),
     ),
     (
+        1855,
+        "test_a_releasing_md_reads_python_as_the_source_does",
+        ("btclib-secp256k1",),
+    ),
+    (
         1928,
         "test_the_suite_runs_each_harness",
         (

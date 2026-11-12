@@ -1142,9 +1142,12 @@ dist=<the distribution's name on PyPI>
 test_dist=<the project's name on TestPyPI>
 pkg=<the import package>
 rtd=<the Read the Docs project>
-python=<the interpreter the install checks run under>
+python=$(grep -Ev '^[[:space:]]*(#|$)' .python-version)
 smoke=<the Python the install checks run>
 ```
 
 `smoke` is quoted where a tree sets it, being Python with spaces in it:
 `smoke='import x; print(x.__version__)'`.
+
+`python` reads `.python-version`, as section 14 of the organization's
+standard asks, so the block is run from the root of the checkout.
