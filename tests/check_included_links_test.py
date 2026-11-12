@@ -201,9 +201,350 @@ FENCES = [
         ["a.md"],
         id="numbered-item-fence",
     ),
+    pytest.param(
+        "- a\n\n  ```text\n  ```\n\n ```{include} a.md\n ```\n",
+        ["a.md"],
+        id="item-code",
+    ),
+    pytest.param("- a\n# H\n  ```text\n ```{include} b.md\n ```\n", [], id="heading"),
+    pytest.param("* * *\n  ```text\n ```{include} b.md\n ```\n", [], id="break"),
+    pytest.param("- a\n> q\n\n  ```text\n ```{include} b.md\n ```\n", [], id="quote"),
+    pytest.param(
+        "text\n2) d\n   ```{include} a.md\n   ```\n", ["a.md"], id="lazy-item"
+    ),
+    pytest.param(
+        " ````{note}\n    ```\n   ~~~{include} b.md\n   ~~~\n ````\n",
+        [],
+        id="indented-directive",
+    ),
+    pytest.param(
+        "````{note}\n---\nclass: x\n---\n```{include} a.md\n```\n````\n",
+        ["a.md"],
+        id="options",
+    ),
+    pytest.param(
+        "---\n```{include} b.md\n```\n---\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="front-matter",
+    ),
+    pytest.param(
+        "<div>\n```{include} b.md\n```\n\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="html-block",
+    ),
+    pytest.param(
+        "<pre>\n\n```{include} b.md\n```\n</pre>\n\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="html-pre",
+    ),
+    pytest.param(
+        "text\n<span>\n```{include} a.md\n```\n", ["a.md"], id="html-tag-in-text"
+    ),
+    pytest.param("- a\n```{include} a.md\n```\n", ["a.md"], id="fence-ends-item"),
+    pytest.param("- a\n  <!--\n```{include} a.md\n```\n", ["a.md"], id="item-comment"),
+    pytest.param(" ```{include} a.md\n ```\n", ["a.md"], id="indented-include"),
+    pytest.param(
+        "   ```text\nx\n```\n\n```{include} a.md\n```\n", ["a.md"], id="indented-code"
+    ),
+    pytest.param(
+        "<!--\n```{include} b.md\n```\n-->\n\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="comment",
+    ),
+    pytest.param(
+        "<!-- x -->\n```{include} a.md\n```\n", ["a.md"], id="one-line-comment"
+    ),
+    pytest.param(
+        "````{note}\n<!--\n````\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="comment-in-directive",
+    ),
+    pytest.param("    <!--\n```{include} a.md\n```\n", ["a.md"], id="indented-comment"),
     pytest.param("    ```{include} b.md\n    ```\n", [], id="four-spaces"),
     pytest.param(
         "```text\n    ```\n```{include} b.md\n```\n", [], id="four-spaces-close"
+    ),
+    pytest.param("\tx\n<br>\n ```{include} b.md\n ```\n", [], id="tab-code"),
+    pytest.param(
+        " ````{note}\n\t```\n```{include} b.md\n```\n", [], id="tab-in-directive"
+    ),
+    pytest.param(
+        " ````{note}\n \t```\n```{include} a.md\n",
+        ["a.md"],
+        id="tab-left-in-directive",
+    ),
+    pytest.param(
+        " `````{note}\n  ````{tip}\n \t ```{include} b.md\n  ````\n `````\n",
+        [],
+        id="tab-in-nested-directive",
+    ),
+    pytest.param(
+        "[r]: http://x\n<br>\n ```{include} b.md\n ```\n", [], id="definition"
+    ),
+    pytest.param("[^n]:\n<span>\n ```{include} b.md\n ```\n", [], id="footnote"),
+    pytest.param(
+        "a[^n]\n\n[^n]: first\n\n    second\n<span>\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="footnote-paragraphs",
+    ),
+    pytest.param(
+        "a[^m]\n\n[^m]: ```text\n    x\n    ```\n<span>\n ```{include} b.md\n ```\n",
+        [],
+        id="footnote-fence",
+    ),
+    pytest.param(
+        "---\n```{include} b.md\n```\n  ...\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="front-matter-dots",
+    ),
+    pytest.param(
+        "---\n```{include} a.md\n```\n...\n", ["a.md"], id="front-matter-dots-last"
+    ),
+    pytest.param(
+        "````{versionchanged} 2.0\n---\n```{include} a.md\n```\n````\n",
+        ["a.md"],
+        id="no-options-dashes",
+    ),
+    pytest.param(
+        "````{only} html\n---\n```{include} a.md\n```\n````\n",
+        ["a.md"],
+        id="no-options-only",
+    ),
+    pytest.param(
+        "````{versionadded} 1.2\n:f: x\n<span>\n```{include} a.md\n```\n````\n",
+        ["a.md"],
+        id="no-options-colon",
+    ),
+    pytest.param(
+        "````{note}\n---\nclass: x\n---X```{include} a.md\n```\n````\n",
+        ["a.md"],
+        id="options-closer-text",
+    ),
+    pytest.param(
+        "````{note}\n:class: x\n\n---\n```{include} a.md\n```\n...\n````\n",
+        ["a.md"],
+        id="body-dots-last",
+    ),
+    pytest.param(
+        "````{note}\n:class: x\n\n---\n```{include} a.md\n```\n...\n\n````\n",
+        ["a.md"],
+        id="body-dots-one-blank",
+    ),
+    pytest.param(
+        "````{note}\n:class: x\n\n---\n```{include} b.md\n```\n...\n\n\n````\n",
+        [],
+        id="body-dots-two-blanks",
+    ),
+    pytest.param(
+        "````{note}\n:class: x\n<br>\n ```{include} b.md\n ```\n````\n",
+        [],
+        id="colon-options",
+    ),
+    pytest.param(
+        "````{note}\n\n---\n```{include} b.md\n```\n---\n````\n",
+        [],
+        id="blank-front-matter",
+    ),
+    pytest.param(
+        "````{note}\n```{topic} T\n```{include} b.md\n```\n```\n````\n",
+        [],
+        id="topic-in-note",
+    ),
+    pytest.param(
+        "````{sidebar} S\n```{topic} T\n```{include} a.md\n```\n```\n````\n",
+        ["a.md"],
+        id="topic-in-sidebar",
+    ),
+    pytest.param(
+        "````{note} text\n<span>\n```{include} a.md\n```\n````\n",
+        ["a.md"],
+        id="opener-text-html",
+    ),
+    pytest.param(
+        "````{tip} text\n\n---\n```{include} a.md\n```\n---\n````\n",
+        ["a.md"],
+        id="opener-text-blank",
+    ),
+    pytest.param(
+        "````{epigraph} text\n---\n```{include} a.md\n```\n---\n````\n",
+        ["a.md"],
+        id="opener-text-quote",
+    ),
+    pytest.param(
+        " ````{hint} <!--\n ```{include} b.md\n ```\n ````\n",
+        [],
+        id="opener-comment",
+    ),
+    pytest.param(
+        "````{note} text\n[r]: http://x\n<br>\n```{include} a.md\n```\n````\n",
+        ["a.md"],
+        id="opener-text-definition",
+    ),
+    pytest.param(
+        "````{note} text\n:class: x\n<span>\n```{include} a.md\n```\n````\n",
+        ["a.md"],
+        id="opener-text-colon-options",
+    ),
+    pytest.param(
+        "````{note} text\n---\nclass: x\n---\n<span>\n```{include} a.md\n```\n````\n",
+        ["a.md"],
+        id="opener-text-dash-options",
+    ),
+    pytest.param(
+        "````{compound} text\n<span>\n```{include} a.md\n```\n````\n",
+        ["a.md"],
+        id="opener-text-compound",
+    ),
+    pytest.param(
+        "````{pull-quote} text\n---\n```{include} a.md\n```\n---\n````\n",
+        ["a.md"],
+        id="opener-text-pull-quote",
+    ),
+    pytest.param(
+        "```{note}text\n```{include} b.md\n```\n",
+        [],
+        id="name-run-on",
+    ),
+    pytest.param(
+        "`````{versionadded} 1\n````{topic} T\n```{include} a.md\n```\n````\n`````\n",
+        ["a.md"],
+        id="topic-in-version",
+    ),
+    pytest.param(
+        "`````{versionadded} 1\n````{sidebar} S\n```{include} a.md\n```\n````\n`````\n",
+        ["a.md"],
+        id="sidebar-in-version",
+    ),
+    pytest.param(
+        "``````{epigraph}\n\n\n-->\n ```{include} b.md\n",
+        [],
+        id="attribution",
+    ),
+    pytest.param("````{acks}\n```{include} b.md\n```\n````\n", [], id="acks"),
+    pytest.param(
+        "````{acks}\n ```{include} b.md\n ```\n````\n", [], id="acks-indented"
+    ),
+    pytest.param(
+        "<!x\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="lowercase-declaration",
+    ),
+    pytest.param(
+        "<!doctype html\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="lowercase-doctype",
+    ),
+    pytest.param(
+        "<!doctype html>\n<span>\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="lowercase-doctype-text",
+    ),
+    pytest.param(
+        "````{note}\n<!x\n```{include} a.md\n```\n````\n",
+        ["a.md"],
+        id="lowercase-declaration-in-directive",
+    ),
+    pytest.param(
+        "<!X\n```{include} b.md\n```\n>\n\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="uppercase-declaration",
+    ),
+    pytest.param(
+        "````{note} ```{include} b.md\n````\n",
+        [],
+        id="backtick-in-info",
+    ),
+    pytest.param(
+        "````{note} ```{include} b.md\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="backtick-in-info-then-include",
+    ),
+    pytest.param(
+        "```text `x`\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="backtick-in-code-info",
+    ),
+    pytest.param(
+        "<div>\n\xa0\n```{include} b.md\n```\n", [], id="no-break-space-not-blank"
+    ),
+    pytest.param(
+        "```text\nx\n```\xa0\n```{include} b.md\n```\n```\n",
+        [],
+        id="no-break-space-not-closer",
+    ),
+    pytest.param("<pre\xa0\n```{include} b.md\n```\n", [], id="no-break-space-tag"),
+    pytest.param(
+        "[a]: x(\n<span>\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="definition-open-paren",
+    ),
+    pytest.param(
+        "[a]: x)\n<span>\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="definition-close-paren",
+    ),
+    pytest.param(
+        "[a]: x" + "(" * 33 + ")" * 33 + "\n<span>\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="definition-deep-parens",
+    ),
+    pytest.param(
+        '[a]: x "a\\"\n<span>\n```{include} a.md\n```\n',
+        ["a.md"],
+        id="definition-escaped-double-quote",
+    ),
+    pytest.param(
+        "[a]: x 'a\\'\n<span>\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="definition-escaped-single-quote",
+    ),
+    pytest.param(
+        "# T\n\n[a]: https://example.com/x_(y\n<span>\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="definition-url-paren",
+    ),
+    pytest.param(
+        "[a]: x\n<span>\n```{include} b.md\n```\n",
+        [],
+        id="definition-control",
+    ),
+    pytest.param(
+        "```\xa0{include} a.md\n```\n",
+        ["a.md"],
+        id="info-no-break-space",
+    ),
+    pytest.param(
+        "```\u3000{include} a.md\n```\n",
+        ["a.md"],
+        id="info-ideographic-space",
+    ),
+    pytest.param(
+        "```\x1f{include} a.md\n```\n",
+        ["a.md"],
+        id="info-unit-separator",
+    ),
+    pytest.param(
+        "````\xa0{note}\n```{include} a.md\n```\n````\n",
+        ["a.md"],
+        id="info-no-break-space-directive",
+    ),
+    pytest.param(
+        "```{include} a.md\xa0\n```\n",
+        ["a.md"],
+        id="info-trailing-no-break-space",
+    ),
+    pytest.param(
+        "[a]: x(y)\n   <br>\n ````\x1f{include} b.md\n", [], id="definition-parens"
+    ),
+    pytest.param(
+        "[a]: x\\y\n   <span>\n ````\x1f{include} b.md\n",
+        [],
+        id="definition-backslash",
+    ),
+    pytest.param(
+        ">\n<!x\n``` `\n## Sec\n  <br>\n```\xa0{include} b.md\xa0\n",
+        [],
+        id="no-html-after-quote",
     ),
 ]
 
