@@ -87,6 +87,7 @@ READER = (
     "opens_container",
     "inner_line",
     "fenced",
+    "Reading",
     "read_page",
     "includes",
 )
@@ -129,7 +130,7 @@ def reader(path: Path) -> dict[str, ast.stmt]:
     """
     out: dict[str, ast.stmt] = {}
     for node in ast.parse(path.read_text(encoding="utf-8")).body:
-        if isinstance(node, ast.FunctionDef):
+        if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
             name = node.name
         elif isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name):
             name = node.targets[0].id

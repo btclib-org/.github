@@ -505,8 +505,8 @@ def opens_container(line: str, *, paragraph: bool) -> bool:
 
     :param line: the line, which opens no fence.
     :param paragraph: whether a paragraph is open above it.
-    :returns: whether it opens a list item, a block quote, a footnote
-        definition or an html block this cannot place.
+    :returns: whether it opens a list item, a block quote or a footnote
+        definition.
     """
     return (
         CONTAINER.match(line) is not None
@@ -576,6 +576,94 @@ def fenced(  # noqa: PLR0913
     return paths, close + 1
 
 
+class Reading:
+    """What `read_page` knows of the blocks open at a line."""
+
+    def __init__(self, *, trusted: bool) -> None:
+        """Start before the first line.
+
+        :param trusted: whether the lines start at the top level.
+        """
+        self.trusted = trusted
+        self.top = trusted
+        self.paragraph = False
+        self.blank = False
+        self.raw = False
+        # the fewest spaces a line needs to sit inside a list item open
+        self.floor = 4
+        # what ends an html block that may hide the lines read
+        self.end: re.Pattern[str] | None = None
+        # what closes a fence behind spaces left closed, which may be code
+        self.shut: re.Pattern[str] | None = None
+        # whether the line read closes such a fence
+        self.closing = False
+
+    def skips(self, line: str) -> bool:
+        """Read a line as the blocks left open see it.
+
+        :param line: the line.
+        :returns: whether nothing more is read of it: it is blank, or an
+            html block at the top level holds it.
+        """
+        # whether the line may still be a block's own
+        held = self.end is not None or self.shut is not None
+        if self.end is not None:
+            self.end = None if self.end.search(line) else self.end
+            if self.top:
+                # the block's own, its last line included
+                return True
+        self.closing = self.shut is not None and self.shut.search(line) is not None
+        self.shut = None if self.closing else self.shut
+        if not line.strip(" \t"):
+            self.blank, self.raw, self.paragraph = True, False, False
+            return True
+        self.place(line, held=held)
+        return False
+
+    def place(self, line: str, *, held: bool) -> None:
+        """Read whether a line that is not blank is at the top level.
+
+        :param line: the line.
+        :param held: whether an html block or a fence left closed may
+            still hold it.
+        """
+        if self.trusted and not held and not self.raw:
+            self.top = self.top or ends_containers(
+                line, floor=self.floor, blank=self.blank
+            )
+        self.floor = 4 if self.top else self.floor
+        self.blank = False
+
+    def read(self, line: str) -> None:
+        """Read a line `skips` leaves, which opens no fence.
+
+        :param line: the line.
+        """
+        if self.top and not opens_container(line, paragraph=self.paragraph):
+            self.end, self.paragraph = top_line(line, paragraph=self.paragraph)
+            return
+        self.top = False
+        self.end, self.raw, self.floor = inner_line(
+            line, end=self.end, raw=self.raw, floor=self.floor
+        )
+
+    def leaves_closed(self, fence: re.Match[str], *, indented: bool) -> bool:
+        """Read a fence this leaves closed, and what may close it.
+
+        Below the top level a fence behind spaces or a tab on the page is
+        left closed, but unless it closes one, it may open a code block.
+
+        :param fence: the opener's match of `FENCE`.
+        :param indented: whether spaces or a tab are before it on the page.
+        :returns: whether the fence is left closed.
+        """
+        if self.top or not indented:
+            return False
+        closer = rf"^ {{0,3}}{fence[2][0]}{{{len(fence[2])},}}[ \t]*$"
+        self.shut = None if self.closing else re.compile(closer)
+        return True
+
+
 def read_page(  # noqa: PLR0913
     lines: list[str],
     *,
@@ -588,13 +676,12 @@ def read_page(  # noqa: PLR0913
     """Return the paths of the include fences in lines of markdown.
 
     The lines are at the top level, of a page or of a directive's body,
-    until one may open a list item, a block quote, a footnote definition
-    or an html block this cannot place. From there only a fence with
-    nothing before it on the page opens, and an html block hides
-    nothing. A line is at the top level again where `ends_containers`
-    says so, unless an html block or a fence left closed may still hold
-    it. Trusted lines start at the top level; untrusted ones never reach
-    it.
+    until one may open a list item, a block quote or a footnote
+    definition. From there only a fence with nothing before it on the
+    page opens, and an html block hides nothing. A line is at the top
+    level again where `ends_containers` says so, unless an html block or
+    a fence left closed may still hold it. Trusted lines start at the top
+    level; untrusted ones never reach it.
 
     A link reference definition is read where it fits on one line, as
     `definition` says, which leaves a character reference in its
@@ -621,48 +708,20 @@ def read_page(  # noqa: PLR0913
     page = [*page]
     at = markdown_start(texts, bodies, page, directive=directive, opener=opener)
     paths: list[str] = []
-    top, paragraph, blank, raw = trusted, False, False, False
-    # the fewest spaces a line needs to sit inside a list item open
-    floor = 4
-    # what ends an html block that may hide the lines read
-    end: re.Pattern[str] | None = None
-    # what closes a fence behind spaces left closed, which may be code
-    shut: re.Pattern[str] | None = None
+    state = Reading(trusted=trusted)
     while at < len(texts):
         text, at = texts[at], at + 1
-        # whether the line may still be a block's own
-        held = end is not None or shut is not None
-        if end is not None:
-            end = None if end.search(text) else end
-            if top:
-                # the block's own, its last line included
-                continue
-        closing = shut is not None and shut.search(text) is not None
-        shut = None if closing else shut
-        if not text.strip(" \t"):
-            blank, raw, paragraph = True, False, False
+        if state.skips(text):
             continue
         fence = FENCE.match(text)
-        if trusted and not held and not raw:
-            top = top or ends_containers(text, floor=floor, blank=blank)
-        floor = 4 if top else floor
-        blank = False
-        if fence is None and top and not opens_container(text, paragraph=paragraph):
-            end, paragraph = top_line(text, paragraph=paragraph)
-        elif fence is None:
-            top = False
-            end, raw, floor = inner_line(text, end=end, raw=raw, floor=floor)
-        elif not top and page[at - 1][0] in " \t":
-            # a fence behind spaces or a tab on the page is left closed,
-            # but unless it closes one, it may open a code block
-            closer = rf"^ {{0,3}}{fence[2][0]}{{{len(fence[2])},}}[ \t]*$"
-            shut = None if closing else re.compile(closer)
-        else:
+        if fence is None:
+            state.read(text)
+        elif not state.leaves_closed(fence, indented=page[at - 1][0] in " \t"):
             found, at = fenced(
-                texts, bodies, page, at, fence, directive=directive, top=top
+                texts, bodies, page, at, fence, directive=directive, top=state.top
             )
             paths.extend(found)
-            paragraph = False
+            state.paragraph = False
     return paths
 
 
