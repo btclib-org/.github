@@ -21,8 +21,8 @@ not deadlines.
   organization's standards, with no new features planned
   (btclib-org/.github#1330).
 - **`bip39-slip39`** is maintained: fixes, dependency updates and the
-  organization's standards, and the work *Intended* below names
-  (btclib-org/.github#1892, btclib-org/.github#2197).
+  organization's standards (btclib-org/.github#1892,
+  btclib-org/.github#2197).
 - **`bitcoin-core-rpc`** follows the RPCs of each Bitcoin Core release
   (btclib-org/.github#1330).
 - **`btclib-benchmarks`** is maintained as it is: fixes, dependency
@@ -60,9 +60,6 @@ its intentions beyond that.
 - **A Bulletproofs++ range proof in `ecc`**, beside the Borromean one,
   following secp256k1-zkp's `bppp` module as it lands upstream
   (btclib-org/btclib#1908).
-- **The language of a mnemonic in `bip39-slip39`**: every language whose
-  word-list holds all the mnemonic's words, so that the dispatch needs no
-  language from its caller (btclib-org/bip39-slip39#253).
 - **BIP44 account discovery in `btclib-wallet`**: which accounts and
   addresses of a key have been used (btclib-org/btclib-wallet#816).
 - **`coin-addresses`, a package of its own for the addresses of other
