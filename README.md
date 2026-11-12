@@ -1731,7 +1731,7 @@ the workflow a reader already goes to for what runs that material.
 
 ```toml
 [tool.coverage.run]
-source = ["<package>", "tests"]
+source = ["<package>", "tests", ".github/scripts"]
 omit = ["*/site-packages/*", "tests/integration/*"]
 branch = true
 
@@ -1745,6 +1745,16 @@ fail_under = 100.0
 
 - **The tests are measured too.** A test nothing runs is dead code with
   the authority of a test.
+- **So are the scripts under `.github/scripts`**, where a tree holds
+  Python scripts there. They are code a workflow runs, and left out of
+  `source` they are outside the floor, so a branch of one that no test
+  reaches goes unseen. The directory is no importable package, and
+  coverage measures it by path all the same. In a subdirectory, it
+  reports a script nothing runs only where each directory down to it
+  holds an `__init__.py`, or where `[tool.coverage.report]` sets
+  `include_namespace_packages`. A script goes in `omit`, its reason
+  beside it, where the suite cannot reach it, or where it is a copy
+  section 14 compares, tested where its canonical copy is.
 - **`branch = true`.** Statement coverage alone calls a half-tested `if`
   fully covered: the line ran, one of its two ways out never did. The
   gate is 100% of statements *and* branches.
@@ -1754,9 +1764,9 @@ fail_under = 100.0
   a `pragma: no cover` at every site. A pattern that would also exclude
   something a test can reach is not one of these: for a one-off, the
   pragma is still the answer.
-- **`source` is named, never left to `--cov` alone.** Unnamed, it measures
-  every file the run imports, which reaches a script a test imports by
-  path — uncovered, because nothing runs its `main()` but a subprocess.
+- **`source` is named, never left to `--cov` alone.** Unnamed, coverage
+  reports only the files the run imports, so a module no test imports is
+  missing from the table rather than at 0%.
 - **100 is not the same rule with the bar raised.** coverage special-cases
   the value: nothing short of an exact 100.00% passes, where 99.99 passed
   everything above 99.985%. It also makes the report agree with the exit
