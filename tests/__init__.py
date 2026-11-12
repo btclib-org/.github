@@ -422,11 +422,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_a_registered_tree_holds_its_answers",
         ("coin-addresses",),
     ),
-    (
-        2210,
-        "test_a_scorecard_tree_has_a_recent_good_first_issue",
-        ("coin-addresses",),
-    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
