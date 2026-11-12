@@ -408,6 +408,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("bip32-descriptors", "btclib-node"),
     ),
     (
+        2197,
+        "test_a_registered_tree_released_within_six_months",
+        ("coin-addresses",),
+    ),
+    (
         2210,
         "test_a_registered_tree_holds_its_answers",
         ("coin-addresses",),

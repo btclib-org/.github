@@ -29,7 +29,7 @@ from urllib.request import Request, urlopen
 import pytest
 import yaml
 
-from . import ORG, by_hand, gh_json
+from . import ORG, Refused, by_hand, gh_json
 from .grid_test import record
 
 if TYPE_CHECKING:
@@ -526,21 +526,68 @@ def test_a_failure_other_than_a_missing_file_stops(
 _SIX_MONTHS = timedelta(days=183)
 
 
+def published(repository: str) -> str | None:
+    """Ask GitHub when a tree's latest release was published.
+
+    :param repository: the repository asked about.
+    :returns: the release's `published_at`, or `None` where the API
+        answers 404, which it does for a tree that has never released.
+    :raises Refused: where GitHub refuses for another reason than a 404.
+    """
+    try:
+        latest = gh_json(f"repos/{ORG}/{repository}/releases/latest")
+    except Refused as refused:
+        if "(HTTP 404)" in refused.stderr:
+            return None
+        raise
+    when: str = latest["published_at"]
+    return when
+
+
+@pytest.mark.parametrize(
+    ("stderr", "refused"),
+    [
+        ("gh: Not Found (HTTP 404)\n", False),
+        ("gh: Server Error (HTTP 500)\n", True),
+        ("gh: API rate limit exceeded (HTTP 403)\n", True),
+    ],
+    ids=["no-release", "server-error", "rate-limit"],
+)
+def test_only_a_404_reads_as_no_release(
+    monkeypatch: pytest.MonkeyPatch, stderr: str, *, refused: bool
+) -> None:
+    """A tree with no release is a finding; any other refusal still raises."""
+
+    def gh(endpoint: str) -> dict[str, str]:
+        raise Refused(1, ["gh", "api", endpoint], stderr=stderr)
+
+    monkeypatch.setattr("tests.bestpractices_test.gh_json", gh)
+    if refused:
+        with pytest.raises(Refused):
+            published("btclib")
+    else:
+        assert published("btclib") is None
+
+
 @pytest.mark.integration
 def test_a_registered_tree_released_within_six_months(repository: str) -> None:
     """Section 10 reviews the answers at a release, so a release is due.
 
     A failure is answered by an issue asking for the review, cited by a
-    `BACKLOG` row until the tree releases.
+    `BACKLOG` row until the tree releases. A tree that has never released
+    fails too, its first release being the review it waits on.
 
     :param repository: the repository asked about.
     """
     if repository not in record()["scorecard"]:
         pytest.skip(f"section 10's scorecard entry does not name {repository}")
-    published = gh_json(f"repos/{ORG}/{repository}/releases/latest")["published_at"]
-    age = datetime.now(UTC) - datetime.fromisoformat(published)
+    when = published(repository)
+    assert when is not None, f"{repository} has no release; " + by_hand(
+        repository, "gh release list --limit 1"
+    )
+    age = datetime.now(UTC) - datetime.fromisoformat(when)
     assert age < _SIX_MONTHS, (
-        f"{repository} last released at {published}: open an issue in"
+        f"{repository} last released at {when}: open an issue in"
         f" {ORG}/.github asking for its bestpractices.dev review; "
         + by_hand(repository, "gh release view --json tagName,publishedAt")
     )
