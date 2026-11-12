@@ -25,8 +25,9 @@ BLOB = f"{PYPROJECT['project']['urls']['repository']}/blob/main/"
 source_suffix = [".rst", ".md"]
 
 # section 14's verbatim part of docs/source/conf.py starts below this line
-# a line opening or closing a fence: its marker, and the info string after it
-FENCE = re.compile(r"^(`{3,}|~{3,})\s*(.*?)\s*$")
+# a line opening or closing a fence, behind up to three spaces: its marker,
+# and the info string after it. Behind four spaces it is no fence
+FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})\s*(.*?)\s*$")
 
 # the info string of an include fence; its argument runs to the end of the line
 INCLUDE = re.compile(r"^\{include\}\s+(.+)$")

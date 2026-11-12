@@ -186,6 +186,16 @@ FENCES = [
     pytest.param("````{eval-rst}\n```{include} b.md\n```\n````\n", [], id="eval-rst"),
     pytest.param("~~~{include} a.md\n~~~\n", ["a.md"], id="tilde-include"),
     pytest.param("````{include} a.md\n````\n", ["a.md"], id="long-include"),
+    pytest.param(
+        "```text\nexample\n ```\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="indented-close",
+    ),
+    pytest.param("   ```{include} a.md\n   ```\n", ["a.md"], id="indented-include"),
+    pytest.param("    ```{include} b.md\n    ```\n", [], id="four-spaces"),
+    pytest.param(
+        "```text\n    ```\n```{include} b.md\n```\n", [], id="four-spaces-close"
+    ),
 ]
 
 

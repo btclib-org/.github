@@ -30,8 +30,9 @@ from pathlib import Path
 # where the pages sit, relative to the root of the tree
 SOURCE = Path("docs/source")
 
-# a line opening or closing a fence: its marker, and the info string after it
-FENCE = re.compile(r"^(`{3,}|~{3,})\s*(.*?)\s*$")
+# a line opening or closing a fence, behind up to three spaces: its marker,
+# and the info string after it. Behind four spaces it is no fence
+FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})\s*(.*?)\s*$")
 
 # the info string of an include fence; its argument runs to the end of the line
 INCLUDE = re.compile(r"^\{include\}\s+(.+)$")
