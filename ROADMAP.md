@@ -59,8 +59,6 @@ its intentions beyond that.
 - **A Bulletproofs++ range proof in `ecc`**, beside the Borromean one,
   following secp256k1-zkp's `bppp` module as it lands upstream
   (btclib-org/btclib#1908).
-- **BIP44 account discovery in `btclib-wallet`**: which accounts and
-  addresses of a key have been used (btclib-org/btclib-wallet#816).
 - **`coin-addresses`, a package of its own for the addresses of other
   coins**: a public key to an address, and the validation of an address,
   and nothing above that. Its first release covers the coins on
