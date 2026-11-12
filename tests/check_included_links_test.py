@@ -191,7 +191,16 @@ FENCES = [
         ["a.md"],
         id="indented-close",
     ),
-    pytest.param("   ```{include} a.md\n   ```\n", ["a.md"], id="indented-include"),
+    pytest.param(
+        "- ```text\n  x\n  ```\n\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="bullet-item-fence",
+    ),
+    pytest.param(
+        "1. ```text\n   x\n   ```\n\n```{include} a.md\n```\n",
+        ["a.md"],
+        id="numbered-item-fence",
+    ),
     pytest.param("    ```{include} b.md\n    ```\n", [], id="four-spaces"),
     pytest.param(
         "```text\n    ```\n```{include} b.md\n```\n", [], id="four-spaces-close"

@@ -25,9 +25,10 @@ BLOB = f"{PYPROJECT['project']['urls']['repository']}/blob/main/"
 source_suffix = [".rst", ".md"]
 
 # section 14's verbatim part of docs/source/conf.py starts below this line
-# a line opening or closing a fence, behind up to three spaces: its marker,
-# and the info string after it. Behind four spaces it is no fence
-FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})\s*(.*?)\s*$")
+# a line opening or closing a fence: the spaces before it, its marker, and
+# the info string after it. Behind four spaces, a line at the top level of
+# a page is no fence
+FENCE = re.compile(r"^( {0,3})(`{3,}|~{3,})\s*(.*?)\s*$")
 
 # the info string of an include fence; its argument runs to the end of the line
 INCLUDE = re.compile(r"^\{include\}\s+(.+)$")
@@ -82,6 +83,8 @@ def includes(text: str) -> list[str]:
     parses, so a fence inside it is read. Any other fence is code, and
     what it holds is shown, not parsed. A fence closes at a bare marker
     of its own character, at least as long as the one that opened it.
+    A marker behind spaces may close a fence but opens none: it may sit
+    in a list item, which this does not read.
 
     :param text: the page.
     :returns: the paths, as the fences write them.
@@ -93,7 +96,7 @@ def includes(text: str) -> list[str]:
         fence = FENCE.match(line)
         if fence is None:
             continue
-        marker, info = fence.groups()
+        indent, marker, info = fence.groups()
         if open_fences:
             top, _ = open_fences[-1]
             if not info and marker[0] == top[0] and len(marker) >= len(top):
@@ -101,6 +104,8 @@ def includes(text: str) -> list[str]:
                 continue
             if open_fences[-1][1]:
                 continue
+        if indent:
+            continue
         if include := INCLUDE.match(info):
             paths.append(include[1])
         directive = DIRECTIVE.match(info)
