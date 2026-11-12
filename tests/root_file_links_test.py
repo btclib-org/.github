@@ -84,6 +84,9 @@ READER = (
     "markdown_start",
     "dedent",
     "ends_containers",
+    "opens_container",
+    "inner_line",
+    "fenced",
     "read_page",
     "includes",
 )

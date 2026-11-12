@@ -260,9 +260,12 @@ def destination(line: str, at: int) -> int | None:
         while (at := at + 1) < len(line) and line[at] not in "<>":
             at += line[at] == "\\"
         return at + 1 if line[at : at + 1] == ">" else None
-    while at < len(line) and line[at] > " " and line[at] != "\x7f":
-        if line[at : at + 2] == "\\ ":
-            break
+    while (
+        at < len(line)
+        and line[at] > " "
+        and line[at] != "\x7f"
+        and line[at : at + 2] != "\\ "
+    ):
         if line[at] == "\\":
             at += 1
         elif line[at] == "(":
@@ -363,8 +366,7 @@ def options(texts: list[str], *, directive: str) -> int:
         rest = (at for at in range(1, len(texts)) if texts[at].startswith("---"))
         skip = next(rest, len(texts))
         closing = texts[skip] if skip < len(texts) else ""
-        tail = closing[len(closing) - len(closing.lstrip("-")) + 1 :]
-        if tail:
+        if tail := closing[len(closing) - len(closing.lstrip("-")) + 1 :]:
             texts[skip] = tail
             return skip
         return min(skip + 1, len(texts))
@@ -490,7 +492,83 @@ def ends_containers(line: str, *, floor: int, blank: bool) -> bool:
         or HEADING.match(line)
     ):
         return True
-    return blank and indent == 0 and not (CONTAINER.match(line) or opens_html(line))
+    return blank and indent == 0 and not CONTAINER.match(line) and not opens_html(line)
+
+
+def opens_container(line: str, *, paragraph: bool) -> bool:
+    """Return whether a line at the top level opens a container.
+
+    :param line: the line, which opens no fence.
+    :param paragraph: whether a paragraph is open above it.
+    :returns: whether it opens a list item, a block quote, a footnote
+        definition or an html block this cannot place.
+    """
+    return (
+        CONTAINER.match(line) is not None
+        and HEADING.match(line) is None
+        and not (paragraph and not interrupts(line))
+    )
+
+
+def inner_line(
+    line: str, *, end: re.Pattern[str] | None, raw: bool, floor: int
+) -> tuple[re.Pattern[str] | None, bool, int]:
+    """Read a line below the top level that opens no fence.
+
+    :param line: the line.
+    :param end: what ends the html block that may hide the line, or None.
+    :param raw: whether the line may be inside an html block opened above.
+    :param floor: the spaces the list items open ask, 4 where none is.
+    :returns: `end`, `raw` and `floor` after the line.
+    """
+    block = html_block(line)
+    end = block if block is not None and not block.search(line) else end
+    raw = raw or (block is None and opens_html(line))
+    item = ITEM.match(line)
+    floor = min(floor, item.end() + (0 if item[3] else 1)) if item else floor
+    return end, raw, floor
+
+
+def fenced(  # noqa: PLR0913
+    texts: list[str],
+    bodies: list[str],
+    page: list[str],
+    at: int,
+    fence: re.Match[str],
+    *,
+    directive: str,
+    top: bool,
+) -> tuple[list[str], int]:
+    """Read the fence a line opens, and the body of its directive.
+
+    :param texts: the lines, their leading tabs expanded.
+    :param bodies: the lines, as `dedent` leaves them.
+    :param page: the lines, as the page writes them.
+    :param at: the index of the line after the opener.
+    :param fence: the opener's match of `FENCE`.
+    :param directive: the name of the directive holding the fence, empty
+        for a page.
+    :param top: whether the opener is at the top level.
+    :returns: the paths of the include fences it holds or is, and the
+        index of the line after its closer.
+    """
+    close = fence_end(texts, at, fence[2])
+    info = fence[3].strip()
+    paths = INCLUDE.findall(info)
+    name = DIRECTIVE.match(info)
+    parents = PLACED.get(name[1], (directive,)) if name is not None else ()
+    if name is not None and name[1] in PARSED and directive in parents:
+        paths.extend(
+            read_page(
+                bodies[at:close],
+                page=page[at:close],
+                width=len(fence[1]),
+                trusted=top,
+                directive=name[1],
+                opener=(name[2] or "") if name[1] in UNARGUED else "",
+            )
+        )
+    return paths, close + 1
 
 
 def read_page(  # noqa: PLR0913
@@ -564,44 +642,22 @@ def read_page(  # noqa: PLR0913
             top = top or ends_containers(text, floor=floor, blank=blank)
         floor = 4 if top else floor
         blank = False
-        container = (
-            CONTAINER.match(text)
-            and not HEADING.match(text)
-            and not (top and paragraph and not interrupts(text))
-        )
-        if fence is None and top and not container:
+        if fence is None and top and not opens_container(text, paragraph=paragraph):
             end, paragraph = top_line(text, paragraph=paragraph)
-            continue
-        if fence is None:
-            block, top = html_block(text), False
-            end = block if block is not None and not block.search(text) else end
-            raw = raw or (block is None and opens_html(text))
-            item = ITEM.match(text)
-            floor = min(floor, item.end() + (0 if item[3] else 1)) if item else floor
-            continue
-        if not top and page[at - 1][0] in " \t":
+        elif fence is None:
+            top = False
+            end, raw, floor = inner_line(text, end=end, raw=raw, floor=floor)
+        elif not top and page[at - 1][0] in " \t":
             # a fence behind spaces or a tab on the page is left closed,
             # but unless it closes one, it may open a code block
             closer = rf"^ {{0,3}}{fence[2][0]}{{{len(fence[2])},}}[ \t]*$"
             shut = None if closing else re.compile(closer)
-            continue
-        close, paragraph = fence_end(texts, at, fence[2]), False
-        info = fence[3].strip()
-        paths.extend(INCLUDE.findall(info))
-        name = DIRECTIVE.match(info)
-        parents = PLACED.get(name[1], (directive,)) if name is not None else ()
-        if name is not None and name[1] in PARSED and directive in parents:
-            paths.extend(
-                read_page(
-                    bodies[at:close],
-                    page=page[at:close],
-                    width=len(fence[1]),
-                    trusted=top,
-                    directive=name[1],
-                    opener=(name[2] or "") if name[1] in UNARGUED else "",
-                )
+        else:
+            found, at = fenced(
+                texts, bodies, page, at, fence, directive=directive, top=top
             )
-        at = close + 1
+            paths.extend(found)
+            paragraph = False
     return paths
 
 
