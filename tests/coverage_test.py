@@ -21,9 +21,9 @@ names would report those too, in trees where nothing is wrong.
 
 The second is the one on the scripts under `.github/scripts`: a tree
 holding Python scripts there names the directory in
-`[tool.coverage.run]`'s `source`, where coverage finds each of them, so
-its floor reaches them. Whether a script it omits carries its reason is
-a comment of `pyproject.toml`, and prose is left to a reader.
+`[tool.coverage.run]`'s `source`, and coverage reports each of them
+unrun, so its floor reaches them. Whether a script it omits carries its
+reason is a comment of `pyproject.toml`, and prose is left to a reader.
 
 Asked of a tree that declares a coverage floor rather than of a tier:
 section 8 reads which gate applies off what the tree installs, and where
@@ -82,7 +82,7 @@ PYTHON_SCRIPTS = f"{SCRIPTS}/*.py"
 """The pathspec of the scripts the clause is about."""
 
 MODULE_NAME = re.compile(r"[^.#~!$@%^&*()+=,]+\.pyw?")
-"""The file names `find_python_files` reports unrun."""
+"""The file names `find_python_files` yields, which coverage reports unrun."""
 
 NAMESPACES = {"include_namespace_packages": True}
 """The `[tool.coverage.report]` setting that reports a subdirectory with no
@@ -341,6 +341,13 @@ def test_a_floor_measures_the_scripts_under_github_scripts(
             NAMESPACES,
             [f"{SCRIPTS}/tools/a.b.py"],
             id="unimportable-name-in-a-namespace-package",
+        ),
+        pytest.param(
+            ["café.py", 'a"b.py'],
+            ["pkg", "tests", SCRIPTS],
+            {},
+            [],
+            id="a-name-git-quotes",
         ),
     ],
 )

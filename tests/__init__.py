@@ -225,13 +225,15 @@ def tracked(root: Path, *patterns: str) -> list[str]:
 
     `git ls-files` rather than a walk, so a checkout's own environment
     -- the `.venv` this tree keeps beside its suite -- is not read as
-    part of it.
+    part of it. `-z`, so a path git would quote, such as one holding a
+    non-ASCII letter or a `"`, comes back as written.
 
     :param root: the root of the checkout.
     :param patterns: git pathspecs, `*.toml` and the like.
     :returns: the paths, relative to the root, in git's order.
     """
-    return output("git", "-C", str(root), "ls-files", "--", *patterns).splitlines()
+    listed = output("git", "-C", str(root), "ls-files", "-z", "--", *patterns)
+    return listed.split("\0")[:-1]
 
 
 class Tier(enum.IntEnum):
