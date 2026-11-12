@@ -20,9 +20,9 @@ not deadlines.
 - **`bbt`** is maintained as it is: fixes, dependency updates and the
   organization's standards, with no new features planned
   (btclib-org/.github#1330).
-- **`bip39-slip39`** is maintained as it is: fixes, dependency updates
-  and the organization's standards, with no new features planned
-  (btclib-org/.github#1892).
+- **`bip39-slip39`** is maintained: fixes, dependency updates and the
+  organization's standards, and the work *Intended* below names
+  (btclib-org/.github#1892, btclib-org/.github#2197).
 - **`bitcoin-core-rpc`** follows the RPCs of each Bitcoin Core release
   (btclib-org/.github#1330).
 - **`btclib-benchmarks`** is maintained as it is: fixes, dependency
@@ -35,7 +35,8 @@ not deadlines.
   secp256k1-zkp, which cuts none, for the modules it exposes
   (btclib-org/.github#1330).
 - **`btclib-wallet`** is maintained: fixes, dependency updates and the
-  organization's standards (btclib-org/.github#1892).
+  organization's standards, and the work *Intended* below names
+  (btclib-org/.github#1892, btclib-org/.github#2197).
 - **`ecc`** is maintained: fixes, dependency updates and the
   organization's standards, and the work *Intended* below names
   (btclib-org/.github#1892).
@@ -59,6 +60,25 @@ its intentions beyond that.
 - **A Bulletproofs++ range proof in `ecc`**, beside the Borromean one,
   following secp256k1-zkp's `bppp` module as it lands upstream
   (btclib-org/btclib#1908).
+- **The language of a mnemonic in `bip39-slip39`**: every language whose
+  word-list holds all the mnemonic's words, so that the dispatch needs no
+  language from its caller (btclib-org/bip39-slip39#253).
+- **BIP44 account discovery in `btclib-wallet`**: which accounts and
+  addresses of a key have been used (btclib-org/btclib-wallet#816).
+- **`coin-addresses`, a package of its own for the addresses of other
+  coins**: a public key to an address, and the validation of an address,
+  and nothing above that. Its first release covers the coins on
+  secp256k1: the bitcoin clones, the EVM chains, Tron, Cosmos and XRP
+  (btclib-org/.github#2197).
+- **The ed25519 coins that derive by SLIP-0010 in `coin-addresses`**,
+  its second stage (btclib-org/.github#2199).
+- **Cardano, Polkadot and Monero in `coin-addresses`**, its third stage
+  (btclib-org/.github#2200, btclib-org/.github#2201,
+  btclib-org/.github#2202).
+- **`seed-scan`, a thin package of its own**: the command that finds what
+  a mnemonic of unknown scheme holds, on top of `bip39-slip39`,
+  `bip32-descriptors`, `btclib-wallet` and `coin-addresses`
+  (btclib-org/.github#2203).
 - **Gold at bestpractices.dev** for the repositories section 10's
   `scorecard` entry names (btclib-org/.github#1761).
 
