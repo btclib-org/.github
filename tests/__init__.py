@@ -387,8 +387,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_a_python_tree_guards_sourcery_skips_as_this_one_does",
         (
             "btclib",
-            "btclib-secp256k1",
-            "btclib-wallet",
             "bip32-descriptors",
         ),
     ),
@@ -417,8 +415,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         (
             "bip32-descriptors",
             "btclib",
-            "btclib-secp256k1",
-            "btclib-wallet",
         ),
     ),
     (
