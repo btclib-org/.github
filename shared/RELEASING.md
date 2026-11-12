@@ -814,9 +814,11 @@ request, next to `deps-latest`'s own result.
    the release notes and the vulnerabilities it fixed, signed tags and
    assets, attestation names. Once it lands, open each URL the script's
    `--drift` prints for this repository, save the form at each, and type
-   by hand each criterion it names as too long for a URL. `--drift` then
-   prints nothing for this repository. An advisory this repository
-   publishes is owed the same review.
+   by hand each criterion it names as too long for a URL. Whoever cannot
+   sign in to bestpractices.dev comments on the answers' pull request
+   that the save is owed, and whoever next can saves it. The step stays
+   open until `--drift` prints nothing for this repository. An advisory
+   this repository publishes is owed the same review.
 
 1. Open the next cycle: set a generic next version without the day (e.g.
    after 2026.8.6, use 2026.9) in `pyproject.toml`, through a pull
