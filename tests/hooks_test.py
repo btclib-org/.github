@@ -1839,7 +1839,8 @@ def ignores_the_gate(pattern: str) -> bool:
     elsewhere names a path from the root, one leading `**/` matching no
     directory. So only a single segment names a root file, matched with
     `*` and `?` as globs and `**` as `*`. `ignore_departures` hands it
-    the pattern lowercased, with no backslash and no `[`.
+    the pattern lowercased, in printable ASCII and tabs, with no
+    backslash and no `[`.
 
     :param pattern: one `!` line of the file, the `!` removed.
     :returns: whether the line names the gate.
@@ -1862,17 +1863,24 @@ def ignore_departures(
 
     Owed where the tree tracks `EDITOR_SETTINGS` and its gate runs a
     `prettier` hook: the editor reads `PRETTIER_IGNORE`, never the hook's
-    `exclude`. A line ignores the gate only where it names `CONFIG`
-    literally, alone, after `/` or after one `**/`; any other line, glob
-    or not, ignores nothing, so a pattern prettier would read as ignoring
-    the gate is reported, and a tree passes only by writing the literal.
-    A later `!` line re-includes the gate where it is bare, holds a
-    backslash or a `[`, or matches it lowercased as `ignores_the_gate`
-    reads it. The last line of either kind decides.
+    `exclude`. The file is split as prettier's node-ignore splits it, on
+    line feeds alone, one carriage return dropped from each line's end,
+    and trailing spaces and tabs are trimmed. A line ignores the gate
+    only where it names `CONFIG` literally, alone, after `/` or after one
+    `**/`; any other line, glob or not, ignores nothing, so a pattern
+    prettier would read as ignoring the gate is reported, and a tree
+    passes only by writing the literal. A line holding a character
+    outside printable ASCII other than a tab, a byte order mark or a
+    Unicode line break among them, is one the function does not read:
+    as a positive line it ignores nothing, and after `!` it re-includes
+    the gate. A later `!` line re-includes the gate too where it is bare,
+    holds a backslash or a `[`, or matches it lowercased as
+    `ignores_the_gate` reads it. The last line of either kind decides.
 
     :param document: the gate, as `gate()` returns it.
     :param editing: whether the tree tracks `EDITOR_SETTINGS`.
-    :param ignore: the text of `PRETTIER_IGNORE`, None where there is none.
+    :param ignore: the text of `PRETTIER_IGNORE`, its line ends as they
+        are, None where there is none.
     :returns: one finding, empty where nothing is owed or it is there.
     """
     if not editing or all(hook["id"] != PRETTIER for hook in flattened(document)):
@@ -1880,13 +1888,14 @@ def ignore_departures(
     if ignore is None:
         return [f"there is no {PRETTIER_IGNORE}"]
     ignored = False
-    for line in ignore.splitlines():
-        entry = line.rstrip()
+    for line in ignore.split("\n"):
+        entry = line.removesuffix("\r").rstrip(" \t")
         if not entry or entry.startswith("#"):
             continue
         if entry.startswith("!"):
             pattern = entry.removeprefix("!")
-            unreadable = "\\" in pattern or "[" in pattern
+            printable = all(char == "\t" or " " <= char <= "~" for char in pattern)
+            unreadable = not printable or "\\" in pattern or "[" in pattern
             if unreadable or not pattern or ignores_the_gate(pattern.lower()):
                 ignored = False
         elif entry in LITERAL:
@@ -1908,7 +1917,7 @@ def test_the_editor_leaves_the_gate_to_pre_commit_ci(
     found = ignore_departures(
         gate(repository, trees),
         editing=bool(tracked(root, EDITOR_SETTINGS)),
-        ignore=path.read_text(encoding="utf-8") if path.is_file() else None,
+        ignore=path.read_text(encoding="utf-8", newline="") if path.is_file() else None,
     )
     assert not found, (
         f"the editor's prettier formats what pre-commit.ci's autoupdate writes:"
@@ -1948,6 +1957,12 @@ def test_an_editor_reading_the_gate_is_reported() -> None:
         f"**/**/**/{CONFIG}\n",
         f"{CONFIG}\n!*.yaml\n*.yaml\n",
         "*.yaml\n",
+        f"{CONFIG}\u0085\n",
+        f"{CONFIG}\n!\ufeff{CONFIG}\n",
+        f"!{CONFIG}\u2028{CONFIG}\n",
+        f"!{CONFIG}\r{CONFIG}\n",
+        f"\ufeff{CONFIG}\n",
+        f"{CONFIG}\x1c\n",
     ):
         assert ignore_departures(running, editing=True, ignore=unignored) == wrong
     for listed in (
@@ -1961,6 +1976,7 @@ def test_an_editor_reading_the_gate_is_reported() -> None:
         f"{CONFIG}\n!*/{CONFIG}\n",
         f"{CONFIG}\n!**/**/{CONFIG}\n",
         f"**/{CONFIG}\n",
+        f"{CONFIG}\r\n",
     ):
         assert ignore_departures(running, editing=True, ignore=listed) == []
     assert ignore_departures(running, editing=False, ignore=None) == []
