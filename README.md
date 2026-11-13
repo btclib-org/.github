@@ -4109,10 +4109,11 @@ A label means what its description says. Who applies and removes it:
 - **The check reads the index for the version the tag names**, so a first
   release is no different from any other: the call passes the tag, the wait
   holds until the index serves that version, and it fails on its deadline rather
-  than let the matrix install the version the tag replaces. What has nothing to
-  read before a first release is the schedule, which passes no version, waits
-  for nothing and installs whatever the index serves at the time. A rehearsal
-  has no such job either: the check reads the release index.
+  than let the matrix install the version the tag replaces. The schedule passes
+  no version: it installs whatever the index serves at the time, and skips the
+  install where the package was never published, as
+  `reusable-wait-for-index.yml`'s header says. A rehearsal has no such job: the
+  check reads the release index.
 
 ## 13. Editor and agent configuration
 

@@ -667,8 +667,8 @@ request, next to `deps-latest`'s own result.
    something goes wrong" gives, for `published` a dispatch of
    `pypi-install.yml`.
 
-   A dispatch of `pypi-install.yml` passes no version, so it waits for
-   nothing and installs what the index serves at the time. Read the
+   A dispatch of `pypi-install.yml` passes no version, so it waits for no
+   version and installs what the index serves at the time. Read the
    installed version each cell prints in its log, and dispatch again
    where a cell installed the previous release.
 

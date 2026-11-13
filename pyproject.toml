@@ -45,9 +45,8 @@ keywords = [
 ]
 
 [dependency-groups]
-# `gh` and `git` are the other two dependencies and neither is a wheel:
-# both are on every GitHub-hosted runner already, and CONTRIBUTING.md
-# says so for a developer running this by hand.
+# what the suite needs that is no wheel is CONTRIBUTING.md's
+# *The environment and the gates*
 test = [
     # what `.github/scripts/api_gaps.py` imports, at the version both
     # api workflows run it with: tests/api_gaps_test.py keeps this pin,
