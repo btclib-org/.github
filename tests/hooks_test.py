@@ -182,14 +182,14 @@ characters is what `pinned-rev` accepts.
 """
 
 FROZEN = re.compile(
-    r"^\s*rev: (?P<sha>[0-9a-f]{40}) # frozen: "
+    r"^\s*rev: (?P<sha>[0-9a-f]{40}) +# frozen: "
     r"(?P<tag>v\d{4}\.\d{1,2}\.\d{1,2})$"
 )
 """The `rev:` line section 4 asks of a stanza taking `check-changelog`.
 
 Read off the text: the `# frozen:` comment is YAML's, and the parser has
-dropped it by the time `hooks()` returns. One space before the `#`, the
-form prettier writes, where pre-commit writes two.
+dropped it by the time `hooks()` returns. Any run of spaces before the
+`#`: pre-commit writes two, and a line written by hand may carry one.
 """
 
 REPO_LINE = re.compile(r"^\s*-\s*repo:\s*(?P<repo>\S+)\s*$")
@@ -1747,6 +1747,175 @@ def test_a_gate_off_the_fork_is_reported() -> None:
     ], "a hook from a third actionlint repository is read as agreeing"
 
 
+PRETTIER = "prettier"
+"""The id of the hook section 4's *prose and markup* bullet names."""
+
+
+def prettier_departures(document: dict[str, Any]) -> list[str]:
+    """Report a `prettier` hook that reads the gate itself.
+
+    The filters are read as pre-commit reads them: each pattern searched
+    in the path, the gate's top-level `files` and `exclude` before the
+    hook's own, `files` defaulting to the empty pattern and `exclude` to
+    `^$`.
+
+    :param document: the gate, as `gate()` returns it.
+    :returns: one finding per such hook, empty where there is none.
+    """
+
+    def reads(keys: dict[str, Any]) -> bool:
+        return bool(
+            re.search(str(keys.get("files", "")), CONFIG)
+            and not re.search(str(keys.get("exclude", "^$")), CONFIG)
+        )
+
+    if not reads(document):
+        return []
+    return [
+        f"{hook['id']} from {hook['repo']} reads {CONFIG}"
+        for hook in flattened(document)
+        if hook["id"] == PRETTIER and reads(hook)
+    ]
+
+
+def test_prettier_leaves_the_gate_to_pre_commit_ci(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 4's *prose and markup* bullet: `prettier` excludes the gate.
+
+    README section 4 has why (btclib-org/.github#2038).
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    found = prettier_departures(gate(repository, trees))
+    assert not found, (
+        f"prettier formats what pre-commit.ci's autoupdate writes: {found}; "
+        + by_hand(repository, f"grep -n -A6 'id: {PRETTIER}$' {CONFIG}")
+    )
+
+
+def test_a_prettier_hook_reading_the_gate_is_reported() -> None:
+    """The check above reports a `prettier` hook whose filters admit the gate.
+
+    A hook excluding it, or a gate excluding it for every hook, is not
+    reported, and neither is a hook of another id.
+    """
+    repo = "https://github.com/rbubley/mirrors-prettier"
+    yaml_files = r"^(.*\.ya?ml|\.markdownlint\.jsonc)$"
+    excluded = r"^\.pre-commit-config\.yaml$"
+
+    def document(hook: dict[str, Any], **top: str) -> dict[str, Any]:
+        return {**top, "repos": [{"repo": repo, "hooks": [hook]}]}
+
+    finding = [f"{PRETTIER} from {repo} reads {CONFIG}"]
+    assert prettier_departures(document({"id": PRETTIER})) == finding
+    reading = {"id": PRETTIER, "files": yaml_files}
+    assert prettier_departures(document(reading)) == finding
+    assert prettier_departures(document({**reading, "exclude": "^docs/"})) == finding
+    assert prettier_departures(document({**reading, "exclude": excluded})) == []
+    assert prettier_departures(document({"id": PRETTIER, "files": r"\.json$"})) == []
+    assert prettier_departures(document(reading, exclude=excluded)) == []
+    assert prettier_departures(document(reading, files="^src/")) == []
+    assert prettier_departures(document({"id": "yamllint"})) == []
+
+
+EDITOR_SETTINGS = ".vscode/settings.json"
+"""The file whose `[yaml]` block has the editor's prettier format on save."""
+
+PRETTIER_IGNORE = ".prettierignore"
+"""The file the hook's prettier and the editor's both read ignores from."""
+
+
+def ignore_departures(
+    document: dict[str, Any],
+    *,
+    editing: bool,
+    ignore: str | None,
+) -> list[str]:
+    """Report a tree whose editor's prettier would format the gate itself.
+
+    Owed where the tree tracks `EDITOR_SETTINGS` and its gate runs a
+    `prettier` hook: the editor reads `PRETTIER_IGNORE`, never the hook's
+    `exclude`. It is enough that a line names `CONFIG` literally, with or
+    without a leading `/`, and no later `!` line un-ignores it: any `!`
+    line after it is read as one that does, and a pattern that would
+    match the name without spelling it, as `*.yaml`, is not read at all.
+
+    :param document: the gate, as `gate()` returns it.
+    :param editing: whether the tree tracks `EDITOR_SETTINGS`.
+    :param ignore: the text of `PRETTIER_IGNORE`, None where there is none.
+    :returns: one finding, empty where nothing is owed or it is there.
+    """
+    if not editing or all(hook["id"] != PRETTIER for hook in flattened(document)):
+        return []
+    if ignore is None:
+        return [f"there is no {PRETTIER_IGNORE}"]
+    ignored = False
+    for line in ignore.splitlines():
+        entry = line.rstrip()
+        if entry.startswith("!"):
+            ignored = False
+        elif entry.removeprefix("/") == CONFIG:
+            ignored = True
+    return [] if ignored else [f"{PRETTIER_IGNORE} does not ignore {CONFIG}"]
+
+
+def test_the_editor_leaves_the_gate_to_pre_commit_ci(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 4's *prose and markup* bullet: `.prettierignore` names the gate.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    root = trees[repository]
+    path = root / PRETTIER_IGNORE
+    found = ignore_departures(
+        gate(repository, trees),
+        editing=bool(tracked(root, EDITOR_SETTINGS)),
+        ignore=path.read_text(encoding="utf-8") if path.is_file() else None,
+    )
+    assert not found, (
+        f"the editor's prettier formats what pre-commit.ci's autoupdate writes:"
+        f" {found}; " + by_hand(repository, f"cat {PRETTIER_IGNORE}")
+    )
+
+
+def test_an_editor_reading_the_gate_is_reported() -> None:
+    """The check above reports a missing or wrong `.prettierignore`.
+
+    Nothing is owed where the tree tracks no `EDITOR_SETTINGS` or its gate
+    runs no `prettier` hook.
+    """
+    running = {"repos": [{"repo": "local", "hooks": [{"id": PRETTIER}]}]}
+    other = {"repos": [{"repo": "local", "hooks": [{"id": "yamllint"}]}]}
+    missing = [f"there is no {PRETTIER_IGNORE}"]
+    wrong = [f"{PRETTIER_IGNORE} does not ignore {CONFIG}"]
+    assert ignore_departures(running, editing=True, ignore=None) == missing
+    assert ignore_departures(running, editing=True, ignore="") == wrong
+    assert ignore_departures(running, editing=True, ignore=f"# {CONFIG}\n") == wrong
+    assert ignore_departures(running, editing=True, ignore="docs/\n") == wrong
+    for unignored in (
+        f"{CONFIG}\n!{CONFIG}\n",
+        f"{CONFIG}\n!*.yaml\n",
+        f"{CONFIG}\n!**\n",
+        f" {CONFIG}\n",
+    ):
+        assert ignore_departures(running, editing=True, ignore=unignored) == wrong
+    for listed in (
+        f"# why\n{CONFIG}\n",
+        f"/{CONFIG}\n",
+        f"{CONFIG} \n",
+        f"!{CONFIG}\n{CONFIG}\n",
+    ):
+        assert ignore_departures(running, editing=True, ignore=listed) == []
+    assert ignore_departures(running, editing=False, ignore=None) == []
+    assert ignore_departures(other, editing=True, ignore=None) == []
+
+
 BASELINE = ".secrets.baseline"
 """The file section 4 says `detect-secrets` reads, at the root of a tree."""
 
@@ -2127,11 +2296,13 @@ def test_an_unfrozen_stanza_would_be_reported() -> None:
         f"rev: {sha}",
         "rev: v2026.10.25",
         "hooks: []",
-        f"rev: {sha}  # frozen: v2026.10.25",
+        f"rev: {sha} # v2026.10.25",
+        f"rev: {sha}  # frozen: main",
     ):
         assert unfrozen(block.format(rev)), f"{rev!r} read as frozen"
     for rev in (
         f"rev: {sha} # frozen: v2026.10.25",
+        f"rev: {sha}  # frozen: v2026.10.25",
         f"rev: {sha} # frozen: v2026.1.2",
     ):
         assert unfrozen(block.format(rev)) == [], f"{rev!r} read as unfrozen"
