@@ -1834,9 +1834,10 @@ def ignores_the_gate(pattern: str) -> bool:
     A pattern ending in `/` names directories only, and one with a `/`
     elsewhere names a path from the root, a leading `**/` there matching
     no directory at all. So only a single segment names a root file,
-    globbed as `fnmatch` globs, with `**` read as `*`.
+    matched case-sensitively, `*` and `?` as globs and `**` as `*`.
+    `ignore_departures` hands it no backslash and no `[`.
 
-    :param pattern: one line of the file, negation and escape removed.
+    :param pattern: one line of the file, its negation removed.
     :returns: whether the line names the gate.
     """
     if pattern.endswith("/"):
@@ -1859,10 +1860,13 @@ def ignore_departures(
 
     Owed where the tree tracks `EDITOR_SETTINGS` and its gate runs a
     `prettier` hook: the editor reads `PRETTIER_IGNORE`, never the hook's
-    `exclude`. The file is read as gitignore reads it for that one path:
-    the last line `ignores_the_gate` says matches decides, a `!` in front
-    of it un-ignoring, and a line opening with a backslash is neither a
-    comment nor a negation.
+    `exclude`. The function reads a subset of gitignore: a literal, or a
+    glob of `*`, `?` and `**`, case-sensitive, as `ignores_the_gate`
+    says, the last line that matches deciding and a `!` in front of it
+    un-ignoring. A line it cannot read is taken on the safe side: a `!`
+    line holding a backslash or a `[`, or matching once lowercased,
+    re-includes the gate, and any other line holding either ignores
+    nothing.
 
     :param document: the gate, as `gate()` returns it.
     :param editing: whether the tree tracks `EDITOR_SETTINGS`.
@@ -1878,10 +1882,13 @@ def ignore_departures(
         entry = line.rstrip()
         if not entry or entry.startswith("#"):
             continue
-        negated = entry.startswith("!")
-        pattern = entry.removeprefix("!") if negated else entry.removeprefix("\\")
-        if ignores_the_gate(pattern):
-            ignored = not negated
+        unreadable = "\\" in entry or "[" in entry
+        if entry.startswith("!"):
+            pattern = entry.removeprefix("!")
+            if unreadable or ignores_the_gate(pattern.lower()):
+                ignored = False
+        elif not unreadable and ignores_the_gate(entry):
+            ignored = True
     return [] if ignored else [f"{PRETTIER_IGNORE} does not ignore {CONFIG}"]
 
 
@@ -1929,6 +1936,10 @@ def test_an_editor_reading_the_gate_is_reported() -> None:
         f"{CONFIG}\n!**\n",
         f" {CONFIG}\n",
         f"docs/{CONFIG}\n",
+        f"{CONFIG}\n!{CONFIG.upper()}\n",
+        f"{CONFIG}\n!.pre-commit-config\\.yaml\n",
+        f"{CONFIG}\n!.pre-commit-config.\\*\n",
+        ".pre-commit-config.[!x]aml\n",
     ):
         assert ignore_departures(running, editing=True, ignore=unignored) == wrong
     for listed in (
