@@ -1828,23 +1828,25 @@ PRETTIER_IGNORE = ".prettierignore"
 """The file the hook's prettier and the editor's both read ignores from."""
 
 
+LITERAL = (CONFIG, f"/{CONFIG}", f"**/{CONFIG}")
+"""The `.prettierignore` lines read as ignoring the gate, and no others."""
+
+
 def ignores_the_gate(pattern: str) -> bool:
-    """Say whether a gitignore pattern matches `CONFIG`, a file at the root.
+    """Say whether a negated gitignore pattern matches `CONFIG` at the root.
 
     A pattern ending in `/` names directories only, and one with a `/`
-    elsewhere names a path from the root, a leading `**/` there matching
-    no directory at all. So only a single segment names a root file,
-    matched case-sensitively, `*` and `?` as globs and `**` as `*`.
-    `ignore_departures` hands it no backslash and no `[`.
+    elsewhere names a path from the root, one leading `**/` matching no
+    directory. So only a single segment names a root file, matched with
+    `*` and `?` as globs and `**` as `*`. `ignore_departures` hands it
+    the pattern lowercased, with no backslash and no `[`.
 
-    :param pattern: one line of the file, its negation removed.
+    :param pattern: one `!` line of the file, the `!` removed.
     :returns: whether the line names the gate.
     """
     if pattern.endswith("/"):
         return False
-    pattern = pattern.removeprefix("/")
-    while pattern.startswith("**/"):
-        pattern = pattern.removeprefix("**/")
+    pattern = pattern.removeprefix("/").removeprefix("**/")
     return "/" not in pattern and fnmatch.fnmatchcase(
         CONFIG, pattern.replace("**", "*")
     )
@@ -1860,13 +1862,13 @@ def ignore_departures(
 
     Owed where the tree tracks `EDITOR_SETTINGS` and its gate runs a
     `prettier` hook: the editor reads `PRETTIER_IGNORE`, never the hook's
-    `exclude`. The function reads a subset of gitignore: a literal, or a
-    glob of `*`, `?` and `**`, case-sensitive, as `ignores_the_gate`
-    says, the last line that matches deciding and a `!` in front of it
-    un-ignoring. A line it cannot read is taken on the safe side: a `!`
-    line with nothing after it, holding a backslash or a `[`, or matching
-    once lowercased, re-includes the gate, and any other line holding a
-    backslash or a `[` ignores nothing.
+    `exclude`. A line ignores the gate only where it names `CONFIG`
+    literally, alone, after `/` or after one `**/`; any other line, glob
+    or not, ignores nothing, so a pattern prettier would read as ignoring
+    the gate is reported, and every tree writes the literal. A later `!`
+    line re-includes the gate where it is bare, holds a backslash or a
+    `[`, or matches it lowercased as `ignores_the_gate` reads it. The
+    last line of either kind decides.
 
     :param document: the gate, as `gate()` returns it.
     :param editing: whether the tree tracks `EDITOR_SETTINGS`.
@@ -1882,12 +1884,12 @@ def ignore_departures(
         entry = line.rstrip()
         if not entry or entry.startswith("#"):
             continue
-        unreadable = "\\" in entry or "[" in entry
         if entry.startswith("!"):
             pattern = entry.removeprefix("!")
+            unreadable = "\\" in pattern or "[" in pattern
             if unreadable or not pattern or ignores_the_gate(pattern.lower()):
                 ignored = False
-        elif not unreadable and ignores_the_gate(entry):
+        elif entry in LITERAL:
             ignored = True
     return [] if ignored else [f"{PRETTIER_IGNORE} does not ignore {CONFIG}"]
 
@@ -1942,6 +1944,10 @@ def test_an_editor_reading_the_gate_is_reported() -> None:
         ".pre-commit-config.[!x]aml\n",
         f"{CONFIG}\n!\n",
         f"{CONFIG}\n! \n",
+        f"**/**/{CONFIG}\n",
+        f"**/**/**/{CONFIG}\n",
+        f"{CONFIG}\n!*.yaml\n*.yaml\n",
+        "*.yaml\n",
     ):
         assert ignore_departures(running, editing=True, ignore=unignored) == wrong
     for listed in (
@@ -1953,7 +1959,7 @@ def test_an_editor_reading_the_gate_is_reported() -> None:
         f"{CONFIG}\n!docs/\n",
         f"{CONFIG}\n!{CONFIG}/\n",
         f"{CONFIG}\n!*/{CONFIG}\n",
-        f"{CONFIG}\n!*.yaml\n*.yaml\n",
+        f"{CONFIG}\n!**/**/{CONFIG}\n",
         f"**/{CONFIG}\n",
     ):
         assert ignore_departures(running, editing=True, ignore=listed) == []
