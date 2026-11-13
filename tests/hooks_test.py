@@ -1864,9 +1864,9 @@ def ignore_departures(
     glob of `*`, `?` and `**`, case-sensitive, as `ignores_the_gate`
     says, the last line that matches deciding and a `!` in front of it
     un-ignoring. A line it cannot read is taken on the safe side: a `!`
-    line holding a backslash or a `[`, or matching once lowercased,
-    re-includes the gate, and any other line holding either ignores
-    nothing.
+    line with nothing after it, holding a backslash or a `[`, or matching
+    once lowercased, re-includes the gate, and any other line holding a
+    backslash or a `[` ignores nothing.
 
     :param document: the gate, as `gate()` returns it.
     :param editing: whether the tree tracks `EDITOR_SETTINGS`.
@@ -1885,7 +1885,7 @@ def ignore_departures(
         unreadable = "\\" in entry or "[" in entry
         if entry.startswith("!"):
             pattern = entry.removeprefix("!")
-            if unreadable or ignores_the_gate(pattern.lower()):
+            if unreadable or not pattern or ignores_the_gate(pattern.lower()):
                 ignored = False
         elif not unreadable and ignores_the_gate(entry):
             ignored = True
@@ -1940,6 +1940,8 @@ def test_an_editor_reading_the_gate_is_reported() -> None:
         f"{CONFIG}\n!.pre-commit-config\\.yaml\n",
         f"{CONFIG}\n!.pre-commit-config.\\*\n",
         ".pre-commit-config.[!x]aml\n",
+        f"{CONFIG}\n!\n",
+        f"{CONFIG}\n! \n",
     ):
         assert ignore_departures(running, editing=True, ignore=unignored) == wrong
     for listed in (
