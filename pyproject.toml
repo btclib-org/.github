@@ -210,6 +210,10 @@ ignore = [
 # flake8-no-pep420: a file here is the source section 14 copies into the
 # other trees, never imported, for the reason the scripts' entry gives
 "shared/*.py" = ["INP001"]
+# the part of this file that each tree's conf.py copies byte for byte
+# carries no `noqa` for these rules: in a tree that ignores them, RUF100
+# reports one as unused (issue btclib-org/.github#2242)
+"shared/root_file_links.py" = ["magic-value-comparison", "too-many-arguments"]
 
 [tool.ruff.lint.mccabe]
 # ruff's default, as everywhere in the organization

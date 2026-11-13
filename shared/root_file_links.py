@@ -274,7 +274,7 @@ def destination(line: str, at: int) -> int | None:
             if not level:
                 break
             level -= 1
-        if level > 32:  # noqa: PLR2004
+        if level > 32:
             return None
         at += 1
     return None if at == start or level else at
@@ -529,7 +529,7 @@ def inner_line(
     return end, raw, floor
 
 
-def fenced(  # noqa: PLR0913
+def fenced(
     texts: list[str],
     bodies: list[str],
     page: list[str],
@@ -659,7 +659,7 @@ class Reading:
         return True
 
 
-def read_page(  # noqa: PLR0913
+def read_page(
     lines: list[str],
     *,
     page: list[str],
