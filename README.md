@@ -1019,7 +1019,13 @@ No `autoupdate_branch`: the default branch is the only branch.
 
     The commits endpoint, so the command holds however the repository tags.
 - **prose and markup** — `markdownlint-cli2`, `prettier` (yaml and
-  jsonc), `taplo-format`, `yamllint`.
+  jsonc), `taplo-format`, `yamllint`. `prettier` leaves
+  `.pre-commit-config.yaml` alone, where pre-commit.ci's autoupdate
+  writes two spaces before `# frozen:` and `prettier` one: the hook
+  excludes it, and a tree tracking `.vscode/settings.json` lists it in a
+  `.prettierignore`, which the editor's prettier reads too. The rejected
+  alternative is an owner's commit of `prettier`'s output on each
+  autoupdate pull request (btclib-org/.github#2038).
 - **schemas** — `check-dependabot`, `check-readthedocs`,
   `check-github-issue-config` and `check-github-issue-forms`, because a
   typo in one of them is not an error to the service that reads it: it
@@ -1156,9 +1162,7 @@ No `autoupdate_branch`: the default branch is the only branch.
   With `--freeze` it writes the sha `git rev-parse` gives for the tag, the
   annotated tag's own object, and the `# frozen:` comment, which
   pre-commit.ci keeps on its weekly bump. `pinned-rev` accepts forty hex
-  characters for that reason. One space comes before the `#`, the form
-  `prettier` writes: pre-commit writes two, so a bump fails `prettier`
-  until a commit removes one.
+  characters for that reason.
   The hook repository declares `language: script`,
   `pass_filenames: false`, `always_run:
   true` and `verbose: true`, and the gate orders it ahead of
