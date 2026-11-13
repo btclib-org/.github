@@ -22,7 +22,10 @@ from __future__ import annotations
 import ast
 import importlib
 import importlib.util
+import itertools
+import re
 import shutil
+import timeit
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
 from typing import Any
@@ -56,6 +59,14 @@ READER = (
     "ITEM",
     "HTML_BLOCKS",
     "HTML_NAMED",
+    "_LOW_SPACE",
+    "_HIGH_SPACE",
+    "_NAME",
+    "_NAMES",
+    "_QUOTED",
+    "_UNQUOTED",
+    "_TO_EQUALS",
+    "_TO_END",
     "HTML_TAG",
     "BLANK",
     "HEADING",
@@ -355,6 +366,166 @@ def test_a_relative_link_to_a_file_no_page_renders_is_at_blob(conf: ModuleType) 
     )
     assert isinstance(node, conf.nodes.reference)
     assert node["refuri"] == f"{_BLOB}LICENSE"
+
+
+# markdown-it-py's own pattern for a line opening an html block of type
+# 7, as its `markdown_it/common/html_re.py` spells it at 4.2.0, behind the
+# indent the part allows. Copied under the MIT licence, whose permission
+# notice is this repository's LICENSE word for word: Copyright (c) 2020
+# ExecutableBookProject, of markdown-it-py, and Copyright (c) 2014 Vitaly
+# Puzrin, Alex Kocharin, of markdown-it, which it ports.
+_ATTRIBUTE = (
+    "(?:\\s+[a-zA-Z_:][a-zA-Z0-9:._-]*"
+    "(?:\\s*=\\s*(?:[^\"'=<>`\\x00-\\x20]+|'[^']*'|\"[^\"]*\"))?)"
+)
+_OPEN_TAG = "<[A-Za-z][A-Za-z0-9\\-]*" + _ATTRIBUTE + "*\\s*\\/?>"
+_CLOSE_TAG = "<\\/[A-Za-z][A-Za-z0-9\\-]*\\s*>"
+_MARKDOWN_IT = re.compile("^ {0,3}(?:" + _OPEN_TAG + "|" + _CLOSE_TAG + ")\\s*$")
+
+# lines in the shapes of an html block's and of raw html's tags, alone
+# on the line or not: names, attributes of each kind, the indent, and
+# what makes a line no tag
+_TAGS = (
+    "<p>",
+    "</p>",
+    "<P>",
+    "</Section >",
+    "<h2-x>",
+    "<my-tag9>",
+    "<x/>",
+    "<x />",
+    "<img src=pic.png/>",
+    '<a href="y">',
+    "<a href='y'>",
+    "<a href=y>",
+    "<a href = y >",
+    "<a href=\"y\" title='z' hidden>",
+    '<a b:c="1" _d=2 e.f-g>',
+    "<input disabled\tchecked>",
+    "   <p>",
+    "    <p>",
+    " </p>  ",
+    "<p>\t",
+    "<p><span>",
+    "<p>text",
+    "<p></p>",
+    "text <p>",
+    "<p",
+    "<p class",
+    '<p class="x',
+    "< p>",
+    "<9p>",
+    "</p class=x>",
+    "</p/>",
+    "<a b=c=d>",
+    "<a b=c<d>",
+    "<a b=`c`>",
+    "<a b='c\"d'>",
+    '<a b="c\'d">',
+    "<a b='c'd>",
+    "<a *b>",
+    "<a b!>",
+    "<a b=>",
+    "<a =b>",
+    "<a  />",
+    "<a/ >",
+)
+
+# a character of each class the two patterns tell apart, and a line that
+# leaves `_MARKDOWN_IT` in each of its states other than refusal and
+# match: in the indent, a tag, a name, a value, the whitespace after a
+# value, and a value of whitespace above \x20
+_CHARACTERS = "\x00\t\n !\"'-./:<=>a\xa0"
+_PREFIXES = (
+    "",
+    " ",
+    "  ",
+    "   ",
+    "<",
+    "</",
+    "</a",
+    "</a ",
+    "<a",
+    "<a ",
+    "<a/",
+    "<a>",
+    "<a b",
+    "<a b ",
+    "<a b=",
+    "<a b=x",
+    '<a b="x',
+    "<a b='x",
+    "<a b='x'",
+    "<a b=\xa0",
+    "<a b=\xa0 ",
+    "<a b=x\xa0",
+    "<a b=x\xa0c",
+    "<a b=x\xa0c\xa0",
+)
+
+# the longest word `_CHARACTERS` makes after a prefix, and what may end
+# the line after it: nothing, a tag's end, or a value and a tag's end
+_WORD = 3
+_ENDS = ("", ">", "=a>")
+
+# CodeQL's input with `_SHORT` attributes, and with `_LONGER` times as
+# many: a linear `HTML_TAG` takes about `_LONGER` times as long on the
+# second, and at most `_BOUND` times as long passes
+_SHORT = 64
+_LONGER = 8
+_BOUND = 4 * _LONGER
+
+
+@pytest.mark.parametrize("line", _TAGS)
+def test_html_tag_reads_tags_as_markdown_it_does(conf: ModuleType, line: str) -> None:
+    """The part opens an html block of type 7 where markdown-it-py does.
+
+    :param conf: the part, as a stand-in's `conf.py`.
+    :param line: a line of `_TAGS`.
+    """
+    assert bool(conf.HTML_TAG.match(line)) == bool(_MARKDOWN_IT.match(line))
+
+
+def test_html_tag_matches_every_short_line_markdown_it_matches(
+    conf: ModuleType,
+) -> None:
+    """Every word of `_CHARACTERS` after each prefix, then each end.
+
+    :param conf: the part, as a stand-in's `conf.py`.
+    """
+    lines = [
+        prefix + "".join(word) + end
+        for prefix in _PREFIXES
+        for size in range(_WORD + 1)
+        for word in itertools.product(_CHARACTERS, repeat=size)
+        for end in _ENDS
+    ]
+    assert any(map(_MARKDOWN_IT.match, lines))
+    differ = [
+        line
+        for line in lines
+        if bool(conf.HTML_TAG.match(line)) != bool(_MARKDOWN_IT.match(line))
+    ]
+    assert not differ
+
+
+def test_html_tag_refuses_codeql_s_input_in_linear_time(conf: ModuleType) -> None:
+    """CodeQL's py/redos input, with a no-break space after each value.
+
+    markdown-it-py's pattern takes twice as long for each attribute it
+    is given: refusing the short line takes it longer than this suite's
+    timeout.
+
+    :param conf: the part, as a stand-in's `conf.py`.
+    """
+
+    def best(count: int) -> float:
+        line = "<a :=" + "!\xa0 :=" * count + "!\x00"
+        return min(
+            timeit.repeat(lambda: conf.HTML_TAG.match(line), number=20, repeat=5)
+        )
+
+    assert best(_SHORT * _LONGER) / best(_SHORT) < _BOUND
 
 
 def test_a_copy_differing_by_a_byte_is_not_the_part() -> None:
