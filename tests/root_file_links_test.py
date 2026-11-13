@@ -369,12 +369,11 @@ def test_a_relative_link_to_a_file_no_page_renders_is_at_blob(conf: ModuleType) 
 
 
 # markdown-it-py's own pattern for a line opening an html block of type
-# 7, as its `markdown_it/common/html_re.py` spells it at 4.2.0, the
-# version the trees lock, behind the indent the part allows. Copied under
-# the MIT licence, whose permission notice is this repository's LICENSE
-# word for word: Copyright (c) 2020 ExecutableBookProject, of
-# markdown-it-py, and Copyright (c) 2014 Vitaly Puzrin, Alex Kocharin, of
-# markdown-it, which it ports.
+# 7, as its `markdown_it/common/html_re.py` spells it at 4.2.0, behind the
+# indent the part allows. Copied under the MIT licence, whose permission
+# notice is this repository's LICENSE word for word: Copyright (c) 2020
+# ExecutableBookProject, of markdown-it-py, and Copyright (c) 2014 Vitaly
+# Puzrin, Alex Kocharin, of markdown-it, which it ports.
 _ATTRIBUTE = (
     "(?:\\s+[a-zA-Z_:][a-zA-Z0-9:._-]*"
     "(?:\\s*=\\s*(?:[^\"'=<>`\\x00-\\x20]+|'[^']*'|\"[^\"]*\"))?)"
