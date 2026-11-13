@@ -1865,10 +1865,10 @@ def ignore_departures(
     `exclude`. A line ignores the gate only where it names `CONFIG`
     literally, alone, after `/` or after one `**/`; any other line, glob
     or not, ignores nothing, so a pattern prettier would read as ignoring
-    the gate is reported, and every tree writes the literal. A later `!`
-    line re-includes the gate where it is bare, holds a backslash or a
-    `[`, or matches it lowercased as `ignores_the_gate` reads it. The
-    last line of either kind decides.
+    the gate is reported, and a tree passes only by writing the literal.
+    A later `!` line re-includes the gate where it is bare, holds a
+    backslash or a `[`, or matches it lowercased as `ignores_the_gate`
+    reads it. The last line of either kind decides.
 
     :param document: the gate, as `gate()` returns it.
     :param editing: whether the tree tracks `EDITOR_SETTINGS`.
