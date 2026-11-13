@@ -33,15 +33,21 @@ repository. A rule changes by a pull request like any other change.
   *Branch protection and rulesets* is the rule: every change reaches
   `main` through one, squashed (section 11's *Signatures* has the
   signature), and nobody can push to `main` directly. A pull request lands
-  with an approving review from somebody other than its author. In a
-  repository whose `README.md` carries the OpenSSF Best Practices badge
-  (section 2's badge row), the ruleset has no bypass actor, so nobody
-  merges without that approval; in an emergency the maintainer adds the
-  bypass back and removes it after the merge. The badge's
-  `two_person_review` criterion asks that at least half of the changes a
-  release ships were reviewed by another person. In any other repository
-  the maintainer is the only bypass actor, in `pull_request` mode, and
-  can merge without that approval wherever it helps.
+  with an approving review from somebody other than its author. In any
+  repository the maintainer is the only bypass actor of `main-self-merge`,
+  in `pull_request` mode, and can merge without that approval wherever it
+  helps. The settings check of section 15, *Auditing a repository against
+  this file*, prints each ruleset's bypass list. In a repository whose
+  `README.md` carries the OpenSSF Best Practices badge (section 2's badge
+  row), the standard asks for no bypass actor, so that nobody merges
+  without that approval; in an emergency the maintainer adds the bypass
+  back and removes it after the merge. Until the backlog settles, the
+  maintainer keeps the bypass on those repositories too, a deviation from
+  the standard (btclib-org/.github#2021). The maintainer judges when the
+  backlog has settled and removes the bypass then, with no date or
+  condition set. The
+  badge's `two_person_review` criterion asks that at least half of the
+  changes a release ships were reviewed by another person.
   `CONTRIBUTING.md`'s *The review* and *Landing it* are the exchange and
   the landing.
 - **A disagreement goes to the maintainer.** One that survives a second
