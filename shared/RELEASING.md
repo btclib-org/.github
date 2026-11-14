@@ -497,9 +497,7 @@ request, next to `deps-latest`'s own result.
    goes first, as `CONTRIBUTING.md`'s *Landing it* says. A release pull
    request waits only while a lower-numbered pull request carries the
    label, so that releases go out oldest first instead of each waiting on
-   the others. No pull request merges by itself meanwhile: auto-merge is
-   off, as section 11 of the organization's standard says under *Merge
-   method*.
+   the others.
 
    A pull request can merge between the version step and the label. So
    once the label is on, fetch, and check that `origin/main` is still the
