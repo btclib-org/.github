@@ -361,7 +361,7 @@ jobs:
           # a warning and exit 0 on any failure, for the reason the
           # header gives
           warn() {
-            echo "::warning::the reactions were left as they were: $1."
+            echo "::warning::could not finish updating reactions: $1."
             exit 0
           }
           case $REACTION in
@@ -1052,7 +1052,7 @@ jobs:
           # a warning and exit 0 on any failure, for the reason the
           # header gives
           warn() {
-            echo "::warning::the reactions were left as they were: $1."
+            echo "::warning::could not finish updating reactions: $1."
             exit 0
           }
           case $REACTION in

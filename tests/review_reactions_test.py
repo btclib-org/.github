@@ -37,9 +37,8 @@ WORKFLOW = ROOT / ".github/workflows/reusable-claude-review.yml"
 # the caller in this tree, whose calling job grants the scopes
 CALLER = ROOT / ".github/workflows/claude-review.yml"
 
-# the warning the shell ends on, with status 0, where it leaves the
-# reactions as they were
-WARNING = "::warning::the reactions were left as they were: "
+# the warning the shell ends on, with status 0, where a call fails
+WARNING = "::warning::could not finish updating reactions: "
 
 # the identity the job's GITHUB_TOKEN posts as
 ACTIONS = "github-actions[bot]"
@@ -66,8 +65,8 @@ OTHER = "fedcba9876543210fedcba9876543210fedcba98"
 # separated by the unit separator. It answers a GET of the reactions or
 # the reviews with the file the test wrote for it, and a POST or a DELETE
 # by editing the reactions file, as the API does, a POST of a reaction
-# already there adding nothing; or by failing where FAIL_LIST, FAIL_POST
-# or FAIL_DELETE is set
+# already there adding nothing; or by failing where FAIL_LIST or
+# FAIL_POST is set, or where FAIL_DELETE names the reaction removed
 STAND_IN = """#!/bin/sh
 for arg in "$@"; do printf '%s\\037' "$arg"; done >> "$CALLS"
 printf '\\n' >> "$CALLS"
@@ -80,7 +79,7 @@ case "$*" in
       else .[-1] += [{"id": 99, "content": $c, "user": {"login": $me}}] end'
     ;;
   *"--method DELETE "*)
-    [ -z "$FAIL_DELETE" ] || exit 1
+    [ "${4##*/}" != "$FAIL_DELETE" ] || exit 1
     edit --argjson id "${4##*/}" 'map(map(select(.id != $id)))'
     ;;
   *"/reactions --paginate --slurp") [ -z "$FAIL_LIST" ] || exit 1; cat "$REACTIONS" ;;
@@ -311,6 +310,19 @@ def test_a_failed_removal_ends_the_shell(stand: Stand) -> None:
     assert done.stdout == f"{WARNING}removing reaction 1 failed.\n"
     assert stand.recorded() == [GET, delete(1)]
     assert stand.left() == [(ACTIONS, "+1")]
+
+
+def test_a_removal_failing_part_way_says_it_did_not_finish(stand: Stand) -> None:
+    """One reaction removed, the next refused: the state changed, then stopped.
+
+    :param stand: the stand-in.
+    """
+    stand.answer(reactions=[reaction(ACTIONS, "+1", 1), reaction(ACTIONS, "eyes", 2)])
+    done = stand.run(only_step("outcome")["run"], REACTION="-1", FAIL_DELETE="2")
+    assert done.returncode == 0, done.stderr
+    assert done.stdout == f"{WARNING}removing reaction 2 failed.\n"
+    assert stand.recorded() == [GET, delete(1), delete(2)]
+    assert stand.left() == [(ACTIONS, "eyes")]
 
 
 @pytest.mark.parametrize("job", ["start", "outcome"])
