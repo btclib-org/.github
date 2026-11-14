@@ -301,9 +301,15 @@ and tools itself. There is a project here, and nothing installs it:
 `package = false`, its Python being one test suite and the local hooks
 under `.github/scripts/`.
 
-`gh` and `git` are the other two prerequisites and neither is a wheel:
-both are on every GitHub-hosted runner already, and the suite shells out
-to them rather than importing a client.
+`gh` and `git` are prerequisites too, and neither is a wheel: both are
+on every GitHub-hosted runner already, and the suite shells out to them
+rather than importing a client.
+
+The `jq` command is one as well: workflow steps the suite runs pipe into
+it, and the runner `lint.yml` runs the suite on has it. The `test`
+group's `jq` package is libjq's Python binding and puts no `jq` on the
+path, and a stand-in built on it would test those steps on a jq other
+than the runner's.
 
 ```shell
 uv run --locked --only-group lint pre-commit run --all-files
