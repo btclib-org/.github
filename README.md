@@ -2094,14 +2094,15 @@ without adding to it is deleted.
 - **Concurrency groups are named literally** —
   `group: alignment-${{ github.event.pull_request.number || github.ref }}` —
   never through `github.workflow`, the *caller's* name in a called workflow, so
-  two called workflows would share a group and cancel each other. The name is
-  the file's stem and a hyphen: a group is the repository's, and two workflows
-  opening theirs with one name would cancel each other's runs. `github.ref`
-  and `github.sha` are the caller's there too, so a gate the release workflow
-  calls appends `${{ inputs.concurrency-suffix }}` (btclib-org/.github#1083).
-  The key is the pull request's own number and not `github.head_ref`
-  (btclib-org/btclib#1158); a run with no pull request falls back to `ref`,
-  except a push run, which the bullet below keys on its commit.
+  two called workflows would share a group and cancel each other. A workflow's
+  top-level group opens with the file's stem and a hyphen: a group is the
+  repository's, and two workflows opening theirs with one name, whatever its
+  case, would cancel each other's runs. `github.ref` and `github.sha` are the
+  caller's there too, so a gate the release workflow calls appends
+  `${{ inputs.concurrency-suffix }}` (btclib-org/.github#1083). The key is the
+  pull request's own number and not `github.head_ref` (btclib-org/btclib#1158);
+  a run with no pull request falls back to `ref`, except a push run, which the
+  bullet below keys on its commit.
 - **A workflow with a `push` trigger on `main` keys a push run on its
   commit**, so each push to `main` that starts a run gets a run and a report of
   its own, while a new push to a pull request's branch still cancels the run

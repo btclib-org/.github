@@ -193,13 +193,15 @@ def named_for_its_file(workflow: Path) -> bool:
 def shared(workflows: list[Path]) -> list[str]:
     """List the group names more than one of a tree's workflows opens with.
 
-    A stem is unique among a tree's files, but `x.yml` and `x.yaml` share
-    one.
+    Every top-level group opens with its file's stem, which is unique
+    among a tree's files but for `x.yml` beside `x.yaml`. GitHub reads a
+    group's name without regard to case, so `ci.yml` and `CI.yaml` share
+    one too, and names are compared casefolded.
 
     :param workflows: the tree's workflow files.
-    :returns: each name two or more groups open with, sorted.
+    :returns: each name two or more groups open with, casefolded, sorted.
     """
-    names = [prefix(workflow) for workflow in workflows if group(workflow)]
+    names = [prefix(workflow).casefold() for workflow in workflows if group(workflow)]
     return sorted({name for name in names if names.count(name) > 1})
 
 
@@ -242,9 +244,9 @@ def test_a_push_run_on_main_is_keyed_on_its_commit(
     """Section 10's push key, asked of every workflow a push to main runs.
 
     Compared as a string after YAML has folded it, as the conditional at
-    `cancel-in-progress` is, the name before the key being the file's
-    stem. No two of the tree's workflows, a push to main running them or
-    not, open their groups with one name.
+    `cancel-in-progress` is. Every top-level group, a push to main
+    running its workflow or not, opens with the file's stem, and no two
+    of the tree's workflows open theirs with one name.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -254,9 +256,10 @@ def test_a_push_run_on_main_is_keyed_on_its_commit(
     wrong = [
         f"{workflow.name}: {group(workflow)!r}"
         for workflow in found
-        if pushed_to_main(workflow) and not keyed_as_asked(workflow, wanted)
+        if (group(workflow) and not named_for_its_file(workflow))
+        or (pushed_to_main(workflow) and not keyed_as_asked(workflow, wanted))
     ] + [f"groups named {name!r} more than once" for name in shared(found)]
-    assert not wrong, f"a push run is not keyed as section 10 says: {wrong}; " + (
+    assert not wrong, f"a group is not named or keyed as section 10 says: {wrong}; " + (
         by_hand(repository, "grep -n -A4 '^concurrency:' .github/workflows/*.yml")
     )
 
@@ -578,3 +581,25 @@ def test_two_workflows_opening_their_groups_with_one_name_are_reported(
     assert shared(sorted(tmp_path.iterdir())) == ["ci-"]
     (tmp_path / "ci.yaml").unlink()
     assert shared(sorted(tmp_path.iterdir())) == []
+
+
+def test_two_names_differing_only_in_case_are_reported(tmp_path: Path) -> None:
+    """`ci-` and `CI-` are one group to GitHub, so they are reported.
+
+    Written in two directories: a file system that ignores case, as
+    macOS's does by default, holds only one of `ci.yml` and `CI.yaml`
+    in one.
+
+    :param tmp_path: where the workflows are written.
+    """
+    found = []
+    for directory, name, stem in (("a", "ci.yml", "ci"), ("b", "CI.yaml", "CI")):
+        (tmp_path / directory).mkdir()
+        workflow = tmp_path / directory / name
+        workflow.write_text(
+            f"on:\n{REVIEWED}concurrency:\n{line(f'{stem}-{KEY_LINE}')}jobs: {{}}\n",
+            encoding="utf-8",
+        )
+        assert keyed_as_asked(workflow, keyed()), name
+        found.append(workflow)
+    assert shared(found) == ["ci-"]
