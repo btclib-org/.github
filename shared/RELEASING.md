@@ -480,45 +480,53 @@ request, next to `deps-latest`'s own result.
    pull request that never mentions it reads exactly like one that skipped
    it.
 
-1. Hold the repository's other landings until the release pull request
-   lands, so that `main` does not move under it (the version step above).
-   Put `release-hold` on it, then list every pull request armed to merge
-   by itself, with the subject and body it was armed with:
+1. Hold the repository's other merges until the release is published, so
+   that `main` does not move under the release between its gates and its
+   tag. Put `release-hold` on the release pull request:
 
    ```shell
    pr=<the release pull request's number>
    ```
 
    ```shell
-   gh pr edit "${pr:?}" --add-label release-hold &&
-   gh api graphql --paginate -F name="${repo:?}" -f query='
-     query($name: String!, $endCursor: String) {
-       repository(owner: "btclib-org", name: $name) {
-         pullRequests(states: OPEN, first: 100, after: $endCursor) {
-           nodes { number headRefOid
-             autoMergeRequest { mergeMethod commitHeadline commitBody } }
-           pageInfo { hasNextPage endCursor }
-         }
-       }
-     }' --jq '.data.repository.pullRequests.nodes[]
-       | select(.autoMergeRequest)'
+   gh pr edit "${pr:?}" --add-label release-hold
    ```
 
-   Disarm each of them but the release pull request and a repair of a red
-   `main`, with `gh pr merge <n> --disable-auto`, and name each, with its
-   head, in a comment on the release pull request. Once the release pull
-   request lands or is abandoned, remove the label, and arm each again
-   pinned to that head, with that subject and body. One whose head has
-   moved since is left to whoever works it.
+   While a pull request carries the label, nobody merges another pull
+   request into `main` here. A red `main`'s repair is the exception: it
+   goes first, as `CONTRIBUTING.md`'s *Landing it* says. A release pull
+   request waits only while a lower-numbered pull request carries the
+   label, so that releases go out oldest first instead of each waiting on
+   the others.
+
+   A pull request can merge between the version step and the label. So
+   once the label is on, fetch, and check that `origin/main` is still the
+   branch's base:
+
+   ```shell
+   git fetch origin
+   ```
+
+   ```shell
+   git merge-base --is-ancestor origin/main HEAD
+   ```
+
+   After a fetch that succeeded, where `merge-base` exits 1, `main` has
+   moved, and the branch is redone on it as the version step says, before
+   the gates. Any other non-zero exit, of either command, is an error to
+   read, not an answer.
+
+   Remove the label once `release.yml`'s run on the tag has published the
+   release, or once the release is abandoned and its pull request closed:
 
    ```shell
    gh pr edit "${pr:?}" --remove-label release-hold
    ```
 
-   ```shell
-   gh pr merge <n> --squash --auto --match-head-commit <head> \
-     --subject <subject> --body <body>
-   ```
+   A label left behind on a release already published or abandoned holds
+   every merge here. Whoever finds one checks that the release is out or
+   its pull request closed, tells the maintainer, and removes the label on
+   his word.
 
 1. Run `uv run pre-commit run --all-files` and `uv run pytest --cov`
    before pressing anything, then verify the Read the Docs build renders,
