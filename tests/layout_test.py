@@ -43,7 +43,7 @@ SUFFIX = "_test.py"
 """Section 7's spelling of a test module's name."""
 
 NODES = 2
-"""The fewest per-node modules that make a test body section 7's exception.
+"""The fewest caller modules that make a test body section 7's exception.
 
 The exception is a test run on several node implementations, one module
 per node.
@@ -256,10 +256,12 @@ def bodiless(root: Path) -> list[str]:
     A `*_test.py` under `tests/`, its `_data` directories aside, that
     defines no test is section 7's exception only where it is the body of
     a test run on several node implementations: at least `NODES` modules
-    in its own directory, each named `<file>_<node>_test.py` for its own
-    `<file>_test.py`, call the same function of it from a test, as
-    `called` reads a call. Anything else is shared code in a module whose
-    name says "test", which section 7 puts in a package `__init__.py`.
+    in its own directory call the same function of it from a test, as
+    `called` reads a call. Any module there named `<file>_*_test.py` for
+    its own `<file>_test.py` counts as a caller: the part after
+    `<file>_` is not read as a node's name. Anything else is shared code
+    in a module whose name says "test", which section 7 puts in a package
+    `__init__.py`.
 
     :param root: the root of the checkout.
     :returns: the offending paths, relative to the root, sorted.
@@ -274,7 +276,7 @@ def bodiless(root: Path) -> list[str]:
     for path, module in parsed.items():
         if defines_a_test(module):
             continue
-        prefix = path.name.removesuffix(SUFFIX) + "_"
+        prefix = f"{path.name.removesuffix(SUFFIX)}_"
         callers = Counter(
             function
             for other, tree in parsed.items()
@@ -294,8 +296,8 @@ def test_a_test_module_defining_no_test_is_a_body_its_node_modules_call(
 ) -> None:
     """Section 7: no test-named module holds only shared code.
 
-    Its one exception, a test body that per-node modules call, is what
-    `bodiless` admits.
+    Its one exception, a test body that `<file>_*_test.py` modules beside
+    it call, is what `bodiless` admits.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
@@ -305,15 +307,15 @@ def test_a_test_module_defining_no_test_is_a_body_its_node_modules_call(
         pytest.skip(f"{repository} has no tests/ directory")
     wrong = bodiless(root)
     assert not wrong, (
-        f"modules under tests/ that define no test and that no two "
-        f"<file>_<node>_test.py call: {wrong}. The candidates, listed in a "
+        f"modules under tests/ that define no test and that no {NODES} "
+        f"<file>_*_test.py call: {wrong}. The candidates, listed in a "
         f"checkout of {ORG}/{repository}: "
         "for f in $(git ls-files 'tests/**_test.py' "
         "| grep -vE '^tests/(.*/)?_data/'); do "
         'grep -qE \'^(async )?def test|^class Test\' "$f" || echo "$f"; done. '
         "Of those, a module is admitted that defines a test inside an if, try "
         "or with block or subclasses TestCase, and so is a body whose function "
-        "two <file>_<node>_test.py of its own directory import by name and call "
+        f"{NODES} <file>_*_test.py of its own directory import by name and call "
         "from a test."
     )
 
@@ -501,7 +503,7 @@ def test_a_body_its_node_modules_call_is_admitted(tmp_path: Path) -> None:
 def test_a_body_not_called_from_per_node_tests_is_refused(
     tmp_path: Path, callers: tuple[str, ...]
 ) -> None:
-    """The body is refused unless two per-node tests beside it call it.
+    """The body is refused unless `NODES` per-node tests beside it call it.
 
     Each case moves one condition of `bodiless` or `called` off.
 
