@@ -495,9 +495,9 @@ request, next to `deps-latest`'s own result.
    While a pull request carries the label, nobody merges another pull
    request into `main` here. A red `main`'s repair is the exception: it
    goes first, as `CONTRIBUTING.md`'s *Landing it* says. A release pull
-   request waits only while a lower-numbered pull request carries the
-   label, so that releases go out oldest first instead of each waiting on
-   the others.
+   request waits while a merged pull request carries the label, and
+   otherwise only while a lower-numbered one does, so that releases go out
+   oldest first instead of each waiting on the others.
 
    A pull request can merge between the version step and the label. So
    once the label is on, fetch, and check that `origin/main` is still the

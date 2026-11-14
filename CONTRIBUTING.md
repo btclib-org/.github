@@ -228,6 +228,27 @@ Whoever approved it runs that merge, or a session on the maintainer's
 word. Auto-merge is off, so no pull request can be armed, for the reason
 [section 11's *Merge method*][s11] gives.
 
+**A release can hold the landing.** Before every merge, these two read
+the repository `gh` resolves, from `GH_REPO` where it is set and from the
+checkout otherwise, and its pull requests carrying `release-hold`,
+merged ones included:
+
+```shell
+gh api 'repos/{owner}/{repo}' --jq .full_name
+```
+
+```shell
+gh api 'repos/{owner}/{repo}/issues?labels=release-hold&state=all' \
+  --jq '[.[] | select(.pull_request)
+    | {number, state, merged: .pull_request.merged_at}]'
+```
+
+The first must print the tree's own `owner/name`. Then `[]` from the
+second is no hold, and any other list is read as a publishing tree's
+`RELEASING.md` says in *Release to PyPI*. A nonzero exit of either, as
+the `404` of a repository that does not exist, is an error, and the
+merge waits until both answer.
+
 **Where the repository has a bypass, the maintainer may land without
 that approval, through it**: [`GOVERNANCE.md`][governance]'s *How a
 decision is made* says which repositories.
