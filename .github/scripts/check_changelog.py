@@ -171,15 +171,16 @@ holds, this repository's own `CHANGELOG.md` among them. They read
 nothing an earlier release holds.
 
 The seventh check is the one section 9 states: a pull request adds no
-entry, and a release's section is written in the pull request that cuts
-it. It reads every `### ` heading of the file against the merge base of
-`HEAD` and `origin/main`, the base being that merge base because the
-gate runs `pre-commit run --all-files`, which sets no from and to refs,
-and `HEAD` already holds an entry the branch committed. A heading is
-refused where the base does not hold it under that same `## ` heading,
-unless that `## ` heading is a `## v<version>` (alone on its line) that the
-base lacks. The check reads headings and not whether a release is real: a
-diff that adds a `## v<version>` heading passes, and a reviewer sees it.
+entry to the file, and a release's section reaches it only in the pull
+request that cuts the release. It reads every `### ` heading of the file
+against the merge base of `HEAD` and `origin/main`, the base being that
+merge base because the gate runs `pre-commit run --all-files`, which
+sets no from and to refs, and `HEAD` already holds an entry the branch
+committed. A heading is refused where the base does not hold it under
+that same `## ` heading, unless that `## ` heading is a `## v<version>`
+(alone on its line) that the base lacks. The check reads headings and
+not whether a release is real: a diff that adds a `## v<version>`
+heading passes, and a reviewer sees it.
 
 So an entry added under any release the base holds is refused, the
 newest included, and so is one under a new heading that is no release.
@@ -628,8 +629,8 @@ def entries_outside_a_release(text: str, base: tuple[str, str]) -> list[str]:
         problems.append(
             f"line {line_at(text, offset)}: heading {title!r} is new {where},"
             f" in a file whose base {sha} (the merge base with {_MAIN}) does"
-            " not hold it there -- an entry is written in the pull request"
-            " that cuts its release (section 9)",
+            " not hold it there -- an entry reaches this file only in the"
+            " pull request that cuts its release (section 9)",
         )
     return problems
 

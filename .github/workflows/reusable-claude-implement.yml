@@ -626,9 +626,11 @@ jobs:
             Read AGENTS.md, CONTRIBUTING.md and REVIEWING.md first: the
             pull request is judged against REVIEWING.md. Do what the issue
             asks, all of it and nothing else. Add no entry to CHANGELOG.md
-            or RELEASE_NOTES.md, add or change no .coderabbit.yaml or
-            .coderabbit.yml in any letter case, and change no file under
-            .github/workflows/.
+            or RELEASE_NOTES.md. Where the tree holds changelog/next/ and
+            the change reaches a user, add its entry there as a file of
+            its own, as section 9 of btclib-org/.github's README.md says.
+            Add or change no .coderabbit.yaml or .coderabbit.yml in any
+            letter case, and change no file under .github/workflows/.
 
             You edit files and run nothing: a later job commits your edit,
             runs the tree's gates on it, and opens the pull request only

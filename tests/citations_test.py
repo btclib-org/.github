@@ -27,10 +27,11 @@ which is the citation that has stopped answering a reader too. Matching
 against the headings alone would report the organization's commonest
 citation, a bullet cited by its bold opening, as a defect.
 
-What this does not read is `CHANGELOG.md`, `RELEASE_NOTES.md` and an
-archived `changelog/`: section 9 keeps a landed entry's citation of a
-heading as written, so one whose heading has since moved is a record
-of its own day, and no edit answers a failure here.
+What this does not read is `CHANGELOG.md`, `RELEASE_NOTES.md` and
+`changelog/`, which holds the archived releases and the entries waiting
+for the next one: section 9 keeps a landed entry's citation of a heading
+as written, so one whose heading has since moved is a record of its own
+day, and no edit answers a failure here.
 """
 
 from __future__ import annotations

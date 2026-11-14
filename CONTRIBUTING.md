@@ -132,7 +132,9 @@ file's other half. Read before opening a pull request, it is what the
 pull request will be answered against.
 
 A pull request adds no entry to `CHANGELOG.md` or `RELEASE_NOTES.md`, a
-release's own pull request excepted ([section 9][s9], [section 12][s12]).
+release's own pull request excepted. In a tree that publishes, one that
+changes what a user gets adds its entry as a file under `changelog/next/`
+instead, which the release assembles ([section 9][s9], [section 12][s12]).
 
 ### One subject, opened as soon as it is written
 

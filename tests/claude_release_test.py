@@ -47,6 +47,9 @@ PIN = "a" * 40
 # the date the stand-in for `date` prints, and the version it makes
 TODAY = "2026.11.10"
 
+# an entry under changelog/next/, which section 9 has a release assemble
+ENTRY = "### A thing is done\n\nIt is done (closes #1).\n"
+
 
 @pytest.fixture(autouse=True)
 def no_git_config(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -220,13 +223,11 @@ def test_the_agent_s_token_lists_every_default_and_writes_nothing() -> None:
     assert action()["allowed_non_write_users"] == "-none-"
 
 
-def test_the_agent_edits_the_three_files_and_runs_nothing() -> None:
-    """No Bash rule, and an `Edit` rule for each file the agent writes."""
+def test_the_agent_edits_the_body_alone_and_runs_nothing() -> None:
+    """No Bash rule, and one `Edit` rule: the history files are assembled."""
     allowed = tools("--allowedTools")
     assert not [rule for rule in allowed if rule.startswith("Bash")]
     assert [rule for rule in allowed if rule.startswith("Edit")] == [
-        "Edit(./CHANGELOG.md)",
-        "Edit(./RELEASE_NOTES.md)",
         "Edit(/${{ runner.temp }}/claude-release-body/body.md)",
     ]
     denied = tools("--disallowedTools")
@@ -299,6 +300,8 @@ def released(tmp_path: Path) -> tuple[Path, Path]:
     git(tree, "commit", "-q", "-m", "First")
     git(tree, "tag", "v2026.11.7")
     (tree / "code.py").write_text("x = 1\n")
+    (tree / "changelog/next").mkdir(parents=True)
+    (tree / "changelog/next/1.md").write_text(ENTRY)
     git(tree, "add", "-A")
     git(tree, "commit", "-q", "-m", "Do a thing (closes #1) (#2)")
     (tree / "standard").symlink_to(ROOT)
@@ -387,6 +390,13 @@ def nothing_since(tree: Path, bench: Path) -> None:
     git(tree, "tag", "-f", "v2026.11.7", "HEAD")
 
 
+def no_entries(tree: Path, bench: Path) -> None:
+    """Land the commit since the tag with no entry."""
+    del bench
+    git(tree, "rm", "-q", "changelog/next/1.md")
+    git(tree, "commit", "-q", "--amend", "--no-edit")
+
+
 def heading_written(tree: Path, bench: Path) -> None:
     """Write the release's heading, with words after it, in the notes."""
     del bench
@@ -440,6 +450,7 @@ def below_the_latest(tree: Path, bench: Path) -> None:
         (no_tag, "a first release is prepared by hand"),
         (tag_elsewhere, "the newest v* tag is v2026.11.8"),
         (nothing_since, "nothing has landed since v2026.11.7"),
+        (no_entries, "changelog/next holds no entry"),
         (heading_written, f'RELEASE_NOTES.md holds a "## v{TODAY}" heading'),
         (notes_missing, "the tree holds no RELEASE_NOTES.md"),
         (tagged_today, f"the tag v{TODAY} exists already"),
@@ -707,65 +718,175 @@ def test_the_facts_travel_only_under_their_digest(
         assert (tmp_path / "unpacked/subjects.txt").read_text() == "A subject\n"
 
 
-def edited(tmp_path: Path, *, notes: bool = True) -> tuple[Path, dict[str, str]]:
-    """Pack an edit as `write` does, and lay it over a fresh checkout.
+def edited(
+    tmp_path: Path, *, notes: bool = True, removed: str = "changelog/next/1.md\n"
+) -> tuple[Path, dict[str, str]]:
+    """Pack a body as `write` does, and lay the release over a fresh checkout.
 
     :param tmp_path: a directory of this test's own.
-    :param notes: whether the edit changes `RELEASE_NOTES.md`.
+    :param notes: whether the release changes `RELEASE_NOTES.md`.
+    :param removed: the list of the entries the assembly removed.
     :returns: the checkout, and the outputs of the unpacking step.
     """
     tree = lock_tree(tmp_path)
     for name in ("CHANGELOG.md", "RELEASE_NOTES.md"):
         (tree / name).write_text("## v2026.11.7\n\nIt.\n")
+    (tree / "changelog/next").mkdir(parents=True)
+    (tree / "changelog/next/1.md").write_text(ENTRY)
     git(tree, "add", "-A")
     git(tree, "commit", "-q", "-m", "y")
-    work = tmp_path / "work"
-    git(tree, "worktree", "add", "-q", str(work))
-    (work / "CHANGELOG.md").write_text(f"## v{TODAY}\n\nNew.\n\n## v2026.11.7\n\nIt.\n")
-    if notes:
-        (work / "RELEASE_NOTES.md").write_text(f"## v{TODAY}\n\nAct.\n")
     (body := tmp_path / "body").mkdir()
     (body / "body.md").write_text("The release.\n")
-    (work / "stray.txt").write_text("left by the step\n")
+    (body / "stray.txt").write_text("left by the step\n")
     out = tmp_path / "out"
     env = {"BODY": str(body), "OUT": str(out), "GITHUB_OUTPUT": str(tmp_path / "w")}
-    run = step("write", "Pack the release's sections")["run"]
-    done = run_step(run, work, tmp_path, env)
+    done = run_step(step("write", "Pack the body")["run"], tmp_path, tmp_path, env)
     assert done.returncode == 0, done.stdout + done.stderr
+    listed = subprocess.run(
+        ["tar", "-tf", str(out / "edit.tar")],
+        capture_output=True,
+        encoding="utf-8",
+        check=True,
+    )
+    assert listed.stdout.split() == ["./", "./body.md"]
     (facts := tmp_path / "facts/tree").mkdir(parents=True)
     for name in ("pyproject.toml", "uv.lock"):
         (facts / name).write_text((tree / name).read_text().replace("2026.12", TODAY))
+    section = f"## v{TODAY}\n\n{ENTRY}\n## v2026.11.7\n\nIt.\n"
+    (facts / "CHANGELOG.md").write_text(section)
+    (facts / "RELEASE_NOTES.md").write_text(
+        section if notes else "## v2026.11.7\n\nIt.\n"
+    )
+    (facts.parent / "removed.txt").write_text(removed)
     env = {
         "IN": str(out),
         "FACTS": str(facts.parent),
         "EXPECTED": outputs(tmp_path / "w")["digest"],
         "GITHUB_OUTPUT": str(tmp_path / "g"),
     }
-    done = run_step(
+    run_step(
         step("gates", "Unpack the edit over the checkout")["run"], tree, tmp_path, env
     )
-    assert done.returncode == (0 if notes else 1), done.stdout + done.stderr
     return tree, outputs(tmp_path / "g")
 
 
-def test_the_edit_lays_the_four_files_over_the_checkout(tmp_path: Path) -> None:
-    """Nothing else the editing step left travels.
+def test_the_release_lays_four_files_and_removes_the_entries(tmp_path: Path) -> None:
+    """Nothing else travels, and the tree is recorded.
 
     :param tmp_path: a directory of this test's own.
     """
     tree, found = edited(tmp_path)
-    staged = git(tree, "diff", "--cached", "--name-only").split()
-    assert staged == ["CHANGELOG.md", "RELEASE_NOTES.md", "pyproject.toml", "uv.lock"]
+    staged = git(tree, "diff", "--cached", "--name-status").split("\n")
+    assert staged == [
+        "M\tCHANGELOG.md",
+        "M\tRELEASE_NOTES.md",
+        "D\tchangelog/next/1.md",
+        "M\tpyproject.toml",
+        "M\tuv.lock",
+        "",
+    ]
     assert found["tree"] == git(tree, "write-tree").strip()
 
 
-def test_an_edit_that_leaves_a_file_unchanged_is_refused(tmp_path: Path) -> None:
-    """A release changes the four files, the notes among them.
+@pytest.mark.parametrize(
+    ("notes", "removed"),
+    [
+        (False, "changelog/next/1.md\n"),
+        (True, ""),
+        (True, "README.md\n"),
+        (True, "changelog/next/1.md\nchangelog/next/sub/2.md\n"),
+    ],
+    ids=["notes-unchanged", "nothing-removed", "outside-the-entries", "nested"],
+)
+def test_a_release_that_is_not_the_assembly_is_refused(
+    tmp_path: Path,
+    notes: bool,  # noqa: FBT001
+    removed: str,
+) -> None:
+    """The files the release sets change, the listed entries go, nothing else.
+
+    :param tmp_path: a directory of this test's own.
+    :param notes: whether the release changes `RELEASE_NOTES.md`.
+    :param removed: the list of the entries the assembly removed.
+    """
+    _, found = edited(tmp_path, notes=notes, removed=removed)
+    assert found == {}
+
+
+def assembling(tmp_path: Path) -> tuple[Path, Path]:
+    """Make a checkout with an entry and its version set, and a bench.
+
+    :param tmp_path: a directory of this test's own.
+    :returns: the checkout and the bench, whose `uv` runs a script with
+        this interpreter.
+    """
+    tree = lock_tree(tmp_path)
+    for name in ("CHANGELOG.md", "RELEASE_NOTES.md"):
+        (tree / name).write_text("# History\n\n## v2026.11.7\n\n### It\n\nIt.\n")
+    (tree / "changelog/next").mkdir(parents=True)
+    (tree / "changelog/next/1.md").write_text(ENTRY)
+    git(tree, "add", "-A")
+    git(tree, "commit", "-q", "-m", "y")
+    for name in ("pyproject.toml", "uv.lock"):
+        path = tree / name
+        path.write_text(path.read_text().replace("2026.12", TODAY))
+    (tree / "standard").symlink_to(ROOT)
+    bench = tmp_path / "bench"
+    bench.mkdir()
+    stand_in(
+        bench,
+        "uv",
+        'while [ "$#" -gt 0 ]; do case "$1" in *.py) break ;; *) shift ;; esac; done\n'
+        f'exec {sys.executable} "$@"\n',
+    )
+    (tmp_path / "facts/tree").mkdir(parents=True)
+    return tree, bench
+
+
+def test_the_assembly_writes_the_sections_and_lists_the_entries(tmp_path: Path) -> None:
+    """The step runs section 9's script, and packs what it changed.
 
     :param tmp_path: a directory of this test's own.
     """
-    _, found = edited(tmp_path, notes=False)
-    assert found == {}
+    tree, bench = assembling(tmp_path)
+    env = {"VERSION": TODAY, "FACTS": str(tmp_path / "facts")}
+    run = step("prepare", "Assemble the release's sections")["run"]
+    done = run_step(run, tree, bench, env)
+    assert done.returncode == 0, done.stdout + done.stderr
+    assert (tmp_path / "facts/removed.txt").read_text() == "changelog/next/1.md\n"
+    for name in ("CHANGELOG.md", "RELEASE_NOTES.md"):
+        text = (tmp_path / "facts/tree" / name).read_text()
+        assert (
+            text
+            == f"# History\n\n## v{TODAY}\n\n{ENTRY}\n## v2026.11.7\n\n### It\n\nIt.\n"
+        )
+
+
+@pytest.mark.parametrize(
+    ("stray", "staged"),
+    [("README.md", False), ("new.txt", False), ("README.md", True), ("new.txt", True)],
+)
+def test_an_assembly_that_changes_anything_else_is_refused(
+    tmp_path: Path,
+    stray: str,
+    staged: bool,  # noqa: FBT001
+) -> None:
+    """A file changed or added beside the assembly fails the step, staged too.
+
+    :param tmp_path: a directory of this test's own.
+    :param stray: the file changed or added.
+    :param staged: whether the change is in the index too.
+    """
+    tree, bench = assembling(tmp_path)
+    (tree / stray).write_text("y\n")
+    if staged:
+        git(tree, "add", stray)
+    env = {"VERSION": TODAY, "FACTS": str(tmp_path / "facts")}
+    run = step("prepare", "Assemble the release's sections")["run"]
+    done = run_step(run, tree, bench, env)
+    assert done.returncode == 1, done.stdout + done.stderr
+    assert "::error::the assembly changed" in done.stdout
+    assert not (tmp_path / "facts/removed.txt").exists()
 
 
 def test_publish_lays_the_edit_as_the_gates_did() -> None:
@@ -812,7 +933,7 @@ def test_the_release_is_committed_by_claude_with_no_trailer(
 def test_a_default_branch_that_moved_is_refused(
     tmp_path: Path, tip: str, expected: int
 ) -> None:
-    """The sections are written from the run's commit, which has to be the tip.
+    """The release is assembled from the run's commit, which has to be the tip.
 
     :param tmp_path: a directory of this test's own.
     :param tip: the sha the API answers.

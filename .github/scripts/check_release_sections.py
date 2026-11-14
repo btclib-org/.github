@@ -4,9 +4,10 @@
 
 """Refuse a release section that adds more than the release, or too little.
 
-`reusable-claude-release.yml` has the agent write a release's section of
-`CHANGELOG.md` and of `RELEASE_NOTES.md`, and this is what its gates job
-asks of each file before the tree's own gates run. The edited file is
+`reusable-claude-release.yml` assembles a release's section of
+`CHANGELOG.md` and of `RELEASE_NOTES.md` with `changelog_entries.py`,
+and this is what its gates job asks of each file before the tree's own
+gates run. The edited file is
 compared with the file at the base, the commit the release is cut from:
 
 - its first `## ` heading is `## v<version>`, alone on its line, and its
@@ -19,7 +20,7 @@ compared with the file at the base, the commit the release is cut from:
   `shared/RELEASING.md`'s *Release to PyPI* says;
 - the file without the release's section is the base without its first
   section where that is a work-in-progress one, and the base whole
-  otherwise. So the agent changes no line outside its section, a
+  otherwise. So the release changes no line outside its section, a
   released entry included. Section 9's *Nothing already written is
   rewritten* says which corrections a release's pull request may make
   to a released entry; such an edit is a person's.

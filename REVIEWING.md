@@ -361,6 +361,10 @@ another document holds the rule, the question names it.
   `check-changelog` refuses a new entry in `CHANGELOG.md` and reads nothing
   of a bullet added under an entry the base holds. It reads no other file, so
   a new entry in `RELEASE_NOTES.md` is the reviewer's to catch.
+- In a tree that publishes, does a branch that changes what a user gets add
+  its entry under `changelog/next/`, and does the entry say what changed, in
+  the shape section 9 gives it? It lands as written: the release assembles it
+  and writes nothing.
 - Does a new refusal, repr, log line or `assert` message **print a value
   that may be secret**? Section 7's *A refusal carries no secret* has the
   rule and the test it asks for.
