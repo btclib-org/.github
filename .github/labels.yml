@@ -39,6 +39,10 @@ labels:
   - name: on-hold
     color: "c5def5"
     description: Paused by someone's decision; resumes when someone decides to
+  - name: release-hold
+    color: "d876e3"
+    description: >-
+      A release pull request being finished; other landings here wait for it
   - name: upstream-dependent
     color: "d4c5f9"
     description: Waits on an upstream project

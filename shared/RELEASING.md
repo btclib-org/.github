@@ -480,6 +480,46 @@ request, next to `deps-latest`'s own result.
    pull request that never mentions it reads exactly like one that skipped
    it.
 
+1. Hold the repository's other landings until the release pull request
+   lands, so that `main` does not move under it (the version step above).
+   Put `release-hold` on it, then list every pull request armed to merge
+   by itself, with the subject and body it was armed with:
+
+   ```shell
+   pr=<the release pull request's number>
+   ```
+
+   ```shell
+   gh pr edit "${pr:?}" --add-label release-hold &&
+   gh api graphql --paginate -F name="${repo:?}" -f query='
+     query($name: String!, $endCursor: String) {
+       repository(owner: "btclib-org", name: $name) {
+         pullRequests(states: OPEN, first: 100, after: $endCursor) {
+           nodes { number headRefOid
+             autoMergeRequest { mergeMethod commitHeadline commitBody } }
+           pageInfo { hasNextPage endCursor }
+         }
+       }
+     }' --jq '.data.repository.pullRequests.nodes[]
+       | select(.autoMergeRequest)'
+   ```
+
+   Disarm each of them but the release pull request and a repair of a red
+   `main`, with `gh pr merge <n> --disable-auto`, and name each, with its
+   head, in a comment on the release pull request. Once the release pull
+   request lands or is abandoned, remove the label, and arm each again
+   pinned to that head, with that subject and body. One whose head has
+   moved since is left to whoever works it.
+
+   ```shell
+   gh pr edit "${pr:?}" --remove-label release-hold
+   ```
+
+   ```shell
+   gh pr merge <n> --squash --auto --match-head-commit <head> \
+     --subject <subject> --body <body>
+   ```
+
 1. Run `uv run pre-commit run --all-files` and `uv run pytest --cov`
    before pressing anything, then verify the Read the Docs build renders,
    on `https://app.readthedocs.org/projects/<rtd>/builds/`. Read the

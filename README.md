@@ -3673,6 +3673,8 @@ A label means what its description says. Who applies and removes it:
   wait, and removed by whoever finds it over;
 - `on-hold` — applied by whoever pauses the issue, and removed by
   whoever resumes it;
+- `release-hold` — applied and removed as `RELEASING.md`'s *Release to
+  PyPI* says;
 - `upstream-dependent` — applied by whoever finds the dependency, and
   removed by whoever finds the wait over;
 - `upstream-report` — applied by whoever finds the report owed. Once it
