@@ -444,6 +444,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_a_registered_tree_holds_its_answers",
         ("seed-scan",),
     ),
+    (
+        2275,
+        "test_a_test_module_defining_no_test_is_a_body_its_node_modules_call",
+        ("btclib-wallet", "functional-tests"),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
