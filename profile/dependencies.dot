@@ -41,7 +41,8 @@
 // `btclib-functional-tests` and `btclib-node` into `btclib` pass on
 // either side of `bip32-descriptors`. Every other arrow of
 // `btclib-benchmarks` leaves its box from below, runs under its row and
-// round the outside.
+// round the outside. Its arrow to `bip39-slip39` runs under `seed-scan`'s
+// row as well, so that none of `seed-scan`'s arrows crosses it.
 //
 // The colours are for a transparent background under both of GitHub's
 // themes: text sits on the fill of its box, and the grey of the arrows
