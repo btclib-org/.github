@@ -529,9 +529,10 @@ request, next to `deps-latest`'s own result.
    ```
 
    A label left behind on a release already published or abandoned holds
-   every merge here. Whoever finds one checks that the release is out or
-   its pull request closed, tells the maintainer, and removes the label on
-   his word.
+   every merge here. Whoever finds one checks that the release is out, or
+   that its pull request closed without merging, tells the maintainer, and
+   removes the label on his word. A merged release pull request is closed
+   too, and holds until its release is published.
 
 1. Run `uv run pre-commit run --all-files` and `uv run pytest --cov`
    before pressing anything, then verify the Read the Docs build renders,
