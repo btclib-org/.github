@@ -4,19 +4,21 @@
 
 """Tests for the release wait of `.github/scripts`.
 
-What a run of `pypi-install.yml` shows is the wait that does not wait: on
-a schedule and on a dispatch the tag is empty, and the matrix installing
-anything at all is the check that the script returned. What no run can
-show is any other outcome -- what is waited on is somebody else's upload,
-so neither a release nor a rehearsal can arrange for the index to be
-late -- so the retry, the deadline and the `::error::` are reached here
-or nowhere.
+A run of `pypi-install.yml` shows the answer the index gives that day:
+whether it serves a release's version, or, on a schedule and on a
+dispatch, whose tag is empty, whether it has the project. What is waited
+on is somebody else's upload and somebody else's index, which neither a
+release nor a rehearsal can arrange to be late or down, so the retry,
+the deadline and the `::error::` of either question are reached here or
+nowhere.
 
 Both of the wait's inputs are substituted for that. `_Transport` is the
-index: a scripted sequence of answers that also records what it was
-asked, timeout included. `_Clock` is the clock, and it moves only when
-the script sleeps on it, which is what makes the deadline arrive in no
-time at all and the attempts before it exact rather than approximate.
+index asked for a version, and `_Project` the index asked for the
+project: each a scripted sequence of answers that also records what it
+was asked, timeout included. `_Clock` is the clock, and it moves only
+when the script sleeps on it, which is what makes the deadline arrive in
+no time at all and the attempts before it exact rather than
+approximate.
 
 The script is loaded by path, `.github/scripts` being no package, as the
 other scripts under it are tested.
@@ -133,13 +135,36 @@ def _index(
     return transport
 
 
+class _Project:
+    """Whether the index has the project, in order, and what it was asked."""
+
+    def __init__(self, answers: list[bool | None]) -> None:
+        self.answers = answers
+        self.asked: list[tuple[str, float]] = []
+
+    def __call__(self, url: str, timeout: float) -> bool | None:
+        """Answer the next verdict in the script, and record the question."""
+        self.asked.append((url, timeout))
+        return self.answers.pop(0) if self.answers else None
+
+
+def _project(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch, answers: list[bool | None]
+) -> _Project:
+    """Put a scripted sequence of answers where the project question goes."""
+    project = _Project(answers)
+    monkeypatch.setattr(script, "known", project)
+    return project
+
+
 @pytest.mark.usefixtures("clock")
-def test_an_empty_tag_is_nothing_to_wait_for(
+def test_an_empty_tag_asks_for_the_project_not_a_version(
     script: ModuleType,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
 ) -> None:
-    """A run with no release behind it asks the index nothing at all.
+    """A run with no release behind it asks for no version, only the project.
 
     `clock` is asked for through `usefixtures` although nothing here
     should sleep, and that is the point: without it a regressed guard
@@ -148,11 +173,110 @@ def test_an_empty_tag_is_nothing_to_wait_for(
     the same regression into an immediate failure.
     """
     index = _index(script, monkeypatch, [])
+    project = _project(script, monkeypatch, [True])
+    output = tmp_path / "output"
 
-    assert script.main(["btclib", ""]) == 0
+    assert script.main(["btclib", "", "--output", str(output)]) == 0
 
     assert index.asked == []
-    assert "nothing to wait for" in capsys.readouterr().out
+    assert project.asked == [(_URL, 10.0)]
+    assert output.read_text() == "published=true\n"
+    assert "asking whether the index has btclib" in capsys.readouterr().out
+
+
+@pytest.mark.usefixtures("clock")
+def test_a_bare_v_is_refused_rather_than_read_as_no_tag(
+    script: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
+) -> None:
+    """A tag naming no version asks the index nothing and writes nothing."""
+    index = _index(script, monkeypatch, [])
+    project = _project(script, monkeypatch, [False])
+    output = tmp_path / "output"
+
+    assert script.main(["coin-addresses", "v", "--output", str(output)]) == 1
+
+    assert index.asked == []
+    assert project.asked == []
+    assert not output.exists()
+    assert "::error::the tag 'v' names no version" in capsys.readouterr().out
+
+
+@pytest.mark.usefixtures("clock")
+def test_a_project_the_index_never_had_is_not_published(
+    script: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
+) -> None:
+    """The one answer that skips the matrix, and the run still passes."""
+    _project(script, monkeypatch, [False])
+    output = tmp_path / "output"
+
+    assert script.main(["coin-addresses", "", "--output", str(output)]) == 0
+
+    assert output.read_text() == "published=false\n"
+    assert "the index has no project coin-addresses" in capsys.readouterr().out
+
+
+def test_an_index_that_never_says_fails_the_run(
+    script: ModuleType,
+    clock: _Clock,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
+) -> None:
+    """An index that is down is asked until the deadline, then fails.
+
+    No output is written, so the matrix runs if the job is ever read as
+    passing: a silent index never reads as a package never published.
+    """
+    project = _project(script, monkeypatch, [])
+    output = tmp_path / "output"
+
+    assert script.main(["btclib", "", "--output", str(output)]) == 1
+
+    assert clock.now == pytest.approx(300.0)
+    assert len(project.asked) == _ASKED_IN_300_S
+    assert not output.exists()
+    reported = capsys.readouterr().out
+    assert "::error::the index did not say within 300 s whether it has btclib" in (
+        reported
+    )
+
+
+def test_an_index_that_answers_late_is_waited_for(
+    script: ModuleType, clock: _Clock, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """An unanswered question costs an interval, not the run."""
+    _project(script, monkeypatch, [None, None, False])
+    output = tmp_path / "output"
+
+    assert script.main(["coin-addresses", "", "--output", str(output)]) == 0
+
+    assert clock.slept == [15.0, 15.0]
+    assert output.read_text() == "published=false\n"
+
+
+def test_a_tagged_run_writes_no_output(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A release's run never reads as a package never published.
+
+    The callers skip the matrix on `published=false` alone, and a
+    release's post-publish check that skipped would read as one that
+    passed.
+    """
+    _index(script, monkeypatch, [True])
+    project = _project(script, monkeypatch, [False])
+    output = tmp_path / "output"
+
+    assert script.main(["coin-addresses", "v2026.9.1", "--output", str(output)]) == 0
+
+    assert project.asked == []
+    assert not output.exists()
 
 
 def test_the_version_asked_for_is_the_one_the_tag_names(
@@ -257,12 +381,9 @@ def test_the_defaults_are_the_budget_a_release_actually_gets(
     """The workflow passes no budget, so the shipped one is what bounds it.
 
     `DEFAULT_TIMEOUT` is the figure the job's `timeout-minutes` is set
-    above, and no other case's outcome turns on it: three state a
-    deadline of their own, and of the three that do not, one returns at
-    the empty-tag guard before the wait is entered and the other two are
-    answered well inside any deadline they could have been given. So the
-    shipped number could be changed without a red run. This is the run
-    the workflow makes.
+    above. This is the run the workflow makes with a tag;
+    `test_an_index_that_never_says_fails_the_run` is the one it makes
+    without, under the same deadline.
     """
     index = _index(script, monkeypatch, [])
 
@@ -461,3 +582,86 @@ def test_the_package_is_keyed_the_way_the_index_keys_it(
 
     assert index.asked == [(url, 10.0)]
     assert clock.slept == []
+
+
+def test_a_page_of_the_project_is_the_project_known(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A 200 for the project's page is a yes, whatever it lists."""
+    asked = _urlopen(monkeypatch, script, _page())
+
+    assert script.known(_URL, 10.0) is True
+    assert [url for url, _, _ in asked] == [_URL]
+
+
+def test_a_2xx_that_is_not_ok_says_nothing_of_the_project(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """`known` compares the status rather than that a status arrived."""
+    monkeypatch.setattr(
+        script,
+        "urlopen",
+        lambda *_args, **_kwargs: _answering(_page(), HTTPStatus.NO_CONTENT),
+    )
+
+    assert script.known(_URL, 10.0) is None
+
+
+def _failing(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch, status: HTTPStatus
+) -> HTTPError:
+    """Have the index answer every request with this status."""
+    failure = HTTPError(_URL, status, status.phrase, Message(), None)
+
+    def urlopen(*_args: object, **_kwargs: object) -> AbstractContextManager[_Answer]:
+        """Fail with this status."""
+        raise failure
+
+    monkeypatch.setattr(script, "urlopen", urlopen)
+    return failure
+
+
+def test_a_404_says_the_index_never_had_the_project(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The one answer read as a no."""
+    with closing(_failing(script, monkeypatch, HTTPStatus.NOT_FOUND)):
+        assert script.known(_URL, 10.0) is False
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        HTTPStatus.GONE,
+        HTTPStatus.INTERNAL_SERVER_ERROR,
+        HTTPStatus.SERVICE_UNAVAILABLE,
+    ],
+)
+def test_any_other_failure_says_nothing_of_the_project(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch, status: HTTPStatus
+) -> None:
+    """A failing index is no answer, and never reads as a project it lacks."""
+    with closing(_failing(script, monkeypatch, status)):
+        assert script.known(_URL, 10.0) is None
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        TimeoutError("timed out"),
+        ConnectionRefusedError("refused"),
+        IncompleteRead(b"{"),
+    ],
+)
+def test_an_index_that_does_not_answer_says_nothing_of_the_project(
+    script: ModuleType, monkeypatch: pytest.MonkeyPatch, failure: Exception
+) -> None:
+    """An index that is down never reads as a project it never had."""
+
+    def urlopen(*_args: object, **_kwargs: object) -> AbstractContextManager[_Answer]:
+        """Fail the way an index that is down fails."""
+        raise failure
+
+    monkeypatch.setattr(script, "urlopen", urlopen)
+
+    assert script.known(_URL, 10.0) is None

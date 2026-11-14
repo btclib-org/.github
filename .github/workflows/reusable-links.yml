@@ -5,6 +5,17 @@ name: reusable-links
 # once. What a tree passes is the one thing the trees rightly differ on,
 # the paths it documents; the trigger, the cron minute and the
 # concurrency group stay in the caller, whose run this is.
+#
+# **A repository that has never released sets aside its own downloads
+# badge.** Section 2's badge row links to `pepy.tech/projects/<name>`,
+# and pepy answers 404 for a package that is not on the index, so before
+# a first release that link is red in every run. The step before lychee
+# asks the releases API, and where it answers an empty list, lychee
+# excludes the pepy URLs whose name is the repository's. Every other link
+# is still checked, and a released repository excludes nothing. An API
+# that does not answer fails the job rather than read as a repository
+# never released. A tree whose package name is not its repository's
+# name matches no exclusion, and its badge stays red until it releases.
 
 on:
   workflow_call:
@@ -41,6 +52,21 @@ jobs:
         with:
           # lychee reads the tree and nothing pushes it back
           persist-credentials: false
+      # the header's never-released paragraph. The name of a repository
+      # holds letters, digits, `-`, `_` and `.`, and the last is escaped
+      # for the regular expression
+      - name: Set aside the downloads badge of a repository never released
+        id: released
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          released=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=1" \
+            --jq 'if type == "array" then length else error("the releases API answered no list") end')
+          if [ "$released" = 0 ]; then
+            name=${GITHUB_REPOSITORY#*/}
+            echo "::notice::$GITHUB_REPOSITORY has never released: its pepy.tech links are not checked"
+            echo "exclude=--exclude '^https://(static\.)?pepy\.tech/(badge|projects)/${name//./\\.}([/?#].*)?\$'" >> "$GITHUB_OUTPUT"
+          fi
       - name: Check the links
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
@@ -101,6 +127,7 @@ jobs:
             --remap '^https://github\.com/btclib-org/(?:bitcoin-node-tests|btclib-functional-tests)/issues/([0-9]+)(?:#issuecomment-[0-9]+|(#.*))?$ https://github.com/btclib-org/functional-tests/issues/$1$2'
             --remap '^(https://github\.com/[^/]+/[^/]+/issues/[0-9]+)#issuecomment-[0-9]+$ $1'
             --remap '^https://github\.com/([^/]+/[^/]+)/blob/([^#]+)(?:#L[0-9]+(?:-L?[0-9]+)?|(#.*))?$ https://raw.githubusercontent.com/$1/$2$3'
+            ${{ steps.released.outputs.exclude }}
             ${{ inputs.targets }}
           # yamllint enable rule:line-length
           # fail the job rather than only summarizing: a green run that
