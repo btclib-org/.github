@@ -53,9 +53,7 @@ test = [
     # api workflows run it with: tests/api_gaps_test.py keeps this pin,
     # theirs and uv.lock's equal
     "griffe==2.2.0",
-    # the binding to libjq that tests/never_released_test.py runs a
-    # workflow's `--jq` filter through, in place of the gojq `gh` embeds:
-    # a wheel, so the suite needs no `jq` on the path
+    # what tests/never_released_test.py runs a workflow's `--jq` filter on
     "jq",
     "pytest",
     # section 7's default, taken rather than declined: tests/README.md
