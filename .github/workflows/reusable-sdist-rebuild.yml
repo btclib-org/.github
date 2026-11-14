@@ -27,6 +27,14 @@ name: reusable-sdist-rebuild
 # the property that row states. It gates nothing, and a caller's own
 # header is where its branch rule (or the absence of one) belongs.
 #
+# **A repository that has never released has no sdist to rebuild**, so
+# the job that finds the tag ends with a notice and no tag, and the
+# rebuild job skips. Never released means the releases API answers an
+# empty list. `gh release view` alone cannot say it: it fails alike where
+# there is no release and where the API did not answer. An API that does
+# not answer fails the job, and so does a repository with releases and
+# none marked latest.
+#
 # The inputs.
 #
 # sdist-builder, string, default "uv": not a free-form command, on
@@ -187,8 +195,39 @@ permissions:
   contents: read
 
 jobs:
+  # the header's never-released paragraph: the tag, or none where the
+  # repository has no release, which skips the rebuild below
+  release:
+    name: Find the latest release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      # restated, a job's permissions replacing the workflow's
+      contents: read
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+    steps:
+      # the release GitHub marks latest, not the newest tag: a tag whose
+      # release never published has no attestation to verify against
+      - name: Find the latest release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          released=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=1" \
+            --jq 'if type == "array" then length else error("the releases API answered no list") end')
+          if [ "$released" = 0 ]; then
+            echo "::notice::$GITHUB_REPOSITORY has never released: no sdist to rebuild"
+            exit 0
+          fi
+          tag=$(gh release view --repo "$GITHUB_REPOSITORY" \
+            --json tagName --jq .tagName)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
   rebuild:
     name: Rebuild the latest release's sdist and verify its attestation
+    needs: release
+    if: needs.release.outputs.tag != ''
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -205,22 +244,10 @@ jobs:
       # every action is pinned to a commit SHA, the tag in the comment:
       # a tag, let alone a branch, is a name its owner can move, and
       # these run in a job that can read the workflow token
-      #
-      # the release GitHub marks latest, not the newest tag: a tag whose
-      # release never published has no attestation to verify against
-      - name: Find the latest release
-        id: release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          tag=$(gh release view --repo "$GITHUB_REPOSITORY" \
-            --json tagName --jq .tagName)
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
       - name: Checkout the release's tag
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ steps.release.outputs.tag }}
+          ref: ${{ needs.release.outputs.tag }}
           # the header argues the string this passes on, empty being no
           # submodules the same way false is
           submodules: ${{ inputs.submodules }}
@@ -279,7 +306,7 @@ jobs:
       - name: Verify the rebuilt sdist against its signer
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.release.outputs.tag }}
+          TAG: ${{ needs.release.outputs.tag }}
         run: |
           gh attestation download dist/*.tar.gz --repo "$GITHUB_REPOSITORY"
           bundle="sha256:$(sha256sum dist/*.tar.gz | cut -d' ' -f1).jsonl"

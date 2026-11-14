@@ -667,10 +667,13 @@ request, next to `deps-latest`'s own result.
    something goes wrong" gives, for `published` a dispatch of
    `pypi-install.yml`.
 
-   A dispatch of `pypi-install.yml` passes no version, so it waits for
-   nothing and installs what the index serves at the time. Read the
-   installed version each cell prints in its log, and dispatch again
-   where a cell installed the previous release.
+   A dispatch of `pypi-install.yml` passes no version, so it waits for no
+   version and installs what the index serves at the time. Where the
+   index answers 404 for the package and the repository has no GitHub
+   release, the install jobs skip and install nothing, as
+   `btclib-org/.github`'s `reusable-wait-for-index.yml` says in its
+   header. Read the installed version each cell prints in its log, and
+   dispatch again where a cell installed the previous release.
 
    Read the Docs builds a tag on its first push only: a deleted and
    re-pushed tag is rebuilt by hand from the builds page, and `documented`

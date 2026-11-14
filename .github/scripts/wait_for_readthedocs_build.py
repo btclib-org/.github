@@ -31,7 +31,7 @@ No trigger reaches the verdict this exists for. The job runs on a tag
 push alone, so a rehearsal has no tag to ask about and a dispatch
 pointing the wait at a branch would spend the whole deadline on a URL
 that answers 404 by construction -- which is why this takes no empty tag
-as nothing to wait for, the way the release wait beside it does.
+as no version to wait for, the way the release wait beside it does.
 `tests/wait_for_readthedocs_build_test.py` is therefore the only thing
 that drives the retry, the deadline and the error path: it substitutes
 the transport and the clock, and advances the clock past the deadline

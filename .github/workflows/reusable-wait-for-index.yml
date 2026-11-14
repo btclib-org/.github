@@ -5,16 +5,17 @@ name: reusable-wait-for-index
 # question a release, a schedule or a dispatch asks of the index -- has
 # it served what a tag names yet, meaning does its simple page list a
 # file of that version, the page `pip` reads -- is written once rather
-# than in every tree. The callers are the trees section 10's *Which trees
-# carry which sentinel* names under `pypi-install`, and the three steps are this
-# job's: a sparse checkout of this repository's `.github/scripts`,
-# `astral-sh/setup-uv`, and a run of `wait_for_pypi_release.py` against
-# the tag a release passes. The script is served from here, so a caller
-# owes no copy of it. The trigger, the schedule's cron minute,
-# `workflow_dispatch`, a `pull_request` filter where a caller carries
-# one, the `concurrency:` group that never cancels a sample, and the
-# calling job's own `if:` all stay in the caller, whose run this job
-# joins.
+# than in every tree. The callers are the trees section 10's *Which
+# trees carry which sentinel* names under `pypi-install`, and the steps
+# are this job's: a sparse checkout of this repository's
+# `.github/scripts`, `astral-sh/setup-uv`, a run of
+# `wait_for_pypi_release.py` against the tag a release passes, and the
+# releases question the output paragraph below gives. The script is
+# served from here, so a caller owes no copy of it. The trigger, the
+# schedule's cron minute, `workflow_dispatch`, a `pull_request` filter
+# where a caller carries one, the `concurrency:` group that never
+# cancels a sample, and the calling job's own `if:` all stay in the
+# caller, whose run this job joins.
 #
 # One job and nothing besides it: every caller's own `install-published`
 # and `install-published-secp256k1` jobs stay in the caller, `needs:
@@ -39,11 +40,27 @@ name: reusable-wait-for-index
 # caller already takes it as its own `workflow_call` input from
 # `release.yml` and hands it on, so this job asks a caller for nothing
 # the caller was not already holding. Empty on the weekly schedule, on a
-# dispatch, and on a pull request touching the script -- nothing to wait
-# for then -- which is why this job runs on every trigger and waits on
-# almost none of them: an `if:` keyed on the tag would make a release the
-# only run that ever reaches it, and a job a release is the first to
-# exercise is a job whose defect ships with that release.
+# dispatch, and on a pull request touching the script, where the job
+# waits for no version and asks only whether the index has the package
+# (the script's docstring) -- which is why this job runs on every
+# trigger and waits for a version on almost none of them: an `if:` keyed
+# on the tag would make a release the only run that ever reaches it, and
+# a job a release is the first to exercise is a job whose defect ships
+# with that release.
+#
+# One output, `published`: `false` where the tag is empty, the index
+# answers 404 for the package's page, and the repository has no GitHub
+# release. A tree that has never released then has nothing to install,
+# and each caller's install jobs carry
+# `needs.wait-for-index.outputs.published != 'false'` in their `if:`, so
+# they skip rather than fail. The script's docstring says which answers
+# of the index are a no. The second question, to the releases API, is
+# what keeps a released tree's sentinel running: where the repository
+# has a release and the index has no such project, as for a `package`
+# that names the wrong one, the job fails instead. An index or an API
+# that does not answer fails it too, so neither reads as a package never
+# published. Any other run leaves the output `true` or empty, and the
+# install jobs run.
 #
 # Resisted: a third input for the runner, the interpreter, or the
 # sparse-checkout path. None of the copies this job replaced varies any
@@ -52,16 +69,16 @@ name: reusable-wait-for-index
 # agreeing about.
 #
 # permissions: contents: read at the workflow level and restated on the
-# job below -- the checkout is the only thing here that reads the
-# token, and a called workflow's own block can only downgrade what the
-# caller granted, never restore an omitted scope, so a caller whose
-# calling job omits a scope this job's own block asks for fails with
-# `startup_failure` before any step runs, measured twice in
-# btclib-org/.github#912, and this repository's own README.md section
-# 11 is the sentence. Here that costs nothing extra to a caller that
-# declares `contents: read` at its own workflow level, which is every
-# scope this job's block asks for, so its calling job needs no
-# `permissions:` block of its own naming it again -- unlike
+# job below -- the checkout and the releases question are what read the
+# token, and reading is all either takes. A called workflow's own block
+# can only downgrade what the caller granted, never restore an omitted
+# scope, so a caller whose calling job omits a scope this job's own
+# block asks for fails with `startup_failure` before any step runs,
+# measured twice in btclib-org/.github#912, and this repository's own
+# README.md section 11 is the sentence. Here that costs nothing extra to
+# a caller that declares `contents: read` at its own workflow level,
+# which is every scope this job's block asks for, so its calling job
+# needs no `permissions:` block of its own naming it again -- unlike
 # reusable-sdist-rebuild.yml's own `attestations: read`, which a
 # caller's workflow-level `contents: read` alone does not cover. That
 # holds only while a calling job declares no block of its own: one added
@@ -91,9 +108,16 @@ on:
           installs anything, empty on a run with no release behind it.
         type: string
         default: ""
+    outputs:
+      published:
+        description: >
+          "false" where the run has no tag and the package was never
+          published, the header's output paragraph says how that is
+          known; "true" or empty otherwise.
+        value: ${{ jobs.wait-for-index.outputs.published }}
 
 # least privilege for the GITHUB_TOKEN at the workflow level, restated
-# on the job below -- the checkout is the only thing here that reads it
+# on the job below -- the checkout and the releases question read it
 permissions:
   contents: read
 
@@ -105,6 +129,8 @@ jobs:
     permissions:
       # restated, a job's permissions replacing the workflow's
       contents: read
+    outputs:
+      published: ${{ steps.index.outputs.published }}
     steps:
       # every action is pinned to a commit SHA, the tag in the comment:
       # a tag, let alone a branch, is a name its owner can move
@@ -139,10 +165,28 @@ jobs:
       # environment and not through an expression pasted into this run
       # block -- the header's package paragraph gives the reason
       - name: Wait for the index to serve the released version
+        id: index
         shell: bash
         env:
           PACKAGE: ${{ inputs.package }}
           TAG: ${{ inputs.version }}
         run: |
           uv run --no-project --python 3.15 \
-            .github/scripts/wait_for_pypi_release.py "$PACKAGE" "$TAG"
+            .github/scripts/wait_for_pypi_release.py "$PACKAGE" "$TAG" \
+            --output "$GITHUB_OUTPUT"
+      # the header's output paragraph: an index with no such project is a
+      # package never published only where the repository never released
+      - name: Refuse a released repository the index does not have
+        if: steps.index.outputs.published == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE: ${{ inputs.package }}
+        run: |
+          released=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=1" \
+            --jq 'if type == "array" then length else error("the releases API answered no list") end')
+          if [ "$released" != 0 ]; then
+            echo "::error::$GITHUB_REPOSITORY has released and the index has no project $PACKAGE"
+            exit 1
+          fi
+          echo "::notice::$GITHUB_REPOSITORY has never released and the index has no project $PACKAGE: nothing to install"
