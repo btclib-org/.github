@@ -223,7 +223,10 @@ name: reusable-claude-review
 # for GitHub Apps"), and on a pull request that is wrong: in run
 # 43598529478 of btclib-org/.github#2271, a token holding `issues: write`
 # and no `pull-requests` was refused the list of the pull request's
-# reactions with "Resource not accessible by integration (HTTP 403)".
+# reactions with "Resource not accessible by integration (HTTP 403)". In
+# run 43600579481 of the same pull request, a token holding
+# `pull-requests: write` alone listed them, posted the eyes, then removed
+# them and posted `confused`.
 #
 # `start` is a job of its own because it runs where the review job does
 # not: on a draft, and with the switch off. `outcome` could be the
