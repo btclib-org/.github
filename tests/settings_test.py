@@ -401,9 +401,10 @@ def test_squash_is_the_only_button(settings: dict[str, dict[str, Any]]) -> None:
 
     A merge commit is refused by linear history already; rebase is the
     one deliberately removed, since it replays a branch's review steps
-    onto `main`.
+    onto `main`. Auto-merge is off, so no pull request can be armed, for
+    the reason section 11's *Merge method* gives.
 
-    Unlike everything else here, these four fields are not public: the
+    Unlike everything else here, these fields are not public: the
     repository endpoint omits them for a token without push access, so
     this is the one question a run needs a credential to ask. Skipped
     rather than passed where it cannot be asked -- a token that answers
@@ -418,6 +419,7 @@ def test_squash_is_the_only_button(settings: dict[str, dict[str, Any]]) -> None:
         "allow_squash_merge": True,
         "allow_merge_commit": False,
         "allow_rebase_merge": False,
+        "allow_auto_merge": False,
         "delete_branch_on_merge": True,
     }
     wrong: dict[str, dict[str, bool]] = {}
@@ -434,7 +436,7 @@ def test_squash_is_the_only_button(settings: dict[str, dict[str, Any]]) -> None:
     if unseen:
         pytest.skip(
             f"this run's token cannot see the merge method on {unseen}:"
-            " those four fields need push access to read"
+            " those fields need push access to read"
         )
 
 

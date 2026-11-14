@@ -3073,15 +3073,13 @@ string, which the endpoint refuses. `PATCH` the sub-endpoint; a partial
 
 ### Merge method
 
-**Squash is the only button enabled**, and auto-merge presses it once the
-review and the checks are in. One change is one commit on `main`. A merge
-commit is refused by linear history already; rebase-and-merge is the one
-deliberately removed, since it replays a branch's review steps onto
-`main`.
+**Squash is the only button enabled**: one change is one commit on
+`main`. Linear history already refuses a merge commit; rebase-and-merge
+is removed, since it replays a branch's review steps onto `main`.
 
-**`allow_auto_merge` is on**, and a copy reads it back with the other
-merge settings. Off, every landing waits on somebody pressing *Squash
-and merge* when the last check goes green, and nothing turns red.
+**The merge is explicit and `allow_auto_merge` is off**, so no pull request can
+be armed: an armed one would merge at a moment nobody reads, once the approval
+and the required checks are in, which leave out the ack of record (*Review*).
 
 `squash_merge_commit_title` and `squash_merge_commit_message` are set so
 that a single-commit branch lands under its own subject and a longer one
@@ -4443,7 +4441,8 @@ that is `read`, and `allowed_actions: all` with `sha_pinning_required: true`:
 ```shell
 R=<org>/<repo>
 gh api repos/$R --jq '{allow_squash_merge, allow_merge_commit,
-  allow_rebase_merge, delete_branch_on_merge, security_and_analysis}'
+  allow_rebase_merge, allow_auto_merge, delete_branch_on_merge,
+  security_and_analysis}'
 gh api repos/$R/actions/permissions/workflow
 gh api repos/$R/actions/permissions \
   --jq '{allowed_actions, sha_pinning_required}'
@@ -4994,7 +4993,7 @@ No tool checks them.
    an empty repository's first pushed branch becomes the default
    whatever it is named, and a tree built on a branch of its own pushes
    that branch first;
-   squash-only, with auto-merge; `delete_branch_on_merge`; section 11's
+   squash-only, auto-merge off; `delete_branch_on_merge`; section 11's
    rulesets — only after that push, since section 11's bypass mode
    refuses a direct one once `main-self-merge` is active, and the root
    commit is necessarily one; `main-self-merge`'s bypass is the
