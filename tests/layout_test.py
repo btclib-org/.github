@@ -178,8 +178,8 @@ def bound(test: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
     Each `arg` of its signature, and in `own_scope` each name stored or
     deleted, each name an `import` binds, each nested `def` or `class`,
     and each `except ... as` name. A name stored as a comprehension's
-    target, or declared `global` or `nonlocal`, is listed too, though
-    Python does not make it local to the test.
+    target, or stored after a `global` or `nonlocal` declaration, is
+    listed too, though Python does not make it local to the test.
 
     :param test: the test function.
     :returns: the names.
@@ -486,7 +486,6 @@ def test_a_body_its_node_modules_call_is_admitted(tmp_path: Path) -> None:
         pytest.param((NESTED_DEF,) * 2, id="a call in a nested def"),
         pytest.param((NESTED_LAMBDA,) * 2, id="a call in a lambda"),
         pytest.param((NESTED_ASYNC_DEF,) * 2, id="a call in a nested async def"),
-        pytest.param((NESTED_CLASS,) * 2, id="a call in a nested class body"),
         pytest.param((SHADOWING_PARAMETER,) * 2, id="a parameter of the name"),
         pytest.param((SHADOWING_ASSIGNMENT,) * 2, id="an assignment of the name"),
         pytest.param(
@@ -532,6 +531,18 @@ def test_a_call_of_a_name_the_test_binds_is_refused(
     """
     caller = ABSOLUTE + binding + "    a_block_reaches_every_node(None)\n"
     _tree(tmp_path, caller, caller)
+    assert bodiless(tmp_path) == REFUSED
+
+
+def test_a_call_in_a_nested_class_body_is_not_read(tmp_path: Path) -> None:
+    """A call in a nested class body is not counted.
+
+    A class body runs when the test does, but `own_scope` does not read
+    it, so its call is not counted.
+
+    :param tmp_path: where the stand-in tree is built.
+    """
+    _tree(tmp_path, NESTED_CLASS, NESTED_CLASS)
     assert bodiless(tmp_path) == REFUSED
 
 
