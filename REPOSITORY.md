@@ -358,10 +358,9 @@ gh api repos/btclib-org/.github/actions/permissions/workflow
 
 `read`, which is what every workflow here needs: `lint.yml` and
 `links.yml` read the tree, and `claude-review.yml`'s calling job elevates
-itself to `pull-requests: write` to write on a pull request, to
-`issues: write` for the review's reactions on it and to `id-token: write`
-for the OIDC token the action mints at startup. Nothing publishes,
-attests or writes to the repository's contents.
+itself to `pull-requests: write` to write on a pull request and to
+`id-token: write` for the OIDC token the action mints at startup. Nothing
+publishes, attests or writes to the repository's contents.
 
 `can_approve_pull_request_reviews` is false, and [the standard says why
 that matters as much as the token][s11-tokens].

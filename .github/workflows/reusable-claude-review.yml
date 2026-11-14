@@ -106,13 +106,11 @@ name: reusable-claude-review
 # as a `startup_failure`, rather than going red on a step -- section 11
 # of this repository's own README.md is that sentence and
 # btclib-org/.github#912 the measurement under it. **A caller's calling
-# job therefore carries `permissions: contents: read, issues: write,
-# pull-requests: write, id-token: write`**, every scope a job below
-# declares: `issues: write` is what the reactions take,
-# `pull-requests: write` what posting a review takes, and `id-token:
-# write` the OIDC token the action mints during its own startup, whose
-# absence ends a run before authentication with "Could not fetch an OIDC
-# token".
+# job therefore carries `permissions: contents: read, pull-requests:
+# write, id-token: write`**, every scope a job below declares: the
+# second is what posting a review and the reactions take, and the third
+# the OIDC token the action mints during its own startup, whose absence
+# ends a run before authentication with "Could not fetch an OIDC token".
 #
 # The token the action works with is the `claude` App's installation
 # token, and `additional_permissions` narrows it. At the pinned commit
@@ -218,36 +216,31 @@ name: reusable-claude-review
 # They are the GITHUB_TOKEN's, posted as github-actions[bot]. The App's
 # token is no option: the review step mints it, so it does not exist for
 # the eyes, and the action revokes it as that step ends (`Revoke app
-# token` in its `action.yml`). GitHub's table of what an App's token may
-# call lists the issue reactions endpoints under the "Issues" permission
-# and not under "Pull requests" ("Permissions required for GitHub
-# Apps"), so the reaction jobs hold `issues: write` and nothing else.
+# token` in its `action.yml`). The reaction jobs hold `pull-requests:
+# write` and nothing else, a scope every caller grants for the review
+# already. GitHub's table of what an App's token may call lists the
+# issue reactions endpoints under "Issues" alone ("Permissions required
+# for GitHub Apps"), and on a pull request that is wrong: in run
+# 43598529478 of btclib-org/.github#2271, a token holding `issues: write`
+# and no `pull-requests` was refused the list of the pull request's
+# reactions with "Resource not accessible by integration (HTTP 403)".
 #
-# In jobs of their own, and not as steps of the review job, because that
-# job reads the pull request, which its author writes, and the action
-# hands that job's token to the CLI's environment, as
-# DEFAULT_WORKFLOW_TOKEN among the rest of the step's environment
-# (`base-action/src/parse-sdk-options.ts`). With `issues: write` there, a
-# review steered by a hostile diff could label, edit or close issues, and
-# the `agent` label on an issue starts reusable-claude-implement.yml.
-# That is a step up from `pull-requests: write`, and jobs of their own
-# cost less.
+# `start` is a job of its own because it runs where the review job does
+# not: on a draft, and with the switch off. `outcome` could be the
+# review job's last step, run on `!cancelled()`; it is a job so that
+# both reaction runs are one shell in one shape of job, which the test
+# holds equal.
 #
-# The calling job grants `issues: write` all the same, a called job
-# holding no scope its caller does not grant ("Reusing workflow
-# configurations"). The review job does not get it: its own
-# `permissions:` names no `issues`, and a block that names any scope
-# sets every scope it leaves out to `none` ("Workflow syntax", at
-# `permissions`). A called job's own block is what its token holds
-# within the caller's bound, as section 11's *Tokens, publishing,
-# scanning* measured from the `GITHUB_TOKEN Permissions` group of a
-# job's log. tests/review_reactions_test.py reads that block.
+# A reaction is a display, and the verdict check alone decides the
+# colour. So the shell reports a call that fails as a warning and ends
+# 0, and a reaction job never goes red: that 403 turned both reaction
+# jobs red in run 43598529478.
 #
 # The reaction jobs run the same shell, with the reaction in REACTION,
 # and the test holds them equal. It removes github-actions[bot]'s eyes,
 # `+1`, `-1` and `confused` but the one it keeps, and only then posts
 # that one, so a post that fails, in a run cancelled afterwards, leaves
-# no earlier verdict behind. A removal that fails stops the shell and
+# no earlier verdict behind. A removal that fails ends the shell and
 # leaves the reactions it had not reached, a stale verdict among them.
 # A reaction another workflow posts as github-actions[bot], with one of
 # those, would go too.
@@ -347,7 +340,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
-      issues: write # the reactions on the pull request
+      pull-requests: write # the reactions on the pull request
     steps:
       # no checkout: nothing of the pull request's runs here. The
       # repository and the number reach the shell through the
@@ -362,25 +355,30 @@ jobs:
             ${{ vars.CLAUDE_REVIEW_ENABLED == 'true'
                 && !github.event.pull_request.draft && 'eyes' || '' }}
         run: |
+          # a warning and exit 0 on any failure, for the reason the
+          # header gives
+          warn() {
+            echo "::warning::the reactions were left as they were: $1."
+            exit 0
+          }
           case $REACTION in
             ""|eyes|+1|-1|confused) ;;
-            *)
-              echo "::error::$REACTION is none of this job's reactions."
-              exit 1
-              ;;
+            *) warn "$REACTION is none of this job's reactions" ;;
           esac
           url=repos/$REPO/issues/$NUMBER/reactions
-          listed=$(gh api "$url" --paginate --slurp)
+          listed=$(gh api "$url" --paginate --slurp) || warn "listing them failed"
           ids=$(printf '%s' "$listed" | jq -r --arg keep "$REACTION" '.[][]
             | select(.user.login == "github-actions[bot]")
             | select(.content | IN("eyes", "+1", "-1", "confused"))
             | select(.content != $keep)
-            | .id')
+            | .id') || warn "reading the list failed"
           for id in $ids; do
-            gh api --method DELETE "$url/$id" --silent
+            gh api --method DELETE "$url/$id" --silent \
+              || warn "removing reaction $id failed"
           done
           if [ -n "$REACTION" ]; then
-            gh api --method POST "$url" -f "content=$REACTION" --silent
+            gh api --method POST "$url" -f "content=$REACTION" --silent \
+              || warn "posting $REACTION failed"
           fi
 
   review:
@@ -444,9 +442,7 @@ jobs:
     outputs:
       reaction: ${{ steps.verdict.outputs.reaction }}
     permissions:
-      # restated, a job's permissions replacing the workflow's. No
-      # `issues`, which the caller grants for the reactions: unnamed
-      # here, it is `none`, for the reason the header gives
+      # restated, a job's permissions replacing the workflow's
       contents: read
       # what posting the review takes
       pull-requests: write # posting the review
@@ -1039,7 +1035,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
-      issues: write # the reactions on the pull request
+      pull-requests: write # the reactions on the pull request
     steps:
       # the same shell as `start`, with the reaction the verdict check
       # wrote, `confused` where it wrote none
@@ -1050,25 +1046,30 @@ jobs:
           NUMBER: ${{ github.event.pull_request.number }}
           REACTION: ${{ needs.review.outputs.reaction || 'confused' }}
         run: |
+          # a warning and exit 0 on any failure, for the reason the
+          # header gives
+          warn() {
+            echo "::warning::the reactions were left as they were: $1."
+            exit 0
+          }
           case $REACTION in
             ""|eyes|+1|-1|confused) ;;
-            *)
-              echo "::error::$REACTION is none of this job's reactions."
-              exit 1
-              ;;
+            *) warn "$REACTION is none of this job's reactions" ;;
           esac
           url=repos/$REPO/issues/$NUMBER/reactions
-          listed=$(gh api "$url" --paginate --slurp)
+          listed=$(gh api "$url" --paginate --slurp) || warn "listing them failed"
           ids=$(printf '%s' "$listed" | jq -r --arg keep "$REACTION" '.[][]
             | select(.user.login == "github-actions[bot]")
             | select(.content | IN("eyes", "+1", "-1", "confused"))
             | select(.content != $keep)
-            | .id')
+            | .id') || warn "reading the list failed"
           for id in $ids; do
-            gh api --method DELETE "$url/$id" --silent
+            gh api --method DELETE "$url/$id" --silent \
+              || warn "removing reaction $id failed"
           done
           if [ -n "$REACTION" ]; then
-            gh api --method POST "$url" -f "content=$REACTION" --silent
+            gh api --method POST "$url" -f "content=$REACTION" --silent \
+              || warn "posting $REACTION failed"
           fi
 
   mention:

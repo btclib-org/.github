@@ -12,7 +12,8 @@ with the calls is not asked: no test reaches GitHub
 (btclib-org/.github#2267).
 
 The jobs' permissions are read as the workflow's header gives them: the
-review job holds no `issues` scope although the caller grants one.
+reaction jobs hold `pull-requests: write` alone, which the caller grants
+for the review already, so a caller needs no new scope.
 """
 
 from __future__ import annotations
@@ -36,8 +37,9 @@ WORKFLOW = ROOT / ".github/workflows/reusable-claude-review.yml"
 # the caller in this tree, whose calling job grants the scopes
 CALLER = ROOT / ".github/workflows/claude-review.yml"
 
-# the exit status of the shell for a reaction it refuses
-REFUSED = 1
+# the warning the shell ends on, with status 0, where it leaves the
+# reactions as they were
+WARNING = "::warning::the reactions were left as they were: "
 
 # the identity the job's GITHUB_TOKEN posts as
 ACTIONS = "github-actions[bot]"
@@ -64,8 +66,8 @@ OTHER = "fedcba9876543210fedcba9876543210fedcba98"
 # separated by the unit separator. It answers a GET of the reactions or
 # the reviews with the file the test wrote for it, and a POST or a DELETE
 # by editing the reactions file, as the API does, a POST of a reaction
-# already there adding nothing; or by failing where FAIL_POST or
-# FAIL_DELETE is set
+# already there adding nothing; or by failing where FAIL_LIST, FAIL_POST
+# or FAIL_DELETE is set
 STAND_IN = """#!/bin/sh
 for arg in "$@"; do printf '%s\\037' "$arg"; done >> "$CALLS"
 printf '\\n' >> "$CALLS"
@@ -81,7 +83,7 @@ case "$*" in
     [ -z "$FAIL_DELETE" ] || exit 1
     edit --argjson id "${4##*/}" 'map(map(select(.id != $id)))'
     ;;
-  *"/reactions --paginate --slurp") cat "$REACTIONS" ;;
+  *"/reactions --paginate --slurp") [ -z "$FAIL_LIST" ] || exit 1; cat "$REACTIONS" ;;
   *"/reviews --paginate --slurp") cat "$REVIEWS" ;;
   *) exit 9 ;;
 esac
@@ -292,20 +294,40 @@ def test_a_failed_post_leaves_no_earlier_verdict(stand: Stand) -> None:
     """
     stand.answer(reactions=[reaction(ACTIONS, "+1", 1), reaction(ACTIONS, "eyes", 2)])
     done = stand.run(only_step("start")["run"], REACTION="eyes", FAIL_POST="1")
-    assert done.returncode != 0
+    assert done.returncode == 0, done.stderr
+    assert done.stdout == f"{WARNING}posting eyes failed.\n"
     assert stand.recorded()[-1][:4] == POST[:4]
     assert stand.left() == [(ACTIONS, "eyes")]
 
 
-def test_a_failed_removal_stops_the_shell(stand: Stand) -> None:
+def test_a_failed_removal_ends_the_shell(stand: Stand) -> None:
     """The limit the header states: a stale reaction stays, nothing is posted.
 
     :param stand: the stand-in.
     """
     stand.answer(reactions=[reaction(ACTIONS, "+1", 1)])
     done = stand.run(only_step("outcome")["run"], REACTION="-1", FAIL_DELETE="1")
-    assert done.returncode != 0
+    assert done.returncode == 0, done.stderr
+    assert done.stdout == f"{WARNING}removing reaction 1 failed.\n"
     assert stand.recorded() == [GET, delete(1)]
+    assert stand.left() == [(ACTIONS, "+1")]
+
+
+@pytest.mark.parametrize("job", ["start", "outcome"])
+def test_a_refused_list_is_a_warning_and_not_a_red_job(stand: Stand, job: str) -> None:
+    """What run 43598529478 met: the API refused the list, with HTTP 403.
+
+    The shell ends 0 so that the job is green, leaving the verdict check
+    the only thing that decides the colour.
+
+    :param stand: the stand-in.
+    :param job: the reaction job.
+    """
+    stand.answer(reactions=[reaction(ACTIONS, "+1", 1)])
+    done = stand.run(only_step(job)["run"], REACTION="confused", FAIL_LIST="1")
+    assert done.returncode == 0, done.stderr
+    assert done.stdout == f"{WARNING}listing them failed.\n"
+    assert stand.recorded() == [GET]
     assert stand.left() == [(ACTIONS, "+1")]
 
 
@@ -334,14 +356,14 @@ def test_it_reads_every_page(stand: Stand) -> None:
 def test_it_refuses_anything_else_and_does_not_call_gh(
     stand: Stand, content: str
 ) -> None:
-    """Anything but one of the jobs' reactions is refused, `gh` unrun.
+    """Anything but one of the jobs' reactions is a warning, `gh` unrun.
 
     :param stand: the stand-in.
     :param content: the reaction asked for.
     """
     done = stand.run(only_step("start")["run"], REACTION=content)
-    assert done.returncode == REFUSED, (done.returncode, done.stderr)
-    assert done.stdout.startswith("::error::")
+    assert done.returncode == 0, done.stderr
+    assert done.stdout.startswith(WARNING)
     assert not stand.recorded()
 
 
@@ -491,14 +513,14 @@ def test_the_outcome_follows_both_whatever_the_review_s_result() -> None:
 
 
 @pytest.mark.parametrize("job", ["start", "outcome"])
-def test_a_reaction_job_holds_issues_write_and_runs_nothing_of_the_head(
+def test_a_reaction_job_holds_pull_requests_write_and_runs_nothing_of_the_head(
     job: str,
 ) -> None:
-    """No checkout, no action, and no scope but `issues: write`.
+    """No checkout, no action, and no scope but `pull-requests: write`.
 
     :param job: the job's id.
     """
-    assert jobs(WORKFLOW)[job]["permissions"] == {"issues": "write"}
+    assert jobs(WORKFLOW)[job]["permissions"] == {"pull-requests": "write"}
     assert all("uses" not in step for step in jobs(WORKFLOW)[job]["steps"])
 
 
@@ -516,25 +538,6 @@ def calling_grant() -> dict[str, str]:
     return granted
 
 
-def effective(job: str) -> dict[str, str]:
-    """Work out what a callee job's token holds, as the header says.
-
-    A job's own block names what it holds within the caller's grant, and
-    every scope it leaves out is `none`.
-
-    :param job: the callee job's id.
-    :returns: each scope the token holds against its level.
-    """
-    granted = calling_grant()
-    declared: dict[str, str] = jobs(WORKFLOW)[job]["permissions"]
-    order = ["none", "read", "write"]
-    return {
-        scope: min(level, granted.get(scope, "none"), key=order.index)
-        for scope, level in declared.items()
-        if min(level, granted.get(scope, "none"), key=order.index) != "none"
-    }
-
-
 def test_the_caller_grants_every_scope_the_callee_declares() -> None:
     """A scope the calling job leaves off ends the run as `startup_failure`.
 
@@ -546,13 +549,14 @@ def test_the_caller_grants_every_scope_the_callee_declares() -> None:
             assert granted.get(scope) in {level, "write"}, scope
 
 
-def test_the_review_s_token_holds_no_issues_scope() -> None:
-    """The caller grants `issues: write`, and the review job drops it.
+def test_the_caller_grants_what_it_granted_before_the_reactions() -> None:
+    """No tree's calling job needs a new scope for the reactions.
 
-    The header says why the job that reads the pull request must not hold
-    it. The mention job, which reads a comment, drops it too.
+    Every caller of the organization grants these three for the review,
+    so the reactions arrive with a tree's pin and nothing else.
     """
-    assert calling_grant()["issues"] == "write"
-    for job in ("review", "mention"):
-        assert "issues" not in effective(job), job
-    assert effective("start") == {"issues": "write"}
+    assert calling_grant() == {
+        "contents": "read",
+        "pull-requests": "write",
+        "id-token": "write",
+    }
