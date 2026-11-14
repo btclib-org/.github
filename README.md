@@ -2251,18 +2251,24 @@ finding answered with a `# noqa`: `# sourcery skip: <rule>` on the line Sourcery
 reports or on the `def` line of the function holding it, in the form section 4's
 `bare-sourcery-skip` admits, with its reason in a comment beside it.
 
-**Before each push, a branch is read in a scratch clone of the checkout**, by
-the command `reusable-sourcery.yml` runs, on the files that job would read on
-the pull request. The clone's `origin` is set to the public repository, since
-Sourcery refuses a clone whose `origin` is a local path, and `main` is fetched
-from it, since the clone's `origin/main` is otherwise the checkout's local
-`main`, which can be stale. The branch's head is checked out detached:
+**A branch can be read before it is pushed, in a scratch clone of the
+checkout.** The clone's `origin` is set to the public repository, since Sourcery
+refuses a clone whose `origin` is a local path. The pull request's base branch
+is fetched from it, since the clone's `origin/<base>` is otherwise the
+checkout's local branch, which can be stale. `<files>` is what the diff lists,
+or `.` where the job reads the whole tree; where the list is empty and the job
+does not read the whole tree, Sourcery is not run. `<python>` and `<version>`
+are what `reusable-sourcery.yml` pins:
 
 ```shell
 git clone --no-checkout <checkout> <clone>
 git -C <clone> remote set-url origin https://github.com/btclib-org/<repo>
-git -C <clone> fetch origin main
+git -C <clone> fetch origin <base>
 git -C <clone> checkout --detach <head>
+git -C <clone> diff --name-only --no-renames --diff-filter=d \
+  origin/<base>... -- '*.py'
+uvx --directory <clone> --python <python> --from sourcery==<version> \
+  sourcery review --check -- <files>
 ```
 
 **`sourcery` is a required check in a tree whose caller is in place and that no
