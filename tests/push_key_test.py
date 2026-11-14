@@ -35,7 +35,9 @@ is parsed.
 MAIN = "main"
 """The branch whose pushes section 10 keys on their commit."""
 
-PUSH_TERM = "github.event_name == 'push' && github.sha || "
+PUSH_TERM = (
+    "github.event_name == 'push' && format('{0}-{1}', github.sha, github.ref) || "
+)
 """The term section 10's key opens with, and a publishing workflow drops."""
 
 SUFFIX = "${{ inputs.concurrency-suffix }}"
@@ -212,7 +214,8 @@ def keyed_as_asked(workflow: Path, wanted: str) -> bool:
     declares it: without it, a tag push's release call would share the
     group of main's push run on that commit, and cancel it. No key is
     the commit alone: a dispatch on `main` at that commit would share
-    the push run's group, and cancel it. The group opens with the name
+    the push run's group, and cancel it, and so would a tag pushed at it
+    where the trigger takes tags. The group opens with the name
     `named_for_its_file` asks.
 
     :param workflow: the file to read.
@@ -272,6 +275,7 @@ def test_a_push_run_on_main_is_keyed_on_its_commit(
         ("on:\n  push:\n", True),
         ("on:\n  push:\n    branches: [main]\n", True),
         ("on:\n  push:\n    branches: main\n", True),
+        ("on:\n  push:\n    branches: [main]\n    tags: ['v*']\n", True),
         ("on:\n  push:\n    branches: ['**']\n", True),
         ("on:\n  push:\n    branches: ['**', '!main']\n", False),
         ("on:\n  push:\n    branches: [release]\n", False),
@@ -289,6 +293,7 @@ def test_a_push_run_on_main_is_keyed_on_its_commit(
         "a mapping with no filter",
         "main listed",
         "main as one string",
+        "main and tags",
         "every branch",
         "every branch but main",
         "another branch",
@@ -316,12 +321,14 @@ def test_a_push_to_main_is_read_as_github_reads_the_trigger(
 
 
 KEY = (
-    "  group: >-\n    {name}-${{{{ github.event_name == 'push' && github.sha\n"
+    "  group: >-\n    {name}-${{{{ github.event_name == 'push'\n"
+    "    && format('{{0}}-{{1}}', github.sha, github.ref)\n"
     "    || github.event.pull_request.number || github.ref }}}}{tail}\n"
 )
 """Section 10's block as a tree writes it, the name and suffix filled."""
 
 PUSHED = "  push:\n    branches: [main]\n"
+TAGGED = PUSHED + "    tags: ['v*']\n"
 REVIEWED = PUSHED + "  pull_request:\n"
 DISPATCHED = "  workflow_dispatch:\n"
 CALLED = (
@@ -332,7 +339,8 @@ PER_REF = "${{ github.event.pull_request.number || github.ref }}"
 STEM = re.compile(r"([A-Za-z0-9_.]+)-\$\{\{")
 """The name a written group opens with, which `written` names the file for."""
 KEY_LINE = (
-    "${{ github.event_name == 'push' && github.sha"
+    "${{ github.event_name == 'push'"
+    " && format('{0}-{1}', github.sha, github.ref)"
     " || github.event.pull_request.number || github.ref }}"
 )
 """Section 10's key on one line, with no name before it."""
@@ -376,10 +384,7 @@ def line(key: str) -> str:
         (REVIEWED, KEY.format(name="test", tail=SUFFIX), "", False),
         (
             REVIEWED,
-            line(
-                "lint-${{ github.event_name == 'push' && github.sha"
-                " || github.event.pull_request.number || github.ref }}"
-            ),
+            line(f"lint-{KEY_LINE}"),
             "",
             True,
         ),
@@ -387,7 +392,18 @@ def line(key: str) -> str:
             REVIEWED,
             line(
                 "lint-${{ github.event.pull_request.number"
-                " || github.event_name == 'push' && github.sha || github.ref }}"
+                " || github.event_name == 'push'"
+                " && format('{0}-{1}', github.sha, github.ref) || github.ref }}"
+            ),
+            "",
+            False,
+        ),
+        (TAGGED, KEY.format(name="lint", tail=""), "", True),
+        (
+            TAGGED,
+            line(
+                "lint-${{ github.event_name == 'push' && github.sha"
+                " || github.event.pull_request.number || github.ref }}"
             ),
             "",
             False,
@@ -447,6 +463,8 @@ def line(key: str) -> str:
         "a suffix never declared",
         "the key on one line",
         "the terms swapped",
+        "the key, beside tags",
+        "the commit with no ref, beside tags",
         "the per-ref key",
         "the commit alone, push only",
         "the commit alone, beside a dispatch",

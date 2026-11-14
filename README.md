@@ -2102,24 +2102,29 @@ without adding to it is deleted.
   `${{ inputs.concurrency-suffix }}` (btclib-org/.github#1083). The key is the
   pull request's own number and not `github.head_ref` (btclib-org/btclib#1158);
   a run with no pull request falls back to `ref`, except a push run, which the
-  bullet below keys on its commit.
-- **A workflow with a `push` trigger on `main` keys a push run on its
-  commit**, so each push to `main` that starts a run gets a run and a report of
-  its own, while a new push to a pull request's branch still cancels the run
-  before it:
+  bullet below keys on its commit and its ref.
+- **A workflow with a `push` trigger on `main` keys a push run on its commit
+  and its ref**, so each push to `main` that starts a run gets a run and a
+  report of its own, while a new push to a pull request's branch still cancels
+  the run before it:
 
   ```yaml
   concurrency:
     group: >-
-      test-${{ github.event_name == 'push' && github.sha
+      test-${{ github.event_name == 'push'
+      && format('{0}-{1}', github.sha, github.ref)
       || github.event.pull_request.number || github.ref }}
     cancel-in-progress: true
   ```
 
-  The commit alone is rejected as a key: a dispatch on `main` at that commit
-  would share the push run's group and cancel it. One group per ref is
-  rejected too: GitHub keeps one pending run per group and cancels it for the
-  next, and refuses `queue: max` beside `cancel-in-progress: true`
+  The commit alone is rejected as a key: a dispatch on `main` at that commit,
+  or a tag pushed at it, would share the push run's group and cancel it. The
+  commit comes first, so no run of another event shares the key: its key is a
+  pull request's number or a full ref, which opens with `refs/`
+  ([*Contexts reference*](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts)).
+  One group per ref is rejected too: GitHub keeps one pending run per group and
+  cancels it for the next, and refuses `queue: max` beside
+  `cancel-in-progress: true`
   ([*Control the concurrency of workflows and jobs*](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)).
   A workflow granting `id-token: write`, `write-all` included, to deploy or to
   publish a score keeps a key per ref: the key above without its first term,
