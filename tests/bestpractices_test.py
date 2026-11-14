@@ -184,11 +184,14 @@ def test_stale_lists_what_is_older_than_the_release(script: ModuleType) -> None:
         "b_justification": "In the next release; the Draft says so.",
         "c_justification": "v2026.10.4 and v2026.11.1, until 2027-09-30.",
         "d_justification": "2026.9.30 without its v, Python 3.10.",
-        "e_status": "Met",
+        "e_justification": "On every pull request that is Not a Draft.",
+        "f_justification": "BIP340 and draft BIP445, on what is not a draft.",
+        "g_status": "Met",
     }
     assert script.stale(given, "v2026.10.4", "2026-10-03T22:09:48Z") == [
         "a: v2026.9.30, 2026-10-01",
         "b: next release, draft",
+        "f: draft",
     ]
 
 
