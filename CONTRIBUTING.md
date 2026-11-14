@@ -225,8 +225,8 @@ gh pr merge <n> --squash --match-head-commit <the head the checks ran on>
 ```
 
 Whoever approved it runs that merge, or a session on the maintainer's
-word. Nobody arms auto-merge, for the reason [section 11's *Merge
-method*][s11] gives.
+word. Auto-merge is off, so no pull request can be armed, for the reason
+[section 11's *Merge method*][s11] gives.
 
 **Where the repository has a bypass, the maintainer may land without
 that approval, through it**: [`GOVERNANCE.md`][governance]'s *How a

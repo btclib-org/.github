@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import ORG, by_hand, gh, gh_json
+from . import ORG, by_hand, gh_json
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -401,9 +401,10 @@ def test_squash_is_the_only_button(settings: dict[str, dict[str, Any]]) -> None:
 
     A merge commit is refused by linear history already; rebase is the
     one deliberately removed, since it replays a branch's review steps
-    onto `main`.
+    onto `main`. Auto-merge is off, so no pull request can be armed, for
+    the reason section 11's *Merge method* gives.
 
-    Unlike everything else here, these four fields are not public: the
+    Unlike everything else here, these fields are not public: the
     repository endpoint omits them for a token without push access, so
     this is the one question a run needs a credential to ask. Skipped
     rather than passed where it cannot be asked -- a token that answers
@@ -418,6 +419,7 @@ def test_squash_is_the_only_button(settings: dict[str, dict[str, Any]]) -> None:
         "allow_squash_merge": True,
         "allow_merge_commit": False,
         "allow_rebase_merge": False,
+        "allow_auto_merge": False,
         "delete_branch_on_merge": True,
     }
     wrong: dict[str, dict[str, bool]] = {}
@@ -434,23 +436,8 @@ def test_squash_is_the_only_button(settings: dict[str, dict[str, Any]]) -> None:
     if unseen:
         pytest.skip(
             f"this run's token cannot see the merge method on {unseen}:"
-            " those four fields need push access to read"
+            " those fields need push access to read"
         )
-
-
-def test_no_pull_request_is_armed(repository: str) -> None:
-    """Section 11's *Merge method*: nobody arms auto-merge.
-
-    `auto_merge` is a public field of a pull request, so unlike the merge
-    method above no token needs push access to read it.
-
-    :param repository: the repository asked about.
-    """
-    endpoint = f"repos/{ORG}/{repository}/pulls?state=open&per_page=100"
-    armed = gh(endpoint, ".[] | select(.auto_merge) | .number")
-    disarm = f"gh pr merge <n> --repo {ORG}/{repository} --disable-auto"
-    command = by_hand(repository, f"gh api '{endpoint}' --jq '.[].auto_merge'")
-    assert not armed, f"armed: {armed}; disarm with `{disarm}`; {command}"
 
 
 def test_the_workflow_token_is_read(repository: str) -> None:
