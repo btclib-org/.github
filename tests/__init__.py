@@ -445,6 +445,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("seed-scan",),
     ),
     (
+        2275,
+        "test_a_test_module_defining_no_test_is_a_body_its_node_modules_call",
+        ("btclib-wallet", "functional-tests"),
+    ),
+    (
         2277,
         "test_a_push_run_on_main_is_keyed_on_its_commit",
         (
