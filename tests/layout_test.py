@@ -259,8 +259,9 @@ def test_a_test_module_defining_no_test_is_a_body_its_node_modules_call(
         "| grep -vE '^tests/(.*/)?_data/'); do "
         'grep -qE \'^(async )?def test|^class Test\' "$f" || echo "$f"; done. '
         "Of those, a module is admitted that defines a test inside an if, try "
-        "or with block or subclasses TestCase, and so is a body that two "
-        "<file>_<node>_test.py of its own directory call from a test."
+        "or with block or subclasses TestCase, and so is a body whose function "
+        "two <file>_<node>_test.py of its own directory import by name and call "
+        "from a test."
     )
 
 
@@ -475,6 +476,21 @@ def test_a_helper_other_tests_import_is_refused(tmp_path: Path) -> None:
             "try:\n    def test_t():\n        assert True\n"
             "except* ImportError:\n    pass\n",
             id="function in a try with except*",
+        ),
+        pytest.param(
+            "try:\n    pass\nexcept* ImportError:\n    pass\n"
+            "else:\n    def test_t():\n        assert True\n",
+            id="function in a try-except*'s else",
+        ),
+        pytest.param(
+            "try:\n    pass\nexcept* ImportError:\n    pass\n"
+            "finally:\n    def test_t():\n        assert True\n",
+            id="function in a try-except*'s finally",
+        ),
+        pytest.param(
+            "try:\n    pass\nexcept* ImportError:\n"
+            "    def test_t():\n        assert True\n",
+            id="function in an except* handler",
         ),
         pytest.param(
             "try:\n    pass\nexcept ImportError:\n"
