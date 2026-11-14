@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from . import Tier, by_hand
+from . import ORG, Tier, by_hand
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -89,7 +89,9 @@ BLOCKS: dict[type[ast.stmt], tuple[str, ...]] = {
     ast.TryStar: ("body", "orelse", "finalbody"),
     ast.With: ("body",),
 }
-"""The blocks whose statements run when the module is imported."""
+"""The blocks `module_level` walks into, each with its fields of statements.
+
+A `for`, `while` or `match` body also runs on import, and is not read."""
 
 
 def module_level(body: list[ast.stmt]) -> Iterator[ast.stmt]:
@@ -251,13 +253,14 @@ def test_a_test_module_defining_no_test_is_a_body_its_node_modules_call(
     wrong = bodiless(root)
     assert not wrong, (
         f"modules under tests/ that define no test and that no two "
-        f"<file>_<node>_test.py call: {wrong}; "
-        + by_hand(
-            repository,
-            "for f in $(git ls-files 'tests/**_test.py'); do "
-            'grep -qE \'^(async )?def test|^class Test\' "$f" || echo "$f"; '
-            "done",
-        )
+        f"<file>_<node>_test.py call: {wrong}. The candidates, listed in a "
+        f"checkout of {ORG}/{repository}: "
+        "for f in $(git ls-files 'tests/**_test.py' "
+        "| grep -vE '^tests/(.*/)?_data/'); do "
+        'grep -qE \'^(async )?def test|^class Test\' "$f" || echo "$f"; done. '
+        "Of those, a module is admitted that defines a test inside an if, try "
+        "or with block or subclasses TestCase, and so is a body that two "
+        "<file>_<node>_test.py of its own directory call from a test."
     )
 
 
@@ -444,6 +447,34 @@ def test_a_helper_other_tests_import_is_refused(tmp_path: Path) -> None:
         pytest.param(
             "import sys\nif sys:\n    def test_d():\n        assert True\n",
             id="function under an if",
+        ),
+        pytest.param(
+            "import sys\nif not sys:\n    pass\nelse:\n"
+            "    def test_d():\n        assert True\n",
+            id="function in an else",
+        ),
+        pytest.param(
+            "with open(__file__):\n    def test_w():\n        assert True\n",
+            id="function under a with",
+        ),
+        pytest.param(
+            "try:\n    def test_t():\n        assert True\n"
+            "except ImportError:\n    pass\n",
+            id="function in a try",
+        ),
+        pytest.param(
+            "try:\n    pass\nexcept ImportError:\n    pass\n"
+            "else:\n    def test_t():\n        assert True\n",
+            id="function in a try's else",
+        ),
+        pytest.param(
+            "try:\n    pass\nfinally:\n    def test_t():\n        assert True\n",
+            id="function in a finally",
+        ),
+        pytest.param(
+            "try:\n    def test_t():\n        assert True\n"
+            "except* ImportError:\n    pass\n",
+            id="function in a try with except*",
         ),
         pytest.param(
             "try:\n    pass\nexcept ImportError:\n"
