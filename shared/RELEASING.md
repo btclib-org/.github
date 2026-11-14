@@ -493,15 +493,34 @@ request, next to `deps-latest`'s own result.
    ```
 
    While a pull request carries the label, nobody merges another pull
-   request into `main` here. A red `main`'s repair is the exception: it
-   goes first, as `CONTRIBUTING.md`'s *Landing it* says. A release pull
-   request waits only while a lower-numbered pull request carries the
-   label, so that releases go out oldest first instead of each waiting on
-   the others.
+   request into `main` here, nor arms one for auto-merge. A red `main`'s
+   repair is the exception: it goes first, as `CONTRIBUTING.md`'s
+   *Landing it* says. A release pull request waits only while a
+   lower-numbered pull request carries the label, so that releases go out
+   oldest first instead of each waiting on the others.
 
-   A pull request can merge between the version step and the label. So
-   once the label is on, fetch, and check that `origin/main` is still the
-   branch's base:
+   A pull request armed for auto-merge lands once its approval and its
+   checks are in, whatever the label says. So right after the label, list
+   the armed pull requests here, each with whoever armed it:
+
+   ```shell
+   gh pr list --limit 200 --json number,autoMergeRequest --jq '.[]
+     | select(.autoMergeRequest)
+     | "\(.number) \(.autoMergeRequest.enabledBy.login)"'
+   ```
+
+   Disarm each, and comment on it that it waits for this release:
+
+   ```shell
+   gh pr merge <n> --disable-auto
+   ```
+
+   Whoever armed it merges it once the label is off, as
+   `CONTRIBUTING.md`'s *Landing it* says.
+
+   A pull request can merge between the version step and the disarm. So
+   once the label is on and nothing is armed, fetch, and check that
+   `origin/main` is still the branch's base:
 
    ```shell
    git fetch origin
@@ -515,6 +534,11 @@ request, next to `deps-latest`'s own result.
    moved, and the branch is redone on it as the version step says, before
    the gates. Any other non-zero exit, of either command, is an error to
    read, not an answer.
+
+   An older release or a red `main`'s repair can still move `main` during
+   the hold. So both commands run again just before the merge, and where
+   `main` has moved, the branch is redone as the version step says, which
+   gates it again.
 
    Remove the label once `release.yml`'s run on the tag has published the
    release, or once the release is abandoned and its pull request closed:

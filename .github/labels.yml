@@ -69,7 +69,8 @@ labels:
   - name: api-break
     color: "e99695"
     description: Breaks the public API; set by a job, advisory
-    # the trees with a release.yml, whose RELEASING.md section 14 copies
+    # the trees with a release.yml, whose RELEASING.md section 14 copies:
+    # tier 1, as the loop in README section 2 lists it
     repositories: &publishing
       - btclib
       - btclib-secp256k1
