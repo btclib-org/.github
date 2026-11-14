@@ -296,10 +296,10 @@ this heading.
 
 ### The environment and the gates
 
-uv is the only thing that has to be installed; it fetches interpreters
-and tools itself. There is a project here, and nothing installs it:
-`package = false`, its Python being one test suite and the local hooks
-under `.github/scripts/`.
+uv is the one thing to install beyond the commands the next paragraphs
+name; it fetches interpreters and tools itself. There is a project here,
+and nothing installs it: `package = false`, its Python being one test
+suite and the local hooks under `.github/scripts/`.
 
 `gh` and `git` are prerequisites too, and neither is a wheel: both are
 on every GitHub-hosted runner already, and the suite shells out to them
