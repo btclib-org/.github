@@ -225,8 +225,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    version = args.tag.removeprefix("v")
-    if version:
+    if version := args.tag.removeprefix("v"):
         return wait(
             args.package, version, args.timeout, args.interval, args.request_timeout
         )
