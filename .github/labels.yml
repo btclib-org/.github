@@ -96,6 +96,8 @@ dependabot:
   - dependencies
   - docker
   - github_actions
+  - go
   - python
   - python:uv
+  - ruby
   - submodules
