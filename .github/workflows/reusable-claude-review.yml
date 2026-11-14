@@ -13,11 +13,13 @@ name: reusable-claude-review
 # that gated a merge would make a model's judgement a branch rule.
 # Section 11's *Review* is where what CLAUDE_REVIEW_ENABLED does is
 # stated rather than here a second time; it is an organization variable,
-# and both jobs below read it.
+# and the review, the mention and the eyes read it. Where it is off,
+# `start` still clears a new head's reactions, for the reason given at
+# the reactions below.
 #
-# A calling job reaches both jobs below, and each declines the events
-# that are not its own -- the review answers a pull_request, the mention
-# a comment carrying @claude. So the calling job carries no `if:` of the
+# A calling job reaches every job below, and each declines the events
+# that are not its own -- the review and its reactions answer a
+# pull_request, the mention a comment carrying @claude. So the calling job carries no `if:` of the
 # review's: a caller that lifts the old job's condition onto it takes
 # the mention out with it.
 #
@@ -104,11 +106,13 @@ name: reusable-claude-review
 # as a `startup_failure`, rather than going red on a step -- section 11
 # of this repository's own README.md is that sentence and
 # btclib-org/.github#912 the measurement under it. **A caller's calling
-# job therefore carries `permissions: contents: read, pull-requests:
-# write, id-token: write`**, which is what both jobs below declare: the
-# second is what posting a review takes, and the third the OIDC token
-# the action mints during its own startup, whose absence ends a run
-# before authentication with "Could not fetch an OIDC token".
+# job therefore carries `permissions: contents: read, issues: write,
+# pull-requests: write, id-token: write`**, every scope a job below
+# declares: `issues: write` is what the reactions take,
+# `pull-requests: write` what posting a review takes, and `id-token:
+# write` the OIDC token the action mints during its own startup, whose
+# absence ends a run before authentication with "Could not fetch an OIDC
+# token".
 #
 # The token the action works with is the `claude` App's installation
 # token, and `additional_permissions` narrows it. At the pinned commit
@@ -172,9 +176,9 @@ name: reusable-claude-review
 # credentials, so on a pull request the action replaces both with the
 # base branch's before the CLI starts (`restoreConfigFromBase` in its
 # `src/github/operations/restore-config.ts`). `--setting-sources user`
-# is a second bound behind that one, on both jobs: the CLI then loads
-# no project source at all, the base branch's included, where the
-# action loads every source otherwise
+# is a second bound behind that one, on the review and the mention: the
+# CLI then loads no project source at all, the base branch's included,
+# where the action loads every source otherwise
 # (`base-action/src/parse-sdk-options.ts`). Measured on
 # btclib-org/.github#1659, with v1.0.239 and the Claude Code 2.1.287 it
 # installs: a `.claude/settings.json` and a `.mcp.json` the pull
@@ -189,7 +193,77 @@ name: reusable-claude-review
 # did not pass it -- `secrets: inherit` on the calling job, or this one
 # named there. It is declared required, so a caller that passes nothing
 # is refused rather than reviewing with an empty credential; the guard
-# step inside each job is what still catches an emptied secret.
+# step inside the review and the mention is what still catches an
+# emptied secret.
+#
+# The review shows its state on the pull request in reactions, which
+# separate jobs post rather than the model (btclib-org/.github#2267):
+# `start` puts the eyes on while the review runs, and `outcome` replaces
+# them with one reaction once it has ended. The verdict check writes
+# which one, and the review job passes it out: `+1` for an ack of the
+# head, `-1` for `CHANGES REQUESTED` or `NACK` naming the head, and
+# `confused` for anything else -- a `NO VERDICT`, no verdict, a verdict
+# naming another sha, or a review that never ran, which skips the check
+# and leaves the output empty. So the reaction says what the check's
+# colour says, and tells a refusal from a review that judged nothing.
+#
+# A reaction belongs to a head, as a verdict does, so `start` runs on
+# every push, and on every other event of a pull request but its
+# closing, whether or not the review runs. It removes the reactions an
+# earlier run left before anything else, and puts the eyes on only
+# where the review job runs. A `+1` left on a head the review never read
+# -- a draft, or a run while the switch is off -- would otherwise pass
+# for an ack of it.
+#
+# They are the GITHUB_TOKEN's, posted as github-actions[bot]. The App's
+# token is no option: the review step mints it, so it does not exist for
+# the eyes, and the action revokes it as that step ends (`Revoke app
+# token` in its `action.yml`). GitHub's table of what an App's token may
+# call lists the issue reactions endpoints under the "Issues" permission
+# and not under "Pull requests" ("Permissions required for GitHub
+# Apps"), so the reaction jobs hold `issues: write` and nothing else.
+#
+# In jobs of their own, and not as steps of the review job, because that
+# job reads the pull request, which its author writes, and the action
+# hands that job's token to the CLI's environment, as
+# DEFAULT_WORKFLOW_TOKEN among the rest of the step's environment
+# (`base-action/src/parse-sdk-options.ts`). With `issues: write` there, a
+# review steered by a hostile diff could label, edit or close issues, and
+# the `agent` label on an issue starts reusable-claude-implement.yml.
+# That is a step up from `pull-requests: write`, and jobs of their own
+# cost less.
+#
+# The calling job grants `issues: write` all the same, a called job
+# holding no scope its caller does not grant ("Reusing workflow
+# configurations"). The review job does not get it: its own
+# `permissions:` names no `issues`, and a block that names any scope
+# sets every scope it leaves out to `none` ("Workflow syntax", at
+# `permissions`). A called job's own block is what its token holds
+# within the caller's bound, as section 11's *Tokens, publishing,
+# scanning* measured from the `GITHUB_TOKEN Permissions` group of a
+# job's log. tests/review_reactions_test.py reads that block.
+#
+# The reaction jobs run the same shell, with the reaction in REACTION,
+# and the test holds them equal. It removes github-actions[bot]'s eyes,
+# `+1`, `-1` and `confused` but the one it keeps, and only then posts
+# that one, so a post that fails, in a run cancelled afterwards, leaves
+# no earlier verdict behind. A removal that fails stops the shell and
+# leaves the reactions it had not reached, a stale verdict among them.
+# A reaction another workflow posts as github-actions[bot], with one of
+# those, would go too.
+#
+# The review job does not wait for `start`. `outcome` needs `start` and
+# the review job, so a run's eyes are on before its outcome replaces
+# them. It runs unless the run is cancelled, whatever the review job's
+# result, and is skipped where the review job was. Whether it runs after
+# a review job past its own `timeout-minutes`, which ends that job
+# cancelled, is not measured.
+#
+# A run the concurrency group cancels skips `outcome` and keeps its eyes.
+# The group runs one run at a time, the next waiting until the cancelled
+# one has ended (GitHub's "Control workflow concurrency"), so the next
+# run's `start` removes them. Where that next run closes the pull
+# request, `start` does not run and the eyes stay.
 #
 # Divergences resolved rather than carried forward.
 #
@@ -249,8 +323,8 @@ on:
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN:
         description: >
-          The Anthropic credential both jobs run under, btclib-org's
-          organization secret of that name.
+          The Anthropic credential the review and the mention run
+          under, btclib-org's organization secret of that name.
         required: true
 
 # least privilege for the GITHUB_TOKEN at the workflow level, elevated
@@ -259,6 +333,56 @@ permissions:
   contents: read
 
 jobs:
+  start:
+    name: Claude review clears the head's reactions
+    # the reactions' first job, for the reasons the header gives. Its
+    # `if:` is the review job's less the switch and the draft check,
+    # which decide only whether the eyes go on: a push the review never
+    # reads still clears the reactions the last head got
+    if: >-
+      ${{ github.event_name == 'pull_request'
+          && github.event.action != 'closed'
+          && github.event.pull_request.head.repo.full_name
+             == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write # the reactions on the pull request
+    steps:
+      # no checkout: nothing of the pull request's runs here. The
+      # repository and the number reach the shell through the
+      # environment, and REACTION is a word this file writes: the eyes
+      # where the review job runs, and nothing where it does not
+      - name: Clear the reactions, and put the eyes on where a review runs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          REACTION: >-
+            ${{ vars.CLAUDE_REVIEW_ENABLED == 'true'
+                && !github.event.pull_request.draft && 'eyes' || '' }}
+        run: |
+          case $REACTION in
+            ""|eyes|+1|-1|confused) ;;
+            *)
+              echo "::error::$REACTION is none of this job's reactions."
+              exit 1
+              ;;
+          esac
+          url=repos/$REPO/issues/$NUMBER/reactions
+          listed=$(gh api "$url" --paginate --slurp)
+          ids=$(printf '%s' "$listed" | jq -r --arg keep "$REACTION" '.[][]
+            | select(.user.login == "github-actions[bot]")
+            | select(.content | IN("eyes", "+1", "-1", "confused"))
+            | select(.content != $keep)
+            | .id')
+          for id in $ids; do
+            gh api --method DELETE "$url/$id" --silent
+          done
+          if [ -n "$REACTION" ]; then
+            gh api --method POST "$url" -f "content=$REACTION" --silent
+          fi
+
   review:
     name: Claude review
     # a draft is work its author is not asking anyone to read yet, a
@@ -313,8 +437,16 @@ jobs:
     # above it, `timeout-minutes` being off the list of keywords a
     # calling job may carry
     timeout-minutes: 20
+    # the reaction the verdict check wrote, for `outcome` below. A job's
+    # outputs are evaluated as it completes, whatever its result
+    # (`FinalizeJob` in actions/runner's
+    # `src/Runner.Worker/JobExtension.cs`)
+    outputs:
+      reaction: ${{ steps.verdict.outputs.reaction }}
     permissions:
-      # restated, a job's permissions replacing the workflow's
+      # restated, a job's permissions replacing the workflow's. No
+      # `issues`, which the caller grants for the reactions: unnamed
+      # here, it is `none`, for the reason the header gives
       contents: read
       # what posting the review takes
       pull-requests: write # posting the review
@@ -785,6 +917,7 @@ jobs:
       # the colour buys is a reader who sees a refusal in the checks
       # instead of under the fold at the foot of a comment.
       - name: Refuse to report anything but an ack of this head
+        id: verdict
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
@@ -837,6 +970,22 @@ jobs:
                   | first // empty
                   | select(test("^((ACK|NACK|CHANGES REQUESTED) [0-9a-f]{7,40}"
                                 + "|NO VERDICT [0-9a-f]{7,40}: .+)$"))')
+          # The reaction `outcome` posts, for the reasons the header
+          # gives, written before any exit below: the runner reads the
+          # output file in a `finally`, whether the step fails or not
+          # (`ProcessFiles` in actions/runner's
+          # `src/Runner.Worker/ActionRunner.cs`). An empty `$verdict`
+          # leaves `confused`, and its empty sha prefixes every head.
+          case "$verdict" in
+            "ACK "*) outcome=+1 ;;
+            "NACK "*|"CHANGES REQUESTED "*) outcome=-1 ;;
+            *) outcome=confused ;;
+          esac
+          reaction=confused
+          case "$HEAD_SHA" in
+            "${verdict##* }"*) reaction=$outcome ;;
+          esac
+          echo "reaction=$reaction" >> "$GITHUB_OUTPUT"
           if [ -z "$verdict" ]; then
             echo "::error::the review posted no verdict on this pull" \
                  "request, so nothing says whether $HEAD_SHA was read at" \
@@ -877,6 +1026,50 @@ jobs:
               exit 1
               ;;
           esac
+
+  outcome:
+    name: Claude review shows its outcome
+    # the outcome, for the reasons the header gives. `!cancelled()` runs
+    # it whatever the review job's result, a job with `needs` being
+    # skipped otherwise when one of them fails ("Workflow syntax", at
+    # `needs`), and the second conjunct skips it where the review job
+    # was skipped
+    needs: [start, review]
+    if: ${{ !cancelled() && needs.review.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write # the reactions on the pull request
+    steps:
+      # the same shell as `start`, with the reaction the verdict check
+      # wrote, `confused` where it wrote none
+      - name: Put the outcome on the pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          REACTION: ${{ needs.review.outputs.reaction || 'confused' }}
+        run: |
+          case $REACTION in
+            ""|eyes|+1|-1|confused) ;;
+            *)
+              echo "::error::$REACTION is none of this job's reactions."
+              exit 1
+              ;;
+          esac
+          url=repos/$REPO/issues/$NUMBER/reactions
+          listed=$(gh api "$url" --paginate --slurp)
+          ids=$(printf '%s' "$listed" | jq -r --arg keep "$REACTION" '.[][]
+            | select(.user.login == "github-actions[bot]")
+            | select(.content | IN("eyes", "+1", "-1", "confused"))
+            | select(.content != $keep)
+            | .id')
+          for id in $ids; do
+            gh api --method DELETE "$url/$id" --silent
+          done
+          if [ -n "$REACTION" ]; then
+            gh api --method POST "$url" -f "content=$REACTION" --silent
+          fi
 
   mention:
     name: Claude answers a mention

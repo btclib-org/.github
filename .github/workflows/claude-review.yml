@@ -77,10 +77,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # One calling job reaches both of the callee's jobs, and each of those
-  # declines the events that are not its own, so this job carries no
-  # `if:` of the review's: the switch, the draft check, the closed check
-  # and the fork check are the callee's.
+  # One calling job reaches the callee's jobs, and each of those declines
+  # the events that are not its own, so this job carries no `if:` of the
+  # review's: the switch, the draft check, the closed check and the fork
+  # check are the callee's.
   #
   # By path, as links.yml calls reusable-links.yml, rather than the commit
   # pin section 10 asks of a caller in another repository: the callee is
@@ -107,6 +107,9 @@ jobs:
     uses: ./.github/workflows/reusable-claude-review.yml # zizmor: ignore[self-repository]
     permissions:
       contents: read
+      # the review's reactions on the pull request, for the reason the
+      # callee's header gives
+      issues: write # the review's reactions on the pull request
       # what posting the review or the reply takes
       pull-requests: write # posting the review, and the reply to a mention
       # not for workload identity federation, which this does not use:

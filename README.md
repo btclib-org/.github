@@ -3257,8 +3257,9 @@ what the type buys is the group, where the run supersedes a review
 nobody is going to read.
 
 **One organization variable turns on the review and the `@claude`
-answer.** `reusable-claude-review.yml`'s two jobs each carry
-`if: vars.CLAUDE_REVIEW_ENABLED == 'true'`, and every caller reaches both:
+answer.** The review and the mention jobs of `reusable-claude-review.yml`
+each carry `if: vars.CLAUDE_REVIEW_ENABLED == 'true'`, and every caller
+reaches both:
 
 ```shell
 gh api orgs/<org>/actions/variables/CLAUDE_REVIEW_ENABLED \
@@ -3269,9 +3270,9 @@ It answers `["true","all"]`. An undefined `vars.X` is the empty string,
 so the variable's absence is the off state. The switch is the
 organization's, at `visibility=all`, so that no tree can be forgotten.
 
-**Both jobs name an Opus model with `--model` in `claude_args`**, rather
-than taking the action's default, because the review judges claims about
-code. The workflow holds the id.
+**The review and the mention name an Opus model with `--model` in
+`claude_args`**, rather than taking the action's default, because the
+review judges claims about code. The workflow holds the id.
 
 **A pull request that adds or edits `claude-review.yml` gets no ack**
 until the change is on `main`, for the reason the workflow's own header
@@ -3286,6 +3287,14 @@ colour.
 
 It is **not a required check**, its own header saying why: it is what a
 person landing the pull request reads before pressing.
+
+**The pull request shows the review's state in reactions** by
+`github-actions[bot]`: the eyes while it runs, then `+1`, `-1` or
+`confused` for an ack of the head it read, a refusal of it, or no
+verdict on it. Every push clears them first, so a `+1` names the head it
+was posted for unless a removal failed. `reusable-claude-review.yml`'s
+header says why separate jobs post them and not the model, and what a
+failed or cancelled run leaves.
 
 **CodeRabbit is another reviewing bot, and its review is neither the ack
 of record nor a required check.** Its findings are a reading, answered as

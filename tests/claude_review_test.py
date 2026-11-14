@@ -23,7 +23,7 @@ import shlex
 from . import ROOT
 from .workflows_test import jobs
 
-# the reusable review, which holds both jobs
+# the reusable review, which holds the jobs
 WORKFLOW = ROOT / ".github/workflows/reusable-claude-review.yml"
 
 # the caller in this tree, which holds the trigger and its decline

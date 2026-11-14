@@ -358,9 +358,10 @@ gh api repos/btclib-org/.github/actions/permissions/workflow
 
 `read`, which is what every workflow here needs: `lint.yml` and
 `links.yml` read the tree, and `claude-review.yml`'s calling job elevates
-itself to `pull-requests: write` to write on a pull request and to
-`id-token: write` for the OIDC token the action mints at startup. Nothing
-publishes, attests or writes to the repository's contents.
+itself to `pull-requests: write` to write on a pull request, to
+`issues: write` for the review's reactions on it and to `id-token: write`
+for the OIDC token the action mints at startup. Nothing publishes,
+attests or writes to the repository's contents.
 
 `can_approve_pull_request_reviews` is false, and [the standard says why
 that matters as much as the token][s11-tokens].
@@ -636,10 +637,12 @@ gh api orgs/btclib-org/dependabot/secrets \
 # ["CLAUDE_CODE_OAUTH_TOKEN","all"], both
 ```
 
-**A switch this repository does not set.** The jobs `claude-review.yml`
-calls are guarded by `vars.CLAUDE_REVIEW_ENABLED`. The repository's
-variable store answers with the variable above, and the organization's
-holds the switch:
+**A switch this repository does not set.** The review and the mention
+jobs `claude-review.yml` calls are guarded by
+`vars.CLAUDE_REVIEW_ENABLED`; the job that clears a new head's reactions
+runs whatever it says, for the reason `reusable-claude-review.yml`'s
+header gives. The repository's variable store answers with the variable
+above, and the organization's holds the switch:
 
 ```shell
 gh api orgs/btclib-org/actions/variables \
