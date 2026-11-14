@@ -53,9 +53,10 @@ long after the branch is gone.
 ## Working with an LLM
 
 **Your agents are welcome.** Use them to solve the open issues and to
-review the open pull requests; there is no cap on how many pull requests
-you open. What an agent writes owes what any change or review owes: the
-rest of this file and `REVIEWING.md` say what.
+review the open pull requests. There is no cap on how many pull requests
+you open, and no rule to disclose an agent's part: every change is held
+to the same review, whoever or whatever wrote it, as the rest of this
+file and `REVIEWING.md` say.
 
 **A contribution is yours, whoever wrote it.** Read every line before
 you open the pull request, understand it, and be ready to answer a
