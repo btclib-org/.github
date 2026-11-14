@@ -288,8 +288,7 @@ which is a settings change and a landing rather than a call.
 [Merge method][s11-merge] asks for, and which of the two titles lands is
 that subsection's rule.
 
-Auto-merge is on, and [the landing that subsection describes rests on
-it][s11-merge].
+Auto-merge is on, and [nobody arms it][s11-merge].
 
 `delete_branch_on_merge` fires on its own, every landing here being a
 merged pull request, so a branch still standing is one that was closed

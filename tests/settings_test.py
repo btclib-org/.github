@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from . import ORG, by_hand, gh_json
+from . import ORG, by_hand, gh, gh_json
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -436,6 +436,21 @@ def test_squash_is_the_only_button(settings: dict[str, dict[str, Any]]) -> None:
             f"this run's token cannot see the merge method on {unseen}:"
             " those four fields need push access to read"
         )
+
+
+def test_no_pull_request_is_armed(repository: str) -> None:
+    """Section 11's *Merge method*: nobody arms auto-merge.
+
+    `auto_merge` is a public field of a pull request, so unlike the merge
+    method above no token needs push access to read it.
+
+    :param repository: the repository asked about.
+    """
+    endpoint = f"repos/{ORG}/{repository}/pulls?state=open&per_page=100"
+    armed = gh(endpoint, ".[] | select(.auto_merge) | .number")
+    disarm = f"gh pr merge <n> --repo {ORG}/{repository} --disable-auto"
+    command = by_hand(repository, f"gh api '{endpoint}' --jq '.[].auto_merge'")
+    assert not armed, f"armed: {armed}; disarm with `{disarm}`; {command}"
 
 
 def test_the_workflow_token_is_read(repository: str) -> None:
