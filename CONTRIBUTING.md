@@ -314,16 +314,14 @@ this heading.
 
 ### The environment and the gates
 
-uv installs everything that is a wheel; it fetches interpreters and
-tools itself. There is a project here, and nothing installs it:
+uv is the only thing that has to be installed; it fetches interpreters
+and tools itself. There is a project here, and nothing installs it:
 `package = false`, its Python being one test suite and the local hooks
 under `.github/scripts/`.
 
-`gh`, `git` and `jq` are the other prerequisites, and none is a wheel:
-the suite shells out to them rather than importing a client. `gh` and
-`git` are on every GitHub-hosted runner already. `jq` is for the suite
-alone: `tests/never_released_test.py` runs it where `gh --jq` would
-apply a workflow's filter.
+`gh` and `git` are the other two prerequisites and neither is a wheel:
+both are on every GitHub-hosted runner already, and the suite shells out
+to them rather than importing a client.
 
 ```shell
 uv run --locked --only-group lint pre-commit run --all-files

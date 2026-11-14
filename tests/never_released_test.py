@@ -12,14 +12,15 @@ a list. Only the first may skip anything, and the others that find no
 release must fail the step.
 
 The stand-in applies the step's own `--jq` filter to the body it is
-given, with `jq` in place of the gojq `gh` embeds, so what decides is
-the filter the runner runs.
+given, with the `jq` wheel's libjq in place of the gojq `gh` embeds, so
+what decides is the filter the runner runs.
 """
 
 from __future__ import annotations
 
 import re
 import shlex
+import sys
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -60,6 +61,23 @@ case "$1" in
 esac
 """
 
+# the `jq -r <filter>` the stand-in for `gh` calls, run on the `jq`
+# wheel by the suite's own interpreter, so no `jq` on the path is read
+_JQ = """\
+import json
+import sys
+
+import jq
+
+*_, program = sys.argv
+try:
+    found = jq.compile(program).input_text(sys.stdin.read()).all()
+except ValueError as error:
+    sys.exit(f"jq: error: {error}")
+for value in found:
+    print(value if isinstance(value, str) else json.dumps(value))
+"""
+
 # each case, as the body the releases API answers
 _NEVER = {"GH_BODY": "[]", "GH_TAG": ""}
 _RELEASED = {"GH_BODY": '[{"tag_name": "v2026.11.13"}]', "GH_TAG": "v2026.11.13"}
@@ -86,6 +104,21 @@ def _step(workflow: Path, job: str, name: str) -> dict[str, Any]:
     return dict(found)
 
 
+def _bench(tmp_path: Path) -> Path:
+    """Write the stand-ins for `gh` and `jq`.
+
+    :returns: the directory holding them.
+    """
+    bench = tmp_path / "bench"
+    bench.mkdir()
+    stand_in(bench, "gh", _GH)
+    program = tmp_path / "jq_wheel.py"
+    program.write_text(_JQ)
+    python = shlex.quote(sys.executable)
+    stand_in(bench, "jq", f'exec {python} -I {shlex.quote(str(program))} "$@"\n')
+    return bench
+
+
 def _run(
     tmp_path: Path, workflow: Path, job: str, name: str, api: dict[str, str]
 ) -> tuple[int, str, dict[str, str]]:
@@ -93,9 +126,7 @@ def _run(
 
     :returns: the exit code, what the step printed, and its outputs.
     """
-    bench = tmp_path / "bench"
-    bench.mkdir()
-    stand_in(bench, "gh", _GH)
+    bench = _bench(tmp_path)
     output = tmp_path / "output"
     env = {
         "GITHUB_REPOSITORY": "btclib-org/coin-addresses",
@@ -200,9 +231,7 @@ def test_the_wait_reports_published_to_its_caller() -> None:
 
 def _excluded(tmp_path: Path, repository: str) -> re.Pattern[str]:
     """Return the pattern lychee excludes in a repository never released."""
-    bench = tmp_path / "bench"
-    bench.mkdir()
-    stand_in(bench, "gh", _GH)
+    bench = _bench(tmp_path)
     output = tmp_path / "output"
     env = {
         "GITHUB_REPOSITORY": repository,
