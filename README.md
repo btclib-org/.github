@@ -1383,13 +1383,13 @@ check the same code where no source is conditional on the version.
   `local-link-prefix`'s reason, and the hook's default is which.
 - Shared test code lives in a package `__init__.py` — vector loaders,
   helpers — never in a module whose name says "test" and holds none.
-  The exception is a test that runs on several nodes from one module
-  per node: its body is a function without the `test_` prefix in
-  `<file>_test.py`, and each `<file>_<node>_test.py` calls it from a
-  test. That module's name says what it holds, the test itself, where a
-  package `__init__.py` would present it as a helper. The docstring of
-  `functional-tests`'s `tests/integration/conftest.py` states the
-  layout.
+  The exception is a test that runs on several node implementations,
+  one module per node: its body is a function without the `test_`
+  prefix in `<file>_test.py`, and each `<file>_<node>_test.py` calls it
+  from a test. That module's name says what it holds, the test itself,
+  where a package `__init__.py` would present it as a helper.
+  `functional-tests`'s `tests/integration/conftest.py` holds the layout
+  in its docstring.
 - `tests/_data/` holds the data the suite reads, under *Test data is
   vendored, never fetched*. A file under any `_data` directory of
   `tests/` is data, not a test module, so a vendored module keeps its

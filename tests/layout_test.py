@@ -6,7 +6,9 @@
 
 The hook is section 4's and `hooks_test.py` asks whether it runs; this
 asks whether the tree keeps the rule the hook would enforce, which is
-the half a gate that is not installed cannot answer for.
+the half a gate that is not installed cannot answer for. It also asks
+what no hook reads: that a module named for tests defines a test, or is
+the test body section 7 admits.
 
 The per-repository tests carry the `integration` marker, which the
 controls do not: they build a tree in a temporary directory and reach
@@ -23,6 +25,7 @@ import pytest
 from . import Tier, by_hand
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
 
 EXEMPT = ("__init__.py", "conftest.py")
@@ -41,7 +44,8 @@ SUFFIX = "_test.py"
 NODES = 2
 """The fewest per-node modules that make a test body section 7's exception.
 
-The exception is a test run on several nodes, one module per node.
+The exception is a test run on several node implementations, one module
+per node.
 """
 
 
@@ -79,40 +83,114 @@ def test_every_test_file_is_named_so_pytest_collects_it(
     )
 
 
+BLOCKS: dict[type[ast.stmt], tuple[str, ...]] = {
+    ast.If: ("body", "orelse"),
+    ast.Try: ("body", "orelse", "finalbody"),
+    ast.TryStar: ("body", "orelse", "finalbody"),
+    ast.With: ("body",),
+}
+"""The blocks whose statements run when the module is imported."""
+
+
+def module_level(body: list[ast.stmt]) -> Iterator[ast.stmt]:
+    """Yield the statements a module runs on import, blocks included.
+
+    The top level, and inside each `if`, `try` and `with` there, the
+    handlers of a `try` included; never inside a function or a class.
+
+    :param body: the module's own statements.
+    :yields: each statement, outermost first.
+    """
+    for node in body:
+        yield node
+        for field in BLOCKS.get(type(node), ()):
+            yield from module_level(getattr(node, field))
+        if isinstance(node, ast.Try | ast.TryStar):
+            for handler in node.handlers:
+                yield from module_level(handler.body)
+
+
 def defines_a_test(module: ast.Module) -> bool:
-    """Say whether a module defines a test pytest collects by default.
+    """Say whether a module defines a test pytest's defaults collect.
+
+    What is read is each definition the module runs on import, as
+    `module_level` walks them: a function whose name starts `test`, a
+    class whose name starts `Test`, and a class with a base named
+    `TestCase` or ending `.TestCase`, which pytest collects as
+    unittest's whatever its name.
 
     :param module: the parsed module.
-    :returns: whether it defines a `test*` function or a `Test*` class.
+    :returns: whether it defines one.
     """
-    return any(
-        (
-            isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
-            and node.name.startswith("test")
-        )
-        or (isinstance(node, ast.ClassDef) and node.name.startswith("Test"))
-        for node in module.body
-    )
-
-
-def imports(module: ast.Module, stem: str) -> bool:
-    """Say whether a module imports from the module named `stem`.
-
-    :param module: the parsed module.
-    :param stem: the imported module's name, without its package.
-    :returns: whether any import, at any depth, names that module.
-    """
-    for node in ast.walk(module):
-        if isinstance(node, ast.ImportFrom):
-            if (node.module or "").rsplit(".", 1)[-1] == stem:
+    for node in module_level(module.body):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            if node.name.startswith("test"):
                 return True
-            if any(alias.name == stem for alias in node.names):
-                return True
-        if isinstance(node, ast.Import) and any(
-            alias.name.rsplit(".", 1)[-1] == stem for alias in node.names
+        elif isinstance(node, ast.ClassDef) and (
+            node.name.startswith("Test")
+            or any(
+                ast.unparse(base).split(".")[-1] == "TestCase" for base in node.bases
+            )
         ):
             return True
     return False
+
+
+def dotted(root: Path, path: Path) -> str:
+    """Return the module name a path has from the root of its checkout.
+
+    :param root: the root of the checkout.
+    :param path: a `.py` file under it.
+    :returns: the dotted name, `tests.integration.x_test` for instance.
+    """
+    return ".".join(path.relative_to(root).with_suffix("").parts)
+
+
+def calls_the_body(
+    root: Path, body: Path, parsed: ast.Module, caller: ast.Module
+) -> bool:
+    """Say whether a module calls a function of the body module from a test.
+
+    The function is a top-level `def` of the body, imported by a
+    top-level `from` statement of the caller in one of two forms: the
+    body's full name from the checkout's root
+    (`from tests.integration.x_test import f`), or the body's own name
+    relative to its directory (`from .x_test import f`). A test, a
+    top-level function whose name starts `test`, calls it by the name
+    it was imported as.
+
+    :param root: the root of the checkout.
+    :param body: the body module's path.
+    :param parsed: the body module, parsed.
+    :param caller: the parsed module that may call it.
+    :returns: whether it does.
+    """
+    functions = {
+        node.name
+        for node in parsed.body
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+    }
+    stem = body.name.removesuffix(".py")
+    imported = {
+        alias.asname or alias.name
+        for node in caller.body
+        if isinstance(node, ast.ImportFrom)
+        and (
+            (node.level == 0 and node.module == dotted(root, body))
+            or (node.level == 1 and node.module == stem)
+        )
+        for alias in node.names
+        if alias.name in functions
+    }
+    return any(
+        isinstance(call, ast.Call)
+        and isinstance(call.func, ast.Name)
+        and call.func.id in imported
+        for test in caller.body
+        if isinstance(test, ast.FunctionDef | ast.AsyncFunctionDef)
+        and test.name.startswith("test")
+        for call in ast.walk(test)
+    )
 
 
 def bodiless(root: Path) -> list[str]:
@@ -120,9 +198,10 @@ def bodiless(root: Path) -> list[str]:
 
     A `*_test.py` under `tests/`, its `_data` directories aside, that
     defines no test is section 7's exception only where it is the body of
-    a test run on several nodes: at least `NODES` modules beside it,
-    each named `<file>_<node>_test.py` for its own `<file>_test.py`,
-    define a test and import from it. Anything else is shared code in a
+    a test run on several node implementations: at least `NODES` modules
+    in its own directory, each named `<file>_<node>_test.py` for its own
+    `<file>_test.py`, call a function of it from a test, as
+    `calls_the_body` reads a call. Anything else is shared code in a
     module whose name says "test", which section 7 puts in a package
     `__init__.py`.
 
@@ -139,16 +218,13 @@ def bodiless(root: Path) -> list[str]:
     for path, module in parsed.items():
         if defines_a_test(module):
             continue
-        stem = path.name.removesuffix(".py")
         prefix = path.name.removesuffix(SUFFIX) + "_"
         callers = [
             other
             for other, tree in parsed.items()
             if other.parent == path.parent
             and other.name.startswith(prefix)
-            and len(other.name) > len(prefix) + len(SUFFIX)
-            and defines_a_test(tree)
-            and imports(tree, stem)
+            and calls_the_body(root, path, module, tree)
         ]
         if len(callers) < NODES:
             wrong.append(str(path.relative_to(root)))
@@ -186,33 +262,85 @@ def test_a_test_module_defining_no_test_is_a_body_its_node_modules_call(
 
 
 def _write(root: Path, name: str, text: str) -> None:
-    """Write a module under `tests/integration/` of a stand-in tree.
+    """Write a module under `tests/` of a stand-in tree.
 
     :param root: the stand-in tree.
-    :param name: the module's file name.
+    :param name: the module's path under `tests/`, `integration/` by
+        default.
     :param text: its source.
     """
-    path = root / "tests" / "integration" / name
+    path = root / "tests" / (name if "/" in name else f"integration/{name}")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
 
 
+STEM = "p2p_block_sync_test"
+"""The stand-in body module's name."""
+
 BODY = "def a_block_reaches_every_node(adapter):\n    assert adapter\n"
 """A shared test body: a function without the `test_` prefix."""
 
+CALL = (
+    "def test_a_block_reaches_every_node(adapter):\n"
+    "    a_block_reaches_every_node(adapter)\n"
+)
+"""A test calling the body."""
 
-def _caller(stem: str, node: str) -> str:
-    """Return the source of a per-node module calling a body.
+ABSOLUTE = f"from tests.integration.{STEM} import a_block_reaches_every_node\n"
+"""The body imported by its full name."""
 
-    :param stem: the body module's name, without `.py`.
-    :param node: the node the module runs the body on.
-    :returns: the module's source.
+RELATIVE = f"from .{STEM} import a_block_reaches_every_node\n"
+"""The body imported by its name relative to its directory."""
+
+OTHER = "\n\ndef test_other():\n    assert True\n"
+"""A test that calls nothing of the body."""
+
+MODULE_IMPORTED = (
+    f"from tests.integration import {STEM}\n\n\n"
+    "def test_it(adapter):\n"
+    f"    {STEM}.a_block_reaches_every_node(adapter)\n"
+)
+"""A caller importing the body module rather than its function."""
+
+PLAIN_IMPORT = (
+    f"import tests.integration.{STEM}\n\n\n"
+    "def test_it(adapter):\n"
+    f"    tests.integration.{STEM}.a_block_reaches_every_node(adapter)\n"
+)
+"""A caller importing the body module with a plain `import`."""
+
+NESTED_IMPORT = (
+    "def test_a_block_reaches_every_node(adapter):\n"
+    f"    {ABSOLUTE.strip()}\n"
+    "    a_block_reaches_every_node(adapter)\n"
+)
+"""A caller importing the function inside its test."""
+
+GUARDED_IMPORT = (
+    f"from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    {ABSOLUTE}{CALL}"
+)
+"""A caller importing the function under `if TYPE_CHECKING:` only."""
+
+REFUSED = [f"tests/integration/{STEM}.py"]
+"""What `bodiless` answers on a stand-in tree whose body it refuses."""
+
+
+def _tree(
+    root: Path, *callers: str, body: str = BODY, where: str = "integration"
+) -> Path:
+    """Build a stand-in tree: the body, and a caller per source.
+
+    :param root: where the tree goes.
+    :param callers: the source of each caller, the first named for
+        `bitcoind`, the second for `btcd`.
+    :param body: the body module's source.
+    :param where: the directory under `tests/` the callers go in.
+    :returns: the root.
     """
-    return (
-        f"from tests.integration.{stem} import a_block_reaches_every_node\n\n\n"
-        f"def test_a_block_reaches_every_node({node}_adapter):\n"
-        f"    a_block_reaches_every_node({node}_adapter)\n"
-    )
+    _write(root, f"{STEM}.py", body)
+    for node, source in zip(("bitcoind", "btcd"), callers, strict=False):
+        _write(root, f"{where}/p2p_block_sync_{node}_test.py", source)
+    return root
 
 
 def test_a_body_its_node_modules_call_is_admitted(tmp_path: Path) -> None:
@@ -220,81 +348,151 @@ def test_a_body_its_node_modules_call_is_admitted(tmp_path: Path) -> None:
 
     :param tmp_path: where the stand-in tree is built.
     """
-    _write(tmp_path, "p2p_block_sync_test.py", BODY)
-    _write(
-        tmp_path,
-        "p2p_block_sync_bitcoind_test.py",
-        _caller("p2p_block_sync_test", "bitcoind"),
-    )
-    _write(
-        tmp_path,
-        "p2p_block_sync_btcd_test.py",
-        "from .p2p_block_sync_test import a_block_reaches_every_node\n\n\n"
-        "def test_it(btcd_adapter):\n"
-        "    a_block_reaches_every_node(btcd_adapter)\n",
-    )
+    _tree(tmp_path, ABSOLUTE + CALL, RELATIVE + CALL)
     _write(tmp_path, "rpc_net_test.py", "def test_rpc():\n    assert True\n")
     assert bodiless(tmp_path) == []
 
 
-def test_a_body_stripped_of_its_callers_is_refused(tmp_path: Path) -> None:
-    """The same body, with no per-node module, or with one only, is refused.
+@pytest.mark.parametrize(
+    "callers",
+    [
+        pytest.param((), id="no caller"),
+        pytest.param((ABSOLUTE + CALL,), id="one caller"),
+        pytest.param(
+            (ABSOLUTE + CALL.replace("def test_", "def check_") + OTHER,) * 2,
+            id="callers calling it from no test",
+        ),
+        pytest.param(
+            (
+                "def test_it():\n    assert True\n",
+                "def test_it():\n    assert True\n",
+            ),
+            id="callers not importing it",
+        ),
+        pytest.param((MODULE_IMPORTED,) * 2, id="the module imported"),
+        pytest.param((PLAIN_IMPORT,) * 2, id="a plain import"),
+        pytest.param((NESTED_IMPORT,) * 2, id="an import inside the test"),
+        pytest.param((GUARDED_IMPORT,) * 2, id="an import under TYPE_CHECKING"),
+        pytest.param(
+            (f"from tests.other.{STEM} import a_block_reaches_every_node\n{CALL}",) * 2,
+            id="a same-named module of another directory, by its full name",
+        ),
+        pytest.param(
+            (f"from ..other.{STEM} import a_block_reaches_every_node\n{CALL}",) * 2,
+            id="a same-named module of another directory, relatively",
+        ),
+    ],
+)
+def test_a_body_not_called_from_per_node_tests_is_refused(
+    tmp_path: Path, callers: tuple[str, ...]
+) -> None:
+    """The body is refused unless two per-node tests beside it call it.
 
-    :param tmp_path: where the stand-in trees are built.
+    Each case moves one condition of `bodiless` or `calls_the_body` off.
+
+    :param tmp_path: where the stand-in tree is built.
+    :param callers: the per-node modules' sources.
     """
-    bare = tmp_path / "bare"
-    _write(bare, "p2p_block_sync_test.py", BODY)
-    assert bodiless(bare) == ["tests/integration/p2p_block_sync_test.py"]
-    one = tmp_path / "one"
-    _write(one, "p2p_block_sync_test.py", BODY)
-    _write(
-        one,
-        "p2p_block_sync_bitcoind_test.py",
-        _caller("p2p_block_sync_test", "bitcoind"),
+    assert bodiless(_tree(tmp_path, *callers)) == REFUSED
+
+
+def test_per_node_tests_of_another_directory_are_no_callers(tmp_path: Path) -> None:
+    """Callers of the right name and form, but in another directory.
+
+    :param tmp_path: where the stand-in tree is built.
+    """
+    _tree(tmp_path, ABSOLUTE + CALL, ABSOLUTE + CALL, where="other")
+    assert bodiless(tmp_path) == REFUSED
+
+
+def test_a_body_that_is_a_class_is_refused(tmp_path: Path) -> None:
+    """Section 7's body is a function: a class its callers use is refused.
+
+    :param tmp_path: where the stand-in tree is built.
+    """
+    body = (
+        "class a_block_reaches_every_node:\n"
+        "    def __init__(self, adapter):\n"
+        "        self.adapter = adapter\n"
     )
-    assert bodiless(one) == ["tests/integration/p2p_block_sync_test.py"]
+    _tree(tmp_path, ABSOLUTE + CALL, RELATIVE + CALL, body=body)
+    assert bodiless(tmp_path) == REFUSED
 
 
 def test_a_helper_other_tests_import_is_refused(tmp_path: Path) -> None:
     """A helper module named for tests is refused, whoever imports it.
 
-    Modules that import it and define a test, but are not named
-    `<file>_<node>_test.py` for it, are no per-node modules; and modules
-    so named that import nothing from it do not call it.
-
-    :param tmp_path: where the stand-in trees are built.
+    :param tmp_path: where the stand-in tree is built.
     """
-    helper = tmp_path / "helper"
-    _write(helper, "p2p_conns_test.py", "class Conn:\n    pass\n")
+    _write(tmp_path, "p2p_conns_test.py", "def conn():\n    return 1\n")
     for name in ("p2p_fingerprint_test.py", "p2p_sendheaders_test.py"):
         _write(
-            helper,
+            tmp_path,
             name,
-            "from tests.integration.p2p_conns_test import Conn\n\n\n"
-            "def test_conn():\n    assert Conn\n",
+            "from tests.integration.p2p_conns_test import conn\n\n\n"
+            "def test_conn():\n    assert conn()\n",
         )
-    assert bodiless(helper) == ["tests/integration/p2p_conns_test.py"]
-    unrelated = tmp_path / "unrelated"
-    _write(unrelated, "p2p_block_sync_test.py", BODY)
-    for node in ("bitcoind", "btcd"):
-        _write(
-            unrelated,
-            f"p2p_block_sync_{node}_test.py",
-            "def test_it():\n    assert True\n",
-        )
-    assert bodiless(unrelated) == ["tests/integration/p2p_block_sync_test.py"]
+    assert bodiless(tmp_path) == ["tests/integration/p2p_conns_test.py"]
 
 
-def test_a_module_defining_a_test_needs_no_caller(tmp_path: Path) -> None:
-    """A module that defines a test or a test class is never reported.
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param("def test_a():\n    assert True\n", id="function"),
+        pytest.param("async def test_b():\n    assert True\n", id="async function"),
+        pytest.param("class TestC:\n    pass\n", id="Test class"),
+        pytest.param(
+            "import sys\nif sys:\n    def test_d():\n        assert True\n",
+            id="function under an if",
+        ),
+        pytest.param(
+            "try:\n    pass\nexcept ImportError:\n"
+            "    def test_e():\n        assert True\n",
+            id="function in a handler",
+        ),
+        pytest.param(
+            "import unittest\nclass Checks(unittest.TestCase):\n    pass\n",
+            id="TestCase subclass",
+        ),
+        pytest.param(
+            "from unittest import TestCase\nclass Checks(TestCase):\n    pass\n",
+            id="TestCase subclass by its bare name",
+        ),
+    ],
+)
+def test_a_module_defining_a_test_needs_no_caller(tmp_path: Path, source: str) -> None:
+    """A module defining a test pytest collects is never reported.
+
+    :param tmp_path: where the stand-in tree is built.
+    :param source: the module's source.
+    """
+    _write(tmp_path, "a_test.py", source)
+    assert bodiless(tmp_path) == []
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param("def check():\n    def test_f():\n        pass\n", id="nested"),
+        pytest.param(
+            "class Checks:\n    def test_g(self):\n        pass\n", id="class"
+        ),
+    ],
+)
+def test_a_test_pytest_does_not_collect_is_no_test(tmp_path: Path, source: str) -> None:
+    """A `test_` inside a function or a non-test class defines no test.
+
+    :param tmp_path: where the stand-in tree is built.
+    :param source: the module's source.
+    """
+    _write(tmp_path, "a_test.py", source)
+    assert bodiless(tmp_path) == ["tests/integration/a_test.py"]
+
+
+def test_data_is_not_read(tmp_path: Path) -> None:
+    """A module under a `_data` directory is data, whatever it defines.
 
     :param tmp_path: where the stand-in tree is built.
     """
-    _write(tmp_path, "a_test.py", "def test_a():\n    assert True\n")
-    _write(tmp_path, "b_test.py", "async def test_b():\n    assert True\n")
-    _write(tmp_path, "c_test.py", "class TestC:\n    pass\n")
-    (tmp_path / "tests" / "_data").mkdir()
-    (tmp_path / "tests" / "_data" / "vendored_test.py").write_text(
-        "X = 1\n", encoding="utf-8"
-    )
+    _write(tmp_path, "_data/vendored_test.py", "X = 1\n")
     assert bodiless(tmp_path) == []
