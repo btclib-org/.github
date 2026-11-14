@@ -115,6 +115,7 @@ rather than the entry's.
 EXPECTED_DRIFT: dict[str, str] = {
     "tests/secret_free/__init__.py": "btclib-org/.github#2170",
     "RELEASING.md": "btclib-org/.github#1855",
+    ".coderabbit.yaml": "btclib-org/ai-agents-process#432, ai-agents-process@d765a16",
 }
 """A path section 14 names whose copies are known not to agree yet.
 
