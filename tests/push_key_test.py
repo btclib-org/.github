@@ -33,7 +33,7 @@ is parsed.
 """
 
 MAIN = "main"
-"""The branch whose pushes section 10 keys on their commit."""
+"""The branch whose pushes section 10 keys on their commit and ref."""
 
 PUSH_TERM = (
     "github.event_name == 'push' && format('{0}-{1}', github.sha, github.ref) || "
@@ -211,12 +211,12 @@ def keyed_as_asked(workflow: Path, wanted: str) -> bool:
     """Say whether a workflow a push to main runs keys its group as asked.
 
     Every accepted key ends with `SUFFIX` exactly where the workflow
-    declares it: without it, a tag push's release call would share the
-    group of main's push run on that commit, and cancel it. No key is
-    the commit alone: a dispatch on `main` at that commit would share
-    the push run's group, and cancel it, and so would a tag pushed at it
-    where the trigger takes tags. The group opens with the name
-    `named_for_its_file` asks.
+    declares it: without it, a dispatch of the release workflow on
+    `main` would share the group of a dispatch of the gate there, and
+    cancel it. No key is the commit alone: a dispatch on `main` at that
+    commit would share the push run's group, and cancel it, and so
+    would a tag pushed at it where the trigger takes tags. The group
+    opens with the name `named_for_its_file` asks.
 
     :param workflow: the file to read.
     :param wanted: the key section 10 gives, as `keyed` reads it.
