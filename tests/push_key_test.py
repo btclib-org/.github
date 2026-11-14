@@ -195,7 +195,7 @@ def shared(workflows: list[Path]) -> list[str]:
 
     Every top-level group opens with its file's stem, which is unique
     among a tree's files but for `x.yml` beside `x.yaml`. GitHub reads a
-    group's name without regard to case, so `ci.yml` and `CI.yaml` share
+    group's name without regard to case, so `ci.yml` and `CI.yml` share
     one too, and names are compared casefolded.
 
     :param workflows: the tree's workflow files.
@@ -587,13 +587,13 @@ def test_two_names_differing_only_in_case_are_reported(tmp_path: Path) -> None:
     """`ci-` and `CI-` are one group to GitHub, so they are reported.
 
     Written in two directories: a file system that ignores case, as
-    macOS's does by default, holds only one of `ci.yml` and `CI.yaml`
+    macOS's does by default, holds only one of `ci.yml` and `CI.yml`
     in one.
 
     :param tmp_path: where the workflows are written.
     """
     found = []
-    for directory, name, stem in (("a", "ci.yml", "ci"), ("b", "CI.yaml", "CI")):
+    for directory, name, stem in (("a", "ci.yml", "ci"), ("b", "CI.yml", "CI")):
         (tmp_path / directory).mkdir()
         workflow = tmp_path / directory / name
         workflow.write_text(
