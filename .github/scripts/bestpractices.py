@@ -39,10 +39,13 @@ and site agree prints nothing.
 lists each answer whose justification names a `v`-prefixed version older
 than the tree's latest GitHub release, an ISO date before that release,
 or the words "draft" or "next release", which carry no date and are
-always listed. It misses a version written without its `v`, a date in
-another format, and an answer gone stale without naming anything, such as
-an asset name or an advisory state. It also lists a version or a date an
-answer cites on purpose, as history.
+listed whatever the release. "Draft" after "not a", as in "every pull
+request that is not a draft", is not listed. It misses a version written
+without its `v`, a date in another format, and an answer gone stale
+without naming anything, such as an asset name or an advisory state. It
+also lists a version or a date an answer cites on purpose, as history,
+and "draft" said of a pull request in other words, as "while the pull
+request is a draft".
 
 `--differ` reads the files too, and lists each criterion whose status is
 not the same in every tree that has a file, for a review to check each
@@ -99,7 +102,7 @@ STATUS = "_status"
 JUSTIFICATION = "_justification"
 VERSION = re.compile(r"\bv(\d+(?:\.\d+)+)\b")
 DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}(?=\b|T\d{2}:\d{2})")
-UNDATED = re.compile(r"\b(?:draft|next release)\b", re.IGNORECASE)
+UNDATED = re.compile(r"\b(?:(?<!\bnot a )draft|next release)\b", re.IGNORECASE)
 
 Answers = dict[str, Any]
 
