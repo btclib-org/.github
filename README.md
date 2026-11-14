@@ -2094,7 +2094,9 @@ without adding to it is deleted.
 - **Concurrency groups are named literally** —
   `group: alignment-${{ github.event.pull_request.number || github.ref }}` —
   never through `github.workflow`, the *caller's* name in a called workflow, so
-  two called workflows would share a group and cancel each other. `github.ref`
+  two called workflows would share a group and cancel each other. The name is
+  the file's stem and a hyphen: a group is the repository's, and two workflows
+  opening theirs with one name would cancel each other's runs. `github.ref`
   and `github.sha` are the caller's there too, so a gate the release workflow
   calls appends `${{ inputs.concurrency-suffix }}` (btclib-org/.github#1083).
   The key is the pull request's own number and not `github.head_ref`

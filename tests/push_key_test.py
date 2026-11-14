@@ -166,6 +166,43 @@ def suffixed(workflow: Path) -> bool:
     return isinstance(inputs, dict) and "concurrency-suffix" in inputs
 
 
+def prefix(workflow: Path) -> str:
+    """Read the literal name a workflow's group opens with.
+
+    :param workflow: the file to read.
+    :returns: the group up to its first `${{`, the whole group where it
+        has none.
+    """
+    found = group(workflow)
+    return found[: found.index("${{")] if "${{" in found else found
+
+
+def named_for_its_file(workflow: Path) -> bool:
+    """Say whether a workflow's group is named as section 10 names it.
+
+    The name is the file's stem and a hyphen. A group is repository-wide,
+    so two workflows whose groups shared a name would cancel each
+    other's runs.
+
+    :param workflow: the file to read.
+    :returns: whether the group opens with the stem and a hyphen.
+    """
+    return prefix(workflow) == f"{workflow.stem}-"
+
+
+def shared(workflows: list[Path]) -> list[str]:
+    """List the group names more than one of a tree's workflows opens with.
+
+    A stem is unique among a tree's files, but `x.yml` and `x.yaml` share
+    one.
+
+    :param workflows: the tree's workflow files.
+    :returns: each name two or more groups open with, sorted.
+    """
+    names = [prefix(workflow) for workflow in workflows if group(workflow)]
+    return sorted({name for name in names if names.count(name) > 1})
+
+
 def keyed_as_asked(workflow: Path, wanted: str) -> bool:
     """Say whether a workflow a push to main runs keys its group as asked.
 
@@ -173,15 +210,18 @@ def keyed_as_asked(workflow: Path, wanted: str) -> bool:
     declares it: without it, a tag push's release call would share the
     group of main's push run on that commit, and cancel it. No key is
     the commit alone: a dispatch on `main` at that commit would share
-    the push run's group, and cancel it.
+    the push run's group, and cancel it. The group opens with the name
+    `named_for_its_file` asks.
 
     :param workflow: the file to read.
     :param wanted: the key section 10 gives, as `keyed` reads it.
-    :returns: for a workflow that publishes, whether its key is `wanted`
-        without `PUSH_TERM`, or also `REF_ALONE` where it has no
-        `pull_request` trigger; for any other, whether its key is
-        `wanted`.
+    :returns: whether the group is named for the file and, for a
+        workflow that publishes, its key is `wanted` without
+        `PUSH_TERM`, or also `REF_ALONE` where it has no `pull_request`
+        trigger; for any other, whether its key is `wanted`.
     """
+    if not named_for_its_file(workflow):
+        return False
     found = group(workflow)
     key = found[found.index("${{") :] if "${{" in found else found
     if publishes(workflow):
@@ -202,18 +242,20 @@ def test_a_push_run_on_main_is_keyed_on_its_commit(
     """Section 10's push key, asked of every workflow a push to main runs.
 
     Compared as a string after YAML has folded it, as the conditional at
-    `cancel-in-progress` is, the name before the key being the
-    workflow's own.
+    `cancel-in-progress` is, the name before the key being the file's
+    stem. No two of the tree's workflows, a push to main running them or
+    not, open their groups with one name.
 
     :param repository: the repository asked about.
     :param trees: the checkouts.
     """
     wanted = keyed()
+    found = gated(repository, trees)
     wrong = [
         f"{workflow.name}: {group(workflow)!r}"
-        for workflow in gated(repository, trees)
+        for workflow in found
         if pushed_to_main(workflow) and not keyed_as_asked(workflow, wanted)
-    ]
+    ] + [f"groups named {name!r} more than once" for name in shared(found)]
     assert not wrong, f"a push run is not keyed as section 10 says: {wrong}; " + (
         by_hand(repository, "grep -n -A4 '^concurrency:' .github/workflows/*.yml")
     )
@@ -284,6 +326,13 @@ CALLED = (
 )
 PUBLISHING = "permissions:\n  id-token: write\n"
 PER_REF = "${{ github.event.pull_request.number || github.ref }}"
+STEM = re.compile(r"([A-Za-z0-9_.]+)-\$\{\{")
+"""The name a written group opens with, which `written` names the file for."""
+KEY_LINE = (
+    "${{ github.event_name == 'push' && github.sha"
+    " || github.event.pull_request.number || github.ref }}"
+)
+"""Section 10's key on one line, with no name before it."""
 
 
 def written(tmp_path: Path, on: str, group_block: str, permissions: str = "") -> Path:
@@ -293,9 +342,11 @@ def written(tmp_path: Path, on: str, group_block: str, permissions: str = "") ->
     :param on: the events under `on:`.
     :param group_block: the lines under `concurrency:`.
     :param permissions: a workflow-level `permissions:` block, or none.
-    :returns: the file.
+    :returns: the file, named for the name its group opens with, or
+        `w.yml` where the group opens with none.
     """
-    workflow = tmp_path / "w.yml"
+    name = STEM.search(group_block)
+    workflow = tmp_path / f"{name[1] if name else 'w'}.yml"
     workflow.write_text(
         f"on:\n{on}concurrency:\n{group_block}  cancel-in-progress: true\n"
         f"{permissions}jobs: {{}}\n",
@@ -383,6 +434,8 @@ def line(key: str) -> str:
         (PUSHED, KEY.format(name="w", tail=""), "permissions: write-all\n", False),
         (PUSHED, line("w-${{ github.ref }}"), "permissions: write-all\n", True),
         (REVIEWED, "  group: ''\n", "", False),
+        (REVIEWED, line(KEY_LINE), "", False),
+        (REVIEWED, line(f"-{KEY_LINE}"), "", False),
     ],
     ids=[
         "the key",
@@ -411,6 +464,8 @@ def line(key: str) -> str:
         "write-all, on its commit",
         "write-all, on its ref",
         "an empty group",
+        "the key with no name",
+        "the key after a hyphen alone",
     ],
 )
 def test_a_group_is_keyed_as_section_10_asks(
@@ -492,3 +547,34 @@ def test_a_job_granting_write_all_keeps_its_ref(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     assert not keyed_as_asked(workflow, keyed())
+
+
+def test_a_group_named_for_another_file_is_refused(tmp_path: Path) -> None:
+    """The key under another workflow's name fails, under its own passes.
+
+    :param tmp_path: where the workflows are written.
+    """
+    for stem, wanted in (("test", False), ("lint", True)):
+        workflow = tmp_path / "lint.yml"
+        workflow.write_text(
+            f"on:\n{REVIEWED}concurrency:\n{line(f'{stem}-{KEY_LINE}')}jobs: {{}}\n",
+            encoding="utf-8",
+        )
+        assert keyed_as_asked(workflow, keyed()) is wanted, stem
+
+
+def test_two_workflows_opening_their_groups_with_one_name_are_reported(
+    tmp_path: Path,
+) -> None:
+    """A name two of a tree's groups open with is reported, once.
+
+    :param tmp_path: where the workflows are written.
+    """
+    for name, stem in (("ci.yml", "ci"), ("ci.yaml", "ci"), ("b.yml", "b")):
+        (tmp_path / name).write_text(
+            f"on:\n{REVIEWED}concurrency:\n{line(f'{stem}-{KEY_LINE}')}jobs: {{}}\n",
+            encoding="utf-8",
+        )
+    assert shared(sorted(tmp_path.iterdir())) == ["ci-"]
+    (tmp_path / "ci.yaml").unlink()
+    assert shared(sorted(tmp_path.iterdir())) == []
