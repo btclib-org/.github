@@ -41,13 +41,23 @@ therefore the only thing that drives the retry, the deadline and the
 error path: it substitutes the transport and the clock, and advances the
 clock past the deadline itself.
 
-The tag is empty on every trigger but a release call, and an empty tag is
-nothing to wait for rather than an error -- which is what makes this
+The tag is empty on every trigger but a release call. An empty tag names
+no version to wait for, and is no error -- which is what makes this
 runnable on a schedule and a dispatch, where a step only a release runs
-is a step whose defect ships with a release.
+is a step whose defect ships with a release. The script then asks
+whether the index has the project at all, under the same deadline: a
+package never published has nothing to install, and every cell of the
+matrix would fail on that alone. Only a 404 for the project's page
+answers no, and `--output` then records `published=false`, which the
+calling workflow reads to skip the matrix. A 200 answers yes. Any other
+answer, or none, is asked again until the deadline and then fails the
+run: an index that is down must not read as a package that was never
+published. A tag that is a bare `v` names no version either, and is
+refused rather than read as no tag.
 
     uv run --no-project --python 3.15 \
-        .github/scripts/wait_for_pypi_release.py "$PACKAGE" "$TAG"
+        .github/scripts/wait_for_pypi_release.py "$PACKAGE" "$TAG" \
+        --output "$GITHUB_OUTPUT"
 """
 
 from __future__ import annotations
@@ -58,6 +68,8 @@ import re
 import time
 from http import HTTPStatus
 from http.client import HTTPException
+from pathlib import Path
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 # the simple index, which answers one page per project and 404 for a
@@ -162,6 +174,42 @@ def wait(
     return 1
 
 
+def known(url: str, timeout: float) -> bool | None:
+    """Return whether the index has the project, or None if it did not say.
+
+    A 404 is the index's answer for a project it has never had, and the
+    only answer read as no.
+    """
+    request = Request(url, headers={"Accept": ACCEPT}, method="GET")  # noqa: S310
+    # one clause each, so Sourcery reads it (btclib-org/.github#2028).
+    # HTTPError is an OSError too, so it comes first
+    try:  # sourcery skip: merge-except-handler
+        with urlopen(request, timeout=timeout) as answer:  # noqa: S310
+            return True if answer.status == HTTPStatus.OK else None
+    except HTTPError as failure:
+        with failure:
+            return False if failure.code == HTTPStatus.NOT_FOUND else None
+    except OSError:
+        return None
+    except HTTPException:
+        return None
+
+
+def published(
+    package: str, timeout: float, interval: float, request_timeout: float
+) -> bool | None:
+    """Ask the index whether it has the project, until it says or time is up."""
+    url = f"{INDEX}/{normalize(package)}/"
+    deadline = time.monotonic() + timeout
+    while (left := deadline - time.monotonic()) > 0:
+        answer = known(url, min(request_timeout, left))
+        if answer is not None:
+            return answer
+        print(f"the index has not said whether it has {package}")
+        time.sleep(min(interval, max(deadline - time.monotonic(), 0.0)))
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     """Read the tag from the command line and wait for what it names."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -172,15 +220,31 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--request-timeout", type=float, default=DEFAULT_REQUEST_TIMEOUT
     )
+    parser.add_argument(
+        "--output", type=Path, help="the file `published=` is appended to"
+    )
     args = parser.parse_args(argv)
 
-    version = args.tag.removeprefix("v")
-    if not version:
-        print("no release behind this run: nothing to wait for")
-        return 0
-    return wait(
-        args.package, version, args.timeout, args.interval, args.request_timeout
-    )
+    if version := args.tag.removeprefix("v"):
+        return wait(
+            args.package, version, args.timeout, args.interval, args.request_timeout
+        )
+    if args.tag:
+        print(f"::error::the tag {args.tag!r} names no version")
+        return 1
+    print(f"no release behind this run: asking whether the index has {args.package}")
+    found = published(args.package, args.timeout, args.interval, args.request_timeout)
+    if found is None:
+        print(
+            f"::error::the index did not say within {args.timeout:.0f} s "
+            f"whether it has {args.package}"
+        )
+        return 1
+    if args.output is not None:
+        with args.output.open("a", encoding="utf-8") as output:
+            output.write(f"published={str(found).lower()}\n")
+    print(f"the index {'has' if found else 'has no project'} {args.package}")
+    return 0
 
 
 if __name__ == "__main__":

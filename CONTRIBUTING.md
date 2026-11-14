@@ -198,11 +198,10 @@ has seen.
 
 When `main`'s CI is red after a merge, its repair takes priority over
 every other pull request, because until it lands `main`'s runs cannot
-tell a new failure from the one already there. A pull request armed with
-`--auto` (below) stays armed, and others keep landing meanwhile. Holding
-every landing for a repair costs more than the break it guards against,
-so the risk of landing on a red `main` is accepted
-(btclib-org/.github#1777).
+tell a new failure from the one already there. Other pull requests keep
+landing meanwhile. Holding every landing for a repair costs more than
+the break it guards against, so the risk of landing on a red `main` is
+accepted (btclib-org/.github#1777).
 
 A pull request whose required check is red only because `main` was red
 is closed and reopened once the repair lands (`gh pr close <n>`, then
@@ -213,9 +212,8 @@ run's log is read before the run is relied on: its line `HEAD is now at
 <sha> Merge <head> into <base>` names the merge it tested, and where
 `<base>` lacks the repair, the pull request is closed and reopened
 again. No push is made, so its approvals and its ack of record stand.
-Closing disarms `--auto`, so it is armed again once the checks are
-green. The reopen also runs the review bot again, and changes that
-review requests are answered like any other review's.
+The reopen also runs the review bot again, and changes that review
+requests are answered like any other review's.
 
 Then squash, [the only method the rule accepts][s11].
 
@@ -226,8 +224,9 @@ head**, through `gh pr merge` pinned to it:
 gh pr merge <n> --squash --match-head-commit <the head the checks ran on>
 ```
 
-With `--auto` added, GitHub runs the same merge once the approval and
-the checks are in.
+Whoever approved it runs that merge, or a session on the maintainer's
+word. Auto-merge is off, so no pull request can be armed, for the reason
+[section 11's *Merge method*][s11] gives.
 
 **Where the repository has a bypass, the maintainer may land without
 that approval, through it**: [`GOVERNANCE.md`][governance]'s *How a
@@ -288,23 +287,6 @@ settings and why they are what they are.
 [governance]: https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md
 [roadmap]: https://github.com/btclib-org/.github/blob/main/ROADMAP.md
 [good-first]: https://github.com/search?q=org%3Abtclib-org+label%3A%22good+first+issue%22+is%3Aopen&type=issues
-
-## Worktrees
-
-Run `git fetch origin` in the primary checkout, then check that
-`git status --porcelain` is empty and `git branch --show-current` is
-`main`. Run `git pull --ff-only` only when both checks pass, then verify
-`git rev-parse HEAD origin/main` prints the same sha twice. Create a separate
-worktree for each task with
-`git worktree add <path> origin/main -b <branch>`. After committing,
-remove it with `git worktree remove <path>`. If initialized submodules
-make that fail,
-check for uncommitted, untracked, and ignored files in the worktree and
-its initialized submodules. Preserve anything needed before retrying with
-`git worktree remove --force <path>`; it can delete those files. Keep the
-primary checkout clean and on `main`; do not
-switch branches or stash there. Hooks can fix files in place, and the local
-`main` and `refs/stash` are shared by all worktrees.
 
 ## This repository in particular
 

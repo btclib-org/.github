@@ -388,49 +388,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("btclib-wallet",),
     ),
     (
-        2038,
-        "test_prettier_leaves_the_gate_to_pre_commit_ci",
-        (
-            "ai-agents-process",
-            "base58-bech32",
-            "bbt",
-            "benchmarks",
-            "bip32-descriptors",
-            "bip39-slip39",
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-node",
-            "btclib-org.github.io",
-            "btclib-secp256k1",
-            "btclib-wallet",
-            "coin-addresses",
-            "ecc",
-            "functional-tests",
-            "portanode",
-            "seed-scan",
-        ),
-    ),
-    (
-        2038,
-        "test_the_editor_leaves_the_gate_to_pre_commit_ci",
-        (
-            "base58-bech32",
-            "bbt",
-            "benchmarks",
-            "bip32-descriptors",
-            "bip39-slip39",
-            "bitcoin-core-rpc",
-            "btclib",
-            "btclib-node",
-            "btclib-secp256k1",
-            "btclib-wallet",
-            "coin-addresses",
-            "ecc",
-            "functional-tests",
-            "seed-scan",
-        ),
-    ),
-    (
         2156,
         "test_a_job_running_the_suite_names_the_patch_the_floor_names",
         (
@@ -473,11 +430,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ),
     ),
     (
-        2197,
-        "test_a_registered_tree_released_within_six_months",
-        ("coin-addresses",),
-    ),
-    (
         2203,
         "test_a_registered_tree_released_within_six_months",
         ("seed-scan",),
@@ -490,11 +442,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         2230,
         "test_a_registered_tree_holds_its_answers",
-        ("seed-scan",),
-    ),
-    (
-        2230,
-        "test_a_scorecard_tree_has_a_recent_good_first_issue",
         ("seed-scan",),
     ),
 )

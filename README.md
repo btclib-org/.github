@@ -2232,13 +2232,13 @@ reason, a job reading the pull request's files deciding which builds run;
 and `codeql`, whose result the OpenSSF Scorecard reads off a merged pull
 request's own commits.
 
-**`sourcery` is a pull request's check and not a local gate.** It is no section
-4 hook because in a git worktree Sourcery refuses to run without a login or a
-tier that has the CLI and exits 1 having read nothing, so a local gate never
-read it; on a GitHub-hosted runner, whose checkout is a clone with a public
-`origin`, it reads with no login (btclib-org/.github#2005). A tree that tracks
-Python carries a `sourcery.yml` calling `reusable-sourcery.yml` on
-`pull_request` with no `paths` filter, with `synchronize` among its `types:`
+**`sourcery` is a pull request's check, and no section 4 hook.** In a git
+worktree Sourcery refuses to run without a login or a tier that has the CLI, and
+exits 1 having read nothing. In a clone whose `origin` is a public GitHub
+repository it reads with no login, and requires network access to run. A
+GitHub-hosted runner's checkout is such a clone (btclib-org/.github#2005). A
+tree that tracks Python carries a `sourcery.yml` calling `reusable-sourcery.yml`
+on `pull_request` with no `paths` filter, with `synchronize` among its `types:`
 where it lists them, and with no branch filter that excludes `main`, so that its
 protection can gain the check with no change to the caller, for the reason
 *`paths-ignore` only on `push`* gives. It reads the Python files the pull
@@ -2250,6 +2250,27 @@ that job alone. It is fixed, or answered at its own site as section 5 has a ruff
 finding answered with a `# noqa`: `# sourcery skip: <rule>` on the line Sourcery
 reports or on the `def` line of the function holding it, in the form section 4's
 `bare-sourcery-skip` admits, with its reason in a comment beside it.
+
+**A branch can be read before it is pushed, in a scratch clone of the
+checkout.** The clone's `origin` is set to the public repository, since Sourcery
+refuses a clone whose `origin` is a local path. The pull request's base branch
+is fetched from it, since the clone's `origin/<base>` is otherwise the
+checkout's local branch, which can be stale. Sourcery reads `.` in place of the
+diff's names where the job reads the whole tree, as the `whole` pattern of its
+script decides, `xargs -r` runs nothing where the diff lists none, and
+`pipefail` fails the run where git cannot read the base, as the job fails.
+`<python>` and `<version>` are what `reusable-sourcery.yml` pins:
+
+```shell
+git clone --no-checkout <checkout> <clone>
+git -C <clone> remote set-url origin https://github.com/btclib-org/<repo>
+git -C <clone> fetch origin <base>
+git -C <clone> checkout --detach <head>
+(set -o pipefail; git -C <clone> diff -z --name-only --no-renames \
+  --diff-filter=d origin/<base>... -- '*.py' |
+  xargs -0r uvx --directory <clone> --python <python> \
+  --from sourcery==<version> sourcery review --check --)
+```
 
 **`sourcery` is a required check in a tree whose caller is in place and that no
 `BACKLOG` row of `test_a_python_tree_calls_sourcery_with_its_rules_off` in
@@ -3052,15 +3073,13 @@ string, which the endpoint refuses. `PATCH` the sub-endpoint; a partial
 
 ### Merge method
 
-**Squash is the only button enabled**, and auto-merge presses it once the
-review and the checks are in. One change is one commit on `main`. A merge
-commit is refused by linear history already; rebase-and-merge is the one
-deliberately removed, since it replays a branch's review steps onto
-`main`.
+**Squash is the only button enabled**: one change is one commit on
+`main`. Linear history already refuses a merge commit; rebase-and-merge
+is removed, since it replays a branch's review steps onto `main`.
 
-**`allow_auto_merge` is on**, and a copy reads it back with the other
-merge settings. Off, every landing waits on somebody pressing *Squash
-and merge* when the last check goes green, and nothing turns red.
+**The merge is explicit and `allow_auto_merge` is off**, so no pull request can
+be armed: an armed one would merge at a moment nobody reads, once the approval
+and the required checks are in, which leave out the ack of record (*Review*).
 
 `squash_merge_commit_title` and `squash_merge_commit_message` are set so
 that a single-commit branch lands under its own subject and a longer one
@@ -3257,8 +3276,9 @@ what the type buys is the group, where the run supersedes a review
 nobody is going to read.
 
 **One organization variable turns on the review and the `@claude`
-answer.** `reusable-claude-review.yml`'s two jobs each carry
-`if: vars.CLAUDE_REVIEW_ENABLED == 'true'`, and every caller reaches both:
+answer.** The review and the mention jobs of `reusable-claude-review.yml`
+each carry `if: vars.CLAUDE_REVIEW_ENABLED == 'true'`, and every caller
+reaches both:
 
 ```shell
 gh api orgs/<org>/actions/variables/CLAUDE_REVIEW_ENABLED \
@@ -3269,9 +3289,9 @@ It answers `["true","all"]`. An undefined `vars.X` is the empty string,
 so the variable's absence is the off state. The switch is the
 organization's, at `visibility=all`, so that no tree can be forgotten.
 
-**Both jobs name an Opus model with `--model` in `claude_args`**, rather
-than taking the action's default, because the review judges claims about
-code. The workflow holds the id.
+**The review and the mention name an Opus model with `--model` in
+`claude_args`**, rather than taking the action's default, because the
+review judges claims about code. The workflow holds the id.
 
 **A pull request that adds or edits `claude-review.yml` gets no ack**
 until the change is on `main`, for the reason the workflow's own header
@@ -3286,6 +3306,14 @@ colour.
 
 It is **not a required check**, its own header saying why: it is what a
 person landing the pull request reads before pressing.
+
+**The pull request shows the review's state in reactions** by
+`github-actions[bot]`: the eyes while it runs, then `+1`, `-1` or
+`confused` for an ack of the head it read, a refusal of it, or no
+verdict on it. Every push clears them first, so a `+1` names the head it
+was posted for unless a removal failed. `reusable-claude-review.yml`'s
+header says why separate jobs post them and not the model, and what a
+failed or cancelled run leaves.
 
 **CodeRabbit is another reviewing bot, and its review is neither the ack
 of record nor a required check.** Its findings are a reading, answered as
@@ -4111,10 +4139,10 @@ A label means what its description says. Who applies and removes it:
 - **The check reads the index for the version the tag names**, so a first
   release is no different from any other: the call passes the tag, the wait
   holds until the index serves that version, and it fails on its deadline rather
-  than let the matrix install the version the tag replaces. What has nothing to
-  read before a first release is the schedule, which passes no version, waits
-  for nothing and installs whatever the index serves at the time. A rehearsal
-  has no such job either: the check reads the release index.
+  than let the matrix install the version the tag replaces. The schedule passes
+  no version: it installs whatever the index serves at the time, or skips as
+  `reusable-wait-for-index.yml`'s header says of its `published` output. A
+  rehearsal has no such job: the check reads the release index.
 
 ## 13. Editor and agent configuration
 
@@ -4142,11 +4170,10 @@ which `uv sync` built the extension into — so `fromEnvironment` under the
 mirror.
 
 `AGENTS.md` gives each repository concise, provider-neutral guidance for
-coding agents and points to its canonical documents. Contributor
-procedures there would duplicate `CONTRIBUTING.md`, which holds worktree
-setup and cleanup. Claude-specific commands belong under `.claude/` where
-needed, as editor settings belong under `.vscode/`; in `AGENTS.md` they
-would make the shared guidance provider-specific.
+coding agents, points to its canonical documents, and may suggest a worktree
+per task; contributor procedures stay in `CONTRIBUTING.md`. Claude-specific
+commands belong under `.claude/`, as editor settings belong under `.vscode/`;
+in `AGENTS.md` they would make the shared guidance provider-specific.
 
 ## 14. Copied verbatim, and decided per repository
 
@@ -4416,7 +4443,8 @@ that is `read`, and `allowed_actions: all` with `sha_pinning_required: true`:
 ```shell
 R=<org>/<repo>
 gh api repos/$R --jq '{allow_squash_merge, allow_merge_commit,
-  allow_rebase_merge, delete_branch_on_merge, security_and_analysis}'
+  allow_rebase_merge, allow_auto_merge, delete_branch_on_merge,
+  security_and_analysis}'
 gh api repos/$R/actions/permissions/workflow
 gh api repos/$R/actions/permissions \
   --jq '{allowed_actions, sha_pinning_required}'
@@ -4967,7 +4995,7 @@ No tool checks them.
    an empty repository's first pushed branch becomes the default
    whatever it is named, and a tree built on a branch of its own pushes
    that branch first;
-   squash-only, with auto-merge; `delete_branch_on_merge`; section 11's
+   squash-only, auto-merge off; `delete_branch_on_merge`; section 11's
    rulesets — only after that push, since section 11's bypass mode
    refuses a direct one once `main-self-merge` is active, and the root
    commit is necessarily one; `main-self-merge`'s bypass is the
