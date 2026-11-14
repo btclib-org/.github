@@ -445,6 +445,11 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("seed-scan",),
     ),
     (
+        2275,
+        "test_a_test_module_defining_no_test_is_a_body_its_node_modules_call",
+        ("functional-tests",),
+    ),
+    (
         2282,
         "test_a_readme_opens_its_contributing_section_with_the_paragraph",
         (
