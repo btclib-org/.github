@@ -18,6 +18,7 @@ nothing.
 from __future__ import annotations
 
 import ast
+from collections import Counter
 from typing import TYPE_CHECKING
 
 import pytest
@@ -148,24 +149,68 @@ def dotted(root: Path, path: Path) -> str:
     return ".".join(path.relative_to(root).with_suffix("").parts)
 
 
-def calls_the_body(
-    root: Path, body: Path, parsed: ast.Module, caller: ast.Module
-) -> bool:
-    """Say whether a module calls a function of the body module from a test.
+SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)
+"""What opens a scope inside a test, whose calls are not the test's own."""
 
-    The function is a top-level `def` of the body, imported by a
-    top-level `from` statement of the caller in one of two forms: the
-    body's full name from the checkout's root
-    (`from tests.integration.x_test import f`), or the body's own name
-    relative to its directory (`from .x_test import f`). A test, a
-    top-level function whose name starts `test`, calls it by the name
-    it was imported as.
+
+def own_scope(test: ast.FunctionDef | ast.AsyncFunctionDef) -> Iterator[ast.AST]:
+    """Yield the nodes of a test's body that belong to its own scope.
+
+    Every node under the test's statements, down to but not into a
+    nested `def`, `async def`, `lambda` or `class`: those are yielded,
+    and what they hold is not.
+
+    :param test: the test function.
+    :yields: each node, in no particular order.
+    """
+    stack: list[ast.AST] = list(test.body)
+    while stack:
+        node = stack.pop()
+        yield node
+        if not isinstance(node, SCOPES):
+            stack.extend(ast.iter_child_nodes(node))
+
+
+def bound(test: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
+    """Return the names a test binds in its own scope.
+
+    Each `arg` of its signature, and in `own_scope` each name stored or
+    deleted, each name an `import` binds, each nested `def` or `class`,
+    and each `except ... as` name. Any of them makes the name local to
+    the test for the whole of its body.
+
+    :param test: the test function.
+    :returns: the names.
+    """
+    names = {node.arg for node in ast.walk(test.args) if isinstance(node, ast.arg)}
+    for node in own_scope(test):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store | ast.Del):
+            names.add(node.id)
+        elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+            names.add(node.name)
+        elif isinstance(node, ast.alias):
+            names.add((node.asname or node.name).split(".")[0])
+        elif isinstance(node, ast.ExceptHandler) and node.name:
+            names.add(node.name)
+    return names
+
+
+def called(root: Path, body: Path, parsed: ast.Module, caller: ast.Module) -> set[str]:
+    """Return the functions of the body module a module calls from a test.
+
+    A function is a top-level `def` of the body, imported by a top-level
+    `from` statement of the caller in one of two forms: the body's full
+    name from the checkout's root (`from tests.integration.x_test import
+    f`), or the body's own name relative to its directory (`from .x_test
+    import f`). A test, a top-level function whose name starts `test`,
+    calls it by the name it was imported as, in its `own_scope`, and
+    binds no such name itself (`bound`).
 
     :param root: the root of the checkout.
     :param body: the body module's path.
     :param parsed: the body module, parsed.
     :param caller: the parsed module that may call it.
-    :returns: whether it does.
+    :returns: the names, as the body defines them, of the functions called.
     """
     functions = {
         node.name
@@ -174,7 +219,7 @@ def calls_the_body(
     }
     stem = body.name.removesuffix(".py")
     imported = {
-        alias.asname or alias.name
+        alias.asname or alias.name: alias.name
         for node in caller.body
         if isinstance(node, ast.ImportFrom)
         and (
@@ -184,15 +229,23 @@ def calls_the_body(
         for alias in node.names
         if alias.name in functions
     }
-    return any(
-        isinstance(call, ast.Call)
-        and isinstance(call.func, ast.Name)
-        and call.func.id in imported
-        for test in caller.body
-        if isinstance(test, ast.FunctionDef | ast.AsyncFunctionDef)
-        and test.name.startswith("test")
-        for call in ast.walk(test)
-    )
+    out: set[str] = set()
+    for test in caller.body:
+        if not (
+            isinstance(test, ast.FunctionDef | ast.AsyncFunctionDef)
+            and test.name.startswith("test")
+        ):
+            continue
+        shadowed = bound(test)
+        out.update(
+            imported[node.func.id]
+            for node in own_scope(test)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in imported
+            and node.func.id not in shadowed
+        )
+    return out
 
 
 def bodiless(root: Path) -> list[str]:
@@ -202,10 +255,9 @@ def bodiless(root: Path) -> list[str]:
     defines no test is section 7's exception only where it is the body of
     a test run on several node implementations: at least `NODES` modules
     in its own directory, each named `<file>_<node>_test.py` for its own
-    `<file>_test.py`, call a function of it from a test, as
-    `calls_the_body` reads a call. Anything else is shared code in a
-    module whose name says "test", which section 7 puts in a package
-    `__init__.py`.
+    `<file>_test.py`, call the same function of it from a test, as
+    `called` reads a call. Anything else is shared code in a module whose
+    name says "test", which section 7 puts in a package `__init__.py`.
 
     :param root: the root of the checkout.
     :returns: the offending paths, relative to the root, sorted.
@@ -221,14 +273,13 @@ def bodiless(root: Path) -> list[str]:
         if defines_a_test(module):
             continue
         prefix = path.name.removesuffix(SUFFIX) + "_"
-        callers = [
-            other
+        callers = Counter(
+            function
             for other, tree in parsed.items()
-            if other.parent == path.parent
-            and other.name.startswith(prefix)
-            and calls_the_body(root, path, module, tree)
-        ]
-        if len(callers) < NODES:
+            if other.parent == path.parent and other.name.startswith(prefix)
+            for function in called(root, path, module, tree)
+        )
+        if max(callers.values(), default=0) < NODES:
             wrong.append(str(path.relative_to(root)))
     return sorted(wrong)
 
@@ -325,6 +376,45 @@ GUARDED_IMPORT = (
 )
 """A caller importing the function under `if TYPE_CHECKING:` only."""
 
+NESTED_DEF = (
+    ABSOLUTE + "def test_it(adapter):\n"
+    "    def unused():\n"
+    "        a_block_reaches_every_node(adapter)\n"
+)
+"""A caller whose call is in a function its test defines and never runs."""
+
+NESTED_LAMBDA = (
+    ABSOLUTE + "def test_it(adapter):\n"
+    "    unused = lambda: a_block_reaches_every_node(adapter)\n"
+)
+"""A caller whose call is in a lambda its test never calls."""
+
+SHADOWING_PARAMETER = (
+    ABSOLUTE + "def test_it(a_block_reaches_every_node):\n"
+    "    a_block_reaches_every_node(None)\n"
+)
+"""A caller whose test takes a fixture of the body's name, and calls that."""
+
+SHADOWING_ASSIGNMENT = (
+    ABSOLUTE + "def test_it(adapter):\n"
+    "    a_block_reaches_every_node = print\n"
+    "    a_block_reaches_every_node(adapter)\n"
+)
+"""A caller whose test assigns the body's name before calling it."""
+
+SHADOWS = {
+    "keyword-only parameter": "def test_it(*, a_block_reaches_every_node):\n",
+    "deletion": "def test_it(adapter):\n    del a_block_reaches_every_node\n",
+    "nested def": "def test_it(adapter):\n"
+    "    def a_block_reaches_every_node(adapter):\n        pass\n",
+    "nested class": "def test_it(adapter):\n"
+    "    class a_block_reaches_every_node:\n        pass\n",
+    "import": "def test_it(adapter):\n    import os as a_block_reaches_every_node\n",
+    "except as": "def test_it(adapter):\n    try:\n        pass\n"
+    "    except ImportError as a_block_reaches_every_node:\n        pass\n",
+}
+"""Each way a test binds the body's name, its call then following."""
+
 REFUSED = [f"tests/integration/{STEM}.py"]
 """What `bodiless` answers on a stand-in tree whose body it refuses."""
 
@@ -377,6 +467,10 @@ def test_a_body_its_node_modules_call_is_admitted(tmp_path: Path) -> None:
         pytest.param((PLAIN_IMPORT,) * 2, id="a plain import"),
         pytest.param((NESTED_IMPORT,) * 2, id="an import inside the test"),
         pytest.param((GUARDED_IMPORT,) * 2, id="an import under TYPE_CHECKING"),
+        pytest.param((NESTED_DEF,) * 2, id="a call in a nested def"),
+        pytest.param((NESTED_LAMBDA,) * 2, id="a call in a lambda"),
+        pytest.param((SHADOWING_PARAMETER,) * 2, id="a parameter of the name"),
+        pytest.param((SHADOWING_ASSIGNMENT,) * 2, id="an assignment of the name"),
         pytest.param(
             (f"from tests.other.{STEM} import a_block_reaches_every_node\n{CALL}",) * 2,
             id="a same-named module of another directory, by its full name",
@@ -392,7 +486,7 @@ def test_a_body_not_called_from_per_node_tests_is_refused(
 ) -> None:
     """The body is refused unless two per-node tests beside it call it.
 
-    Each case moves one condition of `bodiless` or `calls_the_body` off.
+    Each case moves one condition of `bodiless` or `called` off.
 
     :param tmp_path: where the stand-in tree is built.
     :param callers: the per-node modules' sources.
@@ -407,6 +501,63 @@ def test_per_node_tests_of_another_directory_are_no_callers(tmp_path: Path) -> N
     """
     _tree(tmp_path, ABSOLUTE + CALL, ABSOLUTE + CALL, where="other")
     assert bodiless(tmp_path) == REFUSED
+
+
+@pytest.mark.parametrize("binding", SHADOWS.values(), ids=SHADOWS.keys())
+def test_a_call_of_a_name_the_test_binds_is_refused(
+    tmp_path: Path, binding: str
+) -> None:
+    """A test that binds the body's name calls its own, not the body.
+
+    :param tmp_path: where the stand-in tree is built.
+    :param binding: the test's opening, up to the call.
+    """
+    caller = ABSOLUTE + binding + "    a_block_reaches_every_node(None)\n"
+    _tree(tmp_path, caller, caller)
+    assert bodiless(tmp_path) == REFUSED
+
+
+def test_a_call_in_a_block_of_the_test_counts(tmp_path: Path) -> None:
+    """A call under an `if` or a `with` of the test is in its own scope.
+
+    :param tmp_path: where the stand-in tree is built.
+    """
+    under_if = (
+        ABSOLUTE + "def test_it(adapter):\n"
+        "    if adapter:\n"
+        "        a_block_reaches_every_node(adapter)\n"
+    )
+    under_with = (
+        ABSOLUTE + "def test_it(adapter):\n"
+        "    with adapter:\n"
+        "        a_block_reaches_every_node(adapter)\n"
+    )
+    _tree(tmp_path, under_if, under_with)
+    assert bodiless(tmp_path) == []
+
+
+def test_two_functions_each_called_by_one_node_are_refused(tmp_path: Path) -> None:
+    """Each node module calls the body: one function of it, called by both.
+
+    A body module whose one function only the bitcoind module calls,
+    and whose other only the btcd module calls, is no shared body.
+
+    :param tmp_path: where the stand-in tree is built.
+    """
+    body = BODY + "\n\ndef another(adapter):\n    assert adapter\n"
+    other = (
+        f"from tests.integration.{STEM} import another\n\n\n"
+        "def test_it(adapter):\n    another(adapter)\n"
+    )
+    _tree(tmp_path, ABSOLUTE + CALL, other, body=body)
+    assert bodiless(tmp_path) == REFUSED
+    _tree(
+        tmp_path,
+        ABSOLUTE + CALL,
+        ABSOLUTE + CALL + other.replace("test_it", "test_too"),
+        body=body,
+    )
+    assert bodiless(tmp_path) == []
 
 
 def test_a_body_that_is_a_class_is_refused(tmp_path: Path) -> None:
