@@ -59,10 +59,13 @@ concurrency:
   # each pushing "patch-1", which share one head_ref group and cancel
   # each other.
   #
-  # A run with no pull request -- a push to main, a dispatch -- has no
-  # number and falls back to github.ref, which is what gives it a group
-  # of its own
-  group: lint-${{ github.event.pull_request.number || github.ref }}
+  # A push run is keyed on its commit instead, so each push to main has a
+  # group of its own, and a run that no later push cancels or replaces:
+  # section 10 has why cancel-in-progress: false and queue: max do not
+  # give that. A dispatch has no number and falls back to github.ref
+  group: >-
+    lint-${{ github.event_name == 'push' && github.sha
+    || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
