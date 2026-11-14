@@ -2232,13 +2232,13 @@ reason, a job reading the pull request's files deciding which builds run;
 and `codeql`, whose result the OpenSSF Scorecard reads off a merged pull
 request's own commits.
 
-**`sourcery` is a pull request's check and not a local gate.** It is no section
-4 hook because in a git worktree Sourcery refuses to run without a login or a
-tier that has the CLI and exits 1 having read nothing, so a local gate never
-read it; on a GitHub-hosted runner, whose checkout is a clone with a public
-`origin`, it reads with no login (btclib-org/.github#2005). A tree that tracks
-Python carries a `sourcery.yml` calling `reusable-sourcery.yml` on
-`pull_request` with no `paths` filter, with `synchronize` among its `types:`
+**`sourcery` is a pull request's check, and no section 4 hook.** In a git
+worktree Sourcery refuses to run without a login or a tier that has the CLI, and
+exits 1 having read nothing. In a clone whose `origin` is a public GitHub
+repository it reads with no login, and requires network access to run. A
+GitHub-hosted runner's checkout is such a clone (btclib-org/.github#2005). A
+tree that tracks Python carries a `sourcery.yml` calling `reusable-sourcery.yml`
+on `pull_request` with no `paths` filter, with `synchronize` among its `types:`
 where it lists them, and with no branch filter that excludes `main`, so that its
 protection can gain the check with no change to the caller, for the reason
 *`paths-ignore` only on `push`* gives. It reads the Python files the pull
@@ -2250,6 +2250,20 @@ that job alone. It is fixed, or answered at its own site as section 5 has a ruff
 finding answered with a `# noqa`: `# sourcery skip: <rule>` on the line Sourcery
 reports or on the `def` line of the function holding it, in the form section 4's
 `bare-sourcery-skip` admits, with its reason in a comment beside it.
+
+**Before each push, a branch is read in a scratch clone of the checkout**, by
+the command `reusable-sourcery.yml` runs, on the files that job would read on
+the pull request. The clone's `origin` is set to the public repository, since
+Sourcery refuses a clone whose `origin` is a local path, and `main` is fetched
+from it, since the clone's `origin/main` is otherwise the checkout's local
+`main`, which can be stale. The branch's head is checked out detached:
+
+```shell
+git clone --no-checkout <checkout> <clone>
+git -C <clone> remote set-url origin https://github.com/btclib-org/<repo>
+git -C <clone> fetch origin main
+git -C <clone> checkout --detach <head>
+```
 
 **`sourcery` is a required check in a tree whose caller is in place and that no
 `BACKLOG` row of `test_a_python_tree_calls_sourcery_with_its_rules_off` in
