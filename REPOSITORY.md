@@ -49,7 +49,10 @@ the answer the sibling repositories give.
 ```shell
 gh api repos/btclib-org/.github/branches/main/protection \
   --jq '.required_status_checks | {strict, checks: [.checks[].context]}'
-# {"checks":["Lint","Dependency review","Sign-off","sourcery / Sourcery"],"strict":false}
+```
+
+```json
+{"checks":["Lint","Dependency review","Sign-off","sourcery / Sourcery"],"strict":false}
 ```
 
 The rulesets below enforce the signatures and the review, and [classic
@@ -124,7 +127,10 @@ reported by anything else.
 
 ```shell
 gh api repos/btclib-org/.github --jq '.default_branch'
-# main
+```
+
+```text
+main
 ```
 
 Everything reaches it through a pull request. Rules [aggregate rather
@@ -142,18 +148,21 @@ gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
            rules: [.rules[].type],
            bypass: [.bypass_actors[]?
              | "\(.actor_type) \(.actor_id) \(.bypass_mode)"]}'
-# {"bypass":[],"enforcement":"active","name":"main-integrity",
-#  "refs":["refs/heads/main"],
-#  "rules":["required_linear_history","non_fast_forward","deletion"],
-#  "target":"branch"}
-# {"bypass":["User 3296421 pull_request"],"enforcement":"active",
-#  "name":"main-self-merge","refs":["refs/heads/main"],
-#  "rules":["pull_request"],"target":"branch"}
-# {"bypass":[],"enforcement":"active","name":"tag-integrity",
-#  "refs":["refs/tags/v*"],"rules":["required_signatures"],"target":"tag"}
-# {"bypass":["RepositoryRole 5 always"],"enforcement":"active",
-#  "name":"tag-release-actors","refs":["refs/tags/v*"],
-#  "rules":["creation","update","deletion"],"target":"tag"}
+```
+
+```text
+{"bypass":[],"enforcement":"active","name":"main-integrity",
+ "refs":["refs/heads/main"],
+ "rules":["required_linear_history","non_fast_forward","deletion"],
+ "target":"branch"}
+{"bypass":["User 3296421 pull_request"],"enforcement":"active",
+ "name":"main-self-merge","refs":["refs/heads/main"],
+ "rules":["pull_request"],"target":"branch"}
+{"bypass":[],"enforcement":"active","name":"tag-integrity",
+ "refs":["refs/tags/v*"],"rules":["required_signatures"],"target":"tag"}
+{"bypass":["RepositoryRole 5 always"],"enforcement":"active",
+ "name":"tag-release-actors","refs":["refs/tags/v*"],
+ "rules":["creation","update","deletion"],"target":"tag"}
 ```
 
 [Section 11][s11-branch] says what each of these rulesets holds and who
@@ -169,13 +178,16 @@ and [section 11][s11-tokens] say which jobs read `main`.
 gh api repos/btclib-org/.github/rulesets --jq '.[].id' \
   | xargs -I{} gh api repos/btclib-org/.github/rulesets/{} \
     --jq '.rules[] | select(.type=="pull_request") | .parameters'
-# {"allowed_merge_methods":["squash"],
-#  "dismiss_stale_reviews_on_push":true,
-#  "dismissal_restriction":{"allowed_actors":[],"enabled":false},
-#  "require_code_owner_review":false,
-#  "require_extra_approval_for_unattributed_changes":true,
-#  "require_last_push_approval":false,"required_approving_review_count":1,
-#  "required_review_thread_resolution":true,"required_reviewers":[]}
+```
+
+```json
+{"allowed_merge_methods":["squash"],
+ "dismiss_stale_reviews_on_push":true,
+ "dismissal_restriction":{"allowed_actors":[],"enabled":false},
+ "require_code_owner_review":false,
+ "require_extra_approval_for_unattributed_changes":true,
+ "require_last_push_approval":false,"required_approving_review_count":1,
+ "required_review_thread_resolution":true,"required_reviewers":[]}
 ```
 
 The bypass reaches that whole block and not the approving review alone,
@@ -198,9 +210,18 @@ gh api graphql -f query='{repository(owner: "btclib-org", name: ".github")
   --jq '.data.repository.rulesets.nodes[].bypassActors.nodes[]
     | select(.repositoryRoleName)
     | "\(.repositoryRoleDatabaseId) \(.repositoryRoleName)"'
-# 5 admin
+```
+
+```text
+5 admin
+```
+
+```shell
 gh api users/fametrano --jq .id
-# 3296421
+```
+
+```text
+3296421
 ```
 
 `tag-integrity` and `tag-release-actors` hold for this repository's own
@@ -222,7 +243,10 @@ gh api repos/<owner>/<repo>/git/tags/<sha> --jq .verification
 ```shell
 gh api repos/btclib-org/.github/commits/main \
   --jq '.commit.verification | {verified, reason}'
-# {"reason":"valid","verified":true}
+```
+
+```json
+{"reason":"valid","verified":true}
 ```
 
 No ruleset over `main` carries `required_signatures`, so nothing refuses
@@ -250,7 +274,10 @@ differently. Read at 2026-10-15T15:00:34Z.
 ```shell
 gh api repos/btclib-org/.github/branches/main/protection \
   --jq '.required_signatures.enabled'
-# false
+```
+
+```text
+false
 ```
 
 Classic protection's own copy of the rule is off: [the standard states
@@ -265,9 +292,12 @@ gh api repos/btclib-org/.github \
          delete_on_merge: .delete_branch_on_merge,
          title: .squash_merge_commit_title,
          message: .squash_merge_commit_message}'
-# {"auto":false,"delete_on_merge":true,"merge":false,
-#  "message":"COMMIT_MESSAGES","rebase":false,"squash":true,
-#  "title":"COMMIT_OR_PR_TITLE"}
+```
+
+```json
+{"auto":false,"delete_on_merge":true,"merge":false,
+ "message":"COMMIT_MESSAGES","rebase":false,"squash":true,
+ "title":"COMMIT_OR_PR_TITLE"}
 ```
 
 [Squash is the only method the standard enables][s11-merge], and
@@ -300,7 +330,10 @@ rather than merged.
 gh api repos/btclib-org/.github \
   --jq '{issues: .has_issues, visibility: .visibility,
          wiki: .has_wiki, projects: .has_projects}'
-# {"issues":true,"projects":false,"visibility":"public","wiki":false}
+```
+
+```json
+{"issues":true,"projects":false,"visibility":"public","wiki":false}
 ```
 
 Issues are where this organization's cross-repository findings live, and
@@ -322,7 +355,10 @@ per-user view of the same issues.
 
 ```shell
 gh api repos/btclib-org/.github --jq '.topics'
-# ["bitcoin","btclib","github-organization","repository-standard"]
+```
+
+```json
+["bitcoin","btclib","github-organization","repository-standard"]
 ```
 
 [Section 3 makes a package's `keywords` its topics][s3].
@@ -351,8 +387,11 @@ topics until somebody sets them.
 
 ```shell
 gh api repos/btclib-org/.github/actions/permissions/workflow
-# {"default_workflow_permissions":"read",
-#  "can_approve_pull_request_reviews":false}
+```
+
+```json
+{"default_workflow_permissions":"read",
+ "can_approve_pull_request_reviews":false}
 ```
 
 `read`, which is what every workflow here needs: `lint.yml` and
@@ -376,7 +415,10 @@ moved.
 ```shell
 gh api repos/btclib-org/.github/actions/permissions \
   --jq '{allowed_actions, sha_pinning_required}'
-# {"allowed_actions":"all","sha_pinning_required":true}
+```
+
+```json
+{"allowed_actions":"all","sha_pinning_required":true}
 ```
 
 `sha_pinning_required` is set at the organization level: [section 11
@@ -386,9 +428,18 @@ has the reasons for both fields][s11-tokens].
 
 ```shell
 gh api repos/btclib-org/.github --jq .web_commit_signoff_required
-# true
+```
+
+```text
+true
+```
+
+```shell
 gh api orgs/btclib-org --jq .web_commit_signoff_required
-# true
+```
+
+```text
+true
 ```
 
 Set at the organization level, [for the reason section 11
@@ -400,9 +451,12 @@ gives][s11-sigs].
 gh api repos/btclib-org/.github \
   --jq '.security_and_analysis | {dependabot_security_updates,
         secret_scanning, secret_scanning_push_protection}'
-# {"dependabot_security_updates":{"status":"enabled"},
-#  "secret_scanning":{"status":"enabled"},
-#  "secret_scanning_push_protection":{"status":"enabled"}}
+```
+
+```json
+{"dependabot_security_updates":{"status":"enabled"},
+ "secret_scanning":{"status":"enabled"},
+ "secret_scanning_push_protection":{"status":"enabled"}}
 ```
 
 [The standard asks for secret scanning, its push protection and
@@ -421,7 +475,10 @@ dependencies a pull request adds][s11-tokens] reads it:
 
 ```shell
 gh api repos/btclib-org/.github/dependency-graph/compare/HEAD...HEAD
-# []
+```
+
+```json
+[]
 ```
 
 Version bumps are the other half of what Dependabot does here, and they
@@ -438,7 +495,10 @@ and `meta`, so a second bot on the same pin would only compete with it.
 
 ```shell
 gh api repos/btclib-org/.github/private-vulnerability-reporting
-# {"enabled":true}
+```
+
+```json
+{"enabled":true}
 ```
 
 On, [as the standard asks of every tier][s2-root].
@@ -452,7 +512,10 @@ that re-derives it:
 
 ```shell
 gh api orgs/btclib-org --jq .plan.name
-# free
+```
+
+```text
+free
 ```
 
 The plan is a fact about a changing world rather than a setting this
@@ -474,8 +537,11 @@ Dependabot* above is filtered past them:
 gh api repos/btclib-org/.github \
   --jq '.security_and_analysis | {secret_scanning_non_provider_patterns,
         secret_scanning_validity_checks}'
-# {"secret_scanning_non_provider_patterns":{"status":"disabled"},
-#  "secret_scanning_validity_checks":{"status":"disabled"}}
+```
+
+```json
+{"secret_scanning_non_provider_patterns":{"status":"disabled"},
+ "secret_scanning_validity_checks":{"status":"disabled"}}
 ```
 
 They answer `disabled` because they are [plan-gated rather than
@@ -501,13 +567,16 @@ The site's response headers read back with:
 ```shell
 curl -sI https://btclib.org/ \
   | grep -i -E 'strict|content-security|x-content-type|x-frame'
-# strict-transport-security: max-age=31536000
-# x-frame-options: DENY
-# content-security-policy: default-src 'self'; script-src 'self';
-#   style-src 'self'; img-src 'self' data:; font-src 'self';
-#   object-src 'none'; base-uri 'self'; form-action 'self';
-#   frame-ancestors 'none'
-# x-content-type-options: nosniff
+```
+
+```text
+strict-transport-security: max-age=31536000
+x-frame-options: DENY
+content-security-policy: default-src 'self'; script-src 'self';
+  style-src 'self'; img-src 'self' data:; font-src 'self';
+  object-src 'none'; base-uri 'self'; form-action 'self';
+  frame-ancestors 'none'
+x-content-type-options: nosniff
 ```
 
 - **The hardening headers.** The Response Header Transform Rule
@@ -530,8 +599,11 @@ curl -sI https://btclib.org/ \
 
   ```shell
   curl -sI http://btclib.org/ | grep -i -E '^HTTP|^location'
-  # HTTP/1.1 301 Moved Permanently
-  # Location: https://btclib.org/
+  ```
+
+  ```text
+  HTTP/1.1 301 Moved Permanently
+  Location: https://btclib.org/
   ```
 
   The `301` is Cloudflare's own: it carries `Server: cloudflare` and
@@ -544,9 +616,12 @@ Cloudflare receives the domain's mail:
 
 ```shell
 dig +short MX btclib.org | sort
-# 10 route2.mx.cloudflare.net.
-# 10 route3.mx.cloudflare.net.
-# 38 route1.mx.cloudflare.net.
+```
+
+```text
+10 route2.mx.cloudflare.net.
+10 route3.mx.cloudflare.net.
+38 route1.mx.cloudflare.net.
 ```
 
 A maintainer reads the rules in the dashboard: *Compute → Email Service
@@ -615,11 +690,26 @@ repository's stores:
 
 ```shell
 gh api repos/btclib-org/.github/actions/secrets --jq '.secrets[].name'
-# ALIGNMENT_APP_PRIVATE_KEY
+```
+
+```text
+ALIGNMENT_APP_PRIVATE_KEY
+```
+
+```shell
 gh api repos/btclib-org/.github/actions/variables --jq '.variables[].name'
-# ALIGNMENT_APP_CLIENT_ID
+```
+
+```text
+ALIGNMENT_APP_CLIENT_ID
+```
+
+```shell
 gh api repos/btclib-org/.github/dependabot/secrets --jq .total_count
-# 0
+```
+
+```text
+0
 ```
 
 **A credential this repository spends and does not hold.**
@@ -630,9 +720,19 @@ no copy of it is kept here:
 ```shell
 gh api orgs/btclib-org/actions/secrets \
   --jq '.secrets[] | [.name, .visibility]'
+```
+
+```json
+["CLAUDE_CODE_OAUTH_TOKEN","all"]
+```
+
+```shell
 gh api orgs/btclib-org/dependabot/secrets \
   --jq '.secrets[] | [.name, .visibility]'
-# ["CLAUDE_CODE_OAUTH_TOKEN","all"], both
+```
+
+```json
+["CLAUDE_CODE_OAUTH_TOKEN","all"]
 ```
 
 **A switch this repository does not set.** The review and the mention
@@ -645,7 +745,10 @@ above, and the organization's holds the switch:
 ```shell
 gh api orgs/btclib-org/actions/variables \
   --jq '.variables[] | [.name, .value, .visibility]'
-# ["CLAUDE_REVIEW_ENABLED","true","all"]
+```
+
+```json
+["CLAUDE_REVIEW_ENABLED","true","all"]
 ```
 
 [Section 11 reads that value as the switch's on state][s11-review].

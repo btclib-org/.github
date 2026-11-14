@@ -1960,7 +1960,12 @@ without adding to it is deleted.
   the next; a value the reader sets goes in an assignment block above
   the fence and is read as `${name:?}`. A comment goes above the fence
   as prose: to an interactive `zsh` a `#` is a word, and an apostrophe
-  after it opens a quote that swallows the lines below.
+  after it opens a quote that swallows the lines below. A recorded
+  answer goes in its own fence below its command's: `json` where the
+  answer is one JSON object or array, `text` otherwise. A heredoc's body
+  is its command's input and not a command, so a `#` line there stays.
+  `tests/answers_test.py` refuses any other `#` line in a `shell` fence
+  of a tree's `REPOSITORY.md`.
 - **A comment whose first word is `shellcheck` is a directive.** Wrap so
   the word does not begin a line: a sentence that happens to parse as a
   directive suppresses a real finding, and the gate exits 0.

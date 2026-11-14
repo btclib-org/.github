@@ -449,6 +449,29 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         "test_a_test_module_defining_no_test_is_a_body_its_node_modules_call",
         ("functional-tests",),
     ),
+    (
+        2286,
+        "test_a_tree_keeps_its_answers_out_of_its_shell_fences",
+        (
+            "ai-agents-process",
+            "base58-bech32",
+            "bbt",
+            "benchmarks",
+            "bip32-descriptors",
+            "bip39-slip39",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-node",
+            "btclib-org.github.io",
+            "btclib-secp256k1",
+            "btclib-wallet",
+            "coin-addresses",
+            "ecc",
+            "functional-tests",
+            "portanode",
+            "seed-scan",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
