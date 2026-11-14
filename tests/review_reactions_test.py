@@ -51,6 +51,7 @@ SHARED = {
     "GH_TOKEN": "${{ secrets.GITHUB_TOKEN }}",
     "REPO": "${{ github.repository }}",
     "NUMBER": "${{ github.event.pull_request.number }}",
+    "HEAD_SHA": "${{ github.event.pull_request.head.sha }}",
 }
 
 # the pull request the stand-in is asked about
@@ -65,8 +66,10 @@ OTHER = "fedcba9876543210fedcba9876543210fedcba98"
 # separated by the unit separator. It answers a GET of the reactions or
 # the reviews with the file the test wrote for it, and a POST or a DELETE
 # by editing the reactions file, as the API does, a POST of a reaction
-# already there adding nothing; or by failing where FAIL_LIST or
-# FAIL_POST is set, or where FAIL_DELETE names the reaction removed
+# already there adding nothing. It answers a read of the pull request's
+# head with HEAD_NOW, the run's own head where that is unset. It fails
+# where FAIL_HEAD, FAIL_LIST or FAIL_POST is set, or where FAIL_DELETE
+# names the reaction removed
 STAND_IN = """#!/bin/sh
 for arg in "$@"; do printf '%s\\037' "$arg"; done >> "$CALLS"
 printf '\\n' >> "$CALLS"
@@ -84,6 +87,10 @@ case "$*" in
     ;;
   *"/reactions --paginate --slurp") [ -z "$FAIL_LIST" ] || exit 1; cat "$REACTIONS" ;;
   *"/reviews --paginate --slurp") cat "$REVIEWS" ;;
+  *"/pulls/"*" --jq .head.sha")
+    [ -z "$FAIL_HEAD" ] || exit 1
+    printf '%s\\n' "${HEAD_NOW:-$HEAD_SHA}"
+    ;;
   *) exit 9 ;;
 esac
 """
@@ -168,6 +175,7 @@ class Stand:
             "GH_TOKEN": "stand-in",
             "REPO": REPO,
             "NUMBER": NUMBER,
+            "HEAD_SHA": HEAD,
             **extra,
         }
         return subprocess.run(
@@ -222,6 +230,7 @@ def reaction(login: str, content: str, number: int) -> dict[str, Any]:
 
 POST = ["api", "--method", "POST", URL, "-f"]
 GET = ["api", URL, "--paginate", "--slurp"]
+READ_HEAD = ["api", f"repos/{REPO}/pulls/{NUMBER}", "--jq", ".head.sha"]
 
 
 def delete(number: int) -> list[str]:
@@ -259,6 +268,7 @@ def test_it_removes_the_job_s_others_then_adds_its_reaction(
     done = stand.run(only_step("start")["run"], REACTION=content)
     assert done.returncode == 0, done.stderr
     assert stand.recorded() == [
+        READ_HEAD,
         GET,
         *(delete(number) for kind, number in mine.items() if kind != content),
         [*POST, f"content={content}", "--silent"],
@@ -279,7 +289,7 @@ def test_an_empty_reaction_clears_and_posts_nothing(stand: Stand) -> None:
     stand.answer(reactions=[reaction(ACTIONS, "+1", 1), reaction("someone", "+1", 2)])
     done = stand.run(only_step("start")["run"], REACTION="")
     assert done.returncode == 0, done.stderr
-    assert stand.recorded() == [GET, delete(1)]
+    assert stand.recorded() == [READ_HEAD, GET, delete(1)]
     assert stand.left() == [("someone", "+1")]
 
 
@@ -308,7 +318,7 @@ def test_a_failed_removal_ends_the_shell(stand: Stand) -> None:
     done = stand.run(only_step("outcome")["run"], REACTION="-1", FAIL_DELETE="1")
     assert done.returncode == 0, done.stderr
     assert done.stdout == f"{WARNING}removing reaction 1 failed.\n"
-    assert stand.recorded() == [GET, delete(1)]
+    assert stand.recorded() == [READ_HEAD, GET, delete(1)]
     assert stand.left() == [(ACTIONS, "+1")]
 
 
@@ -321,7 +331,7 @@ def test_a_removal_failing_part_way_says_it_did_not_finish(stand: Stand) -> None
     done = stand.run(only_step("outcome")["run"], REACTION="-1", FAIL_DELETE="2")
     assert done.returncode == 0, done.stderr
     assert done.stdout == f"{WARNING}removing reaction 2 failed.\n"
-    assert stand.recorded() == [GET, delete(1), delete(2)]
+    assert stand.recorded() == [READ_HEAD, GET, delete(1), delete(2)]
     assert stand.left() == [(ACTIONS, "eyes")]
 
 
@@ -339,7 +349,44 @@ def test_a_refused_list_is_a_warning_and_not_a_red_job(stand: Stand, job: str) -
     done = stand.run(only_step(job)["run"], REACTION="confused", FAIL_LIST="1")
     assert done.returncode == 0, done.stderr
     assert done.stdout == f"{WARNING}listing them failed.\n"
-    assert stand.recorded() == [GET]
+    assert stand.recorded() == [READ_HEAD, GET]
+    assert stand.left() == [(ACTIONS, "+1")]
+
+
+def test_a_re_run_for_an_earlier_head_touches_no_reaction(stand: Stand) -> None:
+    """Head A acked, its `outcome` failed, head B pushed as a draft, A re-run.
+
+    B's `start` has cleared A's reactions; the re-run keeps A's event and
+    A's review output, and must not post A's `+1` on B
+    (btclib-org/.github#2271, CodeRabbit's comment 4573637815).
+
+    :param stand: the stand-in.
+    """
+    stand.answer(reactions=[reaction("someone", "+1", 1)])
+    done = stand.run(
+        only_step("outcome")["run"], REACTION="+1", HEAD_SHA=HEAD, HEAD_NOW=OTHER
+    )
+    assert done.returncode == 0, done.stderr
+    assert done.stdout == (
+        f"::warning::left the reactions alone: this run is for {HEAD}"
+        f" and the pull request is at {OTHER}.\n"
+    )
+    assert stand.recorded() == [READ_HEAD]
+    assert stand.left() == [("someone", "+1")]
+
+
+@pytest.mark.parametrize("job", ["start", "outcome"])
+def test_a_head_that_cannot_be_read_is_a_warning(stand: Stand, job: str) -> None:
+    """No reaction is touched where the run cannot tell it is the head's.
+
+    :param stand: the stand-in.
+    :param job: the reaction job.
+    """
+    stand.answer(reactions=[reaction(ACTIONS, "+1", 1)])
+    done = stand.run(only_step(job)["run"], REACTION="-1", FAIL_HEAD="1")
+    assert done.returncode == 0, done.stderr
+    assert done.stdout == f"{WARNING}reading the head failed.\n"
+    assert stand.recorded() == [READ_HEAD]
     assert stand.left() == [(ACTIONS, "+1")]
 
 

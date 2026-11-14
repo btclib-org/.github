@@ -255,6 +255,13 @@ name: reusable-claude-review
 # a review job past its own `timeout-minutes`, which ends that job
 # cancelled, is not measured.
 #
+# A run speaks for the head its event names, and a re-run keeps that
+# event, and the outputs of the jobs it does not re-run ("Re-run
+# workflows and jobs"). So a failed `outcome` of head A, re-run after B
+# was pushed, would post A's verdict on B. The shell reads the pull
+# request's head first and, where it is not the run's, warns and touches
+# no reaction.
+#
 # A run the concurrency group cancels skips `outcome` and keeps its eyes.
 # The group runs one run at a time, the next waiting until the cancelled
 # one has ended (GitHub's "Control workflow concurrency"), so the next
@@ -354,6 +361,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           REACTION: >-
             ${{ vars.CLAUDE_REVIEW_ENABLED == 'true'
                 && !github.event.pull_request.draft && 'eyes' || '' }}
@@ -368,6 +376,13 @@ jobs:
             ""|eyes|+1|-1|confused) ;;
             *) warn "$REACTION is none of this job's reactions" ;;
           esac
+          now=$(gh api "repos/$REPO/pulls/$NUMBER" --jq .head.sha) \
+            || warn "reading the head failed"
+          if [ "$now" != "$HEAD_SHA" ]; then
+            echo "::warning::left the reactions alone: this run is for" \
+                 "$HEAD_SHA and the pull request is at $now."
+            exit 0
+          fi
           url=repos/$REPO/issues/$NUMBER/reactions
           listed=$(gh api "$url" --paginate --slurp) || warn "listing them failed"
           ids=$(printf '%s' "$listed" | jq -r --arg keep "$REACTION" '.[][]
@@ -1047,6 +1062,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           REACTION: ${{ needs.review.outputs.reaction || 'confused' }}
         run: |
           # a warning and exit 0 on any failure, for the reason the
@@ -1059,6 +1075,13 @@ jobs:
             ""|eyes|+1|-1|confused) ;;
             *) warn "$REACTION is none of this job's reactions" ;;
           esac
+          now=$(gh api "repos/$REPO/pulls/$NUMBER" --jq .head.sha) \
+            || warn "reading the head failed"
+          if [ "$now" != "$HEAD_SHA" ]; then
+            echo "::warning::left the reactions alone: this run is for" \
+                 "$HEAD_SHA and the pull request is at $now."
+            exit 0
+          fi
           url=repos/$REPO/issues/$NUMBER/reactions
           listed=$(gh api "$url" --paginate --slurp) || warn "listing them failed"
           ids=$(printf '%s' "$listed" | jq -r --arg keep "$REACTION" '.[][]
