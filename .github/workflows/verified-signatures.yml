@@ -34,10 +34,14 @@ permissions:
 
 concurrency:
   # named literally rather than through github.workflow, as everywhere
-  # else here. Keyed on the commit pushed, and not cancelling: two
+  # else here. Section 10's key: a push run is keyed on the commit
+  # pushed, and a dispatch falls back to github.ref, so a dispatch at
+  # that commit cannot share the push run's group. Not cancelling: two
   # pushes in a row each have a range to check, and the later run does
   # not cover the earlier one's
-  group: verified-signatures-${{ github.sha }}
+  group: >-
+    verified-signatures-${{ github.event_name == 'push' && github.sha
+    || github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 
 jobs:

@@ -2113,10 +2113,10 @@ without adding to it is deleted.
     cancel-in-progress: true
   ```
 
-  A workflow with no `pull_request` trigger may key every run on
-  `${{ github.sha }}`. One group per ref is the rejected alternative: GitHub
-  keeps one pending run per group and cancels it for the next, and refuses
-  `queue: max` beside `cancel-in-progress: true`
+  The commit alone is rejected as a key: a dispatch on `main` at that commit
+  would share the push run's group and cancel it. One group per ref is
+  rejected too: GitHub keeps one pending run per group and cancels it for the
+  next, and refuses `queue: max` beside `cancel-in-progress: true`
   ([*Control the concurrency of workflows and jobs*](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)).
   A workflow granting `id-token: write`, `write-all` included, to deploy or to
   publish a score keeps a key per ref: the key above without its first term,

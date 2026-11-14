@@ -41,9 +41,6 @@ PUSH_TERM = "github.event_name == 'push' && github.sha || "
 SUFFIX = "${{ inputs.concurrency-suffix }}"
 """What a gate the release workflow calls appends to its group (section 10)."""
 
-ALONE = "${{ github.sha }}"
-"""The key section 10 admits for every run of a workflow with no PR trigger."""
-
 REF_ALONE = "${{ github.ref }}"
 """The per-ref key a publishing workflow with no PR trigger may also take."""
 
@@ -174,26 +171,25 @@ def keyed_as_asked(workflow: Path, wanted: str) -> bool:
 
     Every accepted key ends with `SUFFIX` exactly where the workflow
     declares it: without it, a tag push's release call would share the
-    group of main's push run on that commit, and cancel it.
+    group of main's push run on that commit, and cancel it. No key is
+    the commit alone: a dispatch on `main` at that commit would share
+    the push run's group, and cancel it.
 
     :param workflow: the file to read.
     :param wanted: the key section 10 gives, as `keyed` reads it.
     :returns: for a workflow that publishes, whether its key is `wanted`
         without `PUSH_TERM`, or also `REF_ALONE` where it has no
         `pull_request` trigger; for any other, whether its key is
-        `wanted`, or also `ALONE` where it has no `pull_request` trigger.
+        `wanted`.
     """
     found = group(workflow)
     key = found[found.index("${{") :] if "${{" in found else found
-    reviewed = "pull_request" in events(workflow)
     if publishes(workflow):
         allowed = [wanted.replace(PUSH_TERM, "", 1)]
-        extra = REF_ALONE
+        if "pull_request" not in events(workflow):
+            allowed.append(REF_ALONE)
     else:
         allowed = [wanted]
-        extra = ALONE
-    if not reviewed:
-        allowed.append(extra)
     tail = SUFFIX if suffixed(workflow) else ""
     return key in {each + tail for each in allowed}
 
@@ -282,6 +278,7 @@ KEY = (
 
 PUSHED = "  push:\n    branches: [main]\n"
 REVIEWED = PUSHED + "  pull_request:\n"
+DISPATCHED = "  workflow_dispatch:\n"
 CALLED = (
     "  workflow_call:\n    inputs:\n      concurrency-suffix:\n        type: string\n"
 )
@@ -347,10 +344,17 @@ def line(key: str) -> str:
             "",
             False,
         ),
-        (PUSHED, line("v-${{ github.sha }}"), "", True),
+        (PUSHED, line("v-${{ github.sha }}"), "", False),
+        (PUSHED + DISPATCHED, line("v-${{ github.sha }}"), "", False),
         (REVIEWED, line("v-${{ github.sha }}"), "", False),
-        (PUSHED + CALLED, line("v-${{ github.sha }}"), "", False),
-        (PUSHED + CALLED, line("v-${{ github.sha }}" + SUFFIX), "", True),
+        (PUSHED + CALLED, line("v-${{ github.sha }}" + SUFFIX), "", False),
+        (
+            PUSHED + DISPATCHED,
+            line("v-${{ github.event_name }}-${{ github.sha }}"),
+            "",
+            False,
+        ),
+        (PUSHED + DISPATCHED, KEY.format(name="v", tail=""), "", True),
         (PUSHED, line("scorecard-${{ github.ref }}"), PUBLISHING, True),
         (
             PUSHED,
@@ -388,10 +392,12 @@ def line(key: str) -> str:
         "the key on one line",
         "the terms swapped",
         "the per-ref key",
-        "the commit alone, no pull request",
+        "the commit alone, push only",
+        "the commit alone, beside a dispatch",
         "the commit alone, with a pull request",
-        "the commit alone, the suffix missing",
         "the commit alone and the suffix",
+        "the event and the commit",
+        "the key, beside a dispatch",
         "a publisher on its ref",
         "a publisher on its ref and its run",
         "a publisher on its commit",
