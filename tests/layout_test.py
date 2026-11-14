@@ -150,7 +150,8 @@ def dotted(root: Path, path: Path) -> str:
 
 
 SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)
-"""What opens a scope inside a test, whose calls are not the test's own."""
+"""The nodes `own_scope` does not descend into: a nested `def`, `async def`,
+`lambda` or `class`."""
 
 
 def own_scope(test: ast.FunctionDef | ast.AsyncFunctionDef) -> Iterator[ast.AST]:
@@ -176,8 +177,9 @@ def bound(test: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
 
     Each `arg` of its signature, and in `own_scope` each name stored or
     deleted, each name an `import` binds, each nested `def` or `class`,
-    and each `except ... as` name. Any of them makes the name local to
-    the test for the whole of its body.
+    and each `except ... as` name. A name stored as a comprehension's
+    target, or declared `global` or `nonlocal`, is listed too, though
+    Python does not make it local to the test.
 
     :param test: the test function.
     :returns: the names.
@@ -389,6 +391,20 @@ NESTED_LAMBDA = (
 )
 """A caller whose call is in a lambda its test never calls."""
 
+NESTED_ASYNC_DEF = (
+    ABSOLUTE + "def test_it(adapter):\n"
+    "    async def unused():\n"
+    "        a_block_reaches_every_node(adapter)\n"
+)
+"""A caller whose call is in a coroutine function its test never awaits."""
+
+NESTED_CLASS = (
+    ABSOLUTE + "def test_it(adapter):\n"
+    "    class Unused:\n"
+    "        a_block_reaches_every_node(adapter)\n"
+)
+"""A caller whose call is in the body of a class its test defines."""
+
 SHADOWING_PARAMETER = (
     ABSOLUTE + "def test_it(a_block_reaches_every_node):\n"
     "    a_block_reaches_every_node(None)\n"
@@ -469,6 +485,8 @@ def test_a_body_its_node_modules_call_is_admitted(tmp_path: Path) -> None:
         pytest.param((GUARDED_IMPORT,) * 2, id="an import under TYPE_CHECKING"),
         pytest.param((NESTED_DEF,) * 2, id="a call in a nested def"),
         pytest.param((NESTED_LAMBDA,) * 2, id="a call in a lambda"),
+        pytest.param((NESTED_ASYNC_DEF,) * 2, id="a call in a nested async def"),
+        pytest.param((NESTED_CLASS,) * 2, id="a call in a nested class body"),
         pytest.param((SHADOWING_PARAMETER,) * 2, id="a parameter of the name"),
         pytest.param((SHADOWING_ASSIGNMENT,) * 2, id="an assignment of the name"),
         pytest.param(
