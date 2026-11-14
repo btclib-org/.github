@@ -9,7 +9,8 @@ vulnerability reporting.
 When an agent works here, a separate worktree per task keeps the
 contributor's own checkout clean: hooks and agents change files where
 they run. For example, `git worktree add` a directory outside the
-checkout from `origin/main`, and `git worktree remove` it when done.
+checkout, on a new branch from `origin/main`, and `git worktree remove`
+it when done.
 
 Choose the least capable model that can reliably complete the task: use
 a fast model for straightforward execution, a reasoning-focused model
