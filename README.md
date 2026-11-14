@@ -2122,8 +2122,7 @@ without adding to it is deleted.
   publish a score keeps a key per ref: the key above without its first term,
   which one with no `pull_request` trigger may also write as
   `${{ github.ref }}`. Keyed on the commit, two runs would publish at once and
-  the older could land last. Every key ends with the release call's suffix
-  where the workflow takes one. `tests/push_key_test.py` reads each of these.
+  the older could land last. `tests/push_key_test.py` reads each of these.
 - **Triggers**: `push: branches: [main]` and `pull_request`. A push trigger on
   every branch would run the workflow twice for an open pull request, in two
   groups that do not cancel each other; `main` keeps its own trigger because a
