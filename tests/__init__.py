@@ -447,7 +447,7 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
     (
         2275,
         "test_a_test_module_defining_no_test_is_a_body_its_node_modules_call",
-        ("btclib-wallet", "functional-tests"),
+        ("functional-tests",),
     ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
