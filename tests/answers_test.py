@@ -11,10 +11,12 @@ pasting the fence into an interactive `zsh` runs it as a command. So a
 `#` line there is refused, wherever it is indented. A heredoc's body is
 its command's input and no command, so a `#` line there stays.
 
+A `json` fence holds one JSON object or array, a document a JSON parser
+reads whole, and a fence that does not parse as one is refused.
+
 This tree's own file is asked without the network, so `lint.yml`'s
-required job refuses a regression here, and each of its `json` fences
-is asked to hold one value. Every tree's is asked once per repository,
-and `BACKLOG` names the trees the port has not reached.
+required job refuses a regression here. Every tree's is asked once per
+repository, and `BACKLOG` names the trees the port has not reached.
 
 What this does not read: a fence opened on a list marker's line or in
 a block quote, a delimiter such as `<<\EOF`, `<<''` or `<<E"OF"`, and
@@ -32,7 +34,6 @@ import pytest
 from . import ROOT, by_hand
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
     from pathlib import Path
 
 SETTINGS = "REPOSITORY.md"
@@ -45,11 +46,28 @@ What follows the marks is the info string, whose first word is the
 language; a line whose info string is empty can also close a fence.
 """
 
+
+def nested(depth: int) -> str:
+    """Return a pattern for one character of an arithmetic expression.
+
+    :param depth: how many levels of parentheses it may open inside.
+    :returns: the pattern, a character other than a parenthesis or a
+        parenthesized run of them.
+    """
+    pattern = "[^()]"
+    for _ in range(depth):
+        pattern = rf"(?:[^()]|\({pattern}*\))"
+    return pattern
+
+
+DEPTH = 8
+"""How deep the parentheses inside one arithmetic expression may go."""
+
 HEREDOC = re.compile(
     r"'[^']*'"
-    r'|"[^"]*"'
+    r'|"(?:[^"\\]|\\.)*"'
     r"|(?<!\S)#.*"
-    r"|\$?\(\((?:[^()]|\([^()]*\))*\)\)"
+    rf"|\$?\(\({nested(DEPTH)}*\)\)"
     r"|\$\[[^]]*\]"
     r"|(?<!<)<<(?P<dash>-?)[ \t]*"
     r"(?:'(?P<single>[^']+)'"
@@ -58,8 +76,9 @@ HEREDOC = re.compile(
 )
 """A heredoc's opening, and the word that ends its body.
 
-A quoted argument, a trailing comment and an arithmetic expression,
-`$((...))`, `((...))` or `$[...]`, are matched whole, so a `<<` inside
+A quoted argument, a backslash escaping a quote inside double quotes,
+a trailing comment and an arithmetic expression, `$((...))`, `((...))`
+or `$[...]`, nested up to `DEPTH`, are matched whole, so a `<<` inside
 one opens nothing. The lookbehind keeps a here-string's `<<<` from
 reading as one. A quote that one line opens and the next closes is read
 as no quote.
@@ -75,43 +94,50 @@ It reads a bare ```` ```shell ```` opening only, and does not except a
 heredoc's body.
 """
 
+BY_HAND_JSON = (
+    "awk '/^ *```json/ {f = 1; next} f && /^ *```/ {f = 0} f' "
+    + SETTINGS
+    + " | jq -c type"
+)
+"""The command that prints the type of each value the `json` fences hold.
 
-class Line(NamedTuple):
-    """A line inside a fence."""
+Each fence should print one line, `"object"` or `"array"`.
+"""
+
+
+class Fence(NamedTuple):
+    """A fence of a markdown text."""
 
     number: int
-    """Its line number in the text, from 1."""
-
-    block: int
-    """Which fence of the text holds it, from 0."""
+    """The line number of its opening line, from 1."""
 
     language: str
-    """The first word of that fence's info string."""
+    """The first word of its info string."""
 
-    content: str
-    """The line, the fence's own indent removed."""
+    lines: tuple[tuple[int, str], ...]
+    """Each line inside it, by number, its own indent removed."""
 
 
-def fenced(text: str) -> Iterator[Line]:
-    """Yield each line a fence of a markdown text holds.
+def fences(text: str) -> list[Fence]:
+    """Return the fences of a markdown text, empty ones included.
 
     A fence closes on a line of the same mark, at least as long, with no
     info string. A fence left open runs to the end of the text, as
     CommonMark has it.
 
     :param text: the markdown text.
-    :yields: the lines inside fences, in order.
+    :returns: the fences, in order.
     """
-    marks = language = ""
+    found: list[Fence] = []
+    marks = ""
     indent = 0
-    block = -1
     for number, line in enumerate(text.splitlines(), start=1):
         fence = FENCE.match(line)
         if not marks:
             if fence and (fence["marks"][0] != "`" or "`" not in fence["info"]):
                 marks, indent = fence["marks"], len(fence["indent"])
                 language = (fence["info"].split() or [""])[0]
-                block += 1
+                found.append(Fence(number, language, ()))
             continue
         if (
             fence
@@ -122,7 +148,10 @@ def fenced(text: str) -> Iterator[Line]:
             marks = ""
             continue
         spaces = len(line) - len(line.lstrip(" "))
-        yield Line(number, block, language, line[min(indent, spaces) :])
+        last = found[-1]
+        content = (number, line[min(indent, spaces) :])
+        found[-1] = last._replace(lines=(*last.lines, content))
+    return found
 
 
 def commented(text: str) -> list[int]:
@@ -132,21 +161,38 @@ def commented(text: str) -> list[int]:
     :returns: the line numbers, from 1, a heredoc's body left out.
     """
     found: list[int] = []
-    ending = ""
-    dash = False
-    block = -1
-    for line in fenced(text):
-        if line.language != "shell":
+    for fence in fences(text):
+        if fence.language != "shell":
             continue
-        if line.block != block:
-            block, ending = line.block, ""
-        if ending:
-            if (line.content.lstrip("\t") if dash else line.content) == ending:
-                ending = ""
-        elif line.content.lstrip().startswith("#"):
-            found.append(line.number)
-        else:
-            ending, dash = opened(line.content)
+        ending = ""
+        dash = False
+        for number, content in fence.lines:
+            if ending:
+                if (content.lstrip("\t") if dash else content) == ending:
+                    ending = ""
+            elif content.lstrip().startswith("#"):
+                found.append(number)
+            else:
+                ending, dash = opened(content)
+    return found
+
+
+def unparsed(text: str) -> list[int]:
+    """Return the `json` fences that hold no single JSON object or array.
+
+    :param text: the markdown text.
+    :returns: the line numbers of their openings, from 1.
+    """
+    found: list[int] = []
+    for fence in fences(text):
+        if fence.language != "json":
+            continue
+        try:
+            value = json.loads("\n".join(content for _, content in fence.lines))
+        except ValueError:
+            value = None
+        if not isinstance(value, dict | list):
+            found.append(fence.number)
     return found
 
 
@@ -170,19 +216,13 @@ def test_this_tree_keeps_its_answers_out_of_its_shell_fences() -> None:
 
 
 def test_this_tree_s_json_answers_parse() -> None:
-    """Section 9: each `json` fence of this tree's file holds one value."""
-    blocks: dict[int, list[Line]] = {}
-    for line in fenced((ROOT / SETTINGS).read_text(encoding="utf-8")):
-        if line.language == "json":
-            blocks.setdefault(line.block, []).append(line)
-    assert blocks, f"{SETTINGS} has no json fence, so this asks nothing"
-    for lines in blocks.values():
-        body = "\n".join(line.content for line in lines)
-        try:
-            json.loads(body)
-        except ValueError as error:
-            msg = f"{SETTINGS}:{lines[0].number - 1}: json fence does not parse"
-            raise AssertionError(msg) from error
+    """Section 9: each `json` fence of this tree's file is one value."""
+    text = (ROOT / SETTINGS).read_text(encoding="utf-8")
+    assert any(fence.language == "json" for fence in fences(text)), (
+        f"{SETTINGS} has no json fence, so this asks nothing"
+    )
+    lines = unparsed(text)
+    assert not lines, f"{SETTINGS} has a json fence that does not parse at {lines}"
 
 
 @pytest.mark.integration
@@ -203,6 +243,46 @@ def test_a_tree_keeps_its_answers_out_of_its_shell_fences(
         f"{SETTINGS} has a # line in a shell fence at {lines}; "
         + by_hand(repository, BY_HAND)
     )
+
+
+@pytest.mark.integration
+def test_a_tree_s_json_answers_are_one_object_or_array(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 9: each `json` fence of a `REPOSITORY.md` is one value.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    path = trees[repository] / SETTINGS
+    if not path.is_file():
+        pytest.skip(f"{repository} has no {SETTINGS}")
+    lines = unparsed(path.read_text(encoding="utf-8"))
+    assert not lines, (
+        f"{SETTINGS} has a json fence that does not parse at {lines}; "
+        + by_hand(repository, BY_HAND_JSON)
+    )
+
+
+@pytest.mark.parametrize(
+    "body",
+    ["true", "0", '"main"', "null", '{"a": 1}\n{"b": 2}', "", "{"],
+    ids=["true", "number", "string", "null", "stream", "empty", "broken"],
+)
+def test_a_json_fence_holding_no_object_or_array_is_refused(body: str) -> None:
+    """A scalar, a stream, an empty fence or broken JSON is no one value.
+
+    :param body: what the fence holds.
+    """
+    fence = f"```json\n{body}\n```\n" if body else "```json\n```\n"
+    assert unparsed(f"Prose.\n\n{fence}") == [3]
+
+
+def test_a_json_fence_holding_one_object_or_array_passes() -> None:
+    """An object, an array, and an object wrapped across lines."""
+    text = '```json\n{"a": 1}\n```\n\n```json\n[]\n```\n\n```json\n{"a":\n 1}\n```\n'
+    assert unparsed(text) == []
 
 
 def test_an_answer_inside_the_command_s_fence_is_refused() -> None:
@@ -248,6 +328,7 @@ def test_a_here_string_opens_no_heredoc() -> None:
         "printf '%s\\n' '<<EOF'",
         'printf "<<EOF"',
         "echo x # <<EOF",
+        'printf \'%s\\n\' "literal \\" <<EOF"',
     ],
 )
 def test_a_quoted_or_commented_operator_opens_no_heredoc(line: str) -> None:
@@ -306,7 +387,13 @@ def test_an_unclosed_fence_runs_to_the_end() -> None:
 
 @pytest.mark.parametrize(
     "line",
-    ["echo $((1 << n))", "echo $((1 << 2))", "(( x = (1 << n) ))", "echo $[1 << 2]"],
+    [
+        "echo $((1 << n))",
+        "echo $((1 << 2))",
+        "(( x = (1 << n) ))",
+        "echo $[1 << 2]",
+        "echo $((1 << 2 + (3 * (4 + 5))))",
+    ],
 )
 def test_an_arithmetic_shift_opens_no_heredoc(line: str) -> None:
     """A `<<` inside an arithmetic expression is a shift, not a heredoc.
