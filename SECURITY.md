@@ -47,6 +47,11 @@ fix.
 
 ## What belongs here, and what belongs upstream
 
+A flaw that lets funds be stolen, lost or locked is a vulnerability in
+any of these repositories: an output consensus can spend but standard
+relay policy refuses counts as locked, and a transaction that pays far
+more fee than was asked counts as lost.
+
 A defect belongs to the project whose code decides the wrong thing,
 which is not always the project you were running: these repositories
 build on one another and on software nobody here wrote. Where what was
