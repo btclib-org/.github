@@ -515,16 +515,18 @@ def test_the_steps_keep_a_merge_and_find_what_it_carried(
 
     The merge adds a file of its own. Followed as printed, the rebase
     keeps the merge, recreated without that file, and `git diff` against
-    the head before it names the file; the printed restore and commit
-    bring it back, and the check passes.
+    the head before it names the file; the printed restore, run from a
+    subdirectory, and the commit bring it back, and the check passes.
     """
     _git("checkout", "--quiet", "-b", "topic")
     _git("checkout", "--quiet", "-b", "side")
     _commit("side work", signoff=True)
     _git("checkout", "--quiet", "topic")
-    # a change of its own, which `git commit --amend` needs
-    pathlib.Path("work.txt").write_text("work\n", encoding="utf-8")
-    _git("add", "work.txt")
+    # a change of its own, which `git commit --amend` needs, in a
+    # directory the restore then runs from
+    pathlib.Path("sub").mkdir()
+    pathlib.Path("sub/work.txt").write_text("work\n", encoding="utf-8")
+    _git("add", "sub/work.txt")
     _git("commit", "--quiet", "-m", "work")
     _git("merge", "--quiet", "--no-ff", "--no-commit", "side")
     pathlib.Path("merged.txt").write_text("made in the merge\n", encoding="utf-8")
@@ -541,10 +543,10 @@ def test_the_steps_keep_a_merge_and_find_what_it_carried(
     assert _git("rev-list", "--merges", "--count", "main..topic").strip() == "1"
     assert _git("diff", "--name-status", old, "HEAD").split() == ["D", "merged.txt"]
     restore = re.search(
-        r"git restore --source=[0-9a-f]+ --staged --worktree -- \.", out
+        r"git restore --source=[0-9a-f]+ --staged --worktree -- :/", out
     )
     assert restore is not None
-    _git(*restore[0].split()[1:])
+    subprocess.run(["git", *restore[0].split()[1:]], cwd="sub", check=True)
     _git("commit", "--quiet", "--signoff", "-m", "bring back what the merge made")
     assert _git("diff", old, "HEAD") == ""
     assert script.refused("main..topic") == []

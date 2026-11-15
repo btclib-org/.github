@@ -241,7 +241,8 @@ def by_hand(fork: str, authors: list[str], head: str | None) -> list[str]:
     -i` drops with any change made in them alone. Recreated, a merge still
     loses such a change, as git's documentation of the option says, so the
     steps compare the result with `head`, the branch before the rebase,
-    and bring back what differs.
+    and bring back what differs. The restore's pathspec is `:/`, the top
+    of the tree, which is what `git diff` reads from any directory.
 
     An empty address adds the step that corrects the author, since no
     trailer can name it. Another address that is not `_PLAIN` is named as
@@ -277,7 +278,7 @@ def by_hand(fork: str, authors: list[str], head: str | None) -> list[str]:
         steps.append(
             f"Before git push --force-with-lease, git diff {head} HEAD prints"
             " nothing. Where it prints a change, a merge made it and the rebase"
-            f" dropped it: git restore --source={head} --staged --worktree -- ."
+            f" dropped it: git restore --source={head} --staged --worktree -- :/"
             " and git commit --signoff bring it back."
         )
     else:
