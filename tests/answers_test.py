@@ -16,7 +16,7 @@ reads whole, and a fence that does not parse as one is refused.
 
 This tree's own file is asked without the network, so `lint.yml`'s
 required job refuses a regression here. Every tree's is asked once per
-repository, and `BACKLOG` names the trees the port has not reached.
+repository, and `BACKLOG` names any tree a port has not reached.
 
 What this does not read: a fence opened on a list marker's line or in
 a block quote, a delimiter such as `<<\EOF`, `<<''` or `<<E"OF"`, and
