@@ -1529,7 +1529,8 @@ def _lost(gone: int, added: int) -> list[str]:
         (
             f"changelog/next/: the diff removes {gone} entries and adds {added},"
             " so the next release would lose what one says: only a release's"
-            " assembly removes an entry, or a pull request labelled"
+            " assembly removes an entry, a pull request that moves it into the"
+            " release's section before the tag, or a pull request labelled"
             " no-user-change (section 9)"
         ),
     ]
@@ -1587,6 +1588,124 @@ def test_two_entries_removed_and_one_added_are_refused() -> None:
     _commit()
 
     assert script.check("HEAD^1", "HEAD", [], number=9) == _lost(2, 1)
+
+
+# the newest release's section of a history file, and the one before it
+NEWEST = "\n## v2026.12.1\n\n### Older\n\nIts body (closes #1).\n"
+OLDER = "\n## v2026.11.1\n\n### Oldest\n\nIts body (closes #2).\n"
+
+
+def _left(*, tag: bool = True) -> str:
+    """Commit a release's sections and an entry left under `changelog/next/`.
+
+    :param tag: whether git holds the earlier release's tag.
+    :returns: each history file's section once the entry moves into it.
+    """
+    for name in script.FILES:
+        _write(name, f"# {name}\n{NEWEST}{OLDER}")
+    _write("changelog/next/pr4-iss4.md", ENTRY)
+    _commit()
+    if tag:
+        _git("update-ref", "refs/tags/v2026.11.1", "HEAD")
+    return f"{NEWEST}\n{ENTRY}{OLDER}"
+
+
+def _move(section: str, names: tuple[str, ...] = script.FILES) -> None:
+    """Commit the entry moved into `section` of each of `names`."""
+    for name in names:
+        _write(name, f"# {name}\n{section}")
+    Path("changelog/next/pr4-iss4.md").unlink()
+    _commit()
+
+
+@pytest.mark.usefixtures("repo")
+def test_an_entry_moved_into_the_release_before_its_tag_passes() -> None:
+    """The release's section takes the entry it left, in both files."""
+    _move(_left())
+
+    assert script.check("HEAD^1", "HEAD", [], number=9) == []
+
+
+@pytest.mark.usefixtures("repo")
+@pytest.mark.parametrize(
+    ("tag", "reason"),
+    [
+        pytest.param(True, "whose tag v2026.12.1 exists", id="after-the-tag"),
+        pytest.param(
+            False,
+            "and git holds no tag to tell whether v2026.12.1 has one",
+            id="no-tag-fetched",
+        ),
+    ],
+)
+def test_an_entry_moved_once_the_tag_exists_is_refused(
+    *, tag: bool, reason: str
+) -> None:
+    """The tag closes the section; with no tag fetched it may have."""
+    _move(_left(tag=tag))
+    if tag:
+        _git("update-ref", "refs/tags/v2026.12.1", "HEAD^1")
+
+    assert script.check("HEAD^1", "HEAD", [], number=9) == [
+        *_lost(1, 0),
+        (
+            "changelog/next/: the diff moves entries under the newest release,"
+            f" {reason}: an entry moves into a release's section only before"
+            " its tag (section 9)"
+        ),
+    ]
+
+
+@pytest.mark.usefixtures("repo")
+def test_a_move_after_the_tag_is_refused_beside_an_entry_added() -> None:
+    """The tag refuses the move whatever else the diff adds."""
+    section = _left()
+    _git("update-ref", "refs/tags/v2026.12.1", "HEAD")
+    _write("changelog/next/pr9-iss9.md", "### Nine\n\nIt (closes #9).\n")
+    _move(section)
+
+    assert script.check("HEAD^1", "HEAD", [], number=9) == [
+        (
+            "changelog/next/: the diff moves entries under the newest release,"
+            " whose tag v2026.12.1 exists: an entry moves into a release's"
+            " section only before its tag (section 9)"
+        ),
+    ]
+
+
+@pytest.mark.usefixtures("repo")
+def test_an_entry_kept_under_another_name_is_not_moved() -> None:
+    """Its text still waits for the next release, so the release takes none."""
+    _write("changelog/next/pr5-iss5.md", "### Five\n\nIt (closes #5).\n")
+    section = _left()
+    _git("mv", "changelog/next/pr4-iss4.md", "changelog/next/pr9-iss4.md")
+    _write("changelog/next/pr4-iss4.md", ENTRY)
+    Path("changelog/next/pr5-iss5.md").unlink()
+    _move(section)
+
+    assert script.check("HEAD^1", "HEAD", [], number=9) == _lost(2, 1)
+
+
+@pytest.mark.usefixtures("repo")
+@pytest.mark.parametrize(
+    "where",
+    [
+        pytest.param("notes", id="into-one-file"),
+        pytest.param("older", id="under-an-older-release"),
+        pytest.param("other", id="another-text"),
+    ],
+)
+def test_an_entry_not_moved_into_the_release_is_lost(where: str) -> None:
+    """Each file takes it whole, under the newest release, or it is lost."""
+    section = _left()
+    if where == "notes":
+        _move(section, script.FILES[:1])
+    elif where == "older":
+        _move(f"{NEWEST}{OLDER}\n{ENTRY}")
+    else:
+        _move(section.replace("It does it", "It does another"))
+
+    assert script.check("HEAD^1", "HEAD", [], number=9) == _lost(1, 0)
 
 
 @pytest.mark.usefixtures("repo")

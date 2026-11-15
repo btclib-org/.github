@@ -447,8 +447,9 @@ request, next to `deps-latest`'s own result.
    `release.yml` checks that the heading is the version alone and that
    the section is not empty before anything is built, because PyPI never
    accepts a version's file names twice, even once the release is
-   deleted. No other pull request writes either file, and nothing opens
-   the next cycle's section.
+   deleted. No other pull request writes either file but the one moving
+   an entry left in `changelog/next/`, as the merge step says, and nothing
+   opens the next cycle's section.
 
    The assembly folds no `(work in progress, not released yet)` section
    into the release's: it refuses a history file that holds such a
@@ -644,7 +645,8 @@ request, next to `deps-latest`'s own result.
    entry left, and nothing where none is:
 
    ```shell
-   git ls-tree --name-only "${sha:?}" -- changelog/next/ | grep '\.md$'
+   git ls-tree --full-tree --name-only "${sha:?}" -- changelog/next/ |
+     grep '\.md$'
    ```
 
    An entry is left where a pull request landed just before the release
@@ -654,10 +656,6 @@ request, next to `deps-latest`'s own result.
    the same way. Each moves `main`, so the fetch and the reads above run
    again on the new tip, and the tag names the tip they find green and
    holding no entry.
-
-   Until btclib-org/.github#2321 lands, `check-changelog` refuses the pull
-   request that moves an entry, and it lands through the bypass
-   `CONTRIBUTING.md`'s *Landing it* gives.
 
 1. Rehearse on TestPyPI (see above) from `main`, if this cycle touched the
    publish path — that section says which changes make it worth the run,
@@ -678,7 +676,10 @@ request, next to `deps-latest`'s own result.
 
    ```shell
    git fetch origin &&
-   [ "$(git rev-parse origin/main)" = "${sha:?}" ] &&
+   { [ "$(git rev-parse origin/main)" = "${sha:?}" ] || {
+     echo "origin/main is not ${sha:?}, the commit the merge step read" >&2
+     false
+   }; } &&
    git tag -s "v${version:?}" -m "release v${version:?}" "${sha:?}" &&
    git show "v${version:?}:pyproject.toml" |
      grep -Fx "version = \"${version:?}\"" &&
@@ -695,8 +696,8 @@ request, next to `deps-latest`'s own result.
    the chain is what makes the push wait on it.
 
    The fetch and the comparison stop the chain before the tag where `main`
-   has moved since the merge step read it: that step's reads then run
-   again on the new tip.
+   has moved since the merge step read it, and the comparison says so:
+   that step's reads then run again on the new tip.
 
    `version-check` reads the version with `uv version --short`, which
    reads a project directory and so needs the tag checked out. `grep -Fx`

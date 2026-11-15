@@ -38,12 +38,15 @@ jobs:
     permissions:
       contents: read
     steps:
-      # HEAD is the merge commit, and depth 2 holds its parents too
+      # HEAD is the merge commit, and depth 2 holds its parents too. The
+      # tags say whether the newest release takes an entry the pull
+      # request moves into its section
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 2
+          fetch-tags: true
       # `path:` puts it beside the caller's checkout instead of over it;
       # sparse, so what lands is .github/scripts and this repository's root
       # files. `ref:` is this workflow's own commit, `job.workflow_sha`, so
