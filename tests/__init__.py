@@ -450,6 +450,29 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("functional-tests",),
     ),
     (
+        2277,
+        "test_a_push_run_on_main_is_keyed_on_its_commit",
+        (
+            "ai-agents-process",
+            "base58-bech32",
+            "bbt",
+            "benchmarks",
+            "bip32-descriptors",
+            "bip39-slip39",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-node",
+            "btclib-org.github.io",
+            "btclib-secp256k1",
+            "btclib-wallet",
+            "coin-addresses",
+            "ecc",
+            "functional-tests",
+            "portanode",
+            "seed-scan",
+        ),
+    ),
+    (
         2282,
         "test_a_readme_opens_its_contributing_section_with_the_paragraph",
         (
@@ -688,3 +711,64 @@ def subjects(
         )
         raise LookupError(msg)
     return out
+
+
+GLOB = re.compile(r"\\.|\*\*/|\*\*|\*|\[[^\]]+\]|.")
+"""The tokens of a branch filter pattern, an escape or a class whole."""
+
+
+def listed(value: object) -> list[str]:
+    """Read a trigger's list, which YAML may also give as one string.
+
+    :param value: what the key holds.
+    :returns: its entries, as strings, empty where it holds neither.
+    """
+    if isinstance(value, str):
+        return [value]
+    return [str(item) for item in value] if isinstance(value, list) else []
+
+
+def branch_matches(pattern: str, branch: str) -> bool:
+    """Whether a branch filter pattern, `!` removed, matches a branch.
+
+    The tokens are those of GitHub's *Filter pattern cheat sheet*: `**`
+    matches any characters, `**/` any directories or none, `*` any
+    characters but `/`, `?` and `+` make the character before them
+    optional or repeated, `[]` is a class, and a backslash makes the next
+    character literal. A `?` or `+` that opens the pattern has no
+    character before it, and is read as itself.
+
+    :param pattern: the pattern, without a leading `!`.
+    :param branch: the branch name.
+    :returns: whether the whole name matches.
+    """
+    regex = "".join(
+        re.escape(token) if index == 0 and token in {"?", "+"} else _branch_regex(token)
+        for index, token in enumerate(GLOB.findall(pattern))
+    )
+    return re.fullmatch(regex, branch) is not None
+
+
+def _branch_regex(token: str) -> str:
+    wildcards = {"**/": "(?:.*/)?", "**": ".*", "*": "[^/]*", "?": "?", "+": "+"}
+    if token in wildcards:
+        return wildcards[token]
+    if len(token) > 1 and token.startswith("["):
+        return token
+    return re.escape(token.removeprefix("\\") if len(token) > 1 else token)
+
+
+def branch_listed(patterns: list[str], branch: str) -> bool:
+    """Whether a branch filter's patterns, read in order, take a branch.
+
+    The last pattern matching it decides, one starting `!` leaving it out.
+
+    :param patterns: the filter's patterns.
+    :param branch: the branch name.
+    :returns: whether the branch is taken.
+    """
+    taken = False
+    for pattern in patterns:
+        if branch_matches(pattern.removeprefix("!"), branch):
+            taken = not pattern.startswith("!")
+    return taken
