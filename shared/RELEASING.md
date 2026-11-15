@@ -240,8 +240,8 @@ gh api -X POST \
 does so on a branch of its own.** Nothing is pushed to `main` directly,
 this release included: the steps that assemble the release's sections and
 set the version are one pull request, the one that sets the next cycle's
-version is another, and the tag names the commit the first of them left
-behind.
+version is another, and the tag names the tip of `main` once the merge
+step below finds it in order.
 
 `deps-latest` is worth dispatching before the tag rather than waiting for
 its cron, because what it answers is cheaper to know before a version is
@@ -528,17 +528,20 @@ request, next to `deps-latest`'s own result.
    ```
 
    ```shell
-   gh pr edit "${pr:?}" --add-label release-hold
+   gh pr edit "${pr:?}" --repo "btclib-org/${repo:?}" \
+     --add-label release-hold
    ```
 
    While an open or merged pull request carries the label, nobody merges
-   another pull request into `main` here. A red `main`'s repair is the
-   exception: it goes first, as `CONTRIBUTING.md`'s *Landing it* says. A
-   release pull request waits while a merged pull request carries the
-   label, and otherwise only while a lower-numbered open one does, so that
-   releases go out oldest first instead of each waiting on the others. On
-   a pull request closed without merging, the label holds nothing: that
-   release never reached `main`.
+   another pull request into `main` here. A red `main`'s repair is an
+   exception: it goes first, as `CONTRIBUTING.md`'s *Landing it* says. So
+   is a pull request that moves an entry left in `changelog/next/` into
+   the release's section, as the merge step below says. A release pull
+   request waits while a merged pull request carries the label, and
+   otherwise only while a lower-numbered open one does, so that releases
+   go out oldest first instead of each waiting on the others. On a pull
+   request closed without merging, the label holds nothing: that release
+   never reached `main`.
 
    A pull request can merge between the version step and the label. So
    once the label is on, fetch, and check that `origin/main` is still the
@@ -566,7 +569,8 @@ request, next to `deps-latest`'s own result.
    release, or once the release is abandoned and its pull request closed:
 
    ```shell
-   gh pr edit "${pr:?}" --remove-label release-hold
+   gh pr edit "${pr:?}" --repo "btclib-org/${repo:?}" \
+     --remove-label release-hold
    ```
 
    A label left behind on a merged release already published still holds
@@ -609,18 +613,25 @@ request, next to `deps-latest`'s own result.
    Split for the reason the tagging step gives.
 
    ```shell
-   gh pr view "${pr:?}" --json state,mergeCommit \
-     --jq '{state, merged_as: .mergeCommit.oid}'
+   gh pr view "${pr:?}" --repo "btclib-org/${repo:?}" \
+     --json state,mergeCommit --jq '{state, merged_as: .mergeCommit.oid}'
    ```
 
    `MERGED` is what it reads, its `Closes #N` closes the issue, and
    GitHub deletes the release branch itself.
 
-   Then read `lint` and `test` on the commit `main` ends up at before
-   tagging, rather than trust the pull request's own green run:
+   Then fetch, and read the tip of `main`, the commit the tag names:
 
    ```shell
-   gh run list --commit "$(git rev-parse origin/main)"
+   sha=$(git fetch origin && git rev-parse origin/main)
+   ```
+
+   Where the fetch fails, `sha` is empty, and each `${sha:?}` below stops,
+   whatever `sha` held before. Read `lint` and `test` on the tip, rather
+   than trust the pull request's own green run:
+
+   ```shell
+   gh run list --repo "btclib-org/${repo:?}" --commit "${sha:?}"
    ```
 
    a squash creates a commit that is not the one the pull request tested,
@@ -629,25 +640,45 @@ request, next to `deps-latest`'s own result.
    moment earlier. That trigger is the whole reason `main` keeps one, and
    the run to read is the `push` run on `main`.
 
+   Check that `changelog/next/` holds no entry there. This prints each
+   entry left, and nothing where none is:
+
+   ```shell
+   git ls-tree --name-only "${sha:?}" -- changelog/next/ | grep '\.md$'
+   ```
+
+   An entry is left where a pull request landed just before the release
+   merged. A small pull request then moves it into the section just
+   assembled, under the same version, and the tag waits for it. A red
+   `main`'s repair that lands after the release merged is under the tag
+   the same way. Each moves `main`, so the fetch and the reads above run
+   again on the new tip, and the tag names the tip they find green and
+   holding no entry.
+
+   Until btclib-org/.github#2321 lands, `check-changelog` refuses the pull
+   request that moves an entry, and it lands through the bypass
+   `CONTRIBUTING.md`'s *Landing it* gives.
+
 1. Rehearse on TestPyPI (see above) from `main`, if this cycle touched the
    publish path — that section says which changes make it worth the run,
    and asks that a skip be stated in the release pull request rather than
    left to be inferred.
 
-1. Tag the release commit on `main` and push the tag. **Name the
-   commit**, and read the tag back before pushing it. The values stand
-   in a fence of their own with nothing under them to reach, and the
-   fence below writes each as `${name:?}` and chains. Both are needed:
-   `:?` fails at run time, which the chain propagates, where a parse
-   error takes its own `&&` with it. Section 9 of the organization's
-   standard is the rule.
+1. Tag the tip of `main` and push the tag. **Name the commit**, and read
+   the tag back before pushing it. The values stand in a fence of their
+   own with nothing under them to reach, and the fence below writes each
+   as `${name:?}` and chains. Both are needed: `:?` fails at run time,
+   which the chain propagates, where a parse error takes its own `&&` with
+   it. Section 9 of the organization's standard is the rule.
 
    ```shell
    version=<the version being released>
-   sha=<the sha of the release commit>
+   sha=<the tip of main the merge step found in order>
    ```
 
    ```shell
+   git fetch origin &&
+   [ "$(git rev-parse origin/main)" = "${sha:?}" ] &&
    git tag -s "v${version:?}" -m "release v${version:?}" "${sha:?}" &&
    git show "v${version:?}:pyproject.toml" |
      grep -Fx "version = \"${version:?}\"" &&
@@ -662,6 +693,10 @@ request, next to `deps-latest`'s own result.
    with nothing uploaded, which is the guard doing its job; the `git show`
    above is the same check one step earlier, where it costs nothing, and
    the chain is what makes the push wait on it.
+
+   The fetch and the comparison stop the chain before the tag where `main`
+   has moved since the merge step read it: that step's reads then run
+   again on the new tip.
 
    `version-check` reads the version with `uv version --short`, which
    reads a project directory and so needs the tag checked out. `grep -Fx`
