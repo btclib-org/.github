@@ -243,14 +243,16 @@ gh api 'repos/{owner}/{repo}' --jq .full_name
 ```
 
 ```shell
-gh api 'repos/{owner}/{repo}/issues?labels=release-hold&state=all' \
-  --jq '[.[] | select(.pull_request)
+gh api --paginate \
+  'repos/{owner}/{repo}/issues?labels=release-hold&state=all&per_page=100' \
+  --jq '.[] | select(.pull_request)
     | select(.state == "open" or .pull_request.merged_at != null)
-    | {number, state, merged: .pull_request.merged_at}]'
+    | {number, state, merged: .pull_request.merged_at}'
 ```
 
-The first must print the tree's own `owner/name`. Then `[]` from the
-second is no hold, and any other list is read as a publishing tree's
+The first must print the tree's own `owner/name`. The second reads every
+page and prints one line per hold, so where it prints nothing there is
+no hold, and each line it prints is read as a publishing tree's
 `RELEASING.md` says in *Release to PyPI*. A nonzero exit of either, as
 the `404` of a repository that does not exist, is an error, and the
 merge waits until both answer.
