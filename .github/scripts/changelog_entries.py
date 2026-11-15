@@ -75,7 +75,9 @@ diff that changes the package and adds or edits no entry, unless
 `--labels` holds `LABEL`. Given `--pull-request`, it refuses an entry
 the diff adds whose `pr<N>` is another number, and prints the name it
 expects; without it, as in a local run, it reads the name's shape and
-its `iss` parts alone. An entry the diff edits keeps its name. The
+its `iss` parts alone. An entry the diff edits keeps its name, unless
+the edit changes what it cites: then the name it prints carries the
+pull request's number, or `<N>` without `--pull-request`. The
 package is what a user installs: a path under `src/`, a gitlink, which
 pins vendored code a wheel builds, and the `[project]` table of
 `pyproject.toml` but its `version`, which a release's own pull request
@@ -194,7 +196,7 @@ def order(name: str) -> tuple[int, str]:
     return int(found["number"]), name
 
 
-def expected_name(number: int, text: str) -> str:
+def expected_name(number: int | str, text: str) -> str:
     """Return the name of an entry of a pull request, from its text.
 
     Each issue the text cites gives an `iss` part, in the text's order and
@@ -202,7 +204,7 @@ def expected_name(number: int, text: str) -> str:
     repository's name in lower case and without a leading dot. An issue of
     another owner gives none.
 
-    :param number: the pull request's number.
+    :param number: the pull request's number, or `<N>` where it is not known.
     :param text: the entry's text.
     :returns: the file's name.
     """
@@ -234,18 +236,32 @@ def name_problem(name: str) -> str | None:
     )
 
 
-def cited_problem(name: str, text: str, number: int | None = None) -> str | None:
+def cited_problem(
+    name: str,
+    text: str,
+    number: int | None = None,
+    editor: int | str | None = None,
+) -> str | None:
     """Say why an entry's name is not the one its text and number give.
 
     :param name: the file's name, which `name_problem()` admits.
     :param text: the file's text, which `text_problem()` admits.
     :param number: the pull request adding it, None to keep the name's.
+    :param editor: the pull request editing it, or `<N>` where its number
+        is not known: an edit that changes what the entry cites renames it
+        under that number. None where nothing edits it.
     :returns: the reason, naming the file's expected name, or None.
     """
     own = order(name)[0] if number is None else number
     expected = expected_name(own, text)
     if name == expected:
         return None
+    if number is None and editor is not None:
+        return (
+            f"{NEXT / name}: an edit that changes the issues an entry cites"
+            " renames it, under the number of the pull request that edits it"
+            f" (section 9): {NEXT / expected_name(editor, text)}"
+        )
     what = "" if number is None else "its pull request and "
     return (
         f"{NEXT / name}: an entry is named for {what}the issues its text cites,"
@@ -300,18 +316,25 @@ def text_problem(name: str, text: str) -> str | None:
     return f"{NEXT / name}: {problem}" if problem else None
 
 
-def entry_problems(name: str, text: str, number: int | None = None) -> list[str]:
+def entry_problems(
+    name: str,
+    text: str,
+    number: int | None = None,
+    editor: int | str | None = None,
+) -> list[str]:
     """Say why a file under `NEXT` is not an entry.
 
     :param name: the file's name.
     :param text: the file's text.
     :param number: the pull request that adds it, where it is to name it.
+    :param editor: the pull request that edits it, as `cited_problem()`
+        reads it.
     :returns: the reasons, none where it is an entry.
     """
     problem = (
         name_problem(name)
         or text_problem(name, text)
-        or cited_problem(name, text, number)
+        or cited_problem(name, text, number, editor)
     )
     return [problem] if problem else []
 
@@ -808,6 +831,79 @@ def pending(commit: str, run: Git = git) -> dict[str, str]:
     return out
 
 
+# an entry the diff writes: its mode at the head, its status letter,
+# whether it is a rename, and its path
+type Touched = tuple[str, str, bool, str]
+
+
+def touched_entries(diff: list[Change]) -> list[Touched]:
+    """List the entries the diff adds, edits or renames.
+
+    :param diff: what `changed()` listed.
+    :returns: each `.md` path under `NEXT` added, type-changed, or given a
+        new blob, a rename being an addition of a blob the diff removes.
+    """
+    entries = [
+        change
+        for change in diff
+        if PurePosixPath(change[5]).parent == NEXT and change[5].endswith(".md")
+    ]
+    # a rename reads as a removal and an addition of the same blob
+    removed = {before for _, _, before, _, status, _ in entries if status == "D"}
+    # an entry whose mode alone changed is not written: its text is the base's
+    return [
+        (new, status, after in removed and status == "A", path)
+        for _, new, before, after, status, path in entries
+        if status in {"A", "T"} or (status == "M" and before != after)
+    ]
+
+
+def read_problems(
+    read: list[Touched],
+    head: str,
+    number: int | None,
+    run: Git = git,
+) -> list[str]:
+    """Say why an entry the diff writes is not one, its name included.
+
+    :param read: the regular files `touched_entries()` listed.
+    :param head: the commit compared.
+    :param number: the pull request's number, None where it is not known.
+    :param run: what runs git.
+    :returns: one message per reason.
+    """
+    problems = []
+    for _, status, renamed, path in read:
+        text = run("show", f"{head}:{path}").stdout
+        # an entry the pull request adds is named for it, one it edits or
+        # renames keeps the number it has, and one whose edit changes what
+        # it cites is renamed under the pull request's
+        added = status == "A" and not renamed
+        named = number if added else None
+        editor = None if added or renamed else ("<N>" if number is None else number)
+        problems += entry_problems(PurePosixPath(path).name, text, named, editor)
+    return problems
+
+
+def missing_entry(package: list[str], number: int | None) -> str:
+    """Say that the diff changes the package and writes no entry.
+
+    :param package: what `package_paths()` listed.
+    :param number: the pull request's number, None where it is not known.
+    :returns: the message, naming the first paths and the entry to add.
+    """
+    shown = ", ".join(package[:_SHOWN])
+    if len(package) > _SHOWN:
+        shown += ", ..."
+    name = f"pr{'<N>' if number is None else number}-iss<Y>.md"
+    return (
+        f"{shown}: the diff changes what a user gets, and no file under"
+        f" {NEXT}/ holds its entry: add {NEXT}/{name} (section 9 of"
+        f" btclib-org/.github's README.md), or label the pull request"
+        f" {LABEL} where it changes nothing a user gets"
+    )
+
+
 def check(
     base: str,
     head: str,
@@ -826,19 +922,7 @@ def check(
     :returns: one message per reason, none where the diff passes.
     """
     diff = changed(base, head, run)
-    entries = [
-        change
-        for change in diff
-        if PurePosixPath(change[5]).parent == NEXT and change[5].endswith(".md")
-    ]
-    # a rename reads as a removal and an addition of the same blob
-    removed = {before for _, _, before, _, status, _ in entries if status == "D"}
-    # an entry whose mode alone changed is not written: its text is the base's
-    touched = [
-        (new, status, after in removed and status == "A", path)
-        for _, new, before, after, status, path in entries
-        if status in {"A", "T"} or (status == "M" and before != after)
-    ]
+    touched = touched_entries(diff)
     publishes = run("cat-file", "-e", f"{head}:{RELEASE}").returncode == 0
     if not publishes:
         return [
@@ -851,12 +935,7 @@ def check(
         if mode not in _REGULAR
     ]
     read = [change for change in touched if change[0] in _REGULAR]
-    for _, status, renamed, path in read:
-        text = run("show", f"{head}:{path}").stdout
-        # an entry the pull request adds is named for it, one it edits or
-        # renames keeps the number it has
-        named = number if status == "A" and not renamed else None
-        problems += entry_problems(PurePosixPath(path).name, text, named)
+    problems += read_problems(read, head, number, run)
     if read and not problems:
         problems += section_problems(
             pending(head, run),
@@ -866,16 +945,7 @@ def check(
     written = [path for _, _, renamed, path in read if not renamed]
     package = package_paths(base, head, diff, run)
     if package and not written and LABEL not in labels:
-        shown = ", ".join(package[:_SHOWN])
-        if len(package) > _SHOWN:
-            shown += ", ..."
-        name = f"pr{'<N>' if number is None else number}-iss<Y>.md"
-        problems.append(
-            f"{shown}: the diff changes what a user gets, and no file under"
-            f" {NEXT}/ holds its entry: add {NEXT}/{name} (section 9 of"
-            f" btclib-org/.github's README.md), or label the pull request"
-            f" {LABEL} where it changes nothing a user gets",
-        )
+        problems.append(missing_entry(package, number))
     return problems
 
 

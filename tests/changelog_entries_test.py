@@ -1304,6 +1304,28 @@ def test_an_entry_the_pull_request_adds_is_named_for_it() -> None:
 
 
 @pytest.mark.usefixtures("repo")
+def test_an_edit_that_changes_what_an_entry_cites_renames_it_for_its_number() -> None:
+    """It is named under the editing pull request, so the next run passes."""
+    _write("changelog/next/pr5-iss3.md", "### T\n\nIt (closes #3).\n")
+    _commit()
+    _write("changelog/next/pr5-iss3.md", "### T\n\nIt (closes #3, issue #4).\n")
+    _write("src/pkg/__init__.py", '"""A package that does more."""\n')
+    _commit()
+
+    refusal = (
+        "changelog/next/pr5-iss3.md: an edit that changes the issues an entry"
+        " cites renames it, under the number of the pull request that edits it"
+        " (section 9): changelog/next/{}-iss3-iss4.md"
+    )
+    assert script.check("HEAD^1", "HEAD", [], number=12) == [refusal.format("pr12")]
+    assert script.check("HEAD^1", "HEAD", []) == [refusal.format("pr<N>")]
+
+    _git("mv", "changelog/next/pr5-iss3.md", "changelog/next/pr12-iss3-iss4.md")
+    _commit()
+    assert script.check("HEAD~2", "HEAD", [], number=12) == []
+
+
+@pytest.mark.usefixtures("repo")
 def test_a_renamed_entry_is_not_written() -> None:
     """It holds a removed blob: it answers for no change, its number unread."""
     _write("changelog/next/pr4-iss4.md", ENTRY)

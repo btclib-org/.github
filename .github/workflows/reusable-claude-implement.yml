@@ -629,6 +629,12 @@ jobs:
             or RELEASE_NOTES.md. Where the tree holds changelog/next/ and
             the change reaches a user, add its entry there as a file of
             its own, as section 9 of btclib-org/.github's README.md says.
+            Its name holds the pull request's number, which does not
+            exist yet: write the issue's number in its place, so that an
+            entry citing this issue alone is
+            pr${{ github.event.issue.number }}-iss${{ github.event.issue.number }}.md.
+            Once the pull request has its number, a second commit renames
+            the file to the name the changelog-entry check prints.
             Add or change no .coderabbit.yaml or .coderabbit.yml in any
             letter case, and change no file under .github/workflows/.
 

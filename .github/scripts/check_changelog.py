@@ -331,7 +331,7 @@ def line_at(text: str, offset: int) -> int:
 
 
 def closing_tokens(body: str) -> set[str]:
-    """Return every issue token a `closes`/`closed` citation names.
+    """Return every issue token a `close`/`closes` citation names.
 
     Scoped to that keyword and not to `issue`: section 9 of README.md
     lets a branch advance an issue under `(issue #N)` without closing
@@ -363,8 +363,8 @@ def cited_tokens(body: str) -> list[str]:
     """Return every issue token a citation names, in the text's order.
 
     A citation is what `closing_tokens()` reads, under either keyword: a
-    token in a parenthetical, after a `closes`/`closed` or an
-    `issue`/`issues` of its own. A code span is stripped first, for the
+    token in a parenthetical, after the first `close`/`closes` or
+    `issue`/`issues` in it. A code span is stripped first, for the
     reason that function gives. `changelog_entries.py` names an entry
     file after these.
 
