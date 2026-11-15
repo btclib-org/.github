@@ -463,7 +463,12 @@ lacks the helper without excusing it for any other owed file it lacks.
 CODERABBIT = ".coderabbit.yaml"
 """Another owed file whose presence a test of its own asks, for that reason."""
 
-APART = (HELPER, CODERABBIT)
+LINK_CHECK = ".github/scripts/check_link_destinations.py"
+"""An owed file checked separately, so that the `BACKLOG` row waiting
+on its ports excuses no other file.
+"""
+
+APART = (HELPER, CODERABBIT, LINK_CHECK)
 """The owed files the owed-files test leaves to a test of their own."""
 
 
@@ -557,6 +562,20 @@ def test_a_repository_carries_the_coderabbit_configuration_owed_of_it(
     """
     assert CODERABBIT not in absent(trees[repository]), (
         f"section 14 owes this tree {CODERABBIT}"
+    )
+
+
+def test_a_repository_carries_the_link_check_owed_of_it(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """The link-check script is present where section 14 requires it.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    assert LINK_CHECK not in absent(trees[repository]), (
+        f"section 14 owes this tree {LINK_CHECK}"
     )
 
 

@@ -54,6 +54,11 @@ test = [
     "griffe==2.2.0",
     # what tests/never_released_test.py runs a workflow's `--jq` filter on
     "jq",
+    # what .github/scripts/check_link_destinations.py parses markdown
+    # with, at the version the link hooks install:
+    # tests/check_link_destinations_test.py keeps the hooks' pin and
+    # uv.lock's equal to this one
+    "markdown-it-py==4.3.0",
     "pytest",
     # section 7's default, taken rather than declined: tests/README.md
     # says what the shuffle guards in this suite and what argued against
@@ -93,8 +98,9 @@ required-version = ">=0.13.4"
 [tool.ruff]
 # target-version is inferred from project.requires-python. Not for
 # check_changelog.py and mutation_counts.py, which are served to every
-# repository of the organization and run there on whatever interpreter
-# that caller's own pre-commit supplies, nor for
+# repository of the organization, nor for check_link_destinations.py,
+# which every repository carries a copy of: they run there on whatever
+# interpreter that caller's own pre-commit supplies, nor for
 # install_published_release.py, which runs on the interpreter of the cell
 # that calls it, nor for check_run_jobs.py, which runs on the runner's own
 # `python3`: none of them runs on this repository's own 3.14, and
@@ -125,7 +131,7 @@ required-version = ">=0.13.4"
 # on a cell's own interpreter, `setup-python`'s at the matrix floor, which
 # is at or above this one, and check_run_jobs.py on the `python3` of the
 # runner image, which no file here pins.
-".github/scripts/{check_changelog,check_run_jobs,install_published_release,mutation_counts}.py" = "py311"
+".github/scripts/{check_changelog,check_link_destinations,check_run_jobs,install_published_release,mutation_counts}.py" = "py311"
 
 [tool.ruff.lint]
 # preview and explicit-preview-rules only make sense as a pair, and this

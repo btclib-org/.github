@@ -198,33 +198,26 @@ repos:
         args: [--fix]
   # how a link destination is spelled, which markdownlint has no rule
   # for. Section 4 of README.md is the rule, why the prefix and not the
-  # extension, why a badge needed the link text to step over an image,
-  # and what this cannot see; there is no shared hook repository to write
-  # it in once, so it is the same hook in each repository, `pinned-rev`
-  # above being that arrangement already
+  # extension, what the script reads and what it cannot see, and why each
+  # tree runs its own copy, which section 14 lists. The pin is the test
+  # group's in pyproject.toml, which tests/check_link_destinations_test.py
+  # holds equal to it and to uv.lock
   - repo: local
     hooks:
       - id: local-link-prefix
         name: a local markdown link destination begins with ./ or ../
-        language: pygrep
-        # one line, and no literal space in it -- "\x20" is the space the
-        # reference branch allows -- so yamllint reads the value as a
-        # single unbreakable word and its line-length rule exempts it. A
-        # block scalar rather than a quoted one for the same reason a
-        # folded scalar was rejected: folding joins lines with a space,
-        # which would land inside the regex
-        entry: |-
-          (?<![`!\[])(?:!?\[(?:[^]]|\]\([^)]*\))*\]\(|^\x20{0,3}\[[^]]+\]:\s*)(?!\.\.?/|#|[A-Za-z][A-Za-z0-9+.-]*:)[^)\s]
+        entry: python .github/scripts/check_link_destinations.py --prefixed --
+        language: python
+        additional_dependencies: [markdown-it-py==4.3.0]
         types: [markdown]
         exclude: ^README\.md$
       # the root README.md is the package's page on the index, where a
-      # relative link reaches nothing: section 2 of README.md is the
-      # rule. The pattern above with "./" and "../" no longer admitted
+      # relative link reaches nothing: section 2 of README.md is the rule
       - id: readme-absolute-link
         name: the root README.md links a file of the tree absolutely
-        language: pygrep
-        entry: |-
-          (?<![`!\[])(?:!?\[(?:[^]]|\]\([^)]*\))*\]\(|^\x20{0,3}\[[^]]+\]:\s*)(?!#|[A-Za-z][A-Za-z0-9+.-]*:)[^)\s]
+        entry: python .github/scripts/check_link_destinations.py --absolute --
+        language: python
+        additional_dependencies: [markdown-it-py==4.3.0]
         files: ^README\.md$
         types: [markdown]
       # a line that ends inside a word, at that word's own hyphen.
@@ -251,7 +244,11 @@ repos:
       # so a line carrying one is another language's value; and a quote
       # inside a quote of the other kind is a nested program's -- both
       # read off one line, which is also where the three blind spots
-      # come from. Same `\x20` as above, and the same reason.
+      # come from. The value is one line with no literal space in it,
+      # `\x20` being the space, so that yamllint reads it as a single
+      # unbreakable word, which its line-length rule exempts; and a block
+      # scalar, since a folded one joins its lines with a space, which
+      # would land inside the regex.
       # `CHANGELOG.md` and `RELEASE_NOTES.md` are out of reach because
       # section 9 keeps a refused shape in an entry that has landed as
       # written: it has no repair, and there would be no green state
@@ -333,8 +330,8 @@ repos:
         types: [python]
       # section 4's bare-sourcery-skip is the rule. pygrep reads bytes, so
       # \s and \w are ASCII there and \W takes in a non-breaking space; a
-      # block scalar with no literal space, as local-link-prefix's, for the
-      # same reason
+      # block scalar with no literal space, as unquoted-placeholder's, for
+      # the same reason
       - id: bare-sourcery-skip
         name: a sourcery skip names rules, and no tag
         language: pygrep
@@ -449,11 +446,13 @@ repos:
       # `python_version` is one value for [tool.mypy]'s own table and has
       # no per-module override (`python_version` names none of the keys a
       # `[[tool.mypy.overrides]]` module section may set), so the hook
-      # above alone leaves `check_changelog.py`, `mutation_counts.py`,
+      # above alone leaves `check_changelog.py`,
+      # `check_link_destinations.py`, `mutation_counts.py`,
       # `check_run_jobs.py` and `install_published_release.py` checked at
       # this repository's own 3.14 -- newer than any of them actually runs
-      # on where it is served to another repository: `check_changelog.py`
-      # on whatever python3 a caller's own pre-commit run supplies,
+      # on where it is served to another repository or copied into one:
+      # `check_changelog.py` and `check_link_destinations.py` on whatever
+      # python3 a caller's own pre-commit run supplies,
       # `mutation_counts.py` on that caller's own `uv run --locked` (issue
       # btclib-org/.github#1374), `check_run_jobs.py` on the `python3` of
       # the runner that checks a run's jobs, `install_published_release.py`
@@ -476,12 +475,13 @@ repos:
           uv run --locked --no-default-groups --group lint --group test
           mypy --python-version 3.11
           .github/scripts/check_changelog.py
+          .github/scripts/check_link_destinations.py
           .github/scripts/check_run_jobs.py
           .github/scripts/install_published_release.py
           .github/scripts/mutation_counts.py
         language: system
         files: >-
-          ^\.github/scripts/(check_changelog|check_run_jobs|install_published_release|mutation_counts)\.py$
+          ^\.github/scripts/(check_changelog|check_link_destinations|check_run_jobs|install_published_release|mutation_counts)\.py$
         pass_filenames: false
         require_serial: true
   - repo: https://github.com/astral-sh/uv-pre-commit

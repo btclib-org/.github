@@ -1105,11 +1105,13 @@ No `autoupdate_branch`: the default branch is the only branch.
   off every rule of the tag. `suggestion` and `comment`, the other tags
   `rule_types:` names, are refused with them. A colon with no rule name after
   it, before any `#` or `;`, names no rule, and is refused too.
-- **`local-link-prefix`** — pygrep refusing a markdown link whose
-  destination is local and is not explicitly relative, beginning
-  neither `./` nor `../`, in every repository of the organization, this
-  one included, the root `README.md` excepted: an explicit relative
-  prefix is what lets a check downstream key on one pattern.
+- **`local-link-prefix`** — a hook running
+  `.github/scripts/check_link_destinations.py --prefixed`, refusing a
+  markdown link whose destination is local and is not explicitly
+  relative, beginning neither `./` nor `../`, in every repository of the
+  organization, this one included, the root `README.md` excepted: an
+  explicit relative prefix is what lets a check downstream key on one
+  pattern.
 
     Where documentation is built, `docs.yml` greps the built html for
     `href="#./` or `href="#../`, what MyST renders in place of a link
@@ -1118,10 +1120,23 @@ No `autoupdate_branch`: the default branch is the only branch.
     **The prefix is the rule, and not the extension**, an extensionless
     destination and a path into a subdirectory reaching that fallback
     too; whether a destination exists at all is section 10's `links`
-    workflow's question. A `[` preceded by a backtick is exempt.
-- **`readme-absolute-link`** — the same pygrep over the root
-  `README.md` alone, `./` and `../` refused as well, so that a link to a
-  file of the tree is absolute there, for section 2's reason.
+    workflow's question.
+
+    **What markdown-it renders as a link is what the script reads**, the
+    file parsed as CommonMark with GitHub's tables, and its module
+    docstring says what else it reads. A link written in html is not
+    read. A pygrep reading one line at a time is the alternative set
+    aside: it reads code as links, and misses a link split over lines.
+
+    **Each tree carries the script**, section 14 listing it, under a
+    `repo: local` stanza in `language: python` whose
+    `additional_dependencies` pin markdown-it-py at the version of this
+    repository's test group. A hook `.pre-commit-hooks.yaml` serves in
+    `language: python` has pre-commit install the serving repository
+    with pip, and this one builds no distribution.
+- **`readme-absolute-link`** — the same script with `--absolute`, over
+  the root `README.md` alone, `./` and `../` refused as well, so that a
+  link to a file of the tree is absolute there, for section 2's reason.
 - **`no-hyphen-at-end-of-line`** — pygrep refusing a line that ends
   inside a word, at that word's own hyphen, in the file types whose
   prose a build renders: markdown, reStructuredText and Python. Markdown
@@ -4292,6 +4307,11 @@ The paths are what that test compares:
   `.github/scripts/generate_sbom.py`: the file itself satisfies the condition,
   as it does `.taplo.toml`'s, the canonical copy being this repository's.
   Section 10 says which tree keeps another.
+- `.github/scripts/check_link_destinations.py` — owed by every
+  repository: the script section 4's `local-link-prefix` and
+  `readme-absolute-link` run, carried by each tree for the reason that
+  section gives. This repository's copy is the one the others are copied
+  from.
 - `tests/secret_free/__init__.py` — owed where `SECURITY.md`, since a
   published package is what a user hands a secret to. It is section 7's
   *A refusal carries no secret* as a test helper, a package by section
