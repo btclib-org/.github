@@ -93,23 +93,23 @@ NOTES = """\
 Its body (closes #1).
 """
 
+# by pull request 3, 7, 12 and 20: neither the order of the names as
+# strings nor that of the issues they cite
 ENTRIES = {
-    "github-2287.md": (
+    "pr20-github-iss2287.md": (
         "### Another repository's\n\nIts body (issue btclib-org/.github#2287).\n"
     ),
-    "12.md": "### Twelve\n\nTwelve's body\nruns on (closes #12).\n",
-    "3.md": "### Three\n\nThree's body (closes #3).\n",
-    "bip39-slip39-7.md": (
+    "pr3-iss12.md": "### Twelve\n\nTwelve's body\nruns on (closes #12).\n",
+    "pr12-iss3.md": "### Three\n\nThree's body (closes #3).\n",
+    "pr7-bip39-slip39-iss7.md": (
         "### Seven there\n\nIts body (closes btclib-org/bip39-slip39#7).\n"
     ),
 }
+# the entry the tests that need one entry assemble
+THREE = "pr12-iss3.md"
 
 SECTION = """\
 ## v2026.11.15
-
-### Three
-
-Three's body (closes #3).
 
 ### Twelve
 
@@ -119,6 +119,10 @@ runs on (closes #12).
 ### Seven there
 
 Its body (closes btclib-org/bip39-slip39#7).
+
+### Three
+
+Three's body (closes #3).
 
 ### Another repository's
 
@@ -228,7 +232,7 @@ def test_a_file_with_no_release_takes_the_section_at_its_end(base: str) -> None:
 
     :param base: the file before its first release.
     """
-    new = script.section("1", {"3.md": ENTRIES["3.md"]})
+    new = script.section("1", {THREE: ENTRIES[THREE]})
     text = script.inserted("CHANGELOG.md", base, "1", new)
 
     assert text == base.rstrip("\n") + "\n\n" + new
@@ -260,40 +264,55 @@ def test_no_entry_is_no_release(tmp_path: Path, entries: dict[str, str] | None) 
     assert (tmp_path / "CHANGELOG.md").read_text(encoding="utf-8") == CHANGELOG
 
 
+# what a refusal of a name of the wrong shape says
+_SHAPE = "an entry is named pr<N>.md or pr<N>-iss<Y>.md, <N> being"
+
+
 @pytest.mark.parametrize(
     ("name", "text", "reason"),
     [
-        ("notes.md", "### T\n\nB.\n", "an entry is named <n>.md or <repo>-<n>.md"),
-        ("0.md", "### T\n\nB.\n", "an entry is named"),
-        ("Github-1.md", "### T\n\nB.\n", "an entry is named"),
-        ("1.md", "### T\n\nB.", "an entry ends with one newline"),
-        ("1.md", "### T\n\nB.\n\n", "an entry ends with one newline"),
-        ("1.md", "## T\n\nB.\n", "an entry opens with a `### ` title"),
-        ("1.md", "- **T** (closes #1).\n", "an entry opens with a `### ` title"),
-        ("1.md", "### T\nB.\n", "followed by a blank line and the body"),
-        ("1.md", "### T\n", "followed by a blank line and the body"),
-        ("1.md", "### T\n\none\ntwo\nthree\nfour\n", "runs past 3 lines"),
-        ("1.md", "### T\n\none\n\ntwo\n", "holds no blank line and no heading"),
-        ("1.md", "### T\n\none\n### U\n", "holds no blank line and no heading"),
-        ("1.md", "### T\n\none\n  ## U\n", "holds no blank line and no heading"),
-        ("1.md", "### T \n\nB.\n", "the title ends with no space"),
-        ("1.md", "### T\r\n\r\nB.\r\n", "end with a line feed alone"),
-        ("1.md", "### T\n\nB.\n```text\n", "holds no code fence"),
-        ("1.md", "### T\n\nB.\n  ~~~\n", "holds no code fence"),
-        ("1.md", "### T\n\nB.\n<!-- note\n", "no html block"),
-        ("1.md", "### T\n\nText (closes #2).\n---\n", "no heading"),
-        ("1.md", "### T\n\nText (closes #2).\n===\n", "no heading"),
-        ("1.md", "### T\n\nText (closes #2).\n   =  \n", "no heading"),
-        ("1.md", "### T\n\n---\nText (closes #2).\n", "no heading"),
-        ("1.md", "### T\n\nB.\n> # U\n", "no heading"),
-        ("1.md", "### T\n\nB.\n#\n", "no heading"),
-        ("1.md", "### T\n\nB.\n<script>\n", "no html block"),
-        ("1.md", "### T\n\nB.\n<STYLE type=x>\n", "no html block"),
-        ("1.md", "### T\n\nB.\n  <pre\n", "no html block"),
-        ("1.md", "### T\n\nB.\n<textarea>\n", "no html block"),
-        ("1.md", "### T\n\nB.\n<?php\n", "no html block"),
-        ("1.md", "### T\n\nB.\n<!DOCTYPE html>\n", "no html block"),
-        ("1.md", "### T\n\nB.\n<![CDATA[\n", "no html block"),
+        ("notes.md", "### T\n\nB.\n", _SHAPE),
+        ("0.md", "### T\n\nB.\n", _SHAPE),
+        ("Github-1.md", "### T\n\nB.\n", _SHAPE),
+        ("3.md", "### T\n\nB (closes #3).\n", _SHAPE),
+        ("github-3.md", "### T\n\nB (issue btclib-org/.github#3).\n", _SHAPE),
+        ("pr0.md", "### T\n\nB.\n", _SHAPE),
+        ("pr03.md", "### T\n\nB.\n", _SHAPE),
+        ("PR3.md", "### T\n\nB.\n", _SHAPE),
+        ("pr3-iss.md", "### T\n\nB.\n", _SHAPE),
+        ("pr3-issue4.md", "### T\n\nB (issue #4).\n", _SHAPE),
+        ("pr3-iss04.md", "### T\n\nB (issue #4).\n", _SHAPE),
+        ("pr3-Github-iss4.md", "### T\n\nB (issue btclib-org/.github#4).\n", _SHAPE),
+        ("pr3_iss4.md", "### T\n\nB (issue #4).\n", _SHAPE),
+        ("pr1.md", "### T\n\nB (closes #1).\n", "the issues its text cites"),
+        ("pr1.md", "### T\n\nB.", "an entry ends with one newline"),
+        ("pr1.md", "### T\n\nB.\n\n", "an entry ends with one newline"),
+        ("pr1.md", "## T\n\nB.\n", "an entry opens with a `### ` title"),
+        ("pr1-iss1.md", "- **T** (closes #1).\n", "an entry opens with a `### ` title"),
+        ("pr1.md", "### T\nB.\n", "followed by a blank line and the body"),
+        ("pr1.md", "### T\n", "followed by a blank line and the body"),
+        ("pr1.md", "### T\n\none\ntwo\nthree\nfour\n", "runs past 3 lines"),
+        ("pr1.md", "### T\n\none\n\ntwo\n", "holds no blank line and no heading"),
+        ("pr1.md", "### T\n\none\n### U\n", "holds no blank line and no heading"),
+        ("pr1.md", "### T\n\none\n  ## U\n", "holds no blank line and no heading"),
+        ("pr1.md", "### T \n\nB.\n", "the title ends with no space"),
+        ("pr1.md", "### T\r\n\r\nB.\r\n", "end with a line feed alone"),
+        ("pr1.md", "### T\n\nB.\n```text\n", "holds no code fence"),
+        ("pr1.md", "### T\n\nB.\n  ~~~\n", "holds no code fence"),
+        ("pr1.md", "### T\n\nB.\n<!-- note\n", "no html block"),
+        ("pr1.md", "### T\n\nText (closes #2).\n---\n", "no heading"),
+        ("pr1.md", "### T\n\nText (closes #2).\n===\n", "no heading"),
+        ("pr1.md", "### T\n\nText (closes #2).\n   =  \n", "no heading"),
+        ("pr1.md", "### T\n\n---\nText (closes #2).\n", "no heading"),
+        ("pr1.md", "### T\n\nB.\n> # U\n", "no heading"),
+        ("pr1.md", "### T\n\nB.\n#\n", "no heading"),
+        ("pr1.md", "### T\n\nB.\n<script>\n", "no html block"),
+        ("pr1.md", "### T\n\nB.\n<STYLE type=x>\n", "no html block"),
+        ("pr1.md", "### T\n\nB.\n  <pre\n", "no html block"),
+        ("pr1.md", "### T\n\nB.\n<textarea>\n", "no html block"),
+        ("pr1.md", "### T\n\nB.\n<?php\n", "no html block"),
+        ("pr1.md", "### T\n\nB.\n<!DOCTYPE html>\n", "no html block"),
+        ("pr1.md", "### T\n\nB.\n<![CDATA[\n", "no html block"),
     ],
 )
 def test_a_file_that_is_no_entry_is_refused(
@@ -308,7 +327,7 @@ def test_a_file_that_is_no_entry_is_refused(
     :param text: the file's text.
     :param reason: what the refusal says.
     """
-    _tree(tmp_path, {"5.md": "### Five\n\nFive (closes #5).\n", name: text})
+    _tree(tmp_path, {"pr5-iss5.md": "### Five\n\nFive (closes #5).\n", name: text})
 
     with pytest.raises(script.RefusedError) as refused:
         script.assemble("2026.11.15", tmp_path)
@@ -316,7 +335,7 @@ def test_a_file_that_is_no_entry_is_refused(
     (problem,) = refused.value.problems
     assert problem.startswith(f"changelog/next/{name}: ")
     assert reason in problem
-    assert (tmp_path / "changelog" / "next" / "5.md").is_file()
+    assert (tmp_path / "changelog" / "next" / "pr5-iss5.md").is_file()
     assert (tmp_path / "CHANGELOG.md").read_text(encoding="utf-8") == CHANGELOG
 
 
@@ -335,7 +354,7 @@ def test_a_line_that_opens_nothing_is_a_body_line(tmp_path: Path, body: str) -> 
 
     :param body: the entry's body.
     """
-    _tree(tmp_path, {"2.md": f"### Two\n\n{body}\n"})
+    _tree(tmp_path, {"pr2-iss2.md": f"### Two\n\n{body}\n"})
 
     script.assemble("2026.11.15", tmp_path)
 
@@ -347,7 +366,9 @@ def test_a_line_that_opens_nothing_is_a_body_line(tmp_path: Path, body: str) -> 
 def test_two_entries_with_one_title_are_refused(tmp_path: Path) -> None:
     """Each is an entry, and the release's section would repeat a heading."""
     same = "### Fix validation\n\nIt validates (closes #{}).\n"
-    _tree(tmp_path, {"10.md": same.format(10), "11.md": same.format(11)})
+    _tree(
+        tmp_path, {"pr10-iss10.md": same.format(10), "pr11-iss11.md": same.format(11)}
+    )
 
     with pytest.raises(script.RefusedError) as refused:
         script.assemble("2026.11.15", tmp_path)
@@ -357,14 +378,100 @@ def test_two_entries_with_one_title_are_refused(tmp_path: Path) -> None:
             f"changelog/next/{name}: {other} holds the title '### Fix validation'"
             " too, and a release's section repeats no heading"
         )
-        for name, other in (("10.md", "11.md"), ("11.md", "10.md"))
+        for name, other in (
+            ("pr10-iss10.md", "pr11-iss11.md"),
+            ("pr11-iss11.md", "pr10-iss10.md"),
+        )
     ]
     assert (tmp_path / "CHANGELOG.md").read_text(encoding="utf-8") == CHANGELOG
 
 
 def test_an_entry_of_three_lines_is_admitted() -> None:
     """The bound is section 9's, three lines of body."""
-    assert script.entry_problems("1.md", "### T\n\none\ntwo\nthree\n") == []
+    assert script.entry_problems("pr1.md", "### T\n\none\ntwo\nthree\n") == []
+
+
+@pytest.mark.parametrize(
+    ("name", "text"),
+    [
+        ("pr5.md", "### T\n\nIt does a thing.\n"),
+        ("pr5-iss3.md", "### T\n\nIt (closes #3).\n"),
+        ("pr5-iss3-iss4.md", "### T\n\nIt (closes #3, closes #4).\n"),
+        ("pr5-iss4-iss3.md", "### T\n\nIt (closes #4, issue #3).\n"),
+        ("pr5-iss327-iss339.md", "### T\n\nIt (issues #327 and #339).\n"),
+        ("pr5-github-iss2287.md", "### T\n\nIt (issue btclib-org/.github#2287).\n"),
+        (
+            "pr5-iss3-base58-bech32-iss172.md",
+            "### T\n\nIt (closes #3, closes btclib-org/base58-bech32#172).\n",
+        ),
+        (
+            "pr5-btclib-iss8-iss3.md",
+            "### T\n\nIt (closes BtcLib-Org/BTCLib#8, issue #3).\n",
+        ),
+        ("pr5.md", "### T\n\nIt (closes python/cpython#1).\n"),
+        ("pr5-iss3.md", "### T\n\nIt (closes #3), as asked (issue #3).\n"),
+        ("pr5-iss3.md", "### T\n\nIt (see #9, closes #3).\n"),
+        ("pr5.md", "### T\n\nIt reads `(closes #3)` as an example.\n"),
+    ],
+)
+def test_an_entry_is_named_for_the_issues_its_text_cites(name: str, text: str) -> None:
+    """Each issue once, in the text's order; another owner's is not named.
+
+    :param name: the file's name.
+    :param text: the file's text.
+    """
+    assert script.entry_problems(name, text) == []
+    assert script.expected_name(5, text) == name
+
+
+@pytest.mark.parametrize(
+    ("name", "text", "expected"),
+    [
+        ("pr5.md", "### T\n\nIt (closes #3).\n", "pr5-iss3.md"),
+        ("pr5-iss3.md", "### T\n\nIt does a thing.\n", "pr5.md"),
+        (
+            "pr5-iss3-iss4.md",
+            "### T\n\nIt (closes #4, closes #3).\n",
+            "pr5-iss4-iss3.md",
+        ),
+        (
+            "pr5-iss2287.md",
+            "### T\n\nIt (issue btclib-org/.github#2287).\n",
+            "pr5-github-iss2287.md",
+        ),
+        ("pr5-cpython-iss1.md", "### T\n\nIt (closes python/cpython#1).\n", "pr5.md"),
+        ("pr999-iss999.md", "### T\n\nIt (closes #4).\n", "pr999-iss4.md"),
+    ],
+)
+def test_a_name_its_text_does_not_give_is_refused(
+    name: str,
+    text: str,
+    expected: str,
+) -> None:
+    """The refusal names the file the text asks for, keeping the number.
+
+    :param name: the file's name.
+    :param text: the file's text.
+    :param expected: the name the refusal gives.
+    """
+    assert script.entry_problems(name, text) == [
+        (
+            f"changelog/next/{name}: an entry is named for the issues its text"
+            f" cites, in the text's order (section 9): changelog/next/{expected}"
+        ),
+    ]
+
+
+def test_the_entries_follow_their_pull_requests_numbers() -> None:
+    """From the names alone; two of one pull request follow their names."""
+    names = ["pr12-iss3.md", "pr3-iss40.md", "pr12-github-iss1.md", "pr100.md"]
+
+    assert sorted(names, key=script.order) == [
+        "pr3-iss40.md",
+        "pr12-github-iss1.md",
+        "pr12-iss3.md",
+        "pr100.md",
+    ]
 
 
 def test_a_version_already_assembled_is_refused(tmp_path: Path) -> None:
@@ -421,18 +528,18 @@ def test_a_file_named_as_the_directory_is_not_left_by_a_run(tmp_path: Path) -> N
 
 def _staged_entry(root: Path) -> None:
     """Add an entry to the index, and commit nothing."""
-    (root / "changelog/next/20.md").write_text("### T\n\nB (closes #20).\n")
+    (root / "changelog/next/pr20-iss20.md").write_text("### T\n\nB (closes #20).\n")
     subprocess.run(["git", "-C", str(root), "add", "--all"], check=True)
 
 
 def _untracked_entry(root: Path) -> None:
     """Write an entry git does not know."""
-    (root / "changelog/next/20.md").write_text("### T\n\nB (closes #20).\n")
+    (root / "changelog/next/pr20-iss20.md").write_text("### T\n\nB (closes #20).\n")
 
 
 def _edited_entry(root: Path) -> None:
     """Edit an entry the commit holds."""
-    (root / "changelog/next/3.md").write_text("### Three\n\nEdited (closes #3).\n")
+    (root / f"changelog/next/{THREE}").write_text("### Three\n\nEdited (closes #3).\n")
 
 
 def _edited_history(root: Path) -> None:
@@ -444,8 +551,8 @@ def _edited_history(root: Path) -> None:
 def _ignored_entry(root: Path) -> None:
     """Write an entry an ignore rule hides from `git status` by default."""
     with (root / ".git/info/exclude").open("a", encoding="utf-8") as stream:
-        stream.write("changelog/next/21.md\n")
-    (root / "changelog/next/21.md").write_text("### U\n\nB (closes #21).\n")
+        stream.write("changelog/next/pr21-iss21.md\n")
+    (root / "changelog/next/pr21-iss21.md").write_text("### U\n\nB (closes #21).\n")
 
 
 def test_an_ignored_file_the_assembly_does_not_read_is_no_change(
@@ -465,11 +572,11 @@ def test_an_ignored_file_the_assembly_does_not_read_is_no_change(
 @pytest.mark.parametrize(
     ("change", "path"),
     [
-        (_staged_entry, "changelog/next/20.md"),
-        (_untracked_entry, "changelog/next/20.md"),
-        (_edited_entry, "changelog/next/3.md"),
+        (_staged_entry, "changelog/next/pr20-iss20.md"),
+        (_untracked_entry, "changelog/next/pr20-iss20.md"),
+        (_edited_entry, f"changelog/next/{THREE}"),
         (_edited_history, "RELEASE_NOTES.md"),
-        (_ignored_entry, "changelog/next/21.md"),
+        (_ignored_entry, "changelog/next/pr21-iss21.md"),
     ],
     ids=["staged", "untracked", "edited-entry", "edited-history", "ignored"],
 )
@@ -570,8 +677,8 @@ def test_entries_whose_section_check_changelog_refuses_are_refused(
     _tree(
         tmp_path,
         {
-            "4.md": "### Four\n\nIt (closes #9).\n",
-            "5.md": "### Five\n\nIt (closes #9).\n",
+            "pr4-iss9.md": "### Four\n\nIt (closes #9).\n",
+            "pr5-iss9.md": "### Five\n\nIt (closes #9).\n",
         },
     )
 
@@ -628,7 +735,7 @@ def test_a_heading_in_a_fence_or_a_comment_is_not_the_last_release(
     tmp_path: Path,
 ) -> None:
     """A longer fence holds shorter ones; tilde fences and comments count."""
-    _tree(tmp_path, {"3.md": ENTRIES["3.md"]})
+    _tree(tmp_path, {THREE: ENTRIES[THREE]})
     for name in script.FILES:
         (tmp_path / name).write_text(FENCED, encoding="utf-8")
     _commit_at(tmp_path)
@@ -636,7 +743,7 @@ def test_a_heading_in_a_fence_or_a_comment_is_not_the_last_release(
     script.assemble("2026.11.15", tmp_path)
 
     above, _, below = FENCED.partition("## v2026.11.14\n")
-    section = "## v2026.11.15\n\n" + ENTRIES["3.md"]
+    section = "## v2026.11.15\n\n" + ENTRIES[THREE]
     for name in script.FILES:
         text = (tmp_path / name).read_text(encoding="utf-8")
         assert text == above + section + "\n## v2026.11.14\n" + below
@@ -649,7 +756,7 @@ def test_a_work_in_progress_heading_is_refused(tmp_path: Path, name: str) -> Non
 
     :param name: the history file holding the heading.
     """
-    _tree(tmp_path, {"3.md": ENTRIES["3.md"]})
+    _tree(tmp_path, {THREE: ENTRIES[THREE]})
     path = tmp_path / name
     wip = "## v2026.12 (work in progress, not released yet)\n\n### It\n\nIt.\n\n"
     text = path.read_text(encoding="utf-8")
@@ -673,7 +780,7 @@ def test_a_work_in_progress_heading_is_refused(tmp_path: Path, name: str) -> Non
 
 def test_a_work_in_progress_heading_in_a_fence_is_an_example(tmp_path: Path) -> None:
     """Only a heading outside code is one."""
-    _tree(tmp_path, {"3.md": ENTRIES["3.md"]})
+    _tree(tmp_path, {THREE: ENTRIES[THREE]})
     path = tmp_path / "CHANGELOG.md"
     example = "```\n## v1 (work in progress, not released yet)\n```\n\n"
     text = path.read_text(encoding="utf-8")
@@ -692,7 +799,7 @@ def test_a_file_ending_inside_a_fence_is_refused(tmp_path: Path, opened: str) ->
 
     :param opened: what the file opens and never closes.
     """
-    _tree(tmp_path, {"3.md": ENTRIES["3.md"]})
+    _tree(tmp_path, {THREE: ENTRIES[THREE]})
     (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n" + opened, encoding="utf-8")
     _commit_at(tmp_path)
 
@@ -702,7 +809,7 @@ def test_a_file_ending_inside_a_fence_is_refused(tmp_path: Path, opened: str) ->
     assert refused.value.problems == [
         "CHANGELOG.md ends inside a code fence or an html comment",
     ]
-    assert (tmp_path / "changelog" / "next" / "3.md").is_file()
+    assert (tmp_path / "changelog" / "next" / THREE).is_file()
 
 
 def test_a_backtick_run_with_a_backtick_after_it_opens_no_fence() -> None:
@@ -722,7 +829,7 @@ def test_a_symlink_on_the_way_to_the_entries_is_refused(
     outside = tmp_path / "outside"
     entries = outside / "next" if linked == "changelog" else outside
     entries.mkdir(parents=True)
-    (entries / "3.md").write_text(ENTRIES["3.md"], encoding="utf-8")
+    (entries / THREE).write_text(ENTRIES[THREE], encoding="utf-8")
     root = tmp_path / "root"
     root.mkdir()
     (root / "CHANGELOG.md").write_text(CHANGELOG, encoding="utf-8")
@@ -749,8 +856,8 @@ def test_an_entry_git_does_not_track_is_refused(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Every file the run removes is one git can put back at that path."""
-    directory = _tree(tmp_path, {"3.md": ENTRIES["3.md"]})
-    (directory / "4.md").write_text("### Four\n\nFour (closes #4).\n")
+    directory = _tree(tmp_path, {THREE: ENTRIES[THREE]})
+    (directory / "pr4-iss4.md").write_text("### Four\n\nFour (closes #4).\n")
     monkeypatch.setattr(script, "uncommitted", lambda _: [])
 
     with pytest.raises(script.RefusedError) as refused:
@@ -758,23 +865,25 @@ def test_an_entry_git_does_not_track_is_refused(
 
     assert refused.value.problems == [
         (
-            "changelog/next/4.md: git tracks no file at this path, so it could"
+            "changelog/next/pr4-iss4.md: git tracks no file at this path, so it could"
             " not restore it"
         )
     ]
-    assert (directory / "4.md").is_file()
+    assert (directory / "pr4-iss4.md").is_file()
 
 
 def test_a_symlink_is_no_entry(tmp_path: Path) -> None:
     """Assembly reads regular files alone, and writes nothing otherwise."""
-    directory = _tree(tmp_path, {"3.md": ENTRIES["3.md"]})
-    _symlink(directory / "4.md", directory / "3.md")
+    directory = _tree(tmp_path, {THREE: ENTRIES[THREE]})
+    _symlink(directory / "pr4.md", directory / THREE)
     _commit_at(tmp_path)
 
     with pytest.raises(script.RefusedError) as refused:
         script.assemble("2026.11.15", tmp_path)
 
-    assert refused.value.problems == ["changelog/next/4.md: an entry is a regular file"]
+    assert refused.value.problems == [
+        "changelog/next/pr4.md: an entry is a regular file"
+    ]
     assert (tmp_path / "CHANGELOG.md").read_text(encoding="utf-8") == CHANGELOG
 
 
@@ -801,7 +910,7 @@ def _modes_tree(root: Path) -> None:
     """
     root.mkdir()
     directory = _tree(root, ENTRIES, commit=False)
-    (directory / "12.md").chmod(0o755)
+    (directory / "pr3-iss12.md").chmod(0o755)
     (root / "CHANGELOG.md").chmod(_KEPT)
     _commit_at(root)
 
@@ -847,7 +956,7 @@ def _fail(step: str, monkeypatch: pytest.MonkeyPatch) -> None:
             monkeypatch.setattr(
                 Path,
                 "hardlink_to",
-                _once(Path.hardlink_to, lambda _, target: target.name == "3.md"),
+                _once(Path.hardlink_to, lambda _, target: target.name == THREE),
             )
         case "rename":
             monkeypatch.setattr(
@@ -861,7 +970,7 @@ def _fail(step: str, monkeypatch: pytest.MonkeyPatch) -> None:
             monkeypatch.setattr(
                 Path,
                 "unlink",
-                _once(Path.unlink, lambda path, *_, **__: path.name == "3.md"),
+                _once(Path.unlink, lambda path, *_, **__: path.name == THREE),
             )
 
 
@@ -1121,12 +1230,16 @@ def _commit() -> None:
 ENTRY = "### Pkg does a thing\n\nIt does it (closes #4).\n"
 
 
-def _refusal(problems: list[str]) -> str:
-    """Return the one refusal of a missing entry, or fail."""
+def _refusal(problems: list[str], name: str = "pr<N>-iss<Y>.md") -> str:
+    """Return the one refusal of a missing entry, or fail.
+
+    :param problems: what `check` refused.
+    :param name: the entry the refusal asks for.
+    """
     (problem,) = problems
     assert problem.endswith(
         ": the diff changes what a user gets, and no file under changelog/next/"
-        " holds its entry: add changelog/next/<n>.md (section 9 of"
+        f" holds its entry: add changelog/next/{name} (section 9 of"
         " btclib-org/.github's README.md), or label the pull request"
         " no-user-change where it changes nothing a user gets",
     )
@@ -1155,29 +1268,124 @@ def test_the_label_exempts_a_change_to_the_package() -> None:
 
 
 @pytest.mark.usefixtures("repo")
-@pytest.mark.parametrize("path", ["changelog/next/4.md", "changelog/next/github-9.md"])
-def test_an_entry_added_or_edited_passes(path: str) -> None:
-    """The second pull request for an issue edits the file that is there.
+def test_the_refusal_of_a_missing_entry_names_the_pull_request() -> None:
+    """Given its number, the name asked for carries it."""
+    _write("src/pkg/__init__.py", '"""A package that does more."""\n')
+    _commit()
+
+    _refusal(script.check("HEAD^1", "HEAD", [], number=7), "pr7-iss<Y>.md")
+
+
+@pytest.mark.usefixtures("repo")
+def test_an_entry_the_pull_request_adds_is_named_for_it() -> None:
+    """Another number is refused, and the refusal names the file expected."""
+    _write("src/pkg/__init__.py", '"""A package that does more."""\n')
+    _write("changelog/next/pr4-iss9.md", ENTRY)
+    _commit()
+
+    assert script.check("HEAD^1", "HEAD", [], number=7) == [
+        (
+            "changelog/next/pr4-iss9.md: an entry is named for its pull request"
+            " and the issues its text cites, in the text's order (section 9):"
+            " changelog/next/pr7-iss4.md"
+        ),
+    ]
+    assert script.check("HEAD^1", "HEAD", []) == [
+        (
+            "changelog/next/pr4-iss9.md: an entry is named for the issues its"
+            " text cites, in the text's order (section 9):"
+            " changelog/next/pr4-iss4.md"
+        ),
+    ]
+
+    _git("mv", "changelog/next/pr4-iss9.md", "changelog/next/pr7-iss4.md")
+    _commit()
+    assert script.check("HEAD~2", "HEAD", [], number=7) == []
+
+
+@pytest.mark.usefixtures("repo")
+def test_a_renamed_entry_is_not_written() -> None:
+    """It holds a removed blob: it answers for no change, its number unread."""
+    _write("changelog/next/pr4-iss4.md", ENTRY)
+    _commit()
+    _git("mv", "changelog/next/pr4-iss4.md", "changelog/next/pr5-iss4.md")
+    _write("src/pkg/__init__.py", '"""A package that does more."""\n')
+    _commit()
+
+    _refusal(script.check("HEAD^1", "HEAD", [], number=9), "pr9-iss<Y>.md")
+
+
+@pytest.mark.usefixtures("repo")
+def test_a_renamed_entry_s_name_is_read() -> None:
+    """A rename that loses what its text cites is refused, label or not."""
+    _write("changelog/next/pr4-iss4.md", ENTRY)
+    _commit()
+    _git("mv", "changelog/next/pr4-iss4.md", "changelog/next/pr4-iss5.md")
+    _commit()
+
+    assert script.check("HEAD^1", "HEAD", [script.LABEL], number=9) == [
+        (
+            "changelog/next/pr4-iss5.md: an entry is named for the issues its"
+            " text cites, in the text's order (section 9):"
+            " changelog/next/pr4-iss4.md"
+        ),
+    ]
+
+
+@pytest.mark.usefixtures("repo")
+def test_an_entry_renamed_and_edited_is_written() -> None:
+    """Its blob is new, so it is the pull request's own, and named for it."""
+    _write("changelog/next/pr4-iss4.md", ENTRY)
+    _commit()
+    _git("rm", "--quiet", "changelog/next/pr4-iss4.md")
+    _write("changelog/next/pr4-iss4-iss6.md", ENTRY.replace("#4", "#4, closes #6"))
+    _write("src/pkg/__init__.py", '"""A package that does more."""\n')
+    _commit()
+
+    assert script.check("HEAD^1", "HEAD", []) == []
+    assert script.check("HEAD^1", "HEAD", [], number=9) == [
+        (
+            "changelog/next/pr4-iss4-iss6.md: an entry is named for its pull"
+            " request and the issues its text cites, in the text's order"
+            " (section 9): changelog/next/pr9-iss4-iss6.md"
+        ),
+    ]
+
+
+@pytest.mark.usefixtures("repo")
+@pytest.mark.parametrize(
+    ("path", "text"),
+    [
+        ("changelog/next/pr4-iss4.md", ENTRY),
+        (
+            "changelog/next/pr4-github-iss9.md",
+            ENTRY.replace("#4", "btclib-org/.github#9"),
+        ),
+    ],
+)
+def test_an_entry_added_or_edited_passes(path: str, text: str) -> None:
+    """A later pull request edits an entry, and the entry keeps its name.
 
     :param path: the entry's path.
+    :param text: its text.
     """
     _write("src/pkg/__init__.py", '"""A package that does more."""\n')
-    _write(path, ENTRY)
+    _write(path, text)
     _commit()
-    assert script.check("HEAD^1", "HEAD", []) == []
+    assert script.check("HEAD^1", "HEAD", [], number=4) == []
 
     _write("src/pkg/__init__.py", '"""A package that does more still."""\n')
-    _write(path, ENTRY.replace("does it", "does it twice"))
+    _write(path, text.replace("does it", "does it twice"))
     _commit()
-    assert script.check("HEAD^1", "HEAD", []) == []
+    assert script.check("HEAD^1", "HEAD", [], number=9) == []
 
 
 @pytest.mark.usefixtures("repo")
 def test_an_entry_whose_mode_alone_changed_is_not_written() -> None:
     """Its text is the base's, so it says nothing of the package's change."""
-    _write("changelog/next/4.md", ENTRY)
+    _write("changelog/next/pr4-iss4.md", ENTRY)
     _commit()
-    Path("changelog/next/4.md").chmod(0o755)
+    Path("changelog/next/pr4-iss4.md").chmod(0o755)
     _write("src/pkg/__init__.py", '"""A package that does more."""\n')
     _commit()
 
@@ -1190,26 +1398,27 @@ def test_an_entry_whose_mode_alone_changed_is_not_written() -> None:
 def test_an_entry_that_is_no_entry_is_refused_whatever_the_diff() -> None:
     """The text is read on every pull request that writes one."""
     _write("docs/index.md", "# Docs, reworded\n")
-    _write("changelog/next/4.md", "- **Pkg** does a thing (closes #4).\n")
+    _write("changelog/next/pr4-iss4.md", "- **Pkg** does a thing (closes #4).\n")
     _commit()
 
     assert script.check("HEAD^1", "HEAD", []) == [
-        "changelog/next/4.md: an entry opens with a `### ` title",
+        "changelog/next/pr4-iss4.md: an entry opens with a `### ` title",
     ]
 
 
 @pytest.mark.usefixtures("repo")
 def test_an_entry_whose_title_another_holds_is_refused() -> None:
     """The entry already on the base is compared, and not reported."""
-    _write("changelog/next/4.md", ENTRY)
+    _write("changelog/next/pr4-iss4.md", ENTRY)
     _commit()
-    _write("changelog/next/5.md", ENTRY.replace("#4", "#5"))
+    _write("changelog/next/pr5-iss5.md", ENTRY.replace("#4", "#5"))
     _commit()
 
     assert script.check("HEAD^1", "HEAD", []) == [
         (
-            "changelog/next/5.md: 4.md holds the title '### Pkg does a thing'"
-            " too, and a release's section repeats no heading"
+            "changelog/next/pr5-iss5.md: pr4-iss4.md holds the title"
+            " '### Pkg does a thing' too, and a release's section repeats no"
+            " heading"
         ),
     ]
 
@@ -1218,24 +1427,25 @@ def test_an_entry_whose_title_another_holds_is_refused() -> None:
 def test_a_symlink_entry_is_refused_however_it_arrives() -> None:
     """An entry added as a link, or a regular one turned into a link."""
     _write("src/pkg/__init__.py", '"""A package that does more."""\n')
-    _write("changelog/next/4.md", ENTRY)
+    _write("changelog/next/pr4-iss4.md", ENTRY)
     _commit()
-    Path("changelog/next/4.md").unlink()
-    _symlink(Path("changelog/next/4.md"), "../../docs/index.md")
+    Path("changelog/next/pr4-iss4.md").unlink()
+    _symlink(Path("changelog/next/pr4-iss4.md"), "../../docs/index.md")
     _commit()
     assert script.check("HEAD^1", "HEAD", []) == [
         (
-            "changelog/next/4.md: an entry is a regular file, and this one's mode"
-            " is 120000"
+            "changelog/next/pr4-iss4.md: an entry is a regular file, and this"
+            " one's mode is 120000"
         ),
     ]
 
-    _symlink(Path("changelog/next/5.md"), "4.md")
+    _symlink(Path("changelog/next/pr5.md"), "pr4-iss4.md")
     _write("src/pkg/__init__.py", '"""A package that does more still."""\n')
     _commit()
     problems = script.check("HEAD^1", "HEAD", [])
     assert problems[0] == (
-        "changelog/next/5.md: an entry is a regular file, and this one's mode is 120000"
+        "changelog/next/pr5.md: an entry is a regular file, and this one's mode"
+        " is 120000"
     )
     assert _refusal(problems[1:]).startswith("src/pkg/__init__.py: ")
 
@@ -1243,9 +1453,9 @@ def test_a_symlink_entry_is_refused_however_it_arrives() -> None:
 @pytest.mark.usefixtures("repo")
 def test_an_entry_closing_what_another_closes_is_refused() -> None:
     """The section the head's entries make is judged by `check_changelog.py`."""
-    _write("changelog/next/4.md", ENTRY)
+    _write("changelog/next/pr4-iss4.md", ENTRY)
     _commit()
-    _write("changelog/next/5.md", ENTRY.replace("thing", "second thing"))
+    _write("changelog/next/pr5-iss4.md", ENTRY.replace("thing", "second thing"))
     _commit()
 
     (problem,) = script.check("HEAD^1", "HEAD", [])
@@ -1271,7 +1481,7 @@ def test_a_change_outside_the_package_asks_for_nothing() -> None:
 @pytest.mark.usefixtures("repo")
 def test_the_version_is_the_release_s_and_asks_for_nothing() -> None:
     """A release's pull request sets the version and removes the entries."""
-    _write("changelog/next/4.md", ENTRY)
+    _write("changelog/next/pr4-iss4.md", ENTRY)
     _commit()
     _write(
         "pyproject.toml",
@@ -1279,7 +1489,7 @@ def test_the_version_is_the_release_s_and_asks_for_nothing() -> None:
         .read_text(encoding="utf-8")
         .replace("2026.12", "2026.12.1"),
     )
-    Path("changelog/next/4.md").unlink()
+    Path("changelog/next/pr4-iss4.md").unlink()
     _commit()
 
     assert script.check("HEAD^1", "HEAD", []) == []
@@ -1330,11 +1540,11 @@ def test_a_tree_that_does_not_publish_writes_no_entry() -> None:
     _commit()
     assert script.check("HEAD^1", "HEAD", []) == []
 
-    _write("changelog/next/4.md", ENTRY)
+    _write("changelog/next/pr4-iss4.md", ENTRY)
     _commit()
     assert script.check("HEAD^1", "HEAD", []) == [
         (
-            "changelog/next/4.md: this tree does not publish, so it writes no"
+            "changelog/next/pr4-iss4.md: this tree does not publish, so it writes no"
             " entry (section 9)"
         ),
     ]
@@ -1394,12 +1604,40 @@ def test_labels_that_are_not_a_list_of_strings_are_refused(labels: str) -> None:
     assert ran.stderr == f"--labels takes a JSON list of strings, not {labels!r}\n"
 
 
+@pytest.mark.usefixtures("repo")
+def test_run_as_a_program_check_names_an_entry_for_the_pull_request() -> None:
+    """`--pull-request` is the event's number, as the step passes it."""
+    _write("src/pkg/__init__.py", '"""A package that does more."""\n')
+    _write("changelog/next/pr4-iss4.md", ENTRY)
+    _commit()
+
+    refused = _by_path("check", "HEAD^1", "HEAD", "--pull-request", "7")
+    passed = _by_path("check", "HEAD^1", "HEAD", "--pull-request", "4")
+
+    assert refused.returncode == 1
+    assert refused.stderr.endswith(": changelog/next/pr7-iss4.md\n")
+    assert passed.returncode == 0
+
+
+@pytest.mark.usefixtures("repo")
+@pytest.mark.parametrize("number", ["0", "-4", "4x", "", "\u0664"])
+def test_a_pull_request_number_that_is_not_one_is_refused(number: str) -> None:
+    """A positive integer in ASCII digits, or argparse's usage error.
+
+    :param number: the option's value.
+    """
+    ran = _by_path("check", "HEAD^1", "HEAD", "--pull-request", number)
+
+    assert ran.returncode == 2  # noqa: PLR2004 - argparse's usage error
+    assert "a pull request's number is a positive integer" in ran.stderr
+
+
 def test_run_as_a_program_assemble_prints_what_it_removed(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """The tree is the working directory, and a refusal exits 1."""
-    _tree(tmp_path, {"3.md": ENTRIES["3.md"]})
+    _tree(tmp_path, {THREE: ENTRIES[THREE]})
     monkeypatch.chdir(tmp_path)
 
     ran = _by_path("assemble", "2026.11.15")
@@ -1407,7 +1645,7 @@ def test_run_as_a_program_assemble_prints_what_it_removed(
     again = _by_path("assemble", "2026.11.16")
 
     assert ran.returncode == 0
-    assert ran.stdout == "assembled and removed changelog/next/3.md\n"
+    assert ran.stdout == f"assembled and removed changelog/next/{THREE}\n"
     assert again.returncode == 1
     assert again.stderr.startswith("changelog/next holds no entry")
 
@@ -1456,7 +1694,10 @@ def test_the_job_reads_an_open_pull_request_alone() -> None:
 
 
 def test_the_step_reads_the_merge_against_its_first_parent_with_the_labels() -> None:
-    """Depth 2 holds the first parent, and the labels are the event's."""
+    """Depth 2 holds the first parent; the labels and number are the event's.
+
+    The number names an entry the pull request adds.
+    """
     assert _step("Checkout code")["with"]["fetch-depth"] == DEPTH
     checkout = _step("Check out the script")
     assert checkout["with"]["path"] == "standard"
@@ -1464,11 +1705,12 @@ def test_the_step_reads_the_merge_against_its_first_parent_with_the_labels() -> 
     step = _step("Check that a change for the user carries its entry")
     assert step["env"] == {
         "LABELS": "${{ toJSON(github.event.pull_request.labels.*.name) }}",
+        "NUMBER": "${{ github.event.pull_request.number }}",
     }
     assert " ".join(step["run"].replace("\\\n", " ").split()) == (
         "uv run --no-project --python 3.15"
         f" standard/{_SCRIPT.relative_to(ROOT).as_posix()}"
-        ' check HEAD^1 HEAD --labels "$LABELS"'
+        ' check HEAD^1 HEAD --labels "$LABELS" --pull-request "$NUMBER"'
     )
 
 

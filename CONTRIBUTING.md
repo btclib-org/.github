@@ -135,6 +135,10 @@ A pull request adds no entry to `CHANGELOG.md` or `RELEASE_NOTES.md`, a
 release's own pull request excepted. In a tree that publishes, one that
 changes what a user gets adds its entry as a file under `changelog/next/`
 instead, which the release assembles ([section 9][s9], [section 12][s12]).
+The file is named for the pull request's number and the issues its text
+cites, `pr<N>-iss<Y>.md`. Write the number you expect the pull request to
+get; where it gets another, rename the file in a second commit, to the
+name the `changelog-entry` check prints.
 
 ### One subject, opened as soon as it is written
 

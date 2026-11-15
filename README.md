@@ -1990,15 +1990,29 @@ without adding to it is deleted.
 ### `CHANGELOG.md` and `RELEASE_NOTES.md`
 
 - **A pull request that changes what a user gets adds its entry as a
-  file of its own**, `changelog/next/<n>.md`, and writes neither history
-  file. Pull requests citing different issues write different files, so
-  neither puts the other in conflict, and the entry is reviewed with the
-  change it describes. `<n>` is the number of the issue the entry cites,
-  or of the pull request where it cites none: GitHub numbers both in one
-  sequence. An issue of another btclib-org repository gives
-  `<repo>-<n>.md`, the repository's name without a leading dot, so
-  btclib-org/.github#2287 gives `github-2287.md`. A second pull request
-  for the same issue edits the file that is there.
+  file of its own** under `changelog/next/`, and writes neither history
+  file. The file is named for the pull request, so two pull requests
+  never write one file and neither puts the other in conflict, and the
+  entry is reviewed with the change it describes.
+- **An entry is named `pr<N>.md`, or `pr<N>-iss<Y>.md` where its text
+  cites issue `<Y>`.** `<N>` is the number of the pull request that adds
+  it. After it comes one part for each issue the text cites, in the
+  text's order and each once: `-iss<Y>` for `#Y`, and
+  `-<repo>-iss<Y>` for `btclib-org/<repo>#Y`, the repository's name in
+  lower case without a leading dot. An issue outside btclib-org is not in
+  the name. So pull request 40, whose entry cites `(closes #3, issue
+  btclib-org/.github#2287)`, adds `pr40-iss3-github-iss2287.md`. The
+  author writes the number they expect the pull request to get; where it
+  gets another, a second commit renames the file. `changelog-entry.yml`
+  refuses an entry whose issue parts differ from what its text cites,
+  and an entry the pull request adds whose `<N>` is not the pull
+  request's number, and prints the name it expects. A later pull request
+  that edits an entry keeps its name, unless the edit changes the issues
+  it cites: renamed for them, the entry is one that pull request adds,
+  under its own number. A rename alone writes no entry: a file added with
+  the bytes of one the same pull request removes answers for none of its
+  changes. The release puts the entries in the order of their pull
+  requests' numbers, which it reads from the names.
 - **What a user gets is the package**: a path under `src/`, a gitlink,
   which pins vendored code a wheel builds, and the `[project]` table of
   `pyproject.toml` but its `version`, which a release's own pull request

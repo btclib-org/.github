@@ -359,6 +359,32 @@ def closing_tokens(body: str) -> set[str]:
     return tokens
 
 
+def cited_tokens(body: str) -> list[str]:
+    """Return every issue token a citation names, in the text's order.
+
+    A citation is what `closing_tokens()` reads, under either keyword: a
+    token in a parenthetical, after a `closes`/`closed` or an
+    `issue`/`issues` of its own. A code span is stripped first, for the
+    reason that function gives. `changelog_entries.py` names an entry
+    file after these.
+
+    :param body: the text to search -- an entry's heading and body both.
+    :returns: each token as written, `#N` or `owner/repo#N`, in the order
+        the text holds them, a repeated one each time.
+    """
+    body = _CODE_SPAN.sub("", body)
+    tokens: list[str] = []
+    for group in _CITATION_GROUP.finditer(body):
+        text = group.group("body")
+        first = _KEYWORD.search(text)
+        tokens += [
+            token.group(0)
+            for token in _CITATION_TOKEN.finditer(text)
+            if first is not None and first.start() < token.start()
+        ]
+    return tokens
+
+
 def entries(section: str) -> list[tuple[str | None, str, int]]:
     """Split the open section into its entries.
 

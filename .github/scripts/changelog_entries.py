@@ -17,6 +17,14 @@ one a blank line does not end, which could run on into the next entry:
 a comment, `<script`, `<pre`, `<style`, `<textarea`, a processing
 instruction (`<?`), a declaration (`<!` and a letter) and CDATA.
 
+An entry is named `pr<N>.md`, or `pr<N>-iss<Y>.md` and on, `<N>` being
+the pull request that adds it. The issues are the ones its text cites,
+as `check_changelog.py`'s `cited_tokens()` reads a citation, in the
+text's order and each once: `iss<Y>` for `#Y`, `<repo>-iss<Y>` for
+`btclib-org/<repo>#Y`, the repository's name in lower case and without a
+leading dot, and nothing for an issue of another owner. Both commands
+refuse an entry whose `iss` parts are not those.
+
 The entries together are the release's section, and `check_changelog.py`
 beside this script is what judges a section: this script loads it from
 its own directory and runs its checks on the section the entries make,
@@ -29,8 +37,9 @@ after it, and an unclosed fence runs to the end of the file, where
 `assemble` refuses it. An html comment block is read like a fence.
 
 `assemble <version>` writes `## v<version>` and every entry, in the
-order `order()` gives, above the first `## ` heading outside a fence of
-each history file, and removes the entries. The output depends on the
+order of their pull requests' numbers that `order()` gives, above the
+first `## ` heading outside a fence of each history file, and removes
+the entries. The output depends on the
 entries alone, so the same files give the same bytes, and a reviewer of
 the release runs the command on the commit the release is cut from,
 which holds every entry, and compares. It refuses a
@@ -63,17 +72,24 @@ In a tree that publishes, which holds `.github/workflows/release.yml`
 (section 2), it refuses an entry added or edited that is not one, or
 whose section with the other entries the head holds is refused, and a
 diff that changes the package and adds or edits no entry, unless
-`--labels` holds `LABEL`. The package is what a user installs: a path
-under `src/`, a gitlink, which pins vendored code a wheel builds, and the
-`[project]` table of `pyproject.toml` but its `version`, which a
-release's own pull request sets. In a tree that does not publish, it
+`--labels` holds `LABEL`. Given `--pull-request`, it refuses an entry
+the diff adds whose `pr<N>` is another number, and prints the name it
+expects; without it, as in a local run, it reads the name's shape and
+its `iss` parts alone. An entry the diff edits keeps its name. The
+package is what a user installs: a path under `src/`, a gitlink, which
+pins vendored code a wheel builds, and the `[project]` table of
+`pyproject.toml` but its `version`, which a release's own pull request
+sets. In a tree that does not publish, it
 refuses any entry added or edited: nothing would ever assemble it. An
 entry is edited where its text changes: one whose mode alone changes
-says nothing new, and is no entry for the diff.
+says nothing new, and is no entry for the diff. A rename is none either:
+an entry added with the blob of one the diff removes was written by the
+pull request that added it first, so it asks the package for nothing
+and `--pull-request` does not name it. Its name is read as any other's.
 
     uv run --no-project --python 3.15 changelog_entries.py assemble 2026.11.15
     uv run --no-project --python 3.15 changelog_entries.py check \
-        HEAD^1 HEAD --labels "$LABELS"
+        HEAD^1 HEAD --labels "$LABELS" --pull-request "$NUMBER"
 
 `--labels` is a JSON list of strings, as `toJSON()` writes one, and
 anything else is refused.
@@ -109,7 +125,15 @@ RELEASE = ".github/workflows/release.yml"
 # the script whose checks judge a section, beside this one
 CHECKER = Path(__file__).with_name("check_changelog.py")
 
-_NAME = re.compile(r"(?:(?P<repo>[a-z0-9][a-z0-9.-]*)-)?(?P<number>[1-9][0-9]*)\.md")
+# an entry's name: its pull request's number, then an `iss` part for each
+# issue its text cites, one of another btclib-org repository after that
+# repository's name
+_NAME = re.compile(
+    r"pr(?P<number>[1-9][0-9]*)"
+    r"(?P<cited>(?:-(?:[a-z0-9][a-z0-9._-]*-)?iss(?:0|[1-9][0-9]*))*)\.md",
+)
+# the owner whose repositories an entry's name holds the issues of
+_ORGANIZATION = "btclib-org"
 _TITLE = re.compile(r"### \S(?:.*\S)?")
 _VERSION = re.compile(r"[0-9]+(?:\.[0-9]+)*")
 # a line opening or closing a fence: an indent or block-quote marker, the
@@ -154,11 +178,11 @@ class RefusedError(Exception):
         self.problems = problems
 
 
-def order(name: str) -> tuple[str, int]:
+def order(name: str) -> tuple[int, str]:
     """Return where an entry stands in the release's section.
 
-    This tree's own numbers come first, in their order, then each other
-    repository's, by its name and then by number.
+    The entries follow their pull requests' numbers, and two entries of
+    one pull request follow their names.
 
     :param name: the file's name, which `name_problem()` admits.
     :returns: the key to sort by.
@@ -167,7 +191,32 @@ def order(name: str) -> tuple[str, int]:
     if found is None:
         msg = f"{name} is not the name of an entry"
         raise ValueError(msg)
-    return found["repo"] or "", int(found["number"])
+    return int(found["number"]), name
+
+
+def expected_name(number: int, text: str) -> str:
+    """Return the name of an entry of a pull request, from its text.
+
+    Each issue the text cites gives an `iss` part, in the text's order and
+    once: `iss<Y>` for `#Y`, `<repo>-iss<Y>` for `btclib-org/<repo>#Y`, the
+    repository's name in lower case and without a leading dot. An issue of
+    another owner gives none.
+
+    :param number: the pull request's number.
+    :param text: the entry's text.
+    :returns: the file's name.
+    """
+    parts: list[str] = []
+    for token in checker().cited_tokens(text):
+        where, _, issue = token.partition("#")
+        owner, _, repo = where.partition("/")
+        if owner and owner.lower() != _ORGANIZATION:
+            continue
+        repo = repo.lower().removeprefix(".")
+        part = f"{repo}-iss{int(issue)}" if repo else f"iss{int(issue)}"
+        if part not in parts:
+            parts.append(part)
+    return "-".join([f"pr{number}", *parts]) + ".md"
 
 
 def name_problem(name: str) -> str | None:
@@ -179,8 +228,28 @@ def name_problem(name: str) -> str | None:
     if _NAME.fullmatch(name):
         return None
     return (
-        f"{NEXT / name}: an entry is named <n>.md or <repo>-<n>.md, <n> being"
-        " the issue it cites"
+        f"{NEXT / name}: an entry is named pr<N>.md or pr<N>-iss<Y>.md, <N>"
+        " being the pull request that adds it and each iss<Y> an issue its"
+        " text cites (section 9)"
+    )
+
+
+def cited_problem(name: str, text: str, number: int | None = None) -> str | None:
+    """Say why an entry's name is not the one its text and number give.
+
+    :param name: the file's name, which `name_problem()` admits.
+    :param text: the file's text, which `text_problem()` admits.
+    :param number: the pull request adding it, None to keep the name's.
+    :returns: the reason, naming the file's expected name, or None.
+    """
+    own = order(name)[0] if number is None else number
+    expected = expected_name(own, text)
+    if name == expected:
+        return None
+    what = "" if number is None else "its pull request and "
+    return (
+        f"{NEXT / name}: an entry is named for {what}the issues its text cites,"
+        f" in the text's order (section 9): {NEXT / expected}"
     )
 
 
@@ -231,14 +300,19 @@ def text_problem(name: str, text: str) -> str | None:
     return f"{NEXT / name}: {problem}" if problem else None
 
 
-def entry_problems(name: str, text: str) -> list[str]:
+def entry_problems(name: str, text: str, number: int | None = None) -> list[str]:
     """Say why a file under `NEXT` is not an entry.
 
     :param name: the file's name.
     :param text: the file's text.
+    :param number: the pull request that adds it, where it is to name it.
     :returns: the reasons, none where it is an entry.
     """
-    problem = name_problem(name) or text_problem(name, text)
+    problem = (
+        name_problem(name)
+        or text_problem(name, text)
+        or cited_problem(name, text, number)
+    )
     return [problem] if problem else []
 
 
@@ -734,52 +808,71 @@ def pending(commit: str, run: Git = git) -> dict[str, str]:
     return out
 
 
-def check(base: str, head: str, labels: list[str], run: Git = git) -> list[str]:
+def check(
+    base: str,
+    head: str,
+    labels: list[str],
+    run: Git = git,
+    number: int | None = None,
+) -> list[str]:
     """Say why a diff is refused for its changelog entry.
 
     :param base: the commit compared against, a merge commit's first parent.
     :param head: the commit compared.
     :param labels: the pull request's labels.
     :param run: what runs git.
+    :param number: the pull request's number, which names an entry it
+        adds; None where it is not known, as in a local run.
     :returns: one message per reason, none where the diff passes.
     """
     diff = changed(base, head, run)
+    entries = [
+        change
+        for change in diff
+        if PurePosixPath(change[5]).parent == NEXT and change[5].endswith(".md")
+    ]
+    # a rename reads as a removal and an addition of the same blob
+    removed = {before for _, _, before, _, status, _ in entries if status == "D"}
     # an entry whose mode alone changed is not written: its text is the base's
     touched = [
-        (new, path)
-        for _, new, before, after, status, path in diff
-        if (status in {"A", "T"} or (status == "M" and before != after))
-        and PurePosixPath(path).parent == NEXT
-        and path.endswith(".md")
+        (new, status, after in removed and status == "A", path)
+        for _, new, before, after, status, path in entries
+        if status in {"A", "T"} or (status == "M" and before != after)
     ]
     publishes = run("cat-file", "-e", f"{head}:{RELEASE}").returncode == 0
     if not publishes:
         return [
             f"{path}: this tree does not publish, so it writes no entry (section 9)"
-            for _, path in touched
+            for *_, path in touched
         ]
     problems = [
         f"{path}: an entry is a regular file, and this one's mode is {mode}"
-        for mode, path in touched
+        for mode, *_, path in touched
         if mode not in _REGULAR
     ]
-    written = [path for mode, path in touched if mode in _REGULAR]
-    for path in written:
+    read = [change for change in touched if change[0] in _REGULAR]
+    for _, status, renamed, path in read:
         text = run("show", f"{head}:{path}").stdout
-        problems += entry_problems(PurePosixPath(path).name, text)
-    if written and not problems:
+        # an entry the pull request adds is named for it, one it edits or
+        # renames keeps the number it has
+        named = number if status == "A" and not renamed else None
+        problems += entry_problems(PurePosixPath(path).name, text, named)
+    if read and not problems:
         problems += section_problems(
             pending(head, run),
-            {PurePosixPath(path).name for path in written},
+            {PurePosixPath(path).name for *_, path in read},
         )
+    # a renamed entry was written by the pull request that added it
+    written = [path for _, _, renamed, path in read if not renamed]
     package = package_paths(base, head, diff, run)
     if package and not written and LABEL not in labels:
         shown = ", ".join(package[:_SHOWN])
         if len(package) > _SHOWN:
             shown += ", ..."
+        name = f"pr{'<N>' if number is None else number}-iss<Y>.md"
         problems.append(
             f"{shown}: the diff changes what a user gets, and no file under"
-            f" {NEXT}/ holds its entry: add {NEXT}/<n>.md (section 9 of"
+            f" {NEXT}/ holds its entry: add {NEXT}/{name} (section 9 of"
             f" btclib-org/.github's README.md), or label the pull request"
             f" {LABEL} where it changes nothing a user gets",
         )
@@ -803,6 +896,19 @@ def label_names(text: str) -> list[str]:
     return found
 
 
+def pull_request_number(text: str) -> int:
+    """Read the number `--pull-request` gives.
+
+    :param text: the option's value.
+    :returns: the number.
+    :raises argparse.ArgumentTypeError: where it is not a positive number.
+    """
+    if not text.isascii() or not text.isdigit() or int(text) < 1:
+        msg = f"a pull request's number is a positive integer, not {text!r}"
+        raise argparse.ArgumentTypeError(msg)
+    return int(text)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the requested command.
 
@@ -819,13 +925,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     checking.add_argument("base")
     checking.add_argument("head")
     checking.add_argument("--labels", default="[]", help="a JSON list of label names")
+    checking.add_argument(
+        "--pull-request",
+        type=pull_request_number,
+        help="the pull request's number, which names an entry it adds",
+    )
     args = parser.parse_args(argv)
     try:
         if args.command == "assemble":
             for path in assemble(args.version, Path()):
                 print(f"assembled and removed {path.as_posix()}")
             return 0
-        problems = check(args.base, args.head, label_names(args.labels))
+        problems = check(
+            args.base,
+            args.head,
+            label_names(args.labels),
+            number=args.pull_request,
+        )
     except RefusedError as refused:
         problems = refused.problems
     for problem in problems:

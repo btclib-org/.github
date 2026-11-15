@@ -65,11 +65,13 @@ jobs:
       # --no-project and the interpreter named, the script being this
       # repository's and not the caller's (section 10). The labels are the
       # event's: a label added or removed is an event of its own, which the
-      # caller's `labeled` and `unlabeled` types start a run for
+      # caller's `labeled` and `unlabeled` types start a run for. The
+      # number is the pull request's, which names an entry it adds
       - name: Check that a change for the user carries its entry
         env:
           LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          NUMBER: ${{ github.event.pull_request.number }}
         run: |
           uv run --no-project --python 3.15 \
             standard/.github/scripts/changelog_entries.py check \
-            HEAD^1 HEAD --labels "$LABELS"
+            HEAD^1 HEAD --labels "$LABELS" --pull-request "$NUMBER"

@@ -301,7 +301,7 @@ def released(tmp_path: Path) -> tuple[Path, Path]:
     git(tree, "tag", "v2026.11.7")
     (tree / "code.py").write_text("x = 1\n")
     (tree / "changelog/next").mkdir(parents=True)
-    (tree / "changelog/next/1.md").write_text(ENTRY)
+    (tree / "changelog/next/pr2-iss1.md").write_text(ENTRY)
     git(tree, "add", "-A")
     git(tree, "commit", "-q", "-m", "Do a thing (closes #1) (#2)")
     (tree / "standard").symlink_to(ROOT)
@@ -393,7 +393,7 @@ def nothing_since(tree: Path, bench: Path) -> None:
 def no_entries(tree: Path, bench: Path) -> None:
     """Land the commit since the tag with no entry."""
     del bench
-    git(tree, "rm", "-q", "changelog/next/1.md")
+    git(tree, "rm", "-q", "changelog/next/pr2-iss1.md")
     git(tree, "commit", "-q", "--amend", "--no-edit")
 
 
@@ -719,7 +719,7 @@ def test_the_facts_travel_only_under_their_digest(
 
 
 def edited(
-    tmp_path: Path, *, notes: bool = True, removed: str = "changelog/next/1.md\n"
+    tmp_path: Path, *, notes: bool = True, removed: str = "changelog/next/pr2-iss1.md\n"
 ) -> tuple[Path, dict[str, str]]:
     """Pack a body as `write` does, and lay the release over a fresh checkout.
 
@@ -732,7 +732,7 @@ def edited(
     for name in ("CHANGELOG.md", "RELEASE_NOTES.md"):
         (tree / name).write_text("## v2026.11.7\n\nIt.\n")
     (tree / "changelog/next").mkdir(parents=True)
-    (tree / "changelog/next/1.md").write_text(ENTRY)
+    (tree / "changelog/next/pr2-iss1.md").write_text(ENTRY)
     git(tree, "add", "-A")
     git(tree, "commit", "-q", "-m", "y")
     (body := tmp_path / "body").mkdir()
@@ -780,7 +780,7 @@ def test_the_release_lays_four_files_and_removes_the_entries(tmp_path: Path) -> 
     assert staged == [
         "M\tCHANGELOG.md",
         "M\tRELEASE_NOTES.md",
-        "D\tchangelog/next/1.md",
+        "D\tchangelog/next/pr2-iss1.md",
         "M\tpyproject.toml",
         "M\tuv.lock",
         "",
@@ -791,10 +791,10 @@ def test_the_release_lays_four_files_and_removes_the_entries(tmp_path: Path) -> 
 @pytest.mark.parametrize(
     ("notes", "removed"),
     [
-        (False, "changelog/next/1.md\n"),
+        (False, "changelog/next/pr2-iss1.md\n"),
         (True, ""),
         (True, "README.md\n"),
-        (True, "changelog/next/1.md\nchangelog/next/sub/2.md\n"),
+        (True, "changelog/next/pr2-iss1.md\nchangelog/next/sub/2.md\n"),
     ],
     ids=["notes-unchanged", "nothing-removed", "outside-the-entries", "nested"],
 )
@@ -824,7 +824,7 @@ def assembling(tmp_path: Path) -> tuple[Path, Path]:
     for name in ("CHANGELOG.md", "RELEASE_NOTES.md"):
         (tree / name).write_text("# History\n\n## v2026.11.7\n\n### It\n\nIt.\n")
     (tree / "changelog/next").mkdir(parents=True)
-    (tree / "changelog/next/1.md").write_text(ENTRY)
+    (tree / "changelog/next/pr2-iss1.md").write_text(ENTRY)
     git(tree, "add", "-A")
     git(tree, "commit", "-q", "-m", "y")
     for name in ("pyproject.toml", "uv.lock"):
@@ -856,7 +856,9 @@ def test_the_assembly_writes_the_sections_and_lists_the_entries(tmp_path: Path) 
     run = step("prepare", "Assemble the release's sections")["run"]
     done = run_step(run, tree, bench, env)
     assert done.returncode == 0, done.stdout + done.stderr
-    assert (tmp_path / "facts/removed.txt").read_text() == "changelog/next/1.md\n"
+    assert (
+        tmp_path / "facts/removed.txt"
+    ).read_text() == "changelog/next/pr2-iss1.md\n"
     for name in ("CHANGELOG.md", "RELEASE_NOTES.md"):
         text = (tmp_path / "facts/tree" / name).read_text()
         assert (
