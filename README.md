@@ -2011,11 +2011,13 @@ without adding to it is deleted.
 - **A release assembles the entries**, and writes no prose. Its pull
   request runs `.github/scripts/changelog_entries.py`, which puts
   `## v<version>` and every entry, in a fixed order, above the previous
-  release in each history file, and removes the entries. The same entries give
-  the same bytes, so the release's review compares the pull request with
-  the script's output on its base. An empty `changelog/next/` refuses to
-  assemble: nothing changed for a user, so there is no release. Section
-  12 has the step.
+  release in each history file, and removes the entries. It edits or adds
+  no entry: one the release needs fixed or added lands first, in a pull
+  request of its own, so the release's base holds every entry. The same
+  entries give the same bytes, so the release's review compares the pull
+  request with the script's output on its base. An empty
+  `changelog/next/` refuses to assemble: nothing changed for a user, so
+  there is no release. Section 12 has the step.
 - **The history files take the same section.** `RELEASE_NOTES.md` is what the
   GitHub release publishes and what section 12's public-API check reads,
   so an entry whose change asks something of a user says what in its

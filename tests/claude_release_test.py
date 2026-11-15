@@ -830,7 +830,10 @@ def assembling(tmp_path: Path) -> tuple[Path, Path]:
     for name in ("pyproject.toml", "uv.lock"):
         path = tree / name
         path.write_text(path.read_text().replace("2026.12", TODAY))
-    (tree / "standard").symlink_to(ROOT)
+    try:
+        (tree / "standard").symlink_to(ROOT)
+    except OSError as refused:
+        pytest.skip(f"the platform refuses a symlink: {refused}")
     bench = tmp_path / "bench"
     bench.mkdir()
     stand_in(

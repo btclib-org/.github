@@ -496,7 +496,8 @@ jobs:
 
             Where a line of findings.txt names an object the section does
             not, write no body: the entry it needs is missing, the run then
-            fails, and a person adds the entry.
+            fails, and a person adds the entry in a pull request of its own
+            before the release.
           # the model and the setting sources as in
           # reusable-claude-implement.yml. Read, Grep and Glob are scoped
           # to the checkout, to the facts and to where Claude Code saves a

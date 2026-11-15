@@ -4,27 +4,17 @@
 
 """Assemble a release's changelog entries, and ask a pull request for one.
 
-Section 9 of README.md: a pull request that changes what a user gets
-adds its entry as a file of its own under `changelog/next/`, and a
-release assembles those files into `CHANGELOG.md` and `RELEASE_NOTES.md`.
-Pull requests citing different issues write different files, so neither
-conflicts with the other, and the entry is reviewed with the change it
-describes.
+Section 9 of README.md gives the rule this script keeps: what an entry
+under `changelog/next/` is named, what it holds, and when a pull request
+adds one. What follows is what the code adds to it.
 
-A file is named `<n>.md`, `<n>` being the number of the issue it cites,
-or of the pull request where it cites none: GitHub numbers both in one
-sequence. An issue of another btclib-org repository gives
-`<repo>-<n>.md`, the repository's name without a leading dot, so
-btclib-org/.github#2287 gives `github-2287.md`. A second pull request for
-the same issue edits the file that is there. The file is a regular file
-holding the entry as it lands: a `### ` title, a blank line, and at most
-three lines of body, with no heading, no code fence and no html block
-among them. A heading is a `#` run of one to six followed by a space or
-the line's end, after any indent or block-quote marker, or a line of
-`=` or of `-` alone, which is a setext underline after a text line and a
-thematic break otherwise: either is refused. An html block is one a
-blank line does not end, which could run on into the next entry: a
-comment, `<script`, `<pre`, `<style`, `<textarea`, a processing
+An entry's body holds no heading, no code fence and no html block, and
+this script finds them so. A heading is a `#` run of one to six followed
+by a space or the line's end, after any indent or block-quote marker, or
+a line of `=` or of `-` alone, which is a setext underline after a text
+line and a thematic break otherwise: either is refused. An html block is
+one a blank line does not end, which could run on into the next entry:
+a comment, `<script`, `<pre`, `<style`, `<textarea`, a processing
 instruction (`<?`), a declaration (`<!` and a letter) and CDATA.
 
 The entries together are the release's section, and `check_changelog.py`
@@ -40,9 +30,10 @@ after it, and an unclosed fence runs to the end of the file, where
 
 `assemble <version>` writes `## v<version>` and every entry, in the
 order `order()` gives, above the first `## ` heading outside a fence of
-each history file, and removes the entries. The output depends on the entries
-alone, so the same files give the same bytes, and a reviewer of the
-release runs the command on the base and compares. It refuses a
+each history file, and removes the entries. The output depends on the
+entries alone, so the same files give the same bytes, and a reviewer of
+the release runs the command on the commit the release is cut from,
+which holds every entry, and compares. It refuses a
 directory holding no `.md` file, which is the exact form of "nothing
 changed for a user"; an `.md` file that is not an entry; and entries
 whose section `check_changelog.py` refuses. It refuses where a history
@@ -392,8 +383,9 @@ def inserted(name: str, text: str, version: str, new: str) -> str:
     if any(_WORK_IN_PROGRESS in line for _, line in found):
         msg = (
             f"{name} holds a {_WORK_IN_PROGRESS} heading, which a release does"
-            " not fold: remove the heading, move what its section holds into"
-            f" {NEXT}/ as entries, and commit both before the run"
+            " not fold: remove the heading and move what its section holds into"
+            f" {NEXT}/ as entries, in a pull request of its own before the"
+            " release"
         )
         raise RefusedError([msg])
     if code_lines(text)[1]:
@@ -450,6 +442,21 @@ def uncommitted(root: Path) -> list[str]:
         for line in done.stdout.splitlines()
         if not line.startswith("!! ") or read_by_assembly(line[3:])
     ]
+
+
+def tracked(root: Path) -> set[str]:
+    """List the paths git tracks under `NEXT`, as it writes them.
+
+    :param root: the tree's root, a git checkout `uncommitted()` read.
+    :returns: each path from the tree's root.
+    """
+    done = subprocess.run(  # noqa: S603
+        ["git", "-C", str(root), "ls-files", "-z", "--", str(NEXT)],  # noqa: S607
+        capture_output=True,
+        encoding="utf-8",
+        check=True,
+    )
+    return set(filter(None, done.stdout.split("\0")))
 
 
 def read_by_assembly(path: str) -> bool:
@@ -576,6 +583,14 @@ def assemble(version: str, root: Path) -> list[Path]:
             " run that does not finish"
         )
         raise RefusedError([msg])
+    for depth in range(1, len(NEXT.parts) + 1):
+        part = PurePosixPath(*NEXT.parts[:depth])
+        if (root / part).is_symlink():
+            msg = (
+                f"{part} is a symlink: the entries are the tree's own files,"
+                " which git can restore"
+            )
+            raise RefusedError([msg])
     problems = []
     if not _VERSION.fullmatch(version):
         problems.append(f"{version!r} is not a version: digits and dots")
@@ -591,6 +606,13 @@ def assemble(version: str, root: Path) -> list[Path]:
         f"{NEXT / path.name}: an entry is a regular file" for path in irregular
     ]
     data = {path: path.read_bytes() for path in paths if path not in irregular}
+    known = tracked(root)
+    problems += [
+        f"{NEXT / path.name}: git tracks no file at this path, so it could not"
+        " restore it"
+        for path in data
+        if (NEXT / path.name).as_posix() not in known
+    ]
     entries = {path.name: raw.decode("utf-8") for path, raw in data.items()}
     for name, text in entries.items():
         problems += entry_problems(name, text)

@@ -137,6 +137,21 @@ def _git_of_its_own(monkeypatch: pytest.MonkeyPatch) -> None:
 _AS_ANN = ("git", "-c", "user.name=Ann", "-c", "user.email=ann@example.org")
 
 
+def _symlink(link: Path, target: Path | str) -> None:
+    """Make a symlink, or skip the case where the platform refuses one.
+
+    Section 7's *A capability the platform may refuse is asked for inside
+    a guard*.
+
+    :param link: the symlink to make.
+    :param target: what it points to.
+    """
+    try:
+        link.symlink_to(target)
+    except OSError as refused:
+        pytest.skip(f"the platform refuses a symlink: {refused}")
+
+
 def _commit_at(root: Path) -> None:
     """Make `root` a git checkout, and commit everything in it.
 
@@ -396,7 +411,7 @@ def test_a_file_named_as_the_directory_is_not_left_by_a_run(tmp_path: Path) -> N
     """A file or a symlink of that name is the user's, and the run goes on."""
     _tree(tmp_path, ENTRIES)
     (tmp_path / ".changelog-assembly-notes.txt").write_text("x\n", encoding="utf-8")
-    (tmp_path / ".changelog-assembly-link").symlink_to(tmp_path / "changelog")
+    _symlink(tmp_path / ".changelog-assembly-link", tmp_path / "changelog")
 
     script.assemble("2026.11.15", tmp_path)
 
@@ -648,9 +663,9 @@ def test_a_work_in_progress_heading_is_refused(tmp_path: Path, name: str) -> Non
     assert refused.value.problems == [
         (
             f"{name} holds a (work in progress, not released yet) heading, which"
-            " a release does not fold: remove the heading, move what its section"
-            " holds into changelog/next/ as entries, and commit both before the"
-            " run"
+            " a release does not fold: remove the heading and move what its"
+            " section holds into changelog/next/ as entries, in a pull request"
+            " of its own before the release"
         )
     ]
     assert _snapshot(tmp_path) == before
@@ -696,10 +711,64 @@ def test_a_backtick_run_with_a_backtick_after_it_opens_no_fence() -> None:
     assert script.headings(text) == [(text.index("## v1"), "## v1")]
 
 
+@pytest.mark.parametrize("linked", ["changelog/next", "changelog"])
+def test_a_symlink_on_the_way_to_the_entries_is_refused(
+    tmp_path: Path, linked: str
+) -> None:
+    """Git tracks the link, not what it points to, so nothing could restore it.
+
+    :param linked: the directory that is a symlink to one outside the tree.
+    """
+    outside = tmp_path / "outside"
+    entries = outside / "next" if linked == "changelog" else outside
+    entries.mkdir(parents=True)
+    (entries / "3.md").write_text(ENTRIES["3.md"], encoding="utf-8")
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "CHANGELOG.md").write_text(CHANGELOG, encoding="utf-8")
+    (root / "RELEASE_NOTES.md").write_text(NOTES, encoding="utf-8")
+    (root / linked).parent.mkdir(parents=True, exist_ok=True)
+    _symlink(root / linked, outside)
+    _commit_at(root)
+    before = _snapshot(outside)
+
+    with pytest.raises(script.RefusedError) as refused:
+        script.assemble("2026.11.15", root)
+
+    assert refused.value.problems == [
+        (
+            f"{linked} is a symlink: the entries are the tree's own files, which"
+            " git can restore"
+        )
+    ]
+    assert _snapshot(outside) == before
+    assert (root / "CHANGELOG.md").read_text(encoding="utf-8") == CHANGELOG
+
+
+def test_an_entry_git_does_not_track_is_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Every file the run removes is one git can put back at that path."""
+    directory = _tree(tmp_path, {"3.md": ENTRIES["3.md"]})
+    (directory / "4.md").write_text("### Four\n\nFour (closes #4).\n")
+    monkeypatch.setattr(script, "uncommitted", lambda _: [])
+
+    with pytest.raises(script.RefusedError) as refused:
+        script.assemble("2026.11.15", tmp_path)
+
+    assert refused.value.problems == [
+        (
+            "changelog/next/4.md: git tracks no file at this path, so it could"
+            " not restore it"
+        )
+    ]
+    assert (directory / "4.md").is_file()
+
+
 def test_a_symlink_is_no_entry(tmp_path: Path) -> None:
     """Assembly reads regular files alone, and writes nothing otherwise."""
     directory = _tree(tmp_path, {"3.md": ENTRIES["3.md"]})
-    (directory / "4.md").symlink_to(directory / "3.md")
+    _symlink(directory / "4.md", directory / "3.md")
     _commit_at(tmp_path)
 
     with pytest.raises(script.RefusedError) as refused:
@@ -1152,7 +1221,7 @@ def test_a_symlink_entry_is_refused_however_it_arrives() -> None:
     _write("changelog/next/4.md", ENTRY)
     _commit()
     Path("changelog/next/4.md").unlink()
-    Path("changelog/next/4.md").symlink_to("../../docs/index.md")
+    _symlink(Path("changelog/next/4.md"), "../../docs/index.md")
     _commit()
     assert script.check("HEAD^1", "HEAD", []) == [
         (
@@ -1161,7 +1230,7 @@ def test_a_symlink_entry_is_refused_however_it_arrives() -> None:
         ),
     ]
 
-    Path("changelog/next/5.md").symlink_to("4.md")
+    _symlink(Path("changelog/next/5.md"), "4.md")
     _write("src/pkg/__init__.py", '"""A package that does more still."""\n')
     _commit()
     problems = script.check("HEAD^1", "HEAD", [])
