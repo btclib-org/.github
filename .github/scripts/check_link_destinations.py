@@ -4,8 +4,8 @@
 
 """Refuse a markdown link whose destination does not reach its file.
 
-Section 4 of README.md is the rule for the hooks that run this, and
-section 2 is the reason for `readme-absolute-link`'s:
+Section 4 of the organization's standard is the rule for the hooks that
+run this, and section 2 is the reason for `readme-absolute-link`'s:
 
 - `--prefixed`, `local-link-prefix`: a local destination begins with
   `./` or `../`;
@@ -13,7 +13,11 @@ section 2 is the reason for `readme-absolute-link`'s:
   local destination at all.
 
 A destination is local where it is not empty, does not open with `#`
-and names no scheme.
+and names no scheme. It is read as markdown-it renders it, its percent
+escapes as written: `%68ttps:` names no scheme, and `%2E/` is no `./`.
+A refusal prints it decoded, as `normalizeLinkText` gives it, `%2F` and
+`%23` staying escaped, wherever the rule refuses that text too, and as
+rendered otherwise.
 
 markdown-it parses each file as CommonMark, with GitHub's tables, and
 what it renders as a link or an image is what this reads: a link inside
@@ -39,6 +43,7 @@ growing faster than the file on some inputs.
 from __future__ import annotations
 
 import argparse
+import bisect
 import re
 import sys
 from pathlib import Path
@@ -72,6 +77,26 @@ FOOTNOTE_LABEL = re.compile(r"\[\^(?:[^\[\]\\]|\\.)*\]:")
 # what opens a line inside a block quote or a list item's continuation
 CONTAINER = re.compile(r"^[ \t>]*", re.MULTILINE)
 
+# the key, in a parse's env, of the inline source last read and the
+# offsets of its line breaks
+NEWLINES = "check_link_destinations.newlines"
+
+
+def breaks(state: StateInline) -> list[int]:
+    """Give the offsets of the line breaks in an inline source.
+
+    They are found once per source, so that each link costs a search and
+    not a scan of the source before it.
+
+    :param state: the inline parse.
+    :returns: the offsets, ascending.
+    """
+    cached = state.env.get(NEWLINES)
+    if cached is None or cached[0] is not state.src:
+        offsets = [found.start() for found in re.finditer("\n", state.src)]
+        cached = state.env[NEWLINES] = (state.src, offsets)
+    return cached[1]
+
 
 def located(
     rule: Callable[[StateInline, bool], bool],
@@ -95,7 +120,7 @@ def located(
             return False
         for token in state.tokens[count:]:
             if token.type in OPENING:
-                token.meta["line"] = state.src.count("\n", 0, start)
+                token.meta["line"] = bisect.bisect_left(breaks(state), start)
                 token.meta["footnote"] = bool(
                     FOOTNOTE_USE.fullmatch(state.src, start, state.pos)
                 )
@@ -156,9 +181,8 @@ def destinations(text: str) -> Iterator[tuple[int, str]]:
     Within a line the links come in the order the parse meets them.
 
     :param text: the file.
-    :yields: the 1-based line and the destination, as markdown-it's
-        `normalizeLinkText` gives it: the escapes of reserved characters,
-        as `%2F` or `%23`, stay encoded.
+    :yields: the 1-based line and the destination, as markdown-it
+        renders it.
     """
     text = text.replace("\r\n", "\n")
     env: dict[str, Any] = {}
@@ -173,8 +197,7 @@ def destinations(text: str) -> Iterator[tuple[int, str]]:
         else:
             found.append((reference["map"][0] + 1, reference["href"]))
     found.extend(links(tokens))
-    for line, destination in sorted(found, key=lambda item: item[0]):
-        yield line, PARSER.normalizeLinkText(destination)
+    yield from sorted(found, key=lambda item: item[0])
 
 
 def local(destination: str) -> bool:
@@ -191,18 +214,30 @@ def local(destination: str) -> bool:
     )
 
 
+def refused(destination: str, *, absolute: bool) -> bool:
+    """Say whether the rule refuses a destination.
+
+    :param destination: a destination.
+    :param absolute: `--absolute`'s rule, rather than `--prefixed`'s.
+    :returns: whether it is local and, under `--prefixed`, begins neither
+        `./` nor `../`.
+    """
+    return local(destination) and (
+        absolute or not destination.startswith(("./", "../"))
+    )
+
+
 def refusals(text: str, *, absolute: bool) -> Iterator[tuple[int, str]]:
     """Yield the destinations of a file the rule refuses.
 
     :param text: the file.
     :param absolute: `--absolute`'s rule, rather than `--prefixed`'s.
-    :yields: the line and the destination of each refusal.
+    :yields: the line and the destination of each refusal, as printed.
     """
     for line, destination in destinations(text):
-        if local(destination) and (
-            absolute or not destination.startswith(("./", "../"))
-        ):
-            yield line, destination
+        if refused(destination, absolute=absolute):
+            shown = PARSER.normalizeLinkText(destination)
+            yield line, shown if refused(shown, absolute=absolute) else destination
 
 
 def main(argv: Sequence[str] | None = None) -> int:

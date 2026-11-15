@@ -393,6 +393,65 @@ def test_an_escaped_reserved_character_stays_escaped(
     assert refuses(script, text, absolute=True) == [destination]
 
 
+@pytest.mark.parametrize(
+    ("text", "prefixed", "absolute"),
+    [
+        pytest.param(
+            "[a](%68ttps://example.org/x.md)",
+            ["%68ttps://example.org/x.md"],
+            ["%68ttps://example.org/x.md"],
+            id="link",
+        ),
+        pytest.param(
+            "[a]: %68ttps://example.org/x.md",
+            ["%68ttps://example.org/x.md"],
+            ["%68ttps://example.org/x.md"],
+            id="definition",
+        ),
+        pytest.param(
+            "![a](%68ttp://x.org/y.png)",
+            ["%68ttp://x.org/y.png"],
+            ["%68ttp://x.org/y.png"],
+            id="image",
+        ),
+        pytest.param("[a](%2E/x.md)", ["%2E/x.md"], ["./x.md"], id="escaped-dot"),
+        pytest.param("[a](./%78.md)", [], ["./x.md"], id="escaped-name"),
+        pytest.param("[a](https://example.org/%78.md)", [], [], id="scheme"),
+    ],
+)
+def test_a_destination_is_judged_as_rendered(
+    script: ModuleType, text: str, prefixed: list[str], absolute: list[str]
+) -> None:
+    """An escaped letter names no scheme, and an escaped dot is no `./`.
+
+    A refusal prints the decoded text where the rule refuses that too,
+    and the rendered one where decoding would change the verdict.
+
+    :param script: the module.
+    :param text: a file holding the link.
+    :param prefixed: what `local-link-prefix` refuses, as printed.
+    :param absolute: what `readme-absolute-link` refuses, as printed.
+    """
+    assert refuses(script, text, absolute=False) == prefixed
+    assert refuses(script, text, absolute=True) == absolute
+
+
+def test_each_paragraph_counts_its_own_lines(script: ModuleType) -> None:
+    """A paragraph's line breaks are its own, the one before it having none.
+
+    :param script: the module.
+    """
+    text = "[a](a.md) [b](b.md)\n\n[c](c.md)\n[d](d.md)\n\n[x\n![i](\ni.png)](\no.md)"
+    assert list(script.destinations(text)) == [
+        (1, "a.md"),
+        (1, "b.md"),
+        (3, "c.md"),
+        (4, "d.md"),
+        (6, "o.md"),
+        (7, "i.png"),
+    ]
+
+
 def test_a_link_opens_on_its_own_line(script: ModuleType) -> None:
     """A line break inside an earlier link's label moves the next one down.
 
