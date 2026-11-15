@@ -666,6 +666,50 @@ def test_a_fenced_heading_on_the_branch_is_not_reported(script: ModuleType) -> N
     assert script.problems(text, base=_BASE) == []
 
 
+_MOVED = frozenset({_LATE.strip("\n")})
+_UNDER_V2 = _RELEASED.replace("\n## v1", _LATE + "\n## v1")
+
+
+def test_an_entry_moved_under_the_newest_release_before_its_tag_passes(
+    script: ModuleType,
+) -> None:
+    """An entry left in `changelog/next/` moves into the release's section."""
+    assert script.problems(_UNDER_V2, base=_BASE, moved=_MOVED) == []
+
+
+def test_an_entry_moved_once_the_tag_exists_is_caught(script: ModuleType) -> None:
+    """The tag closes the release's section to moves too."""
+    tag = "whose tag v2 exists"
+    found = script.problems(_UNDER_V2, base=_BASE, moved=_MOVED, tag=tag)
+    assert len(found) == 1
+    assert f"'Late' moves from changelog/next/ under 'v2', {tag}" in found[0]
+
+
+def test_an_entry_moved_under_an_older_release_is_caught(script: ModuleType) -> None:
+    """Only the newest release takes a moved entry."""
+    found = script.problems(_RELEASED + _LATE, base=_BASE, moved=_MOVED)
+    assert len(found) == 1
+    assert f"{_REFUSED} 'v1'" in found[0]
+
+
+def test_an_entry_no_removed_entry_holds_is_caught(script: ModuleType) -> None:
+    """A moved entry keeps its text: another under the newest is new."""
+    moved = frozenset({"### Late\n\n- **late** (closes #4): four."})
+    found = script.problems(_UNDER_V2, base=_BASE, moved=moved)
+    assert len(found) == 1
+    assert f"{_REFUSED} 'v2'" in found[0]
+
+
+def test_an_entry_moved_under_a_release_a_new_one_tops_is_caught(
+    script: ModuleType,
+) -> None:
+    """A move goes under the newest release the base holds, still the newest."""
+    text = _UNDER_V2.replace("## v2", f"{_THREE}## v2")
+    found = script.problems(text, base=_BASE, moved=_MOVED)
+    assert len(found) == 1
+    assert f"{_REFUSED} 'v2'" in found[0]
+
+
 def _git(root: Path, *args: str) -> str:
     """Run git in `root` as `Ann`, and return what it prints."""
     return subprocess.run(
@@ -762,3 +806,78 @@ def test_main_says_so_where_there_is_no_merge_base(
     _commit(repo, _RELEASED + _LATE)
     assert script.main([]) == 0
     assert "no entry compared with the base" in capsys.readouterr().out
+
+
+def _left_entry(repo: Path) -> str:
+    """Land an entry under `changelog/next/` on `origin/main`, past a tag.
+
+    `v1` tags the first commit, so that git holds a `v` tag.
+
+    :param repo: the file, as the `repo` fixture returns it.
+    :returns: the entry's path, from the tree's root.
+    """
+    root = repo.parent
+    _git(root, "update-ref", "refs/tags/v1", "origin/main")
+    path = "changelog/next/pr3-iss3.md"
+    (root / path).parent.mkdir(parents=True)
+    (root / path).write_text(_LATE.lstrip("\n"), encoding="utf-8")
+    _git(root, "add", path)
+    _git(root, "commit", "--quiet", "-m", "entry")
+    _git(root, "update-ref", "refs/remotes/origin/main", "HEAD")
+    return path
+
+
+@pytest.mark.parametrize(
+    ("tags", "refused"),
+    [
+        pytest.param((), None, id="before-the-tag"),
+        pytest.param(("v2",), "whose tag v2 exists", id="after-the-tag"),
+        pytest.param(
+            ("-d", "v1"),
+            "and git holds no tag to tell whether v2 has one",
+            id="no-tag-fetched",
+        ),
+    ],
+)
+def test_main_reads_the_move_from_the_base_and_the_tags(
+    script: ModuleType,
+    repo: Path,
+    capsys: pytest.CaptureFixture[str],
+    tags: tuple[str, ...],
+    refused: str | None,
+) -> None:
+    """The entry the branch removes is the one it writes under the newest."""
+    path = _left_entry(repo)
+    _git(repo.parent, "rm", "--quiet", path)
+    _commit(repo, _UNDER_V2)
+    if tags:
+        _git(repo.parent, "tag", *tags)
+    assert script.main([]) == (0 if refused is None else 1)
+    out = capsys.readouterr().out
+    if refused is not None:
+        assert f"under 'v2', {refused}" in out
+
+
+def test_main_refuses_an_entry_the_branch_keeps_under_changelog_next(
+    script: ModuleType,
+    repo: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A copy is no move: the entry still waits for the next release."""
+    _left_entry(repo)
+    _commit(repo, _UNDER_V2)
+    assert script.main([]) == 1
+    assert f"{_REFUSED} 'v2'" in capsys.readouterr().out
+
+
+def test_main_refuses_an_entry_renamed_under_changelog_next(
+    script: ModuleType,
+    repo: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A renamed entry still waits for the next release, so it moves nowhere."""
+    path = _left_entry(repo)
+    _git(repo.parent, "mv", path, "changelog/next/pr9-iss3.md")
+    _commit(repo, _UNDER_V2)
+    assert script.main([]) == 1
+    assert f"{_REFUSED} 'v2'" in capsys.readouterr().out

@@ -54,7 +54,7 @@ def test_neither_history_file_has_a_merge_driver(
     repository: str,
     trees: dict[str, Path],
 ) -> None:
-    """Section 9: only a release's pull request writes these files.
+    """Section 9: only a release and the move after it write these files.
 
     A driver would resolve a second writer's conflict without a word.
 

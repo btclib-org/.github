@@ -5,22 +5,22 @@
 
 """Refuse an entry written outside a release's own pull request.
 
-A pull request adds no entry, and the last check below refuses one. The
-others read what a conflict resolved by deleting its markers breaks: two
-branches appending an entry at the same anchor conflict there, and
-deleting the markers keeps both sides and, at git's default conflict
-style, writes once the lines both blocks start or end with. The
-`merge=union` driver, which section 9 of README.md rejects, writes the
-same; btclib-org/.github#21 and btclib-org/.github#760 measured what that
-costs under it. They stay as the shape checks of a release's own
-section. Every check but the last runs once over the file's own open
-section -- the first `## ` heading's, up to the line before the second,
-or to the end of the file where there is no second. A
-`## ` or `### ` line inside a fenced code block is a markdown example
-rather than a heading of the file's own, and is blanked out before
-either is matched (btclib-org/.github#1372) -- character for character,
-unlike `_CODE_SPAN` below, which removes what it strips outright rather
-than preserving its length.
+A pull request adds no entry, save where the last check below admits
+one, and that check refuses it. The others read what a conflict resolved
+by deleting its markers breaks: two branches appending an entry at the
+same anchor conflict there, and deleting the markers keeps both sides
+and, at git's default conflict style, writes once the lines both blocks
+start or end with. The `merge=union` driver, which section 9 of
+README.md rejects, writes the same; btclib-org/.github#21 and
+btclib-org/.github#760 measured what that costs under it. They stay as
+the shape checks of a release's own section. Every check but the last
+runs once over the file's own open section -- the first `## ` heading's,
+up to the line before the second, or to the end of the file where there
+is no second. A `## ` or `### ` line inside a fenced code block is a
+markdown example rather than a heading of the file's own, and is blanked
+out before either is matched (btclib-org/.github#1372) -- character for
+character, unlike `_CODE_SPAN` below, which removes what it strips
+outright rather than preserving its length.
 
 Three checks, all of them shapes a conflict resolved by deleting its
 markers produces -- a fourth, below them, that is section 9's own bound
@@ -172,18 +172,27 @@ nothing an earlier release holds.
 
 The seventh check is the one section 9 states: a pull request adds no
 entry to the file, and a release's section reaches it only in the pull
-request that cuts the release. It reads every `### ` heading of the file
-against the merge base of `HEAD` and `origin/main`, the base being that
-merge base because the gate runs `pre-commit run --all-files`, which
-sets no from and to refs, and `HEAD` already holds an entry the branch
-committed. A heading is refused where the base does not hold it under
-that same `## ` heading, unless that `## ` heading is a `## v<version>`
-(alone on its line) that the base lacks. The check reads headings and
-not whether a release is real: a diff that adds a `## v<version>`
-heading passes, and a reviewer sees it.
+request that cuts the release, or in one that moves an entry left in
+`changelog/next/` into it before its tag. It reads every `### ` heading
+of the file against the merge base of `HEAD` and `origin/main`, the base
+being that merge base because the gate runs `pre-commit run
+--all-files`, which sets no from and to refs, and `HEAD` already holds
+an entry the branch committed. A heading is refused where the base does
+not hold it under that same `## ` heading, unless that `## ` heading is
+a `## v<version>` (alone on its line) that the base lacks. The check
+reads headings and not whether a release is real: a diff that adds a
+`## v<version>` heading passes, and a reviewer sees it.
+
+A moved entry passes under the newest `## v<version>` where the base's
+newest heading is the same, its text up to the next heading is that of
+an entry the base holds under `changelog/next/` and the tree does not
+hold there under any name, and git holds no tag `v<version>`. Git must
+hold another `v` tag: a tree holding none may not have fetched its
+tags, and the move is refused there.
 
 So an entry added under any release the base holds is refused, the
-newest included, and so is one under a new heading that is no release.
+newest included unless it is moved, and so is one under a new heading
+that is no release.
 A work-in-progress heading retitled to its release is a new release
 heading and passes. A `### ` heading inside a fenced block is an example
 and is not read.
@@ -207,7 +216,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Callable, Sequence
 
 # relative to the working directory, which `pre-commit` sets to the
 # root of the repository being checked: this file is served from
@@ -216,6 +225,8 @@ if TYPE_CHECKING:
 # hook was invoked over
 _CHANGELOG = Path("CHANGELOG.md")
 _MAIN = "origin/main"
+# where the entries wait for the release, from the tree's root
+_NEXT = "changelog/next"
 
 _RELEASE_HEADING = re.compile(r"^## .*$", re.MULTILINE)
 _ENTRY_HEADING = re.compile(r"^### (?P<title>.*)$", re.MULTILINE)
@@ -619,18 +630,51 @@ def entries_by_release(text: str) -> list[tuple[str | None, str, int]]:
     return found
 
 
-def entries_outside_a_release(text: str, base: tuple[str, str]) -> list[str]:
+def newest_release(text: str) -> tuple[str | None, dict[int, str]]:
+    """Read the file's newest release and the entries of its section.
+
+    :param text: the whole file.
+    :returns: the first `## ` heading's text where it is a release,
+        `v<version>` alone, or None; and each `### ` entry of its section,
+        by the offset of its heading, its text stripped of the newlines
+        that end it.
+    """
+    headings = list(_RELEASE_HEADING.finditer(_blank_fenced_blocks(text)))
+    release = headings[0].group(0)[3:].strip() if headings else None
+    if release is None or not _VERSION_HEADING.fullmatch(release):
+        return None, {}
+    section, start = open_section(text)
+    found = {
+        start + offset: body.rstrip("\n")
+        for title, body, offset in entries(section)
+        if title is not None
+    }
+    return release, found
+
+
+def entries_outside_a_release(
+    text: str,
+    base: tuple[str, str],
+    moved: frozenset[str] = frozenset(),
+    tag: str | None = None,
+) -> list[str]:
     """Report a `### ` heading new to a release the base already holds.
 
     A heading is new where the base does not hold it under the same `## `
     heading. It is allowed where its `## ` heading is a release,
     `## v<version>` alone, that the base does not hold either: the
-    release cut in this very diff.
+    release cut in this very diff. It is allowed too where it is moved:
+    under the newest release, the base's newest too, with the text of an
+    entry in `moved`, and `tag` None.
 
     :param text: the whole file.
     :param base: the merge base's sha, and the whole file there.
+    :param moved: the text of each entry the base holds under `_NEXT` and
+        the tree does not, as `moved_entries()` reads it.
+    :param tag: why the newest release takes no moved entry, as
+        `tag_problem()` gives it, or None where it takes them.
     :returns: one message per entry written outside a release's own pull
-        request.
+        request and not moved into its section before the tag.
     """
     sha, before = base
     held = {(release, title) for release, title, _ in entries_by_release(before)}
@@ -639,6 +683,9 @@ def entries_outside_a_release(text: str, base: tuple[str, str]) -> list[str]:
         for heading in _ANY_HEADING.finditer(_blank_fenced_blocks(before))
         if heading.group("release") is not None
     }
+    newest, section = newest_release(text)
+    if newest != newest_release(before)[0]:
+        section = {}
     problems = []
     for release, title, offset in entries_by_release(text):
         if (release, title) in held:
@@ -649,6 +696,15 @@ def entries_outside_a_release(text: str, base: tuple[str, str]) -> list[str]:
             and _VERSION_HEADING.fullmatch(release)
         ):
             continue
+        if section.get(offset) in moved:
+            if tag is None:
+                continue
+            problems.append(
+                f"line {line_at(text, offset)}: heading {title!r} moves from"
+                f" {_NEXT}/ under {release!r}, {tag}: an entry moves into a"
+                " release's section only before its tag (section 9)",
+            )
+            continue
         where = f"under {release!r}"
         if release is None:
             where = "above the first release heading"
@@ -656,9 +712,24 @@ def entries_outside_a_release(text: str, base: tuple[str, str]) -> list[str]:
             f"line {line_at(text, offset)}: heading {title!r} is new {where},"
             f" in a file whose base {sha} (the merge base with {_MAIN}) does"
             " not hold it there -- an entry reaches this file only in the"
-            " pull request that cuts its release (section 9)",
+            " pull request that cuts its release, or moved there from"
+            f" {_NEXT}/ before its tag (section 9)",
         )
     return problems
+
+
+def _git(*args: str) -> subprocess.CompletedProcess[str]:
+    """Run git in the tree `CHANGELOG.md` is in.
+
+    :param args: git's arguments.
+    :returns: what git answered, its output decoded.
+    """
+    return subprocess.run(  # noqa: S603
+        ["git", "-C", str(_CHANGELOG.parent), *args],  # noqa: S607
+        capture_output=True,
+        encoding="utf-8",
+        check=False,
+    )
 
 
 def at_merge_base() -> tuple[str, str] | None:
@@ -667,27 +738,60 @@ def at_merge_base() -> tuple[str, str] | None:
     :returns: the sha and the file, or None where git finds no merge
         base or the base holds no such file.
     """
-
-    def git(*args: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(  # noqa: S603
-            ["git", "-C", str(_CHANGELOG.parent), *args],  # noqa: S607
-            capture_output=True,
-            encoding="utf-8",
-            check=False,
-        )
-
-    base = git("merge-base", "HEAD", _MAIN)
+    base = _git("merge-base", "HEAD", _MAIN)
     if base.returncode:
         return None
     sha = base.stdout.strip()
-    shown = git("show", f"{sha}:./{_CHANGELOG.name}")
+    shown = _git("show", f"{sha}:./{_CHANGELOG.name}")
     return None if shown.returncode else (sha, shown.stdout)
+
+
+def moved_entries(sha: str) -> frozenset[str]:
+    """Read the entries the base holds under `_NEXT` and the tree does not.
+
+    An entry whose text the tree still holds under `_NEXT`, renamed or
+    copied, is not one of them: it still waits for the next release.
+
+    :param sha: the merge base.
+    :returns: each one's text, stripped of the newlines that end it.
+    """
+    listed = _git("ls-tree", "-z", "--name-only", sha, "--", f"{_NEXT}/")
+    gone = {
+        _git("show", f"{sha}:{path}").stdout.rstrip("\n")
+        for path in listed.stdout.split("\0")
+        if path.endswith(".md") and not (_CHANGELOG.parent / path).exists()
+    }
+    kept = {
+        path.read_text(encoding="utf-8").rstrip("\n")
+        for path in (_CHANGELOG.parent / _NEXT).glob("*.md")
+    }
+    return frozenset(gone - kept)
+
+
+def tag_problem(
+    release: str,
+    run: Callable[..., subprocess.CompletedProcess[str]] = _git,
+) -> str | None:
+    """Say why a release takes no moved entry, from its tag.
+
+    :param release: the release's heading, `v<version>`, which is its tag.
+    :param run: what runs git in the tree.
+    :returns: None where git holds no such tag and holds another `v` tag;
+        otherwise the reason.
+    """
+    if run("rev-parse", "--verify", "--quiet", f"refs/tags/{release}").returncode == 0:
+        return f"whose tag {release} exists"
+    if not run("tag", "--list", "v*").stdout.strip():
+        return f"and git holds no tag to tell whether {release} has one"
+    return None
 
 
 def problems(
     text: str,
     grandfathered: int = 0,
     base: tuple[str, str] | None = None,
+    moved: frozenset[str] = frozenset(),
+    tag: str | None = None,
 ) -> list[str]:
     """Return every way the file fails the checks.
 
@@ -695,9 +799,14 @@ def problems(
     :param grandfathered: what `misplaced_entries()` measures against.
     :param base: the merge base's sha and the whole file there, or None
         where there is none to compare against.
+    :param moved: what `entries_outside_a_release()` takes as moved.
+    :param tag: why the newest release takes no moved entry, or None.
     :returns: one message per finding, in the order the checks run.
     """
     section, start = open_section(text)
+    outside = (
+        entries_outside_a_release(text, base, moved, tag) if base is not None else []
+    )
     return [
         *repeated_headings(text, section, start),
         *duplicate_closes(text, section, start),
@@ -705,7 +814,7 @@ def problems(
         *misplaced_entries(text, section, start, grandfathered),
         *long_bodies(text, section, start),
         *wrapped_citations(text, section, start),
-        *(entries_outside_a_release(text, base) if base is not None else []),
+        *outside,
     ]
 
 
@@ -718,7 +827,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Refuse a CHANGELOG.md section a rebase conflict can"
         " break, a citation number markdownlint-cli2's own fixer mangles,"
-        " or an entry written outside a release's own pull request.",
+        " or an entry written outside a release's own pull request or a"
+        " move into it.",
     )
     parser.add_argument(
         "--grandfathered",
@@ -732,12 +842,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
     )
     arguments = parser.parse_args(argv)
+    text = _CHANGELOG.read_text(encoding="utf-8")
     base = at_merge_base()
-    found = problems(
-        _CHANGELOG.read_text(encoding="utf-8"),
-        arguments.grandfathered,
-        base,
-    )
+    moved = moved_entries(base[0]) if base is not None else frozenset()
+    newest = newest_release(text)[0]
+    tag = tag_problem(newest) if moved and newest is not None else None
+    found = problems(text, arguments.grandfathered, base, moved, tag)
     for problem in found:
         print(f"{_CHANGELOG}: {problem}")
     if not found:

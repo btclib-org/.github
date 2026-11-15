@@ -357,10 +357,12 @@ another document holds the rule, the question names it.
   `git log`'s and the changelog's. The finding asks for the history to
   go, not to be shortened.
 - Does the branch add an entry to `CHANGELOG.md` or `RELEASE_NOTES.md`?
-  Outside a release's own pull request that is a blocking finding (section 9).
-  `check-changelog` refuses a new entry in `CHANGELOG.md` and reads nothing
-  of a bullet added under an entry the base holds. It reads no other file, so
-  a new entry in `RELEASE_NOTES.md` is the reviewer's to catch.
+  Outside a release's own pull request, and the one that moves an entry left
+  in `changelog/next/` into its section, that is a blocking finding
+  (section 9). `check-changelog` refuses any other new entry in
+  `CHANGELOG.md` and reads nothing of a bullet added under an entry the base
+  holds. It reads no other file, so a new entry in `RELEASE_NOTES.md` is the
+  reviewer's to catch.
 - In a tree that publishes, does a branch that changes what a user gets add
   its entry under `changelog/next/`, and does the entry say what changed, in
   the shape section 9 gives it? It lands as written: the release assembles it

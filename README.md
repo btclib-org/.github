@@ -1194,8 +1194,9 @@ No `autoupdate_branch`: the default branch is the only branch.
     **It refuses an entry written outside a release's own pull request**
     (btclib-org/.github#1622): a `###` heading the merge base with
     `origin/main` does not hold under the same `##` heading, unless that
-    `##` is a `## v<version>` the base lacks. With no merge base it
-    passes, and says so.
+    `##` is a `## v<version>` the base lacks, or the entry moves from
+    `changelog/next/` as section 9 says. With no merge base it passes,
+    and says so.
 
     **`btclib-org/.github` itself keeps the hook `local`**, a pin being
     a revision other than the working tree: a tree pinning itself would
@@ -1211,8 +1212,9 @@ No `autoupdate_branch`: the default branch is the only branch.
     The check has to fire before the merge that creates the duplicate,
     which only a hook on the branch does; a landed-order gate is declined
     at btclib-org/.github#516. A pull request writes its entry under
-    `changelog/next/` (section 9), so only a release's pull request writes
-    the file this hook reads.
+    `changelog/next/` (section 9), so only a release's pull request, and
+    the one that moves an entry left there into its section, write the
+    file this hook reads.
 
     **The hook runs on every invocation, and carries no `files:`**, the
     script being handed no file list for a filter to decide anything
@@ -2027,15 +2029,26 @@ without adding to it is deleted.
   `## v<version>` and every entry, in a fixed order, above the previous
   release in each history file, and removes the entries.
   `changelog-entry.yml` refuses a pull request that removes more entries
-  than it adds, unless its `CHANGELOG.md` gains a `## v<version>`
-  heading, as a release's does, or it carries `no-user-change`, as the
-  revert of an unreleased change does. The release's pull request edits
-  or adds no entry: one the release needs fixed or added lands first, in
-  a pull request of its own, so the release's base holds every entry. The same
-  entries give the same bytes, so the release's review compares the pull
-  request with the script's output on its base. An empty
-  `changelog/next/` refuses to assemble: nothing changed for a user, so
-  there is no release. Section 12 has the step.
+  than it adds, unless its `CHANGELOG.md` gains a `## v<version>` heading,
+  as a release's does, it moves them as the next bullet says, or it
+  carries `no-user-change`, as the revert of an unreleased change does.
+  The release's pull request edits or adds no entry: one the release needs
+  fixed or added lands first, in a pull request of its own, so the
+  release's base holds every entry. The same entries give the same bytes,
+  so the release's review compares the pull request with the script's
+  output on its base. An empty `changelog/next/` refuses to assemble:
+  nothing changed for a user, so there is no release. Section 12 has the
+  step.
+- **An entry left in `changelog/next/` once the release has merged moves
+  into its section**, under the same `## v<version>` of both history
+  files, in a pull request of its own that lands before the tag.
+  `RELEASING.md`'s merge step says when one is left. That pull request
+  writes the history files beside the release's own: `check-changelog`
+  and `changelog-entry.yml` admit it while git holds no tag
+  `v<version>` and holds another `v` tag, and refuse it once the tag
+  exists. With no `v` tag at all, a missing tag may only be unfetched, so
+  the move after a tree's first release lands through the bypass
+  `CONTRIBUTING.md`'s *Landing it* gives.
 - **The history files take the same section.** `RELEASE_NOTES.md` is what the
   GitHub release publishes and what section 12's public-API check reads,
   so an entry whose change asks something of a user says what in its
@@ -2051,9 +2064,9 @@ without adding to it is deleted.
   an `.md` file under `changelog/next/` that is not one, and entries
   whose section `check-changelog` (section 4) would refuse, on their
   pull request and at the release. `check-changelog` refuses a longer
-  body, and an entry written outside a release's own pull request, in
-  `CHANGELOG.md` only: a new entry in `RELEASE_NOTES.md` is the
-  reviewer's to catch.
+  body, and an entry written outside a release's own pull request and
+  the move above, in `CHANGELOG.md` only: a new entry in
+  `RELEASE_NOTES.md` is the reviewer's to catch.
 - **`changelog/next/` holds `.markdownlint.jsonc`**, which the release
   keeps. markdownlint's MD041 asks a file to open with a `#` heading,
   and an entry opens with `###`; this file asks for `###` there and
@@ -2079,10 +2092,10 @@ without adding to it is deleted.
   no entry, as a file or in either history file: nothing would assemble
   it, and `changelog_entries.py` refuses one there.
   Section 2 owes the file to every tier.
-- **Neither file has a merge driver.** Only a release's pull request
-  writes them, so a conflict there is a second writer, and a driver
-  such as `merge=union` resolves it without a word, the rebase exiting 0
-  (btclib-org/.github#1582).
+- **Neither file has a merge driver.** Only a release's pull request and
+  the move above write them, so a conflict there is a second writer, and
+  a driver such as `merge=union` resolves it without a word, the rebase
+  exiting 0 (btclib-org/.github#1582).
 - **Nothing already written is rewritten.** An entry speaks of its own
   day, and a count in it that has since moved stays. The exceptions: a
   release's pull request may correct which issues the body of a released
@@ -3946,16 +3959,17 @@ A label means what its description says. Who applies and removes it:
   `changelog_entries.py` adds `## v<version>`, the tag's own heading, and the
   entries under `changelog/next/` above the previous release in `CHANGELOG.md`
   and in `RELEASE_NOTES.md`, and removes the entries. No other pull request
-  writes either file (section 9), so the topmost `##` heading of either file on
-  the default branch is the latest release's at every commit. The tag says what
-  `pyproject.toml` says, so the version bump stays in the pull request that
-  sets it. A release publishes the section the release pull request added. A
-  rehearsal of a release with any public-API finding is dispatched from that
-  branch, after the sections are assembled. A rehearsal has no tag, so the
-  public-API check reads the section headed `## v<version>`, the version being
-  `pyproject.toml`'s, else the first `##` section. Before the sections are
-  assembled, that section is the previous release's or a work-in-progress one,
-  and the check fails on each finding it does not name.
+  writes either file but the one moving a left entry under the same heading
+  (section 9), so the topmost `##` heading of either file on the default branch
+  is the latest release's at every commit. The tag says what `pyproject.toml`
+  says, so the version bump stays in the pull request that sets it. A release
+  publishes the tag's own section of `RELEASE_NOTES.md`. A rehearsal of a
+  release with any public-API finding is dispatched from that branch, after the
+  sections are assembled. A rehearsal has no tag, so the public-API check reads
+  the section headed `## v<version>`, the version being `pyproject.toml`'s, else
+  the first `##` section. Before the sections are assembled, that section is the
+  previous release's or a work-in-progress one, and the check fails on each
+  finding it does not name.
 - **A published sdist reproduces from its tag.** The attestation every publisher
   attaches vouches for bytes, so a release rebuilt from the commit its tag names
   — by running what the release ran — gives those bytes back. What the release

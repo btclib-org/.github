@@ -903,6 +903,47 @@ def releases(commit: str, run: Git = git) -> set[str]:
     }
 
 
+def moved(
+    base: str,
+    head: str,
+    removed: list[str],
+    run: Git = git,
+) -> tuple[int, str | None]:
+    """Count the entries the diff moves into the newest release's section.
+
+    An entry is moved where each history file at the head holds its text
+    as an entry of its newest `## v<version>`, which is the newest of
+    each file at the base too, no entry under `NEXT` at the head holds
+    it, and `check_changelog.py`'s `tag_problem()` finds no reason in the
+    tag.
+
+    :param base: the commit compared against.
+    :param head: the commit compared.
+    :param removed: the entries the diff removes, by path.
+    :param run: what runs git.
+    :returns: how many it moves, and the tag's reason where it refuses
+        the moves, None otherwise.
+    """
+    module = checker()
+    found: set[str | None] = set()
+    sections = []
+    for name in FILES:
+        release, entries = module.newest_release(run("show", f"{head}:{name}").stdout)
+        before = module.newest_release(run("show", f"{base}:{name}").stdout)[0]
+        found |= {release, before}
+        sections.append(set(entries.values()))
+    kept = {text.rstrip("\n") for text in pending(head, run).values()}
+    texts = [run("show", f"{base}:{path}").stdout.rstrip("\n") for path in removed]
+    count = sum(
+        text not in kept and all(text in section for section in sections)
+        for text in texts
+    )
+    if len(found) != 1 or None in found or not count:
+        return 0, None
+    tag: str | None = module.tag_problem(found.pop(), run)
+    return (0, tag) if tag else (count, None)
+
+
 def lost_entries(
     base: str,
     head: str,
@@ -914,8 +955,10 @@ def lost_entries(
 
     A rename, a retitle or a replacement removes one and adds one. A
     release's own pull request, whose `CHANGELOG.md` gains a
-    `## v<version>` heading, removes them all, and one labelled `LABEL`,
-    such as the revert of an unreleased change, may remove its own.
+    `## v<version>` heading, removes them all, one labelled `LABEL`,
+    such as the revert of an unreleased change, may remove its own, and
+    an entry `moved()` counts is not lost. A move the tag refuses is
+    refused whatever else the diff adds.
 
     :param base: the commit compared against.
     :param head: the commit compared.
@@ -924,21 +967,33 @@ def lost_entries(
     :param run: what runs git.
     :returns: the reason, none where the diff passes.
     """
-    statuses = [
-        status
+    entries = [
+        (status, path)
         for *_, status, path in diff
         if PurePosixPath(path).parent == NEXT and path.endswith(".md")
     ]
+    statuses = [status for status, _ in entries]
     gone, added = statuses.count("D"), statuses.count("A")
-    if gone <= added or LABEL in labels or releases(head, run) - releases(base, run):
+    if releases(head, run) - releases(base, run):
         return []
-    return [
-        (
+    removed = [path for status, path in entries if status == "D"]
+    count, tag = moved(base, head, removed, run) if removed else (0, None)
+    problems = []
+    if gone - count > added and LABEL not in labels:
+        problems.append(
             f"{NEXT}/: the diff removes {gone} entries and adds {added}, so the"
             " next release would lose what one says: only a release's assembly"
-            f" removes an entry, or a pull request labelled {LABEL} (section 9)"
-        ),
-    ]
+            " removes an entry, a pull request that moves it into the release's"
+            f" section before the tag, or a pull request labelled {LABEL}"
+            " (section 9)"
+        )
+    if tag:
+        problems.append(
+            f"{NEXT}/: the diff moves entries under the newest release, {tag}:"
+            " an entry moves into a release's section only before its tag"
+            " (section 9)"
+        )
+    return problems
 
 
 def missing_entry(package: list[str], number: int | None) -> str:

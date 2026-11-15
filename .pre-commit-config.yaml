@@ -153,7 +153,7 @@ repos:
   - repo: local
     hooks:
       - id: check-changelog
-        name: CHANGELOG.md takes an entry only in a release's own pull request
+        name: CHANGELOG.md takes an entry only in a release's own pull request or a move into it
         entry: .github/scripts/check_changelog.py
         language: script
         args: [--grandfathered, "350"]
