@@ -252,6 +252,11 @@ second is no hold, and any other list is read as a publishing tree's
 the `404` of a repository that does not exist, is an error, and the
 merge waits until both answer.
 
+The check and the merge are two calls, and no rule of a GitHub ruleset
+reads a label, so a label put on between them does not stop the merge.
+Until the release merges, its own check that `main` has not moved
+catches such a merge, as *Release to PyPI* says.
+
 **Where the repository has a bypass, the maintainer may land without
 that approval, through it**: [`GOVERNANCE.md`][governance]'s *How a
 decision is made* says which repositories.
