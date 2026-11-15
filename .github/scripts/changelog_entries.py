@@ -885,6 +885,62 @@ def read_problems(
     return problems
 
 
+def releases(commit: str, run: Git = git) -> set[str]:
+    """Read the release headings of `CHANGELOG.md` at a commit.
+
+    :param commit: the commit to read.
+    :param run: what runs git.
+    :returns: each `## v<version>` line outside code, none where the
+        commit holds no such file.
+    """
+    answer = run("show", f"{commit}:{FILES[0]}")
+    if answer.returncode:
+        return set()
+    return {
+        line
+        for _, line in headings(answer.stdout)
+        if _VERSION.fullmatch(line.removeprefix("## v"))
+    }
+
+
+def lost_entries(
+    base: str,
+    head: str,
+    diff: list[Change],
+    labels: list[str],
+    run: Git = git,
+) -> list[str]:
+    """Say why the diff removes more entries than it adds.
+
+    A rename, a retitle or a replacement removes one and adds one. A
+    release's own pull request, whose `CHANGELOG.md` gains a
+    `## v<version>` heading, removes them all, and one labelled `LABEL`,
+    such as the revert of an unreleased change, may remove its own.
+
+    :param base: the commit compared against.
+    :param head: the commit compared.
+    :param diff: what `changed()` listed.
+    :param labels: the pull request's labels.
+    :param run: what runs git.
+    :returns: the reason, none where the diff passes.
+    """
+    statuses = [
+        status
+        for *_, status, path in diff
+        if PurePosixPath(path).parent == NEXT and path.endswith(".md")
+    ]
+    gone, added = statuses.count("D"), statuses.count("A")
+    if gone <= added or LABEL in labels or releases(head, run) - releases(base, run):
+        return []
+    return [
+        (
+            f"{NEXT}/: the diff removes {gone} entries and adds {added}, so the"
+            " next release would lose what one says: only a release's assembly"
+            f" removes an entry, or a pull request labelled {LABEL} (section 9)"
+        ),
+    ]
+
+
 def missing_entry(package: list[str], number: int | None) -> str:
     """Say that the diff changes the package and writes no entry.
 
@@ -941,6 +997,7 @@ def check(
             pending(head, run),
             {PurePosixPath(path).name for *_, path in read},
         )
+    problems += lost_entries(base, head, diff, labels, run)
     # a renamed entry was written by the pull request that added it
     written = [path for _, _, renamed, path in read if not renamed]
     package = package_paths(base, head, diff, run)

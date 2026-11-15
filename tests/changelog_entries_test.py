@@ -1502,7 +1502,12 @@ def test_a_change_outside_the_package_asks_for_nothing() -> None:
 
 @pytest.mark.usefixtures("repo")
 def test_the_version_is_the_release_s_and_asks_for_nothing() -> None:
-    """A release's pull request sets the version and removes the entries."""
+    """A release's pull request sets the version and removes the entries.
+
+    Its `CHANGELOG.md` gains the release's heading, which a fence holds
+    in the base: one there is no release.
+    """
+    _write("CHANGELOG.md", "# Changelog\n\n```\n## v2026.12.1\n```\n")
     _write("changelog/next/pr4-iss4.md", ENTRY)
     _commit()
     _write(
@@ -1511,10 +1516,77 @@ def test_the_version_is_the_release_s_and_asks_for_nothing() -> None:
         .read_text(encoding="utf-8")
         .replace("2026.12", "2026.12.1"),
     )
+    _write("CHANGELOG.md", "# Changelog\n\n## v2026.12.1\n\n" + ENTRY)
     Path("changelog/next/pr4-iss4.md").unlink()
     _commit()
 
     assert script.check("HEAD^1", "HEAD", []) == []
+
+
+def _lost(gone: int, added: int) -> list[str]:
+    """Return the refusal of a diff that removes more entries than it adds."""
+    return [
+        (
+            f"changelog/next/: the diff removes {gone} entries and adds {added},"
+            " so the next release would lose what one says: only a release's"
+            " assembly removes an entry, or a pull request labelled"
+            " no-user-change (section 9)"
+        ),
+    ]
+
+
+@pytest.mark.usefixtures("repo")
+def test_a_pull_request_that_removes_an_entry_is_refused() -> None:
+    """The next release would lose it; a fenced heading is no release."""
+    _write("CHANGELOG.md", "# Changelog\n")
+    _write("changelog/next/pr4-iss4.md", ENTRY)
+    _commit()
+    _write("CHANGELOG.md", "# Changelog\n\n```\n## v2026.12.1\n```\n")
+    Path("changelog/next/pr4-iss4.md").unlink()
+    _commit()
+
+    assert script.check("HEAD^1", "HEAD", [], number=9) == _lost(1, 0)
+
+
+@pytest.mark.usefixtures("repo")
+def test_the_revert_of_an_unreleased_change_removes_its_entry_with_the_label() -> None:
+    """The release would describe a change it does not ship."""
+    _write("src/pkg/__init__.py", '"""A package that does more."""\n')
+    _write("changelog/next/pr4-iss4.md", ENTRY)
+    _commit()
+    _write("src/pkg/__init__.py", '"""A package."""\n')
+    Path("changelog/next/pr4-iss4.md").unlink()
+    _commit()
+
+    assert script.check("HEAD^1", "HEAD", [script.LABEL], number=9) == []
+
+
+@pytest.mark.usefixtures("repo")
+def test_an_entry_retitled_and_renamed_for_its_issues_passes() -> None:
+    """One removed and one added: a correction, which loses nothing."""
+    _write("changelog/next/pr4-iss4.md", ENTRY)
+    _commit()
+    _git("rm", "--quiet", "changelog/next/pr4-iss4.md")
+    _write(
+        "changelog/next/pr9-iss4-iss6.md",
+        "### Pkg does a thing right\n\nIt does it (closes #4, closes #6).\n",
+    )
+    _commit()
+
+    assert script.check("HEAD^1", "HEAD", [], number=9) == []
+
+
+@pytest.mark.usefixtures("repo")
+def test_two_entries_removed_and_one_added_are_refused() -> None:
+    """A replacement passes one for one, and no more."""
+    _write("changelog/next/pr4-iss4.md", ENTRY)
+    _write("changelog/next/pr5-iss5.md", "### Five\n\nIt (closes #5).\n")
+    _commit()
+    _git("rm", "--quiet", "changelog/next/pr4-iss4.md", "changelog/next/pr5-iss5.md")
+    _write("changelog/next/pr9-iss4.md", ENTRY)
+    _commit()
+
+    assert script.check("HEAD^1", "HEAD", [], number=9) == _lost(2, 1)
 
 
 @pytest.mark.usefixtures("repo")
