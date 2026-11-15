@@ -79,7 +79,7 @@ repos:
         exclude: |
           (?x)^(\.github/scripts/check_changelog\.py
             |tests/(__init__|conftest)\.py
-            |tests/(backlog|build_call|changelog|citations|classifiers|contributing
+            |tests/(answers|backlog|build_call|changelog|citations|classifiers|contributing
               |conventions|copyright|coverage|dependabot|dependencies|dependency_review
               |deprecation|dockerfile|grid|homepage|hooks
               |interpreters|issue_template|layout|links|names|per_subject|pins
