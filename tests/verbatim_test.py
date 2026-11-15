@@ -117,6 +117,7 @@ EXPECTED_DRIFT: dict[str, str] = {
     "RELEASING.md": "btclib-org/.github#1855",
     ".coderabbit.yaml": "btclib-org/ai-agents-process#432, ai-agents-process@d765a16",
     "CONTRIBUTING.md": "btclib-org/.github#2299",
+    "REVIEWING.md": "btclib-org/.github#2277",
 }
 """A path section 14 names whose copies are known not to agree yet.
 
