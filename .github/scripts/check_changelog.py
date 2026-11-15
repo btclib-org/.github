@@ -171,15 +171,16 @@ holds, this repository's own `CHANGELOG.md` among them. They read
 nothing an earlier release holds.
 
 The seventh check is the one section 9 states: a pull request adds no
-entry, and a release's section is written in the pull request that cuts
-it. It reads every `### ` heading of the file against the merge base of
-`HEAD` and `origin/main`, the base being that merge base because the
-gate runs `pre-commit run --all-files`, which sets no from and to refs,
-and `HEAD` already holds an entry the branch committed. A heading is
-refused where the base does not hold it under that same `## ` heading,
-unless that `## ` heading is a `## v<version>` (alone on its line) that the
-base lacks. The check reads headings and not whether a release is real: a
-diff that adds a `## v<version>` heading passes, and a reviewer sees it.
+entry to the file, and a release's section reaches it only in the pull
+request that cuts the release. It reads every `### ` heading of the file
+against the merge base of `HEAD` and `origin/main`, the base being that
+merge base because the gate runs `pre-commit run --all-files`, which
+sets no from and to refs, and `HEAD` already holds an entry the branch
+committed. A heading is refused where the base does not hold it under
+that same `## ` heading, unless that `## ` heading is a `## v<version>`
+(alone on its line) that the base lacks. The check reads headings and
+not whether a release is real: a diff that adds a `## v<version>`
+heading passes, and a reviewer sees it.
 
 So an entry added under any release the base holds is refused, the
 newest included, and so is one under a new heading that is no release.
@@ -330,7 +331,7 @@ def line_at(text: str, offset: int) -> int:
 
 
 def closing_tokens(body: str) -> set[str]:
-    """Return every issue token a `closes`/`closed` citation names.
+    """Return every issue token a `close`/`closes` citation names.
 
     Scoped to that keyword and not to `issue`: section 9 of README.md
     lets a branch advance an issue under `(issue #N)` without closing
@@ -355,6 +356,32 @@ def closing_tokens(body: str) -> set[str]:
             before = [k for k in keywords if k.start() < token.start()]
             if before and before[-1].group(1).lower().startswith("close"):
                 tokens.add(token.group(0))
+    return tokens
+
+
+def cited_tokens(body: str) -> list[str]:
+    """Return every issue token a citation names, in the text's order.
+
+    A citation is what `closing_tokens()` reads, under either keyword: a
+    token in a parenthetical, after the first `close`/`closes` or
+    `issue`/`issues` in it. A code span is stripped first, for the
+    reason that function gives. `changelog_entries.py` names an entry
+    file after these.
+
+    :param body: the text to search -- an entry's heading and body both.
+    :returns: each token as written, `#N` or `owner/repo#N`, in the order
+        the text holds them, a repeated one each time.
+    """
+    body = _CODE_SPAN.sub("", body)
+    tokens: list[str] = []
+    for group in _CITATION_GROUP.finditer(body):
+        text = group.group("body")
+        first = _KEYWORD.search(text)
+        tokens += [
+            token.group(0)
+            for token in _CITATION_TOKEN.finditer(text)
+            if first is not None and first.start() < token.start()
+        ]
     return tokens
 
 
@@ -628,8 +655,8 @@ def entries_outside_a_release(text: str, base: tuple[str, str]) -> list[str]:
         problems.append(
             f"line {line_at(text, offset)}: heading {title!r} is new {where},"
             f" in a file whose base {sha} (the merge base with {_MAIN}) does"
-            " not hold it there -- an entry is written in the pull request"
-            " that cuts its release (section 9)",
+            " not hold it there -- an entry reaches this file only in the"
+            " pull request that cuts its release (section 9)",
         )
     return problems
 

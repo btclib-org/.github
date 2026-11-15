@@ -88,6 +88,10 @@ labels:
     description: >-
       A release under way; other merges here wait until it is published
     repositories: *publishing
+  - name: no-user-change
+    color: "c2e0c6"
+    description: Changes nothing a user gets, so it adds no changelog entry
+    repositories: *publishing
 
 # Labels the test passes over, neither owed nor refused.
 #

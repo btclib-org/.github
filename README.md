@@ -386,8 +386,8 @@ whatever decides it:
 | `REVIEWING.md` | the standard a review is written against | 1, 2, 3 |
 | `REPOSITORY.md` | the settings that live outside the tree | 1, 2, 3 |
 | `RELEASING.md` | how a release is cut, and how one is recovered | 1 |
-| `CHANGELOG.md` | written when a release is cut; a preamble if none | 1, 2, 3 |
-| `RELEASE_NOTES.md` | what a user has to *act* on, on top of it | 1 |
+| `CHANGELOG.md` | assembled at each release; a preamble if none | 1, 2, 3 |
+| `RELEASE_NOTES.md` | the same sections, which GitHub releases show | 1 |
 | `AGENTS.md` | repository guidance for coding agents | 1, 2, 3 |
 | `pyproject.toml` | the project and every tool's configuration | 1, 2 |
 | `uv.lock` | the pinned resolution | 1, 2 |
@@ -1209,9 +1209,10 @@ No `autoupdate_branch`: the default branch is the only branch.
     shared base.
 
     The check has to fire before the merge that creates the duplicate,
-    which only a hook on the branch does; news fragments and a
-    landed-order gate are declined at btclib-org/.github#305 and
-    btclib-org/.github#516.
+    which only a hook on the branch does; a landed-order gate is declined
+    at btclib-org/.github#516. A pull request writes its entry under
+    `changelog/next/` (section 9), so only a release's pull request writes
+    the file this hook reads.
 
     **The hook runs on every invocation, and carries no `files:`**, the
     script being handed no file list for a filter to decide anything
@@ -1988,26 +1989,95 @@ without adding to it is deleted.
 
 ### `CHANGELOG.md` and `RELEASE_NOTES.md`
 
-- **A pull request adds no entry to either file.** An entry written in
-  every pull request lands at one place, so each landing put every other
-  open pull request in conflict there. What a pull request changed is
-  its squash subject, which is `git log`'s.
-- **A release's section is written when the release is cut**, in the
-  release's own pull request, with the whole release in view. Section 12
-  has the step. The changelog takes what a user would notice; the
-  release notes take what a user has to act on; neither restates the
-  other.
+- **A pull request that changes what a user gets adds its entry as a
+  file of its own** under `changelog/next/`, and writes neither history
+  file. The file is named for the pull request, so two pull requests
+  never write one file and neither puts the other in conflict, and the
+  entry is reviewed with the change it describes.
+- **An entry is named `pr<N>.md`, or `pr<N>-iss<Y>.md` where its text
+  cites issue `<Y>`.** `<N>` is the number of the pull request that adds
+  it. After it comes one part for each issue the text cites, in the
+  text's order and each once: `-iss<Y>` for `#Y`, and
+  `-<repo>-iss<Y>` for `btclib-org/<repo>#Y`, the repository's name in
+  lower case without a leading dot. An issue outside btclib-org is not in
+  the name. So pull request 40, whose entry cites `(closes #3, issue
+  btclib-org/.github#2287)`, adds `pr40-iss3-github-iss2287.md`. The
+  author writes the number they expect the pull request to get; where it
+  gets another, a second commit renames the file. `changelog-entry.yml`
+  refuses an entry whose issue parts differ from what its text cites,
+  and an entry the pull request adds whose `<N>` is not the pull
+  request's number, and prints the name it expects. A later pull request
+  that edits an entry keeps its name, unless the edit changes the issues
+  it cites: renamed for them, the entry is one that pull request adds,
+  under its own number. A rename alone writes no entry: a file added with
+  the bytes of one the same pull request removes answers for none of its
+  changes. The release puts the entries in the order of their pull
+  requests' numbers, which it reads from the names.
+- **What a user gets is the package**: a path under `src/`, a gitlink,
+  which pins vendored code a wheel builds, and the `[project]` table of
+  `pyproject.toml` but its `version`, which a release's own pull request
+  sets. A publishing tree's `changelog-entry.yml` fails a pull request
+  that changes any of them and adds or edits no entry, unless the pull
+  request carries `no-user-change` (section 11's *Labels and issue
+  types*); section 10's *The set, and its cadence* has the workflow. A
+  pull request that changes nothing of the package may add an entry
+  too.
+- **A release assembles the entries**, and writes no prose. Its pull
+  request runs `.github/scripts/changelog_entries.py`, which puts
+  `## v<version>` and every entry, in a fixed order, above the previous
+  release in each history file, and removes the entries.
+  `changelog-entry.yml` refuses a pull request that removes more entries
+  than it adds, unless its `CHANGELOG.md` gains a `## v<version>`
+  heading, as a release's does, or it carries `no-user-change`, as the
+  revert of an unreleased change does. The release's pull request edits
+  or adds no entry: one the release needs fixed or added lands first, in
+  a pull request of its own, so the release's base holds every entry. The same
+  entries give the same bytes, so the release's review compares the pull
+  request with the script's output on its base. An empty
+  `changelog/next/` refuses to assemble: nothing changed for a user, so
+  there is no release. Section 12 has the step.
+- **The history files take the same section.** `RELEASE_NOTES.md` is what the
+  GitHub release publishes and what section 12's public-API check reads,
+  so an entry whose change asks something of a user says what in its
+  own lines.
 - **An entry is a `###` title and at most three lines.** The title says
   what changed. The body cites the issue in its own text — `(closes #N)`
   where the change closes it, `(issue #N)` where it does not, and
   `(closes owner/repo#N)` across repositories — and carries no
   measurement, no count and no history; the reasoning is the pull
-  request's. Section 4's `check-changelog` refuses a longer body, and an
-  entry written outside a release's own pull request, in `CHANGELOG.md`
-  only: a new entry in `RELEASE_NOTES.md` is the reviewer's to catch.
+  request's. The body holds no heading, a line of `=` or `-` alone
+  included, no code fence and no html block that a blank line does not
+  end, and the entry is a regular file. `changelog_entries.py` refuses
+  an `.md` file under `changelog/next/` that is not one, and entries
+  whose section `check-changelog` (section 4) would refuse, on their
+  pull request and at the release. `check-changelog` refuses a longer
+  body, and an entry written outside a release's own pull request, in
+  `CHANGELOG.md` only: a new entry in `RELEASE_NOTES.md` is the
+  reviewer's to catch.
+- **`changelog/next/` holds `.markdownlint.jsonc`**, which the release
+  keeps. markdownlint's MD041 asks a file to open with a `#` heading,
+  and an entry opens with `###`; this file asks for `###` there and
+  leaves every other rule as the tree's own configuration has it:
+
+    ```jsonc
+    {
+      "extends": "../../.markdownlint.jsonc",
+      "MD041": { "level": 3 },
+    }
+    ```
+
+- **A pull request from outside the organization that lacks its entry
+  is completed by a maintainer**, who claims it in a comment starting
+  `Claimed` and pushes one commit adding the file, signed and signed off
+  as their own text. Where the contributor has turned off edits by
+  maintainers, the file goes in a pull request of the maintainer's that
+  lands right after. The contributor's own sign-off is not part of
+  this: only the author can give it, and section 11's `Sign-off` check
+  reads it.
 - **A repository that does not release keeps `CHANGELOG.md`'s
   preamble**, saying that its history is `git log` of `main`, and adds
-  no entry.
+  no entry, as a file or in either history file: nothing would assemble
+  it, and `changelog_entries.py` refuses one there.
   Section 2 owes the file to every tier.
 - **Neither file has a merge driver.** Only a release's pull request
   writes them, so a conflict there is a second writer, and a driver
@@ -2110,9 +2180,10 @@ without adding to it is deleted.
   tree starts it by hand, and no issue or comment is a prompt. Steps do what is
   mechanical: the previous tag and the subjects since it, the public-API
   comparison at the commit `release.yml` pins, what is open, the version and the
-  lock. The agent writes the release's sections and the pull request's body, and
-  edits no other file. Its gates job is the one above, run after a check of the
-  two sections and of the notes against the API findings.
+  lock, and the release's sections, which `changelog_entries.py` assembles as
+  section 9 says. The agent writes the pull request's body, and edits no other
+  file. Its gates job is the one above, run after a check of the release's
+  sections and of the notes against the API findings.
   `tests/claude_release_test.py` reads each of these. The rejected alternative
   is an agent that runs the steps itself, which needs a Bash rule and leaves the
   comparison to a model.
@@ -2390,6 +2461,28 @@ byte to an upstream as section 7's *Test data is vendored, never fetched* says:
 a finding there is upstream's, and a `# sourcery skip` would end the copy being
 byte for byte. A pin to a repository outside the tree's fork network is taken on
 trust. `ignored()` and `pinned()` in `tests/hooks_test.py` are the two readings.
+
+**`changelog-entry` is a publishing tree's pull request check, and no section 4
+hook**: it reads the pull request's labels, which no checkout holds. A tree that
+publishes carries a `changelog-entry.yml` calling `reusable-changelog-entry.yml`
+on `pull_request` with `labeled` and `unlabeled` among its `types:`, so that a
+`no-user-change` added or removed runs it again, and without `closed`, a merged
+pull request asking nothing of it. It has no `push` trigger and no
+`workflow_dispatch`, against *What every workflow does*: neither event carries
+the pull request it reads. Its one job calls the workflow pinned as *What every
+workflow does* pins a call into `btclib-org/.github`. Its concurrency group is
+`changelog-entry-${{ github.event.pull_request.number }}`, with
+`cancel-in-progress: true`: it has no push run to key. Section 9 says what it
+asks, and it is no required check:
+
+```yaml
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
+
+permissions:
+  contents: read
+```
 
 **macOS is supported on arm64 alone, and no workflow runs on an x86_64 macOS
 image.** An x86_64 macOS cell can hang until the job's timeout and hold up a
@@ -3774,7 +3867,10 @@ A label means what its description says. Who applies and removes it:
   issue to section 10's `reusable-claude-implement.yml`, and removed by whoever
   withdraws it;
 - `security` and `alignment` — applied by whoever finds it;
-- `api-break` — section 12.
+- `api-break` — section 12;
+- `no-user-change` — applied to a pull request by whoever finds it changes
+  nothing a user gets, which its review reads, and removed by whoever finds it
+  does; section 9 says what it exempts.
 
 ## 12. Releasing
 
@@ -3846,21 +3942,19 @@ A label means what its description says. Who applies and removes it:
   gate's: a gate reading the API would find the run only after it was waited on,
   which is the cost the rule saves. `tests/fuzz_test.py` reads the tree's half,
   that `release.yml` does not call `fuzz`.
-- **The release pull request writes the release's sections.** It adds
-  `## v<version>`, the tag's own heading, above the previous release in
-  `CHANGELOG.md` and in `RELEASE_NOTES.md`, where the repository has one. The
-  changelog's section is written from the squash subjects since the previous
-  tag, `git log v<prev>..HEAD --format=%s`, grouped and shortened; the release
-  notes take what a user has to act on. No other pull request adds an entry to
-  either file (section 9), so the topmost `##` heading of either file on the default
-  branch is the latest release's at every commit. The tag says what
+- **The release pull request assembles the release's sections.** Section 9's
+  `changelog_entries.py` adds `## v<version>`, the tag's own heading, and the
+  entries under `changelog/next/` above the previous release in `CHANGELOG.md`
+  and in `RELEASE_NOTES.md`, and removes the entries. No other pull request
+  writes either file (section 9), so the topmost `##` heading of either file on
+  the default branch is the latest release's at every commit. The tag says what
   `pyproject.toml` says, so the version bump stays in the pull request that
-  sets it. A release publishes the section the release pull request added.
-  A rehearsal of a release with any public-API finding is dispatched from that
-  branch, after the notes are written. A rehearsal has no tag, so the
+  sets it. A release publishes the section the release pull request added. A
+  rehearsal of a release with any public-API finding is dispatched from that
+  branch, after the sections are assembled. A rehearsal has no tag, so the
   public-API check reads the section headed `## v<version>`, the version being
-  `pyproject.toml`'s, else the first `##` section. Before the notes are
-  written, that section is the previous release's or a work-in-progress one,
+  `pyproject.toml`'s, else the first `##` section. Before the sections are
+  assembled, that section is the previous release's or a work-in-progress one,
   and the check fails on each finding it does not name.
 - **A published sdist reproduces from its tag.** The attestation every publisher
   attaches vouches for bytes, so a release rebuilt from the commit its tag names
@@ -4101,10 +4195,10 @@ A label means what its description says. Who applies and removes it:
   breaks of the kinds its docstring names, which griffe does not compare or can
   skip. No griffe release up to 2.4.1 closes that gap, so moving the pin up to
   it would not replace the script, and leaving them for the release's author to
-  list would leave the notes unchecked for them. What the two report is either a
-  `RELEASE_NOTES.md` entry or a reason for not being one, written where the
-  release is written. A break neither reports is read by hand, as the public API
-  step of `shared/RELEASING.md` says.
+  list would leave the notes unchecked for them. What the two report is either an
+  entry, written under `changelog/next/` (section 9), or a reason for not being
+  one, written in the release's pull request. A break neither reports is read by
+  hand, as the public API step of `shared/RELEASING.md` says.
 
     **The release path and not the merge gate.** Before 1.0 a package breaks its
     surface deliberately, so a gate comparing the branch against the last

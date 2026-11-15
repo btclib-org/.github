@@ -1,0 +1,77 @@
+---
+name: reusable-changelog-entry
+
+# Asks a pull request that changes what a user gets for its changelog
+# entry, a file under changelog/next/ (README.md section 9). The script,
+# this repository's .github/scripts/changelog_entries.py, says what
+# counts as the package, which label exempts a pull request, and what a
+# tree that does not publish is asked. No input: the tree's own checkout
+# answers each question. The trigger, its types and the concurrency
+# group stay in the caller, section 10 having them literal. The job is
+# no required check, so no merge waits on it.
+
+on:
+  workflow_call:
+
+# least privilege for the GITHUB_TOKEN: everything running in the job can
+# read the token, and the job writes nothing
+permissions:
+  contents: read
+
+jobs:
+  changelog-entry:
+    # the name the check context is keyed by, after the calling job's own
+    name: Changelog entry
+    # the diff read is the one between a pull request's merge commit and
+    # its first parent, and only a pull_request event checks that commit
+    # out. A draft is work its author is not asking anyone to read yet,
+    # and a closed pull request takes no more changes
+    if: >-
+      ${{ github.event_name == 'pull_request'
+      && github.event.action != 'closed'
+      && !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    # git reads one diff and uv fetches one interpreter, so a job past
+    # this is hung
+    timeout-minutes: 10
+    # restated, a job's permissions replacing the workflow's
+    permissions:
+      contents: read
+    steps:
+      # HEAD is the merge commit, and depth 2 holds its parents too
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      # `path:` puts it beside the caller's checkout instead of over it;
+      # sparse, so what lands is .github/scripts and this repository's root
+      # files. `ref:` is this workflow's own commit, `job.workflow_sha`, so
+      # the script is the one of the workflow that runs it
+      - name: Check out the script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: btclib-org/.github
+          ref: ${{ job.workflow_sha }}
+          path: standard
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+      # caching off: the job installs no dependency, so a cache has nothing
+      # to hold
+      - name: Setup uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: false
+      # --no-project and the interpreter named, the script being this
+      # repository's and not the caller's (section 10). The labels are the
+      # event's: a label added or removed is an event of its own, which the
+      # caller's `labeled` and `unlabeled` types start a run for. The
+      # number is the pull request's, which names an entry it adds
+      - name: Check that a change for the user carries its entry
+        env:
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          uv run --no-project --python 3.15 \
+            standard/.github/scripts/changelog_entries.py check \
+            HEAD^1 HEAD --labels "$LABELS" --pull-request "$NUMBER"

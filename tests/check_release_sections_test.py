@@ -64,6 +64,21 @@ def script(monkeypatch: pytest.MonkeyPatch) -> ModuleType:
             _PREAMBLE + "```text\n## v1\n```\n\n" + _PREVIOUS,
             id="a-fenced-heading",
         ),
+        pytest.param(
+            _PREAMBLE + "<!--\n## v1\n-->\n\n" + _RELEASE + _PREVIOUS,
+            _PREAMBLE + "<!--\n## v1\n-->\n\n" + _PREVIOUS,
+            id="a-heading-in-a-comment",
+        ),
+        pytest.param(
+            _PREAMBLE + "````\n```\n## v1\n````\n\n" + _RELEASE + _PREVIOUS,
+            _PREAMBLE + "````\n```\n## v1\n````\n\n" + _PREVIOUS,
+            id="a-shorter-fence-inside-a-longer",
+        ),
+        pytest.param(
+            _PREAMBLE + _RELEASE.rstrip("\n") + "\n",
+            _PREAMBLE,
+            id="the-first-release",
+        ),
     ],
 )
 def test_a_release_section_added_above_the_previous_passes(
@@ -118,6 +133,12 @@ def test_a_release_section_added_above_the_previous_passes(
             "the first \"## \" heading is '## v2026.11.7'",
             id="a-fenced-release-heading",
         ),
+        pytest.param(
+            "# Log\n\n" + _RELEASE,
+            "# Changelog\n",
+            "differs from the base",
+            id="the-first-release-changing-the-preamble",
+        ),
     ],
 )
 def test_a_section_that_is_not_the_release_s_alone_is_refused(
@@ -144,6 +165,27 @@ def test_run_as_a_program_it_names_the_file(tmp_path: Path) -> None:
         )
         assert done.returncode == expected, done.stdout + done.stderr
         assert (f"::error file={edited}::" in done.stdout) == bool(expected)
+
+
+def test_without_changelog_entries_beside_it_nothing_is_read(tmp_path: Path) -> None:
+    """The fence rule is the assembly's, so the check needs its script."""
+    alone = tmp_path / "check_release_sections.py"
+    alone.write_text(_SCRIPT.read_text(encoding="utf-8"), encoding="utf-8")
+    (tmp_path / "base.md").write_text(_PREAMBLE + _PREVIOUS)
+    (tmp_path / "CHANGELOG.md").write_text(_PREAMBLE + _RELEASE + _PREVIOUS)
+
+    done = subprocess.run(
+        [sys.executable, "-I", str(alone), "2026.12.3", "CHANGELOG.md", "base.md"],
+        cwd=tmp_path,
+        capture_output=True,
+        encoding="utf-8",
+        check=False,
+    )
+
+    assert done.returncode == 1
+    assert done.stderr.endswith(
+        "changelog_entries.py is missing: its fence rule finds the headings\n"
+    )
 
 
 def _awk(tmp_path: Path, text: str) -> int:

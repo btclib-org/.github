@@ -157,7 +157,7 @@ the tag exercises the first.
 1. On GitHub, Actions → release → Run workflow, and pick the branch to
    rehearse (usually `main`). A release with any public-API finding is
    rehearsed from the release pull request's branch, after its notes are
-   written: before, `public-api` reads the previous release's section and
+   assembled: before, `public-api` reads the previous release's section and
    fails.
 
 1. The workflow publishes under the name `test_dist` holds, and appends
@@ -238,7 +238,7 @@ gh api -X POST \
 
 **A release is a tag on `main`, and everything below that edits a file
 does so on a branch of its own.** Nothing is pushed to `main` directly,
-this release included: the steps that write the release's sections and
+this release included: the steps that assemble the release's sections and
 set the version are one pull request, the one that sets the next cycle's
 version is another, and the tag names the commit the first of them left
 behind.
@@ -390,31 +390,71 @@ request, next to `deps-latest`'s own result.
    every job that matters is green, which is why the step after the approval
    below reads the run job by job rather than as a whole.
 
-1. Name in RELEASE_NOTES.md every change to the release's assets or to how they
-   are verified — a file name, a signer, a `--source-ref` — in the release that
+1. Name in an entry every change to the release's assets or to how they are
+   verified — a file name, a signer, a `--source-ref` — in the release that
    first ships it. A script that downloads or verifies a release by the old
    value fails, and the notes are what tell its user the new one
    (btclib-org/.github#1596).
 
-1. Write the release's sections in the release pull request, above the
-   previous release's, as section 12 of the organization's standard
-   says: `## v<version>` in `CHANGELOG.md`, from the squash subjects
-   since the previous tag, grouped and shortened,
+1. Assemble the release's sections in the release pull request, as
+   section 9 of the organization's standard says: btclib-org/.github's
+   `changelog_entries.py` writes `## v<version>` and the entries under
+   `changelog/next/` above the previous release's section of
+   `CHANGELOG.md` and of `RELEASE_NOTES.md`, and removes the entries. The
+   version is the one the next step sets, the date the release is cut:
 
    ```shell
-   git log "${tag:?}"..HEAD --format=%s
+   version=<the version being released>
    ```
 
-   and in `RELEASE_NOTES.md`, what a user has to act
-   on. The heading must be the version alone and the section must not be
-   empty: `release.yml` checks both before anything is built, because PyPI
-   never accepts a version's file names twice, even once the release is
+   ```shell
+   entries=$(mktemp -d) &&
+   ref=$(grep -oE 'reusable-changelog-entry\.yml@[0-9a-f]{40}' \
+       .github/workflows/changelog-entry.yml | cut -d@ -f2) &&
+   scripts=repos/btclib-org/.github/contents/.github/scripts &&
+   gh api -X GET -H 'Accept: application/vnd.github.raw' -f "ref=${ref:?}" \
+       "${scripts:?}/changelog_entries.py" \
+       > "${entries:?}/changelog_entries.py" &&
+   gh api -X GET -H 'Accept: application/vnd.github.raw' -f "ref=${ref:?}" \
+       "${scripts:?}/check_changelog.py" > "${entries:?}/check_changelog.py" &&
+   uv run --no-project --python 3.15 \
+       "${entries:?}/changelog_entries.py" assemble "${version:?}"
+   ```
+
+   The assembly runs on a commit: it refuses a tree where `git status`
+   shows a history file or anything under `changelog/next/` changed,
+   staged or untracked, or an entry ignored, and a tree that is no git
+   checkout.
+
+   The scripts are the ones at the commit `changelog-entry.yml` pins, the ones
+   that checked each entry on its pull request: the first runs the second's
+   checks on the section, from its own directory. Each is written to a file
+   before it runs for the reason the public API step gives. The assembly refuses
+   an empty `changelog/next/`: nothing changed for a user, and there is no
+   release. Where a step of it fails, it puts back what it changed. A run killed
+   before it finishes leaves a `.changelog-assembly-*` directory, and the next
+   run refuses and prints the `git restore` that takes the history files and the
+   entries back to the commit, which loses nothing since they were committed.
+   The same entries give the same bytes, so the release's reviewer runs the same
+   commands on the base and compares the history files with the pull request's.
+   No prose is written here, and the release's pull request edits or adds no
+   entry: an entry found wrong is fixed in its file, and a public API finding or
+   a change of the release's assets that no entry names gets its entry, in a
+   pull request of its own that lands before the release branch is cut. So the
+   base holds every entry, and the reviewer's run on it gives the pull request's
+   bytes.
+
+   `release.yml` checks that the heading is the version alone and that
+   the section is not empty before anything is built, because PyPI never
+   accepts a version's file names twice, even once the release is
    deleted. No other pull request writes either file, and nothing opens
    the next cycle's section.
 
-   A `(work in progress, not released yet)` section, where one remains,
-   is folded into the release's section by its pull request, which
-   deletes the heading.
+   The assembly folds no `(work in progress, not released yet)` section
+   into the release's: it refuses a history file that holds such a
+   heading. Remove the heading and move what its section holds into
+   `changelog/next/` as entries, in a pull request of its own that lands
+   before the release branch is cut.
 
 1. Set the version in `pyproject.toml`, which is the one place it is
    declared, to the date the release is cut, `YYYY.M.D`, and re-lock so
@@ -438,11 +478,10 @@ request, next to `deps-latest`'s own result.
 
    **If `main` moves while the gates run, throw the branch away and redo
    these edits on top of it — never rebase it, and never merge `main` into
-   it.** A rebase over a change that wrote to CHANGELOG.md or
-   RELEASE_NOTES.md near this release's edits stops on a conflict there, and
-   deleting the markers at git's default conflict style drops a line both
-   sides share. Reset onto the new tip, then redo the sections, the version
-   and `uv lock`, and gate again:
+   it.** A rebase brings in the entries that landed meanwhile and leaves
+   them unassembled, and the sections no longer are what the script makes
+   of the new base. Reset onto the new tip, then assemble again, set the
+   version and run `uv lock`, and gate again:
 
    ```shell
    tip=$(git rev-parse HEAD) &&
@@ -450,9 +489,9 @@ request, next to `deps-latest`'s own result.
    git reset --hard origin/main
    ```
 
-   The sections are written again from `git log` of the new tip, and the
-   version is a few lines. Where the branch is already pushed, the redone
-   one goes up with a lease on `tip`, the head reviewed before the fetch:
+   The sections are assembled again from the new tip, and the version is a
+   few lines. Where the branch is already pushed, the redone one goes up
+   with a lease on `tip`, the head reviewed before the fetch:
 
    ```shell
    git push origin HEAD \
@@ -474,7 +513,7 @@ request, next to `deps-latest`'s own result.
    cannot say has to be written, and what a reader should not have to
    discover at the button belongs there too.
 
-   The section of RELEASE_NOTES.md written above is what that body is
+   The section of RELEASE_NOTES.md assembled above is what that body is
    written from. The public API step's result belongs in the body too, a
    line rather than a screenshot — it is a step nothing else enforces, and a
    pull request that never mentions it reads exactly like one that skipped

@@ -4,27 +4,32 @@
 
 """Refuse a release section that adds more than the release, or too little.
 
-`reusable-claude-release.yml` has the agent write a release's section of
-`CHANGELOG.md` and of `RELEASE_NOTES.md`, and this is what its gates job
-asks of each file before the tree's own gates run. The edited file is
-compared with the file at the base, the commit the release is cut from:
+`reusable-claude-release.yml` assembles a release's section of
+`CHANGELOG.md` and of `RELEASE_NOTES.md` with `changelog_entries.py`,
+and this is what its gates job asks of each file before the tree's own
+gates run. The edited file is compared with the file at the base, the
+commit the release is cut from:
 
 - its first `## ` heading is `## v<version>`, alone on its line, and its
   section holds a line that is not blank. `release.yml` asks the same of
   the tag's section before anything is built, through the awk program of
   `reusable-version-check.yml`, and asks it of the section wherever it
   stands;
-- no `## ` heading holds `(work in progress, not released yet)`: the
-  release pull request folds such a section into its own, as
-  `shared/RELEASING.md`'s *Release to PyPI* says;
+- no `## ` heading holds `(work in progress, not released yet)`: a
+  release folds no such section into its own, and `changelog_entries.py`
+  refuses to assemble beside one;
 - the file without the release's section is the base without its first
   section where that is a work-in-progress one, and the base whole
-  otherwise. So the agent changes no line outside its section, a
-  released entry included. Section 9's *Nothing already written is
-  rewritten* says which corrections a release's pull request may make
-  to a released entry; such an edit is a person's.
+  otherwise, but for the blank lines between the section and what is
+  above it where nothing follows it. So the release changes no line
+  outside its section, a released entry included. Section 9's *Nothing
+  already written is rewritten* says which corrections a release's pull
+  request may make to a released entry; such an edit is a person's.
 
-A `## ` line inside a fenced code block is an example, not a heading.
+A `## ` line inside a code fence or an html comment is an example, not a
+heading. The fences and comments are found by `changelog_entries.py`'s
+own rule, which this script loads from beside itself, so the assembly
+and this check read one file alike.
 
     uv run --no-project --python 3.15 \
         .github/scripts/check_release_sections.py \
@@ -36,25 +41,43 @@ where `base.md` is the file at the base, `git show HEAD:CHANGELOG.md`.
 from __future__ import annotations
 
 import argparse
-import re
+import functools
+import importlib.util
 from pathlib import Path
+from typing import Any
 
 # the words a work-in-progress heading carries after its version
 _WORK_IN_PROGRESS = "(work in progress, not released yet)"
+# the script whose fence rule this one reads code by, beside this one
+_ENTRIES = Path(__file__).with_name("changelog_entries.py")
 
-_FENCE = re.compile(r"^(```|~~~)")
+
+@functools.cache
+def _entries() -> Any:  # noqa: ANN401 - a module loaded by path
+    """Load `changelog_entries.py` from this script's directory.
+
+    :returns: the module.
+    :raises SystemExit: where the directory does not hold it.
+    """
+    spec = importlib.util.spec_from_file_location("_changelog_entries", _ENTRIES)
+    if spec is None or spec.loader is None or not _ENTRIES.is_file():
+        msg = f"{_ENTRIES} is missing: its fence rule finds the headings"
+        raise SystemExit(msg)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def headings(lines: list[str]) -> list[int]:
-    """Return the index of each `## ` heading, fenced blocks left out."""
-    found = []
-    fenced = False
-    for index, line in enumerate(lines):
-        if _FENCE.match(line):
-            fenced = not fenced
-        elif not fenced and line.startswith("## "):
-            found.append(index)
-    return found
+    """Return the index of each `## ` heading outside a fence or a comment."""
+    if not lines:
+        return []
+    code, _ = _entries().code_lines("\n".join(lines) + "\n")
+    return [
+        index
+        for index, (line, fenced) in enumerate(zip(lines, code, strict=True))
+        if not fenced and line.startswith("## ")
+    ]
 
 
 def first_section(lines: list[str]) -> tuple[int, int] | None:
@@ -93,7 +116,14 @@ def problems(version: str, text: str, base: str) -> list[str]:
     folded = first_section(before)
     if folded is not None and _WORK_IN_PROGRESS in before[folded[0]]:
         before = before[: folded[0]] + before[folded[1] :]
-    if lines[:start] + lines[end:] != before:
+    above = lines[:start]
+    if end == len(lines):
+        # the section ends the file: a blank line before it belongs to it
+        while above and not above[-1].strip():
+            above.pop()
+        while before and not before[-1].strip():
+            before.pop()
+    if above + lines[end:] != before:
         found.append(
             f'the file outside "{heading}" differs from the base, a folded'
             " work-in-progress section left out"
