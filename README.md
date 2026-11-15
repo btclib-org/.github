@@ -2100,13 +2100,45 @@ without adding to it is deleted.
   one number for every caller, which only a caller the bound would cut raises.
 - **`checkout` passes `persist-credentials: false`.**
 - **Concurrency groups are named literally** —
-  `group: test-${{ github.event.pull_request.number || github.ref }}` — never
-  through `github.workflow`, the *caller's* name in a called workflow, so two
-  called workflows would share a group and cancel each other. `github.ref` is
-  the caller's there too, so a gate the release workflow calls appends
+  `group: alignment-${{ github.event.pull_request.number || github.ref }}` —
+  never through `github.workflow`, the *caller's* name in a called workflow, so
+  two called workflows would share a group and cancel each other. A workflow's
+  top-level group opens with the file's stem and a hyphen: a group is the
+  repository's, and two workflows opening theirs with one name, whatever its
+  case, would cancel each other's runs. `github.ref` and `github.sha` are the
+  caller's there too, so a gate the release workflow calls appends
   `${{ inputs.concurrency-suffix }}` (btclib-org/.github#1083). The key is the
-  pull request's own number and not `github.head_ref`
-  (btclib-org/btclib#1158); a run with no pull request falls back to `ref`.
+  pull request's own number and not `github.head_ref` (btclib-org/btclib#1158);
+  a run with no pull request falls back to `ref`, except a push run, which the
+  bullet below keys on its commit and its ref.
+- **A workflow with a `push` trigger on `main` keys a push run on its commit
+  and its ref**, so each push to `main` that starts a run gets a run and a
+  report of its own, while a new push to a pull request's branch still cancels
+  the run before it:
+
+  ```yaml
+  concurrency:
+    group: >-
+      test-${{ github.event_name == 'push'
+      && format('{0}-{1}', github.sha, github.ref)
+      || github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+  ```
+
+  The commit alone is rejected as a key: a dispatch on `main` at that commit,
+  or a tag pushed at it, would share the push run's group and cancel it. The
+  commit comes first, so no run of another event shares the key: its key is a
+  pull request's number or a full ref, which opens with `refs/`
+  ([*Contexts reference*](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts)).
+  One group per ref is rejected too: GitHub keeps one pending run per group and
+  cancels it for the next, and refuses `queue: max` beside
+  `cancel-in-progress: true`
+  ([*Control the concurrency of workflows and jobs*](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)).
+  A workflow granting `id-token: write`, `write-all` included, to deploy or to
+  publish a score keeps a key per ref: the key above without its first term,
+  which one with no `pull_request` trigger may also write as
+  `${{ github.ref }}`. Keyed on the commit, two runs would publish at once and
+  the older could land last. `tests/push_key_test.py` reads each of these.
 - **Triggers**: `push: branches: [main]` and `pull_request`. A push trigger on
   every branch would run the workflow twice for an open pull request, in two
   groups that do not cancel each other; `main` keeps its own trigger because a
