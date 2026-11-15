@@ -3285,8 +3285,8 @@ nothing in `git log` pointing at what it answered.
 **A batch of ports of the standard is the exception**: its subject cites
 no issue, and its description cites the issues it advances, as
 `ai-agents-process`'s [*Ports of the standard*](https://github.com/btclib-org/ai-agents-process/blob/main/skills/btclib-iss/SKILL.md#ports-of-the-standard)
-says. Citing the issues in the subject is rejected: a batch advances
-many, so its subject would differ from tree to tree, where
+says. Citing the issues in the subject is rejected: the issues a batch
+advances can differ from tree to tree, and so would its subject, where
 `Port btclib-org/.github@<sha>` is the same in every tree and names what
 was ported.
 
