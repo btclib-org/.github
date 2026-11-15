@@ -159,6 +159,12 @@ def refused(revisions: str) -> list[str]:
     return [line(sha, author) for sha, author in refused_authors(revisions)]
 
 
+def _head(revisions: str) -> str | None:
+    """Return the sha a range of the form `base..head` ends at, if one."""
+    heads = [end for end in _git("rev-parse", revisions).split() if end[:1] != "^"]
+    return heads[0] if len(heads) == 1 else None
+
+
 def refused_tail(revisions: str, refused: list[str]) -> tuple[str, str] | None:
     """Return the address and start where `git rebase --signoff` is the fix.
 
@@ -172,10 +178,8 @@ def refused_tail(revisions: str, refused: list[str]) -> tuple[str, str] | None:
     that `ann@…` and `ANN@…` are two, and it is `_PLAIN` and no bot's:
     whoever runs the rebase signs off as that address. Otherwise None.
     """
-    heads = [end for end in _git("rev-parse", revisions).split() if end[:1] != "^"]
-    if len(heads) != 1:
+    if (sha := _head(revisions)) is None:
         return None
-    (sha,) = heads
     tail = []
     while sha in refused:
         tail.append(sha)
@@ -230,8 +234,14 @@ def identity(address: str, start: str) -> str:
     )
 
 
-def by_hand(fork: str, authors: list[str]) -> list[str]:
+def by_hand(fork: str, authors: list[str], head: str | None) -> list[str]:
     """Return how each author signs off their own commits by hand.
+
+    `--rebase-merges` keeps the branch's merges, which a plain `git rebase
+    -i` drops with any change made in them alone. Recreated, a merge still
+    loses such a change, as git's documentation of the option says, so the
+    steps compare the result with `head`, the branch before the rebase,
+    and bring back what differs.
 
     An empty address adds the step that corrects the author, since no
     trailer can name it. Another address that is not `_PLAIN` is named as
@@ -241,9 +251,9 @@ def by_hand(fork: str, authors: list[str]) -> list[str]:
     steps = [
         (
             "Each author signs off their own commits and leaves the others as"
-            f" they are: git rebase -i {fork}, marking those commits edit, then"
-            " at each stop git commit --amend --no-edit --signoff and"
-            " git rebase --continue, and last git push --force-with-lease."
+            f" they are: git rebase -i --rebase-merges {fork}, marking those"
+            " commits edit, then at each stop git commit --amend --no-edit"
+            " --signoff and git rebase --continue."
         ),
         (
             "The trailer is written with the committer identity, so at an"
@@ -263,6 +273,15 @@ def by_hand(fork: str, authors: list[str]) -> list[str]:
             " --signoff, with the author's own address as git config"
             " user.email."
         )
+    if head:
+        steps.append(
+            f"Before git push --force-with-lease, git diff {head} HEAD prints"
+            " nothing. Where it prints a change, a merge made it and the rebase"
+            f" dropped it: git restore --source={head} --staged --worktree -- ."
+            " and git commit --signoff bring it back."
+        )
+    else:
+        steps.append("Last, git push --force-with-lease.")
     return steps
 
 
@@ -342,7 +361,8 @@ def main(argv: list[str] | None = None) -> int:
             address, start = plain
             prose, fix = [identity(address, start)], commands(start)
         else:
-            prose, fix = by_hand(fork, [author for _, author in found]), []
+            authors = [author for _, author in found]
+            prose, fix = by_hand(fork, authors, _head(args.revisions)), []
         for text in [FIX, *prose]:
             print(text)
         for command in fix:

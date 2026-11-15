@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -242,7 +244,9 @@ def test_the_steps_start_where_a_merged_in_base_leaves_off(
     out = capsys.readouterr().out
 
     assert _rebase(out) is None
-    assert f"git rebase -i {_git('rev-parse', 'main').strip()}," in out
+    fork = _git("rev-parse", "main").strip()
+    assert f"git rebase -i --rebase-merges {fork}," in out
+    assert f"git diff {_git('rev-parse', 'topic').strip()} HEAD prints nothing" in out
 
 
 def _summary_variables(
@@ -405,6 +409,19 @@ def _refused_on_both_sides() -> None:
     _commit("last")
 
 
+def _a_merge_inside_the_tail() -> None:
+    """Commit as `Ann` with no trailer, merge a side branch, and again.
+
+    The merge is not refused, so the refused commits are not the tail.
+    """
+    _git("checkout", "--quiet", "-b", "side")
+    _commit("side work", signoff=True)
+    _git("checkout", "--quiet", "topic")
+    _commit("first")
+    _git("merge", "--quiet", "--no-ff", "--no-edit", "side")
+    _commit("last")
+
+
 def _two_cases_of_one_address() -> None:
     """Commit as `ann@example.org` and `ANN@EXAMPLE.ORG`, two addresses."""
     _commit("lower")
@@ -432,6 +449,7 @@ def _a_bot_address_cased() -> None:
             _a_bot,
             _accepted_after_refused,
             _refused_on_both_sides,
+            _a_merge_inside_the_tail,
             _two_cases_of_one_address,
             _an_unusual_address,
             _a_bot_address_cased,
@@ -460,6 +478,76 @@ def test_no_command_where_the_rebase_would_sign_off_more(
     assert "git commit --amend --no-edit --signoff" in out
     assert "GIT_COMMITTER_EMAIL where exported, must be that author's address" in out
     assert "--reset-author" not in out
+
+
+def _follow_the_steps(shell: str, out: str, refused: list[str]) -> None:
+    """Follow the printed steps by hand as `Ann`, up to the push.
+
+    The rebase is the one printed, its todo edited to mark the refused
+    commits `edit`, as the steps ask; at each stop the printed amend and
+    continue run.
+    """
+    found = shutil.which(shell)
+    if found is None:
+        pytest.skip(f"{shell} is not installed")
+    flags = ["-f"] if shell == "zsh" else []
+    rebase = re.search(r"git rebase -i --rebase-merges [0-9a-f]+", out)
+    assert rebase is not None
+    marks = " ".join(f"-e '/^pick {sha[:7]}/s/^pick/edit/'" for sha in refused)
+    _git("config", "user.name", "Ann")
+    _git("config", "user.email", "ann@example.org")
+    env = {**os.environ, "GIT_SEQUENCE_EDITOR": f"sed -i.bak {marks}"}
+    subprocess.run(
+        [found, *flags, "-c", rebase[0]], env=env, capture_output=True, check=True
+    )
+    step = "git commit -q --amend --no-edit --signoff && git rebase --continue"
+    rebasing = pathlib.Path(_git("rev-parse", "--git-path", "rebase-merge").strip())
+    while rebasing.is_dir():
+        subprocess.run([found, *flags, "-c", step], capture_output=True, check=True)
+
+
+@pytest.mark.usefixtures("repo")
+@pytest.mark.parametrize("shell", ["bash", "zsh"])
+def test_the_steps_keep_a_merge_and_find_what_it_carried(
+    script: ModuleType, capsys: pytest.CaptureFixture[str], shell: str
+) -> None:
+    """The steps keep the merges, and their diff finds a merge's own change.
+
+    The merge adds a file of its own. Followed as printed, the rebase
+    keeps the merge, recreated without that file, and `git diff` against
+    the head before it names the file; the printed restore and commit
+    bring it back, and the check passes.
+    """
+    _git("checkout", "--quiet", "-b", "topic")
+    _git("checkout", "--quiet", "-b", "side")
+    _commit("side work", signoff=True)
+    _git("checkout", "--quiet", "topic")
+    # a change of its own, which `git commit --amend` needs
+    pathlib.Path("work.txt").write_text("work\n", encoding="utf-8")
+    _git("add", "work.txt")
+    _git("commit", "--quiet", "-m", "work")
+    _git("merge", "--quiet", "--no-ff", "--no-commit", "side")
+    pathlib.Path("merged.txt").write_text("made in the merge\n", encoding="utf-8")
+    _git("add", "merged.txt")
+    _git("commit", "--quiet", "--signoff", "-m", "merge side, adding merged.txt")
+    old = _git("rev-parse", "HEAD").strip()
+
+    assert script.main(["main..topic"]) == 1
+    out = capsys.readouterr().out
+    _follow_the_steps(
+        shell, out, [sha for sha, _ in script.refused_authors("main..topic")]
+    )
+
+    assert _git("rev-list", "--merges", "--count", "main..topic").strip() == "1"
+    assert _git("diff", "--name-status", old, "HEAD").split() == ["D", "merged.txt"]
+    restore = re.search(
+        r"git restore --source=[0-9a-f]+ --staged --worktree -- \.", out
+    )
+    assert restore is not None
+    _git(*restore[0].split()[1:])
+    _git("commit", "--quiet", "--signoff", "-m", "bring back what the merge made")
+    assert _git("diff", old, "HEAD") == ""
+    assert script.refused("main..topic") == []
 
 
 @pytest.mark.usefixtures("repo")
