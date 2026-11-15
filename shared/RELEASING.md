@@ -492,12 +492,14 @@ request, next to `deps-latest`'s own result.
    gh pr edit "${pr:?}" --add-label release-hold
    ```
 
-   While a pull request carries the label, nobody merges another pull
-   request into `main` here. A red `main`'s repair is the exception: it
-   goes first, as `CONTRIBUTING.md`'s *Landing it* says. A release pull
-   request waits while a merged pull request carries the label, and
-   otherwise only while a lower-numbered one does, so that releases go out
-   oldest first instead of each waiting on the others.
+   While an open or merged pull request carries the label, nobody merges
+   another pull request into `main` here. A red `main`'s repair is the
+   exception: it goes first, as `CONTRIBUTING.md`'s *Landing it* says. A
+   release pull request waits while a merged pull request carries the
+   label, and otherwise only while a lower-numbered open one does, so that
+   releases go out oldest first instead of each waiting on the others. On
+   a pull request closed without merging, the label holds nothing: that
+   release never reached `main`.
 
    A pull request can merge between the version step and the label. So
    once the label is on, fetch, and check that `origin/main` is still the
@@ -528,11 +530,12 @@ request, next to `deps-latest`'s own result.
    gh pr edit "${pr:?}" --remove-label release-hold
    ```
 
-   A label left behind on a release already published or abandoned holds
-   every merge here. Whoever finds one checks that the release is out, or
-   that its pull request closed without merging, tells the maintainer, and
-   removes the label on his word. A merged release pull request is closed
-   too, and holds until its release is published.
+   A label left behind on a merged release already published still holds
+   every merge here. Whoever finds one checks that the release is out,
+   tells the maintainer, and removes the label on his word: a merged
+   release pull request holds until its release is published. One left on
+   a pull request closed without merging holds nothing, and whoever finds
+   it removes it.
 
 1. Run `uv run pre-commit run --all-files` and `uv run pytest --cov`
    before pressing anything, then verify the Read the Docs build renders,

@@ -233,8 +233,8 @@ word. Auto-merge is off, so no pull request can be armed, for the reason
 
 **A release can hold the landing.** Before every merge, these two read
 the repository `gh` resolves, from `GH_REPO` where it is set and from the
-checkout otherwise, and its pull requests carrying `release-hold`,
-merged ones included:
+checkout otherwise, and its open or merged pull requests carrying
+`release-hold`:
 
 ```shell
 gh api 'repos/{owner}/{repo}' --jq .full_name
@@ -243,6 +243,7 @@ gh api 'repos/{owner}/{repo}' --jq .full_name
 ```shell
 gh api 'repos/{owner}/{repo}/issues?labels=release-hold&state=all' \
   --jq '[.[] | select(.pull_request)
+    | select(.state == "open" or .pull_request.merged_at != null)
     | {number, state, merged: .pull_request.merged_at}]'
 ```
 
@@ -252,10 +253,10 @@ second is no hold, and any other list is read as a publishing tree's
 the `404` of a repository that does not exist, is an error, and the
 merge waits until both answer.
 
-The check and the merge are two calls, and no rule of a GitHub ruleset
-reads a label, so a label put on between them does not stop the merge.
-Until the release merges, its own check that `main` has not moved
-catches such a merge, as *Release to PyPI* says.
+The check and the merge are two calls, and none of the [rules a GitHub
+ruleset offers][rulesets] reads a label, so a label put on between them
+does not stop the merge. Until the release merges, its own check that
+`main` has not moved catches such a merge, as *Release to PyPI* says.
 
 **Where the repository has a bypass, the maintainer may land without
 that approval, through it**: [`GOVERNANCE.md`][governance]'s *How a
@@ -313,6 +314,7 @@ settings and why they are what they are.
 [s-sigs]: https://github.com/btclib-org/.github#signatures
 [s-branch]: https://github.com/btclib-org/.github#branch-protection-and-rulesets
 [dco]: https://developercertificate.org/
+[rulesets]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets
 [governance]: https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md
 [roadmap]: https://github.com/btclib-org/.github/blob/main/ROADMAP.md
 [good-first]: https://github.com/search?q=org%3Abtclib-org+label%3A%22good+first+issue%22+is%3Aopen&type=issues
