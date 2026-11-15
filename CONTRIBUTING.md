@@ -85,8 +85,8 @@ sentence carry the point; a body is at most two short paragraphs before
 any code block or template section; a comment is about 250 words, and
 never more than 300, with no list and no heading; a review's summary
 takes the shape `REVIEWING.md`'s *The verdict* gives it, and a pull
-request's findings record the shape `ai-agents-process`'s [*The findings
-record*][p-findings] gives it.
+request's findings record takes the shape `ai-agents-process`'s
+[*The findings record*][p-findings] gives it.
 
 ## Pull requests
 
@@ -129,9 +129,9 @@ is being written, and a tree's own landed subjects are not what to copy
 it from: nothing already landed is rewritten, so what a repository wrote
 before the rule stays where it is.
 
-**A port of the standard is the exception**: its subject cites no issue,
-and its body cites the issues it advances, as `ai-agents-process`'s
-[*Ports of the standard*][p-ports] says.
+**A batch of ports of the standard is the exception**: its subject cites
+no issue, and its description cites the issues it advances, as
+`ai-agents-process`'s [*Ports of the standard*][p-ports] says.
 
 `REVIEWING.md` is the standard a review is written against, and is this
 file's other half. Read before opening a pull request, it is what the
@@ -337,7 +337,7 @@ settings and why they are what they are.
 [roadmap]: https://github.com/btclib-org/.github/blob/main/ROADMAP.md
 [good-first]: https://github.com/search?q=org%3Abtclib-org+label%3A%22good+first+issue%22+is%3Aopen&type=issues
 [p-ports]: https://github.com/btclib-org/ai-agents-process/blob/main/skills/btclib-iss/SKILL.md#ports-of-the-standard
-[p-findings]: https://github.com/btclib-org/ai-agents-process/blob/main/process/btclib-common.md#the-findings-record
+[p-findings]: https://github.com/btclib-org/ai-agents-process/blob/main/process/btclib-common.md
 
 ## This repository in particular
 

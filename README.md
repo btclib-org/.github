@@ -3282,9 +3282,9 @@ by what is true of it. Reserving `(issue #N)` for `CHANGELOG.md` alone
 is rejected, since a branch answering half an issue would then land with
 nothing in `git log` pointing at what it answered.
 
-**A port of the standard is the exception**: its subject cites no issue,
-and its body cites the issues it advances, as `ai-agents-process`'s
-[*Ports of the standard*](https://github.com/btclib-org/ai-agents-process/blob/main/skills/btclib-iss/SKILL.md#ports-of-the-standard)
+**A batch of ports of the standard is the exception**: its subject cites
+no issue, and its description cites the issues it advances, as
+`ai-agents-process`'s [*Ports of the standard*](https://github.com/btclib-org/ai-agents-process/blob/main/skills/btclib-iss/SKILL.md#ports-of-the-standard)
 says.
 
 A pull request that neither closes nor advances an issue carries no
@@ -3309,11 +3309,13 @@ mention that must not close names the issue with no verb immediately in
 front of it — `tracking issue: owner/repo#N`, never
 `<verb> owner/repo#N` — and a cross-repository task keeps its tracking
 issue open this way until every one of its pull requests has landed, and
-somebody closes it by hand. An issue that every tree's port of the
-standard advances closes the same way: the last tree's port cites it as
-advanced too, and the session landing that port closes the issue, with
-the measurement that every tree holds the change, and removes its entry
-from `EXPECTED_DRIFT` in `tests/verbatim_test.py`.
+somebody closes it by hand. An issue the ports of the standard advance
+closes the same way: the last tree's port cites it as advanced too, and
+the session landing that port closes the issue, with the measurement
+that every tree holds the change. Where an `EXPECTED_DRIFT` entry in
+`tests/verbatim_test.py` cites it, that session removes the entry once
+the copies agree, and otherwise points it at the issue of a change still
+waiting on that path.
 
 **Adjacency is the test, and two parsers read a keyword.** A verb the
 number does not immediately follow does not fire. One parser reads the
