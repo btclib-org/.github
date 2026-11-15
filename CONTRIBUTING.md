@@ -142,9 +142,12 @@ It is opened the moment it is written and verified — not held for the
 previous one to be reviewed or to land, and not batched with the next. A
 batch arrives as one reviewing job with several subjects, which is the
 shape that costs the most to read; a finished pull request held back is
-review that could have started and did not. A security advisory's fix is
-the exception, held back as [section 12][s12]'s *A security advisory is
-worked in this order* says.
+review that could have started and did not. A port of the standard is
+one subject: one pull request per tree, holding every change to the
+standard landed since that tree's last port. Its review asks one
+question: does each copy now match the standard's source? A security
+advisory's fix is the exception, held back as [section 12][s12]'s *A
+security advisory is worked in this order* says.
 
 Working this way stacks branches, which is fine and costs one rule: a
 child whose base was amended is moved with the old base named,
