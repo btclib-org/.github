@@ -142,9 +142,12 @@ It is opened the moment it is written and verified — not held for the
 previous one to be reviewed or to land, and not batched with the next. A
 batch arrives as one reviewing job with several subjects, which is the
 shape that costs the most to read; a finished pull request held back is
-review that could have started and did not. A security advisory's fix is
-the exception, held back as [section 12][s12]'s *A security advisory is
-worked in this order* says.
+review that could have started and did not. A port of the standard is
+one subject: one pull request per tree, holding every change to the
+standard landed since that tree's last port. Its review asks one
+question: does each copy now match the standard's source? A security
+advisory's fix is the exception, held back as [section 12][s12]'s *A
+security advisory is worked in this order* says.
 
 Working this way stacks branches, which is fine and costs one rule: a
 child whose base was amended is moved with the old base named,
@@ -317,14 +320,20 @@ this heading.
 
 ### The environment and the gates
 
-uv is the only thing that has to be installed; it fetches interpreters
-and tools itself. There is a project here, and nothing installs it:
-`package = false`, its Python being one test suite and the local hooks
-under `.github/scripts/`.
+uv is the one thing to install beyond the commands the next paragraphs
+name; it fetches interpreters and tools itself. There is a project here,
+and nothing installs it: `package = false`, its Python being one test
+suite and the local hooks under `.github/scripts/`.
 
-`gh` and `git` are the other two prerequisites and neither is a wheel:
-both are on every GitHub-hosted runner already, and the suite shells out
-to them rather than importing a client.
+`gh` and `git` are prerequisites too, and neither is a wheel: both are
+on every GitHub-hosted runner already, and the suite shells out to them
+rather than importing a client.
+
+The `jq` command is one as well: workflow steps the suite runs pipe into
+it, and the runner `lint.yml` runs the suite on has it. The `test`
+group's `jq` package is libjq's Python binding and puts no `jq` on the
+path, and a stand-in built on it would test those steps on a jq other
+than the runner's.
 
 ```shell
 uv run --locked --only-group lint pre-commit run --all-files
