@@ -69,7 +69,9 @@ labels:
   - name: api-break
     color: "e99695"
     description: Breaks the public API; set by a job, advisory
-    repositories:
+    # the trees with a release.yml, whose RELEASING.md section 14 copies:
+    # tier 1, as the loop in README section 2 lists it
+    repositories: &publishing
       - btclib
       - btclib-secp256k1
       - bitcoin-core-rpc
@@ -81,6 +83,11 @@ labels:
       - bip32-descriptors
       - coin-addresses
       - seed-scan
+  - name: release-hold
+    color: "d876e3"
+    description: >-
+      A release under way; other merges here wait until it is published
+    repositories: *publishing
 
 # Labels the test passes over, neither owed nor refused.
 #
