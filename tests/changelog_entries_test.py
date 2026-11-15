@@ -53,6 +53,20 @@ def _script() -> ModuleType:
 
 script = _script()
 
+
+def _release_check() -> ModuleType:
+    """Load `check_release_sections.py`, which the release's gates run."""
+    path = ROOT / ".github" / "scripts" / "check_release_sections.py"
+    spec = importlib.util.spec_from_file_location("check_release_sections", path)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+release_check = _release_check()
+
 CHANGELOG = """\
 # Changelog
 
@@ -174,6 +188,8 @@ def test_the_entries_go_above_the_last_release_in_both_files(tmp_path: Path) -> 
     notes = (tmp_path / "RELEASE_NOTES.md").read_text(encoding="utf-8")
     above, _, below = NOTES.partition("## v2026.11.14\n")
     assert notes == above + SECTION + "\n## v2026.11.14\n" + below
+    assert release_check.problems("2026.11.15", changelog, CHANGELOG) == []
+    assert release_check.problems("2026.11.15", notes, NOTES) == []
 
 
 def test_the_same_entries_give_the_same_bytes(tmp_path: Path) -> None:
@@ -189,11 +205,19 @@ def test_the_same_entries_give_the_same_bytes(tmp_path: Path) -> None:
     assert len(digests) == 1
 
 
-def test_a_file_with_no_release_takes_the_section_at_its_end() -> None:
-    """The first release of a tree has no `## ` heading to go above."""
-    assert script.inserted("CHANGELOG.md", "# Changelog\n", "1", "## v1\n") == (
-        "# Changelog\n\n## v1\n"
-    )
+@pytest.mark.parametrize("base", ["# Changelog\n", "# Changelog\n\nIts preamble.\n\n"])
+def test_a_file_with_no_release_takes_the_section_at_its_end(base: str) -> None:
+    """The first release of a tree has no `## ` heading to go above.
+
+    The release's gates take the file for the base and the section alone.
+
+    :param base: the file before its first release.
+    """
+    new = script.section("1", {"3.md": ENTRIES["3.md"]})
+    text = script.inserted("CHANGELOG.md", base, "1", new)
+
+    assert text == base.rstrip("\n") + "\n\n" + new
+    assert release_check.problems("1", text, base) == []
 
 
 @pytest.mark.parametrize("entries", [{}, None])
@@ -601,6 +625,47 @@ def test_a_heading_in_a_fence_or_a_comment_is_not_the_last_release(
     for name in script.FILES:
         text = (tmp_path / name).read_text(encoding="utf-8")
         assert text == above + section + "\n## v2026.11.14\n" + below
+        assert release_check.problems("2026.11.15", text, FENCED) == []
+
+
+@pytest.mark.parametrize("name", ["CHANGELOG.md", "RELEASE_NOTES.md"])
+def test_a_work_in_progress_heading_is_refused(tmp_path: Path, name: str) -> None:
+    """The assembly folds no such section, and the release's gates refuse it.
+
+    :param name: the history file holding the heading.
+    """
+    _tree(tmp_path, {"3.md": ENTRIES["3.md"]})
+    path = tmp_path / name
+    wip = "## v2026.12 (work in progress, not released yet)\n\n### It\n\nIt.\n\n"
+    text = path.read_text(encoding="utf-8")
+    path.write_text(text.replace("## v2026.11.14", f"{wip}## v2026.11.14", 1))
+    _commit_at(tmp_path)
+    before = _snapshot(tmp_path)
+
+    with pytest.raises(script.RefusedError) as refused:
+        script.assemble("2026.11.15", tmp_path)
+
+    assert refused.value.problems == [
+        (
+            f"{name} holds a (work in progress, not released yet) heading, which"
+            " a release does not fold: remove the heading, move what its section"
+            " holds into changelog/next/ as entries, and commit both before the"
+            " run"
+        )
+    ]
+    assert _snapshot(tmp_path) == before
+
+
+def test_a_work_in_progress_heading_in_a_fence_is_an_example(tmp_path: Path) -> None:
+    """Only a heading outside code is one."""
+    _tree(tmp_path, {"3.md": ENTRIES["3.md"]})
+    path = tmp_path / "CHANGELOG.md"
+    example = "```\n## v1 (work in progress, not released yet)\n```\n\n"
+    text = path.read_text(encoding="utf-8")
+    path.write_text(text.replace("## v2026.11.14", f"{example}## v2026.11.14", 1))
+    _commit_at(tmp_path)
+
+    script.assemble("2026.11.15", tmp_path)
 
 
 @pytest.mark.parametrize(

@@ -425,22 +425,23 @@ request, next to `deps-latest`'s own result.
    fix to one included, and the history files too: the assembly refuses a
    tree where `git status` shows a history file or anything under
    `changelog/next/` changed, staged or untracked, or an entry ignored,
-   and a tree that is no git checkout. The scripts are the ones at the commit `changelog-entry.yml`
-   pins, the ones that checked each entry on its pull request: the first
-   runs the second's checks on the section, from its own directory. Each
-   is written to a file before it runs for the reason the public API step
-   gives. The assembly refuses an empty `changelog/next/`: nothing changed
-   for a user, and there is no release. Where a step of it fails, it puts
-   back what it changed. A run killed before it finishes leaves a
-   `.changelog-assembly-*` directory, and the next run refuses and prints
-   the `git restore` that takes the history files and the entries back to
-   the commit, which loses nothing since they were committed. The same
-   entries give the same bytes, so the release's reviewer runs the same
-   commands on the base and compares the history files with the pull
-   request's. No prose is written here: an entry found wrong is fixed in
-   its file before the run, by a pull request of its own or in this one.
-   A public API finding no entry names, or a change of the release's
-   assets that no entry names, gets its entry that way too.
+   and a tree that is no git checkout.
+
+   The scripts are the ones at the commit `changelog-entry.yml` pins, the ones
+   that checked each entry on its pull request: the first runs the second's
+   checks on the section, from its own directory. Each is written to a file
+   before it runs for the reason the public API step gives. The assembly refuses
+   an empty `changelog/next/`: nothing changed for a user, and there is no
+   release. Where a step of it fails, it puts back what it changed. A run killed
+   before it finishes leaves a `.changelog-assembly-*` directory, and the next
+   run refuses and prints the `git restore` that takes the history files and the
+   entries back to the commit, which loses nothing since they were committed.
+   The same entries give the same bytes, so the release's reviewer runs the same
+   commands on the base and compares the history files with the pull request's.
+   No prose is written here: an entry found wrong is fixed in its file before
+   the run, by a pull request of its own or in this one. A public API finding no
+   entry names, or a change of the release's assets that no entry names, gets
+   its entry that way too.
 
    `release.yml` checks that the heading is the version alone and that
    the section is not empty before anything is built, because PyPI never
@@ -448,9 +449,10 @@ request, next to `deps-latest`'s own result.
    deleted. No other pull request writes either file, and nothing opens
    the next cycle's section.
 
-   A `(work in progress, not released yet)` section, where one remains,
-   is folded into the release's section by its pull request, which
-   deletes the heading.
+   The assembly folds no `(work in progress, not released yet)` section
+   into the release's: it refuses a history file that holds such a
+   heading. Remove the heading, move what its section holds into
+   `changelog/next/` as entries, and commit both before the run.
 
 1. Set the version in `pyproject.toml`, which is the one place it is
    declared, to the date the release is cut, `YYYY.M.D`, and re-lock so

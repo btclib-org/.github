@@ -46,13 +46,15 @@ release runs the command on the base and compares. It refuses a
 directory holding no `.md` file, which is the exact form of "nothing
 changed for a user"; an `.md` file that is not an entry; and entries
 whose section `check_changelog.py` refuses. It refuses where a history
-file already holds the version's heading. Before it changes anything it
-writes each file's new text into a directory of its own at the tree's
-root, and gives each history file and each entry a second name there,
-a hard link, which takes no new data. Then it renames the new texts over
-the history files and removes the entries, which takes no space either;
-where a step fails it renames the second names back, so a failure, a
-full disk included, leaves the tree as it was, each file with its mode.
+file already holds the version's heading, or a `## ` heading marked
+`(work in progress, not released yet)`, which it does not fold. Before
+it changes anything it writes each file's new text into a directory of
+its own at the tree's root, and gives each history file and each entry
+a second name there, a hard link, which takes no new data. Then it
+renames the new texts over the history files and removes the entries,
+which takes no space either; where a step fails it renames the second
+names back, so a failure, a full disk included, leaves the tree as it
+was, each file with its mode.
 It removes no other file: `changelog/next/.markdownlint.jsonc` stays.
 It runs on a commit: it refuses a tree that is not a git checkout, and
 one where `git status` shows a history file or anything under
@@ -137,6 +139,9 @@ _ATX = re.compile(r"[ \t>]*#{1,6}(?:[ \t]|$)")
 # a setext underline, or a thematic break where no text line is above it
 _UNDERLINE = re.compile(r" {0,3}(?:=+|-+)[ \t]*")
 _MAX_BODY_LINES = 3
+# the words of a work-in-progress heading, which `check_release_sections.py`
+# refuses in a release
+_WORK_IN_PROGRESS = "(work in progress, not released yet)"
 # the name an assembly's own directory opens with, at the tree's root
 _STAGING = ".changelog-assembly-"
 _GITLINK = "160000"
@@ -376,12 +381,20 @@ def inserted(name: str, text: str, version: str, new: str) -> str:
     :param new: the section `section()` wrote.
     :returns: the file with the section in it, or at its end where it
         holds no `## ` heading.
-    :raises RefusedError: where the file already holds the heading, or
-        ends inside a code fence or an html comment.
+    :raises RefusedError: where the file already holds the heading, holds
+        a work-in-progress one, or ends inside a code fence or an html
+        comment.
     """
     found = headings(text)
     if any(line == f"## v{version}" for _, line in found):
         msg = f"{name} already holds ## v{version}: a release that holds it is done"
+        raise RefusedError([msg])
+    if any(_WORK_IN_PROGRESS in line for _, line in found):
+        msg = (
+            f"{name} holds a {_WORK_IN_PROGRESS} heading, which a release does"
+            " not fold: remove the heading, move what its section holds into"
+            f" {NEXT}/ as entries, and commit both before the run"
+        )
         raise RefusedError([msg])
     if code_lines(text)[1]:
         msg = f"{name} ends inside a code fence or an html comment"
