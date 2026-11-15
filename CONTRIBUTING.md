@@ -131,7 +131,8 @@ before the rule stays where it is.
 
 **A batch of ports of the standard is the exception**: its subject cites
 no issue, and its description cites the issues it advances, as
-`ai-agents-process`'s [*Ports of the standard*][p-ports] says.
+`ai-agents-process`'s [*Ports of the standard*][p-ports] says, and
+[the standard's *What a pull request says it is*][s-title] says why.
 
 `REVIEWING.md` is the standard a review is written against, and is this
 file's other half. Read before opening a pull request, it is what the
