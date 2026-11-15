@@ -599,9 +599,9 @@ with this paragraph**, above the supported-by line where there is one:
 ```markdown
 ## Contributing
 
-Development is LLM-based: humans are welcome, as long as they are
-comfortable with agentic development ;-). A contribution must have been
-read and understood by the person who submits it.
+Software development in btclib-org is mainly LLM-driven, but human
+beings are welcome too. A contribution must have been read and
+understood by the person who submits it.
 [`CONTRIBUTING.md`](https://github.com/<org>/<repo>/blob/main/CONTRIBUTING.md#working-with-an-llm)
 has the rules.
 ```
@@ -5161,9 +5161,9 @@ runs over the whole tree rather than over what its own step added.
 
 ## Contributing
 
-Development is LLM-based: humans are welcome, as long as they are
-comfortable with agentic development ;-). A contribution must have been
-read and understood by the person who submits it.
+Software development in btclib-org is mainly LLM-driven, but human
+beings are welcome too. A contribution must have been read and
+understood by the person who submits it.
 [`CONTRIBUTING.md`](https://github.com/btclib-org/.github/blob/main/CONTRIBUTING.md#working-with-an-llm)
 has the rules.
 
