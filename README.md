@@ -3282,6 +3282,14 @@ by what is true of it. Reserving `(issue #N)` for `CHANGELOG.md` alone
 is rejected, since a branch answering half an issue would then land with
 nothing in `git log` pointing at what it answered.
 
+**A batch of ports of the standard is the exception**: its subject cites
+no issue, and its description cites the issues it advances, as
+`ai-agents-process`'s [*Ports of the standard*](https://github.com/btclib-org/ai-agents-process/blob/main/skills/btclib-iss/SKILL.md#ports-of-the-standard)
+says. Citing the issues in the subject is rejected: the issues a batch
+advances can differ from tree to tree, and so would its subject, where
+`Port btclib-org/.github@<sha>` is the same in every tree and names what
+was ported.
+
 A pull request that neither closes nor advances an issue carries no
 parentheses. A landed title is not rewritten: it is a commit subject in
 `main`'s history, which nothing rewrites.
@@ -3304,7 +3312,12 @@ mention that must not close names the issue with no verb immediately in
 front of it — `tracking issue: owner/repo#N`, never
 `<verb> owner/repo#N` — and a cross-repository task keeps its tracking
 issue open this way until every one of its pull requests has landed, and
-somebody closes it by hand.
+somebody closes it by hand. An issue the ports of the standard advance
+closes the same way: the last tree's port cites it as advanced too, and
+the session landing that port closes the issue with the command that
+shows every tree owing the change holds it. Where an `EXPECTED_DRIFT`
+entry cites the issue, that session handles the entry as
+`tests/verbatim_test.py` says.
 
 **Adjacency is the test, and two parsers read a keyword.** A verb the
 number does not immediately follow does not fire. One parser reads the
