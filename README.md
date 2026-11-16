@@ -649,16 +649,22 @@ first contributor reads the issue before `CONTRIBUTING.md`, and a pull
 request opened without the trailer waits on them for a fix only they can
 make. `tests/labels_test.py` reads each form's last `body` item.
 
-**`PULL_REQUEST_TEMPLATE.md` opens with the comment on sign-off this
-repository's own template opens with**, the same text through its first
-`-->`: it tells the author to run `git commit -s` and points to
-`CONTRIBUTING.md`'s *Pull requests*. The reason is the issue forms', and
-the template also reaches an author who opened no issue, as they open
-the pull request. Below the comment the file is the tree's own, since
-its checks name that tree's gates; the rejected alternative is the whole
-file the same in every tree, which would give each this one's commands.
-`tests/pull_request_template_test.py` compares each tree's opening
-comment with this one's, and this one with this paragraph.
+**`PULL_REQUEST_TEMPLATE.md` opens with the comment on sign-off
+below**, the same text, before anything else. The reason is the issue
+forms', and the template also reaches an author who opened no issue, as
+they open the pull request. Below the comment the file is the tree's
+own, since its checks name that tree's gates; the rejected alternative
+is the whole file the same in every tree, which would give each this
+one's commands. `tests/pull_request_template_test.py` reads the block
+where it stands and compares each tree's opening comment with it, this
+repository's included:
+
+```html
+<!-- Sign off every commit: `git commit -s` adds the `Signed-off-by:`
+     trailer, and only you can add it to your commits. CONTRIBUTING.md's
+     *Pull requests* says what it certifies and how to add it to commits
+     already made. -->
+```
 
 **`PULL_REQUEST_TEMPLATE.md` sits under `.github/`**, with the forge's
 other inputs, though GitHub also reads it from the root or `docs/`.
