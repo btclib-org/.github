@@ -118,10 +118,12 @@ first because GitHub does not reopen a pull request whose branch was
 force-pushed while it was closed. A new pull request that passes the
 check is as good. An issue is held by its assignees. The closed pull
 request's author is unassigned from each issue it cites. Where that
-leaves an issue with no assignee, the author of the open pull request
-that cites it and passes the `Sign-off` check is assigned to it, the
-earliest opened where there are several. Where there is none, the issue
-stays unassigned and open to every contributor.
+leaves an issue with no assignee, of the open pull requests that cite it
+and pass the `Sign-off` check, the author of the first to pass it is
+assigned to it. Where there is none, the issue stays unassigned and open
+to every contributor. GitHub assigns someone outside the organization
+only to an issue they have commented on, so comment on the issue your
+pull request is for: without that comment, the issue stays unassigned.
 
 Counting from the opening was set aside: a contributor who never saw the
 check fail would have had no chance to fix it. Left open, a pull request
