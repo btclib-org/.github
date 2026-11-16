@@ -583,22 +583,48 @@ def fenced(document: Path, opening: str, language: str) -> str:
     return "\n".join(blocks[0]) + "\n"
 
 
-def bulleted(document: Path, opening: str, closing: str) -> list[str]:
+ITEM = re.compile(r"^[ \t]*(?:[-*+]|[0-9]{1,9}[.)])(?:[ \t]|$)")
+"""A line that may open a list item, whatever its marker and its indent.
+
+CommonMark's markers. A thematic break such as `* * *`, a wrapped line
+opening `14. ` and a marker inside a fenced block match too, though
+Markdown reads none of them as an item: `bulleted` then refuses a line
+it could have passed over, which is the safe side to be wrong on.
+"""
+
+
+def bulleted(
+    document: Path, opening: str, closing: str, *, nested: bool = False
+) -> list[str]:
     """Read the list between two lines, one string per bullet.
 
-    A bullet is its own line and every indented line after it, which is
-    how a bullet wraps at the margin, so a caller matching a pattern
-    against what comes back is asking about the bullet rather than about
-    where the file broke the line. `opening` and `closing` are the prose
-    either side of the list, so moving it within its section does not
-    need the caller changed.
+    A bullet is a line starting `- ` and every line indented by two
+    spaces or a tab after it, which is how a bullet wraps at the margin,
+    so a caller matching a pattern against what comes back is asking
+    about the bullet rather than about where the file broke the line. A
+    paragraph ends a bullet: a line after a blank line that is not
+    indented and opens no list item. `opening` and `closing` are the
+    prose either side of the list, so moving it within its section does
+    not need the caller changed.
+
+    Any other line that opens a list item is refused rather than passed
+    over, as `* `, `+ `, `1. `, ` - `, an item nested under a bullet and
+    an indented marker after a paragraph do: a caller handed a list short
+    of an item checks nothing for it and reports that as agreement. So is
+    a line of prose not indented right after a bullet, which Markdown
+    reads as part of that bullet.
 
     :param document: the markdown file to read.
     :param opening: a substring of the line the list follows.
     :param closing: a substring of the line the list stops at.
+    :param nested: read an item nested under a bullet as part of that
+        bullet, for a list whose bullets are paragraphs that hold a list
+        of their own.
     :returns: the bullets, in the order the list gives them.
-    :raises LookupError: where either end is not found exactly once, or
-        the closing line comes before the opening one.
+    :raises LookupError: where either end is not found exactly once, the
+        closing line comes before the opening one, a line between them
+        opens a list item that is not a bullet, or one not indented
+        follows a bullet with no blank line between.
     """
     lines = document.read_text(encoding="utf-8").splitlines()
     start = sole(document, lines, opening)
@@ -607,11 +633,23 @@ def bulleted(document: Path, opening: str, closing: str) -> list[str]:
         msg = f"{document.name} holds {closing!r} before {opening!r}"
         raise LookupError(msg)
     bullets: list[str] = []
-    for line in lines[start + 1 : end]:
+    within = blank = False
+    for number, line in enumerate(lines[start + 1 : end], start + 2):
+        indented = line.startswith(("  ", "\t"))
         if line.startswith("- "):
             bullets.append(line)
-        elif line.startswith("  ") and bullets:
+            within = True
+        elif indented and within and (nested or not ITEM.match(line)):
             bullets[-1] += f" {line.strip()}"
+        elif ITEM.match(line):
+            msg = f"{document.name}:{number} opens an item, not a bullet: {line!r}"
+            raise LookupError(msg)
+        elif line.strip() and within and not blank:
+            msg = f"{document.name}:{number} continues a bullet unindented: {line!r}"
+            raise LookupError(msg)
+        elif line.strip():
+            within = False
+        blank = not line.strip()
     return bullets
 
 
@@ -641,9 +679,9 @@ def subjects(
     :param pattern: how a bullet of this list names its subject.
     :returns: each subject against the rest of its bullet, the lines it
         wraps over joined by a space, in the order the list gives them.
-    :raises LookupError: where either end is not found exactly once, the
-        closing line comes first, a bullet between them names no subject
-        the pattern reads, or two bullets carry the same one.
+    :raises LookupError: where `bulleted` refuses the list, a bullet
+        names no subject the pattern reads, or two bullets carry the same
+        one.
     """
     read: list[tuple[str, str]] = []
     unread: list[str] = []
