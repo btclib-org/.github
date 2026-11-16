@@ -366,11 +366,6 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
         ("portanode",),
     ),
     (
-        1982,
-        "test_no_workflow_runs_on_an_x86_64_macos_image",
-        ("btclib-secp256k1",),
-    ),
-    (
         2008,
         "test_a_floor_measures_the_scripts_under_github_scripts",
         ("btclib-wallet",),
