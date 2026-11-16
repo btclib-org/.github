@@ -404,7 +404,10 @@ another document holds the rule, the question names it.
   no or a doubt is a question for the maintainer, not for the author, put
   in the summary as a bullet of its own. It does not hold the ack, is
   never ground for a `NACK`, closes nothing, and leaves the rest of the
-  review as for any other pull request.
+  review as for any other pull request. The three answers are the
+  maintainer's to give: a doubt that held the ack or grounded a `NACK`
+  would let the reviewer decide the project's direction, and turn away a
+  contribution the maintainer may welcome.
 
 **What this tree checks beyond these is the last section of this file**,
 which is that repository's own. A repository whose last section names
