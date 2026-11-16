@@ -11,8 +11,8 @@ guard, so without these tests nothing turns red the day the guard goes
 (btclib-org/.github#1813).
 
 The review's `allowed_bots` is read here too, against the bot that
-`reusable-claude-implement.yml` opens its pull requests as, and so is its
-deny list.
+`reusable-claude-implement.yml` opens its pull requests as, and so are its
+deny list and what its prompt says the summary holds.
 """
 
 from __future__ import annotations
@@ -21,6 +21,7 @@ import re
 import shlex
 
 from . import ROOT
+from .contributing_test import flat
 from .workflows_test import jobs
 
 # the reusable review, which holds the jobs
@@ -135,3 +136,25 @@ def test_the_review_denies_what_its_allow_list_does_not_keep_out() -> None:
             break
         values.append(arg)
     assert {tool for value in values for tool in value.split(",")} >= AGENT_DENIED
+
+
+def test_the_summary_holds_what_the_verdict_says() -> None:
+    """The prompt points at `REVIEWING.md`'s *The verdict* for the summary.
+
+    That section names the findings and any question for the maintainer
+    that *What every review here also checks* asks, so a list of the
+    prompt's own would drop what the section adds
+    (btclib-org/.github#2333).
+    """
+    (step,) = [
+        step for step in jobs(WORKFLOW)["review"]["steps"] if step.get("id") == "review"
+    ]
+    prompt = flat(step["with"]["prompt"])
+    reviewing = (ROOT / "REVIEWING.md").read_text(encoding="utf-8")
+    verdict = reviewing.split("\n## The verdict\n", 1)[1].split("\n## ", 1)[0]
+
+    assert (
+        "Then what REVIEWING.md's *The verdict* has the summary hold after the"
+        " verdict line."
+    ) in prompt
+    assert "any question for the maintainer" in flat(verdict)
