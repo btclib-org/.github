@@ -118,12 +118,16 @@ first because GitHub does not reopen a pull request whose branch was
 force-pushed while it was closed. A new pull request that passes the
 check is as good. An issue is held by its assignees. The closed pull
 request's author is unassigned from each issue it cites. Where that
-leaves an issue with no assignee, of the open pull requests that cite it
-and pass the `Sign-off` check, the author of the first to pass it is
-assigned to it. Where there is none, the issue stays unassigned and open
-to every contributor. GitHub assigns someone outside the organization
-only to an issue they have commented on, so comment on the issue your
-pull request is for: without that comment, the issue stays unassigned.
+leaves an issue with no assignee, of the open pull requests that cite
+it, pass the `Sign-off` check and have an author GitHub can assign, the
+author of the first to pass the check is assigned to it. Where there is
+none, the issue stays unassigned and open to every contributor. [GitHub
+assigns][gh-assign] a contributor who has no write access and is not a
+member of the organization only to an issue they have commented on, so
+comment on the issue your pull request is for. A pull request whose
+author cannot be assigned does not hold the issue, even where it passed
+the check first, and its author commenting later does not displace the
+assignee.
 
 Counting from the opening was set aside: a contributor who never saw the
 check fail would have had no chance to fix it. Left open, a pull request
@@ -359,6 +363,7 @@ settings and why they are what they are.
 [s-branch]: https://github.com/btclib-org/.github#branch-protection-and-rulesets
 [dco]: https://developercertificate.org/
 [rulesets]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets
+[gh-assign]: https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/assigning-issues-and-pull-requests-to-other-github-users
 [governance]: https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md
 [roadmap]: https://github.com/btclib-org/.github/blob/main/ROADMAP.md
 [good-first]: https://github.com/search?q=org%3Abtclib-org+label%3A%22good+first+issue%22+is%3Aopen&type=issues
