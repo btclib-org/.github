@@ -66,6 +66,7 @@ OPENED = {
     "thematic break of underscores": "___",
     "setext underline": "===",
     "footnote": f"[^1]: - {ITEM}",
+    "link reference definition": "[ref]: https://example.org",
 }
 """A line opening a block that is no paragraph, put after a paragraph."""
 
@@ -193,6 +194,22 @@ def test_a_paragraph_is_read_past_whatever_it_opens_with(
     assert read(planted(tmp_path, ["", line])) == [READ]
     assert read(planted(tmp_path, [*PARAGRAPH, line])) == [READ]
     assert read(planted(tmp_path, [*PARAGRAPH[:2], line])) == [READ]
+
+
+@pytest.mark.parametrize("space", [" ", "\t", "  \t "], ids=["space", "tab", "mixed"])
+def test_a_line_of_whitespace_is_a_blank_line(tmp_path: Path, space: str) -> None:
+    """Before the first bullet, after a paragraph and between bullets alike.
+
+    :param tmp_path: where the file is written.
+    :param space: the whitespace the line holds.
+    """
+    second = f"- {ITEM}"
+    document = tmp_path / "list.md"
+    body = ["Opening.", space, FIRST, WRAP, space, *PARAGRAPH[1:2], space]
+    body += [second, space, "Closing."]
+    document.write_text("\n".join(body) + "\n", encoding="utf-8")
+    assert read(document) == [READ, second]
+    assert read(planted(tmp_path, [space, second])) == [READ, second]
 
 
 def test_a_line_at_the_margin_right_after_a_bullet_is_refused(

@@ -597,16 +597,18 @@ QUOTE = re.compile(r"^[ \t]*>")
 
 OPENER = re.compile(
     r"[ \t]|#{1,6}(?:[ \t]|$)|\||:?-+:?[ \t]*\||<|`{3}|~{3}"
-    r"|(?:[-*_][ \t]*){3,}$|(?:=+|-+)[ \t]*$|\[\^"
+    r"|(?:[-*_][ \t]*){3,}$|(?:=+|-+)[ \t]*$|\[[^\]]+\]:"
 )
 """A line that opens a block outside a bullet, which is no paragraph's.
 
 An indent, a heading, a table's row or its delimiter row, HTML, a fence
-of backticks or tildes, a thematic break, a setext underline, and a
-footnote. With `QUOTE` and `ITEM` these are the blocks CommonMark and
-GitHub's tables and footnotes start at the margin, and `bulleted` reads
-any other line there as a paragraph's. A paragraph opening with an
-autolink's `<` is refused with HTML, the safe side to be wrong on.
+of backticks or tildes, a thematic break, a setext underline, and the
+definition of a footnote or a link reference. With `QUOTE` and `ITEM`
+these are the blocks CommonMark and GitHub's tables and footnotes start
+at the margin, and `bulleted` reads any other line there that is not
+blank as a paragraph's. A paragraph opening with an autolink's `<` or a
+`|` is refused with the block it looks like, the safe side to be wrong
+on.
 """
 
 
@@ -652,6 +654,9 @@ def bulleted(
     bullets: list[str] = []
     within = blank = False
     for number, line in enumerate(lines[start + 1 : end], start + 2):
+        if not line.strip():
+            blank = True
+            continue
         indented = line.startswith(("  ", "\t"))
         inner = ITEM.match(line) or QUOTE.match(line)
         where = f"{document.name}:{number}"
@@ -666,15 +671,15 @@ def bulleted(
         elif ITEM.match(line):
             msg = f"{where} opens an item, not a bullet: {line!r}"
             raise LookupError(msg)
-        elif line.strip() and within and not blank:
+        elif within and not blank:
             msg = f"{where} continues a bullet unindented: {line!r}"
             raise LookupError(msg)
         elif OPENER.match(line):
             msg = f"{where} is no bullet and no paragraph: {line!r}"
             raise LookupError(msg)
-        elif line.strip():
+        else:
             within = False
-        blank = not line.strip()
+        blank = False
     return bullets
 
 
