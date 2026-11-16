@@ -107,17 +107,17 @@ The check's failure prints the command that adds the trailer. [The
 standard's *Signatures*][s-sigs] says why a signature does not replace
 it, and which commits the `Sign-off` job skips.
 
-**A pull request with a commit still lacking the trailer seven days
-after it was asked for it is closed.** The week runs from the first
-request to sign off on the pull request, a comment that asks for the
-trailer and warns of the closing, not from the opening. The closing
+**A pull request with a commit the `Sign-off` check refuses seven days
+after it was asked for the trailer is closed.** The week runs from the
+first request to sign off on the pull request, a comment that asks for
+the trailer and warns of the closing, not from the opening. The closing
 comment says how the pull request comes back: comment on it asking for a
-reopen, and once a maintainer has reopened it, add the trailer with
-`git rebase --signoff <base>` and force-push. The comment comes first
-because GitHub does not reopen a pull request whose branch was
-force-pushed while it was closed. A new pull request whose commits are
-all signed off is as good. An issue the closed one held is then free,
-and the first pull request whose commits are all signed off takes it.
+reopen, and once a maintainer has reopened it, add the trailers as the
+check's failure says for each author, and force-push. The comment comes
+first because GitHub does not reopen a pull request whose branch was
+force-pushed while it was closed. A new pull request that passes the
+check is as good. An issue the closed one held is then free, and the
+first pull request whose `Sign-off` check passes takes it.
 
 Counting from the opening was set aside: a contributor who never saw the
 check fail would have had no chance to fix it. Left open, a pull request
