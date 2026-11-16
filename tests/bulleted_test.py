@@ -66,12 +66,26 @@ OPENED = {
     "thematic break of underscores": "___",
     "setext underline": "===",
     "footnote": f"[^1]: - {ITEM}",
+    "footnote with an escaped bracket": f"[^a\\]b]: - {ITEM}",
     "link reference definition": "[ref]: https://example.org",
+    "link reference definition with an escaped bracket": "[a\\]b]: /url",
+    "link reference definition with a wrapped label": "[a\nb]: /url",
+    "link reference definition with a wrapped destination": "[ref]:\n/url",
+    "link reference definition with a wrapped title": '[ref]: /url\n"title"',
 }
-"""A line opening a block that is no paragraph, put after a paragraph."""
+"""A line opening a block that is no paragraph, put after a paragraph.
+
+A newline wraps a definition over a second line, as CommonMark lets it.
+"""
 
 UNREAD = "is no bullet and no paragraph"
 """What `bulleted` says of a line opening such a block."""
+
+INSIDE = "opens a block inside a bullet"
+"""What `bulleted` says of such a line indented under a bullet."""
+
+NBSP = "\u00a0"
+"""A no-break space, which Markdown reads as a character, not as space."""
 
 UNPLACED = {
     "block quote": ([f"> - {ITEM}"], "opens a block quote"),
@@ -84,11 +98,26 @@ UNPLACED = {
         f"{name} after a paragraph": ([*PARAGRAPH, line], UNREAD)
         for name, line in OPENED.items()
     },
+    "footnote under the bullet": ([f"  [^b]: - {ITEM}"], INSIDE),
+    **{
+        f"{name} under the bullet": (
+            ["", *(f"  {part}" for part in line.split("\n"))],
+            INSIDE,
+        )
+        for name, line in OPENED.items()
+        if name != "indented line"
+    },
+    "definition across a line of a no-break space": (
+        [*PARAGRAPH, "[a", NBSP, "b]: /url"],
+        UNREAD,
+    ),
+    "line of a no-break space after the bullet": ([NBSP], "continues a bullet"),
 }
 """Each line `bulleted` cannot place, against what it says of it.
 
 A block quote may hold a list item, and so may a footnote; the rest open
-a block this does not read. Each is refused rather than passed over.
+a block this does not read. Each is refused rather than passed over,
+under a bullet as at the margin.
 """
 
 PROSE = {
@@ -99,8 +128,15 @@ PROSE = {
     "link": "[A link](https://example.org) opens it.",
     "emphasis": "**Bold** opens it, and _this_ too.",
     "code": "`code` opens it.",
+    "link wrapped over two lines": "[A link\nthat wraps](/url) opens it.",
+    "escaped closing bracket": "[a\\]: is no label, its bracket escaped.",
+    "bracket inside a label": "[a[b]: is no label, it holds a bracket.",
+    "label cut by a blank line": "[a\n\nb]: /url is no definition.",
 }
-"""Paragraph openings `bulleted` reads: micromark renders each as a `<p>`."""
+"""Paragraph openings `bulleted` reads: micromark renders each as a `<p>`.
+
+A newline wraps an opening over a second line.
+"""
 
 
 def planted(tmp_path: Path, lines: list[str]) -> Path:
@@ -135,6 +171,7 @@ def test_a_bullet_is_read_with_its_wrapped_lines(tmp_path: Path) -> None:
     assert read(planted(tmp_path, [*PARAGRAPH, second])) == [READ, second]
     assert read(planted(tmp_path, PARAGRAPH)) == [READ]
     assert read(planted(tmp_path, ["", "\tmore."])) == [f"{READ} more."]
+    assert read(planted(tmp_path, [f"  {NBSP}more."])) == [f"{READ} {NBSP}more."]
 
 
 def test_a_nested_item_is_read_as_part_of_its_bullet_where_asked(
@@ -152,6 +189,9 @@ def test_a_nested_item_is_read_as_part_of_its_bullet_where_asked(
     assert bulleted(document, "Opening.", "Closing.", nested=True) == quoted
     document = planted(tmp_path, [*PARAGRAPH, f"  * {ITEM}"])
     with pytest.raises(LookupError, match="opens an item, not a bullet"):
+        bulleted(document, "Opening.", "Closing.", nested=True)
+    document = planted(tmp_path, [f"  [^b]: - {ITEM}"])
+    with pytest.raises(LookupError, match=INSIDE):
         bulleted(document, "Opening.", "Closing.", nested=True)
 
 
@@ -248,6 +288,59 @@ def test_an_item_nested_in_section_14_is_refused(tmp_path: Path) -> None:
     document = tmp_path / "README.md"
     document.write_text("\n".join(lines) + "\n", encoding="utf-8")
     with pytest.raises(LookupError, match=r"README\.md:\d+ opens an item"):
+        verbatim(document)
+
+
+FOOTNOTES = {
+    "label escaping a bracket": ("`.markdownlint.jsonc`", [], "[^a\\]b]: ", UNREAD),
+    "label holding line separators": (
+        "`.markdownlint.jsonc`",
+        [],
+        "[^a\u2028\u2028b]: ",
+        UNREAD,
+    ),
+    "under the bullet above": ("`.yamllint.yaml`", [], "  [^b]: ", INSIDE),
+    "under the bullet above, after a blank line": (
+        "`.yamllint.yaml`",
+        [""],
+        "  [^b]: ",
+        INSIDE,
+    ),
+}
+"""Real bullets of section 14 made footnotes, each refused.
+
+Each gives the bullet's subject, the lines put before it, the label put
+in front of it, and what `bulleted` says of it.
+"""
+
+
+@pytest.mark.parametrize(
+    ("subject", "before", "label", "message"), FOOTNOTES.values(), ids=FOOTNOTES.keys()
+)
+def test_a_footnote_in_section_14_is_refused(
+    tmp_path: Path, subject: str, before: list[str], label: str, message: str
+) -> None:
+    """A real bullet made a footnote raises, and is not dropped.
+
+    The bullet is joined onto one line first, so no indented line after
+    it is refused in its place.
+
+    :param tmp_path: where the copy of `README.md` is written.
+    :param subject: the bullet's subject.
+    :param before: the lines put before it.
+    :param label: what is put in front of it.
+    :param message: what the refusal says of it.
+    """
+    lines = (ROOT / "README.md").read_text(encoding="utf-8").split("\n")
+    (at,) = [i for i, line in enumerate(lines) if line.startswith(f"- {subject}")]
+    end = at + 1
+    while lines[end].startswith("  "):
+        end += 1
+    joined = " ".join(line.strip() for line in lines[at:end])
+    lines[at:end] = [*before, f"{label}{joined}"]
+    document = tmp_path / "README.md"
+    document.write_text("\n".join(lines), encoding="utf-8")
+    with pytest.raises(LookupError, match=rf"README\.md:\d+ {message}"):
         verbatim(document)
 
 
