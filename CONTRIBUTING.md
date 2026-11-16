@@ -36,8 +36,8 @@ An issue labelled `good first issue` is one set aside for a first
 contribution: small and self-contained.
 [One search][good-first] lists the open ones across the organization, so
 a newcomer need not know in advance which repository to look in.
-*Pull requests* says when one held by a closed pull request is free
-again.
+*Pull requests* says who holds one, and what becomes of it when a pull
+request citing it is closed.
 
 ## Documentation and comments
 
@@ -116,12 +116,16 @@ reopen, and once a maintainer has reopened it, add the trailers as the
 check's failure says for each author, and force-push. The comment comes
 first because GitHub does not reopen a pull request whose branch was
 force-pushed while it was closed. A new pull request that passes the
-check is as good. An issue the closed one held is then free, and the
-first pull request whose `Sign-off` check passes takes it.
+check is as good. An issue is held by its assignees. The closed pull
+request's author is unassigned from each issue it cites. Where that
+leaves an issue with no assignee, the author of the open pull request
+that cites it and passes the `Sign-off` check is assigned to it, the
+earliest opened where there are several. Where there is none, the issue
+stays unassigned and open to every contributor.
 
 Counting from the opening was set aside: a contributor who never saw the
 check fail would have had no chance to fix it. Left open, a pull request
-nobody can land would hold its issue from every other contributor with
+nobody can land would keep its issue from every other contributor with
 no end, so it is closed, and it can come back.
 
 What a pull request's title and description have to say about the issues
