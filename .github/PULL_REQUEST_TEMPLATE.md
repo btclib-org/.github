@@ -1,3 +1,8 @@
+<!-- Sign off every commit: `git commit -s` adds the `Signed-off-by:`
+     trailer, and only you can add it to your commits. CONTRIBUTING.md's
+     *Pull requests* says what it certifies and how to add it to commits
+     already made. -->
+
 <!-- markdownlint-disable-next-line first-line-heading -->
 ## What this changes
 
@@ -20,8 +25,8 @@
      nothing, so a red run from it shows on the pull request and holds
      nothing. What a squash writes to `main` is the commit GitHub
      composes and signs, not the branch's own, so a branch's commits need
-     not be signed. `verified-signatures.yml` checks what lands, after the
-     push.
+     no signature; they still need the sign-off above.
+     `verified-signatures.yml` checks what lands, after the push.
      A repository whose commands differ from these carries a template of
      its own; this one is what GitHub shows where there is none. -->
 
