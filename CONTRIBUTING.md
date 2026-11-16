@@ -36,6 +36,8 @@ An issue labelled `good first issue` is one set aside for a first
 contribution: small and self-contained.
 [One search][good-first] lists the open ones across the organization, so
 a newcomer need not know in advance which repository to look in.
+*Pull requests* says when one held by a closed pull request is free
+again.
 
 ## Documentation and comments
 
@@ -104,6 +106,23 @@ refuses: *Landing it* says why `--admin` waits for no required check.
 The check's failure prints the command that adds the trailer. [The
 standard's *Signatures*][s-sigs] says why a signature does not replace
 it, and which commits the `Sign-off` job skips.
+
+**A pull request with a commit still lacking the trailer seven days
+after it was asked for it is closed.** The week runs from the first
+request to sign off on the pull request, a comment that asks for the
+trailer and warns of the closing, not from the opening. The closing
+comment says how the pull request comes back: comment on it asking for a
+reopen, and once a maintainer has reopened it, add the trailer with
+`git rebase --signoff <base>` and force-push. The comment comes first
+because GitHub does not reopen a pull request whose branch was
+force-pushed while it was closed. A new pull request whose commits are
+all signed off is as good. An issue the closed one held is then free,
+and the first pull request whose commits are all signed off takes it.
+
+Counting from the opening was set aside: a contributor who never saw the
+check fail would have had no chance to fix it. Left open, a pull request
+nobody can land would hold its issue from every other contributor with
+no end, so it is closed, and it can come back.
 
 What a pull request's title and description have to say about the issues
 it closes, and why a manual link in the Development panel is a trap
