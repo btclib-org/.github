@@ -39,6 +39,10 @@ run shows on its summary page, naming the pull request's base,
 `GITHUB_BASE_REF`. A pass appends nothing, and with the variable unset
 no file is written.
 
+`--comment <file>` writes the comment `reusable-sign-off-comment.yml`
+posts on the pull request, its first line `MARKER`: on a failure the
+summary and `CLOSING`, on a pass a sentence saying so.
+
 The failure gives a command only where `refused_tail` finds the plain
 case, and there it is `git rebase --signoff`, which signs off every
 commit it replays as whoever runs it. In every other case it says how
@@ -72,9 +76,10 @@ BOTS = frozenset(
 )
 
 _ADDRESS = re.compile(r"<([^<>]+)>\s*$")
-# an address a reader can type as it is shown: printable ASCII, not
-# empty, with no space and no backslash, which `visible` writes escapes in
-_PLAIN = re.compile(r"[!-\[\]-~]+")
+# an address a reader can type as it is shown: printable ASCII, with no
+# space and no backslash, which `visible` writes escapes in, and from 1
+# to 254 characters, the longest address RFC 5321 lets a mail path carry
+_PLAIN = re.compile(r"[!-\[\]-~]{1,254}")
 
 FIX = (
     "Each commit above needs a Signed-off-by: trailer with the address"
@@ -83,6 +88,24 @@ FIX = (
 MERGE = (
     "Only an administrator can merge the pull request until every commit above has one."
 )
+# the first line of the comment on the pull request, which is how the
+# workflow finds the comment it wrote before
+MARKER = "<!-- sign-off-comment -->"
+# what the comment says becomes of a pull request still not signed off.
+# The week counts from the first request to sign off, this job's comment
+# or a maintainer's, so the comment names no date and no start of its own;
+# how the pull request comes back is in the `CONTRIBUTING.md` the summary
+# links to
+CLOSING = (
+    "This pull request is closed if its commits still lack the trailer"
+    " seven days after the first request to sign off on it, this comment or"
+    " an earlier one. `CONTRIBUTING.md`, linked above, says how it comes"
+    " back."
+)
+# the size a comment's body is held to, in UTF-8 bytes: GitHub refuses a
+# body of more than 65536 characters, and a count of bytes is at least
+# any count of characters it may mean
+LIMIT = 65536
 
 
 def _git(*args: str) -> str:
@@ -127,8 +150,13 @@ def signs_off(author: str, trailers: str) -> bool:
 
 
 def _show(sha: str, field: str) -> str:
-    """Return one field of a commit, as `git show --format` prints it."""
-    return _git("show", "-s", f"--format={field}", sha)
+    """Return one field of a commit, as `git log --format` prints it.
+
+    `git log` and not `git show -s`, which reads the commit's tree and so
+    fails in a clone that fetched commit objects alone, as
+    `reusable-sign-off-comment.yml`'s does.
+    """
+    return _git("log", "-1", "--no-walk", f"--format={field}", sha)
 
 
 def _trailers(sha: str) -> str:
@@ -265,7 +293,8 @@ def by_hand(fork: str, authors: list[str], head: str | None) -> list[str]:
     if any(author and not _PLAIN.fullmatch(author) for author in authors):
         steps.append(
             "No command is printed for an address with a space, a backslash"
-            " or a character outside printable ASCII."
+            " or a character outside printable ASCII, or longer than 254"
+            " characters."
         )
     if "" in authors:
         steps.append(
@@ -309,11 +338,11 @@ def summary(
 ) -> str:
     """Return the Markdown a failure adds to the run's summary.
 
-    The lines go in a code block: a subject is the author's text, and an
-    address in angle brackets would render as a link. `prose` is what the
-    fix asks, and `fix` its commands, none where the fix is by hand.
-    Outside a job of GitHub Actions, the link to `CONTRIBUTING.md` is this
-    repository's.
+    The lines go in a code block: a subject is the author's text, an
+    address in angle brackets would render as a link, and a mention or an
+    HTML comment there is text. `prose` is what the fix asks, and `fix`
+    its commands, none where the fix is by hand. Outside a job of GitHub
+    Actions, the link to `CONTRIBUTING.md` is this repository's.
     """
     server = os.environ.get("GITHUB_SERVER_URL", "https://github.com")
     repository = os.environ.get("GITHUB_REPOSITORY", "btclib-org/.github")
@@ -346,10 +375,58 @@ def summary(
     )
 
 
+def comment(
+    lines: list[str], prose: list[str], fix: list[str], fork: str, base: str
+) -> str:
+    """Return the comment a failure posts on the pull request.
+
+    It is `MARKER`, the summary and `CLOSING`. Where that passes `LIMIT`
+    bytes, it lists the most lines that keep it within, and a last line
+    counts the rest. What else it holds is bounded: an address in `prose`
+    is `_PLAIN`, and the base is a branch name.
+    """
+
+    def body(shown: int) -> str:
+        rest = len(lines) - shown
+        listed = [*lines[:shown], f"and {rest} more"] if rest else lines
+        listing = summary(listed, prose, fix, fork, base)
+        return f"{MARKER}\n{listing}\n{CLOSING}\n"
+
+    low, high = 0, len(lines)
+    while low < high:
+        middle = (low + high + 1) // 2
+        if len(body(middle).encode("utf-8", "surrogatepass")) <= LIMIT:
+            low = middle
+        else:
+            high = middle - 1
+    return body(low)
+
+
+def passed(revisions: str) -> str:
+    """Return the comment a pass leaves on the pull request."""
+    head = _head(revisions)
+    upto = f"`{head[:12]}`" if head else _span(visible(revisions))
+    return "\n".join(
+        [
+            MARKER,
+            "### Every commit is signed off by its author",
+            "",
+            (
+                f"Each commit read up to {upto} carries a Signed-off-by: trailer"
+                " with its author's address."
+            ),
+            "",
+        ]
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     """Read the range from the command line and check its commits."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("revisions", help="the range, as git rev-list reads it")
+    parser.add_argument(
+        "--comment", type=pathlib.Path, help="the file to write the comment to"
+    )
     args = parser.parse_args(argv)
 
     found = refused_authors(args.revisions)
@@ -369,11 +446,16 @@ def main(argv: list[str] | None = None) -> int:
         for command in fix:
             print(f"    {command}")
         print(MERGE)
+        base = os.environ.get("GITHUB_BASE_REF", "")
         if path := os.environ.get("GITHUB_STEP_SUMMARY"):
-            base = os.environ.get("GITHUB_BASE_REF", "")
             with pathlib.Path(path).open("a", encoding="utf-8") as out:
                 out.write(summary(lines, prose, fix, fork, base))
+        if args.comment:
+            text = comment(lines, prose, fix, fork, base)
+            args.comment.write_text(text, encoding="utf-8")
         return 1
+    if args.comment:
+        args.comment.write_text(passed(args.revisions), encoding="utf-8")
     print(f"every commit of {args.revisions} read is signed off by its author")
     return 0
 

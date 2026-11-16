@@ -1,0 +1,240 @@
+---
+name: reusable-sign-off-comment
+
+# One comment on a pull request whose commits are not all signed off,
+# naming them and giving the commands that fix them, which
+# check_sign_off.py computes; updated on each push, and saying so once
+# they are (btclib-org/.github#2331). The `Sign-off` check stays what
+# gates. A tree's sign-off-comment.yml calls this on `workflow_run` of
+# its `lint` workflow, because a pull_request run from a fork holds a
+# read-only token, which cannot comment. README section 10's bullet on
+# `pull_request_target` and `workflow_run` says what of the triggering
+# run this may read, fetch and run, and its paragraph on
+# `sign-off-comment` why only `comment` takes a concurrency group.
+#
+# `check` holds no write permission and is the only job that reads the
+# branch's commits. `comment` writes the comment and fetches nothing:
+# it reads the body `check` uploaded, checked against its digest.
+
+on:
+  workflow_call:
+
+# least privilege for the GITHUB_TOKEN; each job elevates for itself
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Read the pull request's sign-off
+    # a pull request's run alone: a push to main has no pull request
+    if: ${{ github.event.workflow_run.event == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    cache-mode: none
+    permissions:
+      contents: read
+      pull-requests: read # the pull request the run's head commit is on
+    outputs:
+      number: ${{ steps.check.outputs.number }}
+      failed: ${{ steps.check.outputs.failed }}
+      digest: ${{ steps.check.outputs.digest }}
+    steps:
+      # the run names no pull request for a fork's branch, so it is asked
+      # of the API by head, and taken only where exactly one open pull
+      # request, not a draft, has the run's head commit: otherwise the
+      # branch has moved on, and its own run answers. A draft is read
+      # once it is ready, as the Sign-off job reads it
+      - name: Find the pull request
+        id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.event.workflow_run.head_repository.owner.login }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ -z "$OWNER" ] || [ -z "$BRANCH" ]; then
+            echo "the run names no head branch: nothing to read"
+            exit 0
+          fi
+          pulls="${RUNNER_TEMP:?}/sign-off-pulls.json"
+          gh api --paginate -X GET "repos/$GITHUB_REPOSITORY/pulls" \
+            -f state=open -f head="$OWNER:$BRANCH" -f per_page=100 > "$pulls"
+          found=$(jq -rn --arg sha "$HEAD_SHA" '
+            [inputs[] | select(.state == "open" and .draft == false
+              and .head.sha == $sha)]
+            | if length == 1 then .[0] | .number, .base.ref else empty end
+          ' "$pulls")
+          if [ -z "$found" ]; then
+            echo "no one open pull request is at $HEAD_SHA: nothing to read"
+            exit 0
+          fi
+          { read -r number; read -r base; } <<< "$found"
+          if ! [[ $number =~ ^[1-9][0-9]*$ ]] \
+            || ! git check-ref-format "refs/heads/$base"; then
+            echo "::error::the API answered a pull request this cannot read"
+            exit 1
+          fi
+          {
+            echo "number=$number"
+            echo "base=$base"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Check out the script
+        if: steps.find.outputs.number != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: btclib-org/.github
+          ref: ${{ job.workflow_sha }}
+          path: standard
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+
+      - name: Install uv
+        if: steps.find.outputs.number != ''
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: false
+
+      # commit objects alone, `--filter=tree:0`, into a bare repository
+      # of their own: the base branch's tip and the pull request's head.
+      # GIT_NO_LAZY_FETCH keeps git from fetching a tree it would need,
+      # so that a command reading one fails instead. The head is read
+      # where the fetch put it and compared with the run's, since the
+      # branch can move after the lookup
+      - name: Check the commits
+        id: check
+        if: steps.find.outputs.number != ''
+        env:
+          NUMBER: ${{ steps.find.outputs.number }}
+          BASE: ${{ steps.find.outputs.base }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          SCRIPT: standard/.github/scripts/check_sign_off.py
+        run: |
+          export GIT_NO_LAZY_FETCH=1
+          export GIT_DIR="${RUNNER_TEMP:?}/sign-off.git"
+          git init --quiet --bare
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git fetch --quiet --no-tags --filter=tree:0 origin \
+            "+refs/heads/$BASE:refs/remotes/origin/base" \
+            "+refs/pull/$NUMBER/head:refs/pull/head"
+          if [ "$(git rev-parse refs/pull/head)" != "$HEAD_SHA" ]; then
+            echo "the pull request has moved past $HEAD_SHA: nothing to write"
+            exit 0
+          fi
+          out="${RUNNER_TEMP:?}/sign-off-comment"
+          mkdir -p "$out"
+          status=0
+          GITHUB_BASE_REF="$BASE" uv run --no-config --no-project --python 3.15 \
+            "$SCRIPT" --comment "$out/body.md" \
+            "refs/remotes/origin/base..$HEAD_SHA" || status=$?
+          case $status in
+            0) failed=false ;;
+            1) failed=true ;;
+            *) exit "$status" ;;
+          esac
+          # an error the script did not catch exits 1 too, and writes no
+          # comment
+          if [ ! -s "$out/body.md" ]; then
+            echo "::error::the script wrote no comment"
+            exit 1
+          fi
+          digest=$(set -o pipefail; sha256sum "$out/body.md" | cut -d' ' -f1)
+          {
+            echo "number=$NUMBER"
+            echo "failed=$failed"
+            echo "digest=$digest"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload the comment
+        if: steps.check.outputs.number != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sign-off-comment
+          path: ${{ runner.temp }}/sign-off-comment
+          retention-days: 1
+
+  comment:
+    name: Comment on the pull request
+    needs: check
+    if: ${{ needs.check.outputs.number != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    cache-mode: none
+    concurrency:
+      group: sign-off-comment-${{ needs.check.outputs.number }}
+      cancel-in-progress: false
+      queue: max
+    permissions:
+      pull-requests: write # the one comment on the pull request
+    steps:
+      - name: Download the comment
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: sign-off-comment
+          path: ${{ runner.temp }}/sign-off-comment
+
+      # the comment this job wrote before is the first by
+      # github-actions[bot] whose first line is the body's, the marker: a
+      # contributor's comment carrying the marker is somebody else's. It
+      # is edited where there is one. Otherwise one is posted on a failure
+      # alone, so that a branch whose commits were always signed off gets
+      # no comment
+      - name: Post or edit the comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ needs.check.outputs.number }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          FAILED: ${{ needs.check.outputs.failed }}
+          DIGEST: ${{ needs.check.outputs.digest }}
+          DECIDE: |
+            [inputs[]]
+            | map(select(.user.login == "github-actions[bot]"
+                and ((.body // "") | split("\n") | .[0] | rtrimstr("\r"))
+                  == $marker))
+            | if length > 0 then "update \(.[0].id)"
+              elif $failed == "true" then "create"
+              else "nothing" end
+        run: |
+          body="${RUNNER_TEMP:?}/sign-off-comment/body.md"
+          digest=$(set -o pipefail; sha256sum "$body" | cut -d' ' -f1)
+          if [ "$digest" != "$DIGEST" ]; then
+            echo "::error::the comment is not the one the check job wrote"
+            exit 1
+          fi
+          if ! [[ $NUMBER =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::no pull request number"
+            exit 1
+          fi
+          head=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$NUMBER" --jq .head.sha)
+          if [ "$head" != "$HEAD_SHA" ]; then
+            echo "the pull request has moved past $HEAD_SHA: nothing to write"
+            exit 0
+          fi
+          comments="${RUNNER_TEMP:?}/sign-off-comments.json"
+          gh api --paginate \
+            "repos/$GITHUB_REPOSITORY/issues/$NUMBER/comments?per_page=100" \
+            > "$comments"
+          marker=$(head -n 1 "$body")
+          decision=$(jq -rn --arg marker "$marker" --arg failed "$FAILED" \
+            "$DECIDE" "$comments")
+          case $decision in
+            create)
+              gh api --silent -X POST \
+                "repos/$GITHUB_REPOSITORY/issues/$NUMBER/comments" \
+                -F "body=@$body"
+              ;;
+            "update "*)
+              id=${decision#update }
+              if ! [[ $id =~ ^[1-9][0-9]*$ ]]; then
+                echo "::error::the API answered a comment this cannot edit"
+                exit 1
+              fi
+              gh api --silent -X PATCH \
+                "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F "body=@$body"
+              ;;
+            nothing) echo "every commit is signed off and no comment is there" ;;
+            *)
+              echo "::error::no decision on the comment"
+              exit 1
+              ;;
+          esac
