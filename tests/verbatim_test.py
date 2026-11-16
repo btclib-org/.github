@@ -177,14 +177,16 @@ def names_a_commit(value: str, repositories: Collection[str]) -> bool:
     return found is not None and found["repository"] in repositories
 
 
-def verbatim() -> dict[str, str]:
+def verbatim(document: Path = ROOT / "README.md") -> dict[str, str]:
     """Read both halves of section 14 that name a whole path.
 
+    :param document: the file to read, this tree's `README.md` unless a
+        control names another.
     :returns: each path, relative to a repository root, against the
         clause its bullet opens with.
     """
     return subjects(
-        ROOT / "README.md",
+        document,
         "**The same file in every repository**",
         "**Decided per repository**",
     )

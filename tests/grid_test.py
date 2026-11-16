@@ -160,7 +160,8 @@ def debts() -> dict[str, str]:
     A paragraph naming a debt and no row is refused rather than dropped,
     and so is a row given one twice, for the reason `subjects` refuses a
     bullet it cannot read: a debt this fails to find is a row whose
-    exemption stops holding with nothing saying so.
+    exemption stops holding with nothing saying so. A list nested under
+    a paragraph is part of it, as Markdown reads it.
 
     :returns: each row against the issue its paragraph names, qualified,
         rows whose paragraph names none left out.
@@ -168,7 +169,7 @@ def debts() -> dict[str, str]:
         row, or two of them name the same row.
     """
     out: dict[str, str] = {}
-    for paragraph in bulleted(ROOT / "README.md", *OWED):
+    for paragraph in bulleted(ROOT / "README.md", *OWED, nested=True):
         owed = DEBT.search(paragraph)
         if not owed:
             continue

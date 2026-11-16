@@ -66,6 +66,7 @@ from __future__ import annotations
 
 import enum
 import functools
+import itertools
 import json
 import re
 import shlex
@@ -606,35 +607,151 @@ def fenced(document: Path, opening: str, language: str) -> str:
     return "\n".join(blocks[0]) + "\n"
 
 
-def bulleted(document: Path, opening: str, closing: str) -> list[str]:
+ITEM = re.compile(r"^[ \t]*(?:[-*+]|[0-9]{1,9}[.)])(?:[ \t]|$)")
+"""A line that may open a list item, whatever its marker and its indent.
+
+CommonMark's markers. A thematic break such as `* * *`, a wrapped line
+opening `14. ` and a marker inside a fenced block match too, though
+Markdown reads none of them as an item: `bulleted` then refuses a line
+it could have passed over, which is the safe side to be wrong on.
+"""
+
+QUOTE = re.compile(r"^[ \t]*>")
+"""A line that opens a block quote, which may hold a list of its own."""
+
+SPACE = " \t"
+"""Markdown's whitespace, the only characters an indent or a blank line holds.
+
+`str.strip` with no argument also removes a no-break space, which
+Markdown reads as a character, so a line holding one is not blank.
+"""
+
+OPENER = re.compile(
+    r"[ \t]|#{1,6}(?:[ \t]|$)|\||:?-+:?[ \t]*\||<|`{3}|~{3}"
+    r"|(?:[-*_][ \t]*){3,}$|(?:=+|-+)[ \t]*$"
+)
+"""A line that opens a block which is no paragraph's.
+
+An indent, a heading, a table's row or its delimiter row, HTML, a fence
+of backticks or tildes, a thematic break and a setext underline. With
+`DEFINITION`, `QUOTE` and `ITEM` these are the blocks CommonMark and
+GitHub's tables and footnotes start. `bulleted` matches a line outside
+a bullet as it stands, so an indent there is refused, and a line inside
+one after its indent, and reads any other line that is not blank as a
+paragraph's. A paragraph opening with an autolink's `<` or a `|` is
+refused with the block it looks like, the safe side to be wrong on.
+"""
+
+DEFINITION = re.compile(r"\[(?:[^\\\[\]]|\\.)+\]:", re.DOTALL)
+"""The definition of a link reference or a footnote, from its first line.
+
+It is matched, the indent removed, against the lines from there to the
+next blank one, since CommonMark lets a label wrap. A label is what lies
+between `[` and `]:`, and holds no bracket that a backslash does not
+escape. A definition that wraps its destination or its title onto later
+lines is refused at its first line all the same. A label CommonMark
+rejects for its length, or for holding only whitespace, is refused too,
+the safe side.
+"""
+
+
+def unplaced(line: str, *, inside: bool, lazy: bool, block: bool) -> str:
+    """Say why `bulleted` refuses a line it does not join to a bullet.
+
+    :param line: the line, which is not blank and opens no bullet.
+    :param inside: whether it is indented under a bullet.
+    :param lazy: whether it follows a bullet's line with no blank line
+        between them.
+    :param block: whether it opens a block `OPENER` or `DEFINITION`
+        names, after its indent.
+    :returns: what the refusal says of it, empty where it is a
+        paragraph's.
+    """
+    if QUOTE.match(line):
+        return "opens a block quote"
+    if ITEM.match(line):
+        return "opens an item, not a bullet"
+    if inside:
+        return "opens a block inside a bullet"
+    if lazy:
+        return "continues a bullet unindented"
+    return "is no bullet and no paragraph" if OPENER.match(line) or block else ""
+
+
+def bulleted(
+    document: Path, opening: str, closing: str, *, nested: bool = False
+) -> list[str]:
     """Read the list between two lines, one string per bullet.
 
-    A bullet is its own line and every indented line after it, which is
-    how a bullet wraps at the margin, so a caller matching a pattern
-    against what comes back is asking about the bullet rather than about
-    where the file broke the line. `opening` and `closing` are the prose
-    either side of the list, so moving it within its section does not
-    need the caller changed.
+    A bullet is a line starting `- ` and every line indented by two
+    spaces or a tab after it, which is how a bullet wraps at the margin,
+    so a caller matching a pattern against what comes back is asking
+    about the bullet rather than about where the file broke the line. A
+    paragraph's line opens none of the blocks `OPENER`, `DEFINITION`,
+    `QUOTE` and `ITEM` name, and one after a blank line ends a bullet.
+    `opening` and `closing` are the prose either side of the list, so
+    moving it within its section does not need the caller changed.
+
+    Every other line that is not blank is refused rather than passed
+    over: a caller handed a list short of an item checks nothing for it
+    and reports that as agreement. Among them are a list item other than
+    a bullet, as `* `, `+ `, `1. `, ` - `, an item nested under a bullet
+    and an indented marker after a paragraph; a block quote, which
+    may hold a list; a line under a bullet that opens any other block
+    after its indent, as a footnote, which may hold a list too; and a
+    line of prose not indented right after a bullet, which Markdown
+    reads as part of that bullet.
+
+    A line ends where Markdown's does: `read_text` turns a carriage
+    return, alone or before a line feed, into a line feed, and the text
+    is split there alone, where `splitlines` also splits on U+2028 and
+    the other separators Markdown keeps inside a line.
 
     :param document: the markdown file to read.
     :param opening: a substring of the line the list follows.
     :param closing: a substring of the line the list stops at.
+    :param nested: read an item or a block quote nested under a bullet
+        as part of that bullet, for a list whose bullets are paragraphs
+        that hold a list of their own.
     :returns: the bullets, in the order the list gives them.
-    :raises LookupError: where either end is not found exactly once, or
-        the closing line comes before the opening one.
+    :raises LookupError: where either end is not found exactly once, the
+        closing line comes before the opening one, or a line between
+        them is one this refuses.
     """
-    lines = document.read_text(encoding="utf-8").splitlines()
+    lines = document.read_text(encoding="utf-8").split("\n")
     start = sole(document, lines, opening)
     end = sole(document, lines, closing)
     if end < start:
         msg = f"{document.name} holds {closing!r} before {opening!r}"
         raise LookupError(msg)
     bullets: list[str] = []
-    for line in lines[start + 1 : end]:
+    within = blank = False
+    for number, line in enumerate(lines[start + 1 : end], start + 2):
+        if not line.strip(SPACE):
+            blank = True
+            continue
+        inside = within and line.startswith(("  ", "\t"))
+        inner = ITEM.match(line) or QUOTE.match(line)
+        paragraph = itertools.takewhile(
+            lambda text: text.strip(SPACE), lines[number - 1 : end]
+        )
+        block = bool(
+            OPENER.match(line.lstrip(SPACE))
+            or DEFINITION.match("\n".join(paragraph).lstrip(SPACE))
+        )
         if line.startswith("- "):
             bullets.append(line)
-        elif line.startswith("  ") and bullets:
-            bullets[-1] += f" {line.strip()}"
+            within = True
+        elif inside and (nested if inner else not block):
+            bullets[-1] += f" {line.strip(SPACE)}"
+        elif refusal := unplaced(
+            line, inside=inside, lazy=within and not blank, block=block
+        ):
+            msg = f"{document.name}:{number} {refusal}: {line!r}"
+            raise LookupError(msg)
+        else:
+            within = False
+        blank = False
     return bullets
 
 
@@ -664,9 +781,9 @@ def subjects(
     :param pattern: how a bullet of this list names its subject.
     :returns: each subject against the rest of its bullet, the lines it
         wraps over joined by a space, in the order the list gives them.
-    :raises LookupError: where either end is not found exactly once, the
-        closing line comes first, a bullet between them names no subject
-        the pattern reads, or two bullets carry the same one.
+    :raises LookupError: where `bulleted` refuses the list, a bullet
+        names no subject the pattern reads, or two bullets carry the same
+        one.
     """
     read: list[tuple[str, str]] = []
     unread: list[str] = []
