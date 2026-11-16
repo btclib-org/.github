@@ -24,13 +24,15 @@ writes its own, so comparing the rest across the trees would be a
 verbatim rule section 14 does not state.
 
 The per-repository questions reach the network, and `conftest.py` marks
-them `integration`. The question asked of this tree alone reaches
+them `integration`. The questions asked of this tree alone reach
 nothing, so the module carries no marker of its own.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+
+import pytest
 
 from . import ORG, ROOT, by_hand, fenced, tracked
 
@@ -67,13 +69,18 @@ def opening(text: str) -> str:
 def owed() -> str:
     """Return the comment section 2's block gives every tree.
 
+    An empty block would make a template opening with no comment pass,
+    `opening` answering it with the empty string too, so the block has
+    to be one comment with words inside it.
+
     :returns: the block's text, without the line break `fenced` ends it
         with.
     :raises LookupError: where the section holds no such block, or one
-        that is not a single comment.
+        that is not a single comment holding words.
     """
     block = fenced(README, RULE, "html").removesuffix("\n")
-    if opening(block) != block:
+    inside = block[len(OPEN) : -len(CLOSE)]
+    if not block or opening(block) != block or not inside.strip():
         msg = f"{README.name}'s block under {RULE!r} is not one comment: {block!r}"
         raise LookupError(msg)
     return block
@@ -138,3 +145,43 @@ def test_this_template_opens_with_the_comment_section_2_gives() -> None:
         f"{TEMPLATE} does not open with the comment section 2 of"
         f" {ORG}/.github's README.md gives, the same text"
     )
+
+
+@pytest.mark.parametrize(
+    "block",
+    [
+        pytest.param([], id="empty"),
+        pytest.param(["   "], id="whitespace only"),
+        pytest.param(["", ""], id="blank lines"),
+        pytest.param(["<!-- -->"], id="a comment holding no words"),
+        pytest.param(["<!-- one --> <!-- two -->"], id="two comments"),
+        pytest.param(["Sign off every commit."], id="no comment"),
+    ],
+)
+def test_a_block_that_is_not_one_comment_holding_words_is_refused(
+    block: list[str],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """`owed()` refuses a block that is not one comment holding words.
+
+    Run on a stand-in `README.md` holding the rule's opening line and the
+    block, so that a block every template opening with no comment would
+    also match is refused rather than made what every tree is compared
+    with.
+
+    :param block: the lines between the fences.
+    :param tmp_path: where the stand-in is written.
+    :param monkeypatch: what puts the stand-in in place of `README`.
+    """
+    readme = tmp_path / "README.md"
+    fence = ["```html", *block, "```"]
+    readme.write_text("\n".join([f"{RULE}**", "", *fence, ""]), encoding="utf-8")
+    monkeypatch.setattr(f"{__name__}.README", readme)
+    with pytest.raises(LookupError, match="is not one comment"):
+        owed()
+    readme.write_text(
+        "\n".join([f"{RULE}**", "", "```html", "<!-- words -->", "```", ""]),
+        encoding="utf-8",
+    )
+    assert owed() == "<!-- words -->"
