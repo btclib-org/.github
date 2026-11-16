@@ -445,6 +445,29 @@ BACKLOG: tuple[tuple[int, str, tuple[str, ...]], ...] = (
             "seed-scan",
         ),
     ),
+    (
+        2331,
+        "test_a_pull_request_template_opens_with_the_sign_off_comment",
+        (
+            "ai-agents-process",
+            "base58-bech32",
+            "bbt",
+            "benchmarks",
+            "bip32-descriptors",
+            "bip39-slip39",
+            "bitcoin-core-rpc",
+            "btclib",
+            "btclib-node",
+            "btclib-org.github.io",
+            "btclib-secp256k1",
+            "btclib-wallet",
+            "coin-addresses",
+            "ecc",
+            "functional-tests",
+            "portanode",
+            "seed-scan",
+        ),
+    ),
 )
 """What the tracker already knows, read by `conftest.py` at collection.
 
