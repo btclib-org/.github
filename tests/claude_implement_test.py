@@ -32,6 +32,7 @@ import pytest
 
 from . import ROOT
 from .claude_review_test import AGENT_DENIED
+from .contributing_test import flat
 from .workflows_test import document, jobs, steps
 
 # the reusable workflow, which holds the jobs and their scripts
@@ -2308,15 +2309,6 @@ ROADMAP_RULE = f"Read(/{ROADMAP_DIR}/ROADMAP.md)"
 
 # what the stand-in below serves as the roadmap
 SERVED = "# Roadmap\n\n## Not intended\n"
-
-
-def flat(text: str) -> str:
-    """Join a wrapped text into one line, each run of whitespace one space.
-
-    :param text: the text, as the workflow wraps it.
-    :returns: the text on one line.
-    """
-    return " ".join(text.split())
 
 
 def test_the_assessment_asks_whether_the_project_gains_before_it_recommends() -> None:
