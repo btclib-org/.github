@@ -104,10 +104,12 @@ LOCAL = (
 )
 """Section 4's *The local hooks*, each with a subject in any Python tree.
 
-mypy and `bare-sourcery-skip` are the bullets of that list not named
-here: mypy is `test_the_gate_runs_mypy`'s subject below, section 6 asking
-for it by name, and `bare-sourcery-skip` is held with the `sourcery` job
-it guards, by `guard_departures` and `stanza_departures`.
+mypy, `bare-sourcery-skip` and `leading-dash-path` are the bullets of
+that list not named here: mypy is `test_the_gate_runs_mypy`'s subject
+below, section 6 asking for it by name, `bare-sourcery-skip` is held with
+the `sourcery` job it guards, by `guard_departures` and
+`stanza_departures`, and `leading-dash-path`, owed by every tree whether
+Python or not, by `dash_departures`.
 """
 
 MYPY = ("mypy", "mirrors-mypy")
@@ -1226,6 +1228,128 @@ def test_a_gate_off_section_4s_guard_would_be_reported() -> None:
         narrowed = {**copy.deepcopy(AGREEING_GATE), key: value}
         assert guard_departures(narrowed) == [
             f"the gate sets {key}: {value!r}, which reaches every hook"
+        ]
+
+
+DASH = "leading-dash-path"
+"""The local hook section 4 puts in every tree, refusing a path led by `-`."""
+
+DASH_STANZA: dict[str, Any] = {
+    "repo": "local",
+    "id": DASH,
+    "name": "a path does not begin with a dash",
+    "language": "fail",
+    "entry": "a hook reads a path beginning with - as its own option: rename it",
+    "files": "^-",
+    "types": [],
+}
+"""Section 4's `leading-dash-path`, whole: a tree's has these keys alone.
+
+Why the stanza is held whole, and why each key is what it is, is section
+4's bullet.
+"""
+
+DASH_REACHING = ("files", "exclude", "default_stages")
+"""The top-level keys of a gate that narrow what `DASH` reads.
+
+`TOP_LEVEL` less `default_language_version`: a `fail` hook installs no
+environment for a version to choose.
+"""
+
+
+def dash_departures(document: dict[str, Any]) -> list[str]:
+    """Report where a gate lacks section 4's `DASH` hook, or narrows it.
+
+    :param document: the gate, as `gate()` returns it.
+    :returns: one finding per departure, empty where there is none.
+    """
+    found = [hook for hook in flattened(document) if hook["id"] == DASH]
+    out = [] if found else [f"no hook {DASH} refuses a path beginning with -"]
+    for hook in found:
+        stanza = {key: value for key, value in hook.items() if key != "rev"}
+        if stanza != DASH_STANZA:
+            out.append(f"{DASH} is not section 4's: {stanza!r}")
+    out.extend(
+        f"the gate sets {key}: {document[key]!r}, which reaches {DASH}"
+        for key in DASH_REACHING
+        if key in document
+    )
+    return out
+
+
+def test_a_gate_refuses_a_path_beginning_with_a_dash(
+    repository: str,
+    trees: dict[str, Path],
+) -> None:
+    """Section 4's `leading-dash-path`, as `DASH_STANZA` writes it.
+
+    Asked of every tier: what the hook guards is the command line
+    pre-commit builds for a hook, which every gate has whatever the tree
+    is written in.
+
+    :param repository: the repository asked about.
+    :param trees: the checkouts.
+    """
+    found = dash_departures(gate(repository, trees))
+    command = by_hand(repository, f"grep -n -A6 'id: {DASH}' {CONFIG}")
+    assert not found, f"{found}; {command}"
+
+
+def test_this_trees_leading_dash_path_is_section_4s() -> None:
+    """This tree's gate carries `DASH_STANZA` whole, and nothing narrows it."""
+    assert dash_departures(yaml.safe_load((ROOT / CONFIG).read_text("utf-8"))) == []
+
+
+AGREEING_DASH_GATE: dict[str, Any] = {
+    "repos": [
+        {
+            "repo": "local",
+            "hooks": [
+                {key: value for key, value in DASH_STANZA.items() if key != "repo"}
+            ],
+        },
+    ],
+}
+"""A gate section 4's `leading-dash-path` reads as agreeing, for controls."""
+
+
+def test_a_gate_off_section_4s_dash_hook_would_be_reported() -> None:
+    """`dash_departures` reports each way off section 4's `leading-dash-path`.
+
+    Each control changes one thing in `AGREEING_DASH_GATE` and asks for
+    the finding naming it: a check that reads nothing stays green on these.
+    """
+    assert dash_departures(AGREEING_DASH_GATE) == []
+    assert dash_departures({"repos": []}) == [
+        f"no hook {DASH} refuses a path beginning with -"
+    ]
+    for key, value in (
+        ("language", "pygrep"),
+        ("entry", "rename it"),
+        ("files", "^-h$"),
+        ("exclude", "^-h$"),
+        ("types", ["file"]),
+        ("stages", ["manual"]),
+        ("name", DASH),
+    ):
+        changed = copy.deepcopy(AGREEING_DASH_GATE)
+        changed["repos"][0]["hooks"][0][key] = value
+        assert [
+            line
+            for line in dash_departures(changed)
+            if line.startswith(f"{DASH} is not section 4's")
+        ], f"{DASH} with {key}: {value!r} is read as agreeing"
+    dropped = copy.deepcopy(AGREEING_DASH_GATE)
+    del dropped["repos"][0]["hooks"][0]["types"]
+    assert dash_departures(dropped), f"{DASH} at the default types is read as agreeing"
+    for key, value in (
+        ("files", "^src/"),
+        ("exclude", "^-"),
+        ("default_stages", ["manual"]),
+    ):
+        narrowed = {**copy.deepcopy(AGREEING_DASH_GATE), key: value}
+        assert dash_departures(narrowed) == [
+            f"the gate sets {key}: {value!r}, which reaches {DASH}"
         ]
 
 

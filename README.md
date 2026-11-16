@@ -1120,6 +1120,31 @@ No `autoupdate_branch`: the default branch is the only branch.
   off every rule of the tag. `suggestion` and `comment`, the other tags
   `rule_types:` names, are refused with them. A colon with no rule name after
   it, before any `#` or `;`, names no rule, and is refused too.
+- **`leading-dash-path`** — a `fail` hook refusing a path that begins
+  with `-`, in every repository of the organization, this one included,
+  its stanza `DASH_STANZA` in `tests/hooks_test.py` whole, and no
+  top-level `files:`, `exclude:` or `default_stages:` reaching it.
+  pre-commit puts no `--` before the file names it passes a hook, so
+  such a path reaches the hook's command line as an option: a file
+  named `-h` has an argparse hook, pygrep's among them, print its help
+  and exit 0 without reading the files passed beside it, under
+  `--all-files` as under `--from-ref`.
+
+    **`language: fail`, because it parses no argument**, so the path it
+    refuses cannot silence it, where a pygrep hook doing the same work
+    would be silenced by the very file it looks for. `types: []` takes
+    in every path, a symlink among them, which the default `[file]`
+    leaves out. The stanza is held whole because an `exclude:`, a
+    `stages:` or a narrower `types:` would take paths out of its reach,
+    as a `language:` that parses arguments would let them silence it.
+    `check-hooks-apply` passes over a `fail` hook, so a tree with no
+    such path stays green.
+
+    **A `--` before the file names, in each hook's `entry` or `args:`,
+    is the alternative set aside**: every stanza passing file names
+    would carry it, and one that forgot it would be silenced again,
+    where this hook guards them all. pre-commit declines to change how
+    it passes file names (pre-commit/pre-commit#2896).
 - **`local-link-prefix`** — a hook running
   `.github/scripts/check_link_destinations.py --prefixed`, refusing a
   markdown link whose destination is local and is not explicitly

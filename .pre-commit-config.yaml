@@ -44,6 +44,16 @@ repos:
         language: pygrep
         entry: '^ *rev: "?v?([0-9]+|[0-9][0-9.]*(a|b|rc|dev)[0-9]+)"?$'
         files: ^\.pre-commit-config\.yaml$
+  # section 4's leading-dash-path is the rule, and says why each key of
+  # the stanza is what it is
+  - repo: local
+    hooks:
+      - id: leading-dash-path
+        name: a path does not begin with a dash
+        language: fail
+        entry: "a hook reads a path beginning with - as its own option: rename it"
+        files: ^-
+        types: []
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
