@@ -592,6 +592,23 @@ Markdown reads none of them as an item: `bulleted` then refuses a line
 it could have passed over, which is the safe side to be wrong on.
 """
 
+QUOTE = re.compile(r"^[ \t]*>")
+"""A line that opens a block quote, which may hold a list of its own."""
+
+OPENER = re.compile(
+    r"[ \t]|#{1,6}(?:[ \t]|$)|\||:?-+:?[ \t]*\||<|`{3}|~{3}"
+    r"|(?:[-*_][ \t]*){3,}$|(?:=+|-+)[ \t]*$|\[\^"
+)
+"""A line that opens a block outside a bullet, which is no paragraph's.
+
+An indent, a heading, a table's row or its delimiter row, HTML, a fence
+of backticks or tildes, a thematic break, a setext underline, and a
+footnote. With `QUOTE` and `ITEM` these are the blocks CommonMark and
+GitHub's tables and footnotes start at the margin, and `bulleted` reads
+any other line there as a paragraph's. A paragraph opening with an
+autolink's `<` is refused with HTML, the safe side to be wrong on.
+"""
+
 
 def bulleted(
     document: Path, opening: str, closing: str, *, nested: bool = False
@@ -602,29 +619,29 @@ def bulleted(
     spaces or a tab after it, which is how a bullet wraps at the margin,
     so a caller matching a pattern against what comes back is asking
     about the bullet rather than about where the file broke the line. A
-    paragraph ends a bullet: a line after a blank line that is not
-    indented and opens no list item. `opening` and `closing` are the
-    prose either side of the list, so moving it within its section does
-    not need the caller changed.
+    paragraph's line opens none of the blocks `OPENER`, `QUOTE` and
+    `ITEM` name, and one after a blank line ends a bullet. `opening` and
+    `closing` are the prose either side of the list, so moving it within
+    its section does not need the caller changed.
 
-    Any other line that opens a list item is refused rather than passed
-    over, as `* `, `+ `, `1. `, ` - `, an item nested under a bullet and
-    an indented marker after a paragraph do: a caller handed a list short
-    of an item checks nothing for it and reports that as agreement. So is
-    a line of prose not indented right after a bullet, which Markdown
-    reads as part of that bullet.
+    Every other line that is not blank is refused rather than passed
+    over: a caller handed a list short of an item checks nothing for it
+    and reports that as agreement. Among them are a list item other than
+    a bullet, as `* `, `+ `, `1. `, ` - `, an item nested under a bullet
+    and an indented marker after a paragraph; a block quote, which
+    may hold a list; and a line of prose not indented right after a
+    bullet, which Markdown reads as part of that bullet.
 
     :param document: the markdown file to read.
     :param opening: a substring of the line the list follows.
     :param closing: a substring of the line the list stops at.
-    :param nested: read an item nested under a bullet as part of that
-        bullet, for a list whose bullets are paragraphs that hold a list
-        of their own.
+    :param nested: read an item or a block quote nested under a bullet
+        as part of that bullet, for a list whose bullets are paragraphs
+        that hold a list of their own.
     :returns: the bullets, in the order the list gives them.
     :raises LookupError: where either end is not found exactly once, the
-        closing line comes before the opening one, a line between them
-        opens a list item that is not a bullet, or one not indented
-        follows a bullet with no blank line between.
+        closing line comes before the opening one, or a line between
+        them is one this refuses.
     """
     lines = document.read_text(encoding="utf-8").splitlines()
     start = sole(document, lines, opening)
@@ -636,16 +653,24 @@ def bulleted(
     within = blank = False
     for number, line in enumerate(lines[start + 1 : end], start + 2):
         indented = line.startswith(("  ", "\t"))
+        inner = ITEM.match(line) or QUOTE.match(line)
+        where = f"{document.name}:{number}"
         if line.startswith("- "):
             bullets.append(line)
             within = True
-        elif indented and within and (nested or not ITEM.match(line)):
+        elif indented and within and (nested or not inner):
             bullets[-1] += f" {line.strip()}"
+        elif QUOTE.match(line):
+            msg = f"{where} opens a block quote: {line!r}"
+            raise LookupError(msg)
         elif ITEM.match(line):
-            msg = f"{document.name}:{number} opens an item, not a bullet: {line!r}"
+            msg = f"{where} opens an item, not a bullet: {line!r}"
             raise LookupError(msg)
         elif line.strip() and within and not blank:
-            msg = f"{document.name}:{number} continues a bullet unindented: {line!r}"
+            msg = f"{where} continues a bullet unindented: {line!r}"
+            raise LookupError(msg)
+        elif OPENER.match(line):
+            msg = f"{where} is no bullet and no paragraph: {line!r}"
             raise LookupError(msg)
         elif line.strip():
             within = False

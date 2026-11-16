@@ -54,6 +54,54 @@ runs, renders each as a list item, nested in the bullet or of its own.
 """
 
 
+OPENED = {
+    "indented line": "  more.",
+    "heading": "# Heading",
+    "table row": "| a | b |",
+    "table delimiter row": "--- | ---",
+    "html": "<div>",
+    "backtick fence": "```",
+    "tilde fence": "~~~",
+    "thematic break of asterisks": "***",
+    "thematic break of underscores": "___",
+    "setext underline": "===",
+    "footnote": f"[^1]: - {ITEM}",
+}
+"""A line opening a block that is no paragraph, put after a paragraph."""
+
+UNREAD = "is no bullet and no paragraph"
+"""What `bulleted` says of a line opening such a block."""
+
+UNPLACED = {
+    "block quote": ([f"> - {ITEM}"], "opens a block quote"),
+    "block quote after a paragraph": (
+        [*PARAGRAPH, f"> - {ITEM}"],
+        "opens a block quote",
+    ),
+    "block quote under the bullet": ([f"  > - {ITEM}"], "opens a block quote"),
+    **{
+        f"{name} after a paragraph": ([*PARAGRAPH, line], UNREAD)
+        for name, line in OPENED.items()
+    },
+}
+"""Each line `bulleted` cannot place, against what it says of it.
+
+A block quote may hold a list item, and so may a footnote; the rest open
+a block this does not read. Each is refused rather than passed over.
+"""
+
+PROSE = {
+    "em dash": "— This remains optional.",
+    "colon": ": This remains optional.",
+    "digit": "15's loop is what checks it.",
+    "non-ASCII letter": "Élan is a word.",
+    "link": "[A link](https://example.org) opens it.",
+    "emphasis": "**Bold** opens it, and _this_ too.",
+    "code": "`code` opens it.",
+}
+"""Paragraph openings `bulleted` reads: micromark renders each as a `<p>`."""
+
+
 def planted(tmp_path: Path, lines: list[str]) -> Path:
     """Write a list between the two lines `bulleted` is given.
 
@@ -98,6 +146,9 @@ def test_a_nested_item_is_read_as_part_of_its_bullet_where_asked(
     document = planted(tmp_path, [f"    - {ITEM}"])
     joined = [f"{READ} - {ITEM}"]
     assert bulleted(document, "Opening.", "Closing.", nested=True) == joined
+    document = planted(tmp_path, ["  > quoted."])
+    quoted = [f"{READ} > quoted."]
+    assert bulleted(document, "Opening.", "Closing.", nested=True) == quoted
     document = planted(tmp_path, [*PARAGRAPH, f"  * {ITEM}"])
     with pytest.raises(LookupError, match="opens an item, not a bullet"):
         bulleted(document, "Opening.", "Closing.", nested=True)
@@ -114,6 +165,34 @@ def test_an_item_that_is_not_a_bullet_is_refused(
     """
     with pytest.raises(LookupError, match=r"list\.md:\d+ opens an item, not a bullet"):
         read(planted(tmp_path, lines))
+
+
+@pytest.mark.parametrize(("lines", "message"), UNPLACED.values(), ids=UNPLACED.keys())
+def test_a_line_that_is_no_bullet_and_no_paragraph_is_refused(
+    tmp_path: Path, lines: list[str], message: str
+) -> None:
+    """A line `bulleted` cannot place raises, naming its line.
+
+    :param tmp_path: where the file is written.
+    :param lines: the lines that follow the opening bullet.
+    :param message: what the refusal says of the line.
+    """
+    with pytest.raises(LookupError, match=rf"list\.md:\d+ {message}"):
+        read(planted(tmp_path, lines))
+
+
+@pytest.mark.parametrize("line", PROSE.values(), ids=PROSE.keys())
+def test_a_paragraph_is_read_past_whatever_it_opens_with(
+    tmp_path: Path, line: str
+) -> None:
+    """A paragraph line is passed over, alone, after a paragraph, or within one.
+
+    :param tmp_path: where the file is written.
+    :param line: the paragraph's opening.
+    """
+    assert read(planted(tmp_path, ["", line])) == [READ]
+    assert read(planted(tmp_path, [*PARAGRAPH, line])) == [READ]
+    assert read(planted(tmp_path, [*PARAGRAPH[:2], line])) == [READ]
 
 
 def test_a_line_at_the_margin_right_after_a_bullet_is_refused(
@@ -152,4 +231,19 @@ def test_an_item_nested_in_section_14_is_refused(tmp_path: Path) -> None:
     document = tmp_path / "README.md"
     document.write_text("\n".join(lines) + "\n", encoding="utf-8")
     with pytest.raises(LookupError, match=r"README\.md:\d+ opens an item"):
+        verbatim(document)
+
+
+def test_a_block_quote_in_section_14_is_refused(tmp_path: Path) -> None:
+    """A real bullet put in a block quote raises, and is not dropped.
+
+    :param tmp_path: where the copy of `README.md` is written.
+    """
+    lines = (ROOT / "README.md").read_text(encoding="utf-8").splitlines()
+    markdownlint = "- `.markdownlint.jsonc`"
+    (at,) = [i for i, line in enumerate(lines) if line.startswith(markdownlint)]
+    lines[at] = f"> {lines[at]}"
+    document = tmp_path / "README.md"
+    document.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    with pytest.raises(LookupError, match=r"README\.md:\d+ opens a block quote"):
         verbatim(document)
