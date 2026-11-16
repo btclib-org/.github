@@ -39,13 +39,14 @@ and site agree prints nothing.
 lists each answer whose justification names a `v`-prefixed version older
 than the tree's latest GitHub release, an ISO date before that release,
 or the words "draft" or "next release", which carry no date and are
-listed whatever the release. "Draft" after "not a", as in "every pull
-request that is not a draft", is not listed. It misses a version written
-without its `v`, a date in another format, and an answer gone stale
-without naming anything, such as an asset name or an advisory state. It
-also lists a version or a date an answer cites on purpose, as history,
-and "draft" said of a pull request in other words, as "while the pull
-request is a draft".
+listed whatever the release. "Draft" after "not a" is not listed,
+whatever whitespace separates the three words, as in "every pull request
+that is not a draft". It misses a version written without its `v`, a
+date in another format, and an answer gone stale without naming
+anything, such as an asset name or an advisory state. It also lists a
+version or a date an answer cites on purpose, as history, and "draft"
+said of a pull request in other words, as "while the pull request is a
+draft".
 
 `--differ` reads the files too, and lists each criterion whose status is
 not the same in every tree that has a file, for a review to check each
@@ -102,7 +103,9 @@ STATUS = "_status"
 JUSTIFICATION = "_justification"
 VERSION = re.compile(r"\bv(\d+(?:\.\d+)+)\b")
 DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}(?=\b|T\d{2}:\d{2})")
-UNDATED = re.compile(r"\b(?:(?<!\bnot a )draft|next release)\b", re.IGNORECASE)
+# "not a draft" is matched whole, so that its "draft" is never matched
+# alone; `findall` gives such a match as an empty string
+UNDATED = re.compile(r"\bnot\s+a\s+draft|\b(draft|next release)\b", re.IGNORECASE)
 
 Answers = dict[str, Any]
 
@@ -289,7 +292,7 @@ def stale(given: Answers, tag: str, published: str) -> list[str]:
             f"v{each}" for each in VERSION.findall(text) if _version(each) < latest
         ]
         dates = [each for each in DATE.findall(text) if each < day]
-        words = [each.lower() for each in UNDATED.findall(text)]
+        words = [each.lower() for each in UNDATED.findall(text) if each]
         if named := dict.fromkeys([*versions, *dates, *words]):
             out.append(f"{criterion}: {', '.join(named)}")
     return out

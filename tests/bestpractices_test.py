@@ -187,11 +187,19 @@ def test_stale_lists_what_is_older_than_the_release(script: ModuleType) -> None:
         "e_justification": "On every pull request that is Not a Draft.",
         "f_justification": "BIP340 and draft BIP445, on what is not a draft.",
         "g_status": "Met",
+        "h_justification": "On every pull request that is not a\r\ndraft.",
+        "i_justification": "On every pull request that is not  a draft.",
+        "j_justification": "On every pull request that is not\ta draft.",
+        "k_justification": "What cannot a draft say?",
+        "l_justification": "Nota draft.",
+        "m_justification": "Each answer is a redraft, kept in drafts.",
     }
     assert script.stale(given, "v2026.10.4", "2026-10-03T22:09:48Z") == [
         "a: v2026.9.30, 2026-10-01",
         "b: next release, draft",
         "f: draft",
+        "k: draft",
+        "l: draft",
     ]
 
 
