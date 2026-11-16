@@ -26,8 +26,8 @@ The endpoints these answers come from are the file's own `gh api` lines,
 listed rather than restated in a second place that would have to be kept
 true. The pattern reaches both scopes: a setting the organization decides
 once is read back here too, where a section below rests on it.
-*btclib.org on Cloudflare* reads a domain, not GitHub, with `curl` and
-`dig`, so this `grep` does not list it.
+*btclib.org on Cloudflare* reads a domain with `curl` and `dig`, not
+GitHub's API, so this `grep` does not list it.
 
 ```shell
 grep -oE '(repos/btclib-org/\.github|orgs/btclib-org)[A-Za-z0-9/{}._-]*' \
@@ -553,63 +553,52 @@ at 2026-09-22T22:21:50Z.
 
 ## btclib.org on Cloudflare
 
-The organization's domain is a zone of a Cloudflare account. It serves
-the site `btclib-org/btclib-org.github.io` deploys, and it receives the
-mail of the organization's addresses. Its settings are set in the
-Cloudflare dashboard, and no tree configures them. The standard rests on
-them for [section 2][s2-root]'s reporting address, for the project pages
-[section 3][s3] makes each `homepage`, and for the `hardened_site`
-answer of each tree registered at bestpractices.dev
-([section 10][s10-carries]).
+The organization's domain is a zone of a Cloudflare account. Its address
+records point the domain at the site `btclib-org/btclib-org.github.io`
+deploys, and it receives the mail of the organization's addresses. Its
+settings are set in the Cloudflare dashboard, and no tree configures
+them. The standard rests on them for [section 2][s2-root]'s reporting
+address, and for the project pages [section 3][s3] makes each
+`homepage`.
 
-The site's response headers read back with:
+**The address records are DNS only, so a request to the site reaches
+GitHub Pages, and no HTTP setting of the zone applies to it.** Cloudflare
+answers a DNS-only record with the origin's own address, and routes no
+HTTP or HTTPS traffic for it ([Cloudflare's *Proxy
+status*](https://developers.cloudflare.com/dns/proxy-status/)).
+`btclib-org/btclib-org.github.io`'s `REPOSITORY.md` reads the records
+back, and says why they stay DNS only, in [*Pages, which is
+btclib.org*](https://github.com/btclib-org/btclib-org.github.io/blob/main/REPOSITORY.md#pages-which-is-btcliborg).
+
+**The site sends none of the hardening headers
+`Strict-Transport-Security`, `Content-Security-Policy`,
+`X-Content-Type-Options` and `X-Frame-Options`.** This prints the
+`server` line alone, which shows that the response arrived:
 
 ```shell
 curl -sI https://btclib.org/ \
-  | grep -i -E 'strict|content-security|x-content-type|x-frame'
+  | grep -i -E '^server|strict|content-security|x-content-type|x-frame'
 ```
 
 ```text
-strict-transport-security: max-age=31536000
-x-frame-options: DENY
-content-security-policy: default-src 'self'; script-src 'self';
-  style-src 'self'; img-src 'self' data:; font-src 'self';
-  object-src 'none'; base-uri 'self'; form-action 'self';
-  frame-ancestors 'none'
-x-content-type-options: nosniff
+server: GitHub.com
 ```
 
-- **The hardening headers.** The Response Header Transform Rule
-  *Hardening headers*, under *Rules*, sets `Content-Security-Policy`,
-  `X-Content-Type-Options: nosniff` and `X-Frame-Options: DENY`. They
-  are what each registered tree's `hardened_site` answer cites. The
-  policy is the one the header of the site's
-  `.github/scripts/check-built-pages.sh` holds the built pages to, so a
-  change to one is a change to the other. `script-src` names `'self'`
-  alone (btclib-org/btclib-org.github.io#182).
-- **HSTS.** *SSL/TLS → Edge Certificates → HTTP Strict Transport
-  Security*: 12 months, `includeSubDomains` off, preload off. The header
-  above answers `max-age=31536000` with neither directive. A year is
-  what GitHub, PyPI and Read the Docs send. The two directives stay off
-  until the subdomains are checked
-  (btclib-org/btclib-org.github.io#184).
-- **Always Use HTTPS.** *SSL/TLS → Edge Certificates*: on, so no page
-  is served over HTTP. A request over HTTP gets a `301` to the same path
-  over HTTPS:
+The `hardened_site` answer of each tree registered at bestpractices.dev
+([section 10][s10-carries]) rests on these headers.
 
-  ```shell
-  curl -sI http://btclib.org/ | grep -i -E '^HTTP|^location'
-  ```
+**A request over HTTP gets a `301` from GitHub Pages** to the same path
+over HTTPS:
 
-  ```text
-  HTTP/1.1 301 Moved Permanently
-  Location: https://btclib.org/
-  ```
+```shell
+curl -sI http://btclib.org/ | grep -i -E '^HTTP|^server|^location'
+```
 
-  The `301` is Cloudflare's own: it carries `Server: cloudflare` and
-  none of the `x-github-request-id` and `via: 1.1 varnish` the HTTPS
-  response carries from GitHub Pages. Whether Always Use HTTPS or a
-  redirect rule sent it, only the dashboard says.
+```text
+HTTP/1.1 301 Moved Permanently
+Server: GitHub.com
+Location: https://btclib.org/
+```
 
 **Email Routing has no public readback.** The MX records say only that
 Cloudflare receives the domain's mail:
