@@ -633,6 +633,7 @@ def test_the_warning_counts_from_the_first_request() -> None:
     )
 
     assert "seven days after the first request to sign off on it" in closing
+    assert "that warns of the closing" in closing
     assert "this comment or an earlier one" in closing
     assert not re.search(r"[0-9]", closing)
     assert "posted" not in closing
