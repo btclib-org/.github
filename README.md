@@ -649,6 +649,21 @@ first contributor reads the issue before `CONTRIBUTING.md`, and a pull
 request opened without the trailer waits on them for a fix only they can
 make. `tests/labels_test.py` reads each form's last `body` item.
 
+**`PULL_REQUEST_TEMPLATE.md` opens with the comment on sign-off below**,
+the same text. The reason is the issue forms', and the template also
+reaches an author who opened no issue. Below the comment the file is the
+tree's own, since its checks name that tree's gates; the rejected
+alternative is the whole file the same in every tree, which would give
+each this one's commands. `tests/pull_request_template_test.py` compares
+each tree's opening comment with the block:
+
+```html
+<!-- Sign off every commit: `git commit -s` adds the `Signed-off-by:`
+     trailer, and only you can add it to your commits. CONTRIBUTING.md's
+     *Pull requests* says what it certifies and how to add it to commits
+     already made. -->
+```
+
 **`PULL_REQUEST_TEMPLATE.md` sits under `.github/`**, with the forge's
 other inputs, though GitHub also reads it from the root or `docs/`.
 Wherever GitHub reads it is rejected: trees would differ for nothing.
