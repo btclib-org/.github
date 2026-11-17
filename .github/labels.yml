@@ -32,7 +32,8 @@ labels:
   - name: flaky-watch
     color: "e4e669"
     description: >-
-      A test failed once; waits for it to fail again with a log to read
+      A test failed once; waits for a second failure or a reproduction on
+      demand, with a log to read
   - name: needs-hardware
     color: "006b75"
     description: Can be tested only on real hardware no runner has
