@@ -2550,8 +2550,10 @@ older head can complete after a newer one's, so a group that cancels a run in
 flight, or a pending run for the next, can cancel the newer head's comment. With
 `queue: max` each run waits for the one before it, and the job writes only where
 the pull request's head is still the run's, so the last to write is the newest
-head's. It is no required check. `tests/sign_off_comment_test.py` asks each tree
-for its caller.
+head's. It is no required check: the `Sign-off` check is what gates, and a
+[`workflow_run`](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_run)
+run is on the default branch's last commit, not on the pull request's head.
+`tests/sign_off_comment_test.py` asks each tree for its caller.
 
 **macOS is supported on arm64 alone, and no workflow runs on an x86_64 macOS
 image.** An x86_64 macOS cell can hang until the job's timeout and hold up a
