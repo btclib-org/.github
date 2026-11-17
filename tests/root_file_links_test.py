@@ -25,6 +25,7 @@ import importlib.util
 import itertools
 import re
 import shutil
+import time
 import timeit
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
@@ -516,16 +517,24 @@ def test_html_tag_refuses_codeql_s_input_in_linear_time(conf: ModuleType) -> Non
     is given: refusing the short line takes it longer than this suite's
     timeout.
 
+    Each line is timed in this thread's CPU time, which leaves out the
+    time the thread waits for a core while other processes run. The two
+    lines take turns, so that a stretch of the run on a slower core, or
+    at a lower clock speed, long enough to slow every round of one line
+    slows rounds of the other as well.
+
     :param conf: the part, as a stand-in's `conf.py`.
     """
 
-    def best(count: int) -> float:
+    def time_match(count: int) -> float:
         line = "<a :=" + "!\xa0 :=" * count + "!\x00"
-        return min(
-            timeit.repeat(lambda: conf.HTML_TAG.match(line), number=20, repeat=5)
+        return timeit.timeit(
+            lambda: conf.HTML_TAG.match(line), number=20, timer=time.thread_time
         )
 
-    assert best(_SHORT * _LONGER) / best(_SHORT) < _BOUND
+    rounds = [(time_match(_SHORT), time_match(_SHORT * _LONGER)) for _ in range(5)]
+    short, longer = (min(times) for times in zip(*rounds, strict=True))
+    assert longer / short < _BOUND
 
 
 def test_a_copy_differing_by_a_byte_is_not_the_part() -> None:
