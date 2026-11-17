@@ -7,9 +7,9 @@ name: sign-off-comment
 # hold. README section 10's paragraph on this workflow is the rule, and
 # says why it has no concurrency group.
 #
-# No push trigger and no workflow_dispatch, departures that paragraph
-# states: what the jobs read is a completed run of lint on a pull
-# request, and neither event carries one.
+# No push trigger and no workflow_dispatch, departures section 10 states
+# for every workflow that reads what neither event carries: what the
+# jobs read is a completed run of lint on a pull request.
 
 on:
   # zizmor's dangerous-triggers is declined on workflow_run, which a
