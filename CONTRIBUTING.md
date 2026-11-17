@@ -36,6 +36,8 @@ An issue labelled `good first issue` is one set aside for a first
 contribution: small and self-contained.
 [One search][good-first] lists the open ones across the organization, so
 a newcomer need not know in advance which repository to look in.
+*Pull requests* says who holds one, and what becomes of it when a pull
+request citing it is closed.
 
 ## Documentation and comments
 
@@ -104,6 +106,33 @@ refuses: *Landing it* says why `--admin` waits for no required check.
 The check's failure prints the command that adds the trailer. [The
 standard's *Signatures*][s-sigs] says why a signature does not replace
 it, and which commits the `Sign-off` job skips.
+
+**A pull request with a commit the `Sign-off` check refuses seven days
+after it was asked for the trailer is closed.** The week runs from the
+first request to sign off on the pull request, a comment that asks for
+the trailer and warns of the closing, not from the opening. The closing
+comment says how the pull request comes back: comment on it asking for a
+reopen, and once a maintainer has reopened it, add the trailers as the
+check's failure says for each author, and force-push. The comment comes
+first because GitHub does not reopen a pull request whose branch was
+force-pushed while it was closed. A new pull request that passes the
+check is as good. An issue is held by its assignees. The closed pull
+request's author is unassigned from each issue it cites. Where that
+leaves an issue with no assignee, of the open pull requests that cite
+it, pass the `Sign-off` check and have an author GitHub can assign, the
+author of the first to pass the check is assigned to it. Where there is
+none, the issue stays unassigned and open to every contributor. [GitHub
+assigns][gh-assign] a contributor who has no write access and is not a
+member of the organization only to an issue they have commented on, so
+comment on the issue your pull request is for. A pull request whose
+author cannot be assigned does not hold the issue, even where it passed
+the check first, and its author commenting later does not displace the
+assignee.
+
+Counting from the opening was set aside: a contributor who never saw the
+check fail would have had no chance to fix it. Left open, a pull request
+nobody can land would keep its issue from every other contributor with
+no end, so it is closed, and it can come back.
 
 What a pull request's title and description have to say about the issues
 it closes, and why a manual link in the Development panel is a trap
@@ -334,6 +363,7 @@ settings and why they are what they are.
 [s-branch]: https://github.com/btclib-org/.github#branch-protection-and-rulesets
 [dco]: https://developercertificate.org/
 [rulesets]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets
+[gh-assign]: https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/assigning-issues-and-pull-requests-to-other-github-users
 [governance]: https://github.com/btclib-org/.github/blob/main/GOVERNANCE.md
 [roadmap]: https://github.com/btclib-org/.github/blob/main/ROADMAP.md
 [good-first]: https://github.com/search?q=org%3Abtclib-org+label%3A%22good+first+issue%22+is%3Aopen&type=issues
