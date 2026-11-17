@@ -1127,8 +1127,7 @@ No `autoupdate_branch`: the default branch is the only branch.
   pre-commit puts no `--` before the file names it passes a hook, so
   such a path reaches the hook's command line as an option: a file
   named `-h` has an argparse hook, pygrep's among them, print its help
-  and exit 0 without reading the files passed beside it, under
-  `--all-files` as under `--from-ref`.
+  and exit 0 without reading the files passed beside it.
 
     **`language: fail`, because it parses no argument**, so the path it
     refuses cannot silence it, where a pygrep hook doing the same work
@@ -1140,11 +1139,13 @@ No `autoupdate_branch`: the default branch is the only branch.
     `check-hooks-apply` passes over a `fail` hook, so a tree with no
     such path stays green.
 
-    **A `--` before the file names, in each hook's `entry` or `args:`,
-    is the alternative set aside**: every stanza passing file names
-    would carry it, and one that forgot it would be silenced again,
-    where this hook guards them all. pre-commit declines to change how
-    it passes file names (pre-commit/pre-commit#2896).
+    **Two alternatives are set aside**: a `--` before the file names in
+    each hook's `entry` or `args:`, lost again by a stanza that forgets
+    it, where this hook guards them all; and a hook served from
+    `.pre-commit-hooks.yaml`, as `check-changelog` is, which a tree runs
+    only once this repository tags and the tree's `rev:` moves to the
+    tag. pre-commit declines to change how it passes file names
+    (pre-commit/pre-commit#2896).
 - **`local-link-prefix`** — a hook running
   `.github/scripts/check_link_destinations.py --prefixed`, refusing a
   markdown link whose destination is local and is not explicitly
