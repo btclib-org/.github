@@ -8,9 +8,9 @@ name: sourcery
 # No paths filter: section 10 gives no tree's caller one, and says
 # which trees require the check (btclib-org/.github#2005).
 #
-# No push trigger and no workflow_dispatch, departures section 10's
-# paragraph on this job states: what it reads is a pull request's
-# files against its base branch, and neither event carries one.
+# No push trigger and no workflow_dispatch, departures section 10 states
+# for every workflow that reads what neither event carries: what it
+# reads is a pull request's files against its base branch.
 
 on:
   pull_request:

@@ -2319,6 +2319,25 @@ without adding to it is deleted.
 - **`workflow_dispatch` on everything**, including the gates: a branch whose
   pull request is not open yet has no other way to ask.
 - **`workflow_call`** where the release workflow reuses the gate.
+- **`pull_request_target` is declined, and `workflow_run` is taken only on a
+  pull request's run, by jobs that run none of its code.** Both run in the base
+  repository with a token that can write, on an event a fork's pull request
+  fires. GitHub's
+  [*Secure use reference*](https://docs.github.com/en/actions/reference/security/secure-use)
+  names `workflow_run` the trigger that separates the privileged run from the
+  pull request's own. Such a workflow reads of the triggering run only its
+  `event`, its `head_sha`, and its `head_repository.owner.login` and
+  `head_branch`, the branch as data alone: that run's workflow file, conclusion,
+  artifacts and names are the branch's to write. It finds the pull request from
+  these. A job's `if:` reads `event`, and each other value reaches a step
+  through `env:` and is checked there before use (`OSPS-BR-01.01`). It fetches
+  commit objects alone, `--filter=tree:0`, with `GIT_NO_LAZY_FETCH=1`, checks
+  out no file of the branch, and reads and writes no cache. What it runs is
+  scripts of `btclib-org/.github` at its own commit, served as the bullet on
+  such a script says. The job holding a write permission fetches nothing.
+  zizmor's `dangerous-triggers` is declined on the trigger's own line.
+  `reusable-sign-off-comment.yml` is such a workflow, and
+  `tests/sign_off_comment_test.py` reads each of these in it.
 - Every step is a `uv` command with `--locked`.
 - **A step that waits for something outside the run is a script under
   `.github/scripts` with a test, not a loop in a `run:` block.** The step exists
@@ -2418,6 +2437,11 @@ reason, a job reading the pull request's files deciding which builds run;
 and `codeql`, whose result the OpenSSF Scorecard reads off a merged pull
 request's own commits.
 
+**A workflow that reads a pull request, or a run, that neither `push` nor
+`workflow_dispatch` carries takes neither trigger**, against *What every
+workflow does*. `sourcery`, `changelog-entry` and `sign-off-comment` below are
+examples.
+
 **`sourcery` is a pull request's check, and no section 4 hook.** In a git
 worktree Sourcery refuses to run without a login or a tier that has the CLI, and
 exits 1 having read nothing. In a clone whose `origin` is a public GitHub
@@ -2430,12 +2454,11 @@ protection can gain the check with no change to the caller, for the reason
 *`paths-ignore` only on `push`* gives. It reads the Python files the pull
 request changes, whole, and the whole tree where it changes `.sourcery.yaml` or
 the version; otherwise, where it changes no Python file, it reads nothing and
-passes. It has no `push` trigger and no `workflow_dispatch`, against *What every
-workflow does*: neither event carries the pull request it reads. A finding fails
-that job alone. It is fixed, or answered at its own site as section 5 has a ruff
-finding answered with a `# noqa`: `# sourcery skip: <rule>` on the line Sourcery
-reports or on the `def` line of the function holding it, in the form section 4's
-`bare-sourcery-skip` admits, with its reason in a comment beside it.
+passes. A finding fails that job alone. It is fixed, or answered at its own site
+as section 5 has a ruff finding answered with a `# noqa`:
+`# sourcery skip: <rule>` on the line Sourcery reports or on the `def` line of
+the function holding it, in the form section 4's `bare-sourcery-skip` admits,
+with its reason in a comment beside it.
 
 **A branch can be read before it is pushed, in a scratch clone of the
 checkout.** The clone's `origin` is set to the public repository, since Sourcery
@@ -2521,13 +2544,11 @@ hook**: it reads the pull request's labels, which no checkout holds. A tree that
 publishes carries a `changelog-entry.yml` calling `reusable-changelog-entry.yml`
 on `pull_request` with `labeled` and `unlabeled` among its `types:`, so that a
 `no-user-change` added or removed runs it again, and without `closed`, a merged
-pull request asking nothing of it. It has no `push` trigger and no
-`workflow_dispatch`, against *What every workflow does*: neither event carries
-the pull request it reads. Its one job calls the workflow pinned as *What every
-workflow does* pins a call into `btclib-org/.github`. Its concurrency group is
-`changelog-entry-${{ github.event.pull_request.number }}`, with
-`cancel-in-progress: true`: it has no push run to key. Section 9 says what it
-asks, and it is no required check:
+pull request asking nothing of it. Its one job calls the workflow pinned as
+*What every workflow does* pins a call into `btclib-org/.github`. Its
+concurrency group is `changelog-entry-${{ github.event.pull_request.number }}`,
+with `cancel-in-progress: true`: it has no push run to key. Section 9 says what
+it asks, and it is no required check:
 
 ```yaml
 on:
@@ -2537,6 +2558,28 @@ on:
 permissions:
   contents: read
 ```
+
+**`sign-off-comment` puts the `Sign-off` job's failure on the pull request**,
+where its author reads it, rather than in the run's summary alone. Every tree
+carries a `sign-off-comment.yml` calling `reusable-sign-off-comment.yml` on
+`workflow_run` of `lint`, `types: [completed]`, its calling job granting
+`pull-requests: write`; this tree calls it by path. It keeps one comment per
+pull request, which `check_sign_off.py` writes: posted on a failure, edited on
+each push after it, and edited to say so once every commit is signed off. A pull
+request that never fails gets none. Nothing signs off for the author, the
+trailer being the author's own statement (section 11's *Signatures*). It has no
+workflow-level concurrency group, and its comment job's group, keyed on the pull
+request, takes `cancel-in-progress: false` and `queue: max`, against
+*`cancel-in-progress` is `true`* and its sentence on a workflow whose product is
+a comment. The run of an older head can complete after a newer one's, so a group
+that cancels a run in flight, or a pending run for the next, can cancel the
+newer head's comment. With `queue: max` each run waits for the one before it,
+and the job writes only where the pull request's head is still the run's, so the
+last to write is the newest head's. It is no required check: the `Sign-off`
+check is what gates, and a
+[`workflow_run`](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_run)
+run is on the default branch's last commit, not on the pull request's head.
+`tests/sign_off_comment_test.py` asks each tree for its caller.
 
 **macOS is supported on arm64 alone, and no workflow runs on an x86_64 macOS
 image.** An x86_64 macOS cell can hang until the job's timeout and hold up a
@@ -4290,10 +4333,11 @@ A label means what its description says. Who applies and removes it:
     `reusable-api-break.yml` walks the surface of the pull request's merge
     commit against its first parent, adds `api-break` on a break and removes
     it on a later push that finds none (btclib-org/.github#1674). A fork's
-    pull request is not labelled: its token is read-only, and
-    `pull_request_target` and `workflow_run`, the ways round that, are
-    triggers the organization declines (`OSPS-BR-01.01`). Its run still
-    writes the finding to the run's summary.
+    pull request is not labelled: its token is read-only, and section 10's
+    bullet on `pull_request_target` and `workflow_run`, the ways round that,
+    declines the first and lets the second check out no file of the branch,
+    which the walk reads. Its run still writes the finding to the run's
+    summary.
 
 - **A job named in `needs:` that is not a gate takes `always()` in the
   dependent's own guard**, beside an explicit `needs.<job>.result == 'success'`

@@ -1,0 +1,43 @@
+---
+name: sign-off-comment
+
+# The comment on a pull request whose commits are not all signed off.
+# The jobs are reusable-sign-off-comment.yml's; what is this tree's is
+# the trigger and the permissions, which a called workflow does not
+# hold. README section 10's paragraph on this workflow is the rule, and
+# says why it has no concurrency group.
+#
+# No push trigger and no workflow_dispatch, departures section 10 states
+# for every workflow that reads what neither event carries: what the
+# jobs read is a completed run of lint on a pull request.
+
+on:
+  # zizmor's dangerous-triggers is declined on workflow_run, which a
+  # fork's pull request fires through its run of lint, on the conditions
+  # README section 10's bullet on `pull_request_target` and
+  # `workflow_run` states (btclib-org/.github#2331)
+  workflow_run: # zizmor: ignore[dangerous-triggers]
+    workflows: [lint]
+    types: [completed]
+
+# least privilege for the GITHUB_TOKEN, elevated on the calling job below
+# and nowhere else
+permissions:
+  contents: read
+
+jobs:
+  # By path, as claude-review.yml calls reusable-claude-review.yml: the
+  # callee is this tree's own file. zizmor's self-repository finding is
+  # declined on the line, as btclib-org/.github#1144 settled.
+  #
+  # Permissions are the calling job's, since a called workflow's own
+  # block can only downgrade them
+  sign-off-comment:
+    # the run is privileged and reads a fork's commits, so it gets no
+    # cache access, which is what actionlint's cache-call-unrestricted
+    # asks for
+    cache-mode: none
+    uses: ./.github/workflows/reusable-sign-off-comment.yml # zizmor: ignore[self-repository]
+    permissions:
+      contents: read
+      pull-requests: write # the one comment on the pull request
