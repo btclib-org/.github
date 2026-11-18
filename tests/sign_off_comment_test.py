@@ -623,6 +623,9 @@ def test_the_check_job_fetches_commits_alone_and_writes_the_failure(
 def test_the_warning_counts_from_the_first_request() -> None:
     """The week starts at the first request, whoever made it, on no date.
 
+    Where the week from the last reopen ends later, that week counts, so
+    that the author has the week to push the trailers.
+
     An earlier request is a maintainer's or this job's own before a pass,
     so the comment names no start of its own, and how the pull request
     comes back is the link to `CONTRIBUTING.md` the summary ends with.
@@ -635,6 +638,7 @@ def test_the_warning_counts_from_the_first_request() -> None:
     assert "seven days after the first request to sign off on it" in closing
     assert "that warns of the closing" in closing
     assert "this comment or an earlier one" in closing
+    assert "or seven days after its last reopen, where that is later" in closing
     assert not re.search(r"[0-9]", closing)
     assert "posted" not in closing
     assert body.index("CONTRIBUTING.md#pull-requests)") < body.index(closing)
