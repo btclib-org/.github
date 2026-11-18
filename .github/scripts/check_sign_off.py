@@ -93,14 +93,16 @@ MERGE = (
 MARKER = "<!-- sign-off-comment -->"
 # what the comment says becomes of a pull request still not signed off.
 # The week counts from the first request to sign off that warns of the
-# closing, this job's comment or a maintainer's, so the comment names no
-# date and no start of its own; how the pull request comes back is in the
-# `CONTRIBUTING.md` the summary links to
+# closing, this job's comment or a maintainer's, or from the last reopen
+# where that is later, so the comment names no date and no start of its
+# own; how the pull request comes back is in the `CONTRIBUTING.md` the
+# summary links to
 CLOSING = (
     "This pull request is closed if its commits still lack the trailer"
     " seven days after the first request to sign off on it that warns of"
-    " the closing, this comment or an earlier one. `CONTRIBUTING.md`, linked"
-    " above, says how it comes back."
+    " the closing, this comment or an earlier one, or seven days after its"
+    " last reopen, where that is later. `CONTRIBUTING.md`, linked above,"
+    " says how it comes back."
 )
 # the size a comment's body is held to, in UTF-8 bytes: GitHub refuses a
 # body of more than 65536 characters, and a count of bytes is at least
