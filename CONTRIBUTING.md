@@ -115,14 +115,14 @@ comment says how the pull request comes back: comment on it asking for a
 reopen, and once a maintainer has reopened it, add the trailers as the
 check's failure says for each author, and force-push. The comment comes
 first because GitHub does not reopen a pull request whose branch was
-force-pushed while it was closed. A reopened pull request is closed for
-its sign-off only seven days after its last reopen. A new pull request
-that passes the check is as good. An issue is held by its assignees. The
-closed pull request's author is unassigned from each issue it cites.
-Where that leaves an issue with no assignee, of the open pull requests
-that cite it, pass the `Sign-off` check and have an author GitHub can
-assign, the author of the first to pass the check is assigned to it.
-Where there is none, the issue stays unassigned and open to every
+force-pushed while it was closed. A reopened pull request is not closed
+for its sign-off before seven days after its last reopen. A new pull
+request that passes the check is as good. An issue is held by its
+assignees. The closed pull request's author is unassigned from each
+issue it cites. Where that leaves an issue with no assignee, of the open
+pull requests that cite it, pass the `Sign-off` check and have an author
+GitHub can assign, the author of the first to pass the check is assigned
+to it. Where there is none, the issue stays unassigned and open to every
 contributor. [GitHub assigns][gh-assign] a contributor who has no write
 access and is not a member of the organization only to an issue they
 have commented on, so comment on the issue your pull request is for. A
@@ -133,7 +133,9 @@ does not displace the assignee.
 Counting from the opening was set aside: a contributor who never saw the
 check fail would have had no chance to fix it. Left open, a pull request
 nobody can land would keep its issue from every other contributor with
-no end, so it is closed, and it can come back.
+no end, so it is closed, and it can come back. Once back, it still meets
+the closing condition, so without the week from its last reopen it could
+be closed again before its author pushes the trailers.
 
 What a pull request's title and description have to say about the issues
 it closes, and why a manual link in the Development panel is a trap
