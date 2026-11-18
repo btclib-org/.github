@@ -2760,8 +2760,8 @@ by that row.
   `bip32-descriptors`, `base58-bech32`;
 - `qa-assets` — `btclib`, `btclib-wallet`, `bip32-descriptors`;
 - `fuzz` — `btclib`, `btclib-secp256k1`, `bitcoin-core-rpc`, `btclib-node`,
-  `btclib-wallet`, `ecc`, `coin-addresses`, `bip39-slip39`, `bip32-descriptors`,
-  `base58-bech32`;
+  `btclib-wallet`, `seed-scan`, `ecc`, `coin-addresses`, `bip39-slip39`,
+  `bip32-descriptors`, `base58-bech32`;
 - `integration-bitcoind` — `btclib`, `bitcoin-core-rpc`, `btclib-node`,
   `btclib-wallet`, `bip32-descriptors`;
 - `btcd-oracle` — `btclib`;
@@ -2889,38 +2889,40 @@ and the badge land together.
   transactions, scripts and signatures off the wire, `btclib-secp256k1` reads
   signatures, public keys and MuSig2 nonces and partial signatures,
   `bitcoin-core-rpc` decodes the replies of an endpoint that may be a host on
-  the internet rather than the node beside the process, so a stranger can
-  choose them, `btclib-node` speaks the peer-to-peer protocol, `btclib-wallet`
-  parses PSBTs, output descriptors and BIP32/BIP322 data a counterparty hands it,
-  `ecc` decodes the DER and BIP340 signatures and the ECIES envelopes a
-  sender writes, `coin-addresses` validates the addresses a stranger hands
-  over to be paid, `bip39-slip39` decodes the SLIP39 shares their holders
-  hand back, a few of whom SLIP39 allows to be compromised,
-  `base58-bech32` decodes the base58, bech32, SS58 and CashAddr strings
-  of the addresses and keys a stranger hands over, and `bip32-descriptors`
-  decodes the BIP32 extended keys, as 78 octets and as Base58Check, the
-  key origins and the descriptor text a counterparty hands it;
-  `portanode` is answered by the `scorecard` entry's Fuzzing exception.
-  `btclib-secp256k1`'s targets reach the vendored C on purpose: what they
-  exercise is this tree's own length checks in front of it
-  (btclib-org/.github#342). Section 7's *Property tests* has how a fuzzer and
-  the property layer stand to each other. `fuzz` runs weekly on `main`, from the
-  calendar. A pull request that changes `fuzz/`, `.clusterfuzzlite/` or
-  `fuzz.yml`, a Dependabot bump of the image or of an action included,
-  dispatches it on its own branch before it lands. A run takes minutes as a
-  script, and over an hour under ClusterFuzzLite with `fuzz-seconds: 3600`, an
-  hour of fuzzing, so this is a dispatch and not a `pull_request` trigger (*What
-  decides is the clock, not the trigger*). That the pull request dispatched it
-  is a person's check rather than a gate's: a gate would ask the API for a run
-  on every pull request's branch, and would hold the pull request for as long as
-  the run takes. A crash the sentinel finds is an issue against the parser,
-  never a suppression, and its regression is an ordinary test naming the input
-  and what the parser now does with it; it does not go in `fuzz/corpus/`, a
-  *seed* corpus that `btclib`'s `tests/fuzz_corpus_test.py` requires to stay
-  valid input. What fills the workflow is the tree's — which entry points are
-  targets and which engine runs them: `atheris` under ClusterFuzzLite in
-  Actions, under OSS-Fuzz, or run as a script. What is fixed here is the name
-  the calendar keys on, which trees owe one, and when it runs.
+  the internet rather than the node beside the process, so a stranger can choose
+  them, `btclib-node` speaks the peer-to-peer protocol, `btclib-wallet` parses
+  PSBTs, output descriptors and BIP32/BIP322 data a counterparty hands it,
+  `seed-scan` reads the bundles and the scan and forks results a user names,
+  which need not be ones it wrote, and the JSON-RPC replies of an EVM node that
+  may be a host on the internet, `ecc` decodes the DER and BIP340 signatures and
+  the ECIES envelopes a sender writes, `coin-addresses` validates the addresses
+  a stranger hands over to be paid, `bip39-slip39` decodes the SLIP39 shares
+  their holders hand back, a few of whom SLIP39 allows to be compromised,
+  `base58-bech32` decodes the base58, bech32, SS58 and CashAddr strings of the
+  addresses and keys a stranger hands over, and `bip32-descriptors` decodes the
+  BIP32 extended keys, as 78 octets and as Base58Check, the key origins and the
+  descriptor text a counterparty hands it; `portanode` is answered by the
+  `scorecard` entry's Fuzzing exception. `btclib-secp256k1`'s targets reach the
+  vendored C on purpose: what they exercise is this tree's own length checks in
+  front of it (btclib-org/.github#342). Section 7's *Property tests* has how a
+  fuzzer and the property layer stand to each other. `fuzz` runs weekly on
+  `main`, from the calendar. A pull request that changes `fuzz/`,
+  `.clusterfuzzlite/` or `fuzz.yml`, a Dependabot bump of the image or of an
+  action included, dispatches it on its own branch before it lands. A run takes
+  minutes as a script, and over an hour under ClusterFuzzLite with
+  `fuzz-seconds: 3600`, an hour of fuzzing, so this is a dispatch and not a
+  `pull_request` trigger (*What decides is the clock, not the trigger*). That
+  the pull request dispatched it is a person's check rather than a gate's: a
+  gate would ask the API for a run on every pull request's branch, and would
+  hold the pull request for as long as the run takes. A crash the sentinel finds
+  is an issue against the parser, never a suppression, and its regression is an
+  ordinary test naming the input and what the parser now does with it; it does
+  not go in `fuzz/corpus/`, a *seed* corpus that `btclib`'s
+  `tests/fuzz_corpus_test.py` requires to stay valid input. What fills the
+  workflow is the tree's — which entry points are targets and which engine runs
+  them: `atheris` under ClusterFuzzLite in Actions, under OSS-Fuzz, or run as a
+  script. What is fixed here is the name the calendar keys on, which trees owe
+  one, and when it runs.
 - **`deps-oldest` follows a tree that builds a distribution.** Its
   `requires-python` and its dependency specifiers are a claim made to whoever
   installs it; a tree that installs nothing makes none, so `bbt` and this
