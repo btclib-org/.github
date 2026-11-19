@@ -644,6 +644,15 @@ jobs:
           # between the findings paragraph and the gates instruction; a
           # caller passing none leaves a blank line there and nothing
           # else
+          #
+          # the check of an inline comment's line is in the prompt and not
+          # in REVIEWING.md, whose shared part changes only with a port to
+          # every tree; btclib-org/ai-agents-process#575 has the decision.
+          # GitHub took this review's comment on a context line of
+          # btclib-org/ecc#575 (discussion_r4575435314). Where `commit_id`
+          # is not given, the tool posts on the pull request's head at
+          # posting time (`src/mcp/github-inline-comment-server.ts` at the
+          # pinned commit)
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
@@ -736,6 +745,18 @@ jobs:
             Never `--approve` and never `--request-changes`. Use
             `mcp__github_inline_comment__create_inline_comment` (with
             `confirmed: true`) for a finding about one line.
+
+            Before posting an inline comment, check its path and line
+            against `gh pr diff`. The line must be one the diff adds,
+            given by its number in the new file with `side: "RIGHT"`, or
+            one it removes, given by its number in the old file with
+            `side: "LEFT"`. Count from the hunk header. GitHub also takes
+            a context line, which the pull request does not change, so a
+            miscounted line posts on the wrong code. Pass the sha your
+            verdict names as `commit_id`. Where the line is neither added
+            nor removed, post no inline comment: the finding's bullet in
+            the summary gives its `file:line`, and a nit on it is not
+            posted.
           # folded rather than literal: the flag has to reach the CLI as
           # one line, and the list is past the width yamllint holds this
           # file to. The fold joins its lines with a space, so each
