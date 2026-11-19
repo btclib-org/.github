@@ -754,9 +754,10 @@ jobs:
             a context line, which the pull request does not change, so a
             miscounted line posts on the wrong code. Pass the sha your
             verdict names as `commit_id`. Where the line is neither added
-            nor removed, post no inline comment: the finding's bullet in
-            the summary gives its `file:line`, and a nit on it is not
-            posted.
+            nor removed, post no inline comment. A blocking or
+            non-blocking finding, or a question, about such a line goes
+            in the summary as a bullet with its `file:line`. A nit about
+            it is not posted.
           # folded rather than literal: the flag has to reach the CLI as
           # one line, and the list is past the width yamllint holds this
           # file to. The fold joins its lines with a space, so each
