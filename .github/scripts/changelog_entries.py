@@ -735,7 +735,7 @@ type Git = Callable[..., subprocess.CompletedProcess[str]]
 
 
 def git(*args: str) -> subprocess.CompletedProcess[str]:
-    """Run git in the working directory, the tree's checkout.
+    """Run git on the repository `GIT_DIR` names, else the working directory's.
 
     :param args: git's arguments.
     :returns: what git answered, its output decoded.

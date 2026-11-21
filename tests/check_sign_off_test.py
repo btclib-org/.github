@@ -874,12 +874,13 @@ def _run_the_step(
     """Run the job's step on a merge whose head commits the stand-ins.
 
     The checkout is the working directory, `GITHUB_WORKSPACE`, with the
-    script where the job has it. The step runs under GitHub's default
-    shell, in the directory its `working-directory` names, the checkout
-    where it names none. uv is the one running the suite, which `UV`
-    names, and downloads no interpreter: its directory and that of the
-    suite's own base interpreter come first on `PATH`, and `VIRTUAL_ENV`,
-    which a runner's step does not set, is dropped.
+    script where the job has it. The step runs under `bash -e`, what
+    GitHub runs for a step that names no `shell:`. It runs in the
+    directory its `working-directory` names, the checkout where it names
+    none. uv is the one running the suite, which `UV` names, and downloads
+    no interpreter: its directory and that of the suite's own base
+    interpreter come first on `PATH`, and `VIRTUAL_ENV`, which a runner's
+    step does not set, is dropped.
     """
     _git("checkout", "--quiet", "-b", "topic")
     for name in planted:
@@ -905,7 +906,7 @@ def _run_the_step(
         PATH=os.pathsep.join([*path, os.environ["PATH"]]),
     )
     return subprocess.run(
-        ["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", step["run"]],
+        ["bash", "-e", "-c", step["run"]],
         cwd=cwd,
         env=env,
         capture_output=True,
