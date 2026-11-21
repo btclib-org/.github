@@ -326,7 +326,7 @@ jobs:
       # Here that is this repository's pyproject.toml, which the sparse
       # checkout puts in standard/. Without that table uv would go on to
       # the caller's root, and --no-config keeps it from reading either.
-      # The checkout still picks the uv release: setup-uv, given no
+      # Even so, the checkout picks the uv release: setup-uv, given no
       # version, reads the root's required-version, and section 1 keeps no
       # pin but the audit's. HEAD is the merge commit: its first parent is
       # the base, its second the head

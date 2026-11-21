@@ -937,12 +937,11 @@ def test_the_step_reads_nothing_the_head_plants(
     """A head with no trailer is refused, whatever it commits for uv to read.
 
     uv takes the interpreter of a `.venv` in its working directory or a
-    parent of it, so a `.venv` at the root reached both jobs while they
-    ran from the checkout. uv reads the `uv.toml`, or the `pyproject.toml`
-    with a `[tool.uv]` table, and the `.python-version` nearest the
-    script. For `lint.yml` those were the checkout's root files, so each
-    plant reached it. For `reusable-lint.yml` they are this repository's,
-    in `standard/`, so no plant but the `.venv` reached it.
+    parent of it, so each step runs outside the checkout. uv reads the
+    `uv.toml`, or the `pyproject.toml` with a `[tool.uv]` table, and the
+    `.python-version` nearest the script. For `lint.yml` those are the
+    checkout's root files, which `--no-config` keeps unread. For
+    `reusable-lint.yml` they are this repository's, in `standard/`.
     """
     temp = tmp_path_factory.mktemp("runner-temp")
 
