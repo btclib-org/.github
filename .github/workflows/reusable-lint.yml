@@ -321,13 +321,15 @@ jobs:
       # repository's and not the caller's (section 10). uv runs the
       # interpreter of a .venv in its working directory or a parent of it.
       # So the step runs from the runner's temporary directory, and GIT_DIR
-      # names the checkout to git. uv reads uv.toml and pyproject.toml in
-      # the script's directory and its parents, the checkout's root among
-      # them. --no-config turns that off. The checkout still picks the uv
-      # release: setup-uv, given no version, reads the root's
-      # required-version, and section 1 keeps no pin but the audit's. HEAD
-      # is the merge commit: its first parent is the base, its second the
-      # head
+      # names the checkout to git. uv reads its settings from the uv.toml,
+      # or the pyproject.toml with a [tool.uv] table, nearest the script.
+      # Here that is this repository's pyproject.toml, which the sparse
+      # checkout puts in standard/. Without that table uv would go on to
+      # the caller's root, and --no-config keeps it from reading either.
+      # The checkout still picks the uv release: setup-uv, given no
+      # version, reads the root's required-version, and section 1 keeps no
+      # pin but the audit's. HEAD is the merge commit: its first parent is
+      # the base, its second the head
       - name: Check that every commit is signed off by its author
         working-directory: ${{ runner.temp }}
         run: |

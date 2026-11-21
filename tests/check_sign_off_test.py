@@ -814,6 +814,9 @@ PLACED = {
     "reusable-lint.yml": pathlib.PurePosixPath("standard", SCRIPT.relative_to(ROOT)),
     "lint.yml": pathlib.PurePosixPath(SCRIPT.relative_to(ROOT)),
 }
+# the root files of this repository that uv reads, which the reusable
+# job's sparse checkout puts in standard/
+STANDARD = {"reusable-lint.yml": ("pyproject.toml", ".python-version")}
 
 
 @pytest.mark.parametrize("workflow", PLACED)
@@ -822,7 +825,8 @@ def test_the_job_reads_the_whole_branch(workflow: str) -> None:
 
     The reusable job runs this repository's copy, checked out at the
     workflow's own commit beside the caller's tree; this repository's own job
-    runs the branch's.
+    runs the branch's. Each names the interpreter `.python-version` pins,
+    since `--no-config` leaves that file unread.
     """
     job = jobs(WORKFLOWS / workflow)["sign-off"]
     checkout = job["steps"][0]
@@ -832,7 +836,10 @@ def test_the_job_reads_the_whole_branch(workflow: str) -> None:
     assert "github.event_name == 'pull_request'" in job["if"]
     assert checkout["uses"].startswith("actions/checkout@")
     assert checkout["with"]["fetch-depth"] == 0
-    assert f'"$GITHUB_WORKSPACE/{PLACED[workflow]}" {RANGE}' in _step(job)["run"]
+    run = _step(job)["run"]
+    assert f'"$GITHUB_WORKSPACE/{PLACED[workflow]}" {RANGE}' in run
+    pin = (ROOT / ".python-version").read_text(encoding="utf-8").split()[0]
+    assert f"--python {pin} " in run, "the step names no interpreter, or another"
 
 
 # what a pull request's head can commit for uv to read in place of what
@@ -874,11 +881,12 @@ def _run_the_step(
     """Run the job's step on a merge whose head commits the stand-ins.
 
     The checkout is the working directory, `GITHUB_WORKSPACE`, with the
-    script where the job has it. The step runs under `bash -e`, what
-    GitHub runs for a step that names no `shell:`. It runs in the
-    directory its `working-directory` names, the checkout where it names
-    none. uv is the one running the suite, which `UV` names, and downloads
-    no interpreter: its directory and that of the suite's own base
+    script where the job has it, and the files `STANDARD` names in
+    `standard/`. The step runs under `bash -e`, what GitHub runs for a
+    step that names no `shell:`. It runs in the directory its
+    `working-directory` names, the checkout where it names none. uv is
+    the one running the suite, which `UV` names, and downloads no
+    interpreter: its directory and that of the suite's own base
     interpreter come first on `PATH`, and `VIRTUAL_ENV`, which a runner's
     step does not set, is dropped.
     """
@@ -892,6 +900,8 @@ def _run_the_step(
     script = workspace / PLACED[workflow]
     script.parent.mkdir(parents=True)
     shutil.copyfile(SCRIPT, script)
+    for name in STANDARD.get(workflow, ()):
+        shutil.copyfile(ROOT / name, workspace / "standard" / name)
     step = _step(jobs(WORKFLOWS / workflow)["sign-off"])
     where = step.get("working-directory", "${{ github.workspace }}")
     cwd = {"${{ runner.temp }}": temp, "${{ github.workspace }}": workspace}[where]
@@ -927,10 +937,12 @@ def test_the_step_reads_nothing_the_head_plants(
     """A head with no trailer is refused, whatever it commits for uv to read.
 
     uv takes the interpreter of a `.venv` in its working directory or a
-    parent of it, and reads `uv.toml`, `pyproject.toml` and
-    `.python-version` in the script's directory and its parents, the
-    checkout's root among them. Each would let the pull request choose
-    what runs the check.
+    parent of it, so a `.venv` at the root reached both jobs while they
+    ran from the checkout. uv reads the `uv.toml`, or the `pyproject.toml`
+    with a `[tool.uv]` table, and the `.python-version` nearest the
+    script. For `lint.yml` those were the checkout's root files, so each
+    plant reached it. For `reusable-lint.yml` they are this repository's,
+    in `standard/`, so no plant but the `.venv` reached it.
     """
     temp = tmp_path_factory.mktemp("runner-temp")
 

@@ -276,10 +276,11 @@ jobs:
 
       # --no-project, so the script installs nothing. It runs from the
       # runner's temporary directory, with --no-config, for the reason
-      # reusable-lint.yml's step gives. --no-config also keeps uv from
-      # reading this tree's .python-version, so the step names the
-      # interpreter that file pins. HEAD is the merge commit: its first
-      # parent is the base, its second the head
+      # reusable-lint.yml's step gives. Here the settings nearest the
+      # script are the pull request's own pyproject.toml. --no-config also
+      # keeps uv from reading this tree's .python-version, so the step
+      # names the interpreter that file pins. HEAD is the merge commit: its
+      # first parent is the base, its second the head
       - name: Check that every commit is signed off by its author
         working-directory: ${{ runner.temp }}
         run: |
