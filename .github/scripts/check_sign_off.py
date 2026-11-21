@@ -26,11 +26,12 @@ not read:
   pull request: a commit authored at one of these addresses passes in a
   person's pull request too.
 
-    uv run --no-project --python 3.15 \
-        .github/scripts/check_sign_off.py HEAD^1..HEAD^2
+    GIT_DIR=<checkout>/.git uv run --no-config --no-project --python 3.15 \
+        <checkout>/.github/scripts/check_sign_off.py HEAD^1..HEAD^2
 
-run from the root of a checkout of a pull request's merge commit, whose
-two parents are the base and the head. Locally, `origin/main..HEAD`.
+run from a directory outside `<checkout>`, a checkout of a pull request's
+merge commit, whose two parents are the base and the head: the `Sign-off`
+job of `reusable-lint.yml` says why. Locally, `origin/main..HEAD`.
 
 A failure prints each commit refused and how to add the trailer. Where
 `GITHUB_STEP_SUMMARY` names a file, as it does in a step of a GitHub
