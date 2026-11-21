@@ -92,7 +92,8 @@ credit for the rest of the review.
 In priority order, stopping at what this diff can be wrong about:
 
 - **Does it answer its issues?** The whole of them, and nothing beside.
-  A diff carrying an unrelated fix cannot be acked for either question.
+  A diff carrying a fix unrelated to its issues and to its own change
+  cannot be acked.
 - **Is it correct?** Reason about the code as it will run, not as it
   reads. Where a claim can be checked, check it rather than believing
   it — and where what the diff adds is what does the deciding, checking

@@ -29,8 +29,8 @@ one about this tree alone stays here.
 
 A finding noticed while doing something else goes where `REVIEWING.md`'s
 *What is filed, and what is not* says, for an author as much as for a
-reviewer: a pull request answering two questions cannot be accepted for
-either.
+reviewer: a pull request carrying a fix unrelated to its issues and to
+its own change cannot be accepted.
 
 An issue labelled `good first issue` is one set aside for a first
 contribution: small and self-contained.
@@ -201,17 +201,21 @@ name the `changelog-entry` check prints.
 
 ### One subject, opened as soon as it is written
 
-A pull request answers one question. Issues that share a subject are one
-pull request, closing each of them; issues that do not are one pull
-request each, however small either of them is.
+Issues that share a subject are one pull request, closing each of them.
+Issues that change the same file may be one pull request as well,
+closing each of them. Other issues are one pull request each, however
+small each is.
 
 It is opened the moment it is written and verified — not held for the
-previous one to be reviewed or to land, and not batched with the next. A
-batch arrives as one reviewing job with several subjects, which is the
-shape that costs the most to read; a finished pull request held back is
-review that could have started and did not. A port of the standard is
-one subject: one pull request per tree, holding every change to the
-standard landed since that tree's last port. Its review asks one
+previous one to be reviewed or to land, and not batched with the next,
+beyond the issues the paragraph above lets it take. A batch of subjects
+that share no file arrives as one reviewing job, the shape that costs
+the most to read. Where they share a file, requiring one pull request
+each is the alternative set aside: it costs a review round for each, and
+their branches can conflict in that file. A finished pull request held
+back is review that could have started and did not. A port of the
+standard is one subject: one pull request per tree, holding every change
+to the standard landed since that tree's last port. Its review asks one
 question: does each copy now match the standard's source? A security
 advisory's fix is the exception, held back as [section 12][s12]'s *A
 security advisory is worked in this order* says.
