@@ -801,20 +801,23 @@ def test_the_script_reads_a_pull_requests_merge_commit(
     assert summary.exists() == bool(code)
 
 
-def _run(job: dict[str, Any]) -> str:
-    """Return the command of the job's step that runs the script."""
-    run: str = next(s["run"] for s in job["steps"] if SCRIPT.name in s.get("run", ""))
-    return run
+def _step(job: dict[str, Any]) -> dict[str, Any]:
+    """Return the job's step that runs the script."""
+    step: dict[str, Any] = next(
+        s for s in job["steps"] if SCRIPT.name in s.get("run", "")
+    )
+    return step
 
 
-@pytest.mark.parametrize(
-    ("workflow", "path"),
-    [
-        ("reusable-lint.yml", f"standard/{SCRIPT.relative_to(ROOT).as_posix()}"),
-        ("lint.yml", SCRIPT.relative_to(ROOT).as_posix()),
-    ],
-)
-def test_the_job_reads_the_whole_branch(workflow: str, path: str) -> None:
+# where each job finds the script, from the root of the caller's checkout
+PLACED = {
+    "reusable-lint.yml": pathlib.PurePosixPath("standard", SCRIPT.relative_to(ROOT)),
+    "lint.yml": pathlib.PurePosixPath(SCRIPT.relative_to(ROOT)),
+}
+
+
+@pytest.mark.parametrize("workflow", PLACED)
+def test_the_job_reads_the_whole_branch(workflow: str) -> None:
     """Each job runs the script on the range, over a checkout of all history.
 
     The reusable job runs this repository's copy, checked out at the
@@ -829,7 +832,129 @@ def test_the_job_reads_the_whole_branch(workflow: str, path: str) -> None:
     assert "github.event_name == 'pull_request'" in job["if"]
     assert checkout["uses"].startswith("actions/checkout@")
     assert checkout["with"]["fetch-depth"] == 0
-    assert f"{path} {RANGE}" in _run(job)
+    assert f'"$GITHUB_WORKSPACE/{PLACED[workflow]}" {RANGE}' in _step(job)["run"]
+
+
+# what a pull request's head can commit for uv to read in place of what
+# the job names, each a stand-in that only shows whether uv read it: the
+# interpreter of the .venv prints READ, and each file asks for a uv or a
+# Python that no runner has, so that uv exits 2 where it reads one
+PLANTED = (".venv", "uv.toml", "pyproject.toml", ".python-version")
+READ = "the planted .venv ran"
+
+
+def _plant(root: Path, name: str) -> None:
+    """Write one stand-in at the root of the tree."""
+    if name == ".venv":
+        subprocess.run(
+            [sys.executable, "-m", "venv", "--without-pip", str(root / name)],
+            check=True,
+        )
+        (site,) = (root / name).glob("lib/python*/site-packages")
+        (site / "planted.pth").write_text(
+            f"import sys; sys.stderr.write({READ!r} + '\\n')\n", encoding="utf-8"
+        )
+    elif name == ".python-version":
+        (root / name).write_text("3.99\n", encoding="utf-8")
+    else:
+        table = "[tool.uv]\n" if name == "pyproject.toml" else ""
+        (root / name).write_text(
+            f'{table}required-version = "==0.0.1"\n', encoding="utf-8"
+        )
+
+
+def _run_the_step(
+    workflow: str,
+    planted: tuple[str, ...],
+    *,
+    signoff: bool,
+    workspace: Path,
+    temp: Path,
+) -> subprocess.CompletedProcess[str]:
+    """Run the job's step on a merge whose head commits the stand-ins.
+
+    The checkout is the working directory, `GITHUB_WORKSPACE`, with the
+    script where the job has it. The step runs under GitHub's default
+    shell, in the directory its `working-directory` names, the checkout
+    where it names none. uv is the one running the suite, which `UV`
+    names, and downloads no interpreter: its directory and that of the
+    suite's own base interpreter come first on `PATH`, and `VIRTUAL_ENV`,
+    which a runner's step does not set, is dropped.
+    """
+    _git("checkout", "--quiet", "-b", "topic")
+    for name in planted:
+        _plant(workspace, name)
+    _git("add", "--force", "--", *planted)
+    _commit("work", signoff=signoff)
+    _git("checkout", "--quiet", "--detach", "main")
+    _git("merge", "--quiet", "--no-ff", "--no-edit", "topic")
+    script = workspace / PLACED[workflow]
+    script.parent.mkdir(parents=True)
+    shutil.copyfile(SCRIPT, script)
+    step = _step(jobs(WORKFLOWS / workflow)["sign-off"])
+    where = step.get("working-directory", "${{ github.workspace }}")
+    cwd = {"${{ runner.temp }}": temp, "${{ github.workspace }}": workspace}[where]
+    uv = os.environ.get("UV") or shutil.which("uv")
+    assert uv, "no uv to run the step: UV is unset and none is on PATH"
+    path = [str(pathlib.Path(uv).parent), str(pathlib.Path(sys.base_prefix, "bin"))]
+    env = {name: value for name, value in os.environ.items() if name != "VIRTUAL_ENV"}
+    env.update(
+        GITHUB_WORKSPACE=str(workspace),
+        RUNNER_TEMP=str(temp),
+        UV_PYTHON_DOWNLOADS="never",
+        PATH=os.pathsep.join([*path, os.environ["PATH"]]),
+    )
+    return subprocess.run(
+        ["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", step["run"]],
+        cwd=cwd,
+        env=env,
+        capture_output=True,
+        encoding="utf-8",
+        check=False,
+    )
+
+
+@pytest.mark.parametrize("planted", PLANTED)
+@pytest.mark.parametrize("workflow", PLACED)
+@pytest.mark.usefixtures("repo")
+def test_the_step_reads_nothing_the_head_plants(
+    workflow: str,
+    planted: str,
+    tmp_path: Path,
+    tmp_path_factory: pytest.TempPathFactory,
+) -> None:
+    """A head with no trailer is refused, whatever it commits for uv to read.
+
+    uv takes the interpreter of a `.venv` in its working directory or a
+    parent of it, and reads `uv.toml`, `pyproject.toml` and
+    `.python-version` in the script's directory and its parents, the
+    checkout's root among them. Each would let the pull request choose
+    what runs the check.
+    """
+    temp = tmp_path_factory.mktemp("runner-temp")
+
+    ran = _run_the_step(
+        workflow, (planted,), signoff=False, workspace=tmp_path, temp=temp
+    )
+
+    assert ran.returncode == 1, ran.stdout + ran.stderr
+    assert READ not in ran.stderr
+    assert "work: no Signed-off-by: <ann@example.org>" in ran.stdout
+
+
+@pytest.mark.parametrize("workflow", PLACED)
+@pytest.mark.usefixtures("repo")
+def test_the_step_passes_a_signed_off_head_from_outside_the_checkout(
+    workflow: str, tmp_path: Path, tmp_path_factory: pytest.TempPathFactory
+) -> None:
+    """Git, pointed at the checkout, reads the range from outside it."""
+    temp = tmp_path_factory.mktemp("runner-temp")
+
+    ran = _run_the_step(workflow, PLANTED, signoff=True, workspace=tmp_path, temp=temp)
+
+    assert ran.returncode == 0, ran.stdout + ran.stderr
+    assert READ not in ran.stderr
+    assert f"every commit of {RANGE} read is signed off" in ran.stdout
 
 
 def test_the_lint_gate_checks_the_sign_off(

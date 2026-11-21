@@ -1909,7 +1909,9 @@ def test_the_job_reads_an_open_pull_request_alone() -> None:
 def test_the_step_reads_the_merge_against_its_first_parent_with_the_labels() -> None:
     """Depth 2 holds the first parent; the labels and number are the event's.
 
-    The number names an entry the pull request adds.
+    The number names an entry the pull request adds. The step runs
+    outside the checkout, with git pointed at it, as the `Sign-off` step
+    does.
     """
     assert _step("Checkout code")["with"]["fetch-depth"] == DEPTH
     checkout = _step("Check out the script")
@@ -1920,9 +1922,11 @@ def test_the_step_reads_the_merge_against_its_first_parent_with_the_labels() -> 
         "LABELS": "${{ toJSON(github.event.pull_request.labels.*.name) }}",
         "NUMBER": "${{ github.event.pull_request.number }}",
     }
+    assert step["working-directory"] == "${{ runner.temp }}"
     assert " ".join(step["run"].replace("\\\n", " ").split()) == (
-        "uv run --no-project --python 3.15"
-        f" standard/{_SCRIPT.relative_to(ROOT).as_posix()}"
+        'GIT_DIR="$GITHUB_WORKSPACE/.git"'
+        " uv run --no-config --no-project --python 3.15"
+        f' "$GITHUB_WORKSPACE/standard/{_SCRIPT.relative_to(ROOT).as_posix()}"'
         ' check HEAD^1 HEAD --labels "$LABELS" --pull-request "$NUMBER"'
     )
 

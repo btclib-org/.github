@@ -267,11 +267,22 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
+      # caching off: the job installs no dependency, so a cache has nothing
+      # to hold
       - name: Install uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: false
 
-      # --no-project, so the script installs nothing, on the interpreter this
-      # tree's .python-version names. HEAD is the merge commit: its first
+      # --no-project, so the script installs nothing. It runs from the
+      # runner's temporary directory, with --no-config, for the reason
+      # reusable-lint.yml's step gives. --no-config also keeps uv from
+      # reading this tree's .python-version, so the step names the
+      # interpreter that file pins. HEAD is the merge commit: its first
       # parent is the base, its second the head
       - name: Check that every commit is signed off by its author
-        run: uv run --no-project .github/scripts/check_sign_off.py HEAD^1..HEAD^2
+        working-directory: ${{ runner.temp }}
+        run: |
+          GIT_DIR="$GITHUB_WORKSPACE/.git" \
+            uv run --no-config --no-project --python 3.15 \
+            "$GITHUB_WORKSPACE/.github/scripts/check_sign_off.py" HEAD^1..HEAD^2

@@ -318,9 +318,17 @@ jobs:
         with:
           enable-cache: false
       # --no-project and the interpreter named, the script being this
-      # repository's and not the caller's (section 10). HEAD is the merge
-      # commit: its first parent is the base, its second the head
+      # repository's and not the caller's (section 10). The pull request's
+      # tree chooses neither the interpreter nor uv's settings: uv runs
+      # the interpreter of a .venv in its working directory or a parent of
+      # it, so the step runs from the runner's temporary directory and
+      # names the checkout to git, and it reads uv.toml and pyproject.toml
+      # in the script's directory and its parents, the checkout's root
+      # among them, which --no-config turns off. HEAD is the merge commit:
+      # its first parent is the base, its second the head
       - name: Check that every commit is signed off by its author
+        working-directory: ${{ runner.temp }}
         run: |
-          uv run --no-project --python 3.15 \
-            standard/.github/scripts/check_sign_off.py HEAD^1..HEAD^2
+          GIT_DIR="$GITHUB_WORKSPACE/.git" \
+            uv run --no-config --no-project --python 3.15 \
+            "$GITHUB_WORKSPACE/standard/.github/scripts/check_sign_off.py" HEAD^1..HEAD^2
