@@ -195,7 +195,7 @@ jobs:
           persist-credentials: false
           sparse-checkout: .github/scripts
       - name: Setup uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
           enable-cache: false
       - name: Refuse a tree that holds no release
@@ -449,7 +449,7 @@ jobs:
           chmod -R a-w "$FACTS"
       - name: Write the release's body
         id: write
-        uses: anthropics/claude-code-action@4fa93a88de49bbef68b10eb15aabedf28ca0e1ed # v1.0.271
+        uses: anthropics/claude-code-action@f431adaf77e0fecf918431e75a2b5b45b85af002 # v1.0.283
         timeout-minutes: 40
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -645,7 +645,7 @@ jobs:
           persist-credentials: false
           sparse-checkout: .github/scripts
       - name: Setup uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
           enable-cache: false
       # the base is the run's commit, HEAD here. check_public_api.py
