@@ -124,7 +124,7 @@ jobs:
       # time rather than for this comment. The environments that cost the
       # minutes today are cached below
       - name: Install uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
 
       # the cache key needs the runner image, not only the OS: a
       # pre-commit environment built on one image is not always usable on
@@ -192,7 +192,7 @@ jobs:
       # and tests/check_audit_test.py holds the copies equal; it is
       # installed last so that the steps above run on the default uv
       - name: Install the uv the audit is pinned to
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
           version: "0.13.5"
           enable-cache: false
@@ -229,7 +229,7 @@ jobs:
       # config file through the input below
       - name: Review the dependencies this pull request changes
         # pinned to a commit SHA, the tag in the comment
-        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        uses: actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec # v5.0.1
         with:
           # the organization's one file, at main, as section 11 of
           # README.md has a tree's own job read it
@@ -270,7 +270,7 @@ jobs:
       # caching off: the job installs no dependency, so a cache has nothing
       # to hold
       - name: Install uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
           enable-cache: false
 
