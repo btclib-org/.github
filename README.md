@@ -3563,6 +3563,13 @@ review judges claims about code. The workflow holds the id.
 until the change is on `main`, for the reason the workflow's own header
 gives. It lands on its gates and a description saying so, and carries
 that change alone; one touching another workflow is reviewed as usual.
+A port of the standard instead carries that change, a pin moved or a
+text edited, with its other changes, and lands on
+`ai-agents-process`'s [*Local review*](https://github.com/btclib-org/ai-agents-process/blob/main/process/local-review.md#local-review)
+too. A pull request of its own for the change is rejected: the port's
+subject would record as ported a change still open, and a pin moved
+alone would leave a tree's workflows on two commits of
+`btclib-org/.github`, against section 10.
 
 **A green check is an ack of the head, and nothing weaker.** The job's
 last step reads back what was posted: a refusal, a `NO VERDICT`, a
